@@ -19,7 +19,7 @@ export const slideFromRight: Variants = {
 };
 
 export const transition = {
-  type: "spring",
+  type: "spring" as const,
   stiffness: 200,
   damping: 20,
 };
