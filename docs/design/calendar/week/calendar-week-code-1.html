@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Wall Hub - Weekly Schedule</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ec92",
+                        "background-light": "#f6f8f7",
+                        "background-dark": "#10221a",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-[#111815] font-display overflow-x-hidden">
+<div class="relative flex h-screen w-full flex-col group/design-root overflow-hidden">
+<header class="relative flex shrink-0 items-center justify-between whitespace-nowrap border-b border-solid border-b-[#dbe6e1] dark:border-b-gray-700 bg-white dark:bg-[#1a2c24] px-4 md:px-10 py-4 shadow-sm z-30">
+<input class="hidden peer" id="nav-toggle" type="checkbox"/>
+<div class="absolute top-full left-4 md:left-10 mt-2 w-72 bg-white dark:bg-[#1a2c24] rounded-2xl shadow-2xl border border-[#dbe6e1] dark:border-gray-700 hidden peer-checked:flex flex-col py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200 origin-top-left">
+<div class="px-5 py-4 border-b border-[#dbe6e1] dark:border-gray-700 mb-2 flex items-center justify-between">
+<span class="text-xs font-bold text-[#618979] uppercase tracking-wider">Menu</span>
+<label class="cursor-pointer" for="nav-toggle">
+<span class="material-symbols-outlined text-[#618979] hover:text-[#111815] dark:hover:text-white">close</span>
+</label>
+</div>
+<nav class="flex flex-col gap-1 px-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-[#f0f4f3] dark:hover:bg-[#2f453b] text-[#111815] dark:text-white transition-colors group" href="#">
+<div class="size-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 group-hover:bg-blue-200 dark:group-hover:bg-blue-800/40">
+<span class="material-symbols-outlined !text-[18px]">view_day</span>
+</div>
+<span class="font-medium text-sm">Daily Schedule</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary/10 text-[#111815] dark:text-white transition-colors" href="#">
+<div class="size-8 rounded-full bg-primary flex items-center justify-center text-[#111815]">
+<span class="material-symbols-outlined !text-[18px]">calendar_view_week</span>
+</div>
+<span class="font-bold text-sm">Weekly Schedule</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-[#f0f4f3] dark:hover:bg-[#2f453b] text-[#111815] dark:text-white transition-colors group" href="#">
+<div class="size-8 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400 group-hover:bg-purple-200 dark:group-hover:bg-purple-800/40">
+<span class="material-symbols-outlined !text-[18px]">trending_up</span>
+</div>
+<span class="font-medium text-sm">My Progress</span>
+</a>
+<div class="h-px bg-[#dbe6e1] dark:bg-gray-700 my-2 mx-4"></div>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-[#f0f4f3] dark:hover:bg-[#2f453b] text-[#111815] dark:text-white transition-colors group" href="#">
+<div class="size-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 group-hover:bg-gray-200 dark:group-hover:bg-gray-700">
+<span class="material-symbols-outlined !text-[18px]">settings</span>
+</div>
+<span class="font-medium text-sm">Settings</span>
+</a>
+</nav>
+</div>
+<div class="flex items-center gap-3 md:gap-4 text-[#111815] dark:text-white">
+<label class="cursor-pointer flex items-center gap-3 group select-none" for="nav-toggle">
+<div class="size-10 flex items-center justify-center bg-primary/20 rounded-xl text-primary group-hover:bg-primary/30 group-active:scale-95 transition-all relative">
+<span class="material-symbols-outlined !text-[28px]">family_home</span>
+<div class="absolute -bottom-1 -right-1 size-4 bg-white dark:bg-[#1a2c24] rounded-full flex items-center justify-center border border-[#dbe6e1] dark:border-gray-600 shadow-sm">
+<span class="material-symbols-outlined !text-[10px] text-[#618979]">expand_more</span>
+</div>
+</div>
+<div class="flex flex-col">
+<h2 class="text-xl md:text-2xl font-bold leading-tight tracking-[-0.015em] group-hover:text-primary transition-colors">Wall Hub</h2>
+<span class="text-[10px] font-bold text-[#618979] dark:text-[#8baea0] uppercase tracking-wide hidden md:block">Family OS</span>
+</div>
+</label>
+</div>
+<div class="flex flex-1 justify-end gap-3 md:gap-6 items-center">
+<div class="hidden md:flex items-center gap-3 bg-[#f0f4f3] dark:bg-[#253830] rounded-full px-4 py-2">
+<span class="material-symbols-outlined text-[#618979] dark:text-[#8baea0]">wb_sunny</span>
+<span class="text-sm font-medium text-[#111815] dark:text-white">72°F</span>
+</div>
+<div class="hidden md:block h-8 w-[1px] bg-[#dbe6e1] dark:bg-gray-600"></div>
+<div class="flex gap-2 md:gap-3">
+<button class="flex min-w-[48px] md:min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 md:h-12 px-0 md:px-6 bg-primary hover:bg-primary/90 transition-colors text-[#111815] text-base font-bold leading-normal tracking-[0.015em] shadow-sm">
+<span class="truncate mr-2 hidden md:inline">Add Event</span>
+<span class="material-symbols-outlined !text-[24px] md:!text-[20px]">add</span>
+</button>
+<button class="hidden md:flex size-12 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-white dark:bg-[#253830] border border-[#dbe6e1] dark:border-gray-600 text-[#111815] dark:text-white hover:bg-[#f0f4f3] dark:hover:bg-[#2f453b] transition-colors shadow-sm">
+<span class="material-symbols-outlined !text-[24px]">settings</span>
+</button>
+<button class="flex size-10 md:size-12 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-white dark:bg-[#253830] border border-[#dbe6e1] dark:border-gray-600 text-[#111815] dark:text-white hover:bg-[#f0f4f3] dark:hover:bg-[#2f453b] transition-colors shadow-sm relative">
+<span class="material-symbols-outlined !text-[24px]">notifications</span>
+<div class="absolute top-2 md:top-3 right-2 md:right-3 size-2.5 bg-red-500 rounded-full border-2 border-white dark:border-[#253830]"></div>
+</button>
+</div>
+<div class="bg-center bg-no-repeat bg-cover rounded-full size-10 md:size-12 border-2 border-primary cursor-pointer shadow-md" data-alt="Family portrait placeholder" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBpV4aIEfmJa0d7qQAKgrp09w9CPHFJukfNug7TlPg6GGsRWlo0lKD1_g3xarhieklGaGMVUIGT1iJORozLGK2biLlRbni1TG7RVwUtvuXoPQTVxBYxL3c36jGl6YNzqNJ31Fve5kxX0_3XfS6GtM8ZpCEZXlW-ge-SkODBbAYMpki5vmASbi_UqwPX3_-jPzQKDigZbddtoJwCKEV3PEs7oOsHZjTtF1oiBMKOiMNJgcnpL34QfM3iQAz_lGG5vWRmECfZmEmHV5g");'></div>
+</div>
+</header>
+<div class="flex flex-col flex-1 overflow-hidden">
+<div class="flex flex-col shrink-0 px-4 md:px-10 pt-6 pb-2 bg-background-light dark:bg-background-dark z-10">
+<div class="flex flex-col lg:flex-row lg:justify-between lg:items-end gap-4 mb-6">
+<div class="flex flex-col gap-1 w-full lg:w-auto">
+<div class="flex items-center justify-between lg:justify-start gap-3">
+<button class="size-10 flex items-center justify-center rounded-full hover:bg-[#e0e8e5] dark:hover:bg-[#253830] text-[#111815] dark:text-white transition-colors">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<h1 class="text-[#111815] dark:text-white tracking-tight text-2xl md:text-[32px] font-bold leading-tight">Oct 23 - Oct 29</h1>
+<button class="size-10 flex items-center justify-center rounded-full hover:bg-[#e0e8e5] dark:hover:bg-[#253830] text-[#111815] dark:text-white transition-colors">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+<p class="text-[#618979] dark:text-[#8baea0] text-sm md:text-base font-normal leading-normal text-center lg:text-left lg:ml-14">Manage your family's weekly rhythm</p>
+</div>
+<div class="flex flex-wrap items-center gap-2 md:gap-4 mt-2 lg:mt-0">
+<div class="flex items-center gap-4 bg-white dark:bg-[#1a2c24] px-4 py-2 rounded-xl border border-[#dbe6e1] dark:border-gray-700 shadow-sm grow lg:grow-0 lg:mr-4">
+<div class="flex flex-col">
+<span class="text-xs text-[#618979] dark:text-[#8baea0] font-medium uppercase tracking-wider">Streak</span>
+<span class="text-lg font-bold text-[#111815] dark:text-white">85%</span>
+</div>
+<div class="flex-1 lg:w-24 h-2 bg-[#dbe6e1] dark:bg-gray-700 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[85%] rounded-full"></div>
+</div>
+<span class="material-symbols-outlined text-orange-500 !text-[24px]">local_fire_department</span>
+</div>
+<div class="flex gap-2 ml-auto">
+<button class="flex min-w-[70px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-white dark:bg-[#1a2c24] border border-[#dbe6e1] dark:border-gray-700 text-[#111815] dark:text-white text-sm font-bold leading-normal shadow-sm hover:bg-[#f0f4f3] dark:hover:bg-[#2f453b] transition-colors">
+                            Today
+                        </button>
+<div class="flex bg-[#e0e8e5] dark:bg-[#1a2c24] p-1 rounded-lg">
+<button class="px-4 py-1.5 rounded bg-white dark:bg-[#2f453b] shadow-sm text-sm font-bold text-[#111815] dark:text-white">Week</button>
+<button class="px-4 py-1.5 rounded text-sm font-medium text-[#618979] dark:text-[#8baea0] hover:text-[#111815] dark:hover:text-white transition-colors">Day</button>
+</div>
+</div>
+</div>
+</div>
+<div class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
+<button class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full bg-[#111815] text-white px-5 shadow-sm transition-transform active:scale-95">
+<span class="material-symbols-outlined !text-[20px]">group</span>
+<p class="text-sm font-bold leading-normal">Everyone</p>
+</button>
+<button class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-[#1a2c24] border border-[#dbe6e1] dark:border-gray-700 pl-2 pr-4 hover:border-primary/50 transition-colors shadow-sm active:scale-95">
+<div class="size-7 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+<span class="material-symbols-outlined !text-[18px] filled">face_3</span>
+</div>
+<p class="text-[#111815] dark:text-white text-sm font-medium leading-normal">Mom</p>
+</button>
+<button class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-[#1a2c24] border border-[#dbe6e1] dark:border-gray-700 pl-2 pr-4 hover:border-primary/50 transition-colors shadow-sm active:scale-95">
+<div class="size-7 rounded-full bg-green-100 flex items-center justify-center text-green-700">
+<span class="material-symbols-outlined !text-[18px] filled">face_6</span>
+</div>
+<p class="text-[#111815] dark:text-white text-sm font-medium leading-normal">Dad</p>
+</button>
+<button class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-[#1a2c24] border border-[#dbe6e1] dark:border-gray-700 pl-2 pr-4 hover:border-primary/50 transition-colors shadow-sm active:scale-95">
+<div class="size-7 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
+<span class="material-symbols-outlined !text-[18px] filled">face_2</span>
+</div>
+<p class="text-[#111815] dark:text-white text-sm font-medium leading-normal">Maya</p>
+</button>
+<button class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-[#1a2c24] border border-[#dbe6e1] dark:border-gray-700 pl-2 pr-4 hover:border-primary/50 transition-colors shadow-sm active:scale-95">
+<div class="size-7 rounded-full bg-orange-100 flex items-center justify-center text-orange-600">
+<span class="material-symbols-outlined !text-[18px] filled">face_5</span>
+</div>
+<p class="text-[#111815] dark:text-white text-sm font-medium leading-normal">Leo</p>
+</button>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto px-4 md:px-10 pb-10 custom-scrollbar">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4 w-full h-auto min-h-full">
+<div class="flex flex-col gap-3 group">
+<div class="bg-white dark:bg-[#1a2c24] rounded-xl p-3 border border-[#dbe6e1] dark:border-gray-700 text-center shadow-sm opacity-60 flex flex-row items-center justify-between xl:flex-col xl:justify-center">
+<p class="text-sm font-medium text-[#618979] dark:text-[#8baea0] uppercase tracking-wide">Mon</p>
+<p class="text-2xl font-bold text-[#111815] dark:text-white">23</p>
+<div class="flex justify-center mt-0 xl:mt-2">
+<div class="size-6 rounded-full bg-primary/20 flex items-center justify-center text-primary text-xs font-bold">4/5</div>
+</div>
+</div>
+<div class="flex flex-col gap-2 flex-1 p-1">
+<div class="bg-white/80 dark:bg-[#1a2c24]/80 p-3 rounded-lg border border-[#e0e8e5] dark:border-gray-700 shadow-sm opacity-60">
+<div class="flex justify-between items-start mb-1">
+<span class="text-xs font-bold text-[#618979] dark:text-[#8baea0]">8:00 AM</span>
+</div>
+<p class="text-sm font-semibold text-[#111815] dark:text-white leading-tight">School Drop-off</p>
+</div>
+<div class="bg-blue-50/80 dark:bg-blue-900/20 p-3 rounded-lg border-l-4 border-blue-400 shadow-sm opacity-60">
+<div class="flex justify-between items-start mb-1">
+<span class="text-xs font-bold text-blue-600 dark:text-blue-400">4:00 PM</span>
+</div>
+<p class="text-sm font-semibold text-[#111815] dark:text-white leading-tight">Soccer Practice</p>
+<div class="flex items-center gap-1 mt-2 text-blue-500 dark:text-blue-400 text-xs">
+<span class="material-symbols-outlined !text-[14px]">location_on</span>
+<span>City Fields</span>
+</div>
+</div>
+<div class="mt-auto bg-[#f0f4f3] dark:bg-[#253830] p-2 rounded-lg flex items-center gap-3 opacity-60">
+<div class="size-6 rounded-full bg-primary flex items-center justify-center text-[#111815]">
+<span class="material-symbols-outlined !text-[16px]">check</span>
+</div>
+<p class="text-xs font-medium text-[#111815] dark:text-white line-through decoration-primary">Trash to Curb</p>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-3 relative">
+<div class="absolute -top-3 left-0 right-0 h-1 bg-primary rounded-t-full hidden xl:block"></div>
+<div class="bg-primary/10 dark:bg-primary/5 rounded-xl p-3 border-2 border-primary text-center shadow-md flex flex-row items-center justify-between xl:flex-col xl:justify-center">
+<p class="text-sm font-bold text-primary uppercase tracking-wide">Tue</p>
+<p class="text-3xl font-extrabold text-[#111815] dark:text-white">24</p>
+<div class="flex justify-center mt-0 xl:mt-2">
+<div class="h-6 px-2 rounded-full bg-primary text-[#111815] text-xs font-bold flex items-center">TODAY</div>
+</div>
+</div>
+<div class="flex flex-col gap-2 flex-1 bg-primary/5 dark:bg-primary/5 rounded-xl p-2 h-full">
+<div class="relative w-full flex items-center my-2">
+<div class="h-[2px] bg-red-500 w-full"></div>
+<div class="absolute right-0 bg-red-500 text-white text-[10px] font-bold px-1 rounded-sm">NOW</div>
+</div>
+<div class="bg-white dark:bg-[#1a2c24] p-3 rounded-lg border border-[#e0e8e5] dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+<div class="flex justify-between items-start mb-1">
+<span class="text-xs font-bold text-[#618979] dark:text-[#8baea0]">8:00 AM</span>
+</div>
+<p class="text-sm font-semibold text-[#111815] dark:text-white leading-tight">School Drop-off</p>
+</div>
+<div class="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg border-l-4 border-purple-400 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+<div class="flex justify-between items-start mb-1">
+<span class="text-xs font-bold text-purple-600 dark:text-purple-400">6:00 PM</span>
+</div>
+<p class="text-sm font-semibold text-[#111815] dark:text-white leading-tight">Gym Session</p>
+<div class="flex -space-x-2 mt-2">
+<div class="size-6 rounded-full border-2 border-white dark:border-[#1a2c24] bg-green-100 flex items-center justify-center text-[10px] font-bold text-green-800">D</div>
+<div class="size-6 rounded-full border-2 border-white dark:border-[#1a2c24] bg-blue-100 flex items-center justify-center text-[10px] font-bold text-blue-800">M</div>
+</div>
+</div>
+<div class="mt-auto bg-white dark:bg-[#1a2c24] p-3 rounded-lg flex items-center gap-3 border border-dashed border-gray-300 dark:border-gray-600 shadow-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-[#253830]">
+<div class="size-6 rounded-full border-2 border-[#dbe6e1] dark:border-gray-600 flex items-center justify-center group-hover:border-primary transition-colors">
+</div>
+<p class="text-xs font-bold text-[#111815] dark:text-white">Read 20 mins</p>
+</div>
+<div class="bg-white dark:bg-[#1a2c24] p-3 rounded-lg flex items-center gap-3 border border-dashed border-gray-300 dark:border-gray-600 shadow-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-[#253830]">
+<div class="size-6 rounded-full border-2 border-[#dbe6e1] dark:border-gray-600 flex items-center justify-center group-hover:border-primary transition-colors">
+</div>
+<p class="text-xs font-bold text-[#111815] dark:text-white">Pack Lunches</p>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-3">
+<div class="bg-white dark:bg-[#1a2c24] rounded-xl p-3 border border-[#dbe6e1] dark:border-gray-700 text-center shadow-sm flex flex-row items-center justify-between xl:flex-col xl:justify-center">
+<p class="text-sm font-medium text-[#618979] dark:text-[#8baea0] uppercase tracking-wide">Wed</p>
+<p class="text-2xl font-bold text-[#111815] dark:text-white">25</p>
+</div>
+<div class="flex flex-col gap-2 flex-1 p-1">
+<div class="bg-white dark:bg-[#1a2c24] p-3 rounded-lg border border-[#e0e8e5] dark:border-gray-700 shadow-sm">
+<div class="flex justify-between items-start mb-1">
+<span class="text-xs font-bold text-[#618979] dark:text-[#8baea0]">8:00 AM</span>
+</div>
+<p class="text-sm font-semibold text-[#111815] dark:text-white leading-tight">School Drop-off</p>
+</div>
+<div class="bg-orange-50 dark:bg-orange-900/20 p-3 rounded-lg border-l-4 border-orange-400 shadow-sm">
+<div class="flex justify-between items-start mb-1">
+<span class="text-xs font-bold text-orange-600 dark:text-orange-400">5:00 PM</span>
+</div>
+<p class="text-sm font-semibold text-[#111815] dark:text-white leading-tight">Piano Lesson</p>
+<div class="flex items-center gap-1 mt-2 text-orange-500 text-xs">
+<span class="material-symbols-outlined !text-[14px]">face_5</span>
+<span>Leo</span>
+</div>
+</div>
+<div class="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg border-l-4 border-green-500 shadow-sm">
+<div class="flex justify-between items-start mb-1">
+<span class="text-xs font-bold text-green-700 dark:text-green-400">6:30 PM</span>
+</div>
+<p class="text-sm font-semibold text-[#111815] dark:text-white leading-tight">Family Dinner</p>
+</div>
+<div class="mt-auto bg-white/50 dark:bg-[#1a2c24]/50 p-2 rounded-lg flex items-center justify-center border border-dashed border-[#dbe6e1] dark:border-gray-700 text-[#618979] dark:text-[#8baea0]">
+<span class="text-xs font-medium">3 Routines</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-3">
+<div class="bg-white dark:bg-[#1a2c24] rounded-xl p-3 border border-[#dbe6e1] dark:border-gray-700 text-center shadow-sm flex flex-row items-center justify-between xl:flex-col xl:justify-center">
+<p class="text-sm font-medium text-[#618979] dark:text-[#8baea0] uppercase tracking-wide">Thu</p>
+<p class="text-2xl font-bold text-[#111815] dark:text-white">26</p>
+</div>
+<div class="flex flex-col gap-2 flex-1 p-1">
+<div class="bg-white dark:bg-[#1a2c24] p-3 rounded-lg border border-[#e0e8e5] dark:border-gray-700 shadow-sm">
+<div class="flex justify-between items-start mb-1">
+<span class="text-xs font-bold text-[#618979] dark:text-[#8baea0]">8:00 AM</span>
+</div>
+<p class="text-sm font-semibold text-[#111815] dark:text-white leading-tight">School Drop-off</p>
+</div>
+<div class="bg-white dark:bg-[#1a2c24] p-3 rounded-lg border border-[#e0e8e5] dark:border-gray-700 shadow-sm">
+<div class="flex justify-between items-start mb-1">
+<span class="text-xs font-bold text-[#618979] dark:text-[#8baea0]">5:30 PM</span>
+</div>
+<p class="text-sm font-semibold text-[#111815] dark:text-white leading-tight">Grocery Run</p>
+</div>
+<div class="mt-auto bg-white/50 dark:bg-[#1a2c24]/50 p-2 rounded-lg flex items-center justify-center border border-dashed border-[#dbe6e1] dark:border-gray-700 text-[#618979] dark:text-[#8baea0]">
+<span class="text-xs font-medium">4 Routines</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-3">
+<div class="bg-white dark:bg-[#1a2c24] rounded-xl p-3 border border-[#dbe6e1] dark:border-gray-700 text-center shadow-sm flex flex-row items-center justify-between xl:flex-col xl:justify-center">
+<p class="text-sm font-medium text-[#618979] dark:text-[#8baea0] uppercase tracking-wide">Fri</p>
+<p class="text-2xl font-bold text-[#111815] dark:text-white">27</p>
+</div>
+<div class="flex flex-col gap-2 flex-1 p-1">
+<div class="bg-white dark:bg-[#1a2c24] p-3 rounded-lg border border-[#e0e8e5] dark:border-gray-700 shadow-sm">
+<div class="flex justify-between items-start mb-1">
+<span class="text-xs font-bold text-[#618979] dark:text-[#8baea0]">8:00 AM</span>
+</div>
+<p class="text-sm font-semibold text-[#111815] dark:text-white leading-tight">School Drop-off</p>
+</div>
+<div class="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border-l-4 border-red-400 shadow-sm">
+<div class="flex justify-between items-start mb-1">
+<span class="text-xs font-bold text-red-600 dark:text-red-400">7:00 PM</span>
+</div>
+<p class="text-sm font-semibold text-[#111815] dark:text-white leading-tight">Date Night ❤️</p>
+<div class="flex items-center gap-1 mt-2 text-red-500 text-xs">
+<span class="material-symbols-outlined !text-[14px]">restaurant</span>
+<span>Downtown</span>
+</div>
+</div>
+<div class="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg border-l-4 border-purple-400 shadow-sm">
+<div class="flex justify-between items-start mb-1">
+<span class="text-xs font-bold text-purple-600 dark:text-purple-400">8:00 PM</span>
+</div>
+<p class="text-sm font-semibold text-[#111815] dark:text-white leading-tight">Movie Night</p>
+<div class="mt-2 text-xs bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 px-2 py-1 rounded w-fit font-bold">Pizza!</div>
+</div>
+<div class="mt-auto bg-white/50 dark:bg-[#1a2c24]/50 p-2 rounded-lg flex items-center justify-center border border-dashed border-[#dbe6e1] dark:border-gray-700 text-[#618979] dark:text-[#8baea0]">
+<span class="text-xs font-medium">3 Routines</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-3">
+<div class="bg-background-light dark:bg-[#1a2c24] rounded-xl p-3 border border-[#dbe6e1] dark:border-gray-700 text-center shadow-sm flex flex-row items-center justify-between xl:flex-col xl:justify-center">
+<p class="text-sm font-medium text-red-500 uppercase tracking-wide">Sat</p>
+<p class="text-2xl font-bold text-[#111815] dark:text-white">28</p>
+</div>
+<div class="flex flex-col gap-2 flex-1 p-1">
+<div class="bg-white dark:bg-[#1a2c24] p-3 rounded-lg border border-[#e0e8e5] dark:border-gray-700 shadow-sm">
+<div class="flex justify-between items-start mb-1">
+<span class="text-xs font-bold text-[#618979] dark:text-[#8baea0]">9:00 AM</span>
+</div>
+<p class="text-sm font-semibold text-[#111815] dark:text-white leading-tight">Pancakes</p>
+</div>
+<div class="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg border-l-4 border-yellow-400 shadow-sm">
+<div class="flex justify-between items-start mb-1">
+<span class="text-xs font-bold text-yellow-700 dark:text-yellow-400">11:00 AM</span>
+</div>
+<p class="text-sm font-semibold text-[#111815] dark:text-white leading-tight">Birthday Party</p>
+<div class="flex items-center gap-1 mt-2 text-yellow-600 text-xs">
+<span class="material-symbols-outlined !text-[14px]">cake</span>
+<span>Max's House</span>
+</div>
+</div>
+<div class="flex-1 rounded-lg border border-dashed border-[#dbe6e1] dark:border-gray-700 flex flex-col items-center justify-center p-4">
+<span class="material-symbols-outlined text-[#dbe6e1] dark:text-gray-600 !text-[40px] mb-2">weekend</span>
+<p class="text-xs font-medium text-[#618979] dark:text-[#8baea0]">Free Time</p>
+</div>
+<div class="mt-auto bg-white/50 dark:bg-[#1a2c24]/50 p-2 rounded-lg flex items-center justify-center border border-dashed border-[#dbe6e1] dark:border-gray-700 text-[#618979] dark:text-[#8baea0]">
+<span class="text-xs font-medium">Clean Room</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-3">
+<div class="bg-background-light dark:bg-[#1a2c24] rounded-xl p-3 border border-[#dbe6e1] dark:border-gray-700 text-center shadow-sm flex flex-row items-center justify-between xl:flex-col xl:justify-center">
+<p class="text-sm font-medium text-red-500 uppercase tracking-wide">Sun</p>
+<p class="text-2xl font-bold text-[#111815] dark:text-white">29</p>
+</div>
+<div class="flex flex-col gap-2 flex-1 p-1">
+<div class="bg-white dark:bg-[#1a2c24] p-3 rounded-lg border border-[#e0e8e5] dark:border-gray-700 shadow-sm">
+<div class="flex justify-between items-start mb-1">
+<span class="text-xs font-bold text-[#618979] dark:text-[#8baea0]">10:00 AM</span>
+</div>
+<p class="text-sm font-semibold text-[#111815] dark:text-white leading-tight">Church</p>
+</div>
+<div class="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg border-l-4 border-green-500 shadow-sm">
+<div class="flex justify-between items-start mb-1">
+<span class="text-xs font-bold text-green-700 dark:text-green-400">12:00 PM</span>
+</div>
+<p class="text-sm font-semibold text-[#111815] dark:text-white leading-tight">Family Brunch</p>
+</div>
+<div class="flex-1 rounded-lg border border-dashed border-[#dbe6e1] dark:border-gray-700 flex flex-col items-center justify-center p-4">
+<span class="material-symbols-outlined text-[#dbe6e1] dark:text-gray-600 !text-[40px] mb-2">bedtime</span>
+<p class="text-xs font-medium text-[#618979] dark:text-[#8baea0]">Nap Time</p>
+</div>
+<div class="mt-auto bg-white/50 dark:bg-[#1a2c24]/50 p-2 rounded-lg flex items-center justify-center border border-dashed border-[#dbe6e1] dark:border-gray-700 text-[#618979] dark:text-[#8baea0]">
+<span class="text-xs font-medium">Meal Prep</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<style>.scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }.scrollbar-hide {
+        -ms-overflow-style: none;scrollbar-width: none;}.custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background-color: #dbe6e1;
+        border-radius: 20px;
+    }
+</style>
+
+</body></html>

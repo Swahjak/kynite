@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Wall Hub - Day View</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ec92",
+                        "primary-dark": "#0db870",
+                        "background-light": "#f6f8f7",
+                        "background-dark": "#10221a",
+                        "card-bg": "#ffffff",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.375rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar for column container */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body class="bg-background-light text-slate-900 font-display selection:bg-primary selection:text-slate-900 h-screen overflow-hidden flex flex-col">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 bg-white px-6 py-3 shrink-0 z-20">
+<div class="flex items-center gap-4 text-[#111815]">
+<div class="size-8 flex items-center justify-center bg-primary rounded-lg text-slate-900">
+<span class="material-symbols-outlined text-[24px]">grid_view</span>
+</div>
+<h2 class="text-[#111815] text-xl font-bold leading-tight tracking-[-0.015em]">Wall Hub</h2>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center justify-center rounded-lg size-10 bg-slate-100 hover:bg-slate-200 text-[#111815] transition-colors">
+<span class="material-symbols-outlined text-[24px]">add</span>
+</button>
+<button class="flex items-center justify-center rounded-lg size-10 bg-slate-100 hover:bg-slate-200 text-[#111815] transition-colors relative">
+<span class="material-symbols-outlined text-[24px]">notifications</span>
+<span class="absolute top-2 right-2 size-2 bg-red-500 rounded-full border border-white"></span>
+</button>
+<button class="flex items-center justify-center rounded-lg size-10 bg-slate-100 hover:bg-slate-200 text-[#111815] transition-colors">
+<span class="material-symbols-outlined text-[24px]">settings</span>
+</button>
+</div>
+</header>
+<!-- Global Dashboard Header -->
+<section class="px-6 py-4 flex flex-wrap items-end justify-between gap-6 bg-white border-b border-slate-100 shadow-sm shrink-0 z-10">
+<!-- Date & Weather -->
+<div class="flex flex-col gap-1 min-w-[200px]">
+<p class="text-slate-900 text-3xl font-black leading-tight tracking-tight">Wednesday, Oct 24</p>
+<div class="flex items-center gap-2 text-slate-500 font-medium">
+<span class="text-xl">🌤️</span>
+<span>72°F | Mostly Sunny</span>
+</div>
+</div>
+<!-- Large Clock -->
+<div class="flex-1 flex justify-center">
+<h1 class="text-slate-900 tracking-tight text-[48px] font-bold leading-none">08:45 <span class="text-2xl font-medium text-slate-400">AM</span></h1>
+</div>
+<!-- View Toggle -->
+<div class="flex min-w-[200px] justify-end">
+<div class="flex h-10 items-center justify-center rounded-lg bg-slate-100 p-1 w-full max-w-[240px]">
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-[4px] px-2 has-[:checked]:bg-white has-[:checked]:shadow-sm has-[:checked]:text-primary-dark text-slate-500 text-sm font-bold transition-all">
+<span class="truncate">Day</span>
+<input checked="" class="invisible w-0 absolute" name="view-toggle" type="radio" value="Day"/>
+</label>
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-[4px] px-2 has-[:checked]:bg-white has-[:checked]:shadow-sm has-[:checked]:text-primary-dark text-slate-500 text-sm font-bold transition-all">
+<span class="truncate">Week</span>
+<input class="invisible w-0 absolute" name="view-toggle" type="radio" value="Week"/>
+</label>
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-[4px] px-2 has-[:checked]:bg-white has-[:checked]:shadow-sm has-[:checked]:text-primary-dark text-slate-500 text-sm font-bold transition-all">
+<span class="truncate">Month</span>
+<input class="invisible w-0 absolute" name="view-toggle" type="radio" value="Month"/>
+</label>
+</div>
+</div>
+</section>
+<!-- Main Content: Columns -->
+<main class="flex-1 overflow-hidden relative w-full bg-slate-50/50">
+<!-- Scrollable Horizontal Container -->
+<div class="flex h-full w-full overflow-x-auto overflow-y-hidden px-6 py-6 gap-6 items-start hide-scrollbar snap-x">
+<!-- Column 1: Mom -->
+<div class="flex flex-col h-full min-w-[320px] w-1/4 max-w-[400px] bg-white rounded-2xl shadow-sm border border-slate-200 snap-center flex-shrink-0">
+<!-- User Header -->
+<div class="p-4 border-b border-slate-100 flex items-center gap-3">
+<div class="size-12 rounded-full bg-slate-200 bg-cover bg-center border-2 border-white shadow-sm" data-alt="Portrait of Mom" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD1G4NlHoPEW-6FNOoPvh9hH1vqXkTpZlBt4NAGfpuPJRwOJlUA2sAnLA9pT2c2r71criQHn9-2vNrkSYrSyrrYU1mM_fpA1CUOA84cn4M9Vc4Plghw3tlkiZTJNGvKW1Eah9OhsxCAQ2Qu8nkizmfFStYTKTfB5ECqQZNncWLs12Lxszt2RxnrDg65NAxyMlHa0YOJM3ANqiQDnN3xTc9rC7VIEByqvvgO3ehYrTD__uhJGJHXfcKdOIfjXRRjGcaZHS5yuWo1q_g');"></div>
+<div class="flex-1">
+<div class="flex justify-between items-center">
+<h3 class="font-bold text-lg text-slate-900">Mom</h3>
+<span class="text-xs font-bold text-primary-dark bg-primary/20 px-2 py-0.5 rounded-full">Lvl 12</span>
+</div>
+<div class="w-full bg-slate-100 rounded-full h-1.5 mt-2 overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 75%"></div>
+</div>
+</div>
+</div>
+<!-- Scrollable Content Area -->
+<div class="flex-1 overflow-y-auto p-3 flex flex-col gap-3 relative">
+<!-- Calendar Events Section -->
+<div class="space-y-3 pb-4 border-b border-slate-100 border-dashed">
+<div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Schedule</div>
+<!-- Event Card: Past -->
+<div class="bg-slate-50 border-l-4 border-slate-300 rounded-r-lg p-3 opacity-60">
+<div class="flex justify-between items-start">
+<span class="text-xs font-bold text-slate-500">07:00 AM</span>
+<span class="material-symbols-outlined text-slate-400 text-[16px]">check_circle</span>
+</div>
+<p class="font-bold text-slate-700 mt-1">Morning Yoga</p>
+</div>
+<!-- Event Card: Current/Active -->
+<div class="bg-indigo-50 border-l-4 border-indigo-500 rounded-r-lg p-3 shadow-sm relative overflow-hidden group">
+<!-- Now Line Indicator (Visual) -->
+<div class="absolute top-1/2 -left-4 w-[120%] h-0.5 bg-red-500 z-10 opacity-40 pointer-events-none"></div>
+<div class="flex justify-between items-start relative z-0">
+<span class="text-xs font-bold text-indigo-600">08:30 AM - 10:00 AM</span>
+<span class="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-1.5 py-0.5 rounded">NOW</span>
+</div>
+<p class="font-bold text-slate-900 mt-1 text-lg">Deep Work Session</p>
+<p class="text-sm text-slate-500">Home Office</p>
+</div>
+<!-- Event Card: Future -->
+<div class="bg-orange-50 border-l-4 border-orange-400 rounded-r-lg p-3">
+<div class="flex justify-between items-start">
+<span class="text-xs font-bold text-orange-600">12:30 PM</span>
+</div>
+<p class="font-bold text-slate-900 mt-1">Lunch w/ Client</p>
+<p class="text-sm text-slate-500">Downtown Bistro</p>
+</div>
+</div>
+<!-- Tasks Section -->
+<div class="space-y-2 pt-2">
+<div class="flex justify-between items-center mb-2">
+<div class="text-xs font-bold text-slate-400 uppercase tracking-wider">Tasks</div>
+<div class="text-[10px] font-bold text-slate-400">2/5 Done</div>
+</div>
+<!-- Task Item -->
+<label class="flex items-center gap-3 p-3 rounded-lg border border-slate-100 bg-white hover:bg-slate-50 transition-colors cursor-pointer group">
+<div class="relative flex items-center">
+<input class="peer size-5 rounded border-slate-300 text-primary focus:ring-primary/20" type="checkbox"/>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-medium text-slate-700 peer-checked:text-slate-400 peer-checked:line-through truncate">Pay Electricity Bill</p>
+</div>
+<span class="text-[10px] font-bold text-primary-dark bg-primary/20 px-1.5 py-0.5 rounded-full">+20 XP</span>
+</label>
+<!-- Task Item -->
+<label class="flex items-center gap-3 p-3 rounded-lg border border-slate-100 bg-white hover:bg-slate-50 transition-colors cursor-pointer group">
+<div class="relative flex items-center">
+<input class="peer size-5 rounded border-slate-300 text-primary focus:ring-primary/20" type="checkbox"/>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-medium text-slate-700 peer-checked:text-slate-400 peer-checked:line-through truncate">Pick up Dry Cleaning</p>
+</div>
+<span class="text-[10px] font-bold text-primary-dark bg-primary/20 px-1.5 py-0.5 rounded-full">+15 XP</span>
+</label>
+<!-- Task Item (Checked) -->
+<label class="flex items-center gap-3 p-3 rounded-lg border border-slate-100 bg-slate-50 transition-colors cursor-pointer group opacity-60">
+<div class="relative flex items-center">
+<input checked="" class="peer size-5 rounded border-slate-300 text-primary focus:ring-primary/20" type="checkbox"/>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-medium text-slate-400 line-through truncate">Water Plants</p>
+</div>
+<span class="text-[10px] font-bold text-slate-400 bg-slate-200 px-1.5 py-0.5 rounded-full">Done</span>
+</label>
+</div>
+</div>
+</div>
+<!-- Column 2: Dad -->
+<div class="flex flex-col h-full min-w-[320px] w-1/4 max-w-[400px] bg-white rounded-2xl shadow-sm border border-slate-200 snap-center flex-shrink-0">
+<!-- User Header -->
+<div class="p-4 border-b border-slate-100 flex items-center gap-3">
+<div class="size-12 rounded-full bg-slate-200 bg-cover bg-center border-2 border-white shadow-sm" data-alt="Portrait of Dad" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC04GGeaDcQyv9iuAlt7MdZw7doEslZa-eMwmI_ecNuW451F3dCQRvEndsDdRb_KOTgaOiVe0ejDhxWNslAFqkuucBJu2PnGldu7PDIaC5dvyuelV_k4wT2adDungDuC8hWyPaO2Lm02ib-RuQsqqXilVQwSYaQ9FJfB9Orr52ApndknYYcoQnSKI8pbXW1msb2hGwSZPwNkR2L9Fef6n65p3hyAjWMbwC7WaUqwxBme2EZub70iE4wNoKB-pcrEuSV63YfmxckeyQ');"></div>
+<div class="flex-1">
+<div class="flex justify-between items-center">
+<h3 class="font-bold text-lg text-slate-900">Dad</h3>
+<span class="text-xs font-bold text-primary-dark bg-primary/20 px-2 py-0.5 rounded-full">Lvl 11</span>
+</div>
+<div class="w-full bg-slate-100 rounded-full h-1.5 mt-2 overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 45%"></div>
+</div>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto p-3 flex flex-col gap-3">
+<div class="space-y-3 pb-4 border-b border-slate-100 border-dashed">
+<div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Schedule</div>
+<!-- Empty State for Morning -->
+<div class="p-4 flex flex-col items-center justify-center text-center bg-slate-50 border border-slate-100 border-dashed rounded-lg mb-2">
+<span class="text-slate-400 text-xs">No morning events</span>
+</div>
+<!-- Event Card: Future -->
+<div class="bg-blue-50 border-l-4 border-blue-500 rounded-r-lg p-3">
+<div class="flex justify-between items-start">
+<span class="text-xs font-bold text-blue-600">02:00 PM</span>
+</div>
+<p class="font-bold text-slate-900 mt-1">Dentist Appointment</p>
+<p class="text-sm text-slate-500">Dr. Smile's Clinic</p>
+</div>
+<!-- Event Card: Future -->
+<div class="bg-emerald-50 border-l-4 border-emerald-500 rounded-r-lg p-3">
+<div class="flex justify-between items-start">
+<span class="text-xs font-bold text-emerald-600">05:30 PM</span>
+</div>
+<p class="font-bold text-slate-900 mt-1">Grocery Run</p>
+<p class="text-sm text-slate-500">Whole Foods</p>
+</div>
+</div>
+<div class="space-y-2 pt-2">
+<div class="flex justify-between items-center mb-2">
+<div class="text-xs font-bold text-slate-400 uppercase tracking-wider">Tasks</div>
+<div class="text-[10px] font-bold text-slate-400">0/3 Done</div>
+</div>
+<label class="flex items-center gap-3 p-3 rounded-lg border border-slate-100 bg-white hover:bg-slate-50 transition-colors cursor-pointer group">
+<div class="relative flex items-center">
+<input class="peer size-5 rounded border-slate-300 text-primary focus:ring-primary/20" type="checkbox"/>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-medium text-slate-700 truncate">Fix Garage Light</p>
+</div>
+<span class="text-[10px] font-bold text-primary-dark bg-primary/20 px-1.5 py-0.5 rounded-full">+50 XP</span>
+</label>
+<label class="flex items-center gap-3 p-3 rounded-lg border border-slate-100 bg-white hover:bg-slate-50 transition-colors cursor-pointer group">
+<div class="relative flex items-center">
+<input class="peer size-5 rounded border-slate-300 text-primary focus:ring-primary/20" type="checkbox"/>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-medium text-slate-700 truncate">Mow Lawn</p>
+</div>
+<span class="text-[10px] font-bold text-primary-dark bg-primary/20 px-1.5 py-0.5 rounded-full">+100 XP</span>
+</label>
+</div>
+</div>
+</div>
+<!-- Column 3: Lily -->
+<div class="flex flex-col h-full min-w-[320px] w-1/4 max-w-[400px] bg-white rounded-2xl shadow-sm border border-slate-200 snap-center flex-shrink-0">
+<!-- User Header -->
+<div class="p-4 border-b border-slate-100 flex items-center gap-3">
+<div class="size-12 rounded-full bg-slate-200 bg-cover bg-center border-2 border-white shadow-sm" data-alt="Portrait of Lily" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBzwhZS0Om7uhMq43ZhMlojU9WvZgbH1SDXqthaDGr5sFRDJkcKjCHAik5RyC-6Nxgu1fjsFPZabdnP9BRAPGGanj3wuggXM3oN3vaBmxS5R3_RqOl1_3Lp5DXPGxKCnkbK_DCKrfTqC1vo5cS7rj7xgpjBncXizqfjyC-h9feTBRTXUnsAbvI_hJqjvUE3h6ESTS-boSbJ3Bo7iin-PxrFpWMOpB_nxjgDlJrU1_hCsi_qRsKmEa-RCDkGnFDbx63-KMwRpUvmb-s');"></div>
+<div class="flex-1">
+<div class="flex justify-between items-center">
+<h3 class="font-bold text-lg text-slate-900">Lily</h3>
+<span class="text-xs font-bold text-primary-dark bg-primary/20 px-2 py-0.5 rounded-full">Lvl 8</span>
+</div>
+<div class="w-full bg-slate-100 rounded-full h-1.5 mt-2 overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 90%"></div>
+</div>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto p-3 flex flex-col gap-3 relative">
+<div class="space-y-3 pb-4 border-b border-slate-100 border-dashed">
+<div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Schedule</div>
+<!-- Event Card: Past -->
+<div class="bg-slate-50 border-l-4 border-slate-300 rounded-r-lg p-3 opacity-60">
+<div class="flex justify-between items-start">
+<span class="text-xs font-bold text-slate-500">08:00 AM</span>
+<span class="material-symbols-outlined text-slate-400 text-[16px]">check_circle</span>
+</div>
+<p class="font-bold text-slate-700 mt-1">School Bus</p>
+</div>
+<!-- Event Card: Current/Active -->
+<div class="bg-pink-50 border-l-4 border-pink-400 rounded-r-lg p-3 shadow-sm relative overflow-hidden">
+<!-- Now Line Indicator (Visual) -->
+<div class="absolute top-1/4 -left-4 w-[120%] h-0.5 bg-red-500 z-10 opacity-40 pointer-events-none"></div>
+<div class="flex justify-between items-start">
+<span class="text-xs font-bold text-pink-600">08:30 AM - 03:00 PM</span>
+<span class="bg-pink-100 text-pink-700 text-[10px] font-bold px-1.5 py-0.5 rounded">NOW</span>
+</div>
+<p class="font-bold text-slate-900 mt-1">School</p>
+<p class="text-sm text-slate-500">Lincoln Elementary</p>
+</div>
+<!-- Event Card: Future -->
+<div class="bg-purple-50 border-l-4 border-purple-400 rounded-r-lg p-3">
+<div class="flex justify-between items-start">
+<span class="text-xs font-bold text-purple-600">04:00 PM</span>
+</div>
+<p class="font-bold text-slate-900 mt-1">Piano Lesson</p>
+</div>
+</div>
+<div class="space-y-2 pt-2">
+<div class="flex justify-between items-center mb-2">
+<div class="text-xs font-bold text-slate-400 uppercase tracking-wider">Tasks</div>
+</div>
+<label class="flex items-center gap-3 p-3 rounded-lg border border-slate-100 bg-white hover:bg-slate-50 transition-colors cursor-pointer group">
+<div class="relative flex items-center">
+<input class="peer size-5 rounded border-slate-300 text-primary focus:ring-primary/20" type="checkbox"/>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-medium text-slate-700 truncate">Math Homework</p>
+</div>
+<span class="text-[10px] font-bold text-primary-dark bg-primary/20 px-1.5 py-0.5 rounded-full">+10 XP</span>
+</label>
+<label class="flex items-center gap-3 p-3 rounded-lg border border-slate-100 bg-white hover:bg-slate-50 transition-colors cursor-pointer group">
+<div class="relative flex items-center">
+<input class="peer size-5 rounded border-slate-300 text-primary focus:ring-primary/20" type="checkbox"/>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-medium text-slate-700 truncate">Clean Room</p>
+</div>
+<span class="text-[10px] font-bold text-primary-dark bg-primary/20 px-1.5 py-0.5 rounded-full">+15 XP</span>
+</label>
+</div>
+</div>
+</div>
+<!-- Column 4: Max -->
+<div class="flex flex-col h-full min-w-[320px] w-1/4 max-w-[400px] bg-white rounded-2xl shadow-sm border border-slate-200 snap-center flex-shrink-0">
+<!-- User Header -->
+<div class="p-4 border-b border-slate-100 flex items-center gap-3">
+<div class="size-12 rounded-full bg-slate-200 bg-cover bg-center border-2 border-white shadow-sm" data-alt="Portrait of Max" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBMtsjy4EUmOyovvX8KiYJs0S7q4CxarAW-xiTHeCI5KiepxQldR8qIdoqs46G1W5W6niwNyiGEmlMJUZv-qeF0HgRNNpEF_sW7jQ6k3NtQvPa9_M7TWYCYFOqfSWj0NrDuL2DN866CDwuA2vKYojKAgdmK1Lm4ZWb0iby2VU3uW4XOCCj7r4UpF6kY-Lwx7kGQSI83PPhIFaKfIWEDEIJ5OGMIbBIOVQcyq6nyiffApOnRm6Frc4XZjIm4-aZp_kVn3t41J-oH-7g');"></div>
+<div class="flex-1">
+<div class="flex justify-between items-center">
+<h3 class="font-bold text-lg text-slate-900">Max</h3>
+<span class="text-xs font-bold text-primary-dark bg-primary/20 px-2 py-0.5 rounded-full">Lvl 5</span>
+</div>
+<div class="w-full bg-slate-100 rounded-full h-1.5 mt-2 overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 25%"></div>
+</div>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto p-3 flex flex-col gap-3 relative">
+<div class="space-y-3 pb-4 border-b border-slate-100 border-dashed min-h-[150px] flex items-center justify-center">
+<div class="text-center">
+<span class="block text-4xl mb-2">🎉</span>
+<p class="font-bold text-slate-900">Free Day!</p>
+<p class="text-xs text-slate-500 mt-1">No scheduled events</p>
+</div>
+</div>
+<div class="space-y-2 pt-2">
+<div class="flex justify-between items-center mb-2">
+<div class="text-xs font-bold text-slate-400 uppercase tracking-wider">Tasks</div>
+</div>
+<label class="flex items-center gap-3 p-3 rounded-lg border border-slate-100 bg-white hover:bg-slate-50 transition-colors cursor-pointer group">
+<div class="relative flex items-center">
+<input class="peer size-5 rounded border-slate-300 text-primary focus:ring-primary/20" type="checkbox"/>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-medium text-slate-700 truncate">Feed the Dog</p>
+</div>
+<span class="text-[10px] font-bold text-primary-dark bg-primary/20 px-1.5 py-0.5 rounded-full">+10 XP</span>
+</label>
+<label class="flex items-center gap-3 p-3 rounded-lg border border-slate-100 bg-white hover:bg-slate-50 transition-colors cursor-pointer group">
+<div class="relative flex items-center">
+<input class="peer size-5 rounded border-slate-300 text-primary focus:ring-primary/20" type="checkbox"/>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-medium text-slate-700 truncate">Read 20 mins</p>
+</div>
+<span class="text-[10px] font-bold text-primary-dark bg-primary/20 px-1.5 py-0.5 rounded-full">+15 XP</span>
+</label>
+</div>
+</div>
+</div>
+<!-- Add New Column Button -->
+<button class="flex flex-col h-full min-w-[80px] w-[80px] bg-slate-100 rounded-2xl border-2 border-dashed border-slate-300 hover:border-primary hover:bg-primary/5 items-center justify-center text-slate-400 hover:text-primary transition-all snap-center flex-shrink-0 mb-4">
+<span class="material-symbols-outlined text-4xl">add</span>
+<span class="text-xs font-bold mt-2">Add</span>
+</button>
+</div>
+</main>
+</body></html>
