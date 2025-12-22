@@ -6,10 +6,11 @@ The Google Sync feature enables 2-way synchronization between Family Planner and
 
 ## Documents
 
-| Document                      | Description                         |
-| ----------------------------- | ----------------------------------- |
-| [Data Model](./data-model.md) | Database schema, sync metadata      |
-| [UI Specification](./ui.md)   | Account linking, calendar selection |
+| Document                      | Description                             |
+| ----------------------------- | --------------------------------------- |
+| [Data Model](./data-model.md) | Database schema, sync metadata          |
+| [UI Specification](./ui.md)   | Account linking, calendar selection     |
+| [API Reference](./api.md)     | Google Calendar API integration details |
 
 ## PRD Mapping
 
