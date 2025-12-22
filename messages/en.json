@@ -87,9 +87,36 @@
     "addEvent": "Add Event"
   },
   "Menu": {
+    "dashboard": "Dashboard",
     "calendar": "Calendar",
     "chores": "Chores",
     "settings": "Settings",
     "help": "Help"
+  },
+  "DashboardPage": {
+    "greeting": {
+      "morning": "Good Morning",
+      "afternoon": "Good Afternoon",
+      "evening": "Good Evening"
+    },
+    "todaysFlow": {
+      "title": "Today",
+      "eventsRemaining": "{count, plural, =0 {No events} =1 {1 event remaining} other {# events remaining}}",
+      "now": "Now",
+      "next": "Next",
+      "later": "Later",
+      "noEvents": "No more events today"
+    },
+    "activeTimers": {
+      "title": "Active Timers",
+      "pause": "Pause",
+      "extend": "+15m"
+    },
+    "weeklyStars": {
+      "title": "Weekly Stars"
+    },
+    "quickActions": {
+      "title": "Quick Actions"
+    }
   }
 }

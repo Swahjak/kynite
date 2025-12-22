@@ -87,9 +87,36 @@
     "addEvent": "Afspraak toevoegen"
   },
   "Menu": {
+    "dashboard": "Dashboard",
     "calendar": "Kalender",
     "chores": "Taken",
     "settings": "Instellingen",
     "help": "Help"
+  },
+  "DashboardPage": {
+    "greeting": {
+      "morning": "Goedemorgen",
+      "afternoon": "Goedemiddag",
+      "evening": "Goedenavond"
+    },
+    "todaysFlow": {
+      "title": "Vandaag",
+      "eventsRemaining": "{count, plural, =0 {Geen events} =1 {1 event over} other {# events over}}",
+      "now": "Nu",
+      "next": "Volgende",
+      "later": "Later",
+      "noEvents": "Geen events meer vandaag"
+    },
+    "activeTimers": {
+      "title": "Actieve Timers",
+      "pause": "Pauze",
+      "extend": "+15m"
+    },
+    "weeklyStars": {
+      "title": "Wekelijkse Sterren"
+    },
+    "quickActions": {
+      "title": "Snelle Acties"
+    }
   }
 }
