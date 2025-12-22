@@ -29,6 +29,13 @@
       "when": 1766432627685,
       "tag": "0003_hard_monster_badoon",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1766435466631,
+      "tag": "0004_big_otto_octavius",
+      "breakpoints": true
     }
   ]
 }
