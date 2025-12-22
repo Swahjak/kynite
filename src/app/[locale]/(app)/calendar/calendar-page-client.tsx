@@ -2,21 +2,27 @@
 
 import { useAddEvent } from "@/contexts/add-event-context";
 import { Calendar } from "@/components/calendar/calendar";
-import type { IEvent, IUser } from "@/components/calendar/interfaces";
+import { CalendarDataProvider } from "@/components/calendar/providers/calendar-data-provider";
 
 interface CalendarPageClientProps {
-  events: IEvent[];
-  users: IUser[];
+  familyId: string;
+  members: Array<{
+    id: string;
+    displayName: string | null;
+    avatarColor: string | null;
+    user: { name: string; image: string | null };
+  }>;
 }
 
-export function CalendarPageClient({ events, users }: CalendarPageClientProps) {
+export function CalendarPageClient({
+  familyId,
+  members,
+}: CalendarPageClientProps) {
   const { addEventButtonRef } = useAddEvent();
 
   return (
-    <Calendar
-      events={events}
-      users={users}
-      addEventButtonRef={addEventButtonRef}
-    />
+    <CalendarDataProvider familyId={familyId} members={members}>
+      <Calendar addEventButtonRef={addEventButtonRef} />
+    </CalendarDataProvider>
   );
 }
