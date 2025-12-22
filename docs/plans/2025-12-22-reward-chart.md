@@ -3350,17 +3350,22 @@ git commit -m "feat(reward-chart): add main page component and exports"
 
 **Files:**
 
-- Create: `src/app/[locale]/(family-required)/(manage)/reward-chart/page.tsx`
+- Create: `src/app/[locale]/(app)/reward-chart/page.tsx`
+
+**Note:** This uses the `(app)` route group structure. The `(app)/layout.tsx` already handles:
+- Authentication check (redirects to `/login` if not authenticated)
+- Family check (redirects to `/onboarding` if no family)
+- AppShell wrapper with header/navigation
+- InteractionModeProvider
 
 **Step 1: Create the page**
 
 ```typescript
-import { headers, cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import { auth } from "@/server/auth";
+import { setRequestLocale } from "next-intl/server";
 import { RewardChartPage, RewardChartProvider } from "@/components/reward-chart";
 import { getChartByMemberId, getChartWithDetails } from "@/server/services/reward-chart-service";
 import { getFamilyMemberByUserId } from "@/server/services/family-service";
+import { getSession } from "@/lib/get-session";
 import {
   startOfWeek,
   endOfWeek,
@@ -3372,27 +3377,28 @@ import {
   startOfDay,
 } from "date-fns";
 import { getCompletionsForDateRange } from "@/server/services/reward-chart-service";
+import type { Locale } from "@/i18n/routing";
 
-export default async function RewardChartRoute() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+type Props = {
+  params: Promise<{ locale: string }>;
+};
 
-  if (!session?.user) {
-    redirect("/sign-in");
-  }
+export default async function RewardChartRoute({ params }: Props) {
+  const { locale } = await params;
+  setRequestLocale(locale as Locale);
 
-  const cookieStore = await cookies();
-  const familyId = cookieStore.get("familyId")?.value;
-
-  if (!familyId) {
-    redirect("/families");
-  }
+  // Session and family are guaranteed by (app) layout
+  const session = await getSession();
+  const familyId = session!.session.familyId!;
 
   // Get member
-  const member = await getFamilyMemberByUserId(session.user.id, familyId);
+  const member = await getFamilyMemberByUserId(session!.user.id, familyId);
   if (!member) {
-    redirect("/families");
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <p className="text-lg font-medium text-slate-600">Member not found</p>
+      </div>
+    );
   }
 
   // Get chart for this member
@@ -3526,7 +3532,7 @@ export default async function RewardChartRoute() {
 **Step 2: Commit**
 
 ```bash
-git add src/app/\[locale\]/\(family-required\)/\(manage\)/reward-chart/page.tsx
+git add src/app/\[locale\]/\(app\)/reward-chart/page.tsx
 git commit -m "feat(reward-chart): add page route for reward chart"
 ```
 

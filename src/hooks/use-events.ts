@@ -44,6 +44,10 @@ async function fetchEvents(
   const response = await fetch(
     `/api/v1/families/${familyId}/events?${searchParams.toString()}`
   );
+  if (!response.ok) {
+    const json = await response.json().catch(() => ({}));
+    throw new Error(json.error?.message ?? `HTTP ${response.status}`);
+  }
   const json: ApiResponse<{ events: EventWithParticipants[] }> =
     await response.json();
 
@@ -59,6 +63,7 @@ export function useEvents(familyId: string, params?: EventsQueryParams) {
     queryKey: ["events", familyId, params],
     queryFn: () => fetchEvents(familyId, params),
     enabled: !!familyId,
+    staleTime: 30000, // 30 seconds
   });
 }
 
@@ -69,6 +74,10 @@ export function useEvent(familyId: string, eventId: string) {
       const response = await fetch(
         `/api/v1/families/${familyId}/events/${eventId}`
       );
+      if (!response.ok) {
+        const json = await response.json().catch(() => ({}));
+        throw new Error(json.error?.message ?? `HTTP ${response.status}`);
+      }
       const json: ApiResponse<{ event: EventWithParticipants }> =
         await response.json();
 
@@ -79,6 +88,7 @@ export function useEvent(familyId: string, eventId: string) {
       return json.data?.event;
     },
     enabled: !!familyId && !!eventId,
+    staleTime: 30000, // 30 seconds
   });
 }
 
@@ -92,6 +102,10 @@ export function useCreateEvent(familyId: string) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(input),
       });
+      if (!response.ok) {
+        const json = await response.json().catch(() => ({}));
+        throw new Error(json.error?.message ?? `HTTP ${response.status}`);
+      }
       const json: ApiResponse<{ event: EventWithParticipants }> =
         await response.json();
 
@@ -123,6 +137,10 @@ export function useUpdateEvent(familyId: string) {
           body: JSON.stringify(input),
         }
       );
+      if (!response.ok) {
+        const json = await response.json().catch(() => ({}));
+        throw new Error(json.error?.message ?? `HTTP ${response.status}`);
+      }
       const json: ApiResponse<{ event: EventWithParticipants }> =
         await response.json();
 
@@ -147,6 +165,10 @@ export function useDeleteEvent(familyId: string) {
         `/api/v1/families/${familyId}/events/${eventId}`,
         { method: "DELETE" }
       );
+      if (!response.ok) {
+        const json = await response.json().catch(() => ({}));
+        throw new Error(json.error?.message ?? `HTTP ${response.status}`);
+      }
       const json: ApiResponse<void> = await response.json();
 
       if (!json.success) {

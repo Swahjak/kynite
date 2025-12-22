@@ -8,8 +8,8 @@ export function transformEventToIEvent(event: EventWithParticipants): IEvent {
     id: event.id,
     title: event.title,
     description: event.description ?? "",
-    startDate: event.startTime.toISOString(),
-    endDate: event.endTime.toISOString(),
+    startDate: new Date(event.startTime).toISOString(),
+    endDate: new Date(event.endTime).toISOString(),
     color: (event.color as IEvent["color"]) ?? "blue",
     users: event.participants.map((p) => ({
       id: p.familyMemberId,
