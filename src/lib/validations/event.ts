@@ -28,9 +28,24 @@ export const createEventSchema = z
     path: ["endTime"],
   });
 
-export const updateEventSchema = createEventSchema.partial().extend({
-  id: z.string(),
-});
+export const updateEventSchema = createEventSchema
+  .partial()
+  .extend({
+    id: z.string(),
+  })
+  .refine(
+    (data) => {
+      // Only validate if both are provided
+      if (data.startTime && data.endTime) {
+        return data.endTime > data.startTime;
+      }
+      return true;
+    },
+    {
+      message: "End time must be after start time",
+      path: ["endTime"],
+    }
+  );
 
 export const eventQuerySchema = z.object({
   startDate: z.coerce.date().optional(),

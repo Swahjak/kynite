@@ -44,14 +44,27 @@ export async function GET(request: Request, { params }: Params) {
     }
 
     const { searchParams } = new URL(request.url);
-    const query = eventQuerySchema.parse({
+    const parsed = eventQuerySchema.safeParse({
       startDate: searchParams.get("startDate") || undefined,
       endDate: searchParams.get("endDate") || undefined,
       participantIds: searchParams.getAll("participantIds"),
       colors: searchParams.getAll("colors"),
     });
 
-    const events = await getEventsForFamily(familyId, query);
+    if (!parsed.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "VALIDATION_ERROR",
+            message: parsed.error.issues[0].message,
+          },
+        },
+        { status: 400 }
+      );
+    }
+
+    const events = await getEventsForFamily(familyId, parsed.data);
 
     return NextResponse.json({
       success: true,
