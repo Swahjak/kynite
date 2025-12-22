@@ -1,4 +1,5 @@
 import { CheckIcon, Filter, RefreshCcw } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,6 +14,7 @@ import type { TEventColor } from "@/components/calendar/types";
 export default function FilterEvents() {
   const { selectedColors, filterEventsBySelectedColors, clearFilter } =
     useCalendar();
+  const t = useTranslations("Filter");
 
   const colors: TEventColor[] = [
     "blue",
@@ -44,7 +46,7 @@ export default function FilterEvents() {
               className={`size-3.5 rounded-full bg-${color}-600 dark:bg-${color}-700`}
             />
             <span className="flex items-center justify-center gap-2 capitalize">
-              {color}
+              {t(`colors.${color}`)}
               <span>
                 {selectedColors.includes(color) && (
                   <span className="text-blue-500">
@@ -65,7 +67,7 @@ export default function FilterEvents() {
           }}
         >
           <RefreshCcw className="size-3.5" />
-          Clear Filter
+          {t("clearFilter")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

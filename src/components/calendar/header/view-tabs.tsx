@@ -1,4 +1,5 @@
 import { motion, AnimatePresence } from "motion/react";
+import { useTranslations } from "next-intl";
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -8,36 +9,19 @@ import { CalendarRange, List, Columns, Grid3X3, Grid2X2 } from "lucide-react";
 import { TCalendarView } from "../types";
 import { memo } from "react";
 
-const tabs = [
-  {
-    name: "Agenda",
-    value: "agenda",
-    icon: () => <CalendarRange className="h-4 w-4" />,
-  },
-  {
-    name: "Day",
-    value: "day",
-    icon: () => <List className="h-4 w-4" />,
-  },
-  {
-    name: "Week",
-    value: "week",
-    icon: () => <Columns className="h-4 w-4" />,
-  },
-  {
-    name: "Month",
-    value: "month",
-    icon: () => <Grid3X3 className="h-4 w-4" />,
-  },
-  {
-    name: "Year",
-    value: "year",
-    icon: () => <Grid2X2 className="h-4 w-4" />,
-  },
-];
+const viewIcons = {
+  agenda: () => <CalendarRange className="h-4 w-4" />,
+  day: () => <List className="h-4 w-4" />,
+  week: () => <Columns className="h-4 w-4" />,
+  month: () => <Grid3X3 className="h-4 w-4" />,
+  year: () => <Grid2X2 className="h-4 w-4" />,
+};
+
+const viewValues = ["agenda", "day", "week", "month", "year"] as const;
 
 function Views() {
   const { view, setView } = useCalendar();
+  const t = useTranslations("Calendar.views");
 
   return (
     <Tabs
@@ -46,8 +30,9 @@ function Views() {
       className="w-full gap-4 sm:w-auto"
     >
       <TabsList className="h-auto w-full gap-2 rounded-xl p-1">
-        {tabs.map(({ icon: Icon, name, value }) => {
+        {viewValues.map((value) => {
           const isActive = view === value;
+          const Icon = viewIcons[value];
 
           return (
             <motion.div
@@ -85,7 +70,7 @@ function Views() {
                         transition={{ duration: 0.25, ease: "easeOut" }}
                         style={{ originX: 0 }}
                       >
-                        {name}
+                        {t(value)}
                       </motion.span>
                     )}
                   </AnimatePresence>

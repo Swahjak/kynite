@@ -1,18 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import {
-  CalendarRange,
-  Columns,
-  Grid2X2,
-  Grid3X3,
-  LayoutList,
-  List,
-  Plus,
-} from "lucide-react";
+import { Plus } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
-import { ButtonGroup } from "@/components/ui/button-group";
 import {
   slideFromLeft,
   slideFromRight,
@@ -25,10 +17,12 @@ import FilterEvents from "@/components/calendar/header/filter";
 import { TodayButton } from "@/components/calendar/header/today-button";
 import { UserSelect } from "@/components/calendar/header/user-select";
 import { Settings } from "@/components/calendar/settings/settings";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import Views from "./view-tabs";
 
 export function CalendarHeader() {
   const { view, events } = useCalendar();
+  const t = useTranslations("Calendar");
 
   return (
     <div className="flex flex-col gap-4 border-b p-4 lg:flex-row lg:items-center lg:justify-between">
@@ -61,11 +55,14 @@ export function CalendarHeader() {
           <AddEditEventDialog>
             <Button>
               <Plus className="h-4 w-4" />
-              Add Event
+              {t("addEvent")}
             </Button>
           </AddEditEventDialog>
         </div>
-        <Settings />
+        <div className="flex items-center gap-1.5">
+          <LanguageSwitcher />
+          <Settings />
+        </div>
       </motion.div>
     </div>
   );

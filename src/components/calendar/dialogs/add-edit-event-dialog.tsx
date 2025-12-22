@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { addMinutes, format, set } from "date-fns";
+import { useTranslations } from "next-intl";
 import { type ReactNode, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -56,6 +57,8 @@ export function AddEditEventDialog({
 }: IProps) {
   const { isOpen, onClose, onToggle } = useDisclosure();
   const { addEvent, updateEvent } = useCalendar();
+  const t = useTranslations("EventDialog");
+  const tCommon = useTranslations("Common");
   const isEditing = !!event;
 
   const initialDates = useMemo(() => {
@@ -121,17 +124,17 @@ export function AddEditEventDialog({
 
       if (isEditing) {
         updateEvent(formattedEvent);
-        toast.success("Event updated successfully");
+        toast.success(t("successUpdate"));
       } else {
         addEvent(formattedEvent);
-        toast.success("Event created successfully");
+        toast.success(t("successCreate"));
       }
 
       onClose();
       form.reset();
     } catch (error) {
       console.error(`Error ${isEditing ? "editing" : "adding"} event:`, error);
-      toast.error(`Failed to ${isEditing ? "edit" : "add"} event`);
+      toast.error(isEditing ? t("errorUpdate") : t("errorCreate"));
     }
   };
 
@@ -140,11 +143,9 @@ export function AddEditEventDialog({
       <ModalTrigger asChild>{children}</ModalTrigger>
       <ModalContent>
         <ModalHeader>
-          <ModalTitle>{isEditing ? "Edit Event" : "Add New Event"}</ModalTitle>
+          <ModalTitle>{isEditing ? t("editTitle") : t("addTitle")}</ModalTitle>
           <ModalDescription>
-            {isEditing
-              ? "Modify your existing event."
-              : "Create a new event for your calendar."}
+            {isEditing ? t("editDescription") : t("addDescription")}
           </ModalDescription>
         </ModalHeader>
 
@@ -160,12 +161,12 @@ export function AddEditEventDialog({
               render={({ field, fieldState }) => (
                 <FormItem>
                   <FormLabel htmlFor="title" className="required">
-                    Title
+                    {t("titleLabel")}
                   </FormLabel>
                   <FormControl>
                     <Input
                       id="title"
-                      placeholder="Enter a title"
+                      placeholder={t("titlePlaceholder")}
                       {...field}
                       className={fieldState.invalid ? "border-red-500" : ""}
                     />
@@ -193,7 +194,9 @@ export function AddEditEventDialog({
               name="color"
               render={({ field, fieldState }) => (
                 <FormItem>
-                  <FormLabel className="required">Variant</FormLabel>
+                  <FormLabel className="required">
+                    {t("variantLabel")}
+                  </FormLabel>
                   <FormControl>
                     <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger
@@ -201,7 +204,7 @@ export function AddEditEventDialog({
                           fieldState.invalid ? "border-red-500" : ""
                         }`}
                       >
-                        <SelectValue placeholder="Select a variant" />
+                        <SelectValue placeholder={t("variantPlaceholder")} />
                       </SelectTrigger>
                       <SelectContent>
                         {COLORS.map((color) => (
@@ -226,11 +229,13 @@ export function AddEditEventDialog({
               name="description"
               render={({ field, fieldState }) => (
                 <FormItem>
-                  <FormLabel className="required">Description</FormLabel>
+                  <FormLabel className="required">
+                    {t("descriptionLabel")}
+                  </FormLabel>
                   <FormControl>
                     <Textarea
                       {...field}
-                      placeholder="Enter a description"
+                      placeholder={t("descriptionPlaceholder")}
                       className={fieldState.invalid ? "border-red-500" : ""}
                     />
                   </FormControl>
@@ -243,11 +248,11 @@ export function AddEditEventDialog({
         <ModalFooter className="flex justify-end gap-2">
           <ModalClose asChild>
             <Button type="button" variant="outline">
-              Cancel
+              {tCommon("cancel")}
             </Button>
           </ModalClose>
           <Button form="event-form" type="submit">
-            {isEditing ? "Save Changes" : "Create Event"}
+            {isEditing ? t("saveChanges") : t("createEvent")}
           </Button>
         </ModalFooter>
       </ModalContent>
