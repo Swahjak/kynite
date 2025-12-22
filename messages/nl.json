@@ -1,0 +1,100 @@
+{
+  "Common": {
+    "appName": "Familie Planner",
+    "loading": "Laden...",
+    "cancel": "Annuleren",
+    "save": "Opslaan",
+    "delete": "Verwijderen",
+    "edit": "Bewerken",
+    "close": "Sluiten",
+    "confirm": "Bevestigen"
+  },
+  "Metadata": {
+    "title": "Familie Planner",
+    "description": "Gezinsorganisatiehub met kalender en taken"
+  },
+  "HomePage": {
+    "title": "Familie Planner",
+    "subtitle": "Het organisatiehub van je gezin",
+    "openCalendar": "Open Kalender"
+  },
+  "Calendar": {
+    "addEvent": "Evenement Toevoegen",
+    "views": {
+      "agenda": "Agenda",
+      "day": "Dag",
+      "week": "Week",
+      "month": "Maand",
+      "year": "Jaar"
+    }
+  },
+  "Filter": {
+    "clearFilter": "Filter Wissen",
+    "colors": {
+      "blue": "Blauw",
+      "green": "Groen",
+      "red": "Rood",
+      "yellow": "Geel",
+      "purple": "Paars",
+      "orange": "Oranje"
+    }
+  },
+  "Settings": {
+    "title": "Kalenderinstellingen",
+    "darkMode": "Donkere modus",
+    "confirmationDialog": "Bevestigingsvenster bij verplaatsen",
+    "dotBadge": "Gebruik punt-badge",
+    "use24Hour": "24-uurs notatie",
+    "agendaGroupBy": "Agenda groeperen op",
+    "groupByDate": "Datum",
+    "groupByColor": "Kleur"
+  },
+  "EventDialog": {
+    "addTitle": "Nieuw Evenement",
+    "editTitle": "Evenement Bewerken",
+    "addDescription": "Maak een nieuw evenement voor je kalender.",
+    "editDescription": "Wijzig je bestaande evenement.",
+    "titleLabel": "Titel",
+    "titlePlaceholder": "Voer een titel in",
+    "descriptionLabel": "Beschrijving",
+    "descriptionPlaceholder": "Voer een beschrijving in",
+    "variantLabel": "Variant",
+    "variantPlaceholder": "Selecteer een variant",
+    "createEvent": "Evenement Maken",
+    "saveChanges": "Wijzigingen Opslaan",
+    "successCreate": "Evenement succesvol aangemaakt",
+    "successUpdate": "Evenement succesvol bijgewerkt",
+    "errorCreate": "Evenement aanmaken mislukt",
+    "errorUpdate": "Evenement bewerken mislukt"
+  },
+  "LanguageSwitcher": {
+    "label": "Taal wisselen",
+    "dutch": "Nederlands",
+    "english": "English"
+  },
+  "Auth": {
+    "login": "Inloggen",
+    "signup": "Registreren",
+    "email": "E-mail",
+    "password": "Wachtwoord",
+    "confirmPassword": "Bevestig wachtwoord",
+    "name": "Naam",
+    "loginTitle": "Welkom terug",
+    "loginDescription": "Voer je gegevens in om toegang te krijgen",
+    "signupTitle": "Account aanmaken",
+    "signupDescription": "Vul je gegevens in om te beginnen",
+    "noAccount": "Nog geen account?",
+    "hasAccount": "Al een account?",
+    "loginButton": "Inloggen",
+    "signupButton": "Account aanmaken",
+    "loggingIn": "Bezig met inloggen...",
+    "signingUp": "Account aanmaken...",
+    "loginError": "Ongeldige e-mail of wachtwoord",
+    "signupError": "Kon account niet aanmaken",
+    "passwordMismatch": "Wachtwoorden komen niet overeen",
+    "emailRequired": "E-mail is verplicht",
+    "passwordRequired": "Wachtwoord is verplicht",
+    "nameRequired": "Naam is verplicht",
+    "passwordMinLength": "Wachtwoord moet minimaal 8 tekens zijn"
+  }
+}

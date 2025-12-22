@@ -1,0 +1,100 @@
+{
+  "Common": {
+    "appName": "Family Planner",
+    "loading": "Loading...",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "confirm": "Confirm"
+  },
+  "Metadata": {
+    "title": "Family Planner",
+    "description": "Family organizational hub with calendar and tasks"
+  },
+  "HomePage": {
+    "title": "Family Planner",
+    "subtitle": "Your family's organizational hub",
+    "openCalendar": "Open Calendar"
+  },
+  "Calendar": {
+    "addEvent": "Add Event",
+    "views": {
+      "agenda": "Agenda",
+      "day": "Day",
+      "week": "Week",
+      "month": "Month",
+      "year": "Year"
+    }
+  },
+  "Filter": {
+    "clearFilter": "Clear Filter",
+    "colors": {
+      "blue": "Blue",
+      "green": "Green",
+      "red": "Red",
+      "yellow": "Yellow",
+      "purple": "Purple",
+      "orange": "Orange"
+    }
+  },
+  "Settings": {
+    "title": "Calendar settings",
+    "darkMode": "Use dark mode",
+    "confirmationDialog": "Show confirmation dialog on event drop",
+    "dotBadge": "Use dot badge",
+    "use24Hour": "Use 24 hour format",
+    "agendaGroupBy": "Agenda view group by",
+    "groupByDate": "Date",
+    "groupByColor": "Color"
+  },
+  "EventDialog": {
+    "addTitle": "Add New Event",
+    "editTitle": "Edit Event",
+    "addDescription": "Create a new event for your calendar.",
+    "editDescription": "Modify your existing event.",
+    "titleLabel": "Title",
+    "titlePlaceholder": "Enter a title",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Enter a description",
+    "variantLabel": "Variant",
+    "variantPlaceholder": "Select a variant",
+    "createEvent": "Create Event",
+    "saveChanges": "Save Changes",
+    "successCreate": "Event created successfully",
+    "successUpdate": "Event updated successfully",
+    "errorCreate": "Failed to add event",
+    "errorUpdate": "Failed to edit event"
+  },
+  "LanguageSwitcher": {
+    "label": "Switch language",
+    "dutch": "Nederlands",
+    "english": "English"
+  },
+  "Auth": {
+    "login": "Log in",
+    "signup": "Sign up",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "name": "Name",
+    "loginTitle": "Welcome back",
+    "loginDescription": "Enter your credentials to access your account",
+    "signupTitle": "Create an account",
+    "signupDescription": "Enter your details to get started",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "loginButton": "Log in",
+    "signupButton": "Create account",
+    "loggingIn": "Logging in...",
+    "signingUp": "Creating account...",
+    "loginError": "Invalid email or password",
+    "signupError": "Could not create account",
+    "passwordMismatch": "Passwords do not match",
+    "emailRequired": "Email is required",
+    "passwordRequired": "Password is required",
+    "nameRequired": "Name is required",
+    "passwordMinLength": "Password must be at least 8 characters"
+  }
+}
