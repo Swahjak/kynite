@@ -6,7 +6,13 @@ import { LinkedGoogleAccountCard } from "./linked-google-account-card";
 import { LinkGoogleAccountButton } from "./link-google-account-button";
 import type { LinkedGoogleAccount } from "@/types/accounts";
 
-export function LinkedAccountsSection() {
+interface LinkedAccountsSectionProps {
+  familyId?: string;
+}
+
+export function LinkedAccountsSection({
+  familyId,
+}: LinkedAccountsSectionProps = {}) {
   const [accounts, setAccounts] = useState<LinkedGoogleAccount[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -75,6 +81,7 @@ export function LinkedAccountsSection() {
           <LinkedGoogleAccountCard
             key={account.id}
             account={account}
+            familyId={familyId}
             onUnlink={handleUnlink}
           />
         ))}
