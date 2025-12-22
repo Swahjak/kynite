@@ -1,5 +1,14 @@
 # App Header Specification
 
+> **Design Reference Only**
+>
+> This document contains visual mockups and styling references. For implementation
+> requirements, data models, and interaction rules, see the feature specification
+> in `docs/features/ui/header.md`.
+>
+> When implementing, apply the project's brand guidelines and established patterns
+> from the codebase. Do not copy mockup code directly.
+
 This document defines the main application header (top bar) for Family Planner, based on design mockups and brand guidelines.
 
 ---
