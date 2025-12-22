@@ -92,6 +92,7 @@
     "dashboard": "Dashboard",
     "calendar": "Kalender",
     "chores": "Taken",
+    "rewardChart": "Sterrenkaart",
     "settings": "Instellingen",
     "help": "Help"
   },
@@ -140,5 +141,21 @@
     "inviteDescription": "Deel een uitnodigingslink met je familie (je kunt dit overslaan)",
     "completeTitle": "Klaar!",
     "completeDescription": "Je familie is klaar voor gebruik"
+  },
+  "SettingsPage": {
+    "title": "Instellingen",
+    "description": "Beheer je familie- en accountinstellingen",
+    "tabs": {
+      "family": "Familie",
+      "accounts": "Gekoppelde accounts"
+    },
+    "family": {
+      "title": "Familie-instellingen",
+      "description": "Beheer je familie en leden"
+    },
+    "accounts": {
+      "title": "Google-accounts",
+      "description": "Beheer je gekoppelde Google-accounts voor kalendertoegang"
+    }
   }
 }

@@ -92,6 +92,7 @@
     "dashboard": "Dashboard",
     "calendar": "Calendar",
     "chores": "Chores",
+    "rewardChart": "Star Chart",
     "settings": "Settings",
     "help": "Help"
   },
@@ -140,5 +141,21 @@
     "inviteDescription": "Share an invite link with your family (you can skip this)",
     "completeTitle": "All Set!",
     "completeDescription": "Your family is ready to go"
+  },
+  "SettingsPage": {
+    "title": "Settings",
+    "description": "Manage your family and account settings",
+    "tabs": {
+      "family": "Family",
+      "accounts": "Linked Accounts"
+    },
+    "family": {
+      "title": "Family Settings",
+      "description": "Manage your family and members"
+    },
+    "accounts": {
+      "title": "Google Accounts",
+      "description": "Manage your connected Google accounts for calendar access"
+    }
   }
 }
