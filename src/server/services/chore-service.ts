@@ -1,6 +1,6 @@
 import { db } from "@/server/db";
 import { chores, familyMembers, users } from "@/server/schema";
-import { eq, and, gte, lte, desc, asc, isNull, or } from "drizzle-orm";
+import { eq, and, gte, lte, asc, isNull, or, aliasedTable } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 import type {
   CreateChoreInput,
@@ -70,10 +70,10 @@ function buildChoreWithAssignee(row: {
 /**
  * Alias tables for multiple joins to same table
  */
-const assignedMembers = familyMembers;
-const completedMembers = familyMembers;
-const assignedUsers = users;
-const completedUsers = users;
+const assignedMembers = aliasedTable(familyMembers, "assigned_members");
+const completedMembers = aliasedTable(familyMembers, "completed_members");
+const assignedUsers = aliasedTable(users, "assigned_users");
+const completedUsers = aliasedTable(users, "completed_users");
 
 /**
  * Get all chores for a family with optional filters
