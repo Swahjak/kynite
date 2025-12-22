@@ -51,19 +51,6 @@ export const accounts = pgTable("accounts", {
     mode: "date",
   }),
   scope: text("scope"),
-  password: text("password"),
-  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
-});
-
-/**
- * Verifications table - Email verification and password reset tokens
- */
-export const verifications = pgTable("verifications", {
-  id: text("id").primaryKey(),
-  identifier: text("identifier").notNull(),
-  value: text("value").notNull(),
-  expiresAt: timestamp("expires_at", { mode: "date" }).notNull(),
   createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
 });
@@ -78,5 +65,3 @@ export type Session = typeof sessions.$inferSelect;
 export type NewSession = typeof sessions.$inferInsert;
 export type Account = typeof accounts.$inferSelect;
 export type NewAccount = typeof accounts.$inferInsert;
-export type Verification = typeof verifications.$inferSelect;
-export type NewVerification = typeof verifications.$inferInsert;
