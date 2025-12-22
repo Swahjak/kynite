@@ -1,6 +1,12 @@
 "use client";
 
-import { Calendar, CheckSquare, Settings, HelpCircle } from "lucide-react";
+import {
+  LayoutDashboard,
+  Calendar,
+  CheckSquare,
+  Settings,
+  HelpCircle,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
@@ -21,11 +27,12 @@ interface NavigationMenuProps {
 interface NavItem {
   href: string;
   icon: React.ComponentType<{ className?: string }>;
-  labelKey: "calendar" | "chores" | "settings" | "help";
+  labelKey: "dashboard" | "calendar" | "chores" | "settings" | "help";
   manageOnly?: boolean;
 }
 
 const navItems: NavItem[] = [
+  { href: "/dashboard", icon: LayoutDashboard, labelKey: "dashboard" },
   { href: "/calendar", icon: Calendar, labelKey: "calendar" },
   { href: "/chores", icon: CheckSquare, labelKey: "chores", manageOnly: true },
   { href: "/settings", icon: Settings, labelKey: "settings", manageOnly: true },
