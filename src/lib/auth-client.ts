@@ -5,7 +5,7 @@ export const authClient = createAuthClient({
 });
 
 // Export commonly used methods for convenience
-export const { signIn, signUp, signOut, useSession } = authClient;
+export const { signIn, signOut, useSession } = authClient;
 
 // Export the full client for advanced operations like linkSocial
 export default authClient;
