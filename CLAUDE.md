@@ -27,6 +27,10 @@ pnpm e2e              # Run all E2E tests
 pnpm e2e:ui           # Open Playwright UI
 pnpm e2e:visual       # Run visual regression tests only
 pnpm e2e:visual:update  # Update visual snapshots
+pnpm e2e:setup        # Start test DB + run migrations
+pnpm e2e:teardown     # Stop test DB
+pnpm e2e:run          # Run tests (requires e2e:setup first)
+pnpm e2e:full         # Full cycle: setup → run → teardown
 
 # Database (Drizzle + PostgreSQL)
 pnpm db:generate      # Generate migrations from schema changes
@@ -54,7 +58,10 @@ pnpm db:studio        # Open Drizzle Studio GUI
 - `src/i18n/` - Internationalization config (routing.ts, request.ts, navigation.ts)
 - `src/server/` - Server-side code (auth.ts, db/, schema.ts)
 - `messages/` - Translation JSON files (nl.json, en.json)
-- `e2e/` - Playwright tests and visual snapshots
+- `e2e/` - Playwright E2E tests
+  - `tests/` - Test specs organized by feature (auth/, family/, dashboard/, visual/)
+  - `fixtures/` - Playwright fixtures for auth and page setup
+  - `utils/` - Test data factory, DB seeder, test scenarios
 
 ### Styling Conventions
 
