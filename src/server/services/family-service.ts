@@ -404,3 +404,15 @@ export async function getMemberByUserId(userId: string, familyId: string) {
 
   return result[0] ?? null;
 }
+
+/**
+ * Get a family member by userId and familyId
+ * Alias for getMemberByUserId
+ * Returns null if user is not a member
+ */
+export async function getFamilyMemberByUserId(
+  userId: string,
+  familyId: string
+) {
+  return getMemberByUserId(userId, familyId);
+}
