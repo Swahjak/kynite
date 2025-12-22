@@ -36,3 +36,13 @@ export function useInteractionMode(): InteractionModeContextValue {
   }
   return context;
 }
+
+/**
+ * Safe version of useInteractionMode that returns "manage" mode as default
+ * when used outside of InteractionModeProvider. Useful for components that
+ * need to work in both contexted and non-contexted environments.
+ */
+export function useInteractionModeSafe(): InteractionModeContextValue {
+  const context = useContext(InteractionModeContext);
+  return context ?? { mode: "manage" };
+}

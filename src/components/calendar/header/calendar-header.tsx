@@ -18,6 +18,7 @@ import { TodayButton } from "@/components/calendar/header/today-button";
 import { UserSelect } from "@/components/calendar/header/user-select";
 import { Settings } from "@/components/calendar/settings/settings";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { useInteractionModeSafe } from "@/contexts/interaction-mode-context";
 import Views from "./view-tabs";
 
 interface CalendarHeaderProps {
@@ -27,6 +28,8 @@ interface CalendarHeaderProps {
 export function CalendarHeader({ addEventButtonRef }: CalendarHeaderProps) {
   const { view, events } = useCalendar();
   const t = useTranslations("Calendar");
+  const { mode } = useInteractionModeSafe();
+  const isManageMode = mode === "manage";
 
   return (
     <div className="flex flex-col gap-4 border-b p-4 lg:flex-row lg:items-center lg:justify-between">
@@ -53,19 +56,21 @@ export function CalendarHeader({ addEventButtonRef }: CalendarHeaderProps) {
           <Views />
         </div>
 
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-1.5">
-          <UserSelect />
+        {isManageMode && (
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-1.5">
+            <UserSelect />
 
-          <AddEditEventDialog>
-            <Button ref={addEventButtonRef}>
-              <Plus className="h-4 w-4" />
-              {t("addEvent")}
-            </Button>
-          </AddEditEventDialog>
-        </div>
+            <AddEditEventDialog>
+              <Button ref={addEventButtonRef}>
+                <Plus className="h-4 w-4" />
+                {t("addEvent")}
+              </Button>
+            </AddEditEventDialog>
+          </div>
+        )}
         <div className="flex items-center gap-1.5">
           <LanguageSwitcher />
-          <Settings />
+          {isManageMode && <Settings />}
         </div>
       </motion.div>
     </div>
