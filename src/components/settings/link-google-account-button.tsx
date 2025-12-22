@@ -6,13 +6,7 @@ import { Button } from "@/components/ui/button";
 import authClient from "@/lib/auth-client";
 import { toast } from "sonner";
 
-interface LinkGoogleAccountButtonProps {
-  onSuccess?: () => void;
-}
-
-export function LinkGoogleAccountButton({
-  onSuccess,
-}: LinkGoogleAccountButtonProps) {
+export function LinkGoogleAccountButton() {
   const [isLinking, setIsLinking] = useState(false);
 
   const handleLinkGoogle = async () => {
@@ -24,8 +18,7 @@ export function LinkGoogleAccountButton({
         callbackURL: "/settings/accounts",
       });
       // User will be redirected to Google OAuth
-      // onSuccess called after redirect back
-      onSuccess?.();
+      // Page remounts after redirect, triggering fetchAccounts
     } catch (error) {
       setIsLinking(false);
       toast.error("Failed to initiate Google account linking");

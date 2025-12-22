@@ -38,8 +38,13 @@ export function LinkedAccountsSection() {
     const response = await fetch(`/api/v1/accounts/linked/${accountId}`, {
       method: "DELETE",
     });
-    const data = await response.json();
 
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.error?.message || "Failed to unlink");
+    }
+
+    const data = await response.json();
     if (data.success) {
       setAccounts((prev) => prev.filter((acc) => acc.id !== accountId));
     } else {
@@ -80,7 +85,7 @@ export function LinkedAccountsSection() {
         )}
       </div>
 
-      <LinkGoogleAccountButton onSuccess={fetchAccounts} />
+      <LinkGoogleAccountButton />
     </div>
   );
 }
