@@ -2,10 +2,11 @@ import { Suspense } from "react";
 import { setRequestLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
-import { LoginForm } from "@/components/auth/login-form";
+import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
 
 type Props = {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ callbackUrl?: string }>;
 };
 
 export async function generateMetadata({ params }: Props) {
@@ -20,8 +21,9 @@ export async function generateMetadata({ params }: Props) {
   };
 }
 
-export default async function LoginPage({ params }: Props) {
+export default async function LoginPage({ params, searchParams }: Props) {
   const { locale } = await params;
+  const { callbackUrl } = await searchParams;
   setRequestLocale(locale as Locale);
 
   const t = await getTranslations("Auth");
@@ -35,9 +37,9 @@ export default async function LoginPage({ params }: Props) {
         </div>
 
         <Suspense
-          fallback={<div className="bg-muted h-64 animate-pulse rounded" />}
+          fallback={<div className="bg-muted h-12 animate-pulse rounded" />}
         >
-          <LoginForm />
+          <GoogleSignInButton callbackUrl={callbackUrl} />
         </Suspense>
       </div>
     </div>
