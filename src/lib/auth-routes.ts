@@ -15,6 +15,16 @@ export const loginRoute = "/login";
 // Route to redirect authenticated users to after login
 export const defaultAuthRedirect = "/calendar";
 
+// Route for family onboarding
+export const onboardingRoute = "/onboarding";
+
+// Routes that allow unauthenticated access for invite links
+// (will redirect to login, then back to invite)
+export const inviteRoutes = ["/join"] as const;
+
+// Routes that require family membership
+export const familyRequiredRoutes = ["/calendar", "/settings"] as const;
+
 /**
  * Check if a pathname is a public route
  * Handles locale prefixes (e.g., /en/login, /nl/signup)
@@ -23,12 +33,14 @@ export function isPublicRoute(pathname: string): boolean {
   // Remove locale prefix if present
   const pathWithoutLocale = pathname.replace(/^\/(en|nl)/, "") || "/";
 
-  return publicRoutes.some((route) => {
-    if (route === "/") {
-      return pathWithoutLocale === "/";
-    }
-    return pathWithoutLocale.startsWith(route);
-  });
+  return (
+    publicRoutes.some((route) => {
+      if (route === "/") {
+        return pathWithoutLocale === "/";
+      }
+      return pathWithoutLocale.startsWith(route);
+    }) || inviteRoutes.some((route) => pathWithoutLocale.startsWith(route))
+  );
 }
 
 /**
@@ -36,4 +48,15 @@ export function isPublicRoute(pathname: string): boolean {
  */
 export function isAuthApiRoute(pathname: string): boolean {
   return pathname.startsWith(authApiPrefix);
+}
+
+/**
+ * Check if a pathname requires family membership
+ * Handles locale prefixes (e.g., /en/calendar, /nl/settings)
+ */
+export function isFamilyRequiredRoute(pathname: string): boolean {
+  const pathWithoutLocale = pathname.replace(/^\/(en|nl)/, "") || "/";
+  return familyRequiredRoutes.some((route) =>
+    pathWithoutLocale.startsWith(route)
+  );
 }
