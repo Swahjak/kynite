@@ -80,5 +80,16 @@
     "signingIn": "Bezig met inloggen...",
     "loginError": "Kon niet inloggen. Probeer het opnieuw.",
     "signOut": "Uitloggen"
+  },
+  "Header": {
+    "brand": "Family Planner",
+    "tagline": "FAMILIE OS",
+    "addEvent": "Afspraak toevoegen"
+  },
+  "Menu": {
+    "calendar": "Kalender",
+    "chores": "Taken",
+    "settings": "Instellingen",
+    "help": "Help"
   }
 }

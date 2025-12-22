@@ -80,5 +80,16 @@
     "signingIn": "Signing in...",
     "loginError": "Could not sign in. Please try again.",
     "signOut": "Sign out"
+  },
+  "Header": {
+    "brand": "Family Planner",
+    "tagline": "FAMILY OS",
+    "addEvent": "Add Event"
+  },
+  "Menu": {
+    "calendar": "Calendar",
+    "chores": "Chores",
+    "settings": "Settings",
+    "help": "Help"
   }
 }
