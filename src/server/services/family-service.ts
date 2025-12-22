@@ -385,3 +385,22 @@ export async function isUserFamilyMember(
 
   return membership.length > 0;
 }
+
+/**
+ * Get a family member by userId and familyId
+ * Returns null if user is not a member
+ */
+export async function getMemberByUserId(userId: string, familyId: string) {
+  const result = await db
+    .select()
+    .from(familyMembers)
+    .where(
+      and(
+        eq(familyMembers.userId, userId),
+        eq(familyMembers.familyId, familyId)
+      )
+    )
+    .limit(1);
+
+  return result[0] ?? null;
+}
