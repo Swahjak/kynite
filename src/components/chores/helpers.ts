@@ -143,14 +143,14 @@ export function formatDueLabel(chore: IChoreWithAssignee): string | null {
  */
 export function getUrgencyVariant(
   urgency: UrgencyStatus
-): "destructive" | "warning" | "secondary" | "default" {
+): "destructive" | "outline" | "secondary" | "default" {
   switch (urgency) {
     case "overdue":
       return "destructive";
     case "urgent":
       return "destructive";
     case "due-soon":
-      return "warning";
+      return "outline";
     default:
       return "secondary";
   }
