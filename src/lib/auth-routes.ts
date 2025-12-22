@@ -25,6 +25,9 @@ export const inviteRoutes = ["/join"] as const;
 // Routes that require family membership
 export const familyRequiredRoutes = ["/calendar", "/settings"] as const;
 
+// Routes that require authentication but not family membership
+export const authOnlyRoutes = [onboardingRoute] as const;
+
 /**
  * Check if a pathname is a public route
  * Handles locale prefixes (e.g., /en/login, /nl/signup)
@@ -48,6 +51,16 @@ export function isPublicRoute(pathname: string): boolean {
  */
 export function isAuthApiRoute(pathname: string): boolean {
   return pathname.startsWith(authApiPrefix);
+}
+
+/**
+ * Check if a pathname is an auth-only route
+ * (requires authentication but not family membership)
+ * Handles locale prefixes (e.g., /en/onboarding, /nl/onboarding)
+ */
+export function isAuthOnlyRoute(pathname: string): boolean {
+  const pathWithoutLocale = pathname.replace(/^\/(en|nl)/, "") || "/";
+  return authOnlyRoutes.some((route) => pathWithoutLocale.startsWith(route));
 }
 
 /**

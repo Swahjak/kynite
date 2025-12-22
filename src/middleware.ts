@@ -4,13 +4,12 @@ import { routing } from "@/i18n/routing";
 import {
   isPublicRoute,
   isAuthApiRoute,
+  isAuthOnlyRoute,
   loginRoute,
   onboardingRoute,
   isFamilyRequiredRoute,
 } from "@/lib/auth-routes";
-
-// Family cookie name (must match family-cookie.ts)
-const FAMILY_COOKIE_NAME = "has-family";
+import { FAMILY_COOKIE_NAME } from "@/lib/family-cookie";
 
 // Create next-intl middleware
 const intlMiddleware = createIntlMiddleware(routing);
@@ -50,11 +49,16 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  // Auth-only routes (need auth but not family)
+  if (isAuthOnlyRoute(pathname)) {
+    return intlMiddleware(request);
+  }
+
   // For family-required routes, check family membership cookie
   if (isFamilyRequiredRoute(pathname)) {
     const hasFamilyCookie = request.cookies.get(FAMILY_COOKIE_NAME);
 
-    if (!hasFamilyCookie?.value) {
+    if (hasFamilyCookie?.value !== "true") {
       // Redirect to onboarding
       const locale = pathname.match(/^\/(en|nl)/)?.[1] || "nl";
       const onboardingUrl = new URL(
