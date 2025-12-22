@@ -26,7 +26,7 @@ interface ICalendarContext {
   events: IEvent[];
   addEvent: (event: IEvent) => void;
   updateEvent: (event: IEvent) => void;
-  removeEvent: (eventId: number) => void;
+  removeEvent: (eventId: string) => void;
   clearFilter: () => void;
 }
 
@@ -142,7 +142,9 @@ export function CalendarProvider({
     if (userId === "all") {
       setFilteredEvents(allEvents);
     } else {
-      const filtered = allEvents.filter((event) => event.user.id === userId);
+      const filtered = allEvents.filter((event) =>
+        event.users.some((user) => user.id === userId)
+      );
       setFilteredEvents(filtered);
     }
   };
@@ -170,7 +172,7 @@ export function CalendarProvider({
     );
   };
 
-  const removeEvent = (eventId: number) => {
+  const removeEvent = (eventId: string) => {
     setAllEvents((prev) => prev.filter((e) => e.id !== eventId));
     setFilteredEvents((prev) => prev.filter((e) => e.id !== eventId));
   };

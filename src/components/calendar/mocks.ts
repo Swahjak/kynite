@@ -5,22 +5,30 @@ export const USERS_MOCK: IUser[] = [
   {
     id: "f3b035ac-49f7-4e92-a715-35680bf63175",
     name: "Michael Doe",
-    picturePath: null,
+    avatarFallback: "MD",
+    avatarColor: "bg-blue-500",
+    avatarUrl: undefined,
   },
   {
     id: "3e36ea6e-78f3-40dd-ab8c-a6c737c3c422",
     name: "Alice Johnson",
-    picturePath: null,
+    avatarFallback: "AJ",
+    avatarColor: "bg-green-500",
+    avatarUrl: undefined,
   },
   {
     id: "a7aff6bd-a50a-4d6a-ab57-76f76bb27cf5",
     name: "Robert Smith",
-    picturePath: null,
+    avatarFallback: "RS",
+    avatarColor: "bg-purple-500",
+    avatarUrl: undefined,
   },
   {
     id: "dd503cf9-6c38-43cf-94cc-0d4032e2f77a",
     name: "Emily Davis",
-    picturePath: null,
+    avatarFallback: "ED",
+    avatarColor: "bg-orange-500",
+    avatarUrl: undefined,
   },
 ];
 
@@ -130,14 +138,14 @@ const mockGenerator = (numberOfEvents: number): IEvent[] => {
 
   // Create an event happening now
   const currentEvent = {
-    id: currentId++,
+    id: String(currentId++),
     startDate: new Date(now.getTime() - 30 * 60000).toISOString(),
     endDate: new Date(now.getTime() + 30 * 60000).toISOString(),
     title: events[Math.floor(Math.random() * events.length)],
     color: COLORS[Math.floor(Math.random() * COLORS.length)],
     description:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-    user: randomUser,
+    users: [randomUser],
   };
 
   result.push(currentEvent);
@@ -177,15 +185,20 @@ const mockGenerator = (numberOfEvents: number): IEvent[] => {
       endDate.setHours(endDate.getHours() + Math.floor(Math.random() * 3) + 1);
     }
 
+    // Randomly assign 1-3 participants
+    const numParticipants = Math.floor(Math.random() * 3) + 1;
+    const shuffledUsers = [...USERS_MOCK].sort(() => Math.random() - 0.5);
+    const eventUsers = shuffledUsers.slice(0, numParticipants);
+
     result.push({
-      id: currentId++,
+      id: String(currentId++),
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString(),
       title: events[Math.floor(Math.random() * events.length)],
       color: COLORS[Math.floor(Math.random() * COLORS.length)],
       description:
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-      user: USERS_MOCK[Math.floor(Math.random() * USERS_MOCK.length)],
+      users: eventUsers,
     });
   }
 

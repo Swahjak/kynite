@@ -1,6 +1,6 @@
 import { setRequestLocale } from "next-intl/server";
-import { Calendar } from "@/components/calendar/calendar";
 import { type Locale } from "@/i18n/routing";
+import { getEvents, getUsers } from "@/components/calendar/requests";
 import { CalendarPageClient } from "./calendar-page-client";
 
 type Props = {
@@ -11,5 +11,7 @@ export default async function CalendarPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale as Locale);
 
-  return <CalendarPageClient />;
+  const [events, users] = await Promise.all([getEvents(), getUsers()]);
+
+  return <CalendarPageClient events={events} users={users} />;
 }

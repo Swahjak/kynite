@@ -3,17 +3,19 @@ import type { TEventColor } from "@/components/calendar/types";
 export interface IUser {
   id: string;
   name: string;
-  picturePath: string | null;
+  avatarFallback: string;
+  avatarColor: string;
+  avatarUrl?: string;
 }
 
 export interface IEvent {
-  id: number;
+  id: string;
   startDate: string;
   endDate: string;
   title: string;
   color: TEventColor;
   description: string;
-  user: IUser;
+  users: IUser[];
 }
 
 export interface ICalendarCell {
