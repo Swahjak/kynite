@@ -1,7 +1,10 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { customSession } from "better-auth/plugins";
 import { db } from "./db";
 import * as schema from "./schema";
+import { familyMembers } from "./schema";
+import { eq } from "drizzle-orm";
 
 if (!process.env.BETTER_AUTH_SECRET) {
   throw new Error(
@@ -31,6 +34,25 @@ export const auth = betterAuth({
       verification: schema.verifications,
     },
   }),
+
+  plugins: [
+    customSession(async ({ user, session }) => {
+      // Query user's family membership
+      const membership = await db
+        .select({ familyId: familyMembers.familyId })
+        .from(familyMembers)
+        .where(eq(familyMembers.userId, user.id))
+        .limit(1);
+
+      return {
+        user,
+        session: {
+          ...session,
+          familyId: membership[0]?.familyId ?? null,
+        },
+      };
+    }),
+  ],
 
   // Google OAuth provider for calendar access
   socialProviders: {
