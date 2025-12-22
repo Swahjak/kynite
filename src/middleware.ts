@@ -1,15 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import createIntlMiddleware from "next-intl/middleware";
 import { routing } from "@/i18n/routing";
-import {
-  isPublicRoute,
-  isAuthApiRoute,
-  isAuthOnlyRoute,
-  loginRoute,
-  onboardingRoute,
-  isFamilyRequiredRoute,
-} from "@/lib/auth-routes";
-import { FAMILY_COOKIE_NAME } from "@/lib/family-cookie";
+import { isPublicRoute, isAuthApiRoute, loginRoute } from "@/lib/auth-routes";
 
 // Create next-intl middleware
 const intlMiddleware = createIntlMiddleware(routing);
@@ -49,27 +41,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Auth-only routes (need auth but not family)
-  if (isAuthOnlyRoute(pathname)) {
-    return intlMiddleware(request);
-  }
-
-  // For family-required routes, check family membership cookie
-  if (isFamilyRequiredRoute(pathname)) {
-    const hasFamilyCookie = request.cookies.get(FAMILY_COOKIE_NAME);
-
-    if (hasFamilyCookie?.value !== "true") {
-      // Redirect to onboarding
-      const locale = pathname.match(/^\/(en|nl)/)?.[1] || "nl";
-      const onboardingUrl = new URL(
-        `/${locale}${onboardingRoute}`,
-        request.url
-      );
-      return NextResponse.redirect(onboardingUrl);
-    }
-  }
-
   // User has session cookie - apply intl middleware and continue
+  // Family membership check happens in layouts, not middleware
   return intlMiddleware(request);
 }
 
