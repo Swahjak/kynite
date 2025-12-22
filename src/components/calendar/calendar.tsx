@@ -12,14 +12,18 @@ async function getCalendarData() {
   };
 }
 
-export async function Calendar() {
+interface CalendarProps {
+  addEventButtonRef?: React.RefObject<HTMLButtonElement | null>;
+}
+
+export async function Calendar({ addEventButtonRef }: CalendarProps) {
   const { events, users } = await getCalendarData();
 
   return (
     <CalendarProvider events={events} users={users} view="month">
       <DndProvider showConfirmation={false}>
         <div className="w-full rounded-xl border">
-          <CalendarHeader />
+          <CalendarHeader addEventButtonRef={addEventButtonRef} />
           <CalendarBody />
         </div>
       </DndProvider>

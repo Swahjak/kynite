@@ -20,7 +20,11 @@ import { Settings } from "@/components/calendar/settings/settings";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import Views from "./view-tabs";
 
-export function CalendarHeader() {
+interface CalendarHeaderProps {
+  addEventButtonRef?: React.RefObject<HTMLButtonElement | null>;
+}
+
+export function CalendarHeader({ addEventButtonRef }: CalendarHeaderProps) {
   const { view, events } = useCalendar();
   const t = useTranslations("Calendar");
 
@@ -53,7 +57,7 @@ export function CalendarHeader() {
           <UserSelect />
 
           <AddEditEventDialog>
-            <Button>
+            <Button ref={addEventButtonRef}>
               <Plus className="h-4 w-4" />
               {t("addEvent")}
             </Button>
