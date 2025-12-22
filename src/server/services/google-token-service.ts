@@ -2,7 +2,7 @@ import { db } from "@/server/db";
 import { accounts } from "@/server/schema";
 import { and, eq } from "drizzle-orm";
 
-interface TokenResult {
+export interface TokenResult {
   accessToken: string;
   refreshToken: string | null;
   accountId: string;
