@@ -240,6 +240,30 @@
   .hover\:bg-primary-hover:hover {
     background-color: var(--primary-hover);
   }
+
+  /* Brand animation durations */
+  .duration-fast {
+    transition-duration: 150ms;
+  }
+
+  .duration-normal {
+    transition-duration: 200ms;
+  }
+
+  .duration-slow {
+    transition-duration: 300ms;
+  }
+
+  .duration-slower {
+    transition-duration: 500ms;
+  }
+
+  /* Smooth color mode transition */
+  .transition-colors-smooth {
+    transition-property: background-color, border-color, color, fill, stroke;
+    transition-timing-function: ease;
+    transition-duration: 200ms;
+  }
 }
 
 @layer components {
