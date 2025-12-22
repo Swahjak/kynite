@@ -84,7 +84,9 @@
   "Header": {
     "brand": "Family Planner",
     "tagline": "FAMILY OS",
-    "addEvent": "Add Event"
+    "addEvent": "Add Event",
+    "switchToManage": "Switch to manage mode",
+    "switchToWall": "Switch to wall display mode"
   },
   "Menu": {
     "dashboard": "Dashboard",

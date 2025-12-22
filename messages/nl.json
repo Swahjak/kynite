@@ -84,7 +84,9 @@
   "Header": {
     "brand": "Family Planner",
     "tagline": "FAMILIE OS",
-    "addEvent": "Afspraak toevoegen"
+    "addEvent": "Afspraak toevoegen",
+    "switchToManage": "Schakel naar beheermodus",
+    "switchToWall": "Schakel naar wandweergave"
   },
   "Menu": {
     "dashboard": "Dashboard",
