@@ -1,9 +1,10 @@
 // e2e/fixtures/page-fixtures.ts
 import { test as authTest } from "./auth-fixtures";
+import type { Page } from "@playwright/test";
 
 export const test = authTest.extend<{
-  authenticatedPage: typeof authTest extends { page: infer P } ? P : never;
-  familyPage: typeof authTest extends { page: infer P } ? P : never;
+  authenticatedPage: Page;
+  familyPage: Page;
 }>({
   authenticatedPage: async (
     { page, context, authenticatedUser, applyAuth },

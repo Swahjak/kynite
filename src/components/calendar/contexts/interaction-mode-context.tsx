@@ -12,7 +12,8 @@ interface InteractionModeContextValue {
   canDragDrop: boolean;
 }
 
-const InteractionModeContext = createContext<InteractionModeContextValue | null>(null);
+const InteractionModeContext =
+  createContext<InteractionModeContextValue | null>(null);
 
 interface InteractionModeProviderProps {
   mode: InteractionMode;

@@ -21,7 +21,9 @@ export function Calendar({ events, users, addEventButtonRef }: CalendarProps) {
   if (!events || !users) {
     try {
       // Dynamic import to avoid circular dependency and make context optional
-      const { useCalendarData } = require("@/components/calendar/providers/calendar-data-provider");
+      const {
+        useCalendarData,
+      } = require("@/components/calendar/providers/calendar-data-provider");
       const context = useCalendarData();
       finalEvents = events ?? context.events;
       finalUsers = users ?? context.users;

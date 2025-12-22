@@ -21,6 +21,7 @@ import {
 } from "date-fns";
 import { getCompletionsForDateRange } from "@/server/services/reward-chart-service";
 import type { Locale } from "@/i18n/routing";
+import type { GoalStatus, CompletionStatus } from "@/components/reward-chart";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -169,13 +170,31 @@ export default async function RewardChartRoute({ params }: Props) {
         daysOfWeek: JSON.parse(t.daysOfWeek) as (0 | 1 | 2 | 3 | 4 | 5 | 6)[],
         createdAt: t.createdAt,
       })),
+      activeGoal: chartDetails.activeGoal
+        ? {
+            ...chartDetails.activeGoal,
+            status: chartDetails.activeGoal.status as GoalStatus,
+          }
+        : null,
+      currentMessage: chartDetails.currentMessage,
       createdAt: chartDetails.createdAt,
       updatedAt: chartDetails.updatedAt,
     },
     weekStart: startDateStr,
     weekEnd: endDateStr,
     days,
-    tasks,
+    tasks: tasks.map((t) => ({
+      ...t,
+      cells: t.cells.map((c) => ({
+        ...c,
+        completion: c.completion
+          ? {
+              ...c.completion,
+              status: c.completion.status as CompletionStatus,
+            }
+          : null,
+      })),
+    })),
     todayStats,
   };
 

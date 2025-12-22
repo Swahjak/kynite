@@ -15,7 +15,7 @@ export function LinkGoogleAccountButton() {
       // Use Better-Auth's social linking
       await authClient.linkSocial({
         provider: "google",
-        callbackURL: "/settings/accounts",
+        callbackURL: "/settings",
       });
       // User will be redirected to Google OAuth
       // Page remounts after redirect, triggering fetchAccounts
