@@ -15,7 +15,7 @@ export function WeeklyStars() {
   );
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2" data-testid="weekly-stars">
       <h3 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
         {t("title")}
       </h3>
