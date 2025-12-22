@@ -15,11 +15,8 @@ export default async function InvitePage({ params }: InvitePageProps) {
 
   const session = await getSession();
 
-  if (!session?.user) {
-    redirect(`/${locale}/login`);
-  }
-
-  const family = await getUserFamily(session.user.id);
+  // Auth check is handled by (auth)/layout.tsx
+  const family = await getUserFamily(session!.user.id);
 
   if (!family) {
     redirect(`/${locale}/onboarding/create`);
