@@ -118,5 +118,25 @@
     "quickActions": {
       "title": "Quick Actions"
     }
+  },
+  "Family": {
+    "title": "Family",
+    "familyName": "Family Name",
+    "familySettings": "Family Settings",
+    "members": "Members",
+    "leaveFamily": "Leave Family"
+  },
+  "FamilyRoles": {
+    "manager": "Manager",
+    "participant": "Member",
+    "caregiver": "Caregiver"
+  },
+  "FamilyOnboarding": {
+    "createTitle": "Create Your Family",
+    "createDescription": "Give your household a name to get started",
+    "inviteTitle": "Invite Family Members",
+    "inviteDescription": "Share an invite link with your family (you can skip this)",
+    "completeTitle": "All Set!",
+    "completeDescription": "Your family is ready to go"
   }
 }

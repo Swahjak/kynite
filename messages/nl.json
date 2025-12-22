@@ -118,5 +118,25 @@
     "quickActions": {
       "title": "Snelle Acties"
     }
+  },
+  "Family": {
+    "title": "Familie",
+    "familyName": "Familienaam",
+    "familySettings": "Familie-instellingen",
+    "members": "Leden",
+    "leaveFamily": "Familie verlaten"
+  },
+  "FamilyRoles": {
+    "manager": "Beheerder",
+    "participant": "Lid",
+    "caregiver": "Verzorger"
+  },
+  "FamilyOnboarding": {
+    "createTitle": "Maak je familie aan",
+    "createDescription": "Geef je huishouden een naam om te beginnen",
+    "inviteTitle": "Nodig familieleden uit",
+    "inviteDescription": "Deel een uitnodigingslink met je familie (je kunt dit overslaan)",
+    "completeTitle": "Klaar!",
+    "completeDescription": "Je familie is klaar voor gebruik"
   }
 }

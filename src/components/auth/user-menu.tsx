@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { LogOut, Settings, User, Loader2 } from "lucide-react";
+import { LogOut, Settings, User, Loader2, Users } from "lucide-react";
+import { useLocale } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -25,6 +26,7 @@ interface UserMenuProps {
 
 export function UserMenu({ user }: UserMenuProps) {
   const router = useRouter();
+  const locale = useLocale();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
@@ -67,6 +69,12 @@ export function UserMenu({ user }: UserMenuProps) {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onClick={() => router.push(`/${locale}/settings/family`)}
+        >
+          <Users className="mr-2 size-4" />
+          Family Settings
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={() => router.push("/settings/accounts")}>
           <Settings className="mr-2 size-4" />
           Settings
