@@ -206,3 +206,54 @@
     font-family: var(--font-display);
   }
 }
+
+@layer components {
+  /* Event color utilities - use as: className="event-blue" */
+  .event-blue {
+    background-color: var(--event-blue-bg);
+    border-left: 4px solid var(--event-blue-border);
+    color: var(--event-blue-text);
+  }
+
+  .event-purple {
+    background-color: var(--event-purple-bg);
+    border-left: 4px solid var(--event-purple-border);
+    color: var(--event-purple-text);
+  }
+
+  .event-orange {
+    background-color: var(--event-orange-bg);
+    border-left: 4px solid var(--event-orange-border);
+    color: var(--event-orange-text);
+  }
+
+  .event-green {
+    background-color: var(--event-green-bg);
+    border-left: 4px solid var(--event-green-border);
+    color: var(--event-green-text);
+  }
+
+  .event-red {
+    background-color: var(--event-red-bg);
+    border-left: 4px solid var(--event-red-border);
+    color: var(--event-red-text);
+  }
+
+  .event-yellow {
+    background-color: var(--event-yellow-bg);
+    border-left: 4px solid var(--event-yellow-border);
+    color: var(--event-yellow-text);
+  }
+
+  .event-pink {
+    background-color: var(--event-pink-bg);
+    border-left: 4px solid var(--event-pink-border);
+    color: var(--event-pink-text);
+  }
+
+  .event-teal {
+    background-color: var(--event-teal-bg);
+    border-left: 4px solid var(--event-teal-border);
+    color: var(--event-teal-text);
+  }
+}
