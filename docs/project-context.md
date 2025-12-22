@@ -70,12 +70,12 @@ _This file contains critical rules and patterns that AI agents must follow when 
 - **E2E Tests (Playwright):**
   - Place all E2E scripts in the root `e2e/` directory.
   - Priority: Critical user journeys (e.g., "Morning Rush", "Google Auth").
-  - Use the `visual.spec.ts` for regression testing on the Wall Hub's "glanceable" UI.
+  - Use the `visual.spec.ts` for regression testing on the Family Planner's "glanceable" UI.
 - **Mocking:** Use standard Vitest mocks for external APIs (like Google Calendar) to ensure fast, deterministic CI runs.
 
 ### Code Quality & Style Rules
 
-- **Styling:** Use Tailwind CSS v4 utility classes. Avoid standard CSS modules unless specifically required for complex PWA layouts.
+- **Styling:** Use Tailwind CSS v4 utility classes. Avoid standard CSS modules unless specifically required for complex PWA layouts. Use "brand-guidelines" skill to ensure consistency with the Family Planner's design system.
 - **Database Schema:**
   - Define all schema in `src/server/schema.ts` (or modularized files imported there).
   - Use `snake_case` for all table and column names to match PostgreSQL standards.
@@ -96,7 +96,7 @@ _This file contains critical rules and patterns that AI agents must follow when 
   - **OAuth Scopes:** Request the minimum required Google Calendar scopes.
   - **Secret Management:** NEVER commit `.env` files. Ensure all API keys are managed through Vercel/Neon environment settings.
 - **Performance:**
-  - **Glanceable UI:** Ensure high contrast for Wall Hub components. Verify minimum font sizes (16px base) and touch target sizes (48x48px).
+  - **Glanceable UI:** Ensure high contrast for Family Planner components. Verify minimum font sizes (16px base) and touch target sizes (48x48px).
 - **Conflict Resolution:** Follow "Last Write Wins" strategy for concurrent edits.
 
 ---

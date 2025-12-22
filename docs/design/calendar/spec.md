@@ -60,12 +60,12 @@ The calendar supports four primary views accessible via the view tabs. The Year 
 
 ### View Tabs Configuration
 
-| View | Icon | Label | Description |
-|------|------|-------|-------------|
-| Today | `view_day` | Today | Family-focused daily overview |
-| Day | `calendar_today` | Day | Hourly timeline for selected date |
-| Week | `calendar_view_week` | Week | 7-day hourly grid |
-| Month | `calendar_month` | Month | Full month grid with day detail sidebar |
+| View  | Icon                 | Label | Description                             |
+| ----- | -------------------- | ----- | --------------------------------------- |
+| Today | `view_day`           | Today | Family-focused daily overview           |
+| Day   | `calendar_today`     | Day   | Hourly timeline for selected date       |
+| Week  | `calendar_view_week` | Week  | 7-day hourly grid                       |
+| Month | `calendar_month`     | Month | Full month grid with day detail sidebar |
 
 > **Note**: Year and Agenda views are retained in code for potential future use but removed from the view tabs UI.
 
@@ -126,12 +126,14 @@ Each family member gets a scrollable column:
 #### Column Components
 
 **User Header**:
+
 - Avatar (48px, circular, border-2 border-white shadow)
 - Name (Lexend, 18px, Bold)
 - Level badge (primary background, 10px uppercase)
 - XP progress bar (primary color, 6px height)
 
 **Schedule Section**:
+
 - Section label: "SCHEDULE" (12px, uppercase, tracking-wider, text-secondary)
 - Event cards with left border color indicator (4px)
 - Past events: Reduced opacity (60%), checkmark icon
@@ -139,6 +141,7 @@ Each family member gets a scrollable column:
 - Future events: Full opacity
 
 **Event Card Anatomy**:
+
 ```
 ┌────────────────────────────────┐
 │ [Time]               [Badge]   │  ← Time in category color
@@ -149,16 +152,19 @@ Each family member gets a scrollable column:
 ```
 
 **Tasks Section**:
+
 - Section label: "TASKS" with completion count (e.g., "2/5 Done")
 - Task items from Chores module (see [Chores Integration](#chores-integration))
 - Checkbox with XP reward indicator
 - Completed tasks: Strikethrough, reduced opacity
 
 **Empty States**:
+
 - No events: "Free Day!" with celebration emoji
 - No morning events: "No morning events" in dashed border container
 
 **Add Column Button**:
+
 - Rightmost position, always visible
 - Dashed border, hover: primary color
 - Icon: `add` (40px)
@@ -191,11 +197,13 @@ Each family member gets a scrollable column:
 #### Sidebar (>md breakpoint)
 
 **Mini Calendar**:
+
 - Compact month grid with current day highlighted
 - Click date to navigate
 - Shows event indicator dots
 
 **Happening Now Panel**:
+
 - Live indicator for currently active events
 - Pulsing dot animation
 - Event title and time remaining
@@ -203,11 +211,13 @@ Each family member gets a scrollable column:
 #### Main Timeline
 
 **Time Column**:
+
 - Hour labels (00:00-23:00 or 12:00 AM-11:00 PM based on settings)
 - Tabular numbers for consistent width
 - Font: Lexend, 12px, text-secondary
 
 **Event Blocks**:
+
 - Positioned by start time and duration
 - Width calculated based on overlapping events
 - Left border with event color (4px)
@@ -215,11 +225,13 @@ Each family member gets a scrollable column:
 - Hover: Elevate with shadow
 
 **Multi-day Events Row**:
+
 - Separate row above timeline for spanning events
 - Horizontal bar representation
 - Click to view details
 
 **Current Time Indicator**:
+
 - Red horizontal line spanning full width
 - "NOW" badge on right edge
 - Auto-scrolls into view on mount
@@ -252,12 +264,14 @@ Each family member gets a scrollable column:
 #### Day Headers
 
 **Structure**:
+
 - Weekday abbreviation (MON, TUE, etc.) - 12px, uppercase, text-secondary
 - Day number - 24px, Bold
 - "TODAY" badge on current day (primary background)
 - Weekend days: Red text for weekday label
 
 **Today Highlight**:
+
 - Primary background on header cell
 - Primary/10 background on entire column
 - Border-top accent bar (2px primary)
@@ -265,12 +279,14 @@ Each family member gets a scrollable column:
 #### Time Grid
 
 **Configuration**:
+
 - 24 rows (one per hour)
 - 7 columns (Mon-Sun, week starts Monday)
 - Grid lines: border-default color
 - Hour labels: Left axis, every hour
 
 **Event Rendering**:
+
 - Same as Day View event blocks
 - Grouped side-by-side when overlapping
 - Max 3 events visible per slot, "+N more" overflow
@@ -318,6 +334,7 @@ Each family member gets a scrollable column:
 #### Month Grid
 
 **Cell Structure**:
+
 ```
 ┌───────────────┐
 │ [Day Number]  │  ← Top-left, bold for current month
@@ -328,27 +345,32 @@ Each family member gets a scrollable column:
 ```
 
 **Day Number Styling**:
+
 - Current month: text-primary, font-medium
 - Adjacent months: text-muted, opacity-50
 - Today: Primary background circle, white text, shadow
 
 **Event Indicators**:
+
 - Dot variant: Small colored circles (6px)
 - Bar variant: Horizontal colored bars (6px height, variable width)
 - Max 3 indicators visible, prioritize multi-day events
 - Click cell to view full event list
 
 **Achievement Indicators**:
+
 - Trophy icon (emoji_events) for days with completed chores
 - Yellow/gold color when achieved
 - Gray when pending for today
 
 **Today Highlight**:
+
 - Background: primary/10
 - Border: 1px solid primary (ring-inset)
 - Day number: Primary circle badge
 
 **Hover States**:
+
 - Background: surface-hover
 - Cursor: pointer
 - Day number: font-bold
@@ -358,22 +380,26 @@ Each family member gets a scrollable column:
 **Visibility**: Desktop only (>lg breakpoint), collapsible
 
 **Header**:
+
 - Selected date: "Oct 24 - Tuesday" (Lexend, 20px, Bold)
 - Subtitle: "Today's Agenda" (14px, text-secondary)
 
 **Weather Widget**:
+
 - Background: blue-50 (light) / blue-900/20 (dark)
 - Icon: Weather symbol (32px)
 - Temperature: Bold, 18px
 - Description: 12px, text-secondary
 
 **Timeline Section**:
+
 - Vertical timeline with left border (2px)
 - Event nodes: Colored circles (16px) on timeline
 - Time labels: 12px, bold, text-secondary
 - Event cards: White background, subtle shadow
 
 **Daily Routines Section**:
+
 - Background: surface-elevated or slight gray
 - Checkbox items from Chores module
 - Completed: Strikethrough, checkmark icon
@@ -386,19 +412,19 @@ Each family member gets a scrollable column:
 
 ```typescript
 interface IEvent {
-  id: number
-  title: string
-  description: string
-  startDate: string      // ISO 8601 format
-  endDate: string        // ISO 8601 format
-  color: TEventColor     // 'blue' | 'green' | 'red' | 'yellow' | 'purple' | 'orange'
-  user: IUser
+  id: number;
+  title: string;
+  description: string;
+  startDate: string; // ISO 8601 format
+  endDate: string; // ISO 8601 format
+  color: TEventColor; // 'blue' | 'green' | 'red' | 'yellow' | 'purple' | 'orange'
+  user: IUser;
 }
 
 interface IUser {
-  id: string
-  name: string
-  picturePath: string | null
+  id: string;
+  name: string;
+  picturePath: string | null;
 }
 ```
 
@@ -406,14 +432,14 @@ interface IUser {
 
 Events are color-coded by category. Colors align with the brand color palette:
 
-| Color | CSS Classes | Use Cases |
-|-------|-------------|-----------|
-| Blue | `blue-50`, `blue-400`, `blue-600` | Sports, activities, outdoor events |
-| Purple | `purple-50`, `purple-400`, `purple-600` | Personal, gym, self-care |
-| Orange | `orange-50`, `orange-400`, `orange-600` | Lessons, learning, education |
-| Green | `green-50`, `green-500`, `green-700` | Family events, meals, gatherings |
-| Red | `red-50`, `red-400`, `red-600` | Date nights, special occasions |
-| Yellow | `yellow-50`, `yellow-400`, `yellow-700` | Celebrations, birthdays, parties |
+| Color  | CSS Classes                             | Use Cases                          |
+| ------ | --------------------------------------- | ---------------------------------- |
+| Blue   | `blue-50`, `blue-400`, `blue-600`       | Sports, activities, outdoor events |
+| Purple | `purple-50`, `purple-400`, `purple-600` | Personal, gym, self-care           |
+| Orange | `orange-50`, `orange-400`, `orange-600` | Lessons, learning, education       |
+| Green  | `green-50`, `green-500`, `green-700`    | Family events, meals, gatherings   |
+| Red    | `red-50`, `red-400`, `red-600`          | Date nights, special occasions     |
+| Yellow | `yellow-50`, `yellow-400`, `yellow-700` | Celebrations, birthdays, parties   |
 
 ### Event Dialogs
 
@@ -422,6 +448,7 @@ Events are color-coded by category. Colors align with the brand color palette:
 **Trigger**: "Add Event" button, double-click on empty cell, or edit existing event
 
 **Fields**:
+
 - Title (required) - Text input
 - Description (optional) - Textarea
 - Start Date/Time - Date picker + time input
@@ -430,6 +457,7 @@ Events are color-coded by category. Colors align with the brand color palette:
 - Assigned User - User dropdown
 
 **Pre-filling**:
+
 - When clicking a specific cell/time slot, pre-fill date and time
 - When editing, populate all fields from existing event
 
@@ -438,6 +466,7 @@ Events are color-coded by category. Colors align with the brand color palette:
 **Trigger**: Click on event
 
 **Content**:
+
 - Event title (large, bold)
 - Date and time range
 - Color indicator
@@ -451,6 +480,7 @@ Events are color-coded by category. Colors align with the brand color palette:
 **Trigger**: Delete button in event details
 
 **Content**:
+
 - Confirmation message
 - Event title for reference
 - Cancel and Confirm buttons
@@ -462,6 +492,7 @@ Events are color-coded by category. Colors align with the brand color palette:
 ### Date Navigation
 
 **Controls**:
+
 - Previous/Next buttons (chevron icons)
 - "Today" button to jump to current date
 
@@ -482,14 +513,17 @@ Events are color-coded by category. Colors align with the brand color palette:
 ```
 
 **States**:
+
 - **Active**: Dark background (#111815), white text, bold
 - **Inactive**: White background, border, text-secondary
 
 **Avatar Indicators**:
+
 - Material symbol faces or user photos
 - Color-coded per family member (see brand guidelines)
 
 **Behavior**:
+
 - Single select (one member or "Everyone")
 - "Everyone" shows all events
 - Member selection filters events to that user only
@@ -501,6 +535,7 @@ Events are color-coded by category. Colors align with the brand color palette:
 **Design**: Multi-select checkboxes with color swatches
 
 **Behavior**:
+
 - Multiple colors can be selected
 - Empty selection = show all colors
 - "Clear filters" button resets selection
@@ -517,20 +552,21 @@ Events can be rescheduled by dragging them to a new date/time slot.
 
 ```typescript
 interface DndContextValue {
-  isDragging: boolean
-  draggedEvent: IEvent | null
-  pendingDrop: { date: Date; hour?: number; minute?: number } | null
-  startDrag: (event: IEvent) => void
-  endDrag: () => void
-  handleEventDrop: (date: Date, hour?: number, minute?: number) => void
-  handleConfirmDrop: () => void
-  handleCancelDrop: () => void
+  isDragging: boolean;
+  draggedEvent: IEvent | null;
+  pendingDrop: { date: Date; hour?: number; minute?: number } | null;
+  startDrag: (event: IEvent) => void;
+  endDrag: () => void;
+  handleEventDrop: (date: Date, hour?: number, minute?: number) => void;
+  handleConfirmDrop: () => void;
+  handleCancelDrop: () => void;
 }
 ```
 
 ### Draggable Events
 
 **Visual Feedback**:
+
 - Cursor: `grab` on hover, `grabbing` while dragging
 - Opacity: Reduced to 50% on source while dragging
 - Ghost image: Browser default drag preview
@@ -541,6 +577,7 @@ interface DndContextValue {
 **Month View**: Day cells are drop targets
 
 **Drop Zone Feedback**:
+
 - Background: `primary/10` on valid drop target hover
 - Border: `primary` highlight
 
@@ -549,6 +586,7 @@ interface DndContextValue {
 **Optional Setting**: Can be enabled in settings
 
 **Dialog Content**:
+
 - Original date/time
 - New date/time
 - Event title
@@ -557,6 +595,7 @@ interface DndContextValue {
 ### Auto-Scroll
 
 When dragging near viewport edges:
+
 - Trigger zone: 50px from edge
 - Scroll speed: 15px per frame
 - Smooth scrolling animation
@@ -572,6 +611,7 @@ The calendar displays gamification elements from the Family Planner gamification
 **Location**: Calendar header, next to view toggle
 
 **Design**:
+
 ```
 ┌─────────────────────────────┐
 │ 🔥 STREAK                   │
@@ -580,6 +620,7 @@ The calendar displays gamification elements from the Family Planner gamification
 ```
 
 **Components**:
+
 - Fire icon (local_fire_department or emoji)
 - "STREAK" label (10px, uppercase, text-secondary)
 - Percentage value (18px, bold, primary color)
@@ -590,11 +631,13 @@ The calendar displays gamification elements from the Family Planner gamification
 **Location**: Family member column headers
 
 **Level Badge**:
+
 - Background: primary/20
 - Text: primary-dark, bold, 10px
 - Format: "Lvl 12"
 
 **XP Progress Bar**:
+
 - Full width below name
 - Height: 6px
 - Background: border-default
@@ -604,6 +647,7 @@ The calendar displays gamification elements from the Family Planner gamification
 ### Achievement Indicators (Month View)
 
 **Trophy Icons on Day Cells**:
+
 - Completed all chores: Gold trophy (yellow-500)
 - Partial completion: Gray trophy (text-muted)
 - No chores that day: No icon
@@ -628,6 +672,7 @@ Display in Month View sidebar
 ### Task Display
 
 **Task Item Structure**:
+
 ```
 ┌─────────────────────────────────────┐
 │ [☐] [Task Title]           [+20 XP] │
@@ -635,11 +680,13 @@ Display in Month View sidebar
 ```
 
 **Components**:
+
 - Checkbox: Rounded, primary accent color when checked
 - Title: 14px, medium weight
 - XP Badge: primary/20 background, primary-dark text
 
 **States**:
+
 - Pending: Full opacity, unchecked
 - Completed: Strikethrough, reduced opacity, "Done" badge
 
@@ -651,6 +698,7 @@ Display in Month View sidebar
 ### Integration Points
 
 The calendar spec defines visual representation only. Task data comes from the Chores module via:
+
 - Context/state management
 - API endpoints (to be defined in Chores spec)
 
@@ -664,7 +712,7 @@ The header provides navigation, filtering, and actions.
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────┐
-│ [🏠 Wall Hub]          [☀️ 72°F]  [+ Add Event] [⚙️] [🔔] [👤]           │
+│ [🏠 Family Planner]          [☀️ 72°F]  [+ Add Event] [⚙️] [🔔] [👤]           │
 │  Family OS                                                                  │
 ├────────────────────────────────────────────────────────────────────────────┤
 │ [<] [Oct 23 - Oct 29] [>]                    [Streak 85%] [Today|Week|...] │
@@ -677,11 +725,13 @@ The header provides navigation, filtering, and actions.
 ### Components
 
 #### Brand Section (Top Left)
+
 - Home icon in primary/20 rounded container
-- "Wall Hub" text (20px, bold)
+- "Family Planner" text (20px, bold)
 - "Family OS" tagline (10px, uppercase, text-secondary)
 
 #### Actions (Top Right)
+
 - Weather widget (icon + temperature)
 - Add Event button (primary background, icon + text)
 - Settings button (icon only)
@@ -689,6 +739,7 @@ The header provides navigation, filtering, and actions.
 - User avatar (circular, border-primary)
 
 #### Navigation Row
+
 - Previous/Next chevron buttons
 - Date range text (32px, bold, tracking-tight)
 - Subtitle text (14px, text-secondary)
@@ -696,6 +747,7 @@ The header provides navigation, filtering, and actions.
 - View toggle pills
 
 #### Filter Row
+
 - Family member filter pills (horizontally scrollable on mobile)
 
 ### Mobile Adaptations
@@ -714,19 +766,20 @@ Settings are accessible via the settings dropdown in the header.
 
 ### Available Settings
 
-| Setting | Type | Default | Description |
-|---------|------|---------|-------------|
-| Dark Mode | Toggle | System | Light/dark theme preference |
-| Time Format | Toggle | 24-hour | Show times as 24h or 12h AM/PM |
-| Badge Variant | Toggle | Colored | Event indicators: dots or colored bars |
-| DnD Confirmation | Toggle | Off | Show confirmation before drop |
-| Language | Select | nl | Dutch or English |
+| Setting          | Type   | Default | Description                            |
+| ---------------- | ------ | ------- | -------------------------------------- |
+| Dark Mode        | Toggle | System  | Light/dark theme preference            |
+| Time Format      | Toggle | 24-hour | Show times as 24h or 12h AM/PM         |
+| Badge Variant    | Toggle | Colored | Event indicators: dots or colored bars |
+| DnD Confirmation | Toggle | Off     | Show confirmation before drop          |
+| Language         | Select | nl      | Dutch or English                       |
 
 ### Settings Panel Design
 
 **Container**: Popover or slide-out panel
 
 **Toggle Items**:
+
 ```
 ┌─────────────────────────────────┐
 │ Dark Mode                    [○]│
@@ -743,6 +796,7 @@ Settings are accessible via the settings dropdown in the header.
 ### Persistence
 
 All settings persist to localStorage:
+
 - Key prefix: `family-planner-calendar-`
 - Values: JSON serialized
 
@@ -752,37 +806,42 @@ All settings persist to localStorage:
 
 ### Breakpoints
 
-| Breakpoint | Min Width | Target Devices |
-|------------|-----------|----------------|
-| sm | 640px | Large phones |
-| md | 768px | Tablets |
-| lg | 1024px | Small laptops |
-| xl | 1280px | Desktops |
-| 2xl | 1536px | Large displays, wall-mounted |
+| Breakpoint | Min Width | Target Devices               |
+| ---------- | --------- | ---------------------------- |
+| sm         | 640px     | Large phones                 |
+| md         | 768px     | Tablets                      |
+| lg         | 1024px    | Small laptops                |
+| xl         | 1280px    | Desktops                     |
+| 2xl        | 1536px    | Large displays, wall-mounted |
 
 ### View Adaptations
 
 #### Today View
+
 - **Mobile (<md)**: Single column, swipe between members
 - **Tablet (md-lg)**: 2 columns visible
 - **Desktop (>lg)**: 3-4 columns visible
 - **Wall Display (>2xl)**: All columns visible
 
 #### Day View
+
 - **Mobile**: Hide sidebar, full-width timeline
 - **Desktop**: Show sidebar with mini calendar
 
 #### Week View
+
 - **Mobile**: Show warning, suggest day/month view
 - **Desktop**: Full 7-column grid
 
 #### Month View
+
 - **Mobile**: Grid only, hide sidebar
 - **Desktop**: Grid + detail sidebar
 
 ### Touch Targets
 
 All interactive elements must meet minimum touch target size:
+
 - Minimum: 44x44px
 - Recommended: 48x48px
 
@@ -821,33 +880,33 @@ All calendar components follow the Family Planner brand guidelines.
 
 ### Typography
 
-| Element | Font | Size | Weight |
-|---------|------|------|--------|
-| Page Title | Lexend | 32px | Bold |
-| Section Title | Lexend | 20px | SemiBold |
-| Event Title | Lexend | 14px | SemiBold |
-| Time Labels | Lexend | 12px | Bold |
-| Body Text | Noto Sans | 14px | Regular |
-| Captions | Lexend | 12px | Medium |
-| Labels | Lexend | 10px | Bold, uppercase |
+| Element       | Font      | Size | Weight          |
+| ------------- | --------- | ---- | --------------- |
+| Page Title    | Lexend    | 32px | Bold            |
+| Section Title | Lexend    | 20px | SemiBold        |
+| Event Title   | Lexend    | 14px | SemiBold        |
+| Time Labels   | Lexend    | 12px | Bold            |
+| Body Text     | Noto Sans | 14px | Regular         |
+| Captions      | Lexend    | 12px | Medium          |
+| Labels        | Lexend    | 10px | Bold, uppercase |
 
 ### Shadows
 
-| Level | Value | Usage |
-|-------|-------|-------|
-| SM | `0 1px 2px rgba(0,0,0,0.05)` | Cards, event blocks |
-| MD | `0 4px 6px rgba(0,0,0,0.1)` | Dropdowns, popovers |
-| LG | `0 10px 15px rgba(0,0,0,0.1)` | Modals, dialogs |
+| Level | Value                         | Usage               |
+| ----- | ----------------------------- | ------------------- |
+| SM    | `0 1px 2px rgba(0,0,0,0.05)`  | Cards, event blocks |
+| MD    | `0 4px 6px rgba(0,0,0,0.1)`   | Dropdowns, popovers |
+| LG    | `0 10px 15px rgba(0,0,0,0.1)` | Modals, dialogs     |
 
 ### Border Radius
 
-| Token | Value | Usage |
-|-------|-------|-------|
-| default | 4px | Subtle rounding |
-| lg | 8px | Buttons, inputs |
-| xl | 12px | Cards |
-| 2xl | 16px | Large cards, modals |
-| full | 9999px | Pills, avatars |
+| Token   | Value  | Usage               |
+| ------- | ------ | ------------------- |
+| default | 4px    | Subtle rounding     |
+| lg      | 8px    | Buttons, inputs     |
+| xl      | 12px   | Cards               |
+| 2xl     | 16px   | Large cards, modals |
+| full    | 9999px | Pills, avatars      |
 
 ### Animations
 
@@ -862,7 +921,7 @@ transition: all 200ms ease;
 
 /* Card hover */
 .card:hover {
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 ```
 
@@ -917,6 +976,7 @@ src/components/calendar/
 ### State Management
 
 **CalendarProvider** manages:
+
 - Current view
 - Selected date
 - Filtered events
@@ -925,19 +985,20 @@ src/components/calendar/
 - Settings (persisted)
 
 **DndProvider** manages:
+
 - Drag state
 - Drop target
 - Pending confirmation
 
 ### Data Dependencies
 
-| Feature | Data Source |
-|---------|-------------|
-| Events | Google Calendar API |
-| Tasks | Chores Module |
-| Users | Auth/Family Module |
-| Settings | localStorage |
-| Weather | Weather API (TBD) |
+| Feature  | Data Source         |
+| -------- | ------------------- |
+| Events   | Google Calendar API |
+| Tasks    | Chores Module       |
+| Users    | Auth/Family Module  |
+| Settings | localStorage        |
+| Weather  | Weather API (TBD)   |
 
 ### Accessibility
 
@@ -959,13 +1020,13 @@ src/components/calendar/
 
 ## Design References
 
-| View | Design File | Screenshot |
-|------|-------------|------------|
-| Month | `calendar-month-code-1.html` | `calendar-month-design-1.png` |
-| Month (alt) | `calendar-month-code-2.tsx` | `calendar-month-design-2.png` |
-| Week | `calendar-week-code-1.html` | `calendar-week-design-1.png` |
-| Week (alt) | `calendar-week-code-2.tsx` | `calendar-week-design-2.png` |
-| Today | `calendar-today-code-1.html` | `calendar-today-design-1.png` |
+| View        | Design File                  | Screenshot                    |
+| ----------- | ---------------------------- | ----------------------------- |
+| Month       | `calendar-month-code-1.html` | `calendar-month-design-1.png` |
+| Month (alt) | `calendar-month-code-2.tsx`  | `calendar-month-design-2.png` |
+| Week        | `calendar-week-code-1.html`  | `calendar-week-design-1.png`  |
+| Week (alt)  | `calendar-week-code-2.tsx`   | `calendar-week-design-2.png`  |
+| Today       | `calendar-today-code-1.html` | `calendar-today-design-1.png` |
 
 ---
 
@@ -989,4 +1050,4 @@ src/components/calendar/
 
 ---
 
-*Last updated: December 2024*
+_Last updated: December 2024_

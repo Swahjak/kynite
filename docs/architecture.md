@@ -86,7 +86,7 @@ We will integrate specific, modern architectural pillars into the current Next.j
 **3. Real-Time Strategy (MVP Pivot):**
 
 - **Decision:** **Optimistic UI + Short Polling (using TanStack Query or SWR)**.
-- **Reasoning:** **MVP Pivot.** Persistent Socket connections are excluded from the MVP scope to maintain Vercel Serverless compatibility. We will achieve the "real-time feel" through instant local UI updates (Optimistic) and frequent polling (2-5s) on the Wall Hub.
+- **Reasoning:** **MVP Pivot.** Persistent Socket connections are excluded from the MVP scope to maintain Vercel Serverless compatibility. We will achieve the "real-time feel" through instant local UI updates (Optimistic) and frequent polling (2-5s) on the Family Planner.
 
 **4. PWA Configuration (To Be Added):**
 
@@ -245,7 +245,7 @@ family-planner-v3/
 ├── src/
 │   ├── app/                    # Next.js App Router (Routes & Layouts)
 │   │   ├── (auth)/             # Better-Auth routes
-│   │   ├── (hub)/              # Wall Hub views (Day/Week/Month/List)
+│   │   ├── (hub)/              # Family Planner views (Day/Week/Month/List)
 │   │   ├── (parent)/           # Mobile Parent Controller
 │   │   ├── api/ v1/            # API-First Route Handlers
 │   │   │   ├── calendar/       # Google Sync endpoints
@@ -354,7 +354,7 @@ TanStack Query polls `/api/v1/...`, triggering Service Layer revalidation from G
 
 - **Serverless Optimized:** Maximum performance on Vercel without custom socket overhead.
 - **Type Safety:** End-to-end TypeScript inference via Drizzle and Better-Auth.
-- **Resilient:** PWA architecture ensures 24/7 "Wall Hub" availability.
+- **Resilient:** PWA architecture ensures 24/7 "Family Planner" availability.
 
 ### Implementation Handoff
 

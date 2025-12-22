@@ -18,6 +18,7 @@ export const googleCalendars = pgTable("google_calendars", {
   googleCalendarId: text("google_calendar_id").notNull(),
   name: text("name").notNull(),
   color: text("color"),
+  accessRole: text("access_role").notNull().default("reader"), // 'owner' | 'writer' | 'reader'
   syncEnabled: boolean("sync_enabled").notNull().default(true),
   lastSyncedAt: timestamp("last_synced_at"),
   syncCursor: text("sync_cursor"), // For incremental sync
@@ -26,19 +27,20 @@ export const googleCalendars = pgTable("google_calendars", {
 });
 ```
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | text | Primary key (CUID or UUID) |
-| `family_id` | text | FK to `families.id` |
-| `account_id` | text | FK to `accounts.id` (Better-Auth OAuth) |
-| `google_calendar_id` | text | Google Calendar ID (e.g., "primary", email, or calendar ID) |
-| `name` | text | Display name from Google |
-| `color` | text | Google's calendar color hex code |
-| `sync_enabled` | boolean | Whether to sync this calendar |
-| `last_synced_at` | timestamp | Last successful sync time |
-| `sync_cursor` | text | Google's sync token for incremental updates |
-| `created_at` | timestamp | When calendar was linked |
-| `updated_at` | timestamp | Last modification time |
+| Column               | Type      | Description                                                 |
+| -------------------- | --------- | ----------------------------------------------------------- |
+| `id`                 | text      | Primary key (CUID or UUID)                                  |
+| `family_id`          | text      | FK to `families.id`                                         |
+| `account_id`         | text      | FK to `accounts.id` (Better-Auth OAuth)                     |
+| `google_calendar_id` | text      | Google Calendar ID (e.g., "primary", email, or calendar ID) |
+| `name`               | text      | Display name from Google                                    |
+| `color`              | text      | Google's calendar color hex code                            |
+| `access_role`        | text      | Calendar permission level: 'owner', 'writer', or 'reader'   |
+| `sync_enabled`       | boolean   | Whether to sync this calendar                               |
+| `last_synced_at`     | timestamp | Last successful sync time                                   |
+| `sync_cursor`        | text      | Google's sync token for incremental updates                 |
+| `created_at`         | timestamp | When calendar was linked                                    |
+| `updated_at`         | timestamp | Last modification time                                      |
 
 ## Relationships
 
@@ -97,27 +99,28 @@ export const googleCalendars = pgTable("google_calendars", {
 
 Events table includes fields for Google sync tracking (defined in Calendar feature):
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `google_calendar_id` | text | FK to `google_calendars.id` |
-| `google_event_id` | text | Google's event ID for 2-way sync |
-| `sync_status` | text | 'synced' \| 'pending' \| 'conflict' |
-| `local_updated_at` | timestamp | When event was modified locally |
-| `remote_updated_at` | timestamp | Google's last modified time |
+| Column               | Type      | Description                         |
+| -------------------- | --------- | ----------------------------------- |
+| `google_calendar_id` | text      | FK to `google_calendars.id`         |
+| `google_event_id`    | text      | Google's event ID for 2-way sync    |
+| `sync_status`        | text      | 'synced' \| 'pending' \| 'conflict' |
+| `local_updated_at`   | timestamp | When event was modified locally     |
+| `remote_updated_at`  | timestamp | Google's last modified time         |
 
 ## Enums
 
 ### SyncStatus
 
 ```typescript
-type SyncStatus = 'synced' | 'pending' | 'conflict';
+type SyncStatus = "synced" | "pending" | "conflict" | "error";
 ```
 
-| Value | Description |
-|-------|-------------|
-| `synced` | Event matches Google state |
-| `pending` | Local changes not yet pushed |
-| `conflict` | Both local and remote modified |
+| Value      | Description                               |
+| ---------- | ----------------------------------------- |
+| `synced`   | Event matches Google state                |
+| `pending`  | Local changes not yet pushed              |
+| `conflict` | Both local and remote modified            |
+| `error`    | Sync failed (e.g., API error, rate limit) |
 
 ## Indexes
 
@@ -143,7 +146,7 @@ SELECT
   gc.name,
   gc.color,
   gc.last_synced_at,
-  a.account_id AS google_account_email
+  a.provider_account_id AS google_account_email
 FROM google_calendars gc
 JOIN accounts a ON gc.account_id = a.id
 WHERE gc.family_id = 'family_123'
@@ -197,3 +200,18 @@ POST/PUT/DELETE https://www.googleapis.com/calendar/v3/calendars/{calendarId}/ev
 ```
 
 Push local changes to Google. Update `sync_status` to 'synced' on success.
+
+## Sync Configuration
+
+### Sync Date Range
+
+Initial sync pulls events within a bounded date range:
+
+```typescript
+const SYNC_RANGE = {
+  pastMonths: 3, // 3 months of history
+  futureMonths: 12, // 1 year ahead
+};
+```
+
+Subsequent syncs use incremental `syncToken` to fetch only changed events.

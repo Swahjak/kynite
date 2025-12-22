@@ -23,7 +23,7 @@ date: "2025-12-21"
 
 ## Executive Summary
 
-Family planner is a proactive "Family Operating System" designed to reduce the mental load of household management and eliminate parental "nagging." By bridging the gap between adult-focused logistics (Google Calendar) and child-friendly behavioral motivation, the system creates a centralized source of truth that actively facilitates daily routines. It comprises a dedicated, always-on Wall Hub for kids and a frictionless Mobile App for parents, ensuring that the entire family stays synchronized, motivated, and on schedule.
+Family planner is a proactive "Family Operating System" designed to reduce the mental load of household management and eliminate parental "nagging." By bridging the gap between adult-focused logistics (Google Calendar) and child-friendly behavioral motivation, the system creates a centralized source of truth that actively facilitates daily routines. It comprises a dedicated, always-on Family Planner for kids and a frictionless Mobile App for parents, ensuring that the entire family stays synchronized, motivated, and on schedule.
 
 ### What Makes This Special
 
@@ -45,23 +45,23 @@ This classification reflects the multi-platform nature of the solution (Next.js/
 
 ### User Success
 
-- **The "Calm Morning" Outcome:** Households experience a measurable reduction in verbal "nagging," with participants successfully departing for school/work on time by following automated Wall Hub routines.
+- **The "Calm Morning" Outcome:** Households experience a measurable reduction in verbal "nagging," with participants successfully departing for school/work on time by following automated Family Planner routines.
 - **Conflict Reduction:** A decrease in friction regarding daily chores, shifted from parental pressure to system-driven prompts.
 - **Positive Reinforcement:** Children/Participants demonstrate a sense of ownership and pride, evidenced by active engagement with the "Star Count" and reward redemption.
 
 ### Business & Engagement Success
 
-- **Single Source of Truth:** Establishing the Wall Hub as the definitive household reference point, aimed at 100% Daily Active Usage (DAU) within the home.
+- **Single Source of Truth:** Establishing the Family Planner as the definitive household reference point, aimed at 100% Daily Active Usage (DAU) within the home.
 - **System Trust:** Building unwavering user confidence through 99.9% system reliability and data integrity between external (Google) and internal (Planner) systems.
 
 ### Technical Success
 
 - **High-Fidelity Sync:** Maintaining a <5-second average latency for Google Calendar sync and a <2-second latency for internal state changes (e.g., Task Complete -> Parent Notification).
-- **Always-On Reliability:** Ensuring the Wall Hub remains responsive and synchronized 24/7, handling intermittent connectivity gracefully.
+- **Always-On Reliability:** Ensuring the Family Planner remains responsive and synchronized 24/7, handling intermittent connectivity gracefully.
 
 ### Measurable Outcomes (KPIs)
 
-- **Interaction Rate:** Average of >5 physical touch interactions per day on the Wall Hub.
+- **Interaction Rate:** Average of >5 physical touch interactions per day on the Family Planner.
 - **Task Velocity:** >80% of assigned chores marked "Done" through the system.
 - **Reward Velocity:** Consistent weekly "Star" accumulation per participant, indicating sustained behavioral engagement.
 
@@ -69,15 +69,15 @@ This classification reflects the multi-platform nature of the solution (Next.js/
 
 **Journey 1: The "Morning Rush" Rescue**
 _Persona: Sarah (Manager) & Leo (Participant)_
-At 7:15 AM, Sarah is packing lunches, dreading the daily battle of getting 6-year-old Leo to put on his shoes. Usually, she has to ask five times, ending in a shout. Today, the Wall Hub chimes. Instead of Mom nagging, the "Shoes On" timer begins a big, friendly countdown. Leo sees he has 4 minutes to "beat the timer." He gets his shoes on and taps the big "DONE" button. The screen explodes with confetti and victory sounds. Sarah gets a buzz on her phone: "Leo completed 'Shoes On'!" She approves the reward from her phone, adding a star to his tally. They walk out the door high-fiving—no conflict, just teamwork.
+At 7:15 AM, Sarah is packing lunches, dreading the daily battle of getting 6-year-old Leo to put on his shoes. Usually, she has to ask five times, ending in a shout. Today, the Family Planner chimes. Instead of Mom nagging, the "Shoes On" timer begins a big, friendly countdown. Leo sees he has 4 minutes to "beat the timer." He gets his shoes on and taps the big "DONE" button. The screen explodes with confetti and victory sounds. Sarah gets a buzz on her phone: "Leo completed 'Shoes On'!" She approves the reward from her phone, adding a star to his tally. They walk out the door high-fiving—no conflict, just teamwork.
 
 **Journey 2: The "Invisible" Coordination**
 _Persona: Sarah (Manager) & Grandpa Joe (Caregiver)_
-At 2:00 PM, Sarah gets stuck in a meeting and needs to change the pickup plan to "After-School Care." She opens the Parent Controller app and updates the event, adding a note to "Pack Swim Gear." Instantaneously, the Wall Hub at home updates. When Grandpa Joe glances at the Hub to check the plan, he sees the new block and the note. He didn't need a text or a call; the "Source of Truth" was updated in real-time. He picks up the gear and the child flawlessly, and the system manages the logistics so the humans don't have to.
+At 2:00 PM, Sarah gets stuck in a meeting and needs to change the pickup plan to "After-School Care." She opens the Parent Controller app and updates the event, adding a note to "Pack Swim Gear." Instantaneously, the Family Planner at home updates. When Grandpa Joe glances at the Hub to check the plan, he sees the new block and the note. He didn't need a text or a call; the "Source of Truth" was updated in real-time. He picks up the gear and the child flawlessly, and the system manages the logistics so the humans don't have to.
 
 **Journey 3: The "Reward Store" Motivation**
 _Persona: Leo (Participant)_
-On Sunday morning, Leo runs to the Wall Hub to check his total Star Count. He navigates to the "My Progress" screen and sees he has earned enough stars for the "Pizza Night" reward. He taps "Redeem," triggering a special animation on the Hub and sending a request to Sarah's phone. Sarah approves the request, and "Pizza Night" is automatically added to the family calendar for that evening. Leo feels a tangible connection between his consistent positive behavior and a real-world reward.
+On Sunday morning, Leo runs to the Family Planner to check his total Star Count. He navigates to the "My Progress" screen and sees he has earned enough stars for the "Pizza Night" reward. He taps "Redeem," triggering a special animation on the Hub and sending a request to Sarah's phone. Sarah approves the request, and "Pizza Night" is automatically added to the family calendar for that evening. Leo feels a tangible connection between his consistent positive behavior and a real-world reward.
 
 ### Journey Requirements Summary
 
@@ -93,13 +93,13 @@ These journeys reveal critical capabilities for the system:
 
 ### Project-Type Overview
 
-Family planner is a modern Web Application optimized as a Progressive Web App (PWA). It leverages Next.js for its core framework, providing a high-performance, responsive experience across both the dedicated Wall Hub (Android Tablet) and the mobile "Parent Controller."
+Family planner is a modern Web Application optimized as a Progressive Web App (PWA). It leverages Next.js for its core framework, providing a high-performance, responsive experience across both the dedicated Family Planner (Android Tablet) and the mobile "Parent Controller."
 
 ### Technical Architecture Considerations
 
 - **Platform & Browser Support:**
   - **Primary Target:** Chrome on Android (optimized for tablet form factors).
-  - **PWA Optimization:** The application will be fully PWA-ready, supporting "Add to Home Screen" with a standalone display mode to provide a full-screen, native-app feel on the Wall Hub.
+  - **PWA Optimization:** The application will be fully PWA-ready, supporting "Add to Home Screen" with a standalone display mode to provide a full-screen, native-app feel on the Family Planner.
 - **Real-Time Synchronization:**
   - **Implementation:** A real-time communication layer (Websockets or similar) will be utilized to ensure that state changes (e.g., Parent adds a task, Child completes a timer) are pushed to all devices in <2 seconds.
 - **Offline Strategy:**
@@ -111,7 +111,7 @@ Family planner is a modern Web Application optimized as a Progressive Web App (P
 ### MVP Strategy & Philosophy
 
 **MVP Approach:** **Experience MVP with Foundational Sync**
-The priority is to deliver the "Calm Morning" outcome through a high-fidelity, polished "Wall Hub" experience. Users must feel the system is "alive" and proactive. While the visual experience (confetti, real-time updates) is paramount, the **Google Calendar Sync** is a hard requirement to ensure the system is useful as a "Single Source of Truth" from Day 1.
+The priority is to deliver the "Calm Morning" outcome through a high-fidelity, polished "Family Planner" experience. Users must feel the system is "alive" and proactive. While the visual experience (confetti, real-time updates) is paramount, the **Google Calendar Sync** is a hard requirement to ensure the system is useful as a "Single Source of Truth" from Day 1.
 
 **Resource Requirements:** Small Team (Solo/Pair) - Full-stack capabilities (Next.js, Websockets) and strong frontend UI/UX skills are critical.
 
@@ -120,7 +120,7 @@ The priority is to deliver the "Calm Morning" outcome through a high-fidelity, p
 **Core User Journeys Supported:**
 
 - **Morning Rush:** Active timers and visual rewards.
-- **Invisible Coordination:** Real-time calendar updates from Parent App to Wall Hub.
+- **Invisible Coordination:** Real-time calendar updates from Parent App to Family Planner.
 
 **Must-Have Capabilities:**
 
@@ -128,7 +128,7 @@ The priority is to deliver the "Calm Morning" outcome through a high-fidelity, p
 - **Real-Time State:** Websocket-based updates for instant multi-device consistency.
 - **Visual Timers:** "Prescription" display and countdown logic on the Hub.
 - **Gamification UI:** "Star Count" and "Confetti" animations.
-- **Views:** Day, Week, Month, and List views on the Wall Hub.
+- **Views:** Day, Week, Month, and List views on the Family Planner.
 
 ### Post-MVP Features
 
@@ -160,19 +160,19 @@ The priority is to deliver the "Calm Morning" outcome through a high-fidelity, p
 
 - **FR1:** The system can synchronize 2-way with **multiple Google Calendars across multiple linked Google accounts** simultaneously.
 - **FR2:** The system can **aggregate and display events from disparate sources** (e.g., individual parent calendars, shared family calendars) into a unified Hub view.
-- **FR3:** Users can view family events in Day, Week, Month, and List layouts on the Wall Hub.
+- **FR3:** Users can view family events in Day, Week, Month, and List layouts on the Family Planner.
 - **FR4:** Parents can create, edit, and delete events in any linked Google Calendar via the mobile app.
 
 ### 2. Routine & Task Management
 
 - **FR5:** Parents can define "Routines" composed of multiple sequential tasks.
 - **FR6:** The system can trigger "Timer Prescriptions" (proactive countdowns) for specific routines.
-- **FR7:** Participants can mark individual tasks and routines as "Complete" via single-tap interaction on the Wall Hub.
+- **FR7:** Participants can mark individual tasks and routines as "Complete" via single-tap interaction on the Family Planner.
 
 ### 3. Motivation Engine
 
 - **FR8:** The system can track "Star" totals for individual participants.
-- **FR9:** The Wall Hub can provide immediate visual feedback (animations) upon task completion.
+- **FR9:** The Family Planner can provide immediate visual feedback (animations) upon task completion.
 - **FR10:** **The system provides a library of at least 10 distinct reward animations** (e.g., confetti, fireworks, rocket launches, etc.) to maintain variety and engagement.
 - **FR11:** **The animation system is extensible**, allowing new visual rewards to be added to the library as independent modules.
 - **FR12:** Participants can request "Reward Redemptions" once star thresholds are met.
@@ -180,19 +180,19 @@ The priority is to deliver the "Calm Morning" outcome through a high-fidelity, p
 
 ### 4. Real-Time Hub Ecosystem
 
-- **FR14:** The system can synchronize state between the Parent App and Wall Hub in real-time (<2 seconds).
-- **FR15:** The Wall Hub can display a "Cached Mode" with an offline indicator when connectivity is lost.
+- **FR14:** The system can synchronize state between the Parent App and Family Planner in real-time (<2 seconds).
+- **FR15:** The Family Planner can display a "Cached Mode" with an offline indicator when connectivity is lost.
 - **FR16:** Parents can receive push notifications for significant participant actions (e.g., Routine Complete).
 
 ### 5. Multi-User Experience
 
 - **FR17:** The system can support multiple Participant profiles with individualized tracking.
-- **FR18:** Caregivers can view the consolidated family schedule on the Wall Hub without authentication.
+- **FR18:** Caregivers can view the consolidated family schedule on the Family Planner without authentication.
 
 ### 6. Administration & Setup
 
 - **FR19:** **Parents can securely link and manage multiple external Google accounts** to the family ecosystem through OAuth.
-- **FR20:** Parents can configure Wall Hub display preferences (e.g., default view, color-coding per calendar source) via the mobile app.
+- **FR20:** Parents can configure Family Planner display preferences (e.g., default view, color-coding per calendar source) via the mobile app.
 - **FR21:** The system can manage the initial setup and device-to-account pairing through a mobile-first flow.
 
 ## Non-Functional Requirements
@@ -200,23 +200,23 @@ The priority is to deliver the "Calm Morning" outcome through a high-fidelity, p
 ### Performance (Critical for "Calm Morning")
 
 - **Sync Latency:** Internal state changes (e.g., Task Complete -> Parent Notification) must synchronize in <2 seconds.
-- **Touch Response:** The Wall Hub UI must respond to physical taps (e.g., "Task Done") in <100ms to provide immediate tactile feedback.
+- **Touch Response:** The Family Planner UI must respond to physical taps (e.g., "Task Done") in <100ms to provide immediate tactile feedback.
 - **Mobile Web Load Time:** The Parent Controller (Mobile Web PWA) must load its primary dashboard in <1.5s on a 4G connection to ensure frictionless "in-the-moment" usage.
 
 ### Reliability & Availability (Critical for "Trust")
 
-- **Hub Uptime:** The Wall Hub (Chrome on Android) must maintain 99.9% availability during active hours.
+- **Hub Uptime:** The Family Planner (Chrome on Android) must maintain 99.9% availability during active hours.
 - **Offline Resilience:** The system must successfully render the last-cached schedule state indefinitely during connectivity loss, utilizing service workers.
 - **Auto-Recovery:** The application must automatically attempt to re-establish Websocket connections every 30 seconds upon signal loss without requiring a manual refresh.
 
 ### Usability & Accessibility (Critical for Neurodiversity)
 
-- **Cognitive Load:** Wall Hub typography and layout must be legible from a distance of at least 6 feet ("Glanceable Design").
+- **Cognitive Load:** Family Planner typography and layout must be legible from a distance of at least 6 feet ("Glanceable Design").
 - **Target Size:** All interactive touch targets on the Hub must be a minimum of 48x48px to accommodate rushed or developing motor skills.
 - **Sensory Safety:** All reward animations must be photosensitive epilepsy safe (no strobe effects) and include configurable volume/intensity settings.
 
 ### Security (Critical for Family Data)
 
 - **Authentication:** The Parent Controller must utilize secure Google OAuth for all account linking and administrative actions.
-- **Kiosk Safety:** The Wall Hub frontend must be optimized for "Full Screen" PWA mode, minimizing the risk of accidental navigation away from the application.
-- **Data Integrity:** The system must utilize "Last Write Wins" conflict resolution for simultaneous edits between the Mobile Web App and the Wall Hub.
+- **Kiosk Safety:** The Family Planner frontend must be optimized for "Full Screen" PWA mode, minimizing the risk of accidental navigation away from the application.
+- **Data Integrity:** The system must utilize "Last Write Wins" conflict resolution for simultaneous edits between the Mobile Web App and the Family Planner.

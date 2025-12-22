@@ -6,24 +6,25 @@ The Google Sync feature enables 2-way synchronization between Family Planner and
 
 ## Documents
 
-| Document | Description |
-|----------|-------------|
-| [Data Model](./data-model.md) | Database schema, sync metadata |
-| [UI Specification](./ui.md) | Account linking, calendar selection |
+| Document                      | Description                         |
+| ----------------------------- | ----------------------------------- |
+| [Data Model](./data-model.md) | Database schema, sync metadata      |
+| [UI Specification](./ui.md)   | Account linking, calendar selection |
 
 ## PRD Mapping
 
-| PRD Requirement | Implementation |
-|-----------------|----------------|
+| PRD Requirement                          | Implementation                                |
+| ---------------------------------------- | --------------------------------------------- |
 | FR1 - Multi-calendar, multi-account sync | `google_calendars` table with `account_id` FK |
-| FR2 - Aggregate disparate sources | Family-level calendar aggregation |
-| FR19 - Secure account linking | Better-Auth Google OAuth with token refresh |
+| FR2 - Aggregate disparate sources        | Family-level calendar aggregation             |
+| FR19 - Secure account linking            | Better-Auth Google OAuth with token refresh   |
 
 ## Key Features
 
 ### Multi-Account Support
 
 Family managers can link multiple Google accounts:
+
 - Personal accounts (sarah@gmail.com)
 - Work accounts (sarah@company.com)
 - Shared family accounts (family@gmail.com)
@@ -31,6 +32,7 @@ Family managers can link multiple Google accounts:
 ### Calendar Selection
 
 Each Google account may have multiple calendars:
+
 - Primary calendar
 - Shared calendars
 - Subscribed calendars (holidays, sports)
@@ -39,21 +41,38 @@ Users select which calendars to sync per account.
 
 ### Sync Strategy
 
-| Direction | Behavior |
-|-----------|----------|
+| Direction        | Behavior                                   |
+| ---------------- | ------------------------------------------ |
 | Google → Planner | Pull events every 5 minutes (configurable) |
-| Planner → Google | Push on local change (optimistic) |
+| Planner → Google | Push on local change (optimistic)          |
+
+### Initial Sync
+
+When a calendar is first linked:
+
+- Pull events from 3 months ago to 1 year ahead
+- Show progress indicator during bulk import
+- Subsequent syncs use incremental `syncToken`
+
+### Sync Architecture
+
+Sync runs as a **server-side background job**:
+
+- Cron job triggers every 5 minutes
+- Processes calendars with `last_synced_at` older than interval
+- Uses job queue for rate limit management
+- Client receives updates via WebSocket push
 
 ### Conflict Resolution
 
 **Strategy:** Last Write Wins (per PRD NFR)
 
-| Scenario | Resolution |
-|----------|------------|
+| Scenario                    | Resolution                 |
+| --------------------------- | -------------------------- |
 | Both modified, remote newer | Keep remote, discard local |
-| Both modified, local newer | Push local to remote |
-| Deleted remotely | Remove from local |
-| Deleted locally | Remove from remote |
+| Both modified, local newer  | Push local to remote       |
+| Deleted remotely            | Remove from local          |
+| Deleted locally             | Remove from remote         |
 
 ## Sync Flow
 
@@ -67,6 +86,23 @@ Users select which calendars to sync per account.
      │   Push (instant)   │   Optimistic UI    │
 ```
 
+### Recurring Events (Post-MVP)
+
+MVP displays recurring events from Google but does not support:
+
+- Editing recurrence rules
+- Modifying individual instances
+- Creating new recurring events
+
+Recurring events appear as individual instances within the sync date range.
+
+### Timezone Handling
+
+- All timestamps stored as UTC in database
+- User's timezone stored in family settings
+- All-day events stored with date-only (no time component)
+- Display converts UTC to user's local timezone
+
 ## Dependencies
 
 - **Better-Auth:** OAuth token storage (`accounts` table)
@@ -75,19 +111,19 @@ Users select which calendars to sync per account.
 
 ## Non-Functional Requirements
 
-| Requirement | Target |
-|-------------|--------|
-| Sync latency (Google → Hub) | < 5 minutes |
-| Push latency (Planner → Google) | < 2 seconds |
-| Token refresh | Automatic, before expiration |
-| Rate limiting | Respect Google API quotas |
+| Requirement                     | Target                       |
+| ------------------------------- | ---------------------------- |
+| Sync latency (Google → Hub)     | < 5 minutes                  |
+| Push latency (Planner → Google) | < 2 seconds                  |
+| Token refresh                   | Automatic, before expiration |
+| Rate limiting                   | Respect Google API quotas    |
 
 ## Error Handling
 
-| Error | Handling |
-|-------|----------|
-| Token expired | Auto-refresh via Better-Auth |
-| Token revoked | Prompt re-authentication |
-| Rate limited | Exponential backoff |
-| Network failure | Queue changes, retry on reconnect |
-| Calendar deleted | Mark as inactive, notify user |
+| Error            | Handling                          |
+| ---------------- | --------------------------------- |
+| Token expired    | Auto-refresh via Better-Auth      |
+| Token revoked    | Prompt re-authentication          |
+| Rate limited     | Exponential backoff               |
+| Network failure  | Queue changes, retry on reconnect |
+| Calendar deleted | Mark as inactive, notify user     |

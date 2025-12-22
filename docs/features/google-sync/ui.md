@@ -9,12 +9,14 @@ Add Google accounts to the family.
 **Access:** Managers only (Management mode)
 
 **Flow:**
+
 1. Click "Add Google Account"
 2. OAuth consent screen (Google)
 3. Return to app with account linked
 4. Select calendars to sync
 
 **Components:**
+
 - Linked accounts list
 - "Add Account" button
 - Account actions (refresh, unlink)
@@ -26,6 +28,7 @@ Choose which calendars to sync from each account.
 **Access:** Managers only
 
 **Components:**
+
 - Account header (email, avatar)
 - Calendar checkboxes with color swatches
 - "Sync All" / "Sync None" toggles
@@ -36,6 +39,7 @@ Choose which calendars to sync from each account.
 Global indicator showing sync health.
 
 **Locations:**
+
 - Calendar header (small icon)
 - Settings panel (detailed)
 
@@ -50,10 +54,10 @@ Global indicator showing sync health.
 
 ## Interaction Modes
 
-| Mode | Access |
-|------|--------|
+| Mode             | Access                            |
+| ---------------- | --------------------------------- |
 | **Wall Display** | View sync status only (read-only) |
-| **Management** | Full account/calendar management |
+| **Management**   | Full account/calendar management  |
 
 ## Components
 
@@ -72,13 +76,13 @@ interface LinkedAccountCardProps {
 }
 ```
 
-| Element | Specification |
-|---------|---------------|
-| Avatar | Google profile picture or email initial |
-| Email | Account identifier |
-| Calendar count | "3 calendars synced" |
-| Last sync | Relative time ("2 min ago") |
-| Actions | Refresh, Unlink buttons |
+| Element        | Specification                           |
+| -------------- | --------------------------------------- |
+| Avatar         | Google profile picture or email initial |
+| Email          | Account identifier                      |
+| Calendar count | "3 calendars synced"                    |
+| Last sync      | Relative time ("2 min ago")             |
+| Actions        | Refresh, Unlink buttons                 |
 
 ### CalendarToggle
 
@@ -90,17 +94,19 @@ interface CalendarToggleProps {
 }
 ```
 
-| Element | Specification |
-|---------|---------------|
+| Element      | Specification                  |
+| ------------ | ------------------------------ |
 | Color swatch | 16x16 circle with Google color |
-| Name | Calendar display name |
-| Toggle | Switch component |
+| Name         | Calendar display name          |
+| Toggle       | Switch component               |
 
 ### SyncStatusBadge
 
 ```tsx
 interface SyncStatusBadgeProps {
-  status: 'synced' | 'syncing' | 'pending' | 'error' | 'offline';
+  // Database states: 'synced', 'pending', 'error'
+  // Runtime states: 'syncing' (during active sync), 'offline' (no connection)
+  status: "synced" | "syncing" | "pending" | "error" | "offline";
   lastSyncedAt?: Date;
   errorMessage?: string;
 }
@@ -142,12 +148,31 @@ Calendar "Work" was deleted or unshared on Google.
 [Remove from Planner] [Dismiss]
 ```
 
-### Sync Conflict
+### Sync Conflict (Auto-Resolved)
 
-```
-Event "Team Meeting" was modified both locally and on Google.
-[Keep Local] [Keep Google] [View Diff]
-```
+Conflicts are resolved automatically using Last Write Wins strategy.
+
+User sees a toast notification:
+
+- "Event updated from Google" (remote was newer)
+- "Your changes synced to Google" (local was newer)
+
+### Read-Only Calendar Indicator
+
+Calendars with `accessRole: 'reader'` show:
+
+- Lock icon on calendar toggle
+- Tooltip: "This calendar is read-only"
+- Events from read-only calendars cannot be edited in Planner
+
+### Initial Sync Progress
+
+When linking a new calendar:
+
+- Modal with progress bar
+- "Syncing 3 months of history..."
+- Event count as it imports
+- "Done! X events imported" confirmation
 
 ## Future Considerations
 

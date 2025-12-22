@@ -63,7 +63,7 @@ The chores view serves as the **task display and completion interface** for the 
 
 ```
 +-------------------------------------------------------------------+
-| Header (Wall Hub + Date/Time + Weather + Profile)                 |
+| Header (Family Planner + Date/Time + Weather + Profile)                 |
 +-------------------------------------------------------------------+
 | Greeting Section                                                   |
 | "Good Morning, Smiths!" - "Let's crush today's goals."            |
@@ -117,26 +117,26 @@ The chores view serves as the **task display and completion interface** for the 
 
 ### 1. Header
 
-The header follows the standard Wall Hub header pattern used across the application.
+The header follows the standard Family Planner header pattern used across the application.
 
-| Element | Specification |
-|---------|---------------|
-| Brand icon | `smart_display` in Primary/20 container |
-| Title | "Wall Hub", xl Bold, Lexend |
-| Subtitle | Date + Time (e.g., "Monday, Oct 24 - 9:41 AM") |
-| Weather widget | Temperature + icon, pill style |
-| Profile avatar | 40px circular, ring-2 |
+| Element        | Specification                                  |
+| -------------- | ---------------------------------------------- |
+| Brand icon     | `smart_display` in Primary/20 container        |
+| Title          | "Family Planner", xl Bold, Lexend              |
+| Subtitle       | Date + Time (e.g., "Monday, Oct 24 - 9:41 AM") |
+| Weather widget | Temperature + icon, pill style                 |
+| Profile avatar | 40px circular, ring-2                          |
 
 ### 2. Greeting Section
 
 Dynamic greeting based on time of day, personalized with family name.
 
-| Element | Specification |
-|---------|---------------|
+| Element  | Specification                               |
+| -------- | ------------------------------------------- |
 | Greeting | Time-based (see Voice & Tone), 3xl-4xl Bold |
-| Subtitle | Encouraging message, lg, Text Secondary |
-| Font | Lexend |
-| Spacing | px-6 pt-8 pb-4 |
+| Subtitle | Encouraging message, lg, Text Secondary     |
+| Font     | Lexend                                      |
+| Spacing  | px-6 pt-8 pb-4                              |
 
 #### Greeting Logic
 
@@ -158,22 +158,22 @@ Dynamic greeting based on time of day, personalized with family name.
 
 Displays daily completion progress and streak information.
 
-| Property | Value |
-|----------|-------|
-| Background | Surface (white / #1c2e26) |
-| Border | 1px solid Border Default |
-| Border radius | 2xl (16px) |
-| Shadow | sm |
-| Padding | 20px |
+| Property      | Value                     |
+| ------------- | ------------------------- |
+| Background    | Surface (white / #1c2e26) |
+| Border        | 1px solid Border Default  |
+| Border radius | 2xl (16px)                |
+| Shadow        | sm                        |
+| Padding       | 20px                      |
 
 #### Elements
 
-| Element | Specification |
-|---------|---------------|
-| Trophy icon | `trophy`, Primary color (#13ec92), 24px |
-| Streak label | "Daily Streak: {N} Days", base Bold |
+| Element          | Specification                                  |
+| ---------------- | ---------------------------------------------- |
+| Trophy icon      | `trophy`, Primary color (#13ec92), 24px        |
+| Streak label     | "Daily Streak: {N} Days", base Bold            |
 | Completion count | "{done}/{total} Done", sm Bold, Text Secondary |
-| Progress bar | Full width, 12px height, Primary fill |
+| Progress bar     | Full width, 12px height, Primary fill          |
 
 #### Progress Bar
 
@@ -189,11 +189,11 @@ Transition: width 500ms ease-out
 
 Segmented control for switching between chore views.
 
-| Property | Value |
-|----------|-------|
+| Property  | Value                              |
+| --------- | ---------------------------------- |
 | Container | h-12, rounded-xl, Background Muted |
-| Padding | p-1 |
-| Position | sticky top-[80px], z-40 |
+| Padding   | p-1                                |
+| Position  | sticky top-[80px], z-40            |
 
 #### Tab States
 
@@ -214,26 +214,26 @@ Segmented control for switching between chore views.
 
 #### Available Filters
 
-| Filter | Icon | Description |
-|--------|------|-------------|
-| All Chores | - | All outstanding chores, sorted by urgency |
-| By Person | - | Columnar view per family member |
-| Urgent | - | Only urgent and overdue chores |
+| Filter     | Icon | Description                               |
+| ---------- | ---- | ----------------------------------------- |
+| All Chores | -    | All outstanding chores, sorted by urgency |
+| By Person  | -    | Columnar view per family member           |
+| Urgent     | -    | Only urgent and overdue chores            |
 
 ### 5. Floating Action Button (FAB)
 
 Navigates to chore management interface (external).
 
-| Property | Value |
-|----------|-------|
-| Position | fixed, bottom-8, right-8 |
-| Size | 64px (size-16) |
-| Background | Primary (#13ec92) |
-| Icon | `add`, 36px, Dark (#111815) |
-| Border radius | full |
-| Shadow | lg |
-| Hover | shadow-xl, scale-105 |
-| Transition | all 300ms |
+| Property      | Value                       |
+| ------------- | --------------------------- |
+| Position      | fixed, bottom-8, right-8    |
+| Size          | 64px (size-16)              |
+| Background    | Primary (#13ec92)           |
+| Icon          | `add`, 36px, Dark (#111815) |
+| Border radius | full                        |
+| Shadow        | lg                          |
+| Hover         | shadow-xl, scale-105        |
+| Transition    | all 300ms                   |
 
 ---
 
@@ -277,24 +277,24 @@ Displays family members in side-by-side columns with their assigned chores.
 
 #### Column Specifications
 
-| Property | Value |
-|----------|-------|
-| Min width | 280px |
-| Max width | 320px |
-| Background | Surface |
-| Border | 1px solid Border Default |
-| Border radius | 2xl (16px) |
-| Padding | 16px |
-| Gap between columns | 16px |
-| Scroll | Horizontal on overflow |
+| Property            | Value                    |
+| ------------------- | ------------------------ |
+| Min width           | 280px                    |
+| Max width           | 320px                    |
+| Background          | Surface                  |
+| Border              | 1px solid Border Default |
+| Border radius       | 2xl (16px)               |
+| Padding             | 16px                     |
+| Gap between columns | 16px                     |
+| Scroll              | Horizontal on overflow   |
 
 #### Column Header
 
-| Element | Specification |
-|---------|---------------|
-| Avatar | 48px circular, ring-2 |
-| Name | lg Bold, Text Primary |
-| Count | sm, Text Secondary (e.g., "3 chores") |
+| Element | Specification                         |
+| ------- | ------------------------------------- |
+| Avatar  | 48px circular, ring-2                 |
+| Name    | lg Bold, Text Primary                 |
+| Count   | sm, Text Secondary (e.g., "3 chores") |
 
 ### Urgent View
 
@@ -310,11 +310,11 @@ A chore is considered **urgent** if ANY of these conditions are true:
 
 #### Visual Distinction
 
-| Status | Badge Color | Badge Text |
-|--------|-------------|------------|
-| Overdue | orange-50/orange-600 | "OVERDUE" |
-| Due tonight | red-50/red-600 | "TONIGHT - {time}" |
-| Urgent (manual) | red-50/red-600 | Priority icon badge |
+| Status          | Badge Color          | Badge Text          |
+| --------------- | -------------------- | ------------------- |
+| Overdue         | orange-50/orange-600 | "OVERDUE"           |
+| Due tonight     | red-50/red-600       | "TONIGHT - {time}"  |
+| Urgent (manual) | red-50/red-600       | Priority icon badge |
 
 ---
 
@@ -333,99 +333,101 @@ The primary UI element displaying individual chores.
 
 ### Card Specifications
 
-| Property | Value |
-|----------|-------|
-| Background | Surface (white / #1c2e26) |
-| Border | 1px solid Border Default |
-| Border radius | 2xl (16px) |
-| Shadow | sm |
-| Padding | 20px (px-5 py-4) |
-| Gap | 16px |
-| Hover border | Primary/50 |
-| Transition | all 200ms |
-| Cursor | pointer |
+| Property      | Value                     |
+| ------------- | ------------------------- |
+| Background    | Surface (white / #1c2e26) |
+| Border        | 1px solid Border Default  |
+| Border radius | 2xl (16px)                |
+| Shadow        | sm                        |
+| Padding       | 20px (px-5 py-4)          |
+| Gap           | 16px                      |
+| Hover border  | Primary/50                |
+| Transition    | all 200ms                 |
+| Cursor        | pointer                   |
 
 ### Avatar Section
 
-| Element | Specification |
-|---------|---------------|
-| Size | 56px (h-14 w-14) |
-| Shape | Circular |
-| Ring | 2px white / surface-dark |
-| Image | User photo or fallback |
+| Element | Specification            |
+| ------- | ------------------------ |
+| Size    | 56px (h-14 w-14)         |
+| Shape   | Circular                 |
+| Ring    | 2px white / surface-dark |
+| Image   | User photo or fallback   |
 
 #### Priority Indicator
 
 When chore is urgent, show indicator badge on avatar:
 
-| Property | Value |
-|----------|-------|
-| Position | absolute, -bottom-1, -right-1 |
-| Size | 24px |
-| Background | red-100 / red-900 |
-| Icon | `priority_high`, 14px |
-| Icon color | red-600 / red-200 |
-| Border | 2px white / surface-dark |
+| Property   | Value                         |
+| ---------- | ----------------------------- |
+| Position   | absolute, -bottom-1, -right-1 |
+| Size       | 24px                          |
+| Background | red-100 / red-900             |
+| Icon       | `priority_high`, 14px         |
+| Icon color | red-600 / red-200             |
+| Border     | 2px white / surface-dark      |
 
 ### Content Section
 
-| Element | Specification |
-|---------|---------------|
-| Title | lg Bold, Text Primary |
-| Title hover | Primary color |
-| Truncate | Single line with ellipsis |
+| Element     | Specification             |
+| ----------- | ------------------------- |
+| Title       | lg Bold, Text Primary     |
+| Title hover | Primary color             |
+| Truncate    | Single line with ellipsis |
 
 ### Status Badge
 
 Contextual badge showing timing/recurrence information.
 
-| Status | Background | Text Color | Example |
-|--------|------------|------------|---------|
-| Tonight | red-50 / red-900/30 | red-600 / red-300 | "TONIGHT - 8 PM" |
-| Overdue | orange-50 / orange-900/30 | orange-600 / orange-300 | "OVERDUE" |
-| Morning | blue-50 / blue-900/30 | blue-600 / blue-300 | "MORNING" |
-| Weekly | Border Default | Text Primary / gray-300 | "WEEKLY" |
-| Weekend | Border Default | Text Primary / gray-300 | "WEEKEND" |
-| Daily | green-50 / green-900/30 | green-600 / green-300 | "DAILY" |
+| Status  | Background                | Text Color              | Example          |
+| ------- | ------------------------- | ----------------------- | ---------------- |
+| Tonight | red-50 / red-900/30       | red-600 / red-300       | "TONIGHT - 8 PM" |
+| Overdue | orange-50 / orange-900/30 | orange-600 / orange-300 | "OVERDUE"        |
+| Morning | blue-50 / blue-900/30     | blue-600 / blue-300     | "MORNING"        |
+| Weekly  | Border Default            | Text Primary / gray-300 | "WEEKLY"         |
+| Weekend | Border Default            | Text Primary / gray-300 | "WEEKEND"        |
+| Daily   | green-50 / green-900/30   | green-600 / green-300   | "DAILY"          |
 
 #### Badge Styling
 
-| Property | Value |
-|----------|-------|
-| Font | xs Bold, uppercase |
-| Padding | px-2 py-0.5 |
-| Border radius | full |
-| Letter spacing | tracking-wide |
+| Property       | Value              |
+| -------------- | ------------------ |
+| Font           | xs Bold, uppercase |
+| Padding        | px-2 py-0.5        |
+| Border radius  | full               |
+| Letter spacing | tracking-wide      |
 
 ### Assignee Label
 
-| Property | Value |
-|----------|-------|
-| Font | sm, Text Secondary |
+| Property | Value              |
+| -------- | ------------------ |
+| Font     | sm, Text Secondary |
 | Position | After status badge |
 
 ### Check Button
 
 Large, touch-friendly completion button.
 
-| Property | Value |
-|----------|-------|
-| Size | 48px (size-12) |
-| Background | Surface Muted (#f0f4f3 / #2a4036) |
-| Icon | `check`, 32px |
-| Icon color | Transparent (hidden until hover) |
-| Border radius | full |
-| Hover background | Primary (#13ec92) |
-| Hover icon | Dark (#111815) |
-| Active | scale-90 |
-| Transition | all 300ms |
+| Property         | Value                             |
+| ---------------- | --------------------------------- |
+| Size             | 48px (size-12)                    |
+| Background       | Surface Muted (#f0f4f3 / #2a4036) |
+| Icon             | `check`, 32px                     |
+| Icon color       | Transparent (hidden until hover)  |
+| Border radius    | full                              |
+| Hover background | Primary (#13ec92)                 |
+| Hover icon       | Dark (#111815)                    |
+| Active           | scale-90                          |
+| Transition       | all 300ms                         |
 
 ### Card States
 
 #### Default State
+
 Standard appearance as described above.
 
 #### Hover State
+
 ```css
 .chore-card:hover {
   border-color: var(--color-primary-50);
@@ -436,14 +438,16 @@ Standard appearance as described above.
 ```
 
 #### Low Priority / Future State
+
 For chores scheduled far in the future:
 
-| Property | Value |
-|----------|-------|
-| Opacity | 80% |
+| Property   | Value                        |
+| ---------- | ---------------------------- |
+| Opacity    | 80%                          |
 | Background | Surface with reduced opacity |
 
 #### Completed State (Momentary)
+
 Brief animation shown after completion:
 
 ```css
@@ -476,34 +480,34 @@ Streak resets when:
 
 #### Streak Display
 
-| Element | Specification |
-|---------|---------------|
-| Icon | `trophy`, Primary color |
-| Label | "Daily Streak: {N} Days" |
-| Font | base Bold |
+| Element | Specification            |
+| ------- | ------------------------ |
+| Icon    | `trophy`, Primary color  |
+| Label   | "Daily Streak: {N} Days" |
+| Font    | base Bold                |
 
 ### Completion Progress
 
 Real-time progress indicator for the current day.
 
-| Element | Specification |
-|---------|---------------|
-| Format | "{completed}/{total} Done" |
-| Font | sm Bold, Text Secondary |
-| Progress bar | Visual percentage fill |
+| Element      | Specification              |
+| ------------ | -------------------------- |
+| Format       | "{completed}/{total} Done" |
+| Font         | sm Bold, Text Secondary    |
+| Progress bar | Visual percentage fill     |
 
 ### XP Integration
 
 When gamification is enabled (see Calendar spec), chore completion awards XP.
 
-| Chore Type | XP Reward |
-|------------|-----------|
-| Daily routine | 10 XP |
-| Weekly task | 25 XP |
-| Urgent/time-sensitive | 15 XP |
-| Special/bonus | 50 XP |
+| Chore Type            | XP Reward |
+| --------------------- | --------- |
+| Daily routine         | 10 XP     |
+| Weekly task           | 25 XP     |
+| Urgent/time-sensitive | 15 XP     |
+| Special/bonus         | 50 XP     |
 
-*Note: XP values are configured in the administration interface.*
+_Note: XP values are configured in the administration interface._
 
 ---
 
@@ -535,20 +539,22 @@ The only interactive action on this interface.
 ### Navigation
 
 #### FAB Tap
+
 - Navigates to chore management interface
 - Could open in modal, new page, or external app
 
 #### Card Tap (Non-button area)
+
 - Optional: Show chore details in a read-only dialog
 - Alternative: No action (button-only interaction)
 
 ### Pull to Refresh (Mobile)
 
-| Property | Value |
-|----------|-------|
-| Threshold | 80px |
+| Property  | Value                           |
+| --------- | ------------------------------- |
+| Threshold | 80px                            |
 | Indicator | Circular spinner, Primary color |
-| Action | Refetch chores from database |
+| Action    | Refetch chores from database    |
 
 ---
 
@@ -558,39 +564,36 @@ The only interactive action on this interface.
 
 ```typescript
 interface IChore {
-  id: string
-  title: string
-  description?: string
-  assignedTo: IUser
-  dueDate?: Date          // Optional due date
-  dueTime?: string        // Optional time (HH:mm format)
-  recurrence: ChoreRecurrence
-  isUrgent: boolean       // Manual urgency flag
-  status: ChoreStatus
-  xpReward: number
-  createdAt: Date
-  completedAt?: Date
-  completedBy?: IUser
+  id: string;
+  title: string;
+  description?: string;
+  assignedTo: IUser;
+  dueDate?: Date; // Optional due date
+  dueTime?: string; // Optional time (HH:mm format)
+  recurrence: ChoreRecurrence;
+  isUrgent: boolean; // Manual urgency flag
+  status: ChoreStatus;
+  xpReward: number;
+  createdAt: Date;
+  completedAt?: Date;
+  completedBy?: IUser;
 }
 
 type ChoreRecurrence =
-  | 'once'
-  | 'daily'
-  | 'weekly'
-  | 'weekdays'
-  | 'weekends'
-  | 'monthly'
+  | "once"
+  | "daily"
+  | "weekly"
+  | "weekdays"
+  | "weekends"
+  | "monthly";
 
-type ChoreStatus =
-  | 'pending'
-  | 'completed'
-  | 'skipped'
+type ChoreStatus = "pending" | "completed" | "skipped";
 
 interface IUser {
-  id: string
-  name: string
-  picturePath: string | null
-  color: string           // For avatar fallback
+  id: string;
+  name: string;
+  picturePath: string | null;
+  color: string; // For avatar fallback
 }
 ```
 
@@ -599,20 +602,20 @@ interface IUser {
 ```typescript
 // Derived urgency status
 function getUrgencyStatus(chore: IChore): UrgencyStatus {
-  if (chore.status !== 'pending') return 'none'
-  if (chore.isUrgent) return 'urgent'
-  if (!chore.dueDate) return 'none'
+  if (chore.status !== "pending") return "none";
+  if (chore.isUrgent) return "urgent";
+  if (!chore.dueDate) return "none";
 
-  const now = new Date()
-  const due = combineDateAndTime(chore.dueDate, chore.dueTime)
+  const now = new Date();
+  const due = combineDateAndTime(chore.dueDate, chore.dueTime);
 
-  if (due < now) return 'overdue'
-  if (due < addHours(now, 4)) return 'due-soon'
+  if (due < now) return "overdue";
+  if (due < addHours(now, 4)) return "due-soon";
 
-  return 'none'
+  return "none";
 }
 
-type UrgencyStatus = 'none' | 'due-soon' | 'urgent' | 'overdue'
+type UrgencyStatus = "none" | "due-soon" | "urgent" | "overdue";
 ```
 
 ### Database Schema
@@ -637,12 +640,12 @@ CREATE TABLE chores (
 
 ### Data Sources
 
-| Data | Source | Refresh Rate |
-|------|--------|--------------|
-| Chores | PostgreSQL | On mount, after completion |
-| Users | PostgreSQL | On mount |
-| Streak | PostgreSQL | After completion |
-| Progress | Computed | Real-time |
+| Data     | Source     | Refresh Rate               |
+| -------- | ---------- | -------------------------- |
+| Chores   | PostgreSQL | On mount, after completion |
+| Users    | PostgreSQL | On mount                   |
+| Streak   | PostgreSQL | After completion           |
+| Progress | Computed   | Real-time                  |
 
 ---
 
@@ -650,13 +653,13 @@ CREATE TABLE chores (
 
 ### Breakpoints
 
-| Breakpoint | Layout | Columns (By Person) |
-|------------|--------|---------------------|
-| < sm (640px) | Single column | 1 |
-| sm - md | Single column | 1-2 (scrollable) |
-| md - lg | Single column | 2-3 |
-| lg - xl | Single column | 3-4 |
-| xl+ | Single column | 4+ |
+| Breakpoint   | Layout        | Columns (By Person) |
+| ------------ | ------------- | ------------------- |
+| < sm (640px) | Single column | 1                   |
+| sm - md      | Single column | 1-2 (scrollable)    |
+| md - lg      | Single column | 2-3                 |
+| lg - xl      | Single column | 3-4                 |
+| xl+          | Single column | 4+                  |
 
 ### Mobile Optimizations
 
@@ -698,22 +701,22 @@ CREATE TABLE chores (
 
 ### Typography
 
-| Element | Font | Size | Weight |
-|---------|------|------|--------|
-| Greeting | Lexend | 3xl-4xl | Bold |
-| Subtitle | Lexend | lg | Regular |
-| Card title | Lexend | lg | Bold |
-| Badge text | Lexend | xs | Bold |
-| Assignee | Noto Sans | sm | Regular |
-| Progress label | Lexend | base | Bold |
-| Filter tabs | Lexend | sm | Bold |
+| Element        | Font      | Size    | Weight  |
+| -------------- | --------- | ------- | ------- |
+| Greeting       | Lexend    | 3xl-4xl | Bold    |
+| Subtitle       | Lexend    | lg      | Regular |
+| Card title     | Lexend    | lg      | Bold    |
+| Badge text     | Lexend    | xs      | Bold    |
+| Assignee       | Noto Sans | sm      | Regular |
+| Progress label | Lexend    | base    | Bold    |
+| Filter tabs    | Lexend    | sm      | Bold    |
 
 ### Shadows
 
-| Usage | Value |
-|-------|-------|
-| Cards | `0 1px 2px rgba(0,0,0,0.05)` |
-| FAB | `0 10px 15px rgba(0,0,0,0.1)` |
+| Usage     | Value                          |
+| --------- | ------------------------------ |
+| Cards     | `0 1px 2px rgba(0,0,0,0.05)`   |
+| FAB       | `0 10px 15px rgba(0,0,0,0.1)`  |
 | FAB hover | `0 25px 50px rgba(0,0,0,0.25)` |
 
 ### Animations
@@ -729,7 +732,7 @@ transition: all 200ms ease;
 
 /* Check button activation */
 .check-button:active {
-  transform: scale(0.90);
+  transform: scale(0.9);
 }
 
 /* Card removal */
@@ -747,21 +750,21 @@ transition: all 200ms ease;
 
 ### WCAG 2.1 AA Compliance
 
-| Requirement | Implementation |
-|-------------|----------------|
-| Color contrast | All text meets 4.5:1 minimum |
+| Requirement      | Implementation                      |
+| ---------------- | ----------------------------------- |
+| Color contrast   | All text meets 4.5:1 minimum        |
 | Focus indicators | 2px Primary outline with 2px offset |
-| Touch targets | Minimum 48x48px for check button |
-| Screen readers | ARIA labels on interactive elements |
-| Reduced motion | Respect `prefers-reduced-motion` |
+| Touch targets    | Minimum 48x48px for check button    |
+| Screen readers   | ARIA labels on interactive elements |
+| Reduced motion   | Respect `prefers-reduced-motion`    |
 
 ### Keyboard Navigation
 
-| Key | Action |
-|-----|--------|
-| Tab | Move between chore cards and check buttons |
-| Enter/Space | Activate check button (complete chore) |
-| Arrow keys | Navigate between cards in list |
+| Key         | Action                                     |
+| ----------- | ------------------------------------------ |
+| Tab         | Move between chore cards and check buttons |
+| Enter/Space | Activate check button (complete chore)     |
+| Arrow keys  | Navigate between cards in list             |
 
 ### Screen Reader Considerations
 
@@ -822,6 +825,7 @@ src/components/chores/
 ### State Management
 
 **ChoresProvider** manages:
+
 - Current filter view (all/person/urgent)
 - Chores list
 - Completion state
@@ -832,25 +836,29 @@ src/components/chores/
 
 ```typescript
 // Main context hook
-function useChores(): ChoresContextValue
+function useChores(): ChoresContextValue;
 
 // Individual chore operations
-function useCompleteChore(): (choreId: string) => Promise<void>
+function useCompleteChore(): (choreId: string) => Promise<void>;
 
 // Computed data
-function useChoreProgress(): { completed: number; total: number; percentage: number }
-function useStreak(): { days: number; isActive: boolean }
-function useGroupedByPerson(): Map<string, IChore[]>
+function useChoreProgress(): {
+  completed: number;
+  total: number;
+  percentage: number;
+};
+function useStreak(): { days: number; isActive: boolean };
+function useGroupedByPerson(): Map<string, IChore[]>;
 ```
 
 ### API Integration
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/chores` | GET | Fetch all pending chores |
-| `/api/chores/:id/complete` | POST | Mark chore as complete |
-| `/api/chores/streak` | GET | Get current streak data |
-| `/api/chores/progress` | GET | Get today's progress |
+| Endpoint                   | Method | Description              |
+| -------------------------- | ------ | ------------------------ |
+| `/api/chores`              | GET    | Fetch all pending chores |
+| `/api/chores/:id/complete` | POST   | Mark chore as complete   |
+| `/api/chores/streak`       | GET    | Get current streak data  |
+| `/api/chores/progress`     | GET    | Get today's progress     |
 
 ### Optimistic Updates
 
@@ -858,15 +866,15 @@ function useGroupedByPerson(): Map<string, IChore[]>
 // Complete chore with optimistic update
 async function completeChore(choreId: string) {
   // Immediately update UI
-  setChores(prev => prev.filter(c => c.id !== choreId))
-  updateProgress(prev => ({ ...prev, completed: prev.completed + 1 }))
+  setChores((prev) => prev.filter((c) => c.id !== choreId));
+  updateProgress((prev) => ({ ...prev, completed: prev.completed + 1 }));
 
   try {
-    await api.post(`/chores/${choreId}/complete`)
+    await api.post(`/chores/${choreId}/complete`);
   } catch (error) {
     // Rollback on failure
-    refetchChores()
-    showErrorToast('Failed to complete chore')
+    refetchChores();
+    showErrorToast("Failed to complete chore");
   }
 }
 ```
@@ -887,14 +895,14 @@ Full dark mode support following the application theme.
 
 ### Color Mapping
 
-| Element | Light | Dark |
-|---------|-------|------|
+| Element         | Light   | Dark    |
+| --------------- | ------- | ------- |
 | Page background | #f6f8f7 | #10221a |
-| Cards | #ffffff | #1c2e26 |
-| Text Primary | #111815 | #ffffff |
-| Text Secondary | #618979 | #8baea0 |
-| Borders | #dbe6e1 | #2a3831 |
-| Primary | #13ec92 | #13ec92 |
+| Cards           | #ffffff | #1c2e26 |
+| Text Primary    | #111815 | #ffffff |
+| Text Secondary  | #618979 | #8baea0 |
+| Borders         | #dbe6e1 | #2a3831 |
+| Primary         | #13ec92 | #13ec92 |
 | Check button bg | #f0f4f3 | #2a4036 |
 
 ### Implementation
@@ -915,11 +923,11 @@ Full dark mode support following the application theme.
 
 ## Design Assets Reference
 
-| File | Description |
-|------|-------------|
-| `chores-design-1.png` | Main chores view mockup |
-| `chores-code-1.html` | Full HTML/CSS reference implementation |
+| File                  | Description                            |
+| --------------------- | -------------------------------------- |
+| `chores-design-1.png` | Main chores view mockup                |
+| `chores-code-1.html`  | Full HTML/CSS reference implementation |
 
 ---
 
-*Last updated: December 2024*
+_Last updated: December 2024_
