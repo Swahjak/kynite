@@ -9,6 +9,9 @@ import type {
   TestFamily,
   TestFamilyMember,
   TestFamilyInvite,
+  TestRewardChart,
+  TestRewardChartTask,
+  TestRewardChartGoal,
 } from "./test-data-factory";
 
 export class DbSeeder {
@@ -86,6 +89,48 @@ export class DbSeeder {
       maxUses: invite.maxUses,
       useCount: invite.useCount,
       createdAt: new Date(),
+    });
+  }
+
+  async seedRewardChart(chart: TestRewardChart): Promise<void> {
+    await this.db.insert(schema.rewardCharts).values({
+      id: chart.id,
+      familyId: chart.familyId,
+      memberId: chart.memberId,
+      isActive: chart.isActive,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+  }
+
+  async seedRewardChartTask(task: TestRewardChartTask): Promise<void> {
+    await this.db.insert(schema.rewardChartTasks).values({
+      id: task.id,
+      chartId: task.chartId,
+      title: task.title,
+      icon: task.icon,
+      iconColor: task.iconColor,
+      starValue: task.starValue,
+      daysOfWeek: task.daysOfWeek,
+      sortOrder: task.sortOrder,
+      isActive: task.isActive,
+      createdAt: new Date(),
+    });
+  }
+
+  async seedRewardChartGoal(goal: TestRewardChartGoal): Promise<void> {
+    await this.db.insert(schema.rewardChartGoals).values({
+      id: goal.id,
+      chartId: goal.chartId,
+      title: goal.title,
+      description: null,
+      emoji: goal.emoji,
+      starTarget: goal.starTarget,
+      starsCurrent: goal.starsCurrent,
+      status: goal.status,
+      achievedAt: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
   }
 
