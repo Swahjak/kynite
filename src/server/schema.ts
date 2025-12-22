@@ -149,6 +149,34 @@ export const googleCalendars = pgTable("google_calendars", {
   updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
 });
 
+/**
+ * Events table - Calendar events with Google sync metadata
+ */
+export const events = pgTable("events", {
+  id: text("id").primaryKey(),
+  familyId: text("family_id")
+    .notNull()
+    .references(() => families.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  description: text("description"),
+  location: text("location"),
+  startTime: timestamp("start_time", { mode: "date" }).notNull(),
+  endTime: timestamp("end_time", { mode: "date" }).notNull(),
+  allDay: boolean("all_day").notNull().default(false),
+  color: text("color"),
+  // Google Sync Metadata
+  googleCalendarId: text("google_calendar_id").references(
+    () => googleCalendars.id,
+    { onDelete: "set null" }
+  ),
+  googleEventId: text("google_event_id"),
+  syncStatus: text("sync_status").default("synced"), // 'synced' | 'pending' | 'conflict' | 'error'
+  localUpdatedAt: timestamp("local_updated_at", { mode: "date" }),
+  remoteUpdatedAt: timestamp("remote_updated_at", { mode: "date" }),
+  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
+});
+
 // ============================================================================
 // Drizzle Relations
 // ============================================================================
@@ -194,6 +222,17 @@ export const googleCalendarsRelations = relations(
   })
 );
 
+export const eventsRelations = relations(events, ({ one }) => ({
+  family: one(families, {
+    fields: [events.familyId],
+    references: [families.id],
+  }),
+  googleCalendar: one(googleCalendars, {
+    fields: [events.googleCalendarId],
+    references: [googleCalendars.id],
+  }),
+}));
+
 // ============================================================================
 // Type Exports
 // ============================================================================
@@ -212,3 +251,5 @@ export type FamilyInvite = typeof familyInvites.$inferSelect;
 export type NewFamilyInvite = typeof familyInvites.$inferInsert;
 export type GoogleCalendar = typeof googleCalendars.$inferSelect;
 export type NewGoogleCalendar = typeof googleCalendars.$inferInsert;
+export type Event = typeof events.$inferSelect;
+export type NewEvent = typeof events.$inferInsert;

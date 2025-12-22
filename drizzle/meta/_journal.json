@@ -8,6 +8,13 @@
       "when": 1766413367692,
       "tag": "0000_foamy_skaar",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1766419167691,
+      "tag": "0001_curly_psynapse",
+      "breakpoints": true
     }
   ]
 }
