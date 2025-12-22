@@ -55,6 +55,30 @@ export async function DELETE(
       );
     }
 
+    // Prevent unlinking the only Google account
+    const googleAccountCount = await db
+      .select({ id: accounts.id })
+      .from(accounts)
+      .where(
+        and(
+          eq(accounts.userId, session.user.id),
+          eq(accounts.providerId, "google")
+        )
+      );
+
+    if (googleAccountCount.length <= 1) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "CANNOT_UNLINK_PRIMARY",
+            message: "Cannot unlink your only Google account",
+          },
+        },
+        { status: 400 }
+      );
+    }
+
     // Delete the linked account
     await db
       .delete(accounts)
