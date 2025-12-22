@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useAddEvent } from "@/contexts/add-event-context";
 import { Calendar } from "@/components/calendar/calendar";
 import type { IEvent, IUser } from "@/components/calendar/interfaces";
 
@@ -10,7 +10,7 @@ interface CalendarPageClientProps {
 }
 
 export function CalendarPageClient({ events, users }: CalendarPageClientProps) {
-  const addEventButtonRef = useRef<HTMLButtonElement>(null);
+  const { addEventButtonRef } = useAddEvent();
 
   return (
     <Calendar

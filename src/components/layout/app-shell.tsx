@@ -2,6 +2,7 @@
 
 import { useState, useEffect, type ReactNode } from "react";
 import { useInteractionMode } from "@/contexts/interaction-mode-context";
+import { useAddEventSafe } from "@/contexts/add-event-context";
 import { AppHeader } from "./app-header";
 import { NavigationMenu } from "./navigation-menu";
 import { cn } from "@/lib/utils";
@@ -16,6 +17,7 @@ interface AppShellProps {
 
 export function AppShell({ children, isManager, onAddEvent }: AppShellProps) {
   const { mode } = useInteractionMode();
+  const addEventContext = useAddEventSafe();
   const [menuOpen, setMenuOpen] = useState(false);
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
 
@@ -37,10 +39,14 @@ export function AppShell({ children, isManager, onAddEvent }: AppShellProps) {
     }
   };
 
+  const handleAddEvent = () => {
+    addEventContext?.addEventButtonRef.current?.click();
+  };
+
   return (
     <div className="bg-background flex min-h-screen flex-col">
       <AppHeader
-        onAddEvent={onAddEvent}
+        onAddEvent={handleAddEvent}
         isManager={isManager}
         onMenuToggle={() => setMenuOpen(true)}
       />
