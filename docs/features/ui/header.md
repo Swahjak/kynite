@@ -4,31 +4,32 @@
 
 The App Header is the primary navigation bar that appears at the top of every screen.
 
-## Interaction Modes
+**Mode determination:** The interaction mode is determined by the route group - `(wall)/` for Wall Display, `(manage)/` for Management.
 
-| Element | Wall Display | Management |
-|---------|--------------|------------|
-| Brand Area | View only | Opens menu |
-| Weather | Visible | Visible |
-| Add Event | **Hidden** | Visible |
-| Settings | **Hidden** | Visible |
-| Notifications | View only | Interactive |
-| Avatar | View only | Opens menu |
+---
 
-### Wall Display Mode
+## Header Elements
 
-The header displays in a simplified "kiosk" mode:
+| Element | Wall | Manage | Status |
+|---------|------|--------|--------|
+| Brand Area | View only | Opens menu | MVP |
+| Weather | Visible | Visible | **Phase 2** |
+| Add Event | Hidden | Button | MVP |
+| Notifications | View only | Interactive | **Phase 2** |
+| Avatar | Hidden | Opens menu | MVP |
+
+### Wall Display Mode (`(wall)/` routes)
+
+Simplified "kiosk" header:
 - Brand logo and family name visible
-- Weather widget visible
-- Notifications badge visible (view only)
-- No interactive buttons except navigation
+- Weather widget visible (Phase 2)
+- No interactive buttons
 
-### Management Mode
+### Management Mode (`(manage)/` routes)
 
-Full header with all interactive elements:
+Full header with interactive elements:
 - Add Event button (primary CTA)
-- Settings button
-- Notifications with badge
+- Notifications with badge (Phase 2)
 - User menu via avatar
 
 ---
@@ -44,7 +45,7 @@ Full header with all interactive elements:
 | Title | "Family Planner", 20px Bold |
 | Tagline | "FAMILY OS", 12px, primary, uppercase |
 
-### Weather Display (Optional)
+### Weather Display (Phase 2)
 
 | Element | Specification |
 |---------|---------------|
@@ -52,7 +53,9 @@ Full header with all interactive elements:
 | Icon | Weather condition, 20px |
 | Temperature | 14px SemiBold, tabular-nums |
 
-### Primary Action Button
+*Requires: Weather API integration spec*
+
+### Primary Action Button (Add Event)
 
 **Management Mode Only**
 
@@ -72,7 +75,7 @@ Full header with all interactive elements:
 | Icon color | Secondary |
 | Hover | Surface hover bg |
 
-### Notification Badge
+### Notification Badge (Phase 2)
 
 | Property | Value |
 |----------|-------|
@@ -81,15 +84,27 @@ Full header with all interactive elements:
 | Background | Red-500 |
 | Font | 10px Bold |
 
+*Requires: Notification system spec*
+
 ---
 
 ## Responsive Behavior
 
 | Breakpoint | Changes |
 |------------|---------|
-| < 640px | Hide weather, Add Event icon-only |
+| < 640px | Add Event icon-only |
 | 640-1024px | All elements, reduced spacing |
 | > 1024px | Full layout |
+
+---
+
+## Implementation Notes
+
+- **Locale handling:** Routes prefixed with `[locale]` via next-intl
+- **Mode layouts:** `(wall)/layout.tsx` and `(manage)/layout.tsx` render different headers
+- **Add Event:** Opens dialog via `CalendarProvider` context
+- **Auth state:** Use better-auth session for avatar/user menu
+- **Components:** Use shadcn/ui Button, Avatar from `src/components/ui/`
 
 ---
 

@@ -4,24 +4,27 @@
 
 The menu is a slide-out drawer (Sheet) triggered from the header. It provides primary navigation for the application.
 
-## Interaction Modes
+**Mode determination:** The interaction mode is determined by the route group - `(wall)/` for Wall Display, `(manage)/` for Management.
 
-| Item | Wall Display | Management |
-|------|--------------|------------|
-| Dashboard | Navigate | Navigate |
-| Schedule | Navigate | Navigate |
-| Chore Log | Navigate | Navigate |
-| Settings | **Hidden** | Navigate |
-| Help | Visible | Visible |
+---
 
-### Wall Display Mode
+## Navigation Items
 
-Simplified navigation without administrative functions:
-- Dashboard, Schedule, Chore Log accessible
-- Settings link hidden
-- Help link visible
+| Item | Icon (Lucide) | Route | Wall | Manage |
+|------|---------------|-------|------|--------|
+| Calendar | Calendar | `/calendar` | Yes | Yes |
+| Chores | CheckSquare | `/chores` | No | Yes |
+| Settings | Settings | `/settings` | No | Yes |
+| Help | HelpCircle | (modal) | Yes | Yes |
 
-### Management Mode
+### Wall Display Mode (`(wall)/` routes)
+
+Simplified navigation for kiosk/hub display:
+- Calendar accessible (main hub view)
+- Chores, Settings hidden
+- Help visible
+
+### Management Mode (`(manage)/` routes)
 
 Full navigation with all items:
 - All navigation items accessible
@@ -38,10 +41,9 @@ Full navigation with all items:
 |          [Family Name]      |
 +-----------------------------+
 | Navigation                  |
-|   ▣ Dashboard        active |
-|   ▢ Schedule                |
-|   ▢ Chore Log               |
-|   ▢ Settings   (mgmt only)  |
+|   ▣ Calendar         active |
+|   ▢ Chores    (mgmt only)   |
+|   ▢ Settings  (mgmt only)   |
 |                             |
 |         (spacer)            |
 +-----------------------------+
@@ -78,16 +80,6 @@ Full navigation with all items:
 | Icon size | 20px |
 | Gap | 12px |
 
-### Navigation Items
-
-| Item | Icon (Lucide) | Route |
-|------|---------------|-------|
-| Dashboard | LayoutDashboard | /dashboard |
-| Schedule | Calendar | /schedule |
-| Chore Log | CheckSquare | /chores |
-| Settings | Settings | /settings |
-| Help | HelpCircle | (modal) |
-
 ---
 
 ## Accessibility
@@ -97,6 +89,15 @@ Full navigation with all items:
 - Escape to close
 - Focus trapped while open
 - `aria-current="page"` on active item
+
+---
+
+## Implementation Notes
+
+- **Locale handling:** Routes prefixed with `[locale]` via next-intl (e.g., `/en/calendar`)
+- **Mode layouts:** `(wall)/layout.tsx` and `(manage)/layout.tsx` control which items render
+- **State management:** Use `CalendarProvider` for calendar-related state
+- **Components:** Use shadcn/ui Sheet from `src/components/ui/`
 
 ---
 

@@ -5,6 +5,7 @@
 ```typescript
 interface IChore {
   id: string
+  familyId: string        // Reference to owning family
   title: string
   description?: string
   assignedTo: IUser
@@ -13,7 +14,7 @@ interface IChore {
   recurrence: ChoreRecurrence
   isUrgent: boolean       // Manual urgency flag
   status: ChoreStatus
-  xpReward: number
+  starReward: number      // Stars earned on completion
   createdAt: Date
   completedAt?: Date
   completedBy?: IUser
@@ -65,6 +66,7 @@ function getUrgencyStatus(chore: IChore): UrgencyStatus {
 ```sql
 CREATE TABLE chores (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  family_id TEXT NOT NULL REFERENCES families(id),
   title VARCHAR(255) NOT NULL,
   description TEXT,
   assigned_to_id UUID REFERENCES users(id),
@@ -73,12 +75,14 @@ CREATE TABLE chores (
   recurrence VARCHAR(20) DEFAULT 'once',
   is_urgent BOOLEAN DEFAULT false,
   status VARCHAR(20) DEFAULT 'pending',
-  xp_reward INTEGER DEFAULT 10,
+  star_reward INTEGER DEFAULT 10,
   created_at TIMESTAMP DEFAULT NOW(),
   completed_at TIMESTAMP,
   completed_by_id UUID REFERENCES users(id)
 );
 ```
+
+> **Note:** User references (`assigned_to_id`, `completed_by_id`) point to `users(id)` rather than `family_members(id)`. The `family_id` column provides family context, ensuring queries scope chores correctly: `WHERE family_id = ? AND assigned_to_id = ?`. See [Families Data Model](../families/data-model.md) for the family membership structure.
 
 ## API Endpoints
 
@@ -98,13 +102,13 @@ CREATE TABLE chores (
 | Streak | PostgreSQL | After completion |
 | Progress | Computed | Real-time |
 
-## XP Rewards
+## Star Rewards
 
-| Chore Type | XP Reward |
-|------------|-----------|
-| Daily routine | 10 XP |
-| Weekly task | 25 XP |
-| Urgent/time-sensitive | 15 XP |
-| Special/bonus | 50 XP |
+| Chore Type | Stars |
+|------------|-------|
+| Daily routine | 10 |
+| Weekly task | 25 |
+| Urgent/time-sensitive | 15 |
+| Special/bonus | 50 |
 
-*Note: XP values are configured in the administration interface.*
+*Note: Star values are configured in the administration interface. Stars can be redeemed in the [Reward Store](../reward-store/data-model.md).*

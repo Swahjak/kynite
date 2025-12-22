@@ -2,14 +2,31 @@
 
 ## Overview
 
-The calendar is the core feature of Family Planner, providing a centralized view of family schedules. It integrates with Google Calendar to display events and connects with the Chores module for task management.
+The calendar is the core feature of Family Planner, providing a centralized view of family schedules. It aggregates events from multiple Google Calendars into a unified family view, with support for multi-user event participation.
 
 ## Documents
 
 | Document | Description |
 |----------|-------------|
-| [Data Model](./data-model.md) | Event entities, interfaces, API endpoints |
+| [Data Model](./data-model.md) | Database schema, events, participants |
 | [UI Specification](./ui.md) | Components, views, interaction modes |
+
+## Dependencies
+
+| Feature | Relationship |
+|---------|--------------|
+| [Families](../families/spec.md) | Events are scoped to a family; participants are family members |
+| [Google Sync](../google-sync/spec.md) | Events sync from linked Google Calendars |
+
+## PRD Mapping
+
+| PRD Requirement | Implementation |
+|-----------------|----------------|
+| FR2 - Aggregate disparate sources | Events from multiple `google_calendars` merged by family |
+| FR3 - Multiple calendar views | Day, Week, Month, List views |
+| FR4 - CRUD operations | Managers can create/edit/delete events |
+| FR14 - Real-time sync | Events update via polling + optimistic UI |
+| FR15 - Cached mode | Events stored locally, offline indicator |
 
 ## Design Reference
 
@@ -24,8 +41,10 @@ Visual mockups available in `docs/design/calendar/`:
 
 - Multiple calendar views (Today, Day, Week, Month)
 - Family member filtering with color-coded avatars
+- Multi-participant events (events can be assigned to multiple family members)
 - Event color categorization
 - Drag-and-drop event rescheduling (Management mode only)
-- Integration with Google Calendar API
+- Google Calendar 2-way sync (via Google Sync feature)
+- Offline support with cached events
 - Dark mode support
 - Internationalization (nl/en)
