@@ -28,14 +28,8 @@ export const auth = betterAuth({
       user: schema.users,
       session: schema.sessions,
       account: schema.accounts,
-      verification: schema.verifications,
     },
   }),
-
-  emailAndPassword: {
-    enabled: true,
-    requireEmailVerification: false,
-  },
 
   // Google OAuth provider for calendar access
   socialProviders: {
