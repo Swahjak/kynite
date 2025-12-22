@@ -177,6 +177,21 @@ export const events = pgTable("events", {
   updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
 });
 
+/**
+ * Event Participants table - Junction table for multi-participant events
+ */
+export const eventParticipants = pgTable("event_participants", {
+  id: text("id").primaryKey(),
+  eventId: text("event_id")
+    .notNull()
+    .references(() => events.id, { onDelete: "cascade" }),
+  familyMemberId: text("family_member_id")
+    .notNull()
+    .references(() => familyMembers.id, { onDelete: "cascade" }),
+  isOwner: boolean("is_owner").notNull().default(false),
+  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+});
+
 // ============================================================================
 // Drizzle Relations
 // ============================================================================
@@ -222,7 +237,7 @@ export const googleCalendarsRelations = relations(
   })
 );
 
-export const eventsRelations = relations(events, ({ one }) => ({
+export const eventsRelations = relations(events, ({ one, many }) => ({
   family: one(families, {
     fields: [events.familyId],
     references: [families.id],
@@ -231,7 +246,22 @@ export const eventsRelations = relations(events, ({ one }) => ({
     fields: [events.googleCalendarId],
     references: [googleCalendars.id],
   }),
+  participants: many(eventParticipants),
 }));
+
+export const eventParticipantsRelations = relations(
+  eventParticipants,
+  ({ one }) => ({
+    event: one(events, {
+      fields: [eventParticipants.eventId],
+      references: [events.id],
+    }),
+    familyMember: one(familyMembers, {
+      fields: [eventParticipants.familyMemberId],
+      references: [familyMembers.id],
+    }),
+  })
+);
 
 // ============================================================================
 // Type Exports
@@ -253,3 +283,5 @@ export type GoogleCalendar = typeof googleCalendars.$inferSelect;
 export type NewGoogleCalendar = typeof googleCalendars.$inferInsert;
 export type Event = typeof events.$inferSelect;
 export type NewEvent = typeof events.$inferInsert;
+export type EventParticipant = typeof eventParticipants.$inferSelect;
+export type NewEventParticipant = typeof eventParticipants.$inferInsert;
