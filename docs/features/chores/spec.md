@@ -6,14 +6,15 @@ The chores view serves as the task display and completion interface for the Fami
 
 ## Documents
 
-| Document | Description |
-|----------|-------------|
+| Document                      | Description                                    |
+| ----------------------------- | ---------------------------------------------- |
 | [Data Model](./data-model.md) | Chore entities, database schema, API endpoints |
-| [UI Specification](./ui.md) | Components, views, interaction modes |
+| [UI Specification](./ui.md)   | Components, views, interaction modes           |
 
 ## Design Reference
 
 Visual mockups available in `docs/design/chores/`:
+
 - `chores-design-*.png` - Chores view mockups
 
 > **Note:** Mockups are reference only. Implement using project brand guidelines.

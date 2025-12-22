@@ -15,6 +15,7 @@
 ### Task 1: Create Directory Structure
 
 **Files:**
+
 - Create: `docs/features/calendar/` (directory)
 - Create: `docs/features/chores/` (directory)
 - Create: `docs/features/dashboard/` (directory)
@@ -44,6 +45,7 @@ git commit -m "docs: create features directory structure"
 ### Task 2: Create Design README
 
 **Files:**
+
 - Create: `docs/design/README.md`
 
 **Step 1: Write the design disclaimer**
@@ -76,11 +78,11 @@ This folder contains **visual mockups and code references** for the Family Plann
 
 Each design folder has a corresponding feature spec in `docs/features/`:
 
-| Design | Feature Spec |
-|--------|--------------|
-| `design/calendar/` | `features/calendar/` |
-| `design/chores/` | `features/chores/` |
-| `design/dashboard/` | `features/dashboard/` |
+| Design                 | Feature Spec             |
+| ---------------------- | ------------------------ |
+| `design/calendar/`     | `features/calendar/`     |
+| `design/chores/`       | `features/chores/`       |
+| `design/dashboard/`    | `features/dashboard/`    |
 | `design/reward-store/` | `features/reward-store/` |
 
 The feature specs define **what** to build. These designs show **how** it could look.
@@ -105,6 +107,7 @@ git commit -m "docs: add design folder README with mockup disclaimer"
 ### Task 3: Create Calendar Index Spec
 
 **Files:**
+
 - Create: `docs/features/calendar/spec.md`
 - Reference: `docs/design/calendar/spec.md` (source)
 
@@ -119,14 +122,15 @@ The calendar is the core feature of Family Planner, providing a centralized view
 
 ## Documents
 
-| Document | Description |
-|----------|-------------|
+| Document                      | Description                               |
+| ----------------------------- | ----------------------------------------- |
 | [Data Model](./data-model.md) | Event entities, interfaces, API endpoints |
-| [UI Specification](./ui.md) | Components, views, interaction modes |
+| [UI Specification](./ui.md)   | Components, views, interaction modes      |
 
 ## Design Reference
 
 Visual mockups available in `docs/design/calendar/`:
+
 - `calendar-month-design-*.png` - Month view mockups
 - `calendar-week-design-*.png` - Week view mockups
 - `calendar-today-design-*.png` - Today view mockups
@@ -156,62 +160,65 @@ git commit -m "docs(calendar): add feature spec index"
 ### Task 4: Create Calendar Data Model
 
 **Files:**
+
 - Create: `docs/features/calendar/data-model.md`
 - Reference: `docs/design/calendar/spec.md:376-408,925-931` (source sections)
 
 **Step 1: Extract and write data model**
 
-```markdown
+````markdown
 # Calendar Data Model
 
 ## Event Entity
 
 ```typescript
 interface IEvent {
-  id: number
-  title: string
-  description: string
-  startDate: string      // ISO 8601 format
-  endDate: string        // ISO 8601 format
-  color: TEventColor
-  user: IUser
+  id: number;
+  title: string;
+  description: string;
+  startDate: string; // ISO 8601 format
+  endDate: string; // ISO 8601 format
+  color: TEventColor;
+  user: IUser;
 }
 
-type TEventColor = 'blue' | 'green' | 'red' | 'yellow' | 'purple' | 'orange'
+type TEventColor = "blue" | "green" | "red" | "yellow" | "purple" | "orange";
 
 interface IUser {
-  id: string
-  name: string
-  picturePath: string | null
+  id: string;
+  name: string;
+  picturePath: string | null;
 }
 ```
+````
 
 ## Event Colors
 
 Events are color-coded by category:
 
-| Color | Use Cases |
-|-------|-----------|
-| Blue | Sports, activities, outdoor events |
-| Purple | Personal, gym, self-care |
-| Orange | Lessons, learning, education |
-| Green | Family events, meals, gatherings |
-| Red | Date nights, special occasions |
-| Yellow | Celebrations, birthdays, parties |
+| Color  | Use Cases                          |
+| ------ | ---------------------------------- |
+| Blue   | Sports, activities, outdoor events |
+| Purple | Personal, gym, self-care           |
+| Orange | Lessons, learning, education       |
+| Green  | Family events, meals, gatherings   |
+| Red    | Date nights, special occasions     |
+| Yellow | Celebrations, birthdays, parties   |
 
 ## Data Sources
 
-| Data | Source | Refresh Rate |
-|------|--------|--------------|
-| Events | Google Calendar API | Every 5 min |
-| Tasks | Chores Module | Real-time |
-| Users | Auth/Family Module | On mount |
-| Settings | localStorage | Immediate |
-| Weather | Weather API (TBD) | Every 30 min |
+| Data     | Source              | Refresh Rate |
+| -------- | ------------------- | ------------ |
+| Events   | Google Calendar API | Every 5 min  |
+| Tasks    | Chores Module       | Real-time    |
+| Users    | Auth/Family Module  | On mount     |
+| Settings | localStorage        | Immediate    |
+| Weather  | Weather API (TBD)   | Every 30 min |
 
 ## State Management
 
 The `CalendarProvider` context manages:
+
 - Current view (today/day/week/month)
 - Selected date
 - Filtered events
@@ -220,23 +227,26 @@ The `CalendarProvider` context manages:
 - Settings (persisted to localStorage)
 
 The `DndProvider` context manages:
+
 - Drag state
 - Drop target
 - Pending confirmation
-```
+
+````
 
 **Step 2: Commit**
 
 ```bash
 git add docs/features/calendar/data-model.md
 git commit -m "docs(calendar): add data model specification"
-```
+````
 
 ---
 
 ### Task 5: Create Calendar UI Spec
 
 **Files:**
+
 - Create: `docs/features/calendar/ui.md`
 - Reference: `docs/design/calendar/spec.md` (source - UI sections)
 
@@ -249,14 +259,15 @@ git commit -m "docs(calendar): add data model specification"
 
 The calendar UI supports two interaction contexts:
 
-| Mode | Device | User | Purpose |
-|------|--------|------|---------|
-| **Wall Display** | Mounted tablet | Kids/Family | View schedules, see timers |
-| **Management** | Mobile/Desktop | Parents/Admins | CRUD operations, settings |
+| Mode             | Device         | User           | Purpose                    |
+| ---------------- | -------------- | -------------- | -------------------------- |
+| **Wall Display** | Mounted tablet | Kids/Family    | View schedules, see timers |
+| **Management**   | Mobile/Desktop | Parents/Admins | CRUD operations, settings  |
 
 ### Wall Display Mode
 
 **Allowed Actions:**
+
 - View all calendar views (Today, Day, Week, Month)
 - Navigate between dates
 - Filter by family member
@@ -264,6 +275,7 @@ The calendar UI supports two interaction contexts:
 - View event details (read-only)
 
 **Hidden/Disabled:**
+
 - "Add Event" button
 - Event edit/delete actions
 - Drag-and-drop rescheduling
@@ -275,6 +287,7 @@ The calendar UI supports two interaction contexts:
 ### Management Mode
 
 **Full Access:**
+
 - All viewing capabilities
 - Create, edit, delete events
 - Drag-and-drop event rescheduling
@@ -287,18 +300,19 @@ The calendar UI supports two interaction contexts:
 
 ### Available Views
 
-| View | Icon | Description |
-|------|------|-------------|
-| Today | `view_day` | Family-focused daily overview with columns per member |
-| Day | `calendar_today` | Hourly timeline for selected date |
-| Week | `calendar_view_week` | 7-day hourly grid |
-| Month | `calendar_month` | Full month grid with day detail sidebar |
+| View  | Icon                 | Description                                           |
+| ----- | -------------------- | ----------------------------------------------------- |
+| Today | `view_day`           | Family-focused daily overview with columns per member |
+| Day   | `calendar_today`     | Hourly timeline for selected date                     |
+| Week  | `calendar_view_week` | 7-day hourly grid                                     |
+| Month | `calendar_month`     | Full month grid with day detail sidebar               |
 
 ### Today View
 
 Family-focused dashboard showing each family member's schedule in parallel columns.
 
 **Components:**
+
 - User header (avatar, name, level, XP bar)
 - Schedule section (event cards)
 - Tasks section (from Chores module)
@@ -308,6 +322,7 @@ Family-focused dashboard showing each family member's schedule in parallel colum
 24-hour timeline with optional mini calendar sidebar.
 
 **Components:**
+
 - Mini calendar (desktop only)
 - "Happening Now" panel
 - Time column (hourly labels)
@@ -325,6 +340,7 @@ Family-focused dashboard showing each family member's schedule in parallel colum
 Full month grid with selected day detail sidebar.
 
 **Components:**
+
 - Month grid with event indicators
 - Day detail sidebar (desktop only)
 - Achievement indicators (trophy icons)
@@ -335,19 +351,20 @@ Full month grid with selected day detail sidebar.
 
 ### Event Card
 
-| Element | Specification |
-|---------|---------------|
-| Left border | 4px solid event color |
-| Background | Event color at 10% opacity |
-| Title | Bold, 14px |
-| Time | Category color |
-| Location | Optional, 12px, secondary color |
+| Element     | Specification                   |
+| ----------- | ------------------------------- |
+| Left border | 4px solid event color           |
+| Background  | Event color at 10% opacity      |
+| Title       | Bold, 14px                      |
+| Time        | Category color                  |
+| Location    | Optional, 12px, secondary color |
 
 ### Filter Tabs
 
 Horizontal pill buttons for view switching.
 
 **States:**
+
 - Active: Dark background, white text, bold
 - Inactive: White background, border, secondary text
 
@@ -359,12 +376,12 @@ Horizontal pills with avatars for filtering events by person.
 
 ## Responsive Behavior
 
-| Breakpoint | Today View | Day View | Week View | Month View |
-|------------|------------|----------|-----------|------------|
-| < md | Single column, swipe | Full-width timeline | Warning shown | Grid only |
-| md - lg | 2 columns | Show sidebar | Full grid | Grid only |
-| > lg | 3-4 columns | Show sidebar | Full grid | Grid + sidebar |
-| > 2xl | All columns | Show sidebar | Full grid | Grid + sidebar |
+| Breakpoint | Today View           | Day View            | Week View     | Month View     |
+| ---------- | -------------------- | ------------------- | ------------- | -------------- |
+| < md       | Single column, swipe | Full-width timeline | Warning shown | Grid only      |
+| md - lg    | 2 columns            | Show sidebar        | Full grid     | Grid only      |
+| > lg       | 3-4 columns          | Show sidebar        | Full grid     | Grid + sidebar |
+| > 2xl      | All columns          | Show sidebar        | Full grid     | Grid + sidebar |
 
 ---
 
@@ -392,6 +409,7 @@ git commit -m "docs(calendar): add UI spec with interaction modes"
 ### Task 6: Create Chores Index Spec
 
 **Files:**
+
 - Create: `docs/features/chores/spec.md`
 
 **Step 1: Write the index file**
@@ -405,14 +423,15 @@ The chores view serves as the task display and completion interface for the Fami
 
 ## Documents
 
-| Document | Description |
-|----------|-------------|
+| Document                      | Description                                    |
+| ----------------------------- | ---------------------------------------------- |
 | [Data Model](./data-model.md) | Chore entities, database schema, API endpoints |
-| [UI Specification](./ui.md) | Components, views, interaction modes |
+| [UI Specification](./ui.md)   | Components, views, interaction modes           |
 
 ## Design Reference
 
 Visual mockups available in `docs/design/chores/`:
+
 - `chores-design-*.png` - Chores view mockups
 
 > **Note:** Mockups are reference only. Implement using project brand guidelines.
@@ -444,71 +463,70 @@ git commit -m "docs(chores): add feature spec index"
 ### Task 7: Create Chores Data Model
 
 **Files:**
+
 - Create: `docs/features/chores/data-model.md`
 - Reference: `docs/design/chores/spec.md:550-637,839-845` (source)
 
 **Step 1: Write data model**
 
-```markdown
+````markdown
 # Chores Data Model
 
 ## Chore Entity
 
 ```typescript
 interface IChore {
-  id: string
-  title: string
-  description?: string
-  assignedTo: IUser
-  dueDate?: Date
-  dueTime?: string        // HH:mm format
-  recurrence: ChoreRecurrence
-  isUrgent: boolean       // Manual urgency flag
-  status: ChoreStatus
-  xpReward: number
-  createdAt: Date
-  completedAt?: Date
-  completedBy?: IUser
+  id: string;
+  title: string;
+  description?: string;
+  assignedTo: IUser;
+  dueDate?: Date;
+  dueTime?: string; // HH:mm format
+  recurrence: ChoreRecurrence;
+  isUrgent: boolean; // Manual urgency flag
+  status: ChoreStatus;
+  xpReward: number;
+  createdAt: Date;
+  completedAt?: Date;
+  completedBy?: IUser;
 }
 
 type ChoreRecurrence =
-  | 'once'
-  | 'daily'
-  | 'weekly'
-  | 'weekdays'
-  | 'weekends'
-  | 'monthly'
+  | "once"
+  | "daily"
+  | "weekly"
+  | "weekdays"
+  | "weekends"
+  | "monthly";
 
-type ChoreStatus =
-  | 'pending'
-  | 'completed'
-  | 'skipped'
+type ChoreStatus = "pending" | "completed" | "skipped";
 
 interface IUser {
-  id: string
-  name: string
-  picturePath: string | null
-  color: string           // For avatar fallback
+  id: string;
+  name: string;
+  picturePath: string | null;
+  color: string; // For avatar fallback
 }
 ```
+````
 
 ## Computed Properties
 
 ```typescript
-type UrgencyStatus = 'none' | 'due-soon' | 'urgent' | 'overdue'
+type UrgencyStatus = "none" | "due-soon" | "urgent" | "overdue";
 
 function getUrgencyStatus(chore: IChore): UrgencyStatus {
-  if (chore.status !== 'pending') return 'none'
-  if (chore.isUrgent) return 'urgent'
-  if (!chore.dueDate) return 'none'
+  if (chore.status !== "pending") return "none";
+  if (chore.isUrgent) return "urgent";
+  if (!chore.dueDate) return "none";
 
-  const now = new Date()
-  const due = combineDateAndTime(chore.dueDate, chore.dueTime)
+  const now = new Date();
+  const due = combineDateAndTime(chore.dueDate, chore.dueTime);
 
-  if (due < now) return 'overdue'
-  if (due < addHours(now, 4)) return 'due-soon'
+  if (due < now) return "overdue";
+  if (due < addHours(now, 4)) return "due-soon";
 
-  return 'none'
+  return "none";
 }
 ```
 
@@ -534,46 +552,48 @@ CREATE TABLE chores (
 
 ## API Endpoints
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/chores` | GET | Fetch all pending chores |
-| `/api/chores/:id/complete` | POST | Mark chore as complete |
-| `/api/chores/streak` | GET | Get current streak data |
-| `/api/chores/progress` | GET | Get today's progress |
+| Endpoint                   | Method | Description              |
+| -------------------------- | ------ | ------------------------ |
+| `/api/chores`              | GET    | Fetch all pending chores |
+| `/api/chores/:id/complete` | POST   | Mark chore as complete   |
+| `/api/chores/streak`       | GET    | Get current streak data  |
+| `/api/chores/progress`     | GET    | Get today's progress     |
 
 ## Data Sources
 
-| Data | Source | Refresh Rate |
-|------|--------|--------------|
-| Chores | PostgreSQL | On mount, after completion |
-| Users | PostgreSQL | On mount |
-| Streak | PostgreSQL | After completion |
-| Progress | Computed | Real-time |
+| Data     | Source     | Refresh Rate               |
+| -------- | ---------- | -------------------------- |
+| Chores   | PostgreSQL | On mount, after completion |
+| Users    | PostgreSQL | On mount                   |
+| Streak   | PostgreSQL | After completion           |
+| Progress | Computed   | Real-time                  |
 
 ## XP Rewards
 
-| Chore Type | XP Reward |
-|------------|-----------|
-| Daily routine | 10 XP |
-| Weekly task | 25 XP |
-| Urgent/time-sensitive | 15 XP |
-| Special/bonus | 50 XP |
+| Chore Type            | XP Reward |
+| --------------------- | --------- |
+| Daily routine         | 10 XP     |
+| Weekly task           | 25 XP     |
+| Urgent/time-sensitive | 15 XP     |
+| Special/bonus         | 50 XP     |
 
-*Note: XP values are configured in the administration interface.*
-```
+_Note: XP values are configured in the administration interface._
+
+````
 
 **Step 2: Commit**
 
 ```bash
 git add docs/features/chores/data-model.md
 git commit -m "docs(chores): add data model specification"
-```
+````
 
 ---
 
 ### Task 8: Create Chores UI Spec
 
 **Files:**
+
 - Create: `docs/features/chores/ui.md`
 
 **Step 1: Write UI spec with interaction modes**
@@ -583,20 +603,22 @@ git commit -m "docs(chores): add data model specification"
 
 ## Interaction Modes
 
-| Mode | Device | User | Purpose |
-|------|--------|------|---------|
-| **Wall Display** | Mounted tablet | Kids/Family | View tasks, mark complete |
-| **Management** | Mobile/Desktop | Parents/Admins | Create, edit, assign chores |
+| Mode             | Device         | User           | Purpose                     |
+| ---------------- | -------------- | -------------- | --------------------------- |
+| **Wall Display** | Mounted tablet | Kids/Family    | View tasks, mark complete   |
+| **Management**   | Mobile/Desktop | Parents/Admins | Create, edit, assign chores |
 
 ### Wall Display Mode
 
 **Allowed Actions:**
+
 - View all chores (All, By Person, Urgent filters)
 - Mark chores as complete (single tap)
 - View progress and streak
 - Pull to refresh
 
 **Hidden/Disabled:**
+
 - FAB (Add Chore button)
 - Edit/delete chore actions
 - Chore creation forms
@@ -607,6 +629,7 @@ git commit -m "docs(chores): add data model specification"
 ### Management Mode
 
 **Full Access:**
+
 - All viewing capabilities
 - Create new chores
 - Edit existing chores
@@ -620,21 +643,22 @@ git commit -m "docs(chores): add data model specification"
 ## Layout
 
 ### Desktop/Tablet (md+)
-
 ```
+
 +-------------------------------------------------------------------+
-| Header                                                             |
+| Header |
 +-------------------------------------------------------------------+
-| Greeting Section                                                   |
+| Greeting Section |
 +-------------------------------------------------------------------+
-| Progress Card (streak + completion bar)                            |
+| Progress Card (streak + completion bar) |
 +-------------------------------------------------------------------+
-| Filter Tabs: [All Chores] [By Person] [Urgent]                    |
+| Filter Tabs: [All Chores] [By Person] [Urgent] |
 +-------------------------------------------------------------------+
-| Chore List / Columns                                               |
+| Chore List / Columns |
 +-------------------------------------------------------------------+
-| FAB [+] (Management mode only)                                     |
+| FAB [+] (Management mode only) |
 +-------------------------------------------------------------------+
+
 ```
 
 ### Mobile (< md)
@@ -738,6 +762,7 @@ git commit -m "docs(chores): add UI spec with interaction modes"
 ### Task 9: Create Dashboard Index Spec
 
 **Files:**
+
 - Create: `docs/features/dashboard/spec.md`
 
 **Step 1: Write the index file**
@@ -751,14 +776,15 @@ The dashboard serves as the home screen and primary interface for the Family Pla
 
 ## Documents
 
-| Document | Description |
-|----------|-------------|
+| Document                      | Description                                  |
+| ----------------------------- | -------------------------------------------- |
 | [Data Model](./data-model.md) | Dashboard entities, interfaces, data sources |
-| [UI Specification](./ui.md) | Components, layout, interaction modes |
+| [UI Specification](./ui.md)   | Components, layout, interaction modes        |
 
 ## Design Reference
 
 Visual mockups available in `docs/design/dashboard/`:
+
 - `dashboard-design-*.png` - Dashboard layout mockups
 
 > **Note:** Mockups are reference only. Implement using project brand guidelines.
@@ -784,11 +810,12 @@ git commit -m "docs(dashboard): add feature spec index"
 ### Task 10: Create Dashboard Data Model
 
 **Files:**
+
 - Create: `docs/features/dashboard/data-model.md`
 
 **Step 1: Write data model**
 
-```markdown
+````markdown
 # Dashboard Data Model
 
 ## Dashboard Data
@@ -796,81 +823,82 @@ git commit -m "docs(dashboard): add feature spec index"
 ```typescript
 interface DashboardData {
   family: {
-    name: string
-    photoUrl?: string
-  }
-  currentTime: Date
-  weather: WeatherData
-  todaysEvents: Event[]
-  activeTimers: Timer[]
-  familyMembers: FamilyMember[]
-  quickActions: QuickAction[]
+    name: string;
+    photoUrl?: string;
+  };
+  currentTime: Date;
+  weather: WeatherData;
+  todaysEvents: Event[];
+  activeTimers: Timer[];
+  familyMembers: FamilyMember[];
+  quickActions: QuickAction[];
 }
 
 interface WeatherData {
-  temperature: number
-  unit: 'F' | 'C'
-  condition: string
-  icon: string
+  temperature: number;
+  unit: "F" | "C";
+  condition: string;
+  icon: string;
 }
 
 interface Event {
-  id: string
-  title: string
-  startTime: Date
-  endTime: Date
-  location?: string
-  category: EventCategory
-  assignedTo?: string[]
+  id: string;
+  title: string;
+  startTime: Date;
+  endTime: Date;
+  location?: string;
+  category: EventCategory;
+  assignedTo?: string[];
 }
 
 interface Timer {
-  id: string
-  title: string
-  subtitle: string
-  remainingSeconds: number
-  totalSeconds: number
-  category: string
-  iconName: string
+  id: string;
+  title: string;
+  subtitle: string;
+  remainingSeconds: number;
+  totalSeconds: number;
+  category: string;
+  iconName: string;
 }
 
 interface FamilyMember {
-  id: string
-  name: string
-  role: 'parent' | 'child'
-  avatarColor: string
-  avatarUrl?: string
-  starCount: number
+  id: string;
+  name: string;
+  role: "parent" | "child";
+  avatarColor: string;
+  avatarUrl?: string;
+  starCount: number;
 }
 
 interface QuickAction {
-  id: string
-  label: string
-  icon: string
-  iconColor: string
-  timerDuration?: number  // seconds
-  isFeatured: boolean
+  id: string;
+  label: string;
+  icon: string;
+  iconColor: string;
+  timerDuration?: number; // seconds
+  isFeatured: boolean;
 }
 ```
+````
 
 ## Data Sources
 
-| Data | Source | Refresh Rate |
-|------|--------|--------------|
-| Current time | Client clock | Every second |
-| Weather | External API | Every 30 min |
-| Events | Google Calendar API | Every 5 min |
-| Timers | Local state / DB | Real-time |
-| Star counts | Database | On demand |
+| Data         | Source              | Refresh Rate |
+| ------------ | ------------------- | ------------ |
+| Current time | Client clock        | Every second |
+| Weather      | External API        | Every 30 min |
+| Events       | Google Calendar API | Every 5 min  |
+| Timers       | Local state / DB    | Real-time    |
+| Star counts  | Database            | On demand    |
 
 ## Greeting Logic
 
 ```typescript
 function getGreeting(hour: number): string {
-  if (hour >= 5 && hour < 12) return "Good Morning"
-  if (hour >= 12 && hour < 17) return "Good Afternoon"
-  if (hour >= 17 && hour < 21) return "Good Evening"
-  return "Good Night"
+  if (hour >= 5 && hour < 12) return "Good Morning";
+  if (hour >= 12 && hour < 17) return "Good Afternoon";
+  if (hour >= 17 && hour < 21) return "Good Evening";
+  return "Good Night";
 }
 ```
 
@@ -878,24 +906,26 @@ function getGreeting(hour: number): string {
 
 ```typescript
 function getLevel(starCount: number): number {
-  return Math.floor(starCount / 10)
+  return Math.floor(starCount / 10);
 }
 // Title varies by level: Explorer, Artist, Champion, etc.
 ```
-```
+
+````
 
 **Step 2: Commit**
 
 ```bash
 git add docs/features/dashboard/data-model.md
 git commit -m "docs(dashboard): add data model specification"
-```
+````
 
 ---
 
 ### Task 11: Create Dashboard UI Spec
 
 **Files:**
+
 - Create: `docs/features/dashboard/ui.md`
 
 **Step 1: Write UI spec with interaction modes**
@@ -905,14 +935,15 @@ git commit -m "docs(dashboard): add data model specification"
 
 ## Interaction Modes
 
-| Mode | Device | User | Purpose |
-|------|--------|------|---------|
-| **Wall Display** | Mounted tablet | Kids/Family | View schedule, see timers, see stars |
-| **Management** | Mobile/Desktop | Parents/Admins | Manage timers, configure actions |
+| Mode             | Device         | User           | Purpose                              |
+| ---------------- | -------------- | -------------- | ------------------------------------ |
+| **Wall Display** | Mounted tablet | Kids/Family    | View schedule, see timers, see stars |
+| **Management**   | Mobile/Desktop | Parents/Admins | Manage timers, configure actions     |
 
 ### Wall Display Mode
 
 **Allowed Actions:**
+
 - View clock and greeting
 - View today's schedule
 - View active timers (display only)
@@ -920,6 +951,7 @@ git commit -m "docs(dashboard): add data model specification"
 - Tap quick actions to start predefined timers
 
 **Hidden/Disabled:**
+
 - Timer pause/extend buttons (display only)
 - Quick action configuration
 - Sidebar navigation to Settings
@@ -929,6 +961,7 @@ git commit -m "docs(dashboard): add data model specification"
 ### Management Mode
 
 **Full Access:**
+
 - All viewing capabilities
 - Timer management (pause, extend, cancel)
 - Quick action configuration
@@ -939,16 +972,17 @@ git commit -m "docs(dashboard): add data model specification"
 ## Layout
 
 ### Desktop (xl+)
-
 ```
+
 +------------------------------------------------------------------+
-| Header                                                            |
+| Header |
 +------------------------------------------------------------------+
-|          |  Greeting + Clock                                      |
-| Sidebar  +--------------------------------------------------------+
-|          |  Today's Flow (2/3)    |  Timers + Stars (1/3)        |
-|          |                        |                               |
+| | Greeting + Clock |
+| Sidebar +--------------------------------------------------------+
+| | Today's Flow (2/3) | Timers + Stars (1/3) |
+| | | |
 +----------+------------------------+-------------------------------+
+
 ```
 
 - Sidebar: 288px fixed
@@ -1033,6 +1067,7 @@ git commit -m "docs(dashboard): add UI spec with interaction modes"
 ### Task 12: Create Reward Store Index Spec
 
 **Files:**
+
 - Create: `docs/features/reward-store/spec.md`
 
 **Step 1: Write the index file**
@@ -1046,14 +1081,15 @@ The Reward Store is a gamification feature that motivates children to complete t
 
 ## Documents
 
-| Document | Description |
-|----------|-------------|
-| [Data Model](./data-model.md) | Reward entities, transactions, API endpoints |
-| [UI Specification](./ui.md) | Components, redemption flow, interaction modes |
+| Document                      | Description                                    |
+| ----------------------------- | ---------------------------------------------- |
+| [Data Model](./data-model.md) | Reward entities, transactions, API endpoints   |
+| [UI Specification](./ui.md)   | Components, redemption flow, interaction modes |
 
 ## Design Reference
 
 Visual mockups available in `docs/design/reward-store/`:
+
 - `reward-store-design-*.png` - Store layout mockups
 
 > **Note:** Mockups are reference only. Implement using project brand guidelines.
@@ -1080,51 +1116,52 @@ git commit -m "docs(reward-store): add feature spec index"
 ### Task 13: Create Reward Store Data Model
 
 **Files:**
+
 - Create: `docs/features/reward-store/data-model.md`
 
 **Step 1: Write data model**
 
-```markdown
+````markdown
 # Reward Store Data Model
 
 ## Reward Entity
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | UUID | Unique identifier |
-| `familyId` | UUID | Family this reward belongs to |
-| `title` | string | Display name (max 50 chars) |
-| `description` | string | Details (max 200 chars) |
-| `starCost` | integer | Stars required to redeem |
-| `imageUrl` | string | Reward image URL (optional) |
-| `isActive` | boolean | Whether reward is available |
-| `limitType` | enum | `none`, `daily`, `weekly`, `monthly`, `once` |
-| `limitCount` | integer | Max redemptions per period |
-| `badge` | string | Optional badge text |
-| `createdAt` | timestamp | Creation date |
-| `updatedAt` | timestamp | Last modification |
+| Field         | Type      | Description                                  |
+| ------------- | --------- | -------------------------------------------- |
+| `id`          | UUID      | Unique identifier                            |
+| `familyId`    | UUID      | Family this reward belongs to                |
+| `title`       | string    | Display name (max 50 chars)                  |
+| `description` | string    | Details (max 200 chars)                      |
+| `starCost`    | integer   | Stars required to redeem                     |
+| `imageUrl`    | string    | Reward image URL (optional)                  |
+| `isActive`    | boolean   | Whether reward is available                  |
+| `limitType`   | enum      | `none`, `daily`, `weekly`, `monthly`, `once` |
+| `limitCount`  | integer   | Max redemptions per period                   |
+| `badge`       | string    | Optional badge text                          |
+| `createdAt`   | timestamp | Creation date                                |
+| `updatedAt`   | timestamp | Last modification                            |
 
 ## Redemption Entity
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | UUID | Unique identifier |
-| `rewardId` | UUID | Reference to reward |
-| `userId` | UUID | User who redeemed |
-| `starCost` | integer | Stars spent (snapshot) |
-| `redeemedAt` | timestamp | When redeemed |
+| Field        | Type      | Description            |
+| ------------ | --------- | ---------------------- |
+| `id`         | UUID      | Unique identifier      |
+| `rewardId`   | UUID      | Reference to reward    |
+| `userId`     | UUID      | User who redeemed      |
+| `starCost`   | integer   | Stars spent (snapshot) |
+| `redeemedAt` | timestamp | When redeemed          |
 
 ## Star Transaction Entity
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | UUID | Unique identifier |
-| `userId` | UUID | User account |
-| `amount` | integer | Positive (earned) or negative (spent) |
-| `type` | enum | `chore`, `bonus`, `redemption` |
-| `referenceId` | UUID | Related chore/redemption ID |
-| `description` | string | Activity description |
-| `createdAt` | timestamp | Transaction time |
+| Field         | Type      | Description                           |
+| ------------- | --------- | ------------------------------------- |
+| `id`          | UUID      | Unique identifier                     |
+| `userId`      | UUID      | User account                          |
+| `amount`      | integer   | Positive (earned) or negative (spent) |
+| `type`        | enum      | `chore`, `bonus`, `redemption`        |
+| `referenceId` | UUID      | Related chore/redemption ID           |
+| `description` | string    | Activity description                  |
+| `createdAt`   | timestamp | Transaction time                      |
 
 ## API Endpoints
 
@@ -1133,6 +1170,7 @@ git commit -m "docs(reward-store): add feature spec index"
 Fetch available rewards for the current user's family.
 
 **Response:**
+
 ```json
 {
   "rewards": [
@@ -1149,12 +1187,14 @@ Fetch available rewards for the current user's family.
   ]
 }
 ```
+````
 
 ### POST /api/rewards/:id/redeem
 
 Redeem a reward. Deducts stars immediately.
 
 **Success Response:**
+
 ```json
 {
   "success": true,
@@ -1169,6 +1209,7 @@ Redeem a reward. Deducts stars immediately.
 ```
 
 **Error Response:**
+
 ```json
 {
   "success": false,
@@ -1186,20 +1227,22 @@ Fetch user's star balance and recent activity.
 ### GET /api/users/:id/redemptions
 
 Fetch user's redemption history.
-```
+
+````
 
 **Step 2: Commit**
 
 ```bash
 git add docs/features/reward-store/data-model.md
 git commit -m "docs(reward-store): add data model specification"
-```
+````
 
 ---
 
 ### Task 14: Create Reward Store UI Spec
 
 **Files:**
+
 - Create: `docs/features/reward-store/ui.md`
 
 **Step 1: Write UI spec with interaction modes**
@@ -1209,14 +1252,15 @@ git commit -m "docs(reward-store): add data model specification"
 
 ## Interaction Modes
 
-| Mode | Device | User | Purpose |
-|------|--------|------|---------|
-| **Wall Display** | Mounted tablet | Kids | View rewards, redeem with stars |
-| **Management** | Mobile/Desktop | Parents | Create, edit, manage rewards |
+| Mode             | Device         | User    | Purpose                         |
+| ---------------- | -------------- | ------- | ------------------------------- |
+| **Wall Display** | Mounted tablet | Kids    | View rewards, redeem with stars |
+| **Management**   | Mobile/Desktop | Parents | Create, edit, manage rewards    |
 
 ### Wall Display Mode
 
 **Allowed Actions:**
+
 - View star balance
 - Browse available rewards
 - Redeem rewards (when affordable)
@@ -1225,6 +1269,7 @@ git commit -m "docs(reward-store): add data model specification"
 - View recent activity
 
 **Hidden/Disabled:**
+
 - Create reward
 - Edit reward
 - Delete reward
@@ -1236,6 +1281,7 @@ git commit -m "docs(reward-store): add data model specification"
 ### Management Mode
 
 **Full Access:**
+
 - All viewing capabilities
 - Create new rewards
 - Edit existing rewards
@@ -1249,15 +1295,16 @@ git commit -m "docs(reward-store): add data model specification"
 ## Layout
 
 ### Desktop
-
 ```
+
 +------------------------------------------------------------------+
-| Header: Greeting + Star Balance Card                              |
+| Header: Greeting + Star Balance Card |
 +----------------------------------------------+-------------------+
-| Rewards Marketplace (2/3)                    | Sidebar (1/3)     |
-| - Filter tabs (Available | Redeemed)         | - Weekly Chart    |
-| - Reward cards grid (2 columns)              | - Recent Activity |
+| Rewards Marketplace (2/3) | Sidebar (1/3) |
+| - Filter tabs (Available | Redeemed) | - Weekly Chart |
+| - Reward cards grid (2 columns) | - Recent Activity |
 +----------------------------------------------+-------------------+
+
 ```
 
 ### Mobile
@@ -1280,14 +1327,16 @@ Single column with sidebar sections stacked below marketplace.
 
 **Structure:**
 ```
+
 +-----------------------------------+
-| [Image]                   [Badge] |
+| [Image] [Badge] |
 +-----------------------------------+
-| Title                             |
-| Description (2 lines max)         |
-|                                   |
-| ★ 500            [Redeem Button]  |
+| Title |
+| Description (2 lines max) |
+| |
+| ★ 500 [Redeem Button] |
 +-----------------------------------+
+
 ```
 
 **States:**
@@ -1346,6 +1395,7 @@ git commit -m "docs(reward-store): add UI spec with interaction modes"
 ### Task 15: Create Header UI Spec
 
 **Files:**
+
 - Create: `docs/features/ui/header.md`
 - Reference: `docs/design/ui/header/spec.md` (source)
 
@@ -1360,18 +1410,19 @@ The App Header is the primary navigation bar that appears at the top of every sc
 
 ## Interaction Modes
 
-| Element | Wall Display | Management |
-|---------|--------------|------------|
-| Brand Area | View only | Opens menu |
-| Weather | Visible | Visible |
-| Add Event | **Hidden** | Visible |
-| Settings | **Hidden** | Visible |
-| Notifications | View only | Interactive |
-| Avatar | View only | Opens menu |
+| Element       | Wall Display | Management  |
+| ------------- | ------------ | ----------- |
+| Brand Area    | View only    | Opens menu  |
+| Weather       | Visible      | Visible     |
+| Add Event     | **Hidden**   | Visible     |
+| Settings      | **Hidden**   | Visible     |
+| Notifications | View only    | Interactive |
+| Avatar        | View only    | Opens menu  |
 
 ### Wall Display Mode
 
 The header displays in a simplified "kiosk" mode:
+
 - Brand logo and family name visible
 - Weather widget visible
 - Notifications badge visible (view only)
@@ -1380,6 +1431,7 @@ The header displays in a simplified "kiosk" mode:
 ### Management Mode
 
 Full header with all interactive elements:
+
 - Add Event button (primary CTA)
 - Settings button
 - Notifications with badge
@@ -1391,59 +1443,59 @@ Full header with all interactive elements:
 
 ### Brand Area
 
-| Element | Specification |
-|---------|---------------|
-| Icon container | 48×48px, primary bg, circular |
-| Icon | Home (Lucide), 24px, dark |
-| Title | "Family Planner", 20px Bold |
-| Tagline | "FAMILY OS", 12px, primary, uppercase |
+| Element        | Specification                         |
+| -------------- | ------------------------------------- |
+| Icon container | 48×48px, primary bg, circular         |
+| Icon           | Home (Lucide), 24px, dark             |
+| Title          | "Family Planner", 20px Bold           |
+| Tagline        | "FAMILY OS", 12px, primary, uppercase |
 
 ### Weather Display (Optional)
 
-| Element | Specification |
-|---------|---------------|
-| Container | Pill shape, border |
-| Icon | Weather condition, 20px |
+| Element     | Specification               |
+| ----------- | --------------------------- |
+| Container   | Pill shape, border          |
+| Icon        | Weather condition, 20px     |
 | Temperature | 14px SemiBold, tabular-nums |
 
 ### Primary Action Button
 
 **Management Mode Only**
 
-| Property | Value |
-|----------|-------|
-| Background | Primary (#13ec92) |
-| Text | Dark, 14px SemiBold |
-| Icon | Plus, 18px |
-| Min height | 44px |
+| Property   | Value               |
+| ---------- | ------------------- |
+| Background | Primary (#13ec92)   |
+| Text       | Dark, 14px SemiBold |
+| Icon       | Plus, 18px          |
+| Min height | 44px                |
 
 ### Action Icons
 
-| Property | Value |
-|----------|-------|
-| Size | 44×44px |
-| Icon size | 22px |
-| Icon color | Secondary |
-| Hover | Surface hover bg |
+| Property   | Value            |
+| ---------- | ---------------- |
+| Size       | 44×44px          |
+| Icon size  | 22px             |
+| Icon color | Secondary        |
+| Hover      | Surface hover bg |
 
 ### Notification Badge
 
-| Property | Value |
-|----------|-------|
-| Position | Top-right of bell |
-| Min size | 18px |
-| Background | Red-500 |
-| Font | 10px Bold |
+| Property   | Value             |
+| ---------- | ----------------- |
+| Position   | Top-right of bell |
+| Min size   | 18px              |
+| Background | Red-500           |
+| Font       | 10px Bold         |
 
 ---
 
 ## Responsive Behavior
 
-| Breakpoint | Changes |
-|------------|---------|
-| < 640px | Hide weather, Add Event icon-only |
-| 640-1024px | All elements, reduced spacing |
-| > 1024px | Full layout |
+| Breakpoint | Changes                           |
+| ---------- | --------------------------------- |
+| < 640px    | Hide weather, Add Event icon-only |
+| 640-1024px | All elements, reduced spacing     |
+| > 1024px   | Full layout                       |
 
 ---
 
@@ -1464,6 +1516,7 @@ git commit -m "docs(ui): add header spec with interaction modes"
 ### Task 16: Create Menu UI Spec
 
 **Files:**
+
 - Create: `docs/features/ui/menu.md`
 - Reference: `docs/design/ui/menu/spec.md` (source)
 
@@ -1478,17 +1531,18 @@ The menu is a slide-out drawer (Sheet) triggered from the header. It provides pr
 
 ## Interaction Modes
 
-| Item | Wall Display | Management |
-|------|--------------|------------|
-| Dashboard | Navigate | Navigate |
-| Schedule | Navigate | Navigate |
-| Chore Log | Navigate | Navigate |
-| Settings | **Hidden** | Navigate |
-| Help | Visible | Visible |
+| Item      | Wall Display | Management |
+| --------- | ------------ | ---------- |
+| Dashboard | Navigate     | Navigate   |
+| Schedule  | Navigate     | Navigate   |
+| Chore Log | Navigate     | Navigate   |
+| Settings  | **Hidden**   | Navigate   |
+| Help      | Visible      | Visible    |
 
 ### Wall Display Mode
 
 Simplified navigation without administrative functions:
+
 - Dashboard, Schedule, Chore Log accessible
 - Settings link hidden
 - Help link visible
@@ -1496,30 +1550,32 @@ Simplified navigation without administrative functions:
 ### Management Mode
 
 Full navigation with all items:
+
 - All navigation items accessible
 - Settings for configuration
 
 ---
 
 ## Anatomy
-
 ```
+
 +-----------------------------+
-| Brand Header                |
-|   [Icon] Family Planner     |
-|          [Family Name]      |
+| Brand Header |
+| [Icon] Family Planner |
+| [Family Name] |
 +-----------------------------+
-| Navigation                  |
-|   ▣ Dashboard        active |
-|   ▢ Schedule                |
-|   ▢ Chore Log               |
-|   ▢ Settings   (mgmt only)  |
-|                             |
-|         (spacer)            |
+| Navigation |
+| ▣ Dashboard active |
+| ▢ Schedule |
+| ▢ Chore Log |
+| ▢ Settings (mgmt only) |
+| |
+| (spacer) |
 +-----------------------------+
-| Footer                      |
-|   ⓘ Help                    |
+| Footer |
+| ⓘ Help |
 +-----------------------------+
+
 ```
 
 ---
@@ -1591,6 +1647,7 @@ git commit -m "docs(ui): add menu spec with interaction modes"
 ### Task 17: Add Disclaimer to Design Specs
 
 **Files:**
+
 - Modify: `docs/design/calendar/spec.md`
 - Modify: `docs/design/chores/spec.md`
 - Modify: `docs/design/dashboard/spec.md`
@@ -1629,6 +1686,7 @@ git commit -m "docs(design): add mockup disclaimers to all design specs"
 Run: `find docs/features -type f -name "*.md" | sort`
 
 Expected output:
+
 ```
 docs/features/calendar/data-model.md
 docs/features/calendar/spec.md
@@ -1663,13 +1721,13 @@ git commit -m "docs: complete features/design restructure with interaction modes
 
 ## Summary
 
-| Phase | Tasks | Files |
-|-------|-------|-------|
-| Setup | 1-2 | 2 (directories + README) |
-| Calendar | 3-5 | 3 |
-| Chores | 6-8 | 3 |
-| Dashboard | 9-11 | 3 |
-| Reward Store | 12-14 | 3 |
-| Shared UI | 15-16 | 2 |
-| Cleanup | 17-18 | 6 modified |
-| **Total** | 18 tasks | 21 file operations |
+| Phase        | Tasks    | Files                    |
+| ------------ | -------- | ------------------------ |
+| Setup        | 1-2      | 2 (directories + README) |
+| Calendar     | 3-5      | 3                        |
+| Chores       | 6-8      | 3                        |
+| Dashboard    | 9-11     | 3                        |
+| Reward Store | 12-14    | 3                        |
+| Shared UI    | 15-16    | 2                        |
+| Cleanup      | 17-18    | 6 modified               |
+| **Total**    | 18 tasks | 21 file operations       |

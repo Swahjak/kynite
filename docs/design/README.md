@@ -25,11 +25,11 @@ This folder contains **visual mockups and code references** for the Family Plann
 
 Each design folder has a corresponding feature spec in `docs/features/`:
 
-| Design | Feature Spec |
-|--------|--------------|
-| `design/calendar/` | `features/calendar/` |
-| `design/chores/` | `features/chores/` |
-| `design/dashboard/` | `features/dashboard/` |
+| Design                 | Feature Spec             |
+| ---------------------- | ------------------------ |
+| `design/calendar/`     | `features/calendar/`     |
+| `design/chores/`       | `features/chores/`       |
+| `design/dashboard/`    | `features/dashboard/`    |
 | `design/reward-store/` | `features/reward-store/` |
 
 The feature specs define **what** to build. These designs show **how** it could look.

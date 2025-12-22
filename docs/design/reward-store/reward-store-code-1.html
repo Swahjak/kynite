@@ -1,382 +1,767 @@
-<!DOCTYPE html>
+<!doctype html>
 
-<html class="light" lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Family Planner - My Progress</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#13ec92",
-                        "primary-dark": "#0eb671",
-                        "background-light": "#f6f8f7",
-                        "background-dark": "#10221a",
-                        "surface-light": "#ffffff",
-                        "surface-dark": "#1a332a",
-                        "text-main": "#111815",
-                        "text-muted": "#618979",
-                    },
-                    fontFamily: {
-                        "display": ["Lexend", "sans-serif"]
-                    },
-                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
-                },
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Family Planner - My Progress</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#13ec92",
+              "primary-dark": "#0eb671",
+              "background-light": "#f6f8f7",
+              "background-dark": "#10221a",
+              "surface-light": "#ffffff",
+              "surface-dark": "#1a332a",
+              "text-main": "#111815",
+              "text-muted": "#618979",
             },
-        }
+            fontFamily: {
+              display: ["Lexend", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+          },
+        },
+      };
     </script>
-<style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-        .icon-filled {
-            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-        /* Custom scrollbar for webkit */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent; 
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #dbe6e1; 
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #13ec92; 
-        }
-        .dark ::-webkit-scrollbar-thumb {
-            background: #2d4a3e;
-        }
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      .icon-filled {
+        font-variation-settings:
+          "FILL" 1,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      /* Custom scrollbar for webkit */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #dbe6e1;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #13ec92;
+      }
+      .dark ::-webkit-scrollbar-thumb {
+        background: #2d4a3e;
+      }
     </style>
-</head>
-<body class="bg-background-light dark:bg-background-dark font-display text-text-main dark:text-gray-100 overflow-hidden h-screen flex">
-<!-- SideNavBar -->
-<aside class="w-72 flex-shrink-0 bg-surface-light dark:bg-surface-dark border-r border-gray-100 dark:border-gray-800 flex flex-col justify-between h-full transition-colors duration-300">
-<div class="flex flex-col gap-6 p-6">
-<div class="flex items-center gap-3">
-<div class="bg-center bg-no-repeat bg-cover rounded-full size-10 shadow-sm" data-alt="User avatar showing a smiling young person" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCvPFp0c9Xw76nA2ocTeQg4UavL2YI699jKPYmFR18GdDFu_30jn4aYGArE4b4qbnKaK7b34S4lQ2KMiLehp33jx5uXafC7E62An0u2i6CHtP5QWN7NrqJgWPA_sW82KM4IK-dHN3NsNnpktBwccrD6mZIZwHLvpykcCjvMJNOF-vfUs_Yf_kNgKElsW_m-F7TnFyLIEaKjKG9EW6HLp5hb-pdN1Wt18WZd-Bl3hSc_lCjZL7E8JIcGMoyn2RucG6M_FRQuirnhyAI");'></div>
-<div>
-<h1 class="text-text-main dark:text-white text-lg font-bold leading-tight">Family Planner</h1>
-<p class="text-text-muted dark:text-gray-400 text-xs font-medium">Family OS</p>
-</div>
-</div>
-<nav class="flex flex-col gap-2">
-<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-text-main dark:text-gray-300 hover:bg-background-light dark:hover:bg-background-dark transition-colors group" href="#">
-<span class="material-symbols-outlined group-hover:text-primary transition-colors">dashboard</span>
-<p class="text-sm font-medium">Dashboard</p>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/20 text-text-main dark:text-white border-l-4 border-primary shadow-sm" href="#">
-<span class="material-symbols-outlined text-primary-dark dark:text-primary icon-filled">stars</span>
-<p class="text-sm font-bold">My Progress</p>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-text-main dark:text-gray-300 hover:bg-background-light dark:hover:bg-background-dark transition-colors group" href="#">
-<span class="material-symbols-outlined group-hover:text-primary transition-colors">check_circle</span>
-<p class="text-sm font-medium">Chores</p>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-text-main dark:text-gray-300 hover:bg-background-light dark:hover:bg-background-dark transition-colors group" href="#">
-<span class="material-symbols-outlined group-hover:text-primary transition-colors">calendar_month</span>
-<p class="text-sm font-medium">Calendar</p>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-text-main dark:text-gray-300 hover:bg-background-light dark:hover:bg-background-dark transition-colors group" href="#">
-<span class="material-symbols-outlined group-hover:text-primary transition-colors">settings</span>
-<p class="text-sm font-medium">Settings</p>
-</a>
-</nav>
-</div>
-<div class="p-6">
-<div class="bg-background-light dark:bg-background-dark rounded-xl p-4 flex flex-col gap-3">
-<div class="flex justify-between items-center">
-<span class="text-xs font-bold uppercase tracking-wider text-text-muted">Family Goal</span>
-<span class="text-xs font-bold text-primary-dark dark:text-primary">85%</span>
-</div>
-<div class="h-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-<div class="h-full bg-primary w-[85%] rounded-full"></div>
-</div>
-<p class="text-xs text-text-muted dark:text-gray-400">Pizza Party at 2,000 pts</p>
-</div>
-</div>
-</aside>
-<!-- Main Content Area -->
-<main class="flex-1 flex flex-col h-full overflow-y-auto bg-background-light dark:bg-background-dark p-6 md:p-10 lg:p-12">
-<div class="max-w-6xl mx-auto w-full flex flex-col gap-8">
-<!-- Page Heading -->
-<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
-<div class="flex flex-col gap-1">
-<h1 class="text-text-main dark:text-white text-3xl md:text-4xl font-black tracking-tight">Good Morning, Alex!</h1>
-<p class="text-text-muted dark:text-gray-400 text-base md:text-lg">Keep up the great work. You're on a <span class="text-primary-dark dark:text-primary font-bold">5-day streak!</span> 🔥</p>
-</div>
-<button class="bg-white dark:bg-surface-dark text-text-main dark:text-white border border-gray-200 dark:border-gray-700 hover:border-primary px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2 shadow-sm transition-all">
-<span class="material-symbols-outlined text-primary">history</span>
-                    View History
+  </head>
+  <body
+    class="bg-background-light dark:bg-background-dark font-display text-text-main flex h-screen overflow-hidden dark:text-gray-100"
+  >
+    <!-- SideNavBar -->
+    <aside
+      class="bg-surface-light dark:bg-surface-dark flex h-full w-72 flex-shrink-0 flex-col justify-between border-r border-gray-100 transition-colors duration-300 dark:border-gray-800"
+    >
+      <div class="flex flex-col gap-6 p-6">
+        <div class="flex items-center gap-3">
+          <div
+            class="size-10 rounded-full bg-cover bg-center bg-no-repeat shadow-sm"
+            data-alt="User avatar showing a smiling young person"
+            style="
+              background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuCvPFp0c9Xw76nA2ocTeQg4UavL2YI699jKPYmFR18GdDFu_30jn4aYGArE4b4qbnKaK7b34S4lQ2KMiLehp33jx5uXafC7E62An0u2i6CHtP5QWN7NrqJgWPA_sW82KM4IK-dHN3NsNnpktBwccrD6mZIZwHLvpykcCjvMJNOF-vfUs_Yf_kNgKElsW_m-F7TnFyLIEaKjKG9EW6HLp5hb-pdN1Wt18WZd-Bl3hSc_lCjZL7E8JIcGMoyn2RucG6M_FRQuirnhyAI&quot;);
+            "
+          ></div>
+          <div>
+            <h1
+              class="text-text-main text-lg leading-tight font-bold dark:text-white"
+            >
+              Family Planner
+            </h1>
+            <p class="text-text-muted text-xs font-medium dark:text-gray-400">
+              Family OS
+            </p>
+          </div>
+        </div>
+        <nav class="flex flex-col gap-2">
+          <a
+            class="text-text-main hover:bg-background-light dark:hover:bg-background-dark group flex items-center gap-3 rounded-lg px-4 py-3 transition-colors dark:text-gray-300"
+            href="#"
+          >
+            <span
+              class="material-symbols-outlined group-hover:text-primary transition-colors"
+              >dashboard</span
+            >
+            <p class="text-sm font-medium">Dashboard</p>
+          </a>
+          <a
+            class="bg-primary/20 text-text-main border-primary flex items-center gap-3 rounded-lg border-l-4 px-4 py-3 shadow-sm dark:text-white"
+            href="#"
+          >
+            <span
+              class="material-symbols-outlined text-primary-dark dark:text-primary icon-filled"
+              >stars</span
+            >
+            <p class="text-sm font-bold">My Progress</p>
+          </a>
+          <a
+            class="text-text-main hover:bg-background-light dark:hover:bg-background-dark group flex items-center gap-3 rounded-lg px-4 py-3 transition-colors dark:text-gray-300"
+            href="#"
+          >
+            <span
+              class="material-symbols-outlined group-hover:text-primary transition-colors"
+              >check_circle</span
+            >
+            <p class="text-sm font-medium">Chores</p>
+          </a>
+          <a
+            class="text-text-main hover:bg-background-light dark:hover:bg-background-dark group flex items-center gap-3 rounded-lg px-4 py-3 transition-colors dark:text-gray-300"
+            href="#"
+          >
+            <span
+              class="material-symbols-outlined group-hover:text-primary transition-colors"
+              >calendar_month</span
+            >
+            <p class="text-sm font-medium">Calendar</p>
+          </a>
+          <a
+            class="text-text-main hover:bg-background-light dark:hover:bg-background-dark group flex items-center gap-3 rounded-lg px-4 py-3 transition-colors dark:text-gray-300"
+            href="#"
+          >
+            <span
+              class="material-symbols-outlined group-hover:text-primary transition-colors"
+              >settings</span
+            >
+            <p class="text-sm font-medium">Settings</p>
+          </a>
+        </nav>
+      </div>
+      <div class="p-6">
+        <div
+          class="bg-background-light dark:bg-background-dark flex flex-col gap-3 rounded-xl p-4"
+        >
+          <div class="flex items-center justify-between">
+            <span
+              class="text-text-muted text-xs font-bold tracking-wider uppercase"
+              >Family Goal</span
+            >
+            <span class="text-primary-dark dark:text-primary text-xs font-bold"
+              >85%</span
+            >
+          </div>
+          <div
+            class="h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700"
+          >
+            <div class="bg-primary h-full w-[85%] rounded-full"></div>
+          </div>
+          <p class="text-text-muted text-xs dark:text-gray-400">
+            Pizza Party at 2,000 pts
+          </p>
+        </div>
+      </div>
+    </aside>
+    <!-- Main Content Area -->
+    <main
+      class="bg-background-light dark:bg-background-dark flex h-full flex-1 flex-col overflow-y-auto p-6 md:p-10 lg:p-12"
+    >
+      <div class="mx-auto flex w-full max-w-6xl flex-col gap-8">
+        <!-- Page Heading -->
+        <div
+          class="flex flex-col justify-between gap-4 md:flex-row md:items-end"
+        >
+          <div class="flex flex-col gap-1">
+            <h1
+              class="text-text-main text-3xl font-black tracking-tight md:text-4xl dark:text-white"
+            >
+              Good Morning, Alex!
+            </h1>
+            <p class="text-text-muted text-base md:text-lg dark:text-gray-400">
+              Keep up the great work. You're on a
+              <span class="text-primary-dark dark:text-primary font-bold"
+                >5-day streak!</span
+              >
+              🔥
+            </p>
+          </div>
+          <button
+            class="dark:bg-surface-dark text-text-main hover:border-primary flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium shadow-sm transition-all dark:border-gray-700 dark:text-white"
+          >
+            <span class="material-symbols-outlined text-primary">history</span>
+            View History
+          </button>
+        </div>
+        <!-- Stats Overview -->
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+          <!-- Total Stars Card -->
+          <div
+            class="bg-surface-light dark:bg-surface-dark group relative flex flex-col gap-1 overflow-hidden rounded-xl p-6 shadow-sm"
+          >
+            <div
+              class="text-primary/10 group-hover:text-primary/20 absolute -top-4 -right-4 rotate-12 transition-colors"
+            >
+              <span class="material-symbols-outlined icon-filled text-[140px]"
+                >star</span
+              >
+            </div>
+            <p
+              class="text-text-muted relative z-10 text-sm font-medium dark:text-gray-400"
+            >
+              Total Stars
+            </p>
+            <div class="relative z-10 flex items-center gap-2">
+              <span class="text-text-main text-4xl font-black dark:text-white"
+                >1,250</span
+              >
+              <span class="material-symbols-outlined text-primary icon-filled"
+                >star</span
+              >
+            </div>
+            <p
+              class="text-primary-dark dark:text-primary relative z-10 mt-2 text-xs font-medium"
+            >
+              +120 this week
+            </p>
+          </div>
+          <!-- Current Level Card -->
+          <div
+            class="bg-surface-light dark:bg-surface-dark relative flex flex-col gap-1 overflow-hidden rounded-xl p-6 shadow-sm"
+          >
+            <div class="absolute -top-4 -right-4 rotate-12 text-purple-500/10">
+              <span class="material-symbols-outlined icon-filled text-[140px]"
+                >military_tech</span
+              >
+            </div>
+            <p
+              class="text-text-muted relative z-10 text-sm font-medium dark:text-gray-400"
+            >
+              Current Level
+            </p>
+            <div class="relative z-10 flex items-center gap-2">
+              <span class="text-text-main text-4xl font-black dark:text-white"
+                >4</span
+              >
+              <span
+                class="rounded-full bg-purple-100 px-2 py-1 text-xs font-bold text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
+                >Expert Helper</span
+              >
+            </div>
+            <p
+              class="text-text-muted relative z-10 mt-2 text-xs font-medium dark:text-gray-400"
+            >
+              Next: Master Helper
+            </p>
+          </div>
+          <!-- Progress Bar Card -->
+          <div
+            class="bg-surface-light dark:bg-surface-dark flex flex-col justify-center gap-3 rounded-xl p-6 shadow-sm"
+          >
+            <div class="flex items-end justify-between">
+              <p class="text-text-main text-base font-bold dark:text-white">
+                Level Progress
+              </p>
+              <p class="text-text-muted text-xs font-medium dark:text-gray-400">
+                1,250 / 1,400
+              </p>
+            </div>
+            <div
+              class="h-3 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700"
+            >
+              <div
+                class="bg-primary h-full rounded-full transition-all duration-1000 ease-out"
+                style="width: 85%"
+              ></div>
+            </div>
+            <p class="text-text-muted text-sm dark:text-gray-400">
+              Only
+              <span class="text-text-main font-bold dark:text-white"
+                >150 stars</span
+              >
+              until Level 5!
+            </p>
+          </div>
+        </div>
+        <!-- Dashboard Split Layout -->
+        <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
+          <!-- Left Column: Rewards (2/3) -->
+          <div class="flex flex-col gap-6 lg:col-span-2">
+            <div class="flex items-center justify-between">
+              <h2
+                class="text-text-main flex items-center gap-2 text-xl font-bold dark:text-white"
+              >
+                <span class="material-symbols-outlined text-primary icon-filled"
+                  >storefront</span
+                >
+                Rewards Marketplace
+              </h2>
+              <!-- Tabs -->
+              <div class="dark:bg-surface-dark flex rounded-lg bg-gray-100 p-1">
+                <button
+                  class="dark:bg-background-dark text-text-main rounded-md bg-white px-4 py-1.5 text-xs font-bold shadow-sm dark:text-white"
+                >
+                  Available
                 </button>
-</div>
-<!-- Stats Overview -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-<!-- Total Stars Card -->
-<div class="bg-surface-light dark:bg-surface-dark rounded-xl p-6 shadow-sm flex flex-col gap-1 relative overflow-hidden group">
-<div class="absolute -right-4 -top-4 text-primary/10 group-hover:text-primary/20 transition-colors rotate-12">
-<span class="material-symbols-outlined text-[140px] icon-filled">star</span>
-</div>
-<p class="text-text-muted dark:text-gray-400 text-sm font-medium z-10 relative">Total Stars</p>
-<div class="flex items-center gap-2 z-10 relative">
-<span class="text-text-main dark:text-white text-4xl font-black">1,250</span>
-<span class="material-symbols-outlined text-primary icon-filled">star</span>
-</div>
-<p class="text-xs text-primary-dark dark:text-primary mt-2 font-medium z-10 relative">+120 this week</p>
-</div>
-<!-- Current Level Card -->
-<div class="bg-surface-light dark:bg-surface-dark rounded-xl p-6 shadow-sm flex flex-col gap-1 relative overflow-hidden">
-<div class="absolute -right-4 -top-4 text-purple-500/10 rotate-12">
-<span class="material-symbols-outlined text-[140px] icon-filled">military_tech</span>
-</div>
-<p class="text-text-muted dark:text-gray-400 text-sm font-medium z-10 relative">Current Level</p>
-<div class="flex items-center gap-2 z-10 relative">
-<span class="text-text-main dark:text-white text-4xl font-black">4</span>
-<span class="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs px-2 py-1 rounded-full font-bold">Expert Helper</span>
-</div>
-<p class="text-xs text-text-muted dark:text-gray-400 mt-2 font-medium z-10 relative">Next: Master Helper</p>
-</div>
-<!-- Progress Bar Card -->
-<div class="bg-surface-light dark:bg-surface-dark rounded-xl p-6 shadow-sm flex flex-col justify-center gap-3">
-<div class="flex justify-between items-end">
-<p class="text-text-main dark:text-white text-base font-bold">Level Progress</p>
-<p class="text-text-muted dark:text-gray-400 text-xs font-medium">1,250 / 1,400</p>
-</div>
-<div class="h-3 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-<div class="h-full bg-primary rounded-full transition-all duration-1000 ease-out" style="width: 85%;"></div>
-</div>
-<p class="text-text-muted dark:text-gray-400 text-sm">Only <span class="text-text-main dark:text-white font-bold">150 stars</span> until Level 5!</p>
-</div>
-</div>
-<!-- Dashboard Split Layout -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-<!-- Left Column: Rewards (2/3) -->
-<div class="lg:col-span-2 flex flex-col gap-6">
-<div class="flex items-center justify-between">
-<h2 class="text-xl font-bold text-text-main dark:text-white flex items-center gap-2">
-<span class="material-symbols-outlined text-primary icon-filled">storefront</span>
-                            Rewards Marketplace
-                        </h2>
-<!-- Tabs -->
-<div class="flex bg-gray-100 dark:bg-surface-dark p-1 rounded-lg">
-<button class="px-4 py-1.5 rounded-md bg-white dark:bg-background-dark shadow-sm text-xs font-bold text-text-main dark:text-white">Available</button>
-<button class="px-4 py-1.5 rounded-md text-xs font-medium text-text-muted dark:text-gray-400 hover:text-text-main dark:hover:text-white transition-colors">Wishlist</button>
-<button class="px-4 py-1.5 rounded-md text-xs font-medium text-text-muted dark:text-gray-400 hover:text-text-main dark:hover:text-white transition-colors">Redeemed</button>
-</div>
-</div>
-<!-- Rewards Grid -->
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-<!-- Reward Card 1 -->
-<div class="group bg-surface-light dark:bg-surface-dark rounded-xl border border-gray-100 dark:border-gray-800 hover:border-primary dark:hover:border-primary transition-all overflow-hidden flex flex-col shadow-sm hover:shadow-md">
-<div class="h-40 bg-cover bg-center relative" data-alt="Illustration of movie night tickets and popcorn" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAaMfmy31q8lrSt4Om-QqgEJtcllIjPqjs8HGJCwOcOhoVDPhJ1vh10Gw3LKkokRWaMsVSQIt3JPXHoOTdVbeJxiCMLAtDMiIHT7kbuoQ2PzmiaVZWXkK03p5xvUIQ-qOkYaUH7DCevgAy2_8RG3WbrZIcZknY6bYZ4_G4CFWEmgq1RPI1QmAXwSPBmsahylTwqZ-yMk1e8cC2lO1pSzRI6hSkalY_nY_NgnwX1PR_Ni85Q4vs6tWWDas1CIBgwhuGR5p3j92HpKeI');">
-<span class="absolute top-3 right-3 bg-white/90 dark:bg-black/80 backdrop-blur-sm px-2 py-1 rounded-md text-xs font-bold text-text-main dark:text-white shadow-sm">
-                                    Popular
-                                </span>
-</div>
-<div class="p-5 flex flex-col flex-1 gap-4">
-<div>
-<h3 class="text-lg font-bold text-text-main dark:text-white">Movie Night Choice</h3>
-<p class="text-sm text-text-muted dark:text-gray-400 mt-1 line-clamp-2">Pick the movie for family night and choose the snacks!</p>
-</div>
-<div class="mt-auto flex items-center justify-between">
-<div class="flex items-center gap-1">
-<span class="material-symbols-outlined text-primary text-xl icon-filled">star</span>
-<span class="text-lg font-bold text-text-main dark:text-white">500</span>
-</div>
-<button class="bg-primary hover:bg-primary-dark text-background-dark font-bold py-2 px-4 rounded-lg text-sm transition-colors shadow-sm shadow-primary/30">
-                                        Redeem
-                                    </button>
-</div>
-</div>
-</div>
-<!-- Reward Card 2 -->
-<div class="group bg-surface-light dark:bg-surface-dark rounded-xl border border-gray-100 dark:border-gray-800 hover:border-primary dark:hover:border-primary transition-all overflow-hidden flex flex-col shadow-sm hover:shadow-md">
-<div class="h-40 bg-cover bg-center relative" data-alt="Illustration of a person relaxing, representing skipping chores" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAkyvXxHf5z_IZVKPhTC90AfgsQsOBiTWEa65IXwQXoSVcEZm7S99V5QbMLO7efAzY53o1GjYBW83NgFUCnDMNAGc0BMzhAfc6p-hkbQW-ixEowtipAAS_fZqFqudKbvsE6ukeUXuYX4uh6rbCS52581sfD66-2fhqmb-wqEfyLOw4bkYea03ERv4TwXWbVps49cXplihGfqjMMfChvPHFchzPeFtHFK-q6vuZb13M5nxr0rAzzJH7Lq5Al6e4C_tZL633vhUZr-O0');">
-</div>
-<div class="p-5 flex flex-col flex-1 gap-4">
-<div>
-<h3 class="text-lg font-bold text-text-main dark:text-white">Skip One Chore</h3>
-<p class="text-sm text-text-muted dark:text-gray-400 mt-1 line-clamp-2">Get a free pass on one daily chore of your choice.</p>
-</div>
-<div class="mt-auto flex items-center justify-between">
-<div class="flex items-center gap-1">
-<span class="material-symbols-outlined text-primary text-xl icon-filled">star</span>
-<span class="text-lg font-bold text-text-main dark:text-white">1,000</span>
-</div>
-<button class="bg-primary hover:bg-primary-dark text-background-dark font-bold py-2 px-4 rounded-lg text-sm transition-colors shadow-sm shadow-primary/30">
-                                        Redeem
-                                    </button>
-</div>
-</div>
-</div>
-<!-- Reward Card 3 -->
-<div class="group bg-surface-light dark:bg-surface-dark rounded-xl border border-gray-100 dark:border-gray-800 hover:border-primary dark:hover:border-primary transition-all overflow-hidden flex flex-col shadow-sm hover:shadow-md">
-<div class="h-40 bg-cover bg-center relative" data-alt="Image of ice cream cones" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDzpG19mXy0ql6886O6r8u0vlXD-r3Wfuli1oB83cXu_fZUcJaKtf-PoF188VG-D924ldzqQLgKERbZT4RFtudoVwlws-_orhrIwjsl3smmllpgSEuPlCfZetO-1Bl0YycG9saKzn8rZjg8MATd4TPsiJ7yfMzwNTsEfQ36rLPtCGAw9Rwu1xamxkPnf54JD1yg9kF0lgprcS1RUhzH2_1FiTWnDE6kfFnQjti8Mr8_1PWcgBVLrKmThP-HM3HyVu7T1Tg_H6QDmf8');">
-</div>
-<div class="p-5 flex flex-col flex-1 gap-4">
-<div>
-<h3 class="text-lg font-bold text-text-main dark:text-white">Ice Cream Trip</h3>
-<p class="text-sm text-text-muted dark:text-gray-400 mt-1 line-clamp-2">We go out for ice cream after dinner.</p>
-</div>
-<div class="mt-auto flex items-center justify-between">
-<div class="flex items-center gap-1">
-<span class="material-symbols-outlined text-primary text-xl icon-filled">star</span>
-<span class="text-lg font-bold text-text-main dark:text-white">350</span>
-</div>
-<button class="bg-primary hover:bg-primary-dark text-background-dark font-bold py-2 px-4 rounded-lg text-sm transition-colors shadow-sm shadow-primary/30">
-                                        Redeem
-                                    </button>
-</div>
-</div>
-</div>
-<!-- Reward Card 4 (Disabled/Goal) -->
-<div class="group bg-surface-light dark:bg-surface-dark rounded-xl border border-gray-100 dark:border-gray-800 transition-all overflow-hidden flex flex-col shadow-sm opacity-80">
-<div class="h-40 bg-cover bg-center relative grayscale group-hover:grayscale-0 transition-all" data-alt="Image of a video game controller" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA5gm-DWXNhipVLT9DyaGN3Fe4_q4ckBpPcLXJvE8LE06pR_GyAk0WVw6e_atBaek6hM98co9R1GLYL-18SUcv8-o-NXc2j72uxK8ohEVW5trsf08w4LYqkbypMbhg0lyK0XX47IX1X_ZofZawi0eahmqGQ33TL1LWQO_Yq8pLJhJA_RjUtt5jwX9wutBmZ2BMDLB4vNqxulSM6T31Zl2tlsnMjMpOeGSfhlRZNCD3vI06ulkC6kMMQgyM4tP2Yb8wDjXGLHNRtwCc');">
-<span class="absolute inset-0 bg-black/40 flex items-center justify-center">
-<span class="bg-black/60 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 border border-white/20">
-<span class="material-symbols-outlined text-base">lock</span> Locked
-                                    </span>
-</span>
-</div>
-<div class="p-5 flex flex-col flex-1 gap-4">
-<div>
-<h3 class="text-lg font-bold text-text-main dark:text-white">New Video Game</h3>
-<p class="text-sm text-text-muted dark:text-gray-400 mt-1 line-clamp-2">Purchase a new game of your choice (up to $60).</p>
-</div>
-<div class="mt-auto flex items-center justify-between">
-<div class="flex items-center gap-1 text-text-muted">
-<span class="material-symbols-outlined text-xl icon-filled">star</span>
-<span class="text-lg font-bold">5,000</span>
-</div>
-<button class="bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 font-bold py-2 px-4 rounded-lg text-sm cursor-not-allowed" disabled="">
-                                        Need 3,750 more
-                                    </button>
-</div>
-</div>
-</div>
-</div>
-</div>
-<!-- Right Column: Analytics (1/3) -->
-<div class="flex flex-col gap-8">
-<!-- Weekly Chart -->
-<div class="bg-surface-light dark:bg-surface-dark rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-800">
-<h3 class="text-base font-bold text-text-main dark:text-white mb-6">Weekly Star Earnings</h3>
-<div class="grid grid-flow-col gap-3 h-48 items-end pb-2">
-<!-- Bar Mon -->
-<div class="flex flex-col items-center gap-2 group w-full">
-<div class="w-full bg-primary/20 dark:bg-primary/10 rounded-t-sm relative h-32 group-hover:bg-primary/30 transition-colors">
-<div class="absolute bottom-0 w-full bg-primary rounded-t-sm" style="height: 40%;"></div>
-</div>
-<span class="text-xs font-medium text-text-muted dark:text-gray-500">M</span>
-</div>
-<!-- Bar Tue -->
-<div class="flex flex-col items-center gap-2 group w-full">
-<div class="w-full bg-primary/20 dark:bg-primary/10 rounded-t-sm relative h-32 group-hover:bg-primary/30 transition-colors">
-<div class="absolute bottom-0 w-full bg-primary rounded-t-sm" style="height: 65%;"></div>
-</div>
-<span class="text-xs font-medium text-text-muted dark:text-gray-500">T</span>
-</div>
-<!-- Bar Wed -->
-<div class="flex flex-col items-center gap-2 group w-full">
-<div class="w-full bg-primary/20 dark:bg-primary/10 rounded-t-sm relative h-32 group-hover:bg-primary/30 transition-colors">
-<div class="absolute bottom-0 w-full bg-primary rounded-t-sm" style="height: 30%;"></div>
-</div>
-<span class="text-xs font-medium text-text-muted dark:text-gray-500">W</span>
-</div>
-<!-- Bar Thu -->
-<div class="flex flex-col items-center gap-2 group w-full">
-<div class="w-full bg-primary/20 dark:bg-primary/10 rounded-t-sm relative h-32 group-hover:bg-primary/30 transition-colors">
-<div class="absolute bottom-0 w-full bg-primary rounded-t-sm" style="height: 80%;"></div>
-</div>
-<span class="text-xs font-medium text-text-muted dark:text-gray-500">T</span>
-</div>
-<!-- Bar Fri -->
-<div class="flex flex-col items-center gap-2 group w-full">
-<div class="w-full bg-primary/20 dark:bg-primary/10 rounded-t-sm relative h-32 group-hover:bg-primary/30 transition-colors">
-<div class="absolute bottom-0 w-full bg-primary rounded-t-sm" style="height: 95%;"></div>
-</div>
-<span class="text-xs font-bold text-primary-dark dark:text-primary">F</span>
-</div>
-<!-- Bar Sat -->
-<div class="flex flex-col items-center gap-2 group w-full">
-<div class="w-full bg-primary/20 dark:bg-primary/10 rounded-t-sm relative h-32 group-hover:bg-primary/30 transition-colors">
-<div class="absolute bottom-0 w-full bg-primary rounded-t-sm" style="height: 20%;"></div>
-</div>
-<span class="text-xs font-medium text-text-muted dark:text-gray-500">S</span>
-</div>
-<!-- Bar Sun -->
-<div class="flex flex-col items-center gap-2 group w-full">
-<div class="w-full bg-primary/20 dark:bg-primary/10 rounded-t-sm relative h-32 group-hover:bg-primary/30 transition-colors">
-<div class="absolute bottom-0 w-full bg-gray-300 dark:bg-gray-700 rounded-t-sm" style="height: 5%;"></div>
-</div>
-<span class="text-xs font-medium text-text-muted dark:text-gray-500">S</span>
-</div>
-</div>
-</div>
-<!-- Recent Activity Feed -->
-<div class="flex flex-col gap-4">
-<div class="flex items-center justify-between">
-<h3 class="text-base font-bold text-text-main dark:text-white">Recent Activity</h3>
-<button class="text-xs text-primary font-bold hover:text-primary-dark transition-colors">View All</button>
-</div>
-<div class="flex flex-col gap-3">
-<!-- Item 1 -->
-<div class="bg-surface-light dark:bg-surface-dark p-3 rounded-lg border border-gray-100 dark:border-gray-800 flex items-center gap-3">
-<div class="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 p-2 rounded-full">
-<span class="material-symbols-outlined text-lg">check</span>
-</div>
-<div class="flex-1">
-<p class="text-sm font-medium text-text-main dark:text-white">Cleaned Room</p>
-<p class="text-xs text-text-muted dark:text-gray-500">2 hours ago</p>
-</div>
-<span class="text-sm font-bold text-primary-dark dark:text-primary">+20</span>
-</div>
-<!-- Item 2 -->
-<div class="bg-surface-light dark:bg-surface-dark p-3 rounded-lg border border-gray-100 dark:border-gray-800 flex items-center gap-3">
-<div class="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 p-2 rounded-full">
-<span class="material-symbols-outlined text-lg">check</span>
-</div>
-<div class="flex-1">
-<p class="text-sm font-medium text-text-main dark:text-white">Homework Done</p>
-<p class="text-xs text-text-muted dark:text-gray-500">Yesterday</p>
-</div>
-<span class="text-sm font-bold text-primary-dark dark:text-primary">+50</span>
-</div>
-<!-- Item 3 -->
-<div class="bg-surface-light dark:bg-surface-dark p-3 rounded-lg border border-gray-100 dark:border-gray-800 flex items-center gap-3">
-<div class="bg-red-100 dark:bg-red-900/30 text-red-500 p-2 rounded-full">
-<span class="material-symbols-outlined text-lg">shopping_bag</span>
-</div>
-<div class="flex-1">
-<p class="text-sm font-medium text-text-main dark:text-white">Redeemed: Snack</p>
-<p class="text-xs text-text-muted dark:text-gray-500">Yesterday</p>
-</div>
-<span class="text-sm font-bold text-red-500">-100</span>
-</div>
-<!-- Item 4 -->
-<div class="bg-surface-light dark:bg-surface-dark p-3 rounded-lg border border-gray-100 dark:border-gray-800 flex items-center gap-3">
-<div class="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 p-2 rounded-full">
-<span class="material-symbols-outlined text-lg">check</span>
-</div>
-<div class="flex-1">
-<p class="text-sm font-medium text-text-main dark:text-white">Walked Dog</p>
-<p class="text-xs text-text-muted dark:text-gray-500">2 days ago</p>
-</div>
-<span class="text-sm font-bold text-primary-dark dark:text-primary">+15</span>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</main>
-</body></html>
+                <button
+                  class="text-text-muted hover:text-text-main rounded-md px-4 py-1.5 text-xs font-medium transition-colors dark:text-gray-400 dark:hover:text-white"
+                >
+                  Wishlist
+                </button>
+                <button
+                  class="text-text-muted hover:text-text-main rounded-md px-4 py-1.5 text-xs font-medium transition-colors dark:text-gray-400 dark:hover:text-white"
+                >
+                  Redeemed
+                </button>
+              </div>
+            </div>
+            <!-- Rewards Grid -->
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <!-- Reward Card 1 -->
+              <div
+                class="group bg-surface-light dark:bg-surface-dark hover:border-primary dark:hover:border-primary flex flex-col overflow-hidden rounded-xl border border-gray-100 shadow-sm transition-all hover:shadow-md dark:border-gray-800"
+              >
+                <div
+                  class="relative h-40 bg-cover bg-center"
+                  data-alt="Illustration of movie night tickets and popcorn"
+                  style="
+                    background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuAaMfmy31q8lrSt4Om-QqgEJtcllIjPqjs8HGJCwOcOhoVDPhJ1vh10Gw3LKkokRWaMsVSQIt3JPXHoOTdVbeJxiCMLAtDMiIHT7kbuoQ2PzmiaVZWXkK03p5xvUIQ-qOkYaUH7DCevgAy2_8RG3WbrZIcZknY6bYZ4_G4CFWEmgq1RPI1QmAXwSPBmsahylTwqZ-yMk1e8cC2lO1pSzRI6hSkalY_nY_NgnwX1PR_Ni85Q4vs6tWWDas1CIBgwhuGR5p3j92HpKeI&quot;);
+                  "
+                >
+                  <span
+                    class="text-text-main absolute top-3 right-3 rounded-md bg-white/90 px-2 py-1 text-xs font-bold shadow-sm backdrop-blur-sm dark:bg-black/80 dark:text-white"
+                  >
+                    Popular
+                  </span>
+                </div>
+                <div class="flex flex-1 flex-col gap-4 p-5">
+                  <div>
+                    <h3
+                      class="text-text-main text-lg font-bold dark:text-white"
+                    >
+                      Movie Night Choice
+                    </h3>
+                    <p
+                      class="text-text-muted mt-1 line-clamp-2 text-sm dark:text-gray-400"
+                    >
+                      Pick the movie for family night and choose the snacks!
+                    </p>
+                  </div>
+                  <div class="mt-auto flex items-center justify-between">
+                    <div class="flex items-center gap-1">
+                      <span
+                        class="material-symbols-outlined text-primary icon-filled text-xl"
+                        >star</span
+                      >
+                      <span
+                        class="text-text-main text-lg font-bold dark:text-white"
+                        >500</span
+                      >
+                    </div>
+                    <button
+                      class="bg-primary hover:bg-primary-dark text-background-dark shadow-primary/30 rounded-lg px-4 py-2 text-sm font-bold shadow-sm transition-colors"
+                    >
+                      Redeem
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <!-- Reward Card 2 -->
+              <div
+                class="group bg-surface-light dark:bg-surface-dark hover:border-primary dark:hover:border-primary flex flex-col overflow-hidden rounded-xl border border-gray-100 shadow-sm transition-all hover:shadow-md dark:border-gray-800"
+              >
+                <div
+                  class="relative h-40 bg-cover bg-center"
+                  data-alt="Illustration of a person relaxing, representing skipping chores"
+                  style="
+                    background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuAkyvXxHf5z_IZVKPhTC90AfgsQsOBiTWEa65IXwQXoSVcEZm7S99V5QbMLO7efAzY53o1GjYBW83NgFUCnDMNAGc0BMzhAfc6p-hkbQW-ixEowtipAAS_fZqFqudKbvsE6ukeUXuYX4uh6rbCS52581sfD66-2fhqmb-wqEfyLOw4bkYea03ERv4TwXWbVps49cXplihGfqjMMfChvPHFchzPeFtHFK-q6vuZb13M5nxr0rAzzJH7Lq5Al6e4C_tZL633vhUZr-O0&quot;);
+                  "
+                ></div>
+                <div class="flex flex-1 flex-col gap-4 p-5">
+                  <div>
+                    <h3
+                      class="text-text-main text-lg font-bold dark:text-white"
+                    >
+                      Skip One Chore
+                    </h3>
+                    <p
+                      class="text-text-muted mt-1 line-clamp-2 text-sm dark:text-gray-400"
+                    >
+                      Get a free pass on one daily chore of your choice.
+                    </p>
+                  </div>
+                  <div class="mt-auto flex items-center justify-between">
+                    <div class="flex items-center gap-1">
+                      <span
+                        class="material-symbols-outlined text-primary icon-filled text-xl"
+                        >star</span
+                      >
+                      <span
+                        class="text-text-main text-lg font-bold dark:text-white"
+                        >1,000</span
+                      >
+                    </div>
+                    <button
+                      class="bg-primary hover:bg-primary-dark text-background-dark shadow-primary/30 rounded-lg px-4 py-2 text-sm font-bold shadow-sm transition-colors"
+                    >
+                      Redeem
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <!-- Reward Card 3 -->
+              <div
+                class="group bg-surface-light dark:bg-surface-dark hover:border-primary dark:hover:border-primary flex flex-col overflow-hidden rounded-xl border border-gray-100 shadow-sm transition-all hover:shadow-md dark:border-gray-800"
+              >
+                <div
+                  class="relative h-40 bg-cover bg-center"
+                  data-alt="Image of ice cream cones"
+                  style="
+                    background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuDzpG19mXy0ql6886O6r8u0vlXD-r3Wfuli1oB83cXu_fZUcJaKtf-PoF188VG-D924ldzqQLgKERbZT4RFtudoVwlws-_orhrIwjsl3smmllpgSEuPlCfZetO-1Bl0YycG9saKzn8rZjg8MATd4TPsiJ7yfMzwNTsEfQ36rLPtCGAw9Rwu1xamxkPnf54JD1yg9kF0lgprcS1RUhzH2_1FiTWnDE6kfFnQjti8Mr8_1PWcgBVLrKmThP-HM3HyVu7T1Tg_H6QDmf8&quot;);
+                  "
+                ></div>
+                <div class="flex flex-1 flex-col gap-4 p-5">
+                  <div>
+                    <h3
+                      class="text-text-main text-lg font-bold dark:text-white"
+                    >
+                      Ice Cream Trip
+                    </h3>
+                    <p
+                      class="text-text-muted mt-1 line-clamp-2 text-sm dark:text-gray-400"
+                    >
+                      We go out for ice cream after dinner.
+                    </p>
+                  </div>
+                  <div class="mt-auto flex items-center justify-between">
+                    <div class="flex items-center gap-1">
+                      <span
+                        class="material-symbols-outlined text-primary icon-filled text-xl"
+                        >star</span
+                      >
+                      <span
+                        class="text-text-main text-lg font-bold dark:text-white"
+                        >350</span
+                      >
+                    </div>
+                    <button
+                      class="bg-primary hover:bg-primary-dark text-background-dark shadow-primary/30 rounded-lg px-4 py-2 text-sm font-bold shadow-sm transition-colors"
+                    >
+                      Redeem
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <!-- Reward Card 4 (Disabled/Goal) -->
+              <div
+                class="group bg-surface-light dark:bg-surface-dark flex flex-col overflow-hidden rounded-xl border border-gray-100 opacity-80 shadow-sm transition-all dark:border-gray-800"
+              >
+                <div
+                  class="relative h-40 bg-cover bg-center grayscale transition-all group-hover:grayscale-0"
+                  data-alt="Image of a video game controller"
+                  style="
+                    background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuA5gm-DWXNhipVLT9DyaGN3Fe4_q4ckBpPcLXJvE8LE06pR_GyAk0WVw6e_atBaek6hM98co9R1GLYL-18SUcv8-o-NXc2j72uxK8ohEVW5trsf08w4LYqkbypMbhg0lyK0XX47IX1X_ZofZawi0eahmqGQ33TL1LWQO_Yq8pLJhJA_RjUtt5jwX9wutBmZ2BMDLB4vNqxulSM6T31Zl2tlsnMjMpOeGSfhlRZNCD3vI06ulkC6kMMQgyM4tP2Yb8wDjXGLHNRtwCc&quot;);
+                  "
+                >
+                  <span
+                    class="absolute inset-0 flex items-center justify-center bg-black/40"
+                  >
+                    <span
+                      class="flex items-center gap-1 rounded-full border border-white/20 bg-black/60 px-3 py-1 text-xs font-bold text-white"
+                    >
+                      <span class="material-symbols-outlined text-base"
+                        >lock</span
+                      >
+                      Locked
+                    </span>
+                  </span>
+                </div>
+                <div class="flex flex-1 flex-col gap-4 p-5">
+                  <div>
+                    <h3
+                      class="text-text-main text-lg font-bold dark:text-white"
+                    >
+                      New Video Game
+                    </h3>
+                    <p
+                      class="text-text-muted mt-1 line-clamp-2 text-sm dark:text-gray-400"
+                    >
+                      Purchase a new game of your choice (up to $60).
+                    </p>
+                  </div>
+                  <div class="mt-auto flex items-center justify-between">
+                    <div class="text-text-muted flex items-center gap-1">
+                      <span
+                        class="material-symbols-outlined icon-filled text-xl"
+                        >star</span
+                      >
+                      <span class="text-lg font-bold">5,000</span>
+                    </div>
+                    <button
+                      class="cursor-not-allowed rounded-lg bg-gray-200 px-4 py-2 text-sm font-bold text-gray-400 dark:bg-gray-700 dark:text-gray-500"
+                      disabled=""
+                    >
+                      Need 3,750 more
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Right Column: Analytics (1/3) -->
+          <div class="flex flex-col gap-8">
+            <!-- Weekly Chart -->
+            <div
+              class="bg-surface-light dark:bg-surface-dark rounded-xl border border-gray-100 p-6 shadow-sm dark:border-gray-800"
+            >
+              <h3
+                class="text-text-main mb-6 text-base font-bold dark:text-white"
+              >
+                Weekly Star Earnings
+              </h3>
+              <div class="grid h-48 grid-flow-col items-end gap-3 pb-2">
+                <!-- Bar Mon -->
+                <div class="group flex w-full flex-col items-center gap-2">
+                  <div
+                    class="bg-primary/20 dark:bg-primary/10 group-hover:bg-primary/30 relative h-32 w-full rounded-t-sm transition-colors"
+                  >
+                    <div
+                      class="bg-primary absolute bottom-0 w-full rounded-t-sm"
+                      style="height: 40%"
+                    ></div>
+                  </div>
+                  <span
+                    class="text-text-muted text-xs font-medium dark:text-gray-500"
+                    >M</span
+                  >
+                </div>
+                <!-- Bar Tue -->
+                <div class="group flex w-full flex-col items-center gap-2">
+                  <div
+                    class="bg-primary/20 dark:bg-primary/10 group-hover:bg-primary/30 relative h-32 w-full rounded-t-sm transition-colors"
+                  >
+                    <div
+                      class="bg-primary absolute bottom-0 w-full rounded-t-sm"
+                      style="height: 65%"
+                    ></div>
+                  </div>
+                  <span
+                    class="text-text-muted text-xs font-medium dark:text-gray-500"
+                    >T</span
+                  >
+                </div>
+                <!-- Bar Wed -->
+                <div class="group flex w-full flex-col items-center gap-2">
+                  <div
+                    class="bg-primary/20 dark:bg-primary/10 group-hover:bg-primary/30 relative h-32 w-full rounded-t-sm transition-colors"
+                  >
+                    <div
+                      class="bg-primary absolute bottom-0 w-full rounded-t-sm"
+                      style="height: 30%"
+                    ></div>
+                  </div>
+                  <span
+                    class="text-text-muted text-xs font-medium dark:text-gray-500"
+                    >W</span
+                  >
+                </div>
+                <!-- Bar Thu -->
+                <div class="group flex w-full flex-col items-center gap-2">
+                  <div
+                    class="bg-primary/20 dark:bg-primary/10 group-hover:bg-primary/30 relative h-32 w-full rounded-t-sm transition-colors"
+                  >
+                    <div
+                      class="bg-primary absolute bottom-0 w-full rounded-t-sm"
+                      style="height: 80%"
+                    ></div>
+                  </div>
+                  <span
+                    class="text-text-muted text-xs font-medium dark:text-gray-500"
+                    >T</span
+                  >
+                </div>
+                <!-- Bar Fri -->
+                <div class="group flex w-full flex-col items-center gap-2">
+                  <div
+                    class="bg-primary/20 dark:bg-primary/10 group-hover:bg-primary/30 relative h-32 w-full rounded-t-sm transition-colors"
+                  >
+                    <div
+                      class="bg-primary absolute bottom-0 w-full rounded-t-sm"
+                      style="height: 95%"
+                    ></div>
+                  </div>
+                  <span
+                    class="text-primary-dark dark:text-primary text-xs font-bold"
+                    >F</span
+                  >
+                </div>
+                <!-- Bar Sat -->
+                <div class="group flex w-full flex-col items-center gap-2">
+                  <div
+                    class="bg-primary/20 dark:bg-primary/10 group-hover:bg-primary/30 relative h-32 w-full rounded-t-sm transition-colors"
+                  >
+                    <div
+                      class="bg-primary absolute bottom-0 w-full rounded-t-sm"
+                      style="height: 20%"
+                    ></div>
+                  </div>
+                  <span
+                    class="text-text-muted text-xs font-medium dark:text-gray-500"
+                    >S</span
+                  >
+                </div>
+                <!-- Bar Sun -->
+                <div class="group flex w-full flex-col items-center gap-2">
+                  <div
+                    class="bg-primary/20 dark:bg-primary/10 group-hover:bg-primary/30 relative h-32 w-full rounded-t-sm transition-colors"
+                  >
+                    <div
+                      class="absolute bottom-0 w-full rounded-t-sm bg-gray-300 dark:bg-gray-700"
+                      style="height: 5%"
+                    ></div>
+                  </div>
+                  <span
+                    class="text-text-muted text-xs font-medium dark:text-gray-500"
+                    >S</span
+                  >
+                </div>
+              </div>
+            </div>
+            <!-- Recent Activity Feed -->
+            <div class="flex flex-col gap-4">
+              <div class="flex items-center justify-between">
+                <h3 class="text-text-main text-base font-bold dark:text-white">
+                  Recent Activity
+                </h3>
+                <button
+                  class="text-primary hover:text-primary-dark text-xs font-bold transition-colors"
+                >
+                  View All
+                </button>
+              </div>
+              <div class="flex flex-col gap-3">
+                <!-- Item 1 -->
+                <div
+                  class="bg-surface-light dark:bg-surface-dark flex items-center gap-3 rounded-lg border border-gray-100 p-3 dark:border-gray-800"
+                >
+                  <div
+                    class="rounded-full bg-green-100 p-2 text-green-600 dark:bg-green-900/30 dark:text-green-400"
+                  >
+                    <span class="material-symbols-outlined text-lg">check</span>
+                  </div>
+                  <div class="flex-1">
+                    <p
+                      class="text-text-main text-sm font-medium dark:text-white"
+                    >
+                      Cleaned Room
+                    </p>
+                    <p class="text-text-muted text-xs dark:text-gray-500">
+                      2 hours ago
+                    </p>
+                  </div>
+                  <span
+                    class="text-primary-dark dark:text-primary text-sm font-bold"
+                    >+20</span
+                  >
+                </div>
+                <!-- Item 2 -->
+                <div
+                  class="bg-surface-light dark:bg-surface-dark flex items-center gap-3 rounded-lg border border-gray-100 p-3 dark:border-gray-800"
+                >
+                  <div
+                    class="rounded-full bg-green-100 p-2 text-green-600 dark:bg-green-900/30 dark:text-green-400"
+                  >
+                    <span class="material-symbols-outlined text-lg">check</span>
+                  </div>
+                  <div class="flex-1">
+                    <p
+                      class="text-text-main text-sm font-medium dark:text-white"
+                    >
+                      Homework Done
+                    </p>
+                    <p class="text-text-muted text-xs dark:text-gray-500">
+                      Yesterday
+                    </p>
+                  </div>
+                  <span
+                    class="text-primary-dark dark:text-primary text-sm font-bold"
+                    >+50</span
+                  >
+                </div>
+                <!-- Item 3 -->
+                <div
+                  class="bg-surface-light dark:bg-surface-dark flex items-center gap-3 rounded-lg border border-gray-100 p-3 dark:border-gray-800"
+                >
+                  <div
+                    class="rounded-full bg-red-100 p-2 text-red-500 dark:bg-red-900/30"
+                  >
+                    <span class="material-symbols-outlined text-lg"
+                      >shopping_bag</span
+                    >
+                  </div>
+                  <div class="flex-1">
+                    <p
+                      class="text-text-main text-sm font-medium dark:text-white"
+                    >
+                      Redeemed: Snack
+                    </p>
+                    <p class="text-text-muted text-xs dark:text-gray-500">
+                      Yesterday
+                    </p>
+                  </div>
+                  <span class="text-sm font-bold text-red-500">-100</span>
+                </div>
+                <!-- Item 4 -->
+                <div
+                  class="bg-surface-light dark:bg-surface-dark flex items-center gap-3 rounded-lg border border-gray-100 p-3 dark:border-gray-800"
+                >
+                  <div
+                    class="rounded-full bg-green-100 p-2 text-green-600 dark:bg-green-900/30 dark:text-green-400"
+                  >
+                    <span class="material-symbols-outlined text-lg">check</span>
+                  </div>
+                  <div class="flex-1">
+                    <p
+                      class="text-text-main text-sm font-medium dark:text-white"
+                    >
+                      Walked Dog
+                    </p>
+                    <p class="text-text-muted text-xs dark:text-gray-500">
+                      2 days ago
+                    </p>
+                  </div>
+                  <span
+                    class="text-primary-dark dark:text-primary text-sm font-bold"
+                    >+15</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>

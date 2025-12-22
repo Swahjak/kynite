@@ -1,227 +1,432 @@
-<!DOCTYPE html>
+<!doctype html>
 
-<html class="light" lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Family Planner - Outstanding Chores</title>
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#13ec92",
-                        "background-light": "#f6f8f7",
-                        "background-dark": "#10221a",
-                        "surface-light": "#ffffff",
-                        "surface-dark": "#1c2e26",
-                    },
-                    fontFamily: {
-                        "display": ["Lexend", "sans-serif"]
-                    },
-                    borderRadius: {
-                        "DEFAULT": "0.25rem", 
-                        "lg": "0.5rem", 
-                        "xl": "0.75rem", 
-                        "2xl": "1rem",
-                        "full": "9999px"
-                    },
-                },
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Family Planner - Outstanding Chores</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#13ec92",
+              "background-light": "#f6f8f7",
+              "background-dark": "#10221a",
+              "surface-light": "#ffffff",
+              "surface-dark": "#1c2e26",
             },
-        }
+            fontFamily: {
+              display: ["Lexend", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              "2xl": "1rem",
+              full: "9999px",
+            },
+          },
+        },
+      };
     </script>
-<style>
-        /* Custom scrollbar for clean look on wall display */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #dbe6e1;
-            border-radius: 10px;
-        }
-        .dark ::-webkit-scrollbar-thumb {
-            background: #2a4036;
-        }
+    <style>
+      /* Custom scrollbar for clean look on wall display */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #dbe6e1;
+        border-radius: 10px;
+      }
+      .dark ::-webkit-scrollbar-thumb {
+        background: #2a4036;
+      }
     </style>
-</head>
-<body class="bg-background-light dark:bg-background-dark text-[#111815] dark:text-white font-display transition-colors duration-200">
-<div class="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden">
-<!-- Main Layout Container -->
-<div class="layout-container flex h-full grow flex-col">
-<!-- Centered Content Wrapper -->
-<div class="flex flex-1 justify-center">
-<div class="layout-content-container flex flex-col w-full max-w-[960px] flex-1 pb-24">
-<!-- Header -->
-<header class="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#e5ece9] dark:border-b-[#2a4036] bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md px-6 py-4">
-<div class="flex items-center gap-4">
-<div class="flex items-center justify-center bg-primary/20 dark:bg-primary/10 rounded-lg p-2">
-<span class="material-symbols-outlined text-[#111815] dark:text-primary text-[24px]">smart_display</span>
-</div>
-<div>
-<h2 class="text-[#111815] dark:text-white text-xl font-bold leading-tight tracking-[-0.015em]">Family Planner</h2>
-<p class="text-sm text-[#618979] dark:text-[#8baaa0] font-medium">Monday, Oct 24 • 9:41 AM</p>
-</div>
-</div>
-<div class="flex flex-1 justify-end gap-4 items-center">
-<div class="hidden sm:flex items-center gap-2 bg-white dark:bg-surface-dark rounded-full px-4 py-2 shadow-sm border border-[#e5ece9] dark:border-[#2a4036]">
-<span class="material-symbols-outlined text-[#111815] dark:text-white text-[20px]">partly_cloudy_day</span>
-<span class="text-sm font-bold">72°F</span>
-</div>
-<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 ring-2 ring-white dark:ring-[#2a4036] shadow-sm" data-alt="Family profile photo placeholder" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAstBjI4MukikOZwjDX0t8gurlEKivBqyCZUxglkmRoBE82ium5dnijgmtzunK--NH6_HcHUco4l9JDHPmMWWOfyL4GMP61bTJKnIVTqzSIpSruCkM8i5-lHKcL9AQvWa6-UwafC1XuyFmE9ibWSc1fuvD5PKqnZiqyO3NgLcZYX2n__qp1w3PXyO_zOjMiLjrIyHbuubBrd9SUvjZQrubstW2s-7gmjxSQkgPOlX4HVeouzpP-PWYQ5Gh1O8yrtef1EFA4e4id9dk");'></div>
-</div>
-</header>
-<!-- Hero / Greeting Section -->
-<div class="px-6 pt-8 pb-4">
-<div class="flex flex-col gap-1">
-<h1 class="text-3xl md:text-4xl font-bold text-[#111815] dark:text-white tracking-tight">Good Morning, Smiths!</h1>
-<p class="text-lg text-[#618979] dark:text-[#8baaa0]">Let's crush today's goals.</p>
-</div>
-</div>
-<!-- Progress Section -->
-<div class="px-6 py-2">
-<div class="flex flex-col gap-3 p-5 rounded-2xl bg-white dark:bg-surface-dark shadow-sm border border-[#e5ece9] dark:border-[#2a4036]">
-<div class="flex gap-6 justify-between items-center">
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-primary text-[24px]">trophy</span>
-<p class="text-[#111815] dark:text-white text-base font-bold leading-normal">Daily Streak: 12 Days</p>
-</div>
-<p class="text-[#618979] dark:text-[#8baaa0] text-sm font-bold leading-normal">3/8 Done</p>
-</div>
-<div class="rounded-full bg-[#dbe6e1] dark:bg-[#2a4036] overflow-hidden">
-<div class="h-3 rounded-full bg-primary transition-all duration-500 ease-out" style="width: 37%;"></div>
-</div>
-</div>
-</div>
-<!-- Filters -->
-<div class="sticky top-[80px] z-40 bg-background-light dark:bg-background-dark px-6 py-4">
-<div class="flex h-12 w-full items-center justify-center rounded-xl bg-[#e5ece9] dark:bg-[#2a4036] p-1">
-<label class="flex cursor-pointer h-full flex-1 items-center justify-center overflow-hidden rounded-lg px-2 has-[:checked]:bg-primary has-[:checked]:shadow-sm has-[:checked]:text-[#111815] text-[#618979] dark:text-[#8baaa0] transition-all duration-200">
-<span class="truncate text-sm font-bold">All Chores</span>
-<input checked="" class="invisible w-0" name="chore-filter" type="radio" value="All Chores"/>
-</label>
-<label class="flex cursor-pointer h-full flex-1 items-center justify-center overflow-hidden rounded-lg px-2 has-[:checked]:bg-primary has-[:checked]:shadow-sm has-[:checked]:text-[#111815] text-[#618979] dark:text-[#8baaa0] transition-all duration-200">
-<span class="truncate text-sm font-bold">By Person</span>
-<input class="invisible w-0" name="chore-filter" type="radio" value="By Person"/>
-</label>
-<label class="flex cursor-pointer h-full flex-1 items-center justify-center overflow-hidden rounded-lg px-2 has-[:checked]:bg-primary has-[:checked]:shadow-sm has-[:checked]:text-[#111815] text-[#618979] dark:text-[#8baaa0] transition-all duration-200">
-<span class="truncate text-sm font-bold">Urgent</span>
-<input class="invisible w-0" name="chore-filter" type="radio" value="Urgent"/>
-</label>
-</div>
-</div>
-<!-- Chore List -->
-<div class="flex flex-col gap-3 px-6 pb-4">
-<!-- Chore Card 1: Urgent -->
-<div class="group flex items-center gap-4 bg-white dark:bg-surface-dark px-5 py-4 rounded-2xl shadow-sm border border-[#e5ece9] dark:border-[#2a4036] hover:border-primary/50 dark:hover:border-primary/50 transition-all cursor-pointer">
-<div class="relative">
-<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-14 w-14 ring-2 ring-white dark:ring-[#2a4036]" data-alt="Dad avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC0VHGJxRkYfmt5a3stVW1UqLSl9_DWIFgrhux_Vb0413MnOmJBVSdnLlYFnl1s60afP4e_cE6IetXFsB3dpWLs2LXhUjeCnN3lyxoJPAPzTcrBFNedzOTueCEhBZSw6618OVnc-ppgqCQxsRCXqP6NO7ZPvqNjk-gcCJfsyqwune3GvGImBCDJyFe0cI4dPYY78_u3t_IKxXRSq-cNMpYIrxKP39Un5Gqugqcuvcyuf6PGqtfDrATe_32WNocQ3l163TpCsQ8MwoI");'></div>
-<div class="absolute -bottom-1 -right-1 bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-200 p-1 rounded-full border-2 border-white dark:border-surface-dark flex items-center justify-center">
-<span class="material-symbols-outlined text-[14px] font-bold">priority_high</span>
-</div>
-</div>
-<div class="flex flex-col justify-center flex-1 min-w-0">
-<p class="text-[#111815] dark:text-white text-lg font-bold leading-normal truncate group-hover:text-primary transition-colors">Take out trash</p>
-<div class="flex items-center gap-2 mt-0.5">
-<span class="bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-300 text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">Tonight • 8 PM</span>
-<span class="text-[#618979] dark:text-[#8baaa0] text-sm">Dad</span>
-</div>
-</div>
-<div class="shrink-0 pl-2">
-<button class="flex size-12 items-center justify-center rounded-full bg-[#f0f4f3] dark:bg-[#2a4036] text-transparent hover:bg-primary hover:text-[#111815] transition-all duration-300 group-active:scale-90">
-<span class="material-symbols-outlined text-[32px]">check</span>
-</button>
-</div>
-</div>
-<!-- Chore Card 2: Sarah -->
-<div class="group flex items-center gap-4 bg-white dark:bg-surface-dark px-5 py-4 rounded-2xl shadow-sm border border-[#e5ece9] dark:border-[#2a4036] hover:border-primary/50 dark:hover:border-primary/50 transition-all cursor-pointer">
-<div class="relative">
-<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-14 w-14 ring-2 ring-white dark:ring-[#2a4036]" data-alt="Sarah avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBUWKuNn-uO9nYaBLyU4XV5tzrsKhRG57x6g7mHII3F3-CfXCSRlBXeFxvbuGp-L6iJuPUEKRE1IzUXh3g2OqgTUdKwnpiNFwVWMhx1lRby49n5KI-HujvLl3uJo8nCLwtZbpTM6Y6AXkmYTQd9tzTxQZiert7bLLl-zICfDNBjqUK_gEB3LRoe0oGagc7NEBCWeIywvpWUe5OV5O0lNWS7CtPyjCJskoiseeTSpMfQlexGcS4EGbO0E2T0H9QaPfZ0FYJrmg-4j5Y");'></div>
-</div>
-<div class="flex flex-col justify-center flex-1 min-w-0">
-<p class="text-[#111815] dark:text-white text-lg font-bold leading-normal truncate group-hover:text-primary transition-colors">Empty dishwasher</p>
-<div class="flex items-center gap-2 mt-0.5">
-<span class="bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-300 text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">Overdue</span>
-<span class="text-[#618979] dark:text-[#8baaa0] text-sm">Sarah</span>
-</div>
-</div>
-<div class="shrink-0 pl-2">
-<button class="flex size-12 items-center justify-center rounded-full bg-[#f0f4f3] dark:bg-[#2a4036] text-transparent hover:bg-primary hover:text-[#111815] transition-all duration-300 group-active:scale-90">
-<span class="material-symbols-outlined text-[32px]">check</span>
-</button>
-</div>
-</div>
-<!-- Chore Card 3: Mom -->
-<div class="group flex items-center gap-4 bg-white dark:bg-surface-dark px-5 py-4 rounded-2xl shadow-sm border border-[#e5ece9] dark:border-[#2a4036] hover:border-primary/50 dark:hover:border-primary/50 transition-all cursor-pointer">
-<div class="relative">
-<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-14 w-14 ring-2 ring-white dark:ring-[#2a4036]" data-alt="Mom avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBp8dW4-8NuugZkUNbolYSDqEAvqiz6t7v1aZpXf1TqRl8zF8TalMX2hGWegPsHAqc1m1HQ3UyTXze6CW2zeRCCupW3YZVh8rAu0yoe3P2Jm7v4suiVN8H1Le0jdzBQgDrnxubY6JbSWOm9emgaY1-4hOd6XsWRdbfAs7IzavQj-3sZme93qQPdIRTbT5dWmLRcj9t8SyoSsjgTAy4ccOoUv0K0LtmKuD-ujzM6U1SEoZvvi0sF_MrnJ65Boe78bieheVqPVChIBAQ");'></div>
-</div>
-<div class="flex flex-col justify-center flex-1 min-w-0">
-<p class="text-[#111815] dark:text-white text-lg font-bold leading-normal truncate group-hover:text-primary transition-colors">Water plants</p>
-<div class="flex items-center gap-2 mt-0.5">
-<span class="bg-[#dbe6e1] dark:bg-[#2a4036] text-[#111815] dark:text-gray-300 text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">Weekly</span>
-<span class="text-[#618979] dark:text-[#8baaa0] text-sm">Mom</span>
-</div>
-</div>
-<div class="shrink-0 pl-2">
-<button class="flex size-12 items-center justify-center rounded-full bg-[#f0f4f3] dark:bg-[#2a4036] text-transparent hover:bg-primary hover:text-[#111815] transition-all duration-300 group-active:scale-90">
-<span class="material-symbols-outlined text-[32px]">check</span>
-</button>
-</div>
-</div>
-<!-- Chore Card 4: Sam -->
-<div class="group flex items-center gap-4 bg-white dark:bg-surface-dark px-5 py-4 rounded-2xl shadow-sm border border-[#e5ece9] dark:border-[#2a4036] hover:border-primary/50 dark:hover:border-primary/50 transition-all cursor-pointer">
-<div class="relative">
-<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-14 w-14 ring-2 ring-white dark:ring-[#2a4036]" data-alt="Sam avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAjpI7rDp8-tURdJX58XqLBUMn3Ep5UpQ0YU9nXk-RX7bWDHihiGueTezKAE3o1FamNKmhS6EhnaSD7aWqFXGt0LmVH3v-U-OmUa8VsFAk1fkCmXAx9XZP8rpHxKlJBxnJVgjKb4vw1X3glA0tXG_0sMfdeG0nhYZ2SQM__Ro1vDpM6VGMH8JWGBORJVMpWUS27NYTdqV44WsgoUqkJAPhOv967jes75c4bG2WVCw85YsFl91RKEDm8HanMKgsD8OWD4bCvlg4L9pE");'></div>
-</div>
-<div class="flex flex-col justify-center flex-1 min-w-0">
-<p class="text-[#111815] dark:text-white text-lg font-bold leading-normal truncate group-hover:text-primary transition-colors">Feed the dog</p>
-<div class="flex items-center gap-2 mt-0.5">
-<span class="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">Morning</span>
-<span class="text-[#618979] dark:text-[#8baaa0] text-sm">Sam</span>
-</div>
-</div>
-<div class="shrink-0 pl-2">
-<button class="flex size-12 items-center justify-center rounded-full bg-[#f0f4f3] dark:bg-[#2a4036] text-transparent hover:bg-primary hover:text-[#111815] transition-all duration-300 group-active:scale-90">
-<span class="material-symbols-outlined text-[32px]">check</span>
-</button>
-</div>
-</div>
-<!-- Chore Card 5: Dad -->
-<div class="group flex items-center gap-4 bg-white dark:bg-surface-dark px-5 py-4 rounded-2xl shadow-sm border border-[#e5ece9] dark:border-[#2a4036] hover:border-primary/50 dark:hover:border-primary/50 transition-all cursor-pointer opacity-80">
-<div class="relative">
-<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-14 w-14 ring-2 ring-white dark:ring-[#2a4036]" data-alt="Dad avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDZ9bG682RCMgkyYQYBbiM6TNBw00h_y_W43-hem-y1OUYb1MFab9Mr_Kr3T8m0efv8rCIGvUcmWMwm3nN7Anez7SQP4w5BbU7Ea_94xSTazWqlhTQlOVLyiUlbqPspdztPyAxTHf1CYNMqvHnm35tzPlJyiC0KSGc7jODtFSeWFHGGg-nI8D2A4Is8i1TEm4jqO1XDqMRdhie5YWP595PlBqMAKJbAjXXpcslU-zfpl6UyEJivJ4dZ_ZK_PnU4aURHgbCOD8zMeRc");'></div>
-</div>
-<div class="flex flex-col justify-center flex-1 min-w-0">
-<p class="text-[#111815] dark:text-white text-lg font-bold leading-normal truncate group-hover:text-primary transition-colors">Fix the shelf</p>
-<div class="flex items-center gap-2 mt-0.5">
-<span class="bg-[#dbe6e1] dark:bg-[#2a4036] text-[#111815] dark:text-gray-300 text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">Weekend</span>
-<span class="text-[#618979] dark:text-[#8baaa0] text-sm">Dad</span>
-</div>
-</div>
-<div class="shrink-0 pl-2">
-<button class="flex size-12 items-center justify-center rounded-full bg-[#f0f4f3] dark:bg-[#2a4036] text-transparent hover:bg-primary hover:text-[#111815] transition-all duration-300 group-active:scale-90">
-<span class="material-symbols-outlined text-[32px]">check</span>
-</button>
-</div>
-</div>
-</div>
-</div>
-</div>
-<!-- Floating Action Button (Fixed position for Family Planner) -->
-<div class="fixed bottom-8 right-8 z-50">
-<button class="flex items-center justify-center size-16 rounded-full bg-primary text-[#111815] shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer">
-<span class="material-symbols-outlined text-[36px]">add</span>
-</button>
-</div>
-</div>
-</div>
-</body></html>
+  </head>
+  <body
+    class="bg-background-light dark:bg-background-dark font-display text-[#111815] transition-colors duration-200 dark:text-white"
+  >
+    <div
+      class="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden"
+    >
+      <!-- Main Layout Container -->
+      <div class="layout-container flex h-full grow flex-col">
+        <!-- Centered Content Wrapper -->
+        <div class="flex flex-1 justify-center">
+          <div
+            class="layout-content-container flex w-full max-w-[960px] flex-1 flex-col pb-24"
+          >
+            <!-- Header -->
+            <header
+              class="bg-background-light/95 dark:bg-background-dark/95 sticky top-0 z-50 flex items-center justify-between border-b border-solid border-b-[#e5ece9] px-6 py-4 whitespace-nowrap backdrop-blur-md dark:border-b-[#2a4036]"
+            >
+              <div class="flex items-center gap-4">
+                <div
+                  class="bg-primary/20 dark:bg-primary/10 flex items-center justify-center rounded-lg p-2"
+                >
+                  <span
+                    class="material-symbols-outlined dark:text-primary text-[24px] text-[#111815]"
+                    >smart_display</span
+                  >
+                </div>
+                <div>
+                  <h2
+                    class="text-xl leading-tight font-bold tracking-[-0.015em] text-[#111815] dark:text-white"
+                  >
+                    Family Planner
+                  </h2>
+                  <p
+                    class="text-sm font-medium text-[#618979] dark:text-[#8baaa0]"
+                  >
+                    Monday, Oct 24 • 9:41 AM
+                  </p>
+                </div>
+              </div>
+              <div class="flex flex-1 items-center justify-end gap-4">
+                <div
+                  class="dark:bg-surface-dark hidden items-center gap-2 rounded-full border border-[#e5ece9] bg-white px-4 py-2 shadow-sm sm:flex dark:border-[#2a4036]"
+                >
+                  <span
+                    class="material-symbols-outlined text-[20px] text-[#111815] dark:text-white"
+                    >partly_cloudy_day</span
+                  >
+                  <span class="text-sm font-bold">72°F</span>
+                </div>
+                <div
+                  class="aspect-square size-10 rounded-full bg-cover bg-center bg-no-repeat shadow-sm ring-2 ring-white dark:ring-[#2a4036]"
+                  data-alt="Family profile photo placeholder"
+                  style="
+                    background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuAstBjI4MukikOZwjDX0t8gurlEKivBqyCZUxglkmRoBE82ium5dnijgmtzunK--NH6_HcHUco4l9JDHPmMWWOfyL4GMP61bTJKnIVTqzSIpSruCkM8i5-lHKcL9AQvWa6-UwafC1XuyFmE9ibWSc1fuvD5PKqnZiqyO3NgLcZYX2n__qp1w3PXyO_zOjMiLjrIyHbuubBrd9SUvjZQrubstW2s-7gmjxSQkgPOlX4HVeouzpP-PWYQ5Gh1O8yrtef1EFA4e4id9dk&quot;);
+                  "
+                ></div>
+              </div>
+            </header>
+            <!-- Hero / Greeting Section -->
+            <div class="px-6 pt-8 pb-4">
+              <div class="flex flex-col gap-1">
+                <h1
+                  class="text-3xl font-bold tracking-tight text-[#111815] md:text-4xl dark:text-white"
+                >
+                  Good Morning, Smiths!
+                </h1>
+                <p class="text-lg text-[#618979] dark:text-[#8baaa0]">
+                  Let's crush today's goals.
+                </p>
+              </div>
+            </div>
+            <!-- Progress Section -->
+            <div class="px-6 py-2">
+              <div
+                class="dark:bg-surface-dark flex flex-col gap-3 rounded-2xl border border-[#e5ece9] bg-white p-5 shadow-sm dark:border-[#2a4036]"
+              >
+                <div class="flex items-center justify-between gap-6">
+                  <div class="flex items-center gap-2">
+                    <span
+                      class="material-symbols-outlined text-primary text-[24px]"
+                      >trophy</span
+                    >
+                    <p
+                      class="text-base leading-normal font-bold text-[#111815] dark:text-white"
+                    >
+                      Daily Streak: 12 Days
+                    </p>
+                  </div>
+                  <p
+                    class="text-sm leading-normal font-bold text-[#618979] dark:text-[#8baaa0]"
+                  >
+                    3/8 Done
+                  </p>
+                </div>
+                <div
+                  class="overflow-hidden rounded-full bg-[#dbe6e1] dark:bg-[#2a4036]"
+                >
+                  <div
+                    class="bg-primary h-3 rounded-full transition-all duration-500 ease-out"
+                    style="width: 37%"
+                  ></div>
+                </div>
+              </div>
+            </div>
+            <!-- Filters -->
+            <div
+              class="bg-background-light dark:bg-background-dark sticky top-[80px] z-40 px-6 py-4"
+            >
+              <div
+                class="flex h-12 w-full items-center justify-center rounded-xl bg-[#e5ece9] p-1 dark:bg-[#2a4036]"
+              >
+                <label
+                  class="has-[:checked]:bg-primary flex h-full flex-1 cursor-pointer items-center justify-center overflow-hidden rounded-lg px-2 text-[#618979] transition-all duration-200 has-[:checked]:text-[#111815] has-[:checked]:shadow-sm dark:text-[#8baaa0]"
+                >
+                  <span class="truncate text-sm font-bold">All Chores</span>
+                  <input
+                    checked=""
+                    class="invisible w-0"
+                    name="chore-filter"
+                    type="radio"
+                    value="All Chores"
+                  />
+                </label>
+                <label
+                  class="has-[:checked]:bg-primary flex h-full flex-1 cursor-pointer items-center justify-center overflow-hidden rounded-lg px-2 text-[#618979] transition-all duration-200 has-[:checked]:text-[#111815] has-[:checked]:shadow-sm dark:text-[#8baaa0]"
+                >
+                  <span class="truncate text-sm font-bold">By Person</span>
+                  <input
+                    class="invisible w-0"
+                    name="chore-filter"
+                    type="radio"
+                    value="By Person"
+                  />
+                </label>
+                <label
+                  class="has-[:checked]:bg-primary flex h-full flex-1 cursor-pointer items-center justify-center overflow-hidden rounded-lg px-2 text-[#618979] transition-all duration-200 has-[:checked]:text-[#111815] has-[:checked]:shadow-sm dark:text-[#8baaa0]"
+                >
+                  <span class="truncate text-sm font-bold">Urgent</span>
+                  <input
+                    class="invisible w-0"
+                    name="chore-filter"
+                    type="radio"
+                    value="Urgent"
+                  />
+                </label>
+              </div>
+            </div>
+            <!-- Chore List -->
+            <div class="flex flex-col gap-3 px-6 pb-4">
+              <!-- Chore Card 1: Urgent -->
+              <div
+                class="group dark:bg-surface-dark hover:border-primary/50 dark:hover:border-primary/50 flex cursor-pointer items-center gap-4 rounded-2xl border border-[#e5ece9] bg-white px-5 py-4 shadow-sm transition-all dark:border-[#2a4036]"
+              >
+                <div class="relative">
+                  <div
+                    class="aspect-square h-14 w-14 rounded-full bg-cover bg-center bg-no-repeat ring-2 ring-white dark:ring-[#2a4036]"
+                    data-alt="Dad avatar"
+                    style="
+                      background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuC0VHGJxRkYfmt5a3stVW1UqLSl9_DWIFgrhux_Vb0413MnOmJBVSdnLlYFnl1s60afP4e_cE6IetXFsB3dpWLs2LXhUjeCnN3lyxoJPAPzTcrBFNedzOTueCEhBZSw6618OVnc-ppgqCQxsRCXqP6NO7ZPvqNjk-gcCJfsyqwune3GvGImBCDJyFe0cI4dPYY78_u3t_IKxXRSq-cNMpYIrxKP39Un5Gqugqcuvcyuf6PGqtfDrATe_32WNocQ3l163TpCsQ8MwoI&quot;);
+                    "
+                  ></div>
+                  <div
+                    class="dark:border-surface-dark absolute -right-1 -bottom-1 flex items-center justify-center rounded-full border-2 border-white bg-red-100 p-1 text-red-600 dark:bg-red-900 dark:text-red-200"
+                  >
+                    <span
+                      class="material-symbols-outlined text-[14px] font-bold"
+                      >priority_high</span
+                    >
+                  </div>
+                </div>
+                <div class="flex min-w-0 flex-1 flex-col justify-center">
+                  <p
+                    class="group-hover:text-primary truncate text-lg leading-normal font-bold text-[#111815] transition-colors dark:text-white"
+                  >
+                    Take out trash
+                  </p>
+                  <div class="mt-0.5 flex items-center gap-2">
+                    <span
+                      class="rounded-full bg-red-50 px-2 py-0.5 text-xs font-bold tracking-wide text-red-600 uppercase dark:bg-red-900/30 dark:text-red-300"
+                      >Tonight • 8 PM</span
+                    >
+                    <span class="text-sm text-[#618979] dark:text-[#8baaa0]"
+                      >Dad</span
+                    >
+                  </div>
+                </div>
+                <div class="shrink-0 pl-2">
+                  <button
+                    class="hover:bg-primary flex size-12 items-center justify-center rounded-full bg-[#f0f4f3] text-transparent transition-all duration-300 group-active:scale-90 hover:text-[#111815] dark:bg-[#2a4036]"
+                  >
+                    <span class="material-symbols-outlined text-[32px]"
+                      >check</span
+                    >
+                  </button>
+                </div>
+              </div>
+              <!-- Chore Card 2: Sarah -->
+              <div
+                class="group dark:bg-surface-dark hover:border-primary/50 dark:hover:border-primary/50 flex cursor-pointer items-center gap-4 rounded-2xl border border-[#e5ece9] bg-white px-5 py-4 shadow-sm transition-all dark:border-[#2a4036]"
+              >
+                <div class="relative">
+                  <div
+                    class="aspect-square h-14 w-14 rounded-full bg-cover bg-center bg-no-repeat ring-2 ring-white dark:ring-[#2a4036]"
+                    data-alt="Sarah avatar"
+                    style="
+                      background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuBUWKuNn-uO9nYaBLyU4XV5tzrsKhRG57x6g7mHII3F3-CfXCSRlBXeFxvbuGp-L6iJuPUEKRE1IzUXh3g2OqgTUdKwnpiNFwVWMhx1lRby49n5KI-HujvLl3uJo8nCLwtZbpTM6Y6AXkmYTQd9tzTxQZiert7bLLl-zICfDNBjqUK_gEB3LRoe0oGagc7NEBCWeIywvpWUe5OV5O0lNWS7CtPyjCJskoiseeTSpMfQlexGcS4EGbO0E2T0H9QaPfZ0FYJrmg-4j5Y&quot;);
+                    "
+                  ></div>
+                </div>
+                <div class="flex min-w-0 flex-1 flex-col justify-center">
+                  <p
+                    class="group-hover:text-primary truncate text-lg leading-normal font-bold text-[#111815] transition-colors dark:text-white"
+                  >
+                    Empty dishwasher
+                  </p>
+                  <div class="mt-0.5 flex items-center gap-2">
+                    <span
+                      class="rounded-full bg-orange-50 px-2 py-0.5 text-xs font-bold tracking-wide text-orange-600 uppercase dark:bg-orange-900/30 dark:text-orange-300"
+                      >Overdue</span
+                    >
+                    <span class="text-sm text-[#618979] dark:text-[#8baaa0]"
+                      >Sarah</span
+                    >
+                  </div>
+                </div>
+                <div class="shrink-0 pl-2">
+                  <button
+                    class="hover:bg-primary flex size-12 items-center justify-center rounded-full bg-[#f0f4f3] text-transparent transition-all duration-300 group-active:scale-90 hover:text-[#111815] dark:bg-[#2a4036]"
+                  >
+                    <span class="material-symbols-outlined text-[32px]"
+                      >check</span
+                    >
+                  </button>
+                </div>
+              </div>
+              <!-- Chore Card 3: Mom -->
+              <div
+                class="group dark:bg-surface-dark hover:border-primary/50 dark:hover:border-primary/50 flex cursor-pointer items-center gap-4 rounded-2xl border border-[#e5ece9] bg-white px-5 py-4 shadow-sm transition-all dark:border-[#2a4036]"
+              >
+                <div class="relative">
+                  <div
+                    class="aspect-square h-14 w-14 rounded-full bg-cover bg-center bg-no-repeat ring-2 ring-white dark:ring-[#2a4036]"
+                    data-alt="Mom avatar"
+                    style="
+                      background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuBp8dW4-8NuugZkUNbolYSDqEAvqiz6t7v1aZpXf1TqRl8zF8TalMX2hGWegPsHAqc1m1HQ3UyTXze6CW2zeRCCupW3YZVh8rAu0yoe3P2Jm7v4suiVN8H1Le0jdzBQgDrnxubY6JbSWOm9emgaY1-4hOd6XsWRdbfAs7IzavQj-3sZme93qQPdIRTbT5dWmLRcj9t8SyoSsjgTAy4ccOoUv0K0LtmKuD-ujzM6U1SEoZvvi0sF_MrnJ65Boe78bieheVqPVChIBAQ&quot;);
+                    "
+                  ></div>
+                </div>
+                <div class="flex min-w-0 flex-1 flex-col justify-center">
+                  <p
+                    class="group-hover:text-primary truncate text-lg leading-normal font-bold text-[#111815] transition-colors dark:text-white"
+                  >
+                    Water plants
+                  </p>
+                  <div class="mt-0.5 flex items-center gap-2">
+                    <span
+                      class="rounded-full bg-[#dbe6e1] px-2 py-0.5 text-xs font-bold tracking-wide text-[#111815] uppercase dark:bg-[#2a4036] dark:text-gray-300"
+                      >Weekly</span
+                    >
+                    <span class="text-sm text-[#618979] dark:text-[#8baaa0]"
+                      >Mom</span
+                    >
+                  </div>
+                </div>
+                <div class="shrink-0 pl-2">
+                  <button
+                    class="hover:bg-primary flex size-12 items-center justify-center rounded-full bg-[#f0f4f3] text-transparent transition-all duration-300 group-active:scale-90 hover:text-[#111815] dark:bg-[#2a4036]"
+                  >
+                    <span class="material-symbols-outlined text-[32px]"
+                      >check</span
+                    >
+                  </button>
+                </div>
+              </div>
+              <!-- Chore Card 4: Sam -->
+              <div
+                class="group dark:bg-surface-dark hover:border-primary/50 dark:hover:border-primary/50 flex cursor-pointer items-center gap-4 rounded-2xl border border-[#e5ece9] bg-white px-5 py-4 shadow-sm transition-all dark:border-[#2a4036]"
+              >
+                <div class="relative">
+                  <div
+                    class="aspect-square h-14 w-14 rounded-full bg-cover bg-center bg-no-repeat ring-2 ring-white dark:ring-[#2a4036]"
+                    data-alt="Sam avatar"
+                    style="
+                      background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuAjpI7rDp8-tURdJX58XqLBUMn3Ep5UpQ0YU9nXk-RX7bWDHihiGueTezKAE3o1FamNKmhS6EhnaSD7aWqFXGt0LmVH3v-U-OmUa8VsFAk1fkCmXAx9XZP8rpHxKlJBxnJVgjKb4vw1X3glA0tXG_0sMfdeG0nhYZ2SQM__Ro1vDpM6VGMH8JWGBORJVMpWUS27NYTdqV44WsgoUqkJAPhOv967jes75c4bG2WVCw85YsFl91RKEDm8HanMKgsD8OWD4bCvlg4L9pE&quot;);
+                    "
+                  ></div>
+                </div>
+                <div class="flex min-w-0 flex-1 flex-col justify-center">
+                  <p
+                    class="group-hover:text-primary truncate text-lg leading-normal font-bold text-[#111815] transition-colors dark:text-white"
+                  >
+                    Feed the dog
+                  </p>
+                  <div class="mt-0.5 flex items-center gap-2">
+                    <span
+                      class="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-bold tracking-wide text-blue-600 uppercase dark:bg-blue-900/30 dark:text-blue-300"
+                      >Morning</span
+                    >
+                    <span class="text-sm text-[#618979] dark:text-[#8baaa0]"
+                      >Sam</span
+                    >
+                  </div>
+                </div>
+                <div class="shrink-0 pl-2">
+                  <button
+                    class="hover:bg-primary flex size-12 items-center justify-center rounded-full bg-[#f0f4f3] text-transparent transition-all duration-300 group-active:scale-90 hover:text-[#111815] dark:bg-[#2a4036]"
+                  >
+                    <span class="material-symbols-outlined text-[32px]"
+                      >check</span
+                    >
+                  </button>
+                </div>
+              </div>
+              <!-- Chore Card 5: Dad -->
+              <div
+                class="group dark:bg-surface-dark hover:border-primary/50 dark:hover:border-primary/50 flex cursor-pointer items-center gap-4 rounded-2xl border border-[#e5ece9] bg-white px-5 py-4 opacity-80 shadow-sm transition-all dark:border-[#2a4036]"
+              >
+                <div class="relative">
+                  <div
+                    class="aspect-square h-14 w-14 rounded-full bg-cover bg-center bg-no-repeat ring-2 ring-white dark:ring-[#2a4036]"
+                    data-alt="Dad avatar"
+                    style="
+                      background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuDZ9bG682RCMgkyYQYBbiM6TNBw00h_y_W43-hem-y1OUYb1MFab9Mr_Kr3T8m0efv8rCIGvUcmWMwm3nN7Anez7SQP4w5BbU7Ea_94xSTazWqlhTQlOVLyiUlbqPspdztPyAxTHf1CYNMqvHnm35tzPlJyiC0KSGc7jODtFSeWFHGGg-nI8D2A4Is8i1TEm4jqO1XDqMRdhie5YWP595PlBqMAKJbAjXXpcslU-zfpl6UyEJivJ4dZ_ZK_PnU4aURHgbCOD8zMeRc&quot;);
+                    "
+                  ></div>
+                </div>
+                <div class="flex min-w-0 flex-1 flex-col justify-center">
+                  <p
+                    class="group-hover:text-primary truncate text-lg leading-normal font-bold text-[#111815] transition-colors dark:text-white"
+                  >
+                    Fix the shelf
+                  </p>
+                  <div class="mt-0.5 flex items-center gap-2">
+                    <span
+                      class="rounded-full bg-[#dbe6e1] px-2 py-0.5 text-xs font-bold tracking-wide text-[#111815] uppercase dark:bg-[#2a4036] dark:text-gray-300"
+                      >Weekend</span
+                    >
+                    <span class="text-sm text-[#618979] dark:text-[#8baaa0]"
+                      >Dad</span
+                    >
+                  </div>
+                </div>
+                <div class="shrink-0 pl-2">
+                  <button
+                    class="hover:bg-primary flex size-12 items-center justify-center rounded-full bg-[#f0f4f3] text-transparent transition-all duration-300 group-active:scale-90 hover:text-[#111815] dark:bg-[#2a4036]"
+                  >
+                    <span class="material-symbols-outlined text-[32px]"
+                      >check</span
+                    >
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Floating Action Button (Fixed position for Family Planner) -->
+        <div class="fixed right-8 bottom-8 z-50">
+          <button
+            class="bg-primary flex size-16 cursor-pointer items-center justify-center rounded-full text-[#111815] shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
+          >
+            <span class="material-symbols-outlined text-[36px]">add</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -17,7 +17,7 @@ export function ActiveTimers() {
     <section className="space-y-2">
       <div className="flex items-center gap-2">
         <Timer className="text-muted-foreground h-4 w-4" />
-        <h2 className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
+        <h2 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
           {t("title")}
         </h2>
       </div>

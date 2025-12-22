@@ -104,9 +104,9 @@ interface CalendarToggleProps {
 
 ```tsx
 interface SyncStatusBadgeProps {
-  // Database states: 'synced', 'pending', 'error'
+  // Database states: 'synced', 'pending', 'conflict', 'error'
   // Runtime states: 'syncing' (during active sync), 'offline' (no connection)
-  status: "synced" | "syncing" | "pending" | "error" | "offline";
+  status: "synced" | "syncing" | "pending" | "conflict" | "error" | "offline";
   lastSyncedAt?: Date;
   errorMessage?: string;
 }

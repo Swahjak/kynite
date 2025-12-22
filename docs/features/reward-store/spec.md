@@ -6,14 +6,15 @@ The Reward Store is a gamification feature that motivates children to complete t
 
 ## Documents
 
-| Document | Description |
-|----------|-------------|
-| [Data Model](./data-model.md) | Reward entities, transactions, API endpoints |
-| [UI Specification](./ui.md) | Components, redemption flow, interaction modes |
+| Document                      | Description                                    |
+| ----------------------------- | ---------------------------------------------- |
+| [Data Model](./data-model.md) | Reward entities, transactions, API endpoints   |
+| [UI Specification](./ui.md)   | Components, redemption flow, interaction modes |
 
 ## Design Reference
 
 Visual mockups available in `docs/design/reward-store/`:
+
 - `reward-store-design-*.png` - Store layout mockups
 
 > **Note:** Mockups are reference only. Implement using project brand guidelines.

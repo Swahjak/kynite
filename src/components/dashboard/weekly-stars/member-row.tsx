@@ -37,7 +37,10 @@ export function MemberRow({ member, rank }: MemberRowProps) {
       >
         <Avatar className="h-8 w-8">
           <AvatarFallback
-            className={cn(colorMap[member.avatarColor] || "bg-gray-500", "text-sm text-white")}
+            className={cn(
+              colorMap[member.avatarColor] || "bg-gray-500",
+              "text-sm text-white"
+            )}
           >
             {member.name.charAt(0)}
           </AvatarFallback>

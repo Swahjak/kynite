@@ -6,35 +6,37 @@ The Families feature provides household management, grouping users into family u
 
 ## Documents
 
-| Document | Description |
-|----------|-------------|
-| [Data Model](./data-model.md) | Database schema, entities, relationships |
-| [UI Specification](./ui.md) | Components, screens, interaction patterns |
+| Document                      | Description                               |
+| ----------------------------- | ----------------------------------------- |
+| [Data Model](./data-model.md) | Database schema, entities, relationships  |
+| [UI Specification](./ui.md)   | Components, screens, interaction patterns |
 
 ## PRD Mapping
 
-| PRD Requirement | Implementation |
-|-----------------|----------------|
+| PRD Requirement                      | Implementation                                  |
+| ------------------------------------ | ----------------------------------------------- |
 | FR17 - Multiple participant profiles | `family_members` table with individual tracking |
-| FR18 - Caregiver view access | `caregiver` role with read-only permissions |
-| FR19 - Multi-account management | Family-level Google account linking |
+| FR18 - Caregiver view access         | `caregiver` role with read-only permissions     |
+| FR19 - Multi-account management      | Family-level Google account linking             |
 
 ## Key Features
 
 ### Family Unit
+
 - Create and manage family/household groups
 - Invite members via email or link
 - Family-wide settings and preferences
 
 ### Member Roles
 
-| Role | Description | Permissions |
-|------|-------------|-------------|
-| `manager` | Parents, primary admins | Full CRUD, settings, member management |
+| Role          | Description               | Permissions                                  |
+| ------------- | ------------------------- | -------------------------------------------- |
+| `manager`     | Parents, primary admins   | Full CRUD, settings, member management       |
 | `participant` | Children, tracked members | View schedules, complete tasks, earn rewards |
-| `caregiver` | Grandparents, babysitters | View-only access to schedules |
+| `caregiver`   | Grandparents, babysitters | View-only access to schedules                |
 
 ### Member Profiles
+
 - Display name (kid-friendly override)
 - Avatar color for calendar identification
 - Individual tracking for rewards/progress (Phase 2)

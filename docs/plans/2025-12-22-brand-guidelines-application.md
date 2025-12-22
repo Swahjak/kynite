@@ -15,6 +15,7 @@
 ### Task 1.1: Install Brand Fonts
 
 **Files:**
+
 - Modify: `src/app/layout.tsx`
 
 **Step 1: Update font imports in layout.tsx**
@@ -65,6 +66,7 @@ git commit -m "feat: replace Geist fonts with Lexend and Noto Sans"
 ### Task 1.2: Configure Font Families in CSS
 
 **Files:**
+
 - Modify: `src/app/globals.css`
 
 **Step 1: Add font-family definitions in @theme**
@@ -90,7 +92,12 @@ Add to the existing base layer or create one:
     font-family: var(--font-body);
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-display);
   }
 }
@@ -116,17 +123,18 @@ git commit -m "feat: configure Lexend for headings, Noto Sans for body"
 ### Task 2.1: Update Primary Colors
 
 **Files:**
+
 - Modify: `src/app/globals.css`
 
 **Step 1: Convert hex colors to oklch**
 
 Use these pre-calculated oklch values for brand colors:
 
-| Color | Hex | OKLCH |
-|-------|-----|-------|
-| Primary | #13ec92 | oklch(0.83 0.18 160) |
+| Color         | Hex     | OKLCH                |
+| ------------- | ------- | -------------------- |
+| Primary       | #13ec92 | oklch(0.83 0.18 160) |
 | Primary Hover | #0fd683 | oklch(0.78 0.17 158) |
-| Primary Dark | #0d9e61 | oklch(0.60 0.14 155) |
+| Primary Dark  | #0d9e61 | oklch(0.60 0.14 155) |
 
 **Step 2: Update :root color variables**
 
@@ -139,7 +147,7 @@ Replace the current primary color values in the `:root` block:
 
   /* Add new brand-specific variables */
   --primary-hover: oklch(0.78 0.17 158);
-  --primary-dark: oklch(0.60 0.14 155);
+  --primary-dark: oklch(0.6 0.14 155);
 }
 ```
 
@@ -152,7 +160,7 @@ In the `.dark` block, update primary colors (same values work for dark mode):
   --primary: oklch(0.83 0.18 160);
   --primary-foreground: oklch(0.15 0.03 160);
   --primary-hover: oklch(0.78 0.17 158);
-  --primary-dark: oklch(0.60 0.14 155);
+  --primary-dark: oklch(0.6 0.14 155);
 }
 ```
 
@@ -174,19 +182,20 @@ git commit -m "feat: update primary color to brand green #13ec92"
 ### Task 2.2: Update Background and Surface Colors
 
 **Files:**
+
 - Modify: `src/app/globals.css`
 
 **Step 1: Calculate brand background colors in oklch**
 
-| Color | Hex | OKLCH |
-|-------|-----|-------|
-| Background Light | #f6f8f7 | oklch(0.975 0.005 160) |
-| Background Dark | #10221a | oklch(0.20 0.03 160) |
-| Surface Light | #ffffff | oklch(1 0 0) |
-| Surface Dark | #1c2e26 | oklch(0.28 0.03 160) |
-| Surface Elevated Dark | #253830 | oklch(0.32 0.03 160) |
-| Surface Hover Light | #f0f4f3 | oklch(0.96 0.008 160) |
-| Surface Hover Dark | #2f453b | oklch(0.38 0.035 160) |
+| Color                 | Hex     | OKLCH                  |
+| --------------------- | ------- | ---------------------- |
+| Background Light      | #f6f8f7 | oklch(0.975 0.005 160) |
+| Background Dark       | #10221a | oklch(0.20 0.03 160)   |
+| Surface Light         | #ffffff | oklch(1 0 0)           |
+| Surface Dark          | #1c2e26 | oklch(0.28 0.03 160)   |
+| Surface Elevated Dark | #253830 | oklch(0.32 0.03 160)   |
+| Surface Hover Light   | #f0f4f3 | oklch(0.96 0.008 160)  |
+| Surface Hover Dark    | #2f453b | oklch(0.38 0.035 160)  |
 
 **Step 2: Update :root with light mode colors**
 
@@ -202,7 +211,7 @@ git commit -m "feat: update primary color to brand green #13ec92"
   --popover-foreground: oklch(0.15 0.02 160);
 
   --muted: oklch(0.96 0.008 160);
-  --muted-foreground: oklch(0.50 0.04 160);
+  --muted-foreground: oklch(0.5 0.04 160);
 
   --accent: oklch(0.96 0.008 160);
   --accent-foreground: oklch(0.15 0.02 160);
@@ -215,7 +224,7 @@ git commit -m "feat: update primary color to brand green #13ec92"
 
 ```css
 .dark {
-  --background: oklch(0.20 0.03 160);
+  --background: oklch(0.2 0.03 160);
   --foreground: oklch(0.98 0 0);
 
   --card: oklch(0.28 0.03 160);
@@ -253,18 +262,19 @@ git commit -m "feat: update background/surface colors to brand palette"
 ### Task 2.3: Update Text Colors
 
 **Files:**
+
 - Modify: `src/app/globals.css`
 
 **Step 1: Calculate brand text colors in oklch**
 
-| Color | Hex | OKLCH |
-|-------|-----|-------|
-| Text Primary Light | #111815 | oklch(0.18 0.02 160) |
-| Text Primary Dark | #ffffff | oklch(1 0 0) |
+| Color                | Hex     | OKLCH                |
+| -------------------- | ------- | -------------------- |
+| Text Primary Light   | #111815 | oklch(0.18 0.02 160) |
+| Text Primary Dark    | #ffffff | oklch(1 0 0)         |
 | Text Secondary Light | #618979 | oklch(0.58 0.06 165) |
-| Text Secondary Dark | #8baea0 | oklch(0.72 0.05 165) |
-| Text Muted Light | #9ca3af | oklch(0.70 0.02 250) |
-| Text Muted Dark | #6b7280 | oklch(0.55 0.02 250) |
+| Text Secondary Dark  | #8baea0 | oklch(0.72 0.05 165) |
+| Text Muted Light     | #9ca3af | oklch(0.70 0.02 250) |
+| Text Muted Dark      | #6b7280 | oklch(0.55 0.02 250) |
 
 **Step 2: Verify foreground colors match brand**
 
@@ -272,13 +282,13 @@ The foreground values from Task 2.2 should align. If not already done, ensure:
 
 ```css
 :root {
-  --foreground: oklch(0.18 0.02 160);  /* #111815 */
-  --muted-foreground: oklch(0.58 0.06 165);  /* #618979 - secondary */
+  --foreground: oklch(0.18 0.02 160); /* #111815 */
+  --muted-foreground: oklch(0.58 0.06 165); /* #618979 - secondary */
 }
 
 .dark {
-  --foreground: oklch(1 0 0);  /* #ffffff */
-  --muted-foreground: oklch(0.72 0.05 165);  /* #8baea0 - secondary */
+  --foreground: oklch(1 0 0); /* #ffffff */
+  --muted-foreground: oklch(0.72 0.05 165); /* #8baea0 - secondary */
 }
 ```
 
@@ -300,17 +310,18 @@ git commit -m "feat: update text colors to brand palette"
 ### Task 2.4: Update Border Colors
 
 **Files:**
+
 - Modify: `src/app/globals.css`
 
 **Step 1: Calculate brand border colors in oklch**
 
-| Color | Hex | OKLCH |
-|-------|-----|-------|
-| Border Default Light | #dbe6e1 | oklch(0.91 0.02 165) |
-| Border Default Dark | #2a3831 | oklch(0.30 0.025 160) |
-| Border Light Light | #e6e8e7 | oklch(0.92 0.005 160) |
-| Border Light Dark | #374740 | oklch(0.38 0.025 160) |
-| Border Focus | #13ec92 | oklch(0.83 0.18 160) |
+| Color                | Hex     | OKLCH                 |
+| -------------------- | ------- | --------------------- |
+| Border Default Light | #dbe6e1 | oklch(0.91 0.02 165)  |
+| Border Default Dark  | #2a3831 | oklch(0.30 0.025 160) |
+| Border Light Light   | #e6e8e7 | oklch(0.92 0.005 160) |
+| Border Light Dark    | #374740 | oklch(0.38 0.025 160) |
+| Border Focus         | #13ec92 | oklch(0.83 0.18 160)  |
 
 **Step 2: Update border variables**
 
@@ -318,13 +329,13 @@ git commit -m "feat: update text colors to brand palette"
 :root {
   --border: oklch(0.91 0.02 165);
   --input: oklch(0.91 0.02 165);
-  --ring: oklch(0.83 0.18 160);  /* Primary for focus rings */
+  --ring: oklch(0.83 0.18 160); /* Primary for focus rings */
 }
 
 .dark {
-  --border: oklch(0.30 0.025 160);
-  --input: oklch(0.30 0.025 160);
-  --ring: oklch(0.83 0.18 160);  /* Primary for focus rings */
+  --border: oklch(0.3 0.025 160);
+  --input: oklch(0.3 0.025 160);
+  --ring: oklch(0.83 0.18 160); /* Primary for focus rings */
 }
 ```
 
@@ -348,6 +359,7 @@ git commit -m "feat: update border colors to brand palette"
 ### Task 3.1: Add Event Color CSS Variables
 
 **Files:**
+
 - Modify: `src/app/globals.css`
 
 **Step 1: Add event color variables to :root**
@@ -360,12 +372,12 @@ Add after the existing color variables:
 
   /* Event Category Colors - Light Mode */
   --event-blue-bg: oklch(0.97 0.02 240);
-  --event-blue-border: oklch(0.70 0.15 240);
-  --event-blue-text: oklch(0.50 0.15 240);
+  --event-blue-border: oklch(0.7 0.15 240);
+  --event-blue-text: oklch(0.5 0.15 240);
 
   --event-purple-bg: oklch(0.97 0.02 300);
-  --event-purple-border: oklch(0.70 0.15 300);
-  --event-purple-text: oklch(0.50 0.15 300);
+  --event-purple-border: oklch(0.7 0.15 300);
+  --event-purple-text: oklch(0.5 0.15 300);
 
   --event-orange-bg: oklch(0.97 0.03 70);
   --event-orange-border: oklch(0.75 0.15 55);
@@ -376,7 +388,7 @@ Add after the existing color variables:
   --event-green-text: oklch(0.45 0.12 145);
 
   --event-red-bg: oklch(0.97 0.02 25);
-  --event-red-border: oklch(0.70 0.18 25);
+  --event-red-border: oklch(0.7 0.18 25);
   --event-red-text: oklch(0.55 0.18 25);
 
   --event-yellow-bg: oklch(0.97 0.03 95);
@@ -388,8 +400,8 @@ Add after the existing color variables:
   --event-pink-text: oklch(0.55 0.15 350);
 
   --event-teal-bg: oklch(0.97 0.02 185);
-  --event-teal-border: oklch(0.70 0.12 185);
-  --event-teal-text: oklch(0.50 0.12 185);
+  --event-teal-border: oklch(0.7 0.12 185);
+  --event-teal-text: oklch(0.5 0.12 185);
 }
 ```
 
@@ -401,36 +413,36 @@ Add after the existing color variables:
 
   /* Event Category Colors - Dark Mode */
   --event-blue-bg: oklch(0.25 0.05 240);
-  --event-blue-border: oklch(0.70 0.15 240);
-  --event-blue-text: oklch(0.80 0.12 240);
+  --event-blue-border: oklch(0.7 0.15 240);
+  --event-blue-text: oklch(0.8 0.12 240);
 
   --event-purple-bg: oklch(0.25 0.05 300);
-  --event-purple-border: oklch(0.70 0.15 300);
-  --event-purple-text: oklch(0.80 0.12 300);
+  --event-purple-border: oklch(0.7 0.15 300);
+  --event-purple-text: oklch(0.8 0.12 300);
 
   --event-orange-bg: oklch(0.25 0.05 70);
   --event-orange-border: oklch(0.75 0.15 55);
-  --event-orange-text: oklch(0.80 0.12 55);
+  --event-orange-text: oklch(0.8 0.12 55);
 
   --event-green-bg: oklch(0.25 0.05 145);
   --event-green-border: oklch(0.65 0.15 145);
-  --event-green-text: oklch(0.75 0.10 145);
+  --event-green-text: oklch(0.75 0.1 145);
 
   --event-red-bg: oklch(0.25 0.05 25);
-  --event-red-border: oklch(0.70 0.18 25);
-  --event-red-text: oklch(0.80 0.15 25);
+  --event-red-border: oklch(0.7 0.18 25);
+  --event-red-text: oklch(0.8 0.15 25);
 
   --event-yellow-bg: oklch(0.25 0.05 95);
   --event-yellow-border: oklch(0.85 0.15 95);
-  --event-yellow-text: oklch(0.80 0.10 95);
+  --event-yellow-text: oklch(0.8 0.1 95);
 
   --event-pink-bg: oklch(0.25 0.05 350);
   --event-pink-border: oklch(0.75 0.15 350);
-  --event-pink-text: oklch(0.80 0.12 350);
+  --event-pink-text: oklch(0.8 0.12 350);
 
   --event-teal-bg: oklch(0.25 0.05 185);
-  --event-teal-border: oklch(0.70 0.12 185);
-  --event-teal-text: oklch(0.80 0.10 185);
+  --event-teal-border: oklch(0.7 0.12 185);
+  --event-teal-text: oklch(0.8 0.1 185);
 }
 ```
 
@@ -438,7 +450,7 @@ Add after the existing color variables:
 
 Run: `pnpm dev`
 Open: Browser DevTools > Elements > Computed
-Expected: All --event-* variables visible on :root
+Expected: All --event-\* variables visible on :root
 
 **Step 4: Commit**
 
@@ -452,6 +464,7 @@ git commit -m "feat: add event category color variables"
 ### Task 3.2: Create Event Color Utility Classes
 
 **Files:**
+
 - Modify: `src/app/globals.css`
 
 **Step 1: Add event color utility classes**
@@ -514,9 +527,12 @@ Add after the @layer base block:
 **Step 2: Verify classes work**
 
 Create a test in browser console:
+
 ```js
-document.body.innerHTML += '<div class="event-blue p-4 rounded-lg">Test Event</div>';
+document.body.innerHTML +=
+  '<div class="event-blue p-4 rounded-lg">Test Event</div>';
 ```
+
 Expected: Blue-tinted card with left border appears
 
 **Step 3: Commit**
@@ -533,6 +549,7 @@ git commit -m "feat: add event color utility classes"
 ### Task 4.1: Add Status Color Variables
 
 **Files:**
+
 - Modify: `src/app/globals.css`
 
 **Step 1: Add status color variables**
@@ -546,8 +563,8 @@ Add to both :root and .dark blocks:
   /* Status Colors */
   --status-success: oklch(0.65 0.15 145);
   --status-warning: oklch(0.75 0.15 55);
-  --status-error: oklch(0.60 0.20 25);
-  --status-info: oklch(0.60 0.15 240);
+  --status-error: oklch(0.6 0.2 25);
+  --status-info: oklch(0.6 0.15 240);
 }
 
 .dark {
@@ -556,8 +573,8 @@ Add to both :root and .dark blocks:
   /* Status Colors - same for dark mode */
   --status-success: oklch(0.65 0.15 145);
   --status-warning: oklch(0.75 0.15 55);
-  --status-error: oklch(0.60 0.20 25);
-  --status-info: oklch(0.60 0.15 240);
+  --status-error: oklch(0.6 0.2 25);
+  --status-info: oklch(0.6 0.15 240);
 }
 ```
 
@@ -575,6 +592,7 @@ git commit -m "feat: add status color variables"
 ### Task 5.1: Add Material Symbols Font
 
 **Files:**
+
 - Modify: `src/app/layout.tsx`
 
 **Step 1: Add Material Symbols link to head**
@@ -628,6 +646,7 @@ git commit -m "feat: add Material Symbols Outlined font"
 ### Task 5.2: Create Icon Component
 
 **Files:**
+
 - Create: `src/components/ui/icon.tsx`
 
 **Step 1: Create the Icon component**
@@ -704,6 +723,7 @@ export function Icon({
 **Step 3: Verify icon renders**
 
 Create test usage:
+
 ```tsx
 import { Icon } from "@/components/ui/icon";
 
@@ -727,6 +747,7 @@ git commit -m "feat: create Icon component for Material Symbols"
 ### Task 5.3: Export Icon from UI Index
 
 **Files:**
+
 - Modify: `src/components/ui/index.ts` (if exists) or skip if no index file
 
 **Step 1: Check if index file exists**
@@ -753,6 +774,7 @@ git commit -m "feat: export Icon component from ui index"
 ### Task 6.1: Update Button Component for Brand Hover
 
 **Files:**
+
 - Modify: `src/components/ui/button.tsx`
 
 **Step 1: Read current button implementation**
@@ -764,6 +786,7 @@ Understand the current button variants and how hover is handled.
 The button should use CSS variables. If using Tailwind, add a custom hover color.
 
 In globals.css, add utility:
+
 ```css
 @layer utilities {
   .hover\:bg-primary-hover:hover {
@@ -773,6 +796,7 @@ In globals.css, add utility:
 ```
 
 Or update button.tsx default variant:
+
 ```tsx
 default: "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
 // Change to:
@@ -787,7 +811,7 @@ Ensure buttons have `active:scale-95` for press feedback:
 
 ```tsx
 const buttonVariants = cva(
-  "... active:scale-95 transition-all duration-200 ...",
+  "... active:scale-95 transition-all duration-200 ..."
   // ...
 );
 ```
@@ -812,6 +836,7 @@ git commit -m "feat: add brand hover and active states to buttons"
 ### Task 7.1: Add Animation Utilities
 
 **Files:**
+
 - Modify: `src/app/globals.css`
 
 **Step 1: Add animation timing utilities**
@@ -867,6 +892,7 @@ Open: http://localhost:3000
 **Step 2: Verify light mode**
 
 Check these elements:
+
 - [ ] Background is subtle green-gray (#f6f8f7)
 - [ ] Primary buttons are bright green (#13ec92)
 - [ ] Headings use Lexend font
@@ -877,6 +903,7 @@ Check these elements:
 **Step 3: Verify dark mode**
 
 Toggle to dark mode and check:
+
 - [ ] Background is deep green-dark (#10221a)
 - [ ] Primary color remains bright green
 - [ ] Text is white/light
@@ -924,42 +951,43 @@ Document all files using Lucide icons.
 
 Map common Lucide icons to Material Symbols equivalents:
 
-| Lucide | Material Symbol |
-|--------|-----------------|
-| Plus | add |
-| X | close |
-| ChevronLeft | chevron_left |
-| ChevronRight | chevron_right |
-| Check | check |
-| Settings | settings |
-| Calendar | calendar_month |
-| Clock | schedule |
-| Home | home |
-| User | person |
-| Users | group |
-| Bell | notifications |
-| Search | search |
-| Menu | menu |
-| MoreHorizontal | more_horiz |
-| MoreVertical | more_vert |
-| Edit | edit |
-| Trash | delete |
-| Save | save |
-| Download | download |
-| Upload | upload |
-| Eye | visibility |
-| EyeOff | visibility_off |
-| Lock | lock |
-| Unlock | lock_open |
-| Mail | mail |
-| Phone | phone |
-| MapPin | location_on |
-| Star | star |
-| Heart | favorite |
+| Lucide         | Material Symbol |
+| -------------- | --------------- |
+| Plus           | add             |
+| X              | close           |
+| ChevronLeft    | chevron_left    |
+| ChevronRight   | chevron_right   |
+| Check          | check           |
+| Settings       | settings        |
+| Calendar       | calendar_month  |
+| Clock          | schedule        |
+| Home           | home            |
+| User           | person          |
+| Users          | group           |
+| Bell           | notifications   |
+| Search         | search          |
+| Menu           | menu            |
+| MoreHorizontal | more_horiz      |
+| MoreVertical   | more_vert       |
+| Edit           | edit            |
+| Trash          | delete          |
+| Save           | save            |
+| Download       | download        |
+| Upload         | upload          |
+| Eye            | visibility      |
+| EyeOff         | visibility_off  |
+| Lock           | lock            |
+| Unlock         | lock_open       |
+| Mail           | mail            |
+| Phone          | phone           |
+| MapPin         | location_on     |
+| Star           | star            |
+| Heart          | favorite        |
 
 **Step 3: Migrate one component at a time**
 
 For each component:
+
 1. Replace `import { IconName } from "lucide-react"` with `import { Icon } from "@/components/ui/icon"`
 2. Replace `<IconName className="..." />` with `<Icon name="icon_name" className="..." />`
 
@@ -974,17 +1002,17 @@ git commit -m "refactor: migrate ComponentName from Lucide to Material Symbols"
 
 ## Summary
 
-| Phase | Tasks | Estimated Steps |
-|-------|-------|-----------------|
-| 1. Typography | 2 | 8 |
-| 2. Color System | 4 | 20 |
-| 3. Event Colors | 2 | 8 |
-| 4. Status Colors | 1 | 3 |
-| 5. Icons | 3 | 12 |
-| 6. Button States | 1 | 5 |
-| 7. Animation | 1 | 3 |
-| 8. Verification | 1 | 7 |
-| 9. Icon Migration | Optional | Varies |
+| Phase             | Tasks    | Estimated Steps |
+| ----------------- | -------- | --------------- |
+| 1. Typography     | 2        | 8               |
+| 2. Color System   | 4        | 20              |
+| 3. Event Colors   | 2        | 8               |
+| 4. Status Colors  | 1        | 3               |
+| 5. Icons          | 3        | 12              |
+| 6. Button States  | 1        | 5               |
+| 7. Animation      | 1        | 3               |
+| 8. Verification   | 1        | 7               |
+| 9. Icon Migration | Optional | Varies          |
 
 **Total: 15 tasks, ~66 steps (excluding optional icon migration)**
 

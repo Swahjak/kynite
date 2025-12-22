@@ -11,6 +11,7 @@ Gap analysis performed 2024-12-22. Critical gaps (#1-3) have been resolved. Belo
 **PRD FR5:** "Parents can define 'Routines' composed of multiple sequential tasks."
 
 **Missing from chores model:**
+
 - `routine_id` foreign key
 - `Routine` entity definition
 - `sort_order` for task sequencing within routine
@@ -24,6 +25,7 @@ Gap analysis performed 2024-12-22. Critical gaps (#1-3) have been resolved. Belo
 The dashboard model shows `Timer` interface with `remainingSeconds`, `totalSeconds`, etc.
 
 **Missing from chores:**
+
 - `timer_duration` (seconds)
 - Link to timer/prescription system
 - How timers relate to chores
@@ -40,6 +42,7 @@ The dashboard model shows `Timer` interface with `remainingSeconds`, `totalSecon
 | caregiver | View only |
 
 **Chores model should document:**
+
 - Who can create/edit chores
 - Who can mark complete
 - Who can view
@@ -51,6 +54,7 @@ The dashboard model shows `Timer` interface with `remainingSeconds`, `totalSecon
 ### 4. Recurrence Handling
 
 The model defines recurrence types but doesn't explain:
+
 - Are recurring chores templates or instances?
 - What happens when completed? (New instance created?)
 - Is there a `chore_instances` table?
@@ -61,13 +65,14 @@ The model defines recurrence types but doesn't explain:
 ### 5. Streak Entity Missing
 
 API lists `/api/chores/streak` but no schema:
+
 ```typescript
 // Missing definition
 interface Streak {
-  userId: string
-  currentStreak: number
-  longestStreak: number
-  lastCompletedAt: Date
+  userId: string;
+  currentStreak: number;
+  longestStreak: number;
+  lastCompletedAt: Date;
 }
 ```
 
@@ -84,20 +89,23 @@ API lists `/api/chores/progress` with no response schema.
 ### 7. IUser Interface Mismatches
 
 **Chores model:**
+
 ```typescript
 interface IUser {
-  id: string
-  name: string
-  picturePath: string | null  // Different name
-  color: string               // Different name
+  id: string;
+  name: string;
+  picturePath: string | null; // Different name
+  color: string; // Different name
 }
 ```
 
 **Families model uses:**
+
 - `avatar_color` (snake_case in DB)
 - `image` (from users table in JOIN)
 
 **Dashboard model uses:**
+
 - `avatarColor` (camelCase)
 - `avatarUrl`
 
@@ -107,11 +115,11 @@ interface IUser {
 
 ### 8. TypeScript/SQL Type Mismatches
 
-| Field | TypeScript | SQL | Issue |
-|-------|------------|-----|-------|
-| id | `string` | `UUID` | Clarify string format |
-| assignedTo | `IUser` (object) | `assigned_to_id` (FK) | Explain hydration |
-| dueDate | `Date?` | `DATE` | Nullability semantics |
+| Field      | TypeScript       | SQL                   | Issue                 |
+| ---------- | ---------------- | --------------------- | --------------------- |
+| id         | `string`         | `UUID`                | Clarify string format |
+| assignedTo | `IUser` (object) | `assigned_to_id` (FK) | Explain hydration     |
+| dueDate    | `Date?`          | `DATE`                | Nullability semantics |
 
 ---
 

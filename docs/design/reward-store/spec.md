@@ -52,12 +52,12 @@ On mobile, the sidebar stacks below the marketplace.
 
 Display a personalized, time-based greeting:
 
-| Time        | Format                          |
-| ----------- | ------------------------------- |
-| 5am - 12pm  | "Good Morning, [FirstName]!"    |
-| 12pm - 5pm  | "Good Afternoon, [FirstName]!"  |
-| 5pm - 9pm   | "Good Evening, [FirstName]!"    |
-| 9pm - 5am   | "Good Night, [FirstName]!"      |
+| Time       | Format                         |
+| ---------- | ------------------------------ |
+| 5am - 12pm | "Good Morning, [FirstName]!"   |
+| 12pm - 5pm | "Good Afternoon, [FirstName]!" |
+| 5pm - 9pm  | "Good Evening, [FirstName]!"   |
+| 9pm - 5am  | "Good Night, [FirstName]!"     |
 
 #### Star Balance Card
 
@@ -72,6 +72,7 @@ Prominently display the user's current star balance:
 ```
 
 **Specifications:**
+
 - Background: `surface-light` / `surface-dark`
 - Star count: `text-4xl font-black` (Lexend)
 - Star icon: Material Symbols `star` (filled, primary color)
@@ -86,12 +87,13 @@ Prominently display the user's current star balance:
 
 Two tabs for filtering rewards:
 
-| Tab           | Description                              |
-| ------------- | ---------------------------------------- |
-| **Available** | Rewards the user can currently redeem    |
-| **Redeemed**  | History of previously redeemed rewards   |
+| Tab           | Description                            |
+| ------------- | -------------------------------------- |
+| **Available** | Rewards the user can currently redeem  |
+| **Redeemed**  | History of previously redeemed rewards |
 
 **Tab styling:**
+
 - Container: `bg-gray-100 dark:bg-surface-dark p-1 rounded-lg`
 - Active tab: `bg-white dark:bg-background-dark shadow-sm font-bold`
 - Inactive tab: `text-text-muted hover:text-text-main`
@@ -99,6 +101,7 @@ Two tabs for filtering rewards:
 ### Reward Cards
 
 Display rewards in a responsive grid:
+
 - Desktop: 2 columns
 - Mobile: 1 column
 
@@ -119,17 +122,20 @@ Display rewards in a responsive grid:
 #### Card States
 
 **Available (Affordable)**
+
 - Full color image
 - Primary "Redeem" button
 - Star cost in `text-primary`
 
 **Available (Unaffordable)**
+
 - Grayscale image with dark overlay
 - "Locked" badge centered on image
 - Disabled button showing "Need X more"
 - Star cost in `text-text-muted`
 
 **Temporarily Unavailable**
+
 - When limit reached (e.g., "once per week")
 - Grayscale image
 - Badge: "Available in X days"
@@ -137,26 +143,26 @@ Display rewards in a responsive grid:
 
 #### Card Specifications
 
-| Element       | Specification                                      |
-| ------------- | -------------------------------------------------- |
-| Container     | `bg-surface rounded-xl border border-border-default` |
-| Image         | Height: 160px, `bg-cover bg-center`                |
-| Title         | `text-lg font-bold` (Lexend)                       |
-| Description   | `text-sm text-text-muted line-clamp-2`             |
-| Star cost     | `text-lg font-bold` with filled star icon          |
-| Border hover  | `hover:border-primary`                             |
-| Shadow        | `shadow-sm hover:shadow-md`                        |
+| Element      | Specification                                        |
+| ------------ | ---------------------------------------------------- |
+| Container    | `bg-surface rounded-xl border border-border-default` |
+| Image        | Height: 160px, `bg-cover bg-center`                  |
+| Title        | `text-lg font-bold` (Lexend)                         |
+| Description  | `text-sm text-text-muted line-clamp-2`               |
+| Star cost    | `text-lg font-bold` with filled star icon            |
+| Border hover | `hover:border-primary`                               |
+| Shadow       | `shadow-sm hover:shadow-md`                          |
 
 #### Badges
 
 Optional badges displayed on reward images:
 
-| Badge Type  | Style                                        | Use Case           |
-| ----------- | -------------------------------------------- | ------------------ |
-| Popular     | `bg-white/90 text-text-main`                 | High redemption    |
-| New         | `bg-primary text-background-dark`            | Recently added     |
-| Limited     | `bg-orange-500 text-white`                   | Limited quantity   |
-| Locked      | `bg-black/60 text-white` with lock icon      | Unaffordable       |
+| Badge Type | Style                                   | Use Case         |
+| ---------- | --------------------------------------- | ---------------- |
+| Popular    | `bg-white/90 text-text-main`            | High redemption  |
+| New        | `bg-primary text-background-dark`       | Recently added   |
+| Limited    | `bg-orange-500 text-white`              | Limited quantity |
+| Locked     | `bg-black/60 text-white` with lock icon | Unaffordable     |
 
 ---
 
@@ -189,6 +195,7 @@ When a user clicks "Redeem":
 ```
 
 **Dialog specifications:**
+
 - Use shadcn/ui `AlertDialog` component
 - "Redeem Now" button: Primary style
 - "Cancel" button: Secondary/outline style
@@ -210,12 +217,12 @@ After successful redemption:
 
 ### Error Handling
 
-| Scenario              | Message                                    |
-| --------------------- | ------------------------------------------ |
-| Insufficient stars    | "You need X more stars for this reward"    |
-| Limit reached         | "You can redeem this again in X days"      |
-| Reward unavailable    | "This reward is no longer available"       |
-| Network error         | "Something went wrong. Please try again."  |
+| Scenario           | Message                                   |
+| ------------------ | ----------------------------------------- |
+| Insufficient stars | "You need X more stars for this reward"   |
+| Limit reached      | "You can redeem this again in X days"     |
+| Reward unavailable | "This reward is no longer available"      |
+| Network error      | "Something went wrong. Please try again." |
 
 ---
 
@@ -231,6 +238,7 @@ A simple bar chart showing daily earnings for the current week:
 ```
 
 **Specifications:**
+
 - Container: `bg-surface rounded-xl p-6 border`
 - Bar height: Proportional to daily earnings (max 128px)
 - Bar color: `bg-primary`
@@ -256,27 +264,30 @@ Shows the last 4-5 activities (earnings and redemptions):
 #### Activity Item Types
 
 **Star Earned:**
+
 - Icon: Check mark in green circle (`bg-green-100 text-green-600`)
 - Delta: `+XX` in `text-primary-dark`
 
 **Reward Redeemed:**
+
 - Icon: Shopping bag in red circle (`bg-red-100 text-red-500`)
 - Delta: `-XX` in `text-red-500`
 
 **Bonus Stars (from parent):**
+
 - Icon: Gift in purple circle (`bg-purple-100 text-purple-600`)
 - Delta: `+XX` in `text-primary-dark`
 - Label: "Bonus: [reason]"
 
 #### Activity Item Specifications
 
-| Element     | Specification                                    |
-| ----------- | ------------------------------------------------ |
-| Container   | `bg-surface p-3 rounded-lg border`               |
-| Icon circle | `p-2 rounded-full` with category colors          |
-| Title       | `text-sm font-medium`                            |
-| Timestamp   | `text-xs text-text-muted`                        |
-| Delta       | `text-sm font-bold` (green for +, red for -)     |
+| Element     | Specification                                |
+| ----------- | -------------------------------------------- |
+| Container   | `bg-surface p-3 rounded-lg border`           |
+| Icon circle | `p-2 rounded-full` with category colors      |
+| Title       | `text-sm font-medium`                        |
+| Timestamp   | `text-xs text-text-muted`                    |
+| Delta       | `text-sm font-bold` (green for +, red for -) |
 
 ---
 
@@ -284,42 +295,42 @@ Shows the last 4-5 activities (earnings and redemptions):
 
 ### Reward Entity
 
-| Field             | Type      | Description                              |
-| ----------------- | --------- | ---------------------------------------- |
-| `id`              | UUID      | Unique identifier                        |
-| `familyId`        | UUID      | Family this reward belongs to            |
-| `title`           | string    | Display name (max 50 chars)              |
-| `description`     | string    | Details (max 200 chars)                  |
-| `starCost`        | integer   | Stars required to redeem                 |
-| `imageUrl`        | string    | Reward image URL (optional)              |
-| `isActive`        | boolean   | Whether reward is currently available    |
-| `limitType`       | enum      | `none`, `daily`, `weekly`, `monthly`, `once` |
-| `limitCount`      | integer   | Max redemptions per period (default: 1)  |
-| `badge`           | string    | Optional badge text                      |
-| `createdAt`       | timestamp | Creation date                            |
-| `updatedAt`       | timestamp | Last modification                        |
+| Field         | Type      | Description                                  |
+| ------------- | --------- | -------------------------------------------- |
+| `id`          | UUID      | Unique identifier                            |
+| `familyId`    | UUID      | Family this reward belongs to                |
+| `title`       | string    | Display name (max 50 chars)                  |
+| `description` | string    | Details (max 200 chars)                      |
+| `starCost`    | integer   | Stars required to redeem                     |
+| `imageUrl`    | string    | Reward image URL (optional)                  |
+| `isActive`    | boolean   | Whether reward is currently available        |
+| `limitType`   | enum      | `none`, `daily`, `weekly`, `monthly`, `once` |
+| `limitCount`  | integer   | Max redemptions per period (default: 1)      |
+| `badge`       | string    | Optional badge text                          |
+| `createdAt`   | timestamp | Creation date                                |
+| `updatedAt`   | timestamp | Last modification                            |
 
 ### Redemption Entity
 
-| Field         | Type      | Description                              |
-| ------------- | --------- | ---------------------------------------- |
-| `id`          | UUID      | Unique identifier                        |
-| `rewardId`    | UUID      | Reference to reward                      |
-| `userId`      | UUID      | User who redeemed                        |
-| `starCost`    | integer   | Stars spent (snapshot)                   |
-| `redeemedAt`  | timestamp | When redeemed                            |
+| Field        | Type      | Description            |
+| ------------ | --------- | ---------------------- |
+| `id`         | UUID      | Unique identifier      |
+| `rewardId`   | UUID      | Reference to reward    |
+| `userId`     | UUID      | User who redeemed      |
+| `starCost`   | integer   | Stars spent (snapshot) |
+| `redeemedAt` | timestamp | When redeemed          |
 
 ### Star Transaction Entity
 
-| Field         | Type      | Description                              |
-| ------------- | --------- | ---------------------------------------- |
-| `id`          | UUID      | Unique identifier                        |
-| `userId`      | UUID      | User account                             |
-| `amount`      | integer   | Positive (earned) or negative (spent)    |
-| `type`        | enum      | `chore`, `bonus`, `redemption`           |
-| `referenceId` | UUID      | Related chore/redemption ID (nullable)   |
-| `description` | string    | Activity description                     |
-| `createdAt`   | timestamp | Transaction time                         |
+| Field         | Type      | Description                            |
+| ------------- | --------- | -------------------------------------- |
+| `id`          | UUID      | Unique identifier                      |
+| `userId`      | UUID      | User account                           |
+| `amount`      | integer   | Positive (earned) or negative (spent)  |
+| `type`        | enum      | `chore`, `bonus`, `redemption`         |
+| `referenceId` | UUID      | Related chore/redemption ID (nullable) |
+| `description` | string    | Activity description                   |
+| `createdAt`   | timestamp | Transaction time                       |
 
 ---
 
@@ -330,6 +341,7 @@ Shows the last 4-5 activities (earnings and redemptions):
 Fetch available rewards for the current user's family.
 
 **Response:**
+
 ```json
 {
   "rewards": [
@@ -354,6 +366,7 @@ Fetch available rewards for the current user's family.
 Redeem a reward.
 
 **Response (success):**
+
 ```json
 {
   "success": true,
@@ -368,6 +381,7 @@ Redeem a reward.
 ```
 
 **Response (error):**
+
 ```json
 {
   "success": false,
@@ -383,6 +397,7 @@ Redeem a reward.
 Fetch user's star balance and recent activity.
 
 **Response:**
+
 ```json
 {
   "balance": 1250,
@@ -405,6 +420,7 @@ Fetch user's star balance and recent activity.
 Fetch user's redemption history.
 
 **Response:**
+
 ```json
 {
   "redemptions": [
@@ -425,15 +441,15 @@ Fetch user's redemption history.
 
 ### Brand Colors
 
-| Token           | Light        | Dark         |
-| --------------- | ------------ | ------------ |
-| `primary`       | `#13ec92`    | `#13ec92`    |
-| `primary-dark`  | `#0d9e61`    | `#13ec92`    |
-| `background`    | `#f6f8f7`    | `#10221a`    |
-| `surface`       | `#ffffff`    | `#1c2e26`    |
-| `text-main`     | `#111815`    | `#ffffff`    |
-| `text-muted`    | `#618979`    | `#8baea0`    |
-| `border`        | `#dbe6e1`    | `#2a3831`    |
+| Token          | Light     | Dark      |
+| -------------- | --------- | --------- |
+| `primary`      | `#13ec92` | `#13ec92` |
+| `primary-dark` | `#0d9e61` | `#13ec92` |
+| `background`   | `#f6f8f7` | `#10221a` |
+| `surface`      | `#ffffff` | `#1c2e26` |
+| `text-main`    | `#111815` | `#ffffff` |
+| `text-muted`   | `#618979` | `#8baea0` |
+| `border`       | `#dbe6e1` | `#2a3831` |
 
 ### Typography
 
@@ -444,6 +460,7 @@ Fetch user's redemption history.
 ### Icons
 
 Material Symbols Outlined:
+
 - `star` (filled) — Star currency
 - `storefront` (filled) — Marketplace header
 - `check` — Completed activity
@@ -514,11 +531,11 @@ Material Symbols Outlined:
 
 ## Design Assets
 
-| File                        | Description                    |
-| --------------------------- | ------------------------------ |
-| `reward-store-design-1.png` | Desktop mockup                 |
-| `reward-store-code-1.html`  | Reference HTML implementation  |
+| File                        | Description                   |
+| --------------------------- | ----------------------------- |
+| `reward-store-design-1.png` | Desktop mockup                |
+| `reward-store-code-1.html`  | Reference HTML implementation |
 
 ---
 
-*Last updated: December 2024*
+_Last updated: December 2024_

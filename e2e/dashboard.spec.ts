@@ -9,7 +9,9 @@ test.describe("Dashboard", () => {
       await expect(page.getByText(/sign in|inloggen/i)).toBeVisible();
     });
 
-    test("preserves callback URL for redirect after login", async ({ page }) => {
+    test("preserves callback URL for redirect after login", async ({
+      page,
+    }) => {
       await page.goto("/dashboard");
       // Should include callback URL in redirect
       await expect(page).toHaveURL(/callbackUrl.*dashboard/);

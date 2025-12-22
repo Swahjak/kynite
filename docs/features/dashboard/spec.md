@@ -6,14 +6,15 @@ The dashboard serves as the home screen and primary interface for the Family Pla
 
 ## Documents
 
-| Document | Description |
-|----------|-------------|
+| Document                      | Description                                  |
+| ----------------------------- | -------------------------------------------- |
 | [Data Model](./data-model.md) | Dashboard entities, interfaces, data sources |
-| [UI Specification](./ui.md) | Components, layout, interaction modes |
+| [UI Specification](./ui.md)   | Components, layout, interaction modes        |
 
 ## Design Reference
 
 Visual mockups available in `docs/design/dashboard/`:
+
 - `dashboard-design-*.png` - Dashboard layout mockups
 
 > **Note:** Mockups are reference only. Implement using project brand guidelines.

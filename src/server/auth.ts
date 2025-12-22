@@ -41,11 +41,12 @@ export const auth = betterAuth({
       accessType: "offline",
       // Always show consent to ensure refresh token is returned
       prompt: "select_account consent",
-      // Request calendar scope for Story 1.2 (includes events and calendar list)
+      // Request calendar scope for 2-way sync (read/write events + calendar list)
       scope: [
         "email",
         "profile",
-        "https://www.googleapis.com/auth/calendar.readonly",
+        "https://www.googleapis.com/auth/calendar.events",
+        "https://www.googleapis.com/auth/calendar.calendarlist.readonly",
       ],
     },
   },

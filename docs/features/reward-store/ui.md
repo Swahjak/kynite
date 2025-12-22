@@ -2,14 +2,15 @@
 
 ## Interaction Modes
 
-| Mode | Device | User | Purpose |
-|------|--------|------|---------|
-| **Wall Display** | Mounted tablet | Kids | View rewards, redeem with stars |
-| **Management** | Mobile/Desktop | Parents | Create, edit, manage rewards |
+| Mode             | Device         | User    | Purpose                         |
+| ---------------- | -------------- | ------- | ------------------------------- |
+| **Wall Display** | Mounted tablet | Kids    | View rewards, redeem with stars |
+| **Management**   | Mobile/Desktop | Parents | Create, edit, manage rewards    |
 
 ### Wall Display Mode
 
 **Allowed Actions:**
+
 - View star balance
 - Browse available rewards
 - Redeem rewards (when affordable)
@@ -18,6 +19,7 @@
 - View recent activity
 
 **Hidden/Disabled:**
+
 - Create reward
 - Edit reward
 - Delete reward
@@ -29,6 +31,7 @@
 ### Management Mode
 
 **Full Access:**
+
 - All viewing capabilities
 - Create new rewards
 - Edit existing rewards
@@ -63,15 +66,16 @@ Single column with sidebar sections stacked below marketplace.
 
 ### Star Balance Card
 
-| Element | Specification |
-|---------|---------------|
-| Total | text-4xl font-black (Lexend) |
-| Star icon | Filled, primary color |
-| Weekly delta | text-xs, primary-dark |
+| Element      | Specification                |
+| ------------ | ---------------------------- |
+| Total        | text-4xl font-black (Lexend) |
+| Star icon    | Filled, primary color        |
+| Weekly delta | text-xs, primary-dark        |
 
 ### Reward Card
 
 **Structure:**
+
 ```
 +-----------------------------------+
 | [Image]                   [Badge] |
@@ -85,20 +89,20 @@ Single column with sidebar sections stacked below marketplace.
 
 **States:**
 
-| State | Image | Button | Star Cost |
-|-------|-------|--------|-----------|
-| Affordable | Full color | Primary "Redeem" | Primary |
-| Unaffordable | Grayscale + overlay | Disabled "Need X more" | Muted |
-| Limit reached | Grayscale | Disabled "Available in X days" | Muted |
+| State         | Image               | Button                         | Star Cost |
+| ------------- | ------------------- | ------------------------------ | --------- |
+| Affordable    | Full color          | Primary "Redeem"               | Primary   |
+| Unaffordable  | Grayscale + overlay | Disabled "Need X more"         | Muted     |
+| Limit reached | Grayscale           | Disabled "Available in X days" | Muted     |
 
 ### Badges
 
-| Type | Style | Use Case |
-|------|-------|----------|
-| Popular | White/90 bg | High redemption |
-| New | Primary bg | Recently added |
-| Limited | Orange bg | Limited quantity |
-| Locked | Black/60 bg + lock icon | Unaffordable |
+| Type    | Style                   | Use Case         |
+| ------- | ----------------------- | ---------------- |
+| Popular | White/90 bg             | High redemption  |
+| New     | Primary bg              | Recently added   |
+| Limited | Orange bg               | Limited quantity |
+| Locked  | Black/60 bg + lock icon | Unaffordable     |
 
 ### Redemption Flow
 
@@ -111,6 +115,7 @@ Single column with sidebar sections stacked below marketplace.
 ### Confirmation Dialog
 
 Use shadcn/ui `AlertDialog`:
+
 - Shows reward title
 - Shows cost and balance before/after
 - "Cancel" (secondary) and "Redeem Now" (primary) buttons

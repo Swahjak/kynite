@@ -4,60 +4,57 @@
 
 ```typescript
 interface IChore {
-  id: string
-  familyId: string        // Reference to owning family
-  title: string
-  description?: string
-  assignedTo: IUser
-  dueDate?: Date
-  dueTime?: string        // HH:mm format
-  recurrence: ChoreRecurrence
-  isUrgent: boolean       // Manual urgency flag
-  status: ChoreStatus
-  starReward: number      // Stars earned on completion
-  createdAt: Date
-  completedAt?: Date
-  completedBy?: IUser
+  id: string;
+  familyId: string; // Reference to owning family
+  title: string;
+  description?: string;
+  assignedTo: IUser;
+  dueDate?: Date;
+  dueTime?: string; // HH:mm format
+  recurrence: ChoreRecurrence;
+  isUrgent: boolean; // Manual urgency flag
+  status: ChoreStatus;
+  starReward: number; // Stars earned on completion
+  createdAt: Date;
+  completedAt?: Date;
+  completedBy?: IUser;
 }
 
 type ChoreRecurrence =
-  | 'once'
-  | 'daily'
-  | 'weekly'
-  | 'weekdays'
-  | 'weekends'
-  | 'monthly'
+  | "once"
+  | "daily"
+  | "weekly"
+  | "weekdays"
+  | "weekends"
+  | "monthly";
 
-type ChoreStatus =
-  | 'pending'
-  | 'completed'
-  | 'skipped'
+type ChoreStatus = "pending" | "completed" | "skipped";
 
 interface IUser {
-  id: string
-  name: string
-  picturePath: string | null
-  color: string           // For avatar fallback
+  id: string;
+  name: string;
+  picturePath: string | null;
+  color: string; // For avatar fallback
 }
 ```
 
 ## Computed Properties
 
 ```typescript
-type UrgencyStatus = 'none' | 'due-soon' | 'urgent' | 'overdue'
+type UrgencyStatus = "none" | "due-soon" | "urgent" | "overdue";
 
 function getUrgencyStatus(chore: IChore): UrgencyStatus {
-  if (chore.status !== 'pending') return 'none'
-  if (chore.isUrgent) return 'urgent'
-  if (!chore.dueDate) return 'none'
+  if (chore.status !== "pending") return "none";
+  if (chore.isUrgent) return "urgent";
+  if (!chore.dueDate) return "none";
 
-  const now = new Date()
-  const due = combineDateAndTime(chore.dueDate, chore.dueTime)
+  const now = new Date();
+  const due = combineDateAndTime(chore.dueDate, chore.dueTime);
 
-  if (due < now) return 'overdue'
-  if (due < addHours(now, 4)) return 'due-soon'
+  if (due < now) return "overdue";
+  if (due < addHours(now, 4)) return "due-soon";
 
-  return 'none'
+  return "none";
 }
 ```
 
@@ -86,29 +83,29 @@ CREATE TABLE chores (
 
 ## API Endpoints
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/chores` | GET | Fetch all pending chores |
-| `/api/chores/:id/complete` | POST | Mark chore as complete |
-| `/api/chores/streak` | GET | Get current streak data |
-| `/api/chores/progress` | GET | Get today's progress |
+| Endpoint                   | Method | Description              |
+| -------------------------- | ------ | ------------------------ |
+| `/api/chores`              | GET    | Fetch all pending chores |
+| `/api/chores/:id/complete` | POST   | Mark chore as complete   |
+| `/api/chores/streak`       | GET    | Get current streak data  |
+| `/api/chores/progress`     | GET    | Get today's progress     |
 
 ## Data Sources
 
-| Data | Source | Refresh Rate |
-|------|--------|--------------|
-| Chores | PostgreSQL | On mount, after completion |
-| Users | PostgreSQL | On mount |
-| Streak | PostgreSQL | After completion |
-| Progress | Computed | Real-time |
+| Data     | Source     | Refresh Rate               |
+| -------- | ---------- | -------------------------- |
+| Chores   | PostgreSQL | On mount, after completion |
+| Users    | PostgreSQL | On mount                   |
+| Streak   | PostgreSQL | After completion           |
+| Progress | Computed   | Real-time                  |
 
 ## Star Rewards
 
-| Chore Type | Stars |
-|------------|-------|
-| Daily routine | 10 |
-| Weekly task | 25 |
-| Urgent/time-sensitive | 15 |
-| Special/bonus | 50 |
+| Chore Type            | Stars |
+| --------------------- | ----- |
+| Daily routine         | 10    |
+| Weekly task           | 25    |
+| Urgent/time-sensitive | 15    |
+| Special/bonus         | 50    |
 
-*Note: Star values are configured in the administration interface. Stars can be redeemed in the [Reward Store](../reward-store/data-model.md).*
+_Note: Star values are configured in the administration interface. Stars can be redeemed in the [Reward Store](../reward-store/data-model.md)._

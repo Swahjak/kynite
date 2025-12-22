@@ -13,11 +13,13 @@
 ## Task 1: Install Sheet Component
 
 **Files:**
+
 - Create: `src/components/ui/sheet.tsx` (via shadcn CLI)
 
 **Step 1: Install shadcn Sheet component**
 
 Run:
+
 ```bash
 pnpm dlx shadcn@latest add sheet
 ```
@@ -27,6 +29,7 @@ Expected: Creates `src/components/ui/sheet.tsx`
 **Step 2: Verify installation**
 
 Run:
+
 ```bash
 ls src/components/ui/sheet.tsx
 ```
@@ -45,6 +48,7 @@ git commit -m "chore: add shadcn sheet component"
 ## Task 2: Add Translation Keys
 
 **Files:**
+
 - Modify: `messages/en.json`
 - Modify: `messages/nl.json`
 
@@ -91,6 +95,7 @@ Add to `messages/nl.json` (merge with existing):
 **Step 3: Verify translations load**
 
 Run:
+
 ```bash
 pnpm dev
 ```
@@ -109,6 +114,7 @@ git commit -m "feat(i18n): add header and menu translations"
 ## Task 3: Create InteractionMode Context
 
 **Files:**
+
 - Create: `src/contexts/interaction-mode-context.tsx`
 - Test: `src/contexts/__tests__/interaction-mode-context.test.tsx`
 
@@ -150,9 +156,7 @@ describe("InteractionModeContext", () => {
 
   it("throws error when used outside provider", () => {
     // Suppress console.error for this test
-    const consoleSpy = vi
-      .spyOn(console, "error")
-      .mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     expect(() => render(<TestComponent />)).toThrow(
       "useInteractionMode must be used within InteractionModeProvider"
@@ -166,6 +170,7 @@ describe("InteractionModeContext", () => {
 **Step 2: Run test to verify it fails**
 
 Run:
+
 ```bash
 pnpm test src/contexts/__tests__/interaction-mode-context.test.tsx
 ```
@@ -187,9 +192,8 @@ interface InteractionModeContextValue {
   mode: InteractionMode;
 }
 
-const InteractionModeContext = createContext<InteractionModeContextValue | null>(
-  null
-);
+const InteractionModeContext =
+  createContext<InteractionModeContextValue | null>(null);
 
 interface InteractionModeProviderProps {
   mode: InteractionMode;
@@ -221,6 +225,7 @@ export function useInteractionMode(): InteractionModeContextValue {
 **Step 4: Run test to verify it passes**
 
 Run:
+
 ```bash
 pnpm test src/contexts/__tests__/interaction-mode-context.test.tsx
 ```
@@ -239,6 +244,7 @@ git commit -m "feat: add InteractionMode context for wall/manage modes"
 ## Task 4: Create Brand Area Component
 
 **Files:**
+
 - Create: `src/components/layout/brand-area.tsx`
 - Test: `src/components/layout/__tests__/brand-area.test.tsx`
 
@@ -287,6 +293,7 @@ describe("BrandArea", () => {
 **Step 2: Run test to verify it fails**
 
 Run:
+
 ```bash
 pnpm test src/components/layout/__tests__/brand-area.test.tsx
 ```
@@ -308,13 +315,13 @@ export function BrandArea() {
     <div className="flex items-center gap-3">
       <div
         data-testid="brand-icon"
-        className="flex size-12 items-center justify-center rounded-full bg-primary"
+        className="bg-primary flex size-12 items-center justify-center rounded-full"
       >
-        <Home className="size-6 text-primary-foreground" />
+        <Home className="text-primary-foreground size-6" />
       </div>
       <div className="flex flex-col">
         <span className="font-display text-xl font-bold">{t("brand")}</span>
-        <span className="text-xs font-medium uppercase tracking-wider text-primary">
+        <span className="text-primary text-xs font-medium tracking-wider uppercase">
           {t("tagline")}
         </span>
       </div>
@@ -326,6 +333,7 @@ export function BrandArea() {
 **Step 4: Run test to verify it passes**
 
 Run:
+
 ```bash
 pnpm test src/components/layout/__tests__/brand-area.test.tsx
 ```
@@ -344,6 +352,7 @@ git commit -m "feat: add BrandArea component"
 ## Task 5: Create Navigation Menu Component
 
 **Files:**
+
 - Create: `src/components/layout/navigation-menu.tsx`
 - Test: `src/components/layout/__tests__/navigation-menu.test.tsx`
 
@@ -378,9 +387,7 @@ function renderWithProviders(
 ) {
   return render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <InteractionModeProvider mode={mode}>
-        {ui}
-      </InteractionModeProvider>
+      <InteractionModeProvider mode={mode}>{ui}</InteractionModeProvider>
     </NextIntlClientProvider>
   );
 }
@@ -388,9 +395,7 @@ function renderWithProviders(
 describe("NavigationMenu", () => {
   it("renders all items in manage mode", async () => {
     const user = userEvent.setup();
-    renderWithProviders(
-      <NavigationMenu open={true} onOpenChange={() => {}} />
-    );
+    renderWithProviders(<NavigationMenu open={true} onOpenChange={() => {}} />);
 
     expect(screen.getByText("Calendar")).toBeInTheDocument();
     expect(screen.getByText("Chores")).toBeInTheDocument();
@@ -415,6 +420,7 @@ describe("NavigationMenu", () => {
 **Step 2: Run test to verify it fails**
 
 Run:
+
 ```bash
 pnpm test src/components/layout/__tests__/navigation-menu.test.tsx
 ```
@@ -505,7 +511,7 @@ export function NavigationMenu({ open, onOpenChange }: NavigationMenuProps) {
 
           <div className="border-t p-2">
             <button
-              className="flex h-12 w-full items-center gap-3 rounded-md px-4 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+              className="text-muted-foreground hover:bg-accent hover:text-accent-foreground flex h-12 w-full items-center gap-3 rounded-md px-4 text-sm font-medium"
               onClick={() => {
                 // TODO: Open help modal
                 onOpenChange(false);
@@ -525,6 +531,7 @@ export function NavigationMenu({ open, onOpenChange }: NavigationMenuProps) {
 **Step 4: Run test to verify it passes**
 
 Run:
+
 ```bash
 pnpm test src/components/layout/__tests__/navigation-menu.test.tsx
 ```
@@ -543,6 +550,7 @@ git commit -m "feat: add NavigationMenu sheet component"
 ## Task 6: Create App Header Component
 
 **Files:**
+
 - Create: `src/components/layout/app-header.tsx`
 - Test: `src/components/layout/__tests__/app-header.test.tsx`
 
@@ -569,8 +577,17 @@ vi.mock("@/lib/auth-client", () => ({
 }));
 
 const messages = {
-  Header: { brand: "Family Planner", tagline: "FAMILY OS", addEvent: "Add Event" },
-  Menu: { calendar: "Calendar", chores: "Chores", settings: "Settings", help: "Help" },
+  Header: {
+    brand: "Family Planner",
+    tagline: "FAMILY OS",
+    addEvent: "Add Event",
+  },
+  Menu: {
+    calendar: "Calendar",
+    chores: "Chores",
+    settings: "Settings",
+    help: "Help",
+  },
 };
 
 function renderWithProviders(mode: "wall" | "manage" = "manage") {
@@ -586,12 +603,16 @@ function renderWithProviders(mode: "wall" | "manage" = "manage") {
 describe("AppHeader", () => {
   it("shows add event button in manage mode", () => {
     renderWithProviders("manage");
-    expect(screen.getByRole("button", { name: /add event/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /add event/i })
+    ).toBeInTheDocument();
   });
 
   it("hides add event button in wall mode", () => {
     renderWithProviders("wall");
-    expect(screen.queryByRole("button", { name: /add event/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /add event/i })
+    ).not.toBeInTheDocument();
   });
 
   it("shows avatar in manage mode", () => {
@@ -614,6 +635,7 @@ describe("AppHeader", () => {
 **Step 2: Run test to verify it fails**
 
 Run:
+
 ```bash
 pnpm test src/components/layout/__tests__/app-header.test.tsx
 ```
@@ -660,7 +682,7 @@ export function AppHeader({ onAddEvent }: AppHeaderProps) {
 
   return (
     <>
-      <header className="flex h-16 items-center justify-between border-b bg-background px-4">
+      <header className="bg-background flex h-16 items-center justify-between border-b px-4">
         {/* Left: Menu trigger + Brand */}
         <div className="flex items-center gap-2">
           {isManageMode && (
@@ -735,6 +757,7 @@ export function AppHeader({ onAddEvent }: AppHeaderProps) {
 **Step 4: Run test to verify it passes**
 
 Run:
+
 ```bash
 pnpm test src/components/layout/__tests__/app-header.test.tsx
 ```
@@ -753,6 +776,7 @@ git commit -m "feat: add AppHeader with dual-mode support"
 ## Task 7: Create Route Group Layouts
 
 **Files:**
+
 - Create: `src/app/[locale]/(manage)/layout.tsx`
 - Create: `src/app/[locale]/(wall)/layout.tsx`
 - Move: `src/app/[locale]/calendar/page.tsx` to `src/app/[locale]/(manage)/calendar/page.tsx`
@@ -770,9 +794,7 @@ export default function ManageLayout({
   children: React.ReactNode;
 }) {
   return (
-    <InteractionModeProvider mode="manage">
-      {children}
-    </InteractionModeProvider>
+    <InteractionModeProvider mode="manage">{children}</InteractionModeProvider>
   );
 }
 ```
@@ -790,9 +812,7 @@ export default function WallLayout({
   children: React.ReactNode;
 }) {
   return (
-    <InteractionModeProvider mode="wall">
-      {children}
-    </InteractionModeProvider>
+    <InteractionModeProvider mode="wall">{children}</InteractionModeProvider>
   );
 }
 ```
@@ -800,6 +820,7 @@ export default function WallLayout({
 **Step 3: Move calendar page to manage group**
 
 Run:
+
 ```bash
 mkdir -p src/app/[locale]/(manage)/calendar
 mv src/app/[locale]/calendar/page.tsx src/app/[locale]/(manage)/calendar/page.tsx
@@ -808,6 +829,7 @@ mv src/app/[locale]/calendar/page.tsx src/app/[locale]/(manage)/calendar/page.ts
 **Step 4: Verify routes work**
 
 Run:
+
 ```bash
 pnpm dev
 ```
@@ -826,6 +848,7 @@ git commit -m "feat: add route group layouts for wall/manage modes"
 ## Task 8: Integrate Header with Calendar Page
 
 **Files:**
+
 - Modify: `src/app/[locale]/(manage)/calendar/page.tsx`
 
 **Step 1: Update calendar page to use AppHeader**
@@ -837,11 +860,13 @@ Read the current implementation first, then integrate AppHeader above the Calend
 **Step 2: Verify integration**
 
 Run:
+
 ```bash
 pnpm dev
 ```
 
 Navigate to calendar, verify:
+
 - App Header appears at top
 - Brand area visible
 - Add Event button visible
@@ -860,6 +885,7 @@ git commit -m "feat: integrate AppHeader with calendar page"
 ## Task 9: Create Wall Display Calendar Page
 
 **Files:**
+
 - Create: `src/app/[locale]/(wall)/calendar/page.tsx`
 
 **Step 1: Create wall mode calendar page**
@@ -874,9 +900,7 @@ export default function WallCalendarPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <AppHeader />
-      <main className="flex-1">
-        {/* Calendar view - read-only */}
-      </main>
+      <main className="flex-1">{/* Calendar view - read-only */}</main>
     </div>
   );
 }
@@ -898,6 +922,7 @@ git commit -m "feat: add wall display calendar page"
 ## Task 10: Add User Menu to Header
 
 **Files:**
+
 - Modify: `src/components/layout/app-header.tsx`
 
 **Step 1: Integrate existing UserMenu component**
@@ -905,26 +930,31 @@ git commit -m "feat: add wall display calendar page"
 Replace the basic avatar button with the existing `UserMenu` component from `src/components/auth/user-menu.tsx`.
 
 Update import:
+
 ```tsx
 import { UserMenu } from "@/components/auth/user-menu";
 ```
 
 Replace avatar button with:
+
 ```tsx
-{user && (
-  <UserMenu
-    user={{
-      name: user.name || "User",
-      email: user.email || "",
-      image: user.image,
-    }}
-  />
-)}
+{
+  user && (
+    <UserMenu
+      user={{
+        name: user.name || "User",
+        email: user.email || "",
+        image: user.image,
+      }}
+    />
+  );
+}
 ```
 
 **Step 2: Verify user menu works**
 
 Run:
+
 ```bash
 pnpm dev
 ```
@@ -945,6 +975,7 @@ git commit -m "feat: integrate UserMenu dropdown in AppHeader"
 **Step 1: Run all tests**
 
 Run:
+
 ```bash
 pnpm test:run
 ```
@@ -954,6 +985,7 @@ Expected: All tests pass
 **Step 2: Run linter**
 
 Run:
+
 ```bash
 pnpm lint
 ```
@@ -975,21 +1007,22 @@ git commit -m "chore: fix lint and test issues"
 
 ## Summary
 
-| Task | Description | Files |
-|------|-------------|-------|
-| 1 | Install Sheet component | `src/components/ui/sheet.tsx` |
-| 2 | Add translation keys | `messages/*.json` |
-| 3 | Create InteractionMode context | `src/contexts/interaction-mode-context.tsx` |
-| 4 | Create Brand Area | `src/components/layout/brand-area.tsx` |
-| 5 | Create Navigation Menu | `src/components/layout/navigation-menu.tsx` |
-| 6 | Create App Header | `src/components/layout/app-header.tsx` |
-| 7 | Create route group layouts | `src/app/[locale]/(manage|wall)/layout.tsx` |
-| 8 | Integrate with calendar | `src/app/[locale]/(manage)/calendar/page.tsx` |
-| 9 | Wall display page | `src/app/[locale]/(wall)/calendar/page.tsx` |
-| 10 | Add UserMenu | `src/components/layout/app-header.tsx` |
-| 11 | Final verification | All files |
+| Task | Description                    | Files                                         |
+| ---- | ------------------------------ | --------------------------------------------- | ----------------- |
+| 1    | Install Sheet component        | `src/components/ui/sheet.tsx`                 |
+| 2    | Add translation keys           | `messages/*.json`                             |
+| 3    | Create InteractionMode context | `src/contexts/interaction-mode-context.tsx`   |
+| 4    | Create Brand Area              | `src/components/layout/brand-area.tsx`        |
+| 5    | Create Navigation Menu         | `src/components/layout/navigation-menu.tsx`   |
+| 6    | Create App Header              | `src/components/layout/app-header.tsx`        |
+| 7    | Create route group layouts     | `src/app/[locale]/(manage                     | wall)/layout.tsx` |
+| 8    | Integrate with calendar        | `src/app/[locale]/(manage)/calendar/page.tsx` |
+| 9    | Wall display page              | `src/app/[locale]/(wall)/calendar/page.tsx`   |
+| 10   | Add UserMenu                   | `src/components/layout/app-header.tsx`        |
+| 11   | Final verification             | All files                                     |
 
 **Out of scope (Phase 2):**
+
 - Weather widget
 - Notifications badge
 - Help modal implementation

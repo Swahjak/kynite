@@ -82,3 +82,94 @@ export function isTokenExpired(expiresAt: Date | null): boolean {
   const bufferMs = 5 * 60 * 1000; // 5 minutes
   return Date.now() >= expiresAt.getTime() - bufferMs;
 }
+
+const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
+
+interface RefreshedToken {
+  accessToken: string;
+  expiresAt: Date;
+}
+
+/**
+ * Refresh an expired Google access token
+ */
+export async function refreshGoogleToken(
+  refreshToken: string
+): Promise<RefreshedToken> {
+  const response = await fetch(GOOGLE_TOKEN_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      client_id: process.env.GOOGLE_CLIENT_ID!,
+      client_secret: process.env.GOOGLE_CLIENT_SECRET!,
+      refresh_token: refreshToken,
+      grant_type: "refresh_token",
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Token refresh failed: ${response.status}`);
+  }
+
+  const data = await response.json();
+
+  return {
+    accessToken: data.access_token,
+    expiresAt: new Date(Date.now() + data.expires_in * 1000),
+  };
+}
+
+/**
+ * Update stored token after refresh
+ */
+export async function updateStoredToken(
+  accountId: string,
+  accessToken: string,
+  expiresAt: Date
+): Promise<void> {
+  await db
+    .update(accounts)
+    .set({
+      accessToken,
+      accessTokenExpiresAt: expiresAt,
+      updatedAt: new Date(),
+    })
+    .where(eq(accounts.id, accountId));
+}
+
+/**
+ * Get a valid access token, refreshing if needed
+ */
+export async function getValidAccessToken(
+  accountDbId: string
+): Promise<string | null> {
+  const account = await db
+    .select()
+    .from(accounts)
+    .where(eq(accounts.id, accountDbId))
+    .limit(1);
+
+  if (account.length === 0 || !account[0].accessToken) {
+    return null;
+  }
+
+  const { accessToken, refreshToken, accessTokenExpiresAt } = account[0];
+
+  // Check if token needs refresh
+  if (isTokenExpired(accessTokenExpiresAt) && refreshToken) {
+    try {
+      const refreshed = await refreshGoogleToken(refreshToken);
+      await updateStoredToken(
+        accountDbId,
+        refreshed.accessToken,
+        refreshed.expiresAt
+      );
+      return refreshed.accessToken;
+    } catch (error) {
+      console.error("Failed to refresh token:", error);
+      return null;
+    }
+  }
+
+  return accessToken;
+}

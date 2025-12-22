@@ -15,12 +15,12 @@ export const families = pgTable("families", {
 });
 ```
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | text | Primary key (CUID or UUID) |
-| `name` | text | Family name (e.g., "The Smiths") |
-| `created_at` | timestamp | When family was created |
-| `updated_at` | timestamp | Last modification time |
+| Column       | Type      | Description                      |
+| ------------ | --------- | -------------------------------- |
+| `id`         | text      | Primary key (CUID or UUID)       |
+| `name`       | text      | Family name (e.g., "The Smiths") |
+| `created_at` | timestamp | When family was created          |
+| `updated_at` | timestamp | Last modification time           |
 
 ### family_members
 
@@ -42,42 +42,42 @@ export const familyMembers = pgTable("family_members", {
 });
 ```
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | text | Primary key |
-| `family_id` | text | FK to `families.id` |
-| `user_id` | text | FK to `users.id` (Better-Auth) |
-| `role` | text | Member role (see below) |
-| `display_name` | text | Optional kid-friendly name override |
-| `avatar_color` | text | Color for calendar identification |
-| `created_at` | timestamp | When member joined |
+| Column         | Type      | Description                         |
+| -------------- | --------- | ----------------------------------- |
+| `id`           | text      | Primary key                         |
+| `family_id`    | text      | FK to `families.id`                 |
+| `user_id`      | text      | FK to `users.id` (Better-Auth)      |
+| `role`         | text      | Member role (see below)             |
+| `display_name` | text      | Optional kid-friendly name override |
+| `avatar_color` | text      | Color for calendar identification   |
+| `created_at`   | timestamp | When member joined                  |
 
 ## Enums
 
 ### FamilyMemberRole
 
 ```typescript
-type FamilyMemberRole = 'manager' | 'participant' | 'caregiver';
+type FamilyMemberRole = "manager" | "participant" | "caregiver";
 ```
 
-| Value | Description | Calendar | Events | Settings |
-|-------|-------------|----------|--------|----------|
-| `manager` | Full admin access | Full CRUD | Full CRUD | Full access |
-| `participant` | Tracked member | View only | Mark complete | View only |
-| `caregiver` | View-only access | View only | View only | None |
+| Value         | Description       | Calendar  | Events        | Settings    |
+| ------------- | ----------------- | --------- | ------------- | ----------- |
+| `manager`     | Full admin access | Full CRUD | Full CRUD     | Full access |
+| `participant` | Tracked member    | View only | Mark complete | View only   |
+| `caregiver`   | View-only access  | View only | View only     | None        |
 
 ### AvatarColor
 
 ```typescript
 type AvatarColor =
-  | 'blue'
-  | 'green'
-  | 'red'
-  | 'yellow'
-  | 'purple'
-  | 'orange'
-  | 'pink'
-  | 'teal';
+  | "blue"
+  | "green"
+  | "red"
+  | "yellow"
+  | "purple"
+  | "orange"
+  | "pink"
+  | "teal";
 ```
 
 Used for visual identification in calendar views.

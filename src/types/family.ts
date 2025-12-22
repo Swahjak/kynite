@@ -44,3 +44,11 @@ export interface FamilyMemberWithUser {
     image: string | null;
   };
 }
+
+export interface FamilyWithMembers {
+  id: string;
+  name: string;
+  createdAt: Date;
+  updatedAt: Date;
+  members: FamilyMemberWithUser[];
+}

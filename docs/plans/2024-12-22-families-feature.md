@@ -13,6 +13,7 @@
 ## Task 1: Database Schema - Families Table
 
 **Files:**
+
 - Modify: `src/server/schema.ts`
 
 **Step 1: Add families table to schema**
@@ -48,6 +49,7 @@ git commit -m "feat(db): add families table schema"
 ## Task 2: Database Schema - Family Members Table
 
 **Files:**
+
 - Modify: `src/server/schema.ts`
 
 **Step 1: Add family_members table to schema**
@@ -90,6 +92,7 @@ git commit -m "feat(db): add family_members table schema"
 ## Task 3: Database Schema - Family Invites Table
 
 **Files:**
+
 - Modify: `src/server/schema.ts`
 
 **Step 1: Add family_invites table to schema**
@@ -119,8 +122,15 @@ export type NewFamilyInvite = typeof familyInvites.$inferInsert;
 **Step 2: Add integer import to drizzle-orm/pg-core**
 
 Ensure the import at the top includes `integer`:
+
 ```typescript
-import { pgTable, text, timestamp, boolean, integer } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  timestamp,
+  boolean,
+  integer,
+} from "drizzle-orm/pg-core";
 ```
 
 **Step 3: Verify schema compiles**
@@ -140,6 +150,7 @@ git commit -m "feat(db): add family_invites table schema"
 ## Task 4: Database Schema - Drizzle Relations
 
 **Files:**
+
 - Modify: `src/server/schema.ts`
 
 **Step 1: Add relations import and define relations**
@@ -195,6 +206,7 @@ git commit -m "feat(db): add drizzle relations for family tables"
 ## Task 5: Generate and Run Database Migration
 
 **Files:**
+
 - Create: `drizzle/XXXX_add_families.sql` (auto-generated)
 
 **Step 1: Generate migration**
@@ -224,6 +236,7 @@ git commit -m "chore(db): add migration for family tables"
 ## Task 6: Family Types
 
 **Files:**
+
 - Create: `src/types/family.ts`
 
 **Step 1: Create family types file**
@@ -302,6 +315,7 @@ git commit -m "feat(types): add family type definitions"
 ## Task 7: Validation Schemas
 
 **Files:**
+
 - Create: `src/lib/validations/family.ts`
 
 **Step 1: Create validation schemas**
@@ -336,7 +350,10 @@ export const updateMemberSchema = z.object({
     .max(50, "Display name must be 50 characters or less")
     .optional()
     .nullable(),
-  avatarColor: z.enum(AVATAR_COLORS as [string, ...string[]]).optional().nullable(),
+  avatarColor: z
+    .enum(AVATAR_COLORS as [string, ...string[]])
+    .optional()
+    .nullable(),
   role: z.enum(FAMILY_MEMBER_ROLES as [string, ...string[]]).optional(),
 });
 
@@ -367,6 +384,7 @@ git commit -m "feat(validation): add family zod schemas"
 ## Task 8: Invite Token Utility
 
 **Files:**
+
 - Create: `src/lib/invite-token.ts`
 
 **Step 1: Create invite token utility**
@@ -402,6 +420,7 @@ git commit -m "feat(util): add invite token generator"
 ## Task 9: Family Service - Get User's Family
 
 **Files:**
+
 - Create: `src/server/services/family-service.ts`
 
 **Step 1: Create family service with getUserFamily function**
@@ -481,7 +500,10 @@ export async function isUserFamilyManager(
     .select({ role: familyMembers.role })
     .from(familyMembers)
     .where(
-      and(eq(familyMembers.userId, userId), eq(familyMembers.familyId, familyId))
+      and(
+        eq(familyMembers.userId, userId),
+        eq(familyMembers.familyId, familyId)
+      )
     )
     .limit(1);
 
@@ -496,7 +518,10 @@ export async function isUserFamilyMember(
     .select({ id: familyMembers.id })
     .from(familyMembers)
     .where(
-      and(eq(familyMembers.userId, userId), eq(familyMembers.familyId, familyId))
+      and(
+        eq(familyMembers.userId, userId),
+        eq(familyMembers.familyId, familyId)
+      )
     )
     .limit(1);
 
@@ -521,6 +546,7 @@ git commit -m "feat(service): add family service with core queries"
 ## Task 10: API Route - Create Family (POST /api/v1/families)
 
 **Files:**
+
 - Create: `src/app/api/v1/families/route.ts`
 
 **Step 1: Create families API route with POST handler**
@@ -545,7 +571,10 @@ export async function POST(request: Request) {
 
     if (!session?.user) {
       return NextResponse.json(
-        { success: false, error: { code: "UNAUTHORIZED", message: "Not authenticated" } },
+        {
+          success: false,
+          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
+        },
         { status: 401 }
       );
     }
@@ -557,7 +586,10 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           success: false,
-          error: { code: "VALIDATION_ERROR", message: parsed.error.errors[0].message },
+          error: {
+            code: "VALIDATION_ERROR",
+            message: parsed.error.errors[0].message,
+          },
         },
         { status: 400 }
       );
@@ -605,7 +637,10 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Error creating family:", error);
     return NextResponse.json(
-      { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to create family" } },
+      {
+        success: false,
+        error: { code: "INTERNAL_ERROR", message: "Failed to create family" },
+      },
       { status: 500 }
     );
   }
@@ -619,7 +654,10 @@ export async function GET() {
 
     if (!session?.user) {
       return NextResponse.json(
-        { success: false, error: { code: "UNAUTHORIZED", message: "Not authenticated" } },
+        {
+          success: false,
+          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
+        },
         { status: 401 }
       );
     }
@@ -643,7 +681,10 @@ export async function GET() {
   } catch (error) {
     console.error("Error listing families:", error);
     return NextResponse.json(
-      { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to list families" } },
+      {
+        success: false,
+        error: { code: "INTERNAL_ERROR", message: "Failed to list families" },
+      },
       { status: 500 }
     );
   }
@@ -667,6 +708,7 @@ git commit -m "feat(api): add POST/GET /api/v1/families routes"
 ## Task 11: API Route - Family by ID (GET/PATCH/DELETE)
 
 **Files:**
+
 - Create: `src/app/api/v1/families/[familyId]/route.ts`
 
 **Step 1: Create family by ID route**
@@ -697,7 +739,10 @@ export async function GET(request: Request, { params }: Params) {
 
     if (!session?.user) {
       return NextResponse.json(
-        { success: false, error: { code: "UNAUTHORIZED", message: "Not authenticated" } },
+        {
+          success: false,
+          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
+        },
         { status: 401 }
       );
     }
@@ -707,7 +752,10 @@ export async function GET(request: Request, { params }: Params) {
     const isMember = await isUserFamilyMember(session.user.id, familyId);
     if (!isMember) {
       return NextResponse.json(
-        { success: false, error: { code: "FORBIDDEN", message: "Not a member of this family" } },
+        {
+          success: false,
+          error: { code: "FORBIDDEN", message: "Not a member of this family" },
+        },
         { status: 403 }
       );
     }
@@ -720,7 +768,10 @@ export async function GET(request: Request, { params }: Params) {
 
     if (family.length === 0) {
       return NextResponse.json(
-        { success: false, error: { code: "NOT_FOUND", message: "Family not found" } },
+        {
+          success: false,
+          error: { code: "NOT_FOUND", message: "Family not found" },
+        },
         { status: 404 }
       );
     }
@@ -739,7 +790,10 @@ export async function GET(request: Request, { params }: Params) {
   } catch (error) {
     console.error("Error getting family:", error);
     return NextResponse.json(
-      { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to get family" } },
+      {
+        success: false,
+        error: { code: "INTERNAL_ERROR", message: "Failed to get family" },
+      },
       { status: 500 }
     );
   }
@@ -753,7 +807,10 @@ export async function PATCH(request: Request, { params }: Params) {
 
     if (!session?.user) {
       return NextResponse.json(
-        { success: false, error: { code: "UNAUTHORIZED", message: "Not authenticated" } },
+        {
+          success: false,
+          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
+        },
         { status: 401 }
       );
     }
@@ -763,7 +820,13 @@ export async function PATCH(request: Request, { params }: Params) {
     const isManager = await isUserFamilyManager(session.user.id, familyId);
     if (!isManager) {
       return NextResponse.json(
-        { success: false, error: { code: "FORBIDDEN", message: "Only managers can update the family" } },
+        {
+          success: false,
+          error: {
+            code: "FORBIDDEN",
+            message: "Only managers can update the family",
+          },
+        },
         { status: 403 }
       );
     }
@@ -775,7 +838,10 @@ export async function PATCH(request: Request, { params }: Params) {
       return NextResponse.json(
         {
           success: false,
-          error: { code: "VALIDATION_ERROR", message: parsed.error.errors[0].message },
+          error: {
+            code: "VALIDATION_ERROR",
+            message: parsed.error.errors[0].message,
+          },
         },
         { status: 400 }
       );
@@ -799,7 +865,10 @@ export async function PATCH(request: Request, { params }: Params) {
   } catch (error) {
     console.error("Error updating family:", error);
     return NextResponse.json(
-      { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to update family" } },
+      {
+        success: false,
+        error: { code: "INTERNAL_ERROR", message: "Failed to update family" },
+      },
       { status: 500 }
     );
   }
@@ -813,7 +882,10 @@ export async function DELETE(request: Request, { params }: Params) {
 
     if (!session?.user) {
       return NextResponse.json(
-        { success: false, error: { code: "UNAUTHORIZED", message: "Not authenticated" } },
+        {
+          success: false,
+          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
+        },
         { status: 401 }
       );
     }
@@ -823,7 +895,13 @@ export async function DELETE(request: Request, { params }: Params) {
     const isManager = await isUserFamilyManager(session.user.id, familyId);
     if (!isManager) {
       return NextResponse.json(
-        { success: false, error: { code: "FORBIDDEN", message: "Only managers can delete the family" } },
+        {
+          success: false,
+          error: {
+            code: "FORBIDDEN",
+            message: "Only managers can delete the family",
+          },
+        },
         { status: 403 }
       );
     }
@@ -834,7 +912,10 @@ export async function DELETE(request: Request, { params }: Params) {
   } catch (error) {
     console.error("Error deleting family:", error);
     return NextResponse.json(
-      { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to delete family" } },
+      {
+        success: false,
+        error: { code: "INTERNAL_ERROR", message: "Failed to delete family" },
+      },
       { status: 500 }
     );
   }
@@ -858,6 +939,7 @@ git commit -m "feat(api): add GET/PATCH/DELETE /api/v1/families/[familyId] route
 ## Task 12: API Route - Family Members
 
 **Files:**
+
 - Create: `src/app/api/v1/families/[familyId]/members/route.ts`
 
 **Step 1: Create members list route**
@@ -868,7 +950,10 @@ git commit -m "feat(api): add GET/PATCH/DELETE /api/v1/families/[familyId] route
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/server/auth";
-import { getFamilyMembers, isUserFamilyMember } from "@/server/services/family-service";
+import {
+  getFamilyMembers,
+  isUserFamilyMember,
+} from "@/server/services/family-service";
 
 type Params = { params: Promise<{ familyId: string }> };
 
@@ -880,7 +965,10 @@ export async function GET(request: Request, { params }: Params) {
 
     if (!session?.user) {
       return NextResponse.json(
-        { success: false, error: { code: "UNAUTHORIZED", message: "Not authenticated" } },
+        {
+          success: false,
+          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
+        },
         { status: 401 }
       );
     }
@@ -890,7 +978,10 @@ export async function GET(request: Request, { params }: Params) {
     const isMember = await isUserFamilyMember(session.user.id, familyId);
     if (!isMember) {
       return NextResponse.json(
-        { success: false, error: { code: "FORBIDDEN", message: "Not a member of this family" } },
+        {
+          success: false,
+          error: { code: "FORBIDDEN", message: "Not a member of this family" },
+        },
         { status: 403 }
       );
     }
@@ -904,7 +995,10 @@ export async function GET(request: Request, { params }: Params) {
   } catch (error) {
     console.error("Error listing members:", error);
     return NextResponse.json(
-      { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to list members" } },
+      {
+        success: false,
+        error: { code: "INTERNAL_ERROR", message: "Failed to list members" },
+      },
       { status: 500 }
     );
   }
@@ -928,6 +1022,7 @@ git commit -m "feat(api): add GET /api/v1/families/[familyId]/members route"
 ## Task 13: API Route - Member by ID (PATCH/DELETE)
 
 **Files:**
+
 - Create: `src/app/api/v1/families/[familyId]/members/[memberId]/route.ts`
 
 **Step 1: Create member by ID route**
@@ -942,7 +1037,10 @@ import { db } from "@/server/db";
 import { familyMembers } from "@/server/schema";
 import { eq, and } from "drizzle-orm";
 import { updateMemberSchema } from "@/lib/validations/family";
-import { isUserFamilyManager, isUserFamilyMember } from "@/server/services/family-service";
+import {
+  isUserFamilyManager,
+  isUserFamilyMember,
+} from "@/server/services/family-service";
 
 type Params = { params: Promise<{ familyId: string; memberId: string }> };
 
@@ -954,7 +1052,10 @@ export async function PATCH(request: Request, { params }: Params) {
 
     if (!session?.user) {
       return NextResponse.json(
-        { success: false, error: { code: "UNAUTHORIZED", message: "Not authenticated" } },
+        {
+          success: false,
+          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
+        },
         { status: 401 }
       );
     }
@@ -965,12 +1066,20 @@ export async function PATCH(request: Request, { params }: Params) {
     const targetMember = await db
       .select()
       .from(familyMembers)
-      .where(and(eq(familyMembers.id, memberId), eq(familyMembers.familyId, familyId)))
+      .where(
+        and(
+          eq(familyMembers.id, memberId),
+          eq(familyMembers.familyId, familyId)
+        )
+      )
       .limit(1);
 
     if (targetMember.length === 0) {
       return NextResponse.json(
-        { success: false, error: { code: "NOT_FOUND", message: "Member not found" } },
+        {
+          success: false,
+          error: { code: "NOT_FOUND", message: "Member not found" },
+        },
         { status: 404 }
       );
     }
@@ -981,7 +1090,10 @@ export async function PATCH(request: Request, { params }: Params) {
     // Only managers can edit others, anyone can edit themselves (except role)
     if (!isManager && !isSelf) {
       return NextResponse.json(
-        { success: false, error: { code: "FORBIDDEN", message: "Cannot edit this member" } },
+        {
+          success: false,
+          error: { code: "FORBIDDEN", message: "Cannot edit this member" },
+        },
         { status: 403 }
       );
     }
@@ -993,7 +1105,10 @@ export async function PATCH(request: Request, { params }: Params) {
       return NextResponse.json(
         {
           success: false,
-          error: { code: "VALIDATION_ERROR", message: parsed.error.errors[0].message },
+          error: {
+            code: "VALIDATION_ERROR",
+            message: parsed.error.errors[0].message,
+          },
         },
         { status: 400 }
       );
@@ -1002,23 +1117,41 @@ export async function PATCH(request: Request, { params }: Params) {
     // Non-managers cannot change roles
     if (parsed.data.role && !isManager) {
       return NextResponse.json(
-        { success: false, error: { code: "FORBIDDEN", message: "Only managers can change roles" } },
+        {
+          success: false,
+          error: {
+            code: "FORBIDDEN",
+            message: "Only managers can change roles",
+          },
+        },
         { status: 403 }
       );
     }
 
     // Check last manager constraint
-    if (parsed.data.role && parsed.data.role !== "manager" && targetMember[0].role === "manager") {
+    if (
+      parsed.data.role &&
+      parsed.data.role !== "manager" &&
+      targetMember[0].role === "manager"
+    ) {
       const managerCount = await db
         .select({ id: familyMembers.id })
         .from(familyMembers)
-        .where(and(eq(familyMembers.familyId, familyId), eq(familyMembers.role, "manager")));
+        .where(
+          and(
+            eq(familyMembers.familyId, familyId),
+            eq(familyMembers.role, "manager")
+          )
+        );
 
       if (managerCount.length <= 1) {
         return NextResponse.json(
           {
             success: false,
-            error: { code: "LAST_MANAGER", message: "Cannot demote the last manager" },
+            error: {
+              code: "LAST_MANAGER",
+              message: "Cannot demote the last manager",
+            },
           },
           { status: 400 }
         );
@@ -1026,8 +1159,10 @@ export async function PATCH(request: Request, { params }: Params) {
     }
 
     const updateData: Record<string, unknown> = {};
-    if (parsed.data.displayName !== undefined) updateData.displayName = parsed.data.displayName;
-    if (parsed.data.avatarColor !== undefined) updateData.avatarColor = parsed.data.avatarColor;
+    if (parsed.data.displayName !== undefined)
+      updateData.displayName = parsed.data.displayName;
+    if (parsed.data.avatarColor !== undefined)
+      updateData.avatarColor = parsed.data.avatarColor;
     if (parsed.data.role !== undefined) updateData.role = parsed.data.role;
 
     await db
@@ -1048,7 +1183,10 @@ export async function PATCH(request: Request, { params }: Params) {
   } catch (error) {
     console.error("Error updating member:", error);
     return NextResponse.json(
-      { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to update member" } },
+      {
+        success: false,
+        error: { code: "INTERNAL_ERROR", message: "Failed to update member" },
+      },
       { status: 500 }
     );
   }
@@ -1062,7 +1200,10 @@ export async function DELETE(request: Request, { params }: Params) {
 
     if (!session?.user) {
       return NextResponse.json(
-        { success: false, error: { code: "UNAUTHORIZED", message: "Not authenticated" } },
+        {
+          success: false,
+          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
+        },
         { status: 401 }
       );
     }
@@ -1073,12 +1214,20 @@ export async function DELETE(request: Request, { params }: Params) {
     const targetMember = await db
       .select()
       .from(familyMembers)
-      .where(and(eq(familyMembers.id, memberId), eq(familyMembers.familyId, familyId)))
+      .where(
+        and(
+          eq(familyMembers.id, memberId),
+          eq(familyMembers.familyId, familyId)
+        )
+      )
       .limit(1);
 
     if (targetMember.length === 0) {
       return NextResponse.json(
-        { success: false, error: { code: "NOT_FOUND", message: "Member not found" } },
+        {
+          success: false,
+          error: { code: "NOT_FOUND", message: "Member not found" },
+        },
         { status: 404 }
       );
     }
@@ -1089,7 +1238,10 @@ export async function DELETE(request: Request, { params }: Params) {
     // Only managers can remove others, anyone can leave (remove themselves)
     if (!isManager && !isSelf) {
       return NextResponse.json(
-        { success: false, error: { code: "FORBIDDEN", message: "Cannot remove this member" } },
+        {
+          success: false,
+          error: { code: "FORBIDDEN", message: "Cannot remove this member" },
+        },
         { status: 403 }
       );
     }
@@ -1099,13 +1251,22 @@ export async function DELETE(request: Request, { params }: Params) {
       const managerCount = await db
         .select({ id: familyMembers.id })
         .from(familyMembers)
-        .where(and(eq(familyMembers.familyId, familyId), eq(familyMembers.role, "manager")));
+        .where(
+          and(
+            eq(familyMembers.familyId, familyId),
+            eq(familyMembers.role, "manager")
+          )
+        );
 
       if (managerCount.length <= 1) {
         return NextResponse.json(
           {
             success: false,
-            error: { code: "LAST_MANAGER", message: "Cannot remove the last manager. Assign another manager first." },
+            error: {
+              code: "LAST_MANAGER",
+              message:
+                "Cannot remove the last manager. Assign another manager first.",
+            },
           },
           { status: 400 }
         );
@@ -1118,7 +1279,10 @@ export async function DELETE(request: Request, { params }: Params) {
   } catch (error) {
     console.error("Error removing member:", error);
     return NextResponse.json(
-      { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to remove member" } },
+      {
+        success: false,
+        error: { code: "INTERNAL_ERROR", message: "Failed to remove member" },
+      },
       { status: 500 }
     );
   }
@@ -1142,6 +1306,7 @@ git commit -m "feat(api): add PATCH/DELETE /api/v1/families/[familyId]/members/[
 ## Task 14: API Route - Family Invites
 
 **Files:**
+
 - Create: `src/app/api/v1/families/[familyId]/invites/route.ts`
 
 **Step 1: Create invites route**
@@ -1170,7 +1335,10 @@ export async function POST(request: Request, { params }: Params) {
 
     if (!session?.user) {
       return NextResponse.json(
-        { success: false, error: { code: "UNAUTHORIZED", message: "Not authenticated" } },
+        {
+          success: false,
+          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
+        },
         { status: 401 }
       );
     }
@@ -1180,7 +1348,13 @@ export async function POST(request: Request, { params }: Params) {
     const isManager = await isUserFamilyManager(session.user.id, familyId);
     if (!isManager) {
       return NextResponse.json(
-        { success: false, error: { code: "FORBIDDEN", message: "Only managers can create invites" } },
+        {
+          success: false,
+          error: {
+            code: "FORBIDDEN",
+            message: "Only managers can create invites",
+          },
+        },
         { status: 403 }
       );
     }
@@ -1188,7 +1362,9 @@ export async function POST(request: Request, { params }: Params) {
     const body = await request.json().catch(() => ({}));
     const parsed = createInviteSchema.safeParse(body);
 
-    const expiresInDays = parsed.success ? parsed.data.expiresInDays : undefined;
+    const expiresInDays = parsed.success
+      ? parsed.data.expiresInDays
+      : undefined;
     const maxUses = parsed.success ? parsed.data.maxUses : undefined;
 
     const inviteId = randomUUID();
@@ -1228,7 +1404,10 @@ export async function POST(request: Request, { params }: Params) {
   } catch (error) {
     console.error("Error creating invite:", error);
     return NextResponse.json(
-      { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to create invite" } },
+      {
+        success: false,
+        error: { code: "INTERNAL_ERROR", message: "Failed to create invite" },
+      },
       { status: 500 }
     );
   }
@@ -1242,7 +1421,10 @@ export async function GET(request: Request, { params }: Params) {
 
     if (!session?.user) {
       return NextResponse.json(
-        { success: false, error: { code: "UNAUTHORIZED", message: "Not authenticated" } },
+        {
+          success: false,
+          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
+        },
         { status: 401 }
       );
     }
@@ -1252,7 +1434,13 @@ export async function GET(request: Request, { params }: Params) {
     const isManager = await isUserFamilyManager(session.user.id, familyId);
     if (!isManager) {
       return NextResponse.json(
-        { success: false, error: { code: "FORBIDDEN", message: "Only managers can view invites" } },
+        {
+          success: false,
+          error: {
+            code: "FORBIDDEN",
+            message: "Only managers can view invites",
+          },
+        },
         { status: 403 }
       );
     }
@@ -1281,7 +1469,10 @@ export async function GET(request: Request, { params }: Params) {
   } catch (error) {
     console.error("Error listing invites:", error);
     return NextResponse.json(
-      { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to list invites" } },
+      {
+        success: false,
+        error: { code: "INTERNAL_ERROR", message: "Failed to list invites" },
+      },
       { status: 500 }
     );
   }
@@ -1305,6 +1496,7 @@ git commit -m "feat(api): add POST/GET /api/v1/families/[familyId]/invites route
 ## Task 15: API Route - Delete Invite
 
 **Files:**
+
 - Create: `src/app/api/v1/families/[familyId]/invites/[inviteId]/route.ts`
 
 **Step 1: Create delete invite route**
@@ -1330,7 +1522,10 @@ export async function DELETE(request: Request, { params }: Params) {
 
     if (!session?.user) {
       return NextResponse.json(
-        { success: false, error: { code: "UNAUTHORIZED", message: "Not authenticated" } },
+        {
+          success: false,
+          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
+        },
         { status: 401 }
       );
     }
@@ -1340,20 +1535,34 @@ export async function DELETE(request: Request, { params }: Params) {
     const isManager = await isUserFamilyManager(session.user.id, familyId);
     if (!isManager) {
       return NextResponse.json(
-        { success: false, error: { code: "FORBIDDEN", message: "Only managers can revoke invites" } },
+        {
+          success: false,
+          error: {
+            code: "FORBIDDEN",
+            message: "Only managers can revoke invites",
+          },
+        },
         { status: 403 }
       );
     }
 
     await db
       .delete(familyInvites)
-      .where(and(eq(familyInvites.id, inviteId), eq(familyInvites.familyId, familyId)));
+      .where(
+        and(
+          eq(familyInvites.id, inviteId),
+          eq(familyInvites.familyId, familyId)
+        )
+      );
 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error revoking invite:", error);
     return NextResponse.json(
-      { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to revoke invite" } },
+      {
+        success: false,
+        error: { code: "INTERNAL_ERROR", message: "Failed to revoke invite" },
+      },
       { status: 500 }
     );
   }
@@ -1377,6 +1586,7 @@ git commit -m "feat(api): add DELETE /api/v1/families/[familyId]/invites/[invite
 ## Task 16: API Route - Validate and Accept Invite
 
 **Files:**
+
 - Create: `src/app/api/v1/invites/[token]/route.ts`
 
 **Step 1: Create invite validation route**
@@ -1448,7 +1658,10 @@ export async function GET(request: Request, { params }: Params) {
   } catch (error) {
     console.error("Error validating invite:", error);
     return NextResponse.json(
-      { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to validate invite" } },
+      {
+        success: false,
+        error: { code: "INTERNAL_ERROR", message: "Failed to validate invite" },
+      },
       { status: 500 }
     );
   }
@@ -1478,7 +1691,10 @@ export async function POST(request: Request, { params }: Params) {
 
     if (!session?.user) {
       return NextResponse.json(
-        { success: false, error: { code: "UNAUTHORIZED", message: "Not authenticated" } },
+        {
+          success: false,
+          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
+        },
         { status: 401 }
       );
     }
@@ -1495,7 +1711,10 @@ export async function POST(request: Request, { params }: Params) {
 
     if (invite.length === 0) {
       return NextResponse.json(
-        { success: false, error: { code: "INVALID_INVITE", message: "Invite not found" } },
+        {
+          success: false,
+          error: { code: "INVALID_INVITE", message: "Invite not found" },
+        },
         { status: 400 }
       );
     }
@@ -1505,7 +1724,10 @@ export async function POST(request: Request, { params }: Params) {
     // Check expiration
     if (inv.expiresAt && inv.expiresAt < now) {
       return NextResponse.json(
-        { success: false, error: { code: "EXPIRED_INVITE", message: "Invite has expired" } },
+        {
+          success: false,
+          error: { code: "EXPIRED_INVITE", message: "Invite has expired" },
+        },
         { status: 400 }
       );
     }
@@ -1513,7 +1735,13 @@ export async function POST(request: Request, { params }: Params) {
     // Check max uses
     if (inv.maxUses !== null && inv.useCount >= inv.maxUses) {
       return NextResponse.json(
-        { success: false, error: { code: "MAX_USES_REACHED", message: "Invite has reached maximum uses" } },
+        {
+          success: false,
+          error: {
+            code: "MAX_USES_REACHED",
+            message: "Invite has reached maximum uses",
+          },
+        },
         { status: 400 }
       );
     }
@@ -1532,7 +1760,13 @@ export async function POST(request: Request, { params }: Params) {
 
     if (existingMembership.length > 0) {
       return NextResponse.json(
-        { success: false, error: { code: "ALREADY_MEMBER", message: "You are already a member of this family" } },
+        {
+          success: false,
+          error: {
+            code: "ALREADY_MEMBER",
+            message: "You are already a member of this family",
+          },
+        },
         { status: 400 }
       );
     }
@@ -1575,7 +1809,10 @@ export async function POST(request: Request, { params }: Params) {
   } catch (error) {
     console.error("Error accepting invite:", error);
     return NextResponse.json(
-      { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to accept invite" } },
+      {
+        success: false,
+        error: { code: "INTERNAL_ERROR", message: "Failed to accept invite" },
+      },
       { status: 500 }
     );
   }
@@ -1603,6 +1840,7 @@ git commit -m "feat(api): add invite validation and acceptance routes"
 ## Task 17: Update Auth Routes Config
 
 **Files:**
+
 - Modify: `src/lib/auth-routes.ts`
 
 **Step 1: Add family-related routes**
@@ -1637,7 +1875,9 @@ export function isAuthApiRoute(pathname: string): boolean {
 
 export function isFamilyRequiredRoute(pathname: string): boolean {
   const pathWithoutLocale = pathname.replace(/^\/(en|nl)/, "") || "/";
-  return familyRequiredRoutes.some((route) => pathWithoutLocale.startsWith(route));
+  return familyRequiredRoutes.some((route) =>
+    pathWithoutLocale.startsWith(route)
+  );
 }
 ```
 
@@ -1658,6 +1898,7 @@ git commit -m "feat(auth): add family route configuration"
 ## Task 18: Update Middleware for Family Check
 
 **Files:**
+
 - Modify: `src/middleware.ts`
 
 **Step 1: Add family membership check**
@@ -1719,7 +1960,10 @@ export async function middleware(request: NextRequest) {
     if (!hasFamilyCookie?.value) {
       // Redirect to onboarding
       const locale = pathname.match(/^\/(en|nl)/)?.[1] || "nl";
-      const onboardingUrl = new URL(`/${locale}${onboardingRoute}`, request.url);
+      const onboardingUrl = new URL(
+        `/${locale}${onboardingRoute}`,
+        request.url
+      );
       return NextResponse.redirect(onboardingUrl);
     }
   }
@@ -1749,6 +1993,7 @@ git commit -m "feat(middleware): add family membership check"
 ## Task 19: Family Cookie Utility
 
 **Files:**
+
 - Create: `src/lib/family-cookie.ts`
 
 **Step 1: Create family cookie utility**
@@ -1800,6 +2045,7 @@ git commit -m "feat(util): add family cookie management"
 ## Task 20: Shared Component - Role Badge
 
 **Files:**
+
 - Create: `src/components/family/role-badge.tsx`
 
 **Step 1: Create role badge component**
@@ -1816,18 +2062,23 @@ interface RoleBadgeProps {
   className?: string;
 }
 
-const roleConfig: Record<FamilyMemberRole, { label: string; className: string }> = {
+const roleConfig: Record<
+  FamilyMemberRole,
+  { label: string; className: string }
+> = {
   manager: {
     label: "Manager",
     className: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
   },
   participant: {
     label: "Member",
-    className: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+    className:
+      "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
   },
   caregiver: {
     label: "Caregiver",
-    className: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
+    className:
+      "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
   },
 };
 
@@ -1859,6 +2110,7 @@ git commit -m "feat(ui): add RoleBadge component"
 ## Task 21: Shared Component - Avatar Color Picker
 
 **Files:**
+
 - Create: `src/components/family/avatar-color-picker.tsx`
 
 **Step 1: Create avatar color picker component**
@@ -1903,7 +2155,7 @@ export function AvatarColorPicker({
           type="button"
           onClick={() => onChange(color)}
           className={cn(
-            "h-10 w-10 rounded-full flex items-center justify-center transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary",
+            "focus:ring-primary flex h-10 w-10 items-center justify-center rounded-full transition-transform hover:scale-110 focus:ring-2 focus:ring-offset-2 focus:outline-none",
             colorClasses[color]
           )}
           aria-label={color}
@@ -1933,6 +2185,7 @@ git commit -m "feat(ui): add AvatarColorPicker component"
 ## Task 22: Shared Component - Family Avatar
 
 **Files:**
+
 - Create: `src/components/family/family-avatar.tsx`
 
 **Step 1: Create family avatar component**
@@ -1987,7 +2240,7 @@ export function FamilyAvatar({
   return (
     <div
       className={cn(
-        "rounded-full flex items-center justify-center font-medium text-white",
+        "flex items-center justify-center rounded-full font-medium text-white",
         bgClass,
         sizeClasses[size],
         className
@@ -2016,6 +2269,7 @@ git commit -m "feat(ui): add FamilyAvatar component"
 ## Task 23: Onboarding Layout
 
 **Files:**
+
 - Create: `src/app/[locale]/onboarding/layout.tsx`
 
 **Step 1: Create onboarding layout**
@@ -2039,10 +2293,8 @@ export default async function OnboardingLayout({
   setRequestLocale(locale as Locale);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="w-full max-w-md">
-        {children}
-      </div>
+    <div className="bg-background flex min-h-screen items-center justify-center p-4">
+      <div className="w-full max-w-md">{children}</div>
     </div>
   );
 }
@@ -2065,6 +2317,7 @@ git commit -m "feat(onboarding): add onboarding layout"
 ## Task 24: Onboarding Entry Page
 
 **Files:**
+
 - Create: `src/app/[locale]/onboarding/page.tsx`
 
 **Step 1: Create onboarding entry page**
@@ -2122,6 +2375,7 @@ git commit -m "feat(onboarding): add onboarding entry page"
 ## Task 25: Create Family Form Component
 
 **Files:**
+
 - Create: `src/components/family/onboarding/create-family-form.tsx`
 
 **Step 1: Create the form component**
@@ -2153,7 +2407,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { createFamilySchema, type CreateFamilyInput } from "@/lib/validations/family";
+import {
+  createFamilySchema,
+  type CreateFamilyInput,
+} from "@/lib/validations/family";
 import { Loader2 } from "lucide-react";
 
 interface CreateFamilyFormProps {
@@ -2254,6 +2511,7 @@ git commit -m "feat(ui): add CreateFamilyForm component"
 ## Task 26: Onboarding Create Page
 
 **Files:**
+
 - Create: `src/app/[locale]/onboarding/create/page.tsx`
 
 **Step 1: Create the create family page**
@@ -2310,6 +2568,7 @@ git commit -m "feat(onboarding): add create family page"
 ## Task 27: Invite Members Step Component
 
 **Files:**
+
 - Create: `src/components/family/onboarding/invite-members-step.tsx`
 
 **Step 1: Create the invite step component**
@@ -2339,7 +2598,10 @@ interface InviteMembersStepProps {
   locale: string;
 }
 
-export function InviteMembersStep({ familyId, locale }: InviteMembersStepProps) {
+export function InviteMembersStep({
+  familyId,
+  locale,
+}: InviteMembersStepProps) {
   const router = useRouter();
   const [inviteUrl, setInviteUrl] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -2418,7 +2680,7 @@ export function InviteMembersStep({ familyId, locale }: InviteMembersStepProps) 
                 )}
               </Button>
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               Share this link with family members to invite them
             </p>
           </div>
@@ -2461,6 +2723,7 @@ git commit -m "feat(ui): add InviteMembersStep component"
 ## Task 28: Onboarding Invite Page
 
 **Files:**
+
 - Create: `src/app/[locale]/onboarding/invite/page.tsx`
 
 **Step 1: Create the invite page**
@@ -2516,6 +2779,7 @@ git commit -m "feat(onboarding): add invite members page"
 ## Task 29: Onboarding Complete Page
 
 **Files:**
+
 - Create: `src/app/[locale]/onboarding/complete/page.tsx`
 
 **Step 1: Create the complete page**
@@ -2565,7 +2829,7 @@ export default async function CompletePage({ params }: CompletePageProps) {
         </div>
         <CardTitle className="text-2xl">All Set!</CardTitle>
       </CardHeader>
-      <CardContent className="text-center space-y-4">
+      <CardContent className="space-y-4 text-center">
         <p className="text-muted-foreground">
           Your family &ldquo;{family.name}&rdquo; is ready to go.
         </p>
@@ -2595,6 +2859,7 @@ git commit -m "feat(onboarding): add complete page with cookie setup"
 ## Task 30: Join Family Page
 
 **Files:**
+
 - Create: `src/app/[locale]/join/[token]/page.tsx`
 
 **Step 1: Create the join family page**
@@ -2720,7 +2985,7 @@ export function JoinFamilyClient({ token, locale }: JoinFamilyClientProps) {
     return (
       <Card>
         <CardContent className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <Loader2 className="text-muted-foreground h-8 w-8 animate-spin" />
         </CardContent>
       </Card>
     );
@@ -2760,9 +3025,7 @@ export function JoinFamilyClient({ token, locale }: JoinFamilyClientProps) {
           <Users className="h-10 w-10 text-blue-600 dark:text-blue-400" />
         </div>
         <CardTitle className="text-2xl">Join Family</CardTitle>
-        <CardDescription>
-          You&apos;ve been invited to join
-        </CardDescription>
+        <CardDescription>You&apos;ve been invited to join</CardDescription>
       </CardHeader>
       <CardContent className="text-center">
         <p className="text-xl font-semibold">{validation.familyName}</p>
@@ -2795,6 +3058,7 @@ git commit -m "feat(join): add join family page and client component"
 ## Task 31: Family Settings Page
 
 **Files:**
+
 - Create: `src/app/[locale]/settings/family/page.tsx`
 
 **Step 1: Create the family settings page**
@@ -2806,7 +3070,10 @@ import { redirect } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { getSession } from "@/lib/get-session";
-import { getUserFamily, getFamilyMembers } from "@/server/services/family-service";
+import {
+  getUserFamily,
+  getFamilyMembers,
+} from "@/server/services/family-service";
 import { FamilySettingsClient } from "@/components/family/family-settings-client";
 
 interface FamilySettingsPageProps {
@@ -2872,6 +3139,7 @@ git commit -m "feat(settings): add family settings page"
 ## Task 32: Family Settings Client Component
 
 **Files:**
+
 - Create: `src/components/family/family-settings-client.tsx`
 
 **Step 1: Create the family settings client component**
@@ -3094,7 +3362,7 @@ export function FamilySettingsClient({
               </>
             )}
           </div>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Created {new Date(family.createdAt).toLocaleDateString()}
           </p>
         </CardContent>
@@ -3141,9 +3409,7 @@ export function FamilySettingsClient({
       <Card>
         <CardHeader>
           <CardTitle>Leave Family</CardTitle>
-          <CardDescription>
-            Remove yourself from this family
-          </CardDescription>
+          <CardDescription>Remove yourself from this family</CardDescription>
         </CardHeader>
         <CardContent>
           <AlertDialog>
@@ -3190,6 +3456,7 @@ git commit -m "feat(ui): add FamilySettingsClient component"
 ## Task 33: Family Member Card Component
 
 **Files:**
+
 - Create: `src/components/family/family-member-card.tsx`
 
 **Step 1: Create the member card component**
@@ -3200,7 +3467,11 @@ git commit -m "feat(ui): add FamilySettingsClient component"
 "use client";
 
 import { useState } from "react";
-import type { FamilyMemberWithUser, FamilyMemberRole, AvatarColor } from "@/types/family";
+import type {
+  FamilyMemberWithUser,
+  FamilyMemberRole,
+  AvatarColor,
+} from "@/types/family";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -3246,7 +3517,7 @@ export function FamilyMemberCard({
   const displayName = member.displayName || member.user.name;
 
   return (
-    <div className="flex items-center justify-between p-3 rounded-lg border">
+    <div className="flex items-center justify-between rounded-lg border p-3">
       <div className="flex items-center gap-3">
         <FamilyAvatar
           name={displayName}
@@ -3256,11 +3527,11 @@ export function FamilyMemberCard({
           <div className="flex items-center gap-2">
             <span className="font-medium">{displayName}</span>
             {isCurrentUser && (
-              <span className="text-xs text-muted-foreground">(you)</span>
+              <span className="text-muted-foreground text-xs">(you)</span>
             )}
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">
+            <span className="text-muted-foreground text-sm">
               {member.user.email}
             </span>
             <RoleBadge role={member.role as FamilyMemberRole} />
@@ -3283,7 +3554,7 @@ export function FamilyMemberCard({
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button size="icon" variant="ghost">
-                <Trash2 className="h-4 w-4 text-destructive" />
+                <Trash2 className="text-destructive h-4 w-4" />
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
@@ -3331,6 +3602,7 @@ git commit -m "feat(ui): add FamilyMemberCard component"
 ## Task 34: Member Edit Dialog Component
 
 **Files:**
+
 - Create: `src/components/family/member-edit-dialog.tsx`
 
 **Step 1: Create the member edit dialog component**
@@ -3341,7 +3613,11 @@ git commit -m "feat(ui): add FamilyMemberCard component"
 "use client";
 
 import { useState } from "react";
-import type { FamilyMemberWithUser, FamilyMemberRole, AvatarColor } from "@/types/family";
+import type {
+  FamilyMemberWithUser,
+  FamilyMemberRole,
+  AvatarColor,
+} from "@/types/family";
 import { FAMILY_MEMBER_ROLES } from "@/types/family";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -3424,7 +3700,7 @@ export function MemberEditDialog({
               onChange={(e) => setDisplayName(e.target.value)}
               placeholder={member.user.name}
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               Leave empty to use account name
             </p>
           </div>
@@ -3437,7 +3713,10 @@ export function MemberEditDialog({
           {canChangeRole && (
             <div className="space-y-2">
               <Label htmlFor="role">Role</Label>
-              <Select value={role} onValueChange={(v) => setRole(v as FamilyMemberRole)}>
+              <Select
+                value={role}
+                onValueChange={(v) => setRole(v as FamilyMemberRole)}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -3482,6 +3761,7 @@ git commit -m "feat(ui): add MemberEditDialog component"
 ## Task 35: Invite Link Generator Component
 
 **Files:**
+
 - Create: `src/components/family/invite-link-generator.tsx`
 
 **Step 1: Create the invite link generator component**
@@ -3559,7 +3839,11 @@ export function InviteLinkGenerator({ familyId }: InviteLinkGeneratorProps) {
       <div className="flex gap-2">
         <Input value={inviteUrl} readOnly className="font-mono text-sm" />
         <Button onClick={copyToClipboard} variant="outline" size="icon">
-          {isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+          {isCopied ? (
+            <Check className="h-4 w-4" />
+          ) : (
+            <Copy className="h-4 w-4" />
+          )}
         </Button>
         <Button
           onClick={generateInvite}
@@ -3574,7 +3858,7 @@ export function InviteLinkGenerator({ familyId }: InviteLinkGeneratorProps) {
           )}
         </Button>
       </div>
-      <p className="text-sm text-muted-foreground">
+      <p className="text-muted-foreground text-sm">
         Share this link with family members to invite them
       </p>
     </div>
@@ -3599,6 +3883,7 @@ git commit -m "feat(ui): add InviteLinkGenerator component"
 ## Task 36: Add Translations
 
 **Files:**
+
 - Modify: `messages/en.json`
 - Modify: `messages/nl.json`
 
@@ -3677,6 +3962,7 @@ git commit -m "feat(i18n): add family translations"
 ## Task 37: Add Family Settings to User Menu
 
 **Files:**
+
 - Modify: `src/components/auth/user-menu.tsx`
 
 **Step 1: Add family settings link to user menu**

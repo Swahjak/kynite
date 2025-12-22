@@ -13,6 +13,7 @@
 ## Task 1: Create Google Sign-In Button Component
 
 **Files:**
+
 - Create: `src/components/auth/google-sign-in-button.tsx`
 
 **Step 1: Create the component file**
@@ -107,6 +108,7 @@ git commit -m "feat(auth): add Google sign-in button component"
 ## Task 2: Update Login Page
 
 **Files:**
+
 - Modify: `src/app/[locale]/login/page.tsx`
 
 **Step 1: Replace login page content**
@@ -175,6 +177,7 @@ git commit -m "feat(auth): replace login form with Google SSO button"
 ## Task 3: Remove Signup Page
 
 **Files:**
+
 - Delete: `src/app/[locale]/signup/page.tsx`
 
 **Step 1: Delete the signup page**
@@ -195,6 +198,7 @@ git commit -m "feat(auth): remove signup page (Google SSO handles registration)"
 ## Task 4: Update Auth Routes Configuration
 
 **Files:**
+
 - Modify: `src/lib/auth-routes.ts`
 
 **Step 1: Remove signup from public routes**
@@ -221,6 +225,7 @@ git commit -m "feat(auth): remove signup from public routes"
 ## Task 5: Update Auth Client Exports
 
 **Files:**
+
 - Modify: `src/lib/auth-client.ts`
 
 **Step 1: Remove signUp export**
@@ -247,6 +252,7 @@ git commit -m "refactor(auth): remove signUp export (no longer used)"
 ## Task 6: Update Translations
 
 **Files:**
+
 - Modify: `messages/en.json`
 - Modify: `messages/nl.json`
 
@@ -294,6 +300,7 @@ git commit -m "feat(i18n): update auth translations for Google SSO"
 ## Task 7: Update Auth Server Configuration
 
 **Files:**
+
 - Modify: `src/server/auth.ts`
 
 **Step 1: Remove emailAndPassword config**
@@ -341,6 +348,7 @@ git commit -m "feat(auth): disable email/password, remove verifications from sch
 ## Task 8: Update Database Schema
 
 **Files:**
+
 - Modify: `src/server/schema.ts`
 
 **Step 1: Remove password column from accounts table**
@@ -398,6 +406,7 @@ git commit -m "feat(db): remove verifications table and password column"
 ## Task 9: Prevent Unlinking Only Google Account
 
 **Files:**
+
 - Modify: `src/app/api/v1/accounts/linked/[accountId]/route.ts`
 
 **Step 1: Add count check before deletion**
@@ -412,10 +421,7 @@ const googleAccountCount = await db
   .select({ id: accounts.id })
   .from(accounts)
   .where(
-    and(
-      eq(accounts.userId, session.user.id),
-      eq(accounts.providerId, "google")
-    )
+    and(eq(accounts.userId, session.user.id), eq(accounts.providerId, "google"))
   );
 
 if (googleAccountCount.length <= 1) {
@@ -444,6 +450,7 @@ git commit -m "fix(api): prevent unlinking only Google account"
 ## Task 10: Delete Unused Auth Components
 
 **Files:**
+
 - Delete: `src/components/auth/login-form.tsx`
 - Delete: `src/components/auth/signup-form.tsx`
 
@@ -529,17 +536,17 @@ Run: `pnpm dev`
 
 ## Summary
 
-| Task | Description | Commit Message |
-|------|-------------|----------------|
-| 1 | Create Google sign-in button | `feat(auth): add Google sign-in button component` |
-| 2 | Update login page | `feat(auth): replace login form with Google SSO button` |
-| 3 | Remove signup page | `feat(auth): remove signup page (Google SSO handles registration)` |
-| 4 | Update auth routes | `feat(auth): remove signup from public routes` |
-| 5 | Update auth client | `refactor(auth): remove signUp export (no longer used)` |
-| 6 | Update translations | `feat(i18n): update auth translations for Google SSO` |
-| 7 | Update auth config | `feat(auth): disable email/password, remove verifications from schema` |
-| 8 | Update database schema | `feat(db): remove verifications table and password column` |
-| 9 | Prevent unlinking only account | `fix(api): prevent unlinking only Google account` |
-| 10 | Delete unused components | `refactor(auth): remove unused email/password form components` |
-| 11 | Verify build | N/A |
-| 12 | Manual testing | N/A |
+| Task | Description                    | Commit Message                                                         |
+| ---- | ------------------------------ | ---------------------------------------------------------------------- |
+| 1    | Create Google sign-in button   | `feat(auth): add Google sign-in button component`                      |
+| 2    | Update login page              | `feat(auth): replace login form with Google SSO button`                |
+| 3    | Remove signup page             | `feat(auth): remove signup page (Google SSO handles registration)`     |
+| 4    | Update auth routes             | `feat(auth): remove signup from public routes`                         |
+| 5    | Update auth client             | `refactor(auth): remove signUp export (no longer used)`                |
+| 6    | Update translations            | `feat(i18n): update auth translations for Google SSO`                  |
+| 7    | Update auth config             | `feat(auth): disable email/password, remove verifications from schema` |
+| 8    | Update database schema         | `feat(db): remove verifications table and password column`             |
+| 9    | Prevent unlinking only account | `fix(api): prevent unlinking only Google account`                      |
+| 10   | Delete unused components       | `refactor(auth): remove unused email/password form components`         |
+| 11   | Verify build                   | N/A                                                                    |
+| 12   | Manual testing                 | N/A                                                                    |
