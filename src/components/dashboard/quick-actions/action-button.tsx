@@ -33,11 +33,11 @@ export function ActionButton({ action }: ActionButtonProps) {
   return (
     <Button
       variant="outline"
-      className="h-20 flex-col gap-1 transition-transform active:scale-95"
+      className="h-16 flex-col gap-1 rounded-lg transition-transform active:scale-95"
       disabled={isDisabled}
       onClick={() => startQuickAction(action.id)}
     >
-      <Icon className="h-6 w-6" />
+      <Icon className="h-5 w-5" />
       <span className="text-xs font-medium">{action.label}</span>
     </Button>
   );

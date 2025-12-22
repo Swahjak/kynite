@@ -15,14 +15,14 @@ export function GreetingClock() {
   });
 
   return (
-    <div className="py-8 text-center">
-      <p className="text-muted-foreground mb-2 text-lg">
+    <div className="py-4 md:py-6">
+      <p className="text-muted-foreground mb-1 text-base md:text-lg">
         {t(`greeting.${timeOfDay}`)}
       </p>
       <time
         dateTime={currentTime.toISOString()}
         suppressHydrationWarning
-        className="text-5xl font-bold tracking-tight tabular-nums sm:text-6xl lg:text-7xl"
+        className="text-4xl font-bold tracking-tight tabular-nums sm:text-5xl md:text-6xl"
       >
         {formattedTime}
       </time>

@@ -15,20 +15,15 @@ export function WeeklyStars() {
   );
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-base">
-          <Trophy className="text-muted-foreground h-5 w-5" />
-          {t("title")}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="pt-0">
-        <div className="space-y-1">
-          {sortedMembers.map((member, index) => (
-            <MemberRow key={member.id} member={member} rank={index + 1} />
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+    <div className="space-y-2">
+      <h3 className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
+        {t("title")}
+      </h3>
+      <div className="space-y-1">
+        {sortedMembers.map((member, index) => (
+          <MemberRow key={member.id} member={member} rank={index + 1} />
+        ))}
+      </div>
+    </div>
   );
 }
