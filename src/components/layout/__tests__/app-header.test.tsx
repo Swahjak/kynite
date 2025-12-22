@@ -15,6 +15,14 @@ vi.mock("@/i18n/navigation", () => ({
   usePathname: () => "/calendar",
 }));
 
+// Mock Next.js navigation
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+    refresh: vi.fn(),
+  }),
+}));
+
 // Mock useSession from better-auth
 vi.mock("@/lib/auth-client", () => ({
   useSession: () => ({

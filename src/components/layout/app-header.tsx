@@ -7,9 +7,9 @@ import { useSession } from "@/lib/auth-client";
 import { useInteractionMode } from "@/contexts/interaction-mode-context";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { BrandArea } from "./brand-area";
 import { NavigationMenu } from "./navigation-menu";
+import { UserMenu } from "@/components/auth/user-menu";
 
 interface AppHeaderProps {
   onAddEvent?: () => void;
@@ -22,13 +22,6 @@ export function AppHeader({ onAddEvent }: AppHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const user = session?.user;
-  const initials = user?.name
-    ?.split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-
   const isManageMode = mode === "manage";
 
   return (
@@ -77,22 +70,17 @@ export function AppHeader({ onAddEvent }: AppHeaderProps) {
                 <Plus className="size-5" />
               </Button>
 
-              {/* User Avatar */}
+              {/* User Menu */}
               {user && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="rounded-full"
-                  data-testid="user-avatar"
-                >
-                  <Avatar className="size-9">
-                    <AvatarImage
-                      src={user.image || undefined}
-                      alt={user.name || "User"}
-                    />
-                    <AvatarFallback>{initials || "U"}</AvatarFallback>
-                  </Avatar>
-                </Button>
+                <div data-testid="user-avatar">
+                  <UserMenu
+                    user={{
+                      name: user.name || "User",
+                      email: user.email || "",
+                      image: user.image,
+                    }}
+                  />
+                </div>
               )}
             </>
           )}

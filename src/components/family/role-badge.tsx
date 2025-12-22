@@ -3,9 +3,10 @@ import type { FamilyMemberRole } from "@/types/family";
 
 interface RoleBadgeProps {
   role: FamilyMemberRole;
+  className?: string;
 }
 
-export function RoleBadge({ role }: RoleBadgeProps) {
+export function RoleBadge({ role, className }: RoleBadgeProps) {
   const variantMap: Record<
     FamilyMemberRole,
     "default" | "secondary" | "outline"
@@ -15,9 +16,15 @@ export function RoleBadge({ role }: RoleBadgeProps) {
     caregiver: "outline",
   };
 
+  const roleLabels: Record<FamilyMemberRole, string> = {
+    manager: "Manager",
+    participant: "Member",
+    caregiver: "Caregiver",
+  };
+
   return (
-    <Badge variant={variantMap[role]}>
-      {role.charAt(0).toUpperCase() + role.slice(1)}
+    <Badge variant={variantMap[role]} className={className}>
+      {roleLabels[role]}
     </Badge>
   );
 }

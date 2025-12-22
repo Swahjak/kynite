@@ -6,9 +6,15 @@ interface FamilyAvatarProps {
   name: string;
   color?: AvatarColor | null;
   size?: "sm" | "md" | "lg";
+  className?: string;
 }
 
-export function FamilyAvatar({ name, color, size = "md" }: FamilyAvatarProps) {
+export function FamilyAvatar({
+  name,
+  color,
+  size = "md",
+  className,
+}: FamilyAvatarProps) {
   const sizeClasses = {
     sm: "size-8 text-xs",
     md: "size-10 text-sm",
@@ -26,19 +32,24 @@ export function FamilyAvatar({ name, color, size = "md" }: FamilyAvatarProps) {
     teal: "bg-[var(--event-teal-border)] text-white",
   };
 
-  const getInitial = (name: string) => {
-    return name.charAt(0).toUpperCase();
+  const getInitials = (name: string): string => {
+    return name
+      .split(" ")
+      .map((part) => part[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   return (
-    <Avatar className={cn(sizeClasses[size])}>
+    <Avatar className={cn(sizeClasses[size], className)}>
       <AvatarFallback
         className={cn(
           "font-semibold",
           color ? colorClassMap[color] : "bg-muted text-muted-foreground"
         )}
       >
-        {getInitial(name)}
+        {getInitials(name)}
       </AvatarFallback>
     </Avatar>
   );

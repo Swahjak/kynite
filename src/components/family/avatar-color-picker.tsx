@@ -7,9 +7,14 @@ import { AVATAR_COLORS } from "@/types/family";
 interface AvatarColorPickerProps {
   value: AvatarColor | null;
   onChange: (color: AvatarColor | null) => void;
+  className?: string;
 }
 
-export function AvatarColorPicker({ value, onChange }: AvatarColorPickerProps) {
+export function AvatarColorPicker({
+  value,
+  onChange,
+  className,
+}: AvatarColorPickerProps) {
   const colorClassMap: Record<AvatarColor, string> = {
     blue: "bg-[var(--event-blue-border)]",
     purple: "bg-[var(--event-purple-border)]",
@@ -22,7 +27,7 @@ export function AvatarColorPicker({ value, onChange }: AvatarColorPickerProps) {
   };
 
   return (
-    <div className="grid grid-cols-4 gap-2">
+    <div className={cn("grid grid-cols-4 gap-2", className)}>
       {AVATAR_COLORS.map((color) => (
         <button
           key={color}
