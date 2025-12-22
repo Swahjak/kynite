@@ -157,5 +157,38 @@
       "title": "Google Accounts",
       "description": "Manage your connected Google accounts for calendar access"
     }
+  },
+  "chores": {
+    "title": "Chores",
+    "greeting": {
+      "morning": "Good Morning",
+      "afternoon": "Good Afternoon",
+      "evening": "Good Evening"
+    },
+    "subtitle": "Let's crush today's goals.",
+    "filters": {
+      "all": "All Chores",
+      "byPerson": "By Person",
+      "urgent": "Urgent"
+    },
+    "progress": {
+      "streak": "Daily Streak: {days} Days",
+      "done": "{completed}/{total} Done"
+    },
+    "empty": {
+      "all": "All done! No pending chores.",
+      "urgent": "No urgent chores. Everything is on track!",
+      "person": "No chores assigned"
+    },
+    "labels": {
+      "overdue": "Overdue",
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "weekdays": "Weekdays",
+      "weekend": "Weekend",
+      "monthly": "Monthly"
+    }
   }
 }

@@ -157,5 +157,38 @@
       "title": "Google-accounts",
       "description": "Beheer je gekoppelde Google-accounts voor kalendertoegang"
     }
+  },
+  "chores": {
+    "title": "Klusjes",
+    "greeting": {
+      "morning": "Goedemorgen",
+      "afternoon": "Goedemiddag",
+      "evening": "Goedenavond"
+    },
+    "subtitle": "Laten we vandaag aan de slag gaan.",
+    "filters": {
+      "all": "Alle klusjes",
+      "byPerson": "Per persoon",
+      "urgent": "Dringend"
+    },
+    "progress": {
+      "streak": "Dagelijkse reeks: {days} dagen",
+      "done": "{completed}/{total} Klaar"
+    },
+    "empty": {
+      "all": "Alles gedaan! Geen openstaande klusjes.",
+      "urgent": "Geen dringende klusjes. Alles op schema!",
+      "person": "Geen klusjes toegewezen"
+    },
+    "labels": {
+      "overdue": "Te laat",
+      "today": "Vandaag",
+      "tomorrow": "Morgen",
+      "daily": "Dagelijks",
+      "weekly": "Wekelijks",
+      "weekdays": "Weekdagen",
+      "weekend": "Weekend",
+      "monthly": "Maandelijks"
+    }
   }
 }
