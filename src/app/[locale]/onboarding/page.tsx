@@ -3,7 +3,6 @@ import { setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { getSession } from "@/lib/get-session";
 import { getUserFamily } from "@/server/services/family-service";
-import { setFamilyCookie } from "@/lib/family-cookie";
 
 interface OnboardingPageProps {
   params: Promise<{ locale: string }>;

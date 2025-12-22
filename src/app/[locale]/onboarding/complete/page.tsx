@@ -3,7 +3,6 @@ import { setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { getSession } from "@/lib/get-session";
 import { getUserFamily } from "@/server/services/family-service";
-import { setFamilyCookie } from "@/lib/family-cookie";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle } from "lucide-react";
@@ -29,8 +28,7 @@ export default async function CompletePage({ params }: CompletePageProps) {
     redirect(`/${locale}/onboarding/create`);
   }
 
-  // Set the family cookie so middleware allows access to protected routes
-  await setFamilyCookie();
+  // No cookie needed - session now includes familyId via customSession
 
   return (
     <Card>
