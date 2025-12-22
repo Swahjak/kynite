@@ -20,6 +20,7 @@ vi.mock("@/i18n/navigation", () => ({
 const messages = {
   Header: { brand: "Family Planner", tagline: "FAMILY OS" },
   Menu: {
+    dashboard: "Dashboard",
     calendar: "Calendar",
     chores: "Chores",
     settings: "Settings",
@@ -42,6 +43,7 @@ describe("NavigationMenu", () => {
   it("renders all items in manage mode", () => {
     renderWithProviders(<NavigationMenu open={true} onOpenChange={() => {}} />);
 
+    expect(screen.getByText("Dashboard")).toBeInTheDocument();
     expect(screen.getByText("Calendar")).toBeInTheDocument();
     expect(screen.getByText("Chores")).toBeInTheDocument();
     expect(screen.getByText("Settings")).toBeInTheDocument();
@@ -54,6 +56,7 @@ describe("NavigationMenu", () => {
       "wall"
     );
 
+    expect(screen.getByText("Dashboard")).toBeInTheDocument();
     expect(screen.getByText("Calendar")).toBeInTheDocument();
     expect(screen.queryByText("Chores")).not.toBeInTheDocument();
     expect(screen.queryByText("Settings")).not.toBeInTheDocument();

@@ -40,6 +40,7 @@ const messages = {
     addEvent: "Add Event",
   },
   Menu: {
+    dashboard: "Dashboard",
     calendar: "Calendar",
     chores: "Chores",
     settings: "Settings",
