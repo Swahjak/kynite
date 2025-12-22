@@ -124,6 +124,32 @@ export const familyInvites = pgTable("family_invites", {
 });
 
 // ============================================================================
+// Google Calendar Sync Tables
+// ============================================================================
+
+/**
+ * Google Calendars table - Tracks synced calendars per family
+ */
+export const googleCalendars = pgTable("google_calendars", {
+  id: text("id").primaryKey(),
+  familyId: text("family_id")
+    .notNull()
+    .references(() => families.id, { onDelete: "cascade" }),
+  accountId: text("account_id")
+    .notNull()
+    .references(() => accounts.id, { onDelete: "cascade" }),
+  googleCalendarId: text("google_calendar_id").notNull(),
+  name: text("name").notNull(),
+  color: text("color"),
+  accessRole: text("access_role").notNull().default("reader"), // 'owner' | 'writer' | 'reader'
+  syncEnabled: boolean("sync_enabled").notNull().default(true),
+  lastSyncedAt: timestamp("last_synced_at", { mode: "date" }),
+  syncCursor: text("sync_cursor"), // Google's sync token for incremental updates
+  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
+});
+
+// ============================================================================
 // Drizzle Relations
 // ============================================================================
 
@@ -154,6 +180,20 @@ export const familyInvitesRelations = relations(familyInvites, ({ one }) => ({
   }),
 }));
 
+export const googleCalendarsRelations = relations(
+  googleCalendars,
+  ({ one }) => ({
+    family: one(families, {
+      fields: [googleCalendars.familyId],
+      references: [families.id],
+    }),
+    account: one(accounts, {
+      fields: [googleCalendars.accountId],
+      references: [accounts.id],
+    }),
+  })
+);
+
 // ============================================================================
 // Type Exports
 // ============================================================================
@@ -170,3 +210,5 @@ export type FamilyMember = typeof familyMembers.$inferSelect;
 export type NewFamilyMember = typeof familyMembers.$inferInsert;
 export type FamilyInvite = typeof familyInvites.$inferSelect;
 export type NewFamilyInvite = typeof familyInvites.$inferInsert;
+export type GoogleCalendar = typeof googleCalendars.$inferSelect;
+export type NewGoogleCalendar = typeof googleCalendars.$inferInsert;
