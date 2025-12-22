@@ -236,6 +236,12 @@
   }
 }
 
+@layer utilities {
+  .hover\:bg-primary-hover:hover {
+    background-color: var(--primary-hover);
+  }
+}
+
 @layer components {
   /* Event color utilities - use as: className="event-blue" */
   .event-blue {
