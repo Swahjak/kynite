@@ -15,6 +15,12 @@ if (!process.env.BETTER_AUTH_URL) {
   );
 }
 
+if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+  console.warn(
+    "GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET not set. Google OAuth disabled."
+  );
+}
+
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
@@ -29,6 +35,35 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false,
+  },
+
+  // Google OAuth provider for calendar access
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      // Request refresh tokens for server-side API access
+      accessType: "offline",
+      // Always show consent to ensure refresh token is returned
+      prompt: "select_account consent",
+      // Request calendar scopes for Story 1.2
+      scope: [
+        "email",
+        "profile",
+        "https://www.googleapis.com/auth/calendar.readonly",
+        "https://www.googleapis.com/auth/calendar.events.readonly",
+        "https://www.googleapis.com/auth/calendar.calendarlist.readonly",
+      ],
+    },
+  },
+
+  // Enable account linking for multi-account support
+  account: {
+    accountLinking: {
+      enabled: true,
+      // Allow linking Google accounts with different emails
+      allowDifferentEmails: true,
+    },
   },
 
   session: {
