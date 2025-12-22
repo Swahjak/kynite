@@ -1,4 +1,11 @@
-import { pgTable, text, timestamp, boolean } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  timestamp,
+  boolean,
+  integer,
+} from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 
 // ============================================================================
 // Better-Auth Required Tables
@@ -68,6 +75,86 @@ export const verifications = pgTable("verifications", {
 });
 
 // ============================================================================
+// Family Management Tables
+// ============================================================================
+
+/**
+ * Families table - Core household information
+ */
+export const families = pgTable("families", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
+});
+
+/**
+ * Family Members table - User membership in families with roles
+ */
+export const familyMembers = pgTable("family_members", {
+  id: text("id").primaryKey(),
+  familyId: text("family_id")
+    .notNull()
+    .references(() => families.id, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  role: text("role").notNull(), // 'manager' | 'participant' | 'caregiver'
+  displayName: text("display_name"),
+  avatarColor: text("avatar_color"),
+  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+});
+
+/**
+ * Family Invites table - Shareable invitation links
+ */
+export const familyInvites = pgTable("family_invites", {
+  id: text("id").primaryKey(),
+  familyId: text("family_id")
+    .notNull()
+    .references(() => families.id, { onDelete: "cascade" }),
+  token: text("token").notNull().unique(),
+  createdById: text("created_by_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  expiresAt: timestamp("expires_at", { mode: "date" }),
+  maxUses: integer("max_uses"),
+  useCount: integer("use_count").notNull().default(0),
+  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+});
+
+// ============================================================================
+// Drizzle Relations
+// ============================================================================
+
+export const familiesRelations = relations(families, ({ many }) => ({
+  members: many(familyMembers),
+  invites: many(familyInvites),
+}));
+
+export const familyMembersRelations = relations(familyMembers, ({ one }) => ({
+  family: one(families, {
+    fields: [familyMembers.familyId],
+    references: [families.id],
+  }),
+  user: one(users, {
+    fields: [familyMembers.userId],
+    references: [users.id],
+  }),
+}));
+
+export const familyInvitesRelations = relations(familyInvites, ({ one }) => ({
+  family: one(families, {
+    fields: [familyInvites.familyId],
+    references: [families.id],
+  }),
+  createdBy: one(users, {
+    fields: [familyInvites.createdById],
+    references: [users.id],
+  }),
+}));
+
+// ============================================================================
 // Type Exports
 // ============================================================================
 
@@ -77,3 +164,9 @@ export type Session = typeof sessions.$inferSelect;
 export type NewSession = typeof sessions.$inferInsert;
 export type Account = typeof accounts.$inferSelect;
 export type NewAccount = typeof accounts.$inferInsert;
+export type Family = typeof families.$inferSelect;
+export type NewFamily = typeof families.$inferInsert;
+export type FamilyMember = typeof familyMembers.$inferSelect;
+export type NewFamilyMember = typeof familyMembers.$inferInsert;
+export type FamilyInvite = typeof familyInvites.$inferSelect;
+export type NewFamilyInvite = typeof familyInvites.$inferInsert;
