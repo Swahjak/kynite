@@ -73,28 +73,12 @@
     "english": "English"
   },
   "Auth": {
-    "login": "Log in",
-    "signup": "Sign up",
-    "email": "Email",
-    "password": "Password",
-    "confirmPassword": "Confirm password",
-    "name": "Name",
-    "loginTitle": "Welcome back",
-    "loginDescription": "Enter your credentials to access your account",
-    "signupTitle": "Create an account",
-    "signupDescription": "Enter your details to get started",
-    "noAccount": "Don't have an account?",
-    "hasAccount": "Already have an account?",
-    "loginButton": "Log in",
-    "signupButton": "Create account",
-    "loggingIn": "Logging in...",
-    "signingUp": "Creating account...",
-    "loginError": "Invalid email or password",
-    "signupError": "Could not create account",
-    "passwordMismatch": "Passwords do not match",
-    "emailRequired": "Email is required",
-    "passwordRequired": "Password is required",
-    "nameRequired": "Name is required",
-    "passwordMinLength": "Password must be at least 8 characters"
+    "login": "Sign in",
+    "loginTitle": "Welcome",
+    "loginDescription": "Sign in with your Google account to continue",
+    "continueWithGoogle": "Continue with Google",
+    "signingIn": "Signing in...",
+    "loginError": "Could not sign in. Please try again.",
+    "signOut": "Sign out"
   }
 }

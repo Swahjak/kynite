@@ -74,27 +74,11 @@
   },
   "Auth": {
     "login": "Inloggen",
-    "signup": "Registreren",
-    "email": "E-mail",
-    "password": "Wachtwoord",
-    "confirmPassword": "Bevestig wachtwoord",
-    "name": "Naam",
-    "loginTitle": "Welkom terug",
-    "loginDescription": "Voer je gegevens in om toegang te krijgen",
-    "signupTitle": "Account aanmaken",
-    "signupDescription": "Vul je gegevens in om te beginnen",
-    "noAccount": "Nog geen account?",
-    "hasAccount": "Al een account?",
-    "loginButton": "Inloggen",
-    "signupButton": "Account aanmaken",
-    "loggingIn": "Bezig met inloggen...",
-    "signingUp": "Account aanmaken...",
-    "loginError": "Ongeldige e-mail of wachtwoord",
-    "signupError": "Kon account niet aanmaken",
-    "passwordMismatch": "Wachtwoorden komen niet overeen",
-    "emailRequired": "E-mail is verplicht",
-    "passwordRequired": "Wachtwoord is verplicht",
-    "nameRequired": "Naam is verplicht",
-    "passwordMinLength": "Wachtwoord moet minimaal 8 tekens zijn"
+    "loginTitle": "Welkom",
+    "loginDescription": "Log in met je Google-account om door te gaan",
+    "continueWithGoogle": "Doorgaan met Google",
+    "signingIn": "Bezig met inloggen...",
+    "loginError": "Kon niet inloggen. Probeer het opnieuw.",
+    "signOut": "Uitloggen"
   }
 }
