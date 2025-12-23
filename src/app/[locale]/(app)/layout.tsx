@@ -18,18 +18,11 @@ export default async function AppLayout({ children, params }: AppLayoutProps) {
 
   const session = await getSession();
 
-  // DEBUG: Log session state (remove after debugging)
-  console.log("[AppLayout] Session check:", {
-    hasSession: !!session,
-    hasUser: !!session?.user,
-    hasFamilyId: !!session?.session?.familyId,
-    userId: session?.user?.id,
-  });
-
-  // Not authenticated - redirect to login
+  // DEBUG: Throw error with session info instead of redirecting
   if (!session?.user) {
-    console.log("[AppLayout] No user in session, redirecting to login");
-    redirect(`/${locale}/login`);
+    throw new Error(
+      `[AppLayout] Session check failed. Has session: ${!!session}, BETTER_AUTH_URL: ${process.env.BETTER_AUTH_URL}`
+    );
   }
 
   // No family - redirect to onboarding

@@ -11,20 +11,14 @@ export default async function AuthLayout({
   params,
 }: AuthLayoutProps) {
   const { locale } = await params;
+
+  // DEBUG: Throw error with session info instead of redirecting
   const session = await getSession();
-
-  // DEBUG: Log session state
-  console.log("[AuthLayout] Session check:", {
-    hasSession: !!session,
-    hasUser: !!session?.user,
-    userId: session?.user?.id,
-    email: session?.user?.email,
-  });
-
-  // Not authenticated - redirect to login
   if (!session?.user) {
-    console.log("[AuthLayout] No user in session, redirecting to login");
-    redirect(`/${locale}/login`);
+    // Temporarily show error page instead of redirect to see what's happening
+    throw new Error(
+      `Session check failed. Has session object: ${!!session}, BETTER_AUTH_URL: ${process.env.BETTER_AUTH_URL}`
+    );
   }
 
   return <>{children}</>;
