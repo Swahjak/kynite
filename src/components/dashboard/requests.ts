@@ -5,11 +5,11 @@ import {
   getFamilyMembers,
 } from "@/server/services/family-service";
 import { getEventsForFamily } from "@/server/services/event-service";
-import {
-  getChartsForFamily,
-  getCompletionsForDateRange,
-} from "@/server/services/reward-chart-service";
+import { getChartsForFamily } from "@/server/services/reward-chart-service";
 import { startOfDay, endOfDay, startOfWeek, endOfWeek, format } from "date-fns";
+import { db } from "@/server/db";
+import { rewardChartTasks, rewardChartCompletions } from "@/server/schema";
+import { eq, and, gte, lte, inArray } from "drizzle-orm";
 
 function mapEventToDashboardEvent(
   event: {
@@ -86,37 +86,107 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
   // Fetch reward charts for family
   const chartsData = await getChartsForFamily(family.id);
 
-  // Calculate weekly stars for each member
-  const familyMembers: FamilyMemberStar[] = await Promise.all(
-    members.map(async (member) => {
-      const chartEntry = chartsData.find((c) => c.chart.memberId === member.id);
-      let weeklyStarCount = 0;
+  if (chartsData.length === 0) {
+    // No charts, return members with 0 stars
+    const familyMembers: FamilyMemberStar[] = members.map((member) => ({
+      id: member.id,
+      name: member.displayName || member.user?.name || "Unknown",
+      avatarColor: member.avatarColor || "#888888",
+      weeklyStarCount: 0,
+      level: 1,
+      levelTitle: "Beginner",
+    }));
 
-      if (chartEntry) {
-        const completions = await getCompletionsForDateRange(
-          chartEntry.chart.id,
-          format(weekStart, "yyyy-MM-dd"),
-          format(weekEnd, "yyyy-MM-dd")
-        );
+    return {
+      familyName: family.name,
+      todaysEvents: events
+        .map((event) => mapEventToDashboardEvent(event, now))
+        .sort((a, b) => a.startTime.getTime() - b.startTime.getTime()),
+      activeTimers: MOCK_DASHBOARD_DATA.activeTimers,
+      familyMembers,
+      quickActions: MOCK_DASHBOARD_DATA.quickActions,
+    };
+  }
 
-        // Count completed tasks (each completion that is "completed" counts as 1 star)
-        weeklyStarCount = completions.filter(
-          (c) => c.status === "completed"
-        ).length;
-      }
+  // Fetch all tasks for all charts in a single query
+  const chartIds = chartsData.map((c) => c.chart.id);
+  const allTasks = await db
+    .select()
+    .from(rewardChartTasks)
+    .where(
+      and(
+        inArray(rewardChartTasks.chartId, chartIds),
+        eq(rewardChartTasks.isActive, true)
+      )
+    );
 
-      const { level, levelTitle } = calculateLevel(weeklyStarCount);
-
-      return {
-        id: member.id,
-        name: member.displayName || member.user?.name || "Unknown",
-        avatarColor: member.avatarColor || "#888888",
-        weeklyStarCount,
-        level,
-        levelTitle,
-      };
-    })
+  // Create maps for quick lookup
+  const taskStarValueMap = new Map(
+    allTasks.map((task) => [task.id, task.starValue])
   );
+  const taskToChartMap = new Map(
+    allTasks.map((task) => [task.id, task.chartId])
+  );
+
+  // Fetch all completions for the week in a single query
+  const taskIds = allTasks.map((t) => t.id);
+  const allCompletions =
+    taskIds.length > 0
+      ? await db
+          .select()
+          .from(rewardChartCompletions)
+          .where(
+            and(
+              inArray(rewardChartCompletions.taskId, taskIds),
+              gte(rewardChartCompletions.date, format(weekStart, "yyyy-MM-dd")),
+              lte(rewardChartCompletions.date, format(weekEnd, "yyyy-MM-dd"))
+            )
+          )
+      : [];
+
+  // Group completions by chartId
+  const completionsByChart = new Map<string, typeof allCompletions>();
+  for (const completion of allCompletions) {
+    const chartId = taskToChartMap.get(completion.taskId);
+    if (chartId) {
+      if (!completionsByChart.has(chartId)) {
+        completionsByChart.set(chartId, []);
+      }
+      completionsByChart.get(chartId)!.push(completion);
+    }
+  }
+
+  // Calculate weekly stars for each member
+  const familyMembers: FamilyMemberStar[] = members.map((member) => {
+    let weeklyStarCount = 0;
+
+    // Find chart for this member
+    const chartEntry = chartsData.find((c) => c.chart.memberId === member.id);
+
+    if (chartEntry) {
+      const completions = completionsByChart.get(chartEntry.chart.id) ?? [];
+
+      // Sum the starValue from each completed task
+      weeklyStarCount = completions
+        .filter((c) => c.status === "completed")
+        .reduce((sum, completion) => {
+          // Look up the starValue for this task
+          const starValue = taskStarValueMap.get(completion.taskId) ?? 1;
+          return sum + starValue;
+        }, 0);
+    }
+
+    const { level, levelTitle } = calculateLevel(weeklyStarCount);
+
+    return {
+      id: member.id,
+      name: member.displayName || member.user?.name || "Unknown",
+      avatarColor: member.avatarColor || "#888888",
+      weeklyStarCount,
+      level,
+      levelTitle,
+    };
+  });
 
   const todaysEvents = events
     .map((event) => mapEventToDashboardEvent(event, now))
