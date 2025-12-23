@@ -8,6 +8,7 @@ import type {
   ChoreQueryInput,
 } from "@/lib/validations/chore";
 import type { IChoreWithAssignee } from "@/types/chore";
+import { addStars } from "./star-service";
 
 // =============================================================================
 // HELPER: Build chore with assignee from row
@@ -30,7 +31,10 @@ function buildChoreWithAssignee(row: {
             id: row.assignedMember.id,
             familyId: row.assignedMember.familyId,
             userId: row.assignedMember.userId,
-            role: row.assignedMember.role as "manager" | "participant" | "caregiver",
+            role: row.assignedMember.role as
+              | "manager"
+              | "participant"
+              | "caregiver",
             displayName: row.assignedMember.displayName,
             avatarColor: row.assignedMember.avatarColor,
             createdAt: row.assignedMember.createdAt,
@@ -48,7 +52,10 @@ function buildChoreWithAssignee(row: {
             id: row.completedMember.id,
             familyId: row.completedMember.familyId,
             userId: row.completedMember.userId,
-            role: row.completedMember.role as "manager" | "participant" | "caregiver",
+            role: row.completedMember.role as
+              | "manager"
+              | "participant"
+              | "caregiver",
             displayName: row.completedMember.displayName,
             avatarColor: row.completedMember.avatarColor,
             createdAt: row.completedMember.createdAt,
@@ -206,7 +213,8 @@ export async function updateChore(
 
   if (input.title !== undefined) updates.title = input.title;
   if (input.description !== undefined) updates.description = input.description;
-  if (input.assignedToId !== undefined) updates.assignedToId = input.assignedToId;
+  if (input.assignedToId !== undefined)
+    updates.assignedToId = input.assignedToId;
   if (input.dueDate !== undefined) updates.dueDate = input.dueDate;
   if (input.dueTime !== undefined) updates.dueTime = input.dueTime;
   if (input.recurrence !== undefined) updates.recurrence = input.recurrence;
@@ -223,7 +231,10 @@ export async function updateChore(
 /**
  * Delete a chore
  */
-export async function deleteChore(choreId: string, familyId: string): Promise<void> {
+export async function deleteChore(
+  choreId: string,
+  familyId: string
+): Promise<void> {
   const existing = await getChoreById(choreId, familyId);
   if (!existing) throw new Error("Chore not found");
 
@@ -240,7 +251,8 @@ export async function completeChore(
 ): Promise<IChoreWithAssignee> {
   const existing = await getChoreById(choreId, familyId);
   if (!existing) throw new Error("Chore not found");
-  if (existing.status === "completed") throw new Error("Chore already completed");
+  if (existing.status === "completed")
+    throw new Error("Chore already completed");
 
   await db
     .update(chores)
@@ -251,6 +263,17 @@ export async function completeChore(
       updatedAt: new Date(),
     })
     .where(eq(chores.id, choreId));
+
+  // Award stars for completing chore
+  if (existing.starReward > 0) {
+    await addStars({
+      memberId: completedById,
+      amount: existing.starReward,
+      type: "chore",
+      referenceId: choreId,
+      description: existing.title,
+    });
+  }
 
   const chore = await getChoreById(choreId, familyId);
   if (!chore) throw new Error("Failed to complete chore");
@@ -266,7 +289,19 @@ export async function undoChoreCompletion(
 ): Promise<IChoreWithAssignee> {
   const existing = await getChoreById(choreId, familyId);
   if (!existing) throw new Error("Chore not found");
-  if (existing.status !== "completed") throw new Error("Chore is not completed");
+  if (existing.status !== "completed")
+    throw new Error("Chore is not completed");
+
+  // Remove stars that were awarded (creates negative transaction)
+  if (existing.starReward > 0 && existing.completedById) {
+    await addStars({
+      memberId: existing.completedById,
+      amount: -existing.starReward,
+      type: "chore",
+      referenceId: choreId,
+      description: `Undo: ${existing.title}`,
+    });
+  }
 
   await db
     .update(chores)
@@ -316,7 +351,9 @@ export async function getChoreProgress(
     return false;
   });
 
-  const completed = relevantChores.filter((c) => c.status === "completed").length;
+  const completed = relevantChores.filter(
+    (c) => c.status === "completed"
+  ).length;
   const total = relevantChores.length;
   const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
 

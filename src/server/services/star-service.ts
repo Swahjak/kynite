@@ -34,12 +34,13 @@ export async function getBalance(memberId: string): Promise<number> {
 
 /**
  * Add stars to a member's balance (earning)
+ * Supports negative amounts for reversals/corrections
  */
 export async function addStars(
   input: AddStarsInput
 ): Promise<{ transaction: StarTransaction; newBalance: number }> {
-  if (input.amount <= 0) {
-    throw new Error("Amount must be positive");
+  if (input.amount === 0) {
+    throw new Error("Amount cannot be zero");
   }
 
   // Get family ID for the member
