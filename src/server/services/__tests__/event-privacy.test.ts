@@ -112,3 +112,10 @@ describe("redactEventDetails", () => {
     expect(redacted.endTime).toEqual(event.endTime);
   });
 });
+
+describe("getEventById privacy filtering", () => {
+  // Note: This would require mocking the database
+  // For now, just document the expected behavior
+  it.todo("should redact private event details for non-owners");
+  it.todo("should show full details for calendar owners");
+});

@@ -43,7 +43,7 @@ export async function GET(request: Request, { params }: Params) {
       );
     }
 
-    const event = await getEventById(eventId, familyId);
+    const event = await getEventById(eventId, familyId, session.user.id);
     if (!event) {
       return NextResponse.json(
         {

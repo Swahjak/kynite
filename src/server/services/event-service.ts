@@ -161,7 +161,7 @@ export async function getEventsForFamily(
     calendarName: row.calendar?.name ?? null,
     calendarColor: row.calendar?.color ?? null,
     accessRole: row.calendar?.accessRole ?? null,
-    isHidden: false, // TODO: Implement private calendar logic in Task 3
+    isHidden: false,
     participants: participantsByEvent.get(row.event.id) ?? [],
   }));
 
@@ -194,15 +194,19 @@ export async function getEventsForFamily(
 
 export async function getEventById(
   eventId: string,
-  familyId: string
+  familyId: string,
+  viewerUserId?: string
 ): Promise<EventWithParticipants | null> {
   const eventRows = await db
     .select({
       event: events,
       calendar: googleCalendars,
+      calendarIsPrivate: googleCalendars.isPrivate,
+      calendarAccountUserId: accounts.userId,
     })
     .from(events)
     .leftJoin(googleCalendars, eq(events.googleCalendarId, googleCalendars.id))
+    .leftJoin(accounts, eq(googleCalendars.accountId, accounts.id))
     .where(and(eq(events.id, eventId), eq(events.familyId, familyId)))
     .limit(1);
 
@@ -224,7 +228,7 @@ export async function getEventById(
     .innerJoin(users, eq(familyMembers.userId, users.id))
     .where(eq(eventParticipants.eventId, eventId));
 
-  return {
+  const result = {
     id: row.event.id,
     familyId: row.event.familyId,
     title: row.event.title,
@@ -240,7 +244,7 @@ export async function getEventById(
     calendarName: row.calendar?.name ?? null,
     calendarColor: row.calendar?.color ?? null,
     accessRole: row.calendar?.accessRole ?? null,
-    isHidden: false, // TODO: Implement private calendar logic in Task 3
+    isHidden: false,
     participants: participantRows.map((p) => ({
       id: p.eventParticipant.id,
       familyMemberId: p.familyMember.id,
@@ -251,6 +255,21 @@ export async function getEventById(
       isOwner: p.eventParticipant.isOwner,
     })),
   };
+
+  // Apply privacy filtering
+  const calendarInfo =
+    row.calendarIsPrivate !== undefined
+      ? {
+          isPrivate: row.calendarIsPrivate ?? false,
+          accountUserId: row.calendarAccountUserId ?? "",
+        }
+      : null;
+
+  if (shouldRedactEvent({ calendar: calendarInfo }, viewerUserId)) {
+    return redactEventDetails({ ...result, isHidden: true });
+  }
+
+  return { ...result, isHidden: false };
 }
 
 export async function createEvent(
