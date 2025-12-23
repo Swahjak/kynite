@@ -586,6 +586,10 @@ export const memberPrimaryGoalsRelations = relations(
       fields: [memberPrimaryGoals.memberId],
       references: [familyMembers.id],
     }),
+    reward: one(rewards, {
+      fields: [memberPrimaryGoals.rewardId],
+      references: [rewards.id],
+    }),
   })
 );
 
