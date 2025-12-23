@@ -174,42 +174,43 @@ describe("reward-store-service", () => {
   describe("redeemReward", () => {
     it("creates redemption and deducts stars", async () => {
       const { db } = await import("@/server/db");
-      const { removeStars } = await import("../star-service");
+      const { removeStars, getBalance } = await import("../star-service");
+
+      vi.mocked(getBalance).mockResolvedValue(100);
 
       vi.mocked(removeStars).mockResolvedValue({
         transaction: { id: "txn-1" } as any,
         newBalance: 50,
       });
 
-      vi.mocked(db.transaction).mockImplementation(async (callback) => {
-        return callback({
-          select: vi.fn().mockReturnValue({
-            from: vi.fn().mockReturnValue({
-              where: vi.fn().mockResolvedValue([
-                {
-                  id: "reward-1",
-                  title: "Movie Night",
-                  starCost: 50,
-                  limitType: "none",
-                  isActive: true,
-                },
-              ]),
-            }),
-          }),
-          insert: vi.fn().mockReturnValue({
-            values: vi.fn().mockReturnValue({
-              returning: vi.fn().mockResolvedValue([
-                {
-                  id: "redemption-1",
-                  rewardId: "reward-1",
-                  memberId: "member-1",
-                  starCost: 50,
-                },
-              ]),
-            }),
-          }),
-        } as never);
-      });
+      // Mock db.select for getRewardById and canRedeem calls
+      vi.mocked(db.select).mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([
+            {
+              id: "reward-1",
+              title: "Movie Night",
+              starCost: 50,
+              limitType: "none",
+              isActive: true,
+            },
+          ]),
+        }),
+      } as never);
+
+      // Mock db.insert for redemption creation
+      vi.mocked(db.insert).mockReturnValue({
+        values: vi.fn().mockReturnValue({
+          returning: vi.fn().mockResolvedValue([
+            {
+              id: "redemption-1",
+              rewardId: "reward-1",
+              memberId: "member-1",
+              starCost: 50,
+            },
+          ]),
+        }),
+      } as never);
 
       const { redeemReward } = await import("../reward-store-service");
       const result = await redeemReward("member-1", "reward-1");
