@@ -66,6 +66,12 @@ export type UpdateRewardChartTaskInput = z.infer<
   typeof updateRewardChartTaskSchema
 >;
 
+export const reorderTasksSchema = z.object({
+  taskIds: z.array(z.string().min(1)).min(1, "At least one task required"),
+});
+
+export type ReorderTasksInput = z.infer<typeof reorderTasksSchema>;
+
 // =============================================================================
 // COMPLETIONS
 // =============================================================================

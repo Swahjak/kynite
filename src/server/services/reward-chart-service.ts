@@ -203,6 +203,28 @@ export async function deleteTask(taskId: string) {
     .where(eq(rewardChartTasks.id, taskId));
 }
 
+/**
+ * Reorder tasks by updating sortOrder for all tasks in the chart
+ */
+export async function reorderTasks(
+  chartId: string,
+  taskIds: string[]
+): Promise<void> {
+  await db.transaction(async (tx) => {
+    for (let i = 0; i < taskIds.length; i++) {
+      await tx
+        .update(rewardChartTasks)
+        .set({ sortOrder: i })
+        .where(
+          and(
+            eq(rewardChartTasks.id, taskIds[i]),
+            eq(rewardChartTasks.chartId, chartId)
+          )
+        );
+    }
+  });
+}
+
 // =============================================================================
 // COMPLETION OPERATIONS
 // =============================================================================
