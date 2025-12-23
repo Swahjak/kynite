@@ -46,14 +46,14 @@ export function TaskRow({
 
   return (
     <div
-      className="group grid grid-cols-[1.8fr_repeat(7,1fr)] divide-x divide-slate-100 transition-colors hover:bg-slate-50/50 dark:divide-slate-700/50 dark:hover:bg-slate-800/50"
+      className="group col-span-full grid grid-cols-subgrid divide-x divide-slate-100 transition-colors hover:bg-slate-50/50 dark:divide-slate-700/50 dark:hover:bg-slate-800/50"
       draggable={draggable && showControls}
       onDragStart={(e) => onDragStart?.(e, task.id)}
       onDragOver={onDragOver}
       onDrop={(e) => onDrop?.(e, task.id)}
     >
       {/* Task Info */}
-      <div className="flex items-center gap-3 px-4 py-2">
+      <div className="relative flex min-w-0 items-center gap-3 px-4 py-2">
         {/* Drag Handle - only visible in manage mode */}
         {showControls && (
           <GripVertical className="h-4 w-4 cursor-grab text-slate-400 opacity-0 transition-opacity group-hover:opacity-100" />
@@ -83,9 +83,9 @@ export function TaskRow({
           {task.title}
         </span>
 
-        {/* Edit/Delete Controls - only visible in manage mode */}
+        {/* Edit/Delete Controls - only visible in manage mode, positioned absolutely to float over content */}
         {showControls && (
-          <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+          <div className="absolute top-1/2 right-2 flex -translate-y-1/2 items-center gap-1 rounded-lg bg-white/90 opacity-0 shadow-sm backdrop-blur-sm transition-opacity group-hover:opacity-100 dark:bg-slate-800/90">
             <Button
               variant="ghost"
               size="icon"

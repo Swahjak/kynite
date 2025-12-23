@@ -39,8 +39,13 @@ export function WeekView() {
 
   return (
     <div className="flex h-full flex-col gap-4 overflow-hidden p-4">
-      {/* Header with navigation and filters */}
+      {/* Header with filters and navigation */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <PersonFilterChips
+          users={users}
+          selectedUserId={selectedUserId}
+          onSelect={filterEventsBySelectedUser}
+        />
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" onClick={goToPreviousWeek}>
             <ChevronLeft className="size-5" />
@@ -55,11 +60,6 @@ export function WeekView() {
             Today
           </Button>
         </div>
-        <PersonFilterChips
-          users={users}
-          selectedUserId={selectedUserId}
-          onSelect={filterEventsBySelectedUser}
-        />
       </div>
 
       {/* Week grid */}

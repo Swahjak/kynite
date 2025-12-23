@@ -15,7 +15,7 @@ export function AddTaskRow({ onClick }: AddTaskRowProps) {
     <button
       onClick={onClick}
       className={cn(
-        "grid grid-cols-[1.8fr_repeat(7,1fr)] divide-x divide-slate-100 transition-colors hover:bg-slate-50/50 dark:divide-slate-700/50 dark:hover:bg-slate-800/50",
+        "col-span-full m-4 grid grid-cols-subgrid divide-x divide-slate-100 transition-colors hover:bg-slate-50/50 dark:divide-slate-700/50 dark:hover:bg-slate-800/50",
         "border-2 border-dashed border-slate-200 dark:border-slate-700",
         "rounded-lg"
       )}

@@ -253,7 +253,9 @@
     "taskCreated": "Task created",
     "taskDeleteError": "Failed to delete task",
     "taskSaveError": "Failed to save task",
-    "taskReorderError": "Failed to reorder tasks"
+    "taskReorderError": "Failed to reorder tasks",
+    "editChart": "Edit chart",
+    "doneEditing": "Done editing"
   },
   "rewardStore": {
     "title": "Reward Store",

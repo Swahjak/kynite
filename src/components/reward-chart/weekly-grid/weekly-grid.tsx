@@ -2,12 +2,13 @@
 
 import { useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
+import { Pencil, Check } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { DayHeader } from "./day-header";
 import { TaskRow } from "./task-row";
 import { AddTaskRow } from "./add-task-row";
 import { GridFooter } from "./grid-footer";
 import { useRewardChart } from "../contexts/reward-chart-context";
-import { useInteractionMode } from "@/contexts/interaction-mode-context";
 import { TaskDialog } from "../dialogs/task-dialog";
 import type { TaskFormValues } from "../dialogs/task-dialog";
 import type { IRewardChartTask } from "../interfaces";
@@ -29,9 +30,11 @@ export function WeeklyGrid({ className }: WeeklyGridProps) {
     updateTask,
     deleteTask,
     reorderTasks,
+    isManager,
   } = useRewardChart();
-  const { mode } = useInteractionMode();
-  const isManageMode = mode === "manage";
+
+  // Local edit mode state (only managers can toggle)
+  const [isEditMode, setIsEditMode] = useState(false);
 
   // Task dialog state
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
@@ -141,71 +144,90 @@ export function WeeklyGrid({ className }: WeeklyGridProps) {
   const { days, tasks, todayStats } = weekData;
 
   return (
-    <div
-      className={cn(
-        "overflow-hidden rounded-3xl bg-white shadow-sm dark:bg-slate-800",
-        className
-      )}
-    >
-      {/* Header Row */}
-      <div className="grid grid-cols-[1.8fr_repeat(7,1fr)] border-b bg-slate-50/50 dark:border-slate-700 dark:bg-slate-800/50">
-        {/* Task/Routine label */}
-        <div className="flex items-center px-4 py-3">
-          <span className="text-xs font-medium tracking-wider text-slate-400 uppercase">
-            Task / Routine
-          </span>
+    <div className="relative">
+      <div
+        className={cn(
+          "grid grid-cols-[minmax(180px,1.5fr)_repeat(7,1fr)] overflow-hidden rounded-3xl bg-white shadow-sm dark:bg-slate-800",
+          className
+        )}
+      >
+        {/* Header Row */}
+        <div className="col-span-full grid grid-cols-subgrid border-b bg-slate-50/50 dark:border-slate-700 dark:bg-slate-800/50">
+          {/* Task/Routine label */}
+          <div className="flex items-center px-4 py-3">
+            <span className="text-xs font-medium tracking-wider text-slate-400 uppercase">
+              Task / Routine
+            </span>
+          </div>
+
+          {/* Day headers */}
+          {days.map((day) => (
+            <DayHeader key={day.date} day={day} />
+          ))}
         </div>
 
-        {/* Day headers */}
-        {days.map((day) => (
-          <DayHeader key={day.date} day={day} />
-        ))}
+        {/* Task Rows */}
+        <div className="col-span-full grid grid-cols-subgrid divide-y divide-slate-100 dark:divide-slate-700/50">
+          {tasks.length === 0 ? (
+            <div className="col-span-full px-6 py-8 text-center text-slate-500">
+              No tasks configured yet
+            </div>
+          ) : (
+            tasks.map((taskRow) => (
+              <TaskRow
+                key={taskRow.task.id}
+                taskRow={taskRow}
+                days={days}
+                onComplete={completeTask}
+                onUndo={undoCompletion}
+                disabled={isLoading}
+                showControls={isEditMode}
+                onEdit={handleEditTask}
+                onDelete={handleDeleteTask}
+                draggable={isEditMode}
+                onDragStart={handleDragStart}
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
+              />
+            ))
+          )}
+
+          {/* Add Task Row - only in edit mode */}
+          {isEditMode && <AddTaskRow onClick={handleAddTask} />}
+        </div>
+
+        {/* Footer */}
+        <GridFooter todayStats={todayStats} />
+
+        {/* Task Dialog */}
+        <TaskDialog
+          open={taskDialogOpen}
+          onOpenChange={setTaskDialogOpen}
+          task={editingTask}
+          onSubmit={handleTaskSubmit}
+        />
       </div>
 
-      {/* Task Rows */}
-      <div className="divide-y divide-slate-100 dark:divide-slate-700/50">
-        {tasks.length === 0 ? (
-          <div className="px-6 py-8 text-center text-slate-500">
-            No tasks configured yet
-          </div>
-        ) : (
-          tasks.map((taskRow) => (
-            <TaskRow
-              key={taskRow.task.id}
-              taskRow={taskRow}
-              days={days}
-              onComplete={completeTask}
-              onUndo={undoCompletion}
-              disabled={isLoading}
-              showControls={isManageMode}
-              onEdit={handleEditTask}
-              onDelete={handleDeleteTask}
-              draggable={isManageMode}
-              onDragStart={handleDragStart}
-              onDragOver={handleDragOver}
-              onDrop={handleDrop}
-            />
-          ))
-        )}
-
-        {/* Add Task Row - only in manage mode */}
-        {isManageMode && (
-          <div className="p-4">
-            <AddTaskRow onClick={handleAddTask} />
-          </div>
-        )}
-      </div>
-
-      {/* Footer */}
-      <GridFooter todayStats={todayStats} />
-
-      {/* Task Dialog */}
-      <TaskDialog
-        open={taskDialogOpen}
-        onOpenChange={setTaskDialogOpen}
-        task={editingTask}
-        onSubmit={handleTaskSubmit}
-      />
+      {/* Edit Mode FAB - fixed to viewport bottom-right, only visible to managers */}
+      {isManager && (
+        <Button
+          onClick={() => setIsEditMode(!isEditMode)}
+          size="icon"
+          className={cn(
+            "fixed right-6 bottom-6 z-50 h-14 w-14 rounded-full shadow-lg transition-colors",
+            isEditMode
+              ? "bg-green-600 hover:bg-green-700"
+              : "bg-indigo-600 hover:bg-indigo-700"
+          )}
+          aria-label={isEditMode ? t("doneEditing") : t("editChart")}
+        >
+          {isEditMode ? (
+            <Check className="h-6 w-6 text-white" />
+          ) : (
+            <Pencil className="h-6 w-6 text-white" />
+          )}
+        </Button>
+      )}
     </div>
   );
 }

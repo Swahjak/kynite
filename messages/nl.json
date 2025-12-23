@@ -253,7 +253,9 @@
     "taskCreated": "Taak aangemaakt",
     "taskDeleteError": "Taak verwijderen mislukt",
     "taskSaveError": "Taak opslaan mislukt",
-    "taskReorderError": "Taken herschikken mislukt"
+    "taskReorderError": "Taken herschikken mislukt",
+    "editChart": "Bewerk kaart",
+    "doneEditing": "Klaar met bewerken"
   },
   "rewardStore": {
     "title": "Beloningswinkel",

@@ -24,6 +24,7 @@ interface RewardChartContextValue {
   refetch: () => Promise<void>;
   familyId: string;
   chartId: string;
+  isManager: boolean;
   // Task mutations
   createTask: (input: CreateTaskInput) => Promise<void>;
   updateTask: (taskId: string, input: UpdateTaskInput) => Promise<void>;
@@ -45,6 +46,7 @@ interface RewardChartProviderProps {
   familyId: string;
   chartId: string;
   initialData: WeeklyChartData | null;
+  isManager?: boolean;
 }
 
 export function RewardChartProvider({
@@ -52,6 +54,7 @@ export function RewardChartProvider({
   familyId,
   chartId,
   initialData,
+  isManager = false,
 }: RewardChartProviderProps) {
   const [weekData, setWeekData] = useState<WeeklyChartData | null>(initialData);
   const [isLoading, setIsLoading] = useState(false);
@@ -272,6 +275,7 @@ export function RewardChartProvider({
     refetch,
     familyId,
     chartId,
+    isManager,
     // Task mutations
     createTask,
     updateTask,

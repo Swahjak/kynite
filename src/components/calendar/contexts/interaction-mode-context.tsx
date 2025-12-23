@@ -50,3 +50,20 @@ export function useInteractionMode() {
   }
   return context;
 }
+
+/**
+ * Safe version that returns "management" mode permissions as default
+ * when used outside of InteractionModeProvider.
+ */
+export function useInteractionModeSafe(): InteractionModeContextValue {
+  const context = useContext(InteractionModeContext);
+  return (
+    context ?? {
+      mode: "management",
+      canEdit: true,
+      canCreate: true,
+      canDelete: true,
+      canDragDrop: true,
+    }
+  );
+}

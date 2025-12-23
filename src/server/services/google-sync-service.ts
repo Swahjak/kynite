@@ -1,18 +1,42 @@
 import { db } from "@/server/db";
-import { googleCalendars, events } from "@/server/schema";
-import { eq, and, isNull, or, lt } from "drizzle-orm";
+import {
+  googleCalendars,
+  events,
+  eventParticipants,
+  familyMembers,
+  users,
+} from "@/server/schema";
+import { eq, and, isNull, or, lt, inArray } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 import { getValidAccessToken } from "./google-token-service";
 import {
   GoogleCalendarClient,
   GoogleCalendarApiError,
 } from "./google-calendar-client";
-import type { GoogleCalendarEvent } from "@/types/google-calendar";
+import type {
+  GoogleCalendarEvent,
+  GoogleEventType,
+} from "@/types/google-calendar";
 
 const SYNC_RANGE = {
   pastMonths: 3,
   futureMonths: 12,
 };
+
+// Event types that represent status/availability rather than actual events
+const STATUS_EVENT_TYPES: GoogleEventType[] = [
+  "workingLocation",
+  "focusTime",
+  "outOfOffice",
+];
+
+/**
+ * Check if event type is a status event (working location, focus time, etc.)
+ * These should be filtered out as they're not actual calendar events
+ */
+function isStatusEvent(eventType?: GoogleEventType): boolean {
+  return eventType !== undefined && STATUS_EVENT_TYPES.includes(eventType);
+}
 
 interface SyncResult {
   calendarId: string;
@@ -79,6 +103,8 @@ export async function performInitialSync(
 
       for (const googleEvent of response.items) {
         if (googleEvent.status === "cancelled") continue;
+        // Skip status events (working location, focus time, out of office)
+        if (isStatusEvent(googleEvent.eventType)) continue;
 
         await upsertEventFromGoogle(cal.familyId, calendarId, googleEvent);
         eventsCreated++;
@@ -171,6 +197,9 @@ export async function performIncrementalSync(
         if (googleEvent.status === "cancelled") {
           await deleteEventByGoogleId(calendarId, googleEvent.id);
           eventsDeleted++;
+        } else if (isStatusEvent(googleEvent.eventType)) {
+          // Skip status events (working location, focus time, out of office)
+          continue;
         } else {
           const result = await upsertEventFromGoogle(
             cal.familyId,
@@ -249,7 +278,11 @@ async function upsertEventFromGoogle(
     )
     .limit(1);
 
+  let eventId: string;
+  let result: "created" | "updated";
+
   if (existing.length > 0) {
+    eventId = existing[0].id;
     await db
       .update(events)
       .set({
@@ -263,25 +296,96 @@ async function upsertEventFromGoogle(
         syncStatus: "synced",
         updatedAt: new Date(),
       })
-      .where(eq(events.id, existing[0].id));
-    return "updated";
+      .where(eq(events.id, eventId));
+    result = "updated";
+  } else {
+    eventId = createId();
+    await db.insert(events).values({
+      id: eventId,
+      familyId,
+      title: googleEvent.summary || "(No title)",
+      description: googleEvent.description,
+      location: googleEvent.location,
+      startTime,
+      endTime,
+      allDay,
+      googleCalendarId,
+      googleEventId: googleEvent.id,
+      remoteUpdatedAt: new Date(googleEvent.updated),
+      syncStatus: "synced",
+    });
+    result = "created";
   }
 
-  await db.insert(events).values({
-    id: createId(),
-    familyId,
-    title: googleEvent.summary || "(No title)",
-    description: googleEvent.description,
-    location: googleEvent.location,
-    startTime,
-    endTime,
-    allDay,
-    googleCalendarId,
-    googleEventId: googleEvent.id,
-    remoteUpdatedAt: new Date(googleEvent.updated),
-    syncStatus: "synced",
-  });
-  return "created";
+  // Sync attendees to event participants
+  await syncEventParticipants(eventId, familyId, googleEvent.attendees);
+
+  return result;
+}
+
+/**
+ * Match Google Calendar attendees to family members and sync participants
+ */
+async function syncEventParticipants(
+  eventId: string,
+  familyId: string,
+  attendees?: { email: string; organizer?: boolean }[]
+): Promise<void> {
+  // Delete existing participants for this event (we'll recreate from Google data)
+  await db
+    .delete(eventParticipants)
+    .where(eq(eventParticipants.eventId, eventId));
+
+  if (!attendees || attendees.length === 0) {
+    return;
+  }
+
+  // Get family members with their user emails
+  const members = await db
+    .select({
+      memberId: familyMembers.id,
+      email: users.email,
+    })
+    .from(familyMembers)
+    .innerJoin(users, eq(familyMembers.userId, users.id))
+    .where(eq(familyMembers.familyId, familyId));
+
+  if (members.length === 0) {
+    return;
+  }
+
+  // Create email to member ID map (case-insensitive)
+  const emailToMember = new Map(
+    members.map((m) => [m.email.toLowerCase(), m.memberId])
+  );
+
+  // Match attendees to family members
+  const participantsToCreate: {
+    eventId: string;
+    familyMemberId: string;
+    isOwner: boolean;
+  }[] = [];
+
+  for (const attendee of attendees) {
+    const memberId = emailToMember.get(attendee.email.toLowerCase());
+    if (memberId) {
+      participantsToCreate.push({
+        eventId,
+        familyMemberId: memberId,
+        isOwner: attendee.organizer ?? false,
+      });
+    }
+  }
+
+  // Insert matched participants
+  if (participantsToCreate.length > 0) {
+    await db.insert(eventParticipants).values(
+      participantsToCreate.map((p) => ({
+        id: createId(),
+        ...p,
+      }))
+    );
+  }
 }
 
 /**

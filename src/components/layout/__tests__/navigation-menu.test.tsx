@@ -23,6 +23,7 @@ const messages = {
     dashboard: "Dashboard",
     calendar: "Calendar",
     chores: "Chores",
+    rewardChart: "Star Chart",
     settings: "Settings",
     help: "Help",
   },
@@ -34,7 +35,7 @@ function renderWithProviders(
 ) {
   return render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <InteractionModeProvider mode={mode}>{ui}</InteractionModeProvider>
+      <InteractionModeProvider initialMode={mode}>{ui}</InteractionModeProvider>
     </NextIntlClientProvider>
   );
 }

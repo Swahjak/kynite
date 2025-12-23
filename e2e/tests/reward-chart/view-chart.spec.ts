@@ -22,7 +22,7 @@ test.describe("Reward Chart", () => {
     // Create test chart
     const chart = createTestRewardChart(
       familyWithMembers.family.id,
-      familyWithMembers.member.id
+      familyWithMembers.membership.id
     );
     await seeder.seedRewardChart(chart);
 
@@ -67,7 +67,7 @@ test.describe("Reward Chart", () => {
 
     const chart = createTestRewardChart(
       familyWithMembers.family.id,
-      familyWithMembers.member.id
+      familyWithMembers.membership.id
     );
     await seeder.seedRewardChart(chart);
 

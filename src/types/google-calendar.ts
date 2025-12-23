@@ -26,9 +26,26 @@ export interface GoogleEventDateTime {
   timeZone?: string;
 }
 
+export interface GoogleCalendarAttendee {
+  email: string;
+  displayName?: string;
+  responseStatus?: "needsAction" | "declined" | "tentative" | "accepted";
+  self?: boolean;
+  organizer?: boolean;
+}
+
+export type GoogleEventType =
+  | "default"
+  | "workingLocation"
+  | "focusTime"
+  | "outOfOffice"
+  | "fromGmail"
+  | "birthday";
+
 export interface GoogleCalendarEvent {
   id: string;
   status: "confirmed" | "tentative" | "cancelled";
+  eventType?: GoogleEventType;
   summary?: string;
   description?: string;
   location?: string;
@@ -38,6 +55,7 @@ export interface GoogleCalendarEvent {
   updated: string;
   colorId?: string;
   recurringEventId?: string;
+  attendees?: GoogleCalendarAttendee[];
 }
 
 export interface GoogleEventsListResponse {

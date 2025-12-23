@@ -147,7 +147,10 @@ const deleteChore = useCallback(
 
 ```typescript
 import { toast } from "sonner";
-import type { CreateChoreInput, UpdateChoreInput } from "@/lib/validations/chore";
+import type {
+  CreateChoreInput,
+  UpdateChoreInput,
+} from "@/lib/validations/chore";
 ```
 
 **Step 4: Update value object**
@@ -904,10 +907,14 @@ const { members } = useChores();
 
 const [dialogOpen, setDialogOpen] = useState(false);
 const [dialogMode, setDialogMode] = useState<"create" | "edit">("create");
-const [editingChore, setEditingChore] = useState<IChoreWithAssignee | null>(null);
+const [editingChore, setEditingChore] = useState<IChoreWithAssignee | null>(
+  null
+);
 
 const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-const [deletingChore, setDeletingChore] = useState<IChoreWithAssignee | null>(null);
+const [deletingChore, setDeletingChore] = useState<IChoreWithAssignee | null>(
+  null
+);
 ```
 
 **Step 3: Add handlers**
@@ -1110,16 +1117,16 @@ git add -A && git commit -m "chore: cleanup and final adjustments"
 
 ## Summary
 
-| Task | Component | Description |
-|------|-----------|-------------|
-| 0 | Tests | Fix pre-existing test failures |
-| 1 | ChoresContext | Add mutation functions |
-| 2 | ChoreDialog | Create/edit form dialog |
-| 3 | DeleteConfirmDialog | Deletion confirmation |
-| 4 | FAB | Floating action button |
-| 5 | ChoreCard | Tap-to-expand with actions |
-| 6 | Views | Pass handlers to ChoreCard |
-| 7 | Chores | Integrate dialogs and FAB |
-| 8 | Index | Export new components |
-| 9 | Translations | Add i18n strings |
-| 10 | Testing | Verify everything works |
+| Task | Component           | Description                    |
+| ---- | ------------------- | ------------------------------ |
+| 0    | Tests               | Fix pre-existing test failures |
+| 1    | ChoresContext       | Add mutation functions         |
+| 2    | ChoreDialog         | Create/edit form dialog        |
+| 3    | DeleteConfirmDialog | Deletion confirmation          |
+| 4    | FAB                 | Floating action button         |
+| 5    | ChoreCard           | Tap-to-expand with actions     |
+| 6    | Views               | Pass handlers to ChoreCard     |
+| 7    | Chores              | Integrate dialogs and FAB      |
+| 8    | Index               | Export new components          |
+| 9    | Translations        | Add i18n strings               |
+| 10   | Testing             | Verify everything works        |

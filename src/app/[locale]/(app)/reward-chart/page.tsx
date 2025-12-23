@@ -2,6 +2,7 @@ import { setRequestLocale } from "next-intl/server";
 import {
   RewardChartPage,
   RewardChartProvider,
+  EmptyChartState,
 } from "@/components/reward-chart";
 import {
   getChartByMemberId,
@@ -106,16 +107,11 @@ export default async function RewardChartRoute({
     // If no chart exists for this child, show create option
     if (!chart) {
       return (
-        <div className="flex min-h-[400px] items-center justify-center">
-          <div className="text-center">
-            <p className="text-lg font-medium text-slate-600">
-              No star chart for {targetChild.displayName}
-            </p>
-            <p className="mt-1 text-sm text-slate-500">
-              Create a star chart to track their progress!
-            </p>
-          </div>
-        </div>
+        <EmptyChartState
+          familyId={familyId}
+          memberId={targetChild.id}
+          memberName={targetChild.displayName || "Child"}
+        />
       );
     }
   } else {
@@ -278,6 +274,7 @@ export default async function RewardChartRoute({
       familyId={familyId}
       chartId={chart.id}
       initialData={weekData}
+      isManager={isManager}
     >
       <RewardChartPage />
     </RewardChartProvider>

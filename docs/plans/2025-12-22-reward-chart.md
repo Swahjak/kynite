@@ -3353,6 +3353,7 @@ git commit -m "feat(reward-chart): add main page component and exports"
 - Create: `src/app/[locale]/(app)/reward-chart/page.tsx`
 
 **Note:** This uses the `(app)` route group structure. The `(app)/layout.tsx` already handles:
+
 - Authentication check (redirects to `/login` if not authenticated)
 - Family check (redirects to `/onboarding` if no family)
 - AppShell wrapper with header/navigation

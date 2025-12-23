@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useChores } from "./contexts/chores-context";
-import { useInteractionMode } from "@/components/calendar/contexts/interaction-mode-context";
+import { useInteractionModeSafe } from "@/components/calendar/contexts/interaction-mode-context";
 import { ProgressCard } from "./components/progress-card";
 import { FilterTabs } from "./components/filter-tabs";
 import { Fab } from "./components/fab";
@@ -18,7 +18,7 @@ interface ChoresProps {
 
 export function Chores({ familyName }: ChoresProps) {
   const { currentView, isLoading } = useChores();
-  const { canCreate, canEdit } = useInteractionMode();
+  const { canCreate, canEdit } = useInteractionModeSafe();
 
   // Dialog state
   const [choreDialogOpen, setChoreDialogOpen] = useState(false);

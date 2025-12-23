@@ -13,7 +13,7 @@ function TestComponent() {
 describe("InteractionModeContext", () => {
   it("provides wall mode when specified", () => {
     render(
-      <InteractionModeProvider mode="wall">
+      <InteractionModeProvider initialMode="wall">
         <TestComponent />
       </InteractionModeProvider>
     );
@@ -22,7 +22,7 @@ describe("InteractionModeContext", () => {
 
   it("provides manage mode when specified", () => {
     render(
-      <InteractionModeProvider mode="manage">
+      <InteractionModeProvider initialMode="manage">
         <TestComponent />
       </InteractionModeProvider>
     );

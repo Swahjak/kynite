@@ -24,22 +24,28 @@ const InteractionModeContext =
 
 interface InteractionModeProviderProps {
   children: ReactNode;
+  /** Initial mode - useful for testing. If not provided, reads from localStorage. */
+  initialMode?: InteractionMode;
 }
 
 export function InteractionModeProvider({
   children,
+  initialMode,
 }: InteractionModeProviderProps) {
-  const [mode, setModeState] = useState<InteractionMode>("manage");
-  const [isHydrated, setIsHydrated] = useState(false);
+  const [mode, setModeState] = useState<InteractionMode>(
+    initialMode ?? "manage"
+  );
+  const [isHydrated, setIsHydrated] = useState(!!initialMode);
 
-  // Read from localStorage on mount
+  // Read from localStorage on mount (skip if initialMode was provided)
   useEffect(() => {
+    if (initialMode) return;
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored === "wall" || stored === "manage") {
       setModeState(stored);
     }
     setIsHydrated(true);
-  }, []);
+  }, [initialMode]);
 
   const setMode = useCallback((newMode: InteractionMode) => {
     localStorage.setItem(STORAGE_KEY, newMode);

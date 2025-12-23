@@ -4,14 +4,12 @@ import { auth } from "@/server/auth";
 import {
   getUserFamily,
   getFamilyMembers,
-  isUserFamilyManager,
 } from "@/server/services/family-service";
 import {
   getChoresForFamily,
   getChoreProgress,
 } from "@/server/services/chore-service";
 import { Chores, ChoresProvider } from "@/components/chores";
-import { InteractionModeProvider } from "@/components/calendar/contexts/interaction-mode-context";
 
 export default async function ChoresPage() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -24,16 +22,15 @@ export default async function ChoresPage() {
     redirect("/families/create");
   }
 
-  const [chores, progress, members, isManager] = await Promise.all([
+  const [chores, progress, members] = await Promise.all([
     getChoresForFamily(family.id, { status: "pending" }),
     getChoreProgress(family.id),
     getFamilyMembers(family.id),
-    isUserFamilyManager(session.user.id, family.id),
   ]);
 
   return (
-    <div className="container max-w-4xl py-8">
-      <InteractionModeProvider mode={isManager ? "management" : "wall"}>
+    <div className="flex-1 p-4 md:p-6 lg:p-8">
+      <div className="mx-auto max-w-4xl">
         <ChoresProvider
           familyId={family.id}
           initialChores={chores}
@@ -42,7 +39,7 @@ export default async function ChoresPage() {
         >
           <Chores familyName={family.name} />
         </ChoresProvider>
-      </InteractionModeProvider>
+      </div>
     </div>
   );
 }

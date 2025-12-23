@@ -89,12 +89,8 @@
           "name": "accounts_user_id_users_id_fk",
           "tableFrom": "accounts",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -212,12 +208,8 @@
           "name": "chores_family_id_families_id_fk",
           "tableFrom": "chores",
           "tableTo": "families",
-          "columnsFrom": [
-            "family_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["family_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -225,12 +217,8 @@
           "name": "chores_assigned_to_id_family_members_id_fk",
           "tableFrom": "chores",
           "tableTo": "family_members",
-          "columnsFrom": [
-            "assigned_to_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["assigned_to_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -238,12 +226,8 @@
           "name": "chores_completed_by_id_family_members_id_fk",
           "tableFrom": "chores",
           "tableTo": "family_members",
-          "columnsFrom": [
-            "completed_by_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["completed_by_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -297,12 +281,8 @@
           "name": "event_participants_event_id_events_id_fk",
           "tableFrom": "event_participants",
           "tableTo": "events",
-          "columnsFrom": [
-            "event_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["event_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -310,12 +290,8 @@
           "name": "event_participants_family_member_id_family_members_id_fk",
           "tableFrom": "event_participants",
           "tableTo": "family_members",
-          "columnsFrom": [
-            "family_member_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["family_member_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -437,12 +413,8 @@
           "name": "events_family_id_families_id_fk",
           "tableFrom": "events",
           "tableTo": "families",
-          "columnsFrom": [
-            "family_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["family_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -450,12 +422,8 @@
           "name": "events_google_calendar_id_google_calendars_id_fk",
           "tableFrom": "events",
           "tableTo": "google_calendars",
-          "columnsFrom": [
-            "google_calendar_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["google_calendar_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -566,12 +534,8 @@
           "name": "family_invites_family_id_families_id_fk",
           "tableFrom": "family_invites",
           "tableTo": "families",
-          "columnsFrom": [
-            "family_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["family_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -579,12 +543,8 @@
           "name": "family_invites_created_by_id_users_id_fk",
           "tableFrom": "family_invites",
           "tableTo": "users",
-          "columnsFrom": [
-            "created_by_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_by_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -594,9 +554,7 @@
         "family_invites_token_unique": {
           "name": "family_invites_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -657,12 +615,8 @@
           "name": "family_members_family_id_families_id_fk",
           "tableFrom": "family_members",
           "tableTo": "families",
-          "columnsFrom": [
-            "family_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["family_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -670,12 +624,8 @@
           "name": "family_members_user_id_users_id_fk",
           "tableFrom": "family_members",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -773,12 +723,8 @@
           "name": "google_calendars_family_id_families_id_fk",
           "tableFrom": "google_calendars",
           "tableTo": "families",
-          "columnsFrom": [
-            "family_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["family_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -786,12 +732,8 @@
           "name": "google_calendars_account_id_accounts_id_fk",
           "tableFrom": "google_calendars",
           "tableTo": "accounts",
-          "columnsFrom": [
-            "account_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["account_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -850,12 +792,8 @@
           "name": "reward_chart_completions_task_id_reward_chart_tasks_id_fk",
           "tableFrom": "reward_chart_completions",
           "tableTo": "reward_chart_tasks",
-          "columnsFrom": [
-            "task_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["task_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -947,12 +885,8 @@
           "name": "reward_chart_goals_chart_id_reward_charts_id_fk",
           "tableFrom": "reward_chart_goals",
           "tableTo": "reward_charts",
-          "columnsFrom": [
-            "chart_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["chart_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1012,12 +946,8 @@
           "name": "reward_chart_messages_chart_id_reward_charts_id_fk",
           "tableFrom": "reward_chart_messages",
           "tableTo": "reward_charts",
-          "columnsFrom": [
-            "chart_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["chart_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1025,12 +955,8 @@
           "name": "reward_chart_messages_author_id_family_members_id_fk",
           "tableFrom": "reward_chart_messages",
           "tableTo": "family_members",
-          "columnsFrom": [
-            "author_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["author_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1116,12 +1042,8 @@
           "name": "reward_chart_tasks_chart_id_reward_charts_id_fk",
           "tableFrom": "reward_chart_tasks",
           "tableTo": "reward_charts",
-          "columnsFrom": [
-            "chart_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["chart_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1182,12 +1104,8 @@
           "name": "reward_charts_family_id_families_id_fk",
           "tableFrom": "reward_charts",
           "tableTo": "families",
-          "columnsFrom": [
-            "family_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["family_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1195,12 +1113,8 @@
           "name": "reward_charts_member_id_family_members_id_fk",
           "tableFrom": "reward_charts",
           "tableTo": "family_members",
-          "columnsFrom": [
-            "member_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["member_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1272,12 +1186,8 @@
           "name": "sessions_user_id_users_id_fk",
           "tableFrom": "sessions",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1287,9 +1197,7 @@
         "sessions_token_unique": {
           "name": "sessions_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -1353,9 +1261,7 @@
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},

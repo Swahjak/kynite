@@ -9,7 +9,7 @@ interface GridFooterProps {
 
 export function GridFooter({ todayStats }: GridFooterProps) {
   return (
-    <div className="flex items-center justify-between border-t bg-slate-50 px-6 py-4 dark:border-slate-700 dark:bg-slate-800/50">
+    <div className="col-span-full flex items-center justify-between border-t bg-slate-50 px-6 py-4 dark:border-slate-700 dark:bg-slate-800/50">
       {/* Info hint */}
       <div className="flex items-center gap-2 text-sm text-slate-400">
         <Info className="h-4 w-4" />

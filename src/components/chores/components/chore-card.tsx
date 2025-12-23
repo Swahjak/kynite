@@ -13,7 +13,7 @@ import {
   getUrgencyVariant,
 } from "../helpers";
 import { useChores } from "../contexts/chores-context";
-import { useInteractionMode } from "@/components/calendar/contexts/interaction-mode-context";
+import { useInteractionModeSafe } from "@/components/calendar/contexts/interaction-mode-context";
 
 interface ChoreCardProps {
   chore: IChoreWithAssignee;
@@ -23,7 +23,7 @@ interface ChoreCardProps {
 
 export function ChoreCard({ chore, onEdit, onDelete }: ChoreCardProps) {
   const { completeChore, expandedChoreId, setExpandedChoreId } = useChores();
-  const { canEdit } = useInteractionMode();
+  const { canEdit } = useInteractionModeSafe();
   const [isCompleting, setIsCompleting] = useState(false);
 
   const urgency = getUrgencyStatus(chore);

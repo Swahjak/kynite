@@ -48,11 +48,14 @@ const messages = {
   },
 };
 
-function renderWithProviders(mode: "wall" | "manage" = "manage") {
+function renderWithProviders(
+  mode: "wall" | "manage" = "manage",
+  props: { onAddEvent?: () => void } = {}
+) {
   return render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <InteractionModeProvider mode={mode}>
-        <AppHeader />
+      <InteractionModeProvider initialMode={mode}>
+        <AppHeader {...props} />
       </InteractionModeProvider>
     </NextIntlClientProvider>
   );
@@ -60,13 +63,13 @@ function renderWithProviders(mode: "wall" | "manage" = "manage") {
 
 describe("AppHeader", () => {
   it("shows add event button in manage mode", () => {
-    renderWithProviders("manage");
+    renderWithProviders("manage", { onAddEvent: vi.fn() });
     const addButtons = screen.getAllByRole("button", { name: /add event/i });
     expect(addButtons.length).toBeGreaterThan(0);
   });
 
   it("hides add event button in wall mode", () => {
-    renderWithProviders("wall");
+    renderWithProviders("wall", { onAddEvent: vi.fn() });
     expect(
       screen.queryByRole("button", { name: /add event/i })
     ).not.toBeInTheDocument();
