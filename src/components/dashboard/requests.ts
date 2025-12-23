@@ -4,14 +4,27 @@ import { getUserFamily } from "@/server/services/family-service";
 import { getEventsForFamily } from "@/server/services/event-service";
 import { startOfDay, endOfDay } from "date-fns";
 
-function mapEventToDashboardEvent(event: {
-  id: string;
-  title: string;
-  startTime: Date;
-  endTime: Date;
-  location: string | null;
-  color: string | null;
-}): DashboardEvent {
+function mapEventToDashboardEvent(
+  event: {
+    id: string;
+    title: string;
+    startTime: Date;
+    endTime: Date;
+    location: string | null;
+    color: string | null;
+  },
+  now: Date
+): DashboardEvent {
+  // Calculate state based on current time
+  let state: "past" | "now" | "upcoming";
+  if (now >= event.endTime) {
+    state = "past";
+  } else if (now >= event.startTime) {
+    state = "now";
+  } else {
+    state = "upcoming";
+  }
+
   return {
     id: event.id,
     title: event.title,
@@ -19,7 +32,7 @@ function mapEventToDashboardEvent(event: {
     endTime: event.endTime,
     location: event.location ?? undefined,
     category: event.color ?? "default",
-    state: "upcoming" as const,
+    state,
   };
 }
 
@@ -47,7 +60,7 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
   });
 
   const todaysEvents = events
-    .map(mapEventToDashboardEvent)
+    .map((event) => mapEventToDashboardEvent(event, now))
     .sort((a, b) => a.startTime.getTime() - b.startTime.getTime());
 
   return {
