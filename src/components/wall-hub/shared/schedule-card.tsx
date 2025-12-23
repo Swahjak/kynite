@@ -1,6 +1,7 @@
 "use client";
 
 import { format, isWithinInterval, parseISO } from "date-fns";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import type { IEvent } from "@/components/calendar/interfaces";
 
@@ -44,6 +45,24 @@ export function ScheduleCard({ event, showNowBadge }: ScheduleCardProps) {
         )}
       </div>
       <p className="text-sm font-semibold">{event.title}</p>
+      {event.users.length > 0 && (
+        <div className="mt-2 flex -space-x-1">
+          {event.users.map((user) => (
+            <Avatar
+              key={user.id}
+              className="size-6 border-2 border-white dark:border-gray-800"
+            >
+              <AvatarImage src={user.avatarUrl} alt={user.name} />
+              <AvatarFallback
+                style={{ backgroundColor: user.avatarColor }}
+                className="text-[10px] font-bold"
+              >
+                {user.avatarFallback}
+              </AvatarFallback>
+            </Avatar>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
