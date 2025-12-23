@@ -96,6 +96,16 @@
     "settings": "Settings",
     "help": "Help"
   },
+  "WallHub": {
+    "today": "Today",
+    "week": "Week",
+    "calendar": "Calendar",
+    "schedule": "Schedule",
+    "tasks": "Tasks",
+    "freeDay": "Free Day!",
+    "noScheduledEvents": "No scheduled events",
+    "done": "Done"
+  },
   "DashboardPage": {
     "greeting": {
       "morning": "Good Morning",

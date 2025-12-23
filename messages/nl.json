@@ -96,6 +96,16 @@
     "settings": "Instellingen",
     "help": "Help"
   },
+  "WallHub": {
+    "today": "Vandaag",
+    "week": "Week",
+    "calendar": "Kalender",
+    "schedule": "Schema",
+    "tasks": "Taken",
+    "freeDay": "Vrije dag!",
+    "noScheduledEvents": "Geen geplande evenementen",
+    "done": "Klaar"
+  },
   "DashboardPage": {
     "greeting": {
       "morning": "Goedemorgen",
