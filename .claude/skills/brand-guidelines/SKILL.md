@@ -1,9 +1,25 @@
 ---
 name: brand-guidelines
-description: Applies Family Planner's brand colors, typography, and design patterns. Use when implementing UI components, applying brand colors/typography, or ensuring design consistency.
+description: Applies Kynite's brand colors, typography, and design patterns. Use when implementing UI components, applying brand colors/typography, or ensuring design consistency.
 ---
 
-# Family Planner Brand
+# Kynite Brand
+
+## Identity
+
+- **Brand Name**: Kynite
+- **Tagline**: Routines without the friction
+
+## Logo
+
+The logo features two cartoon-style figures reaching up together toward a golden star with sparkle rays, representing collaboration, family togetherness, and achievement.
+
+- **Figures color**: `#13ec92` (primary brand color)
+- **Star color**: `#D4A84B` (golden)
+- **Files**:
+  - Icon: `/public/images/logo-icon.svg`
+  - Horizontal: `/public/images/logo-horizontal.svg`
+  - Favicon: `/public/favicon.svg` (star element only)
 
 ## Colors
 

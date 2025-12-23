@@ -1,6 +1,6 @@
-# Family Planner Brand Guidelines
+# Kynite Brand Guidelines
 
-This document defines the visual identity, design language, and user experience principles for Family Planner.
+This document defines the visual identity, design language, and user experience principles for Kynite.
 
 ---
 
@@ -8,11 +8,11 @@ This document defines the visual identity, design language, and user experience 
 
 ### Brand Name
 
-**Family Planner** — A family organizational hub designed for wall-mounted displays and mobile devices.
+**Kynite** — A family organizational hub designed for wall-mounted displays and mobile devices.
 
 ### Tagline
 
-_Family OS_ — Positioning the app as the operating system for family life.
+_Routines without the friction_ — Emphasizing effortless family organization.
 
 ### Brand Personality
 
@@ -25,28 +25,35 @@ _Family OS_ — Positioning the app as the operating system for family life.
 
 ## Logo & Icon
 
-### Primary Icon
+### Primary Logo
 
-The brand uses an icon-based identity featuring a **house/home symbol** rendered in the primary brand color. The icon represents:
+The logo features **two cartoon-style figures reaching up together toward a golden star** with sparkle rays. This represents:
 
-- Family and home life
-- A central hub for organization
-- Warmth and togetherness
+- Family collaboration and togetherness
+- Achievement and reaching for goals (the star)
+- Joy and shared accomplishment
 
-### Icon Specifications
+### Logo Specifications
 
 ```
-Shape: Rounded house silhouette
-Color: Primary (#13ec92)
-Background: Primary with 20% opacity for containers
-Style: Material Symbols "family_home" or custom house icon
+Figures color: #13ec92 (primary brand color)
+Star color: #D4A84B (golden)
+Text color: #13ec92 (primary brand color, matches figures)
+Background: #10221a (dark green)
 ```
+
+### Logo Files
+
+- **Full logo with text**: `docs/design/logo/logo-colorized.svg`
+- **Icon only (figures + star)**: `public/images/logo-icon.svg`
+- **Horizontal layout**: `public/images/logo-horizontal.svg`
+- **Favicon (star only)**: `public/favicon.svg`
 
 ### Icon Usage
 
-- Header: Icon with text "Family Planner" and "Family OS" tagline
-- Favicon: Simplified house icon
-- App icon: House icon on primary color background
+- Header: Logo icon with text "Kynite" and tagline
+- Favicon: Golden star element (scales well at 16-32px)
+- App icon: Full logo on dark background
 
 ---
 
