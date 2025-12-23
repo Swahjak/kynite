@@ -1,4 +1,5 @@
 import type { DashboardData, DashboardEvent, FamilyMemberStar } from "./types";
+// Keep MOCK_DASHBOARD_DATA for activeTimers and quickActions until those features are implemented
 import { MOCK_DASHBOARD_DATA } from "./mocks";
 import {
   getUserFamily,
