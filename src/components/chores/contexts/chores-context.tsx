@@ -1,8 +1,16 @@
 "use client";
 
 import { createContext, useContext, useState, useCallback } from "react";
-import type { IChoreWithAssignee, IChoreProgress, ChoreViewFilter } from "@/types/chore";
+import type {
+  IChoreWithAssignee,
+  IChoreProgress,
+  ChoreViewFilter,
+} from "@/types/chore";
 import type { FamilyMemberWithUser } from "@/types/family";
+import type {
+  CreateChoreInput,
+  UpdateChoreInput,
+} from "@/lib/validations/chore";
 
 interface ChoresContextValue {
   chores: IChoreWithAssignee[];
@@ -13,6 +21,13 @@ interface ChoresContextValue {
   completeChore: (choreId: string) => Promise<void>;
   refreshChores: () => Promise<void>;
   isLoading: boolean;
+  // New: expanded card management
+  expandedChoreId: string | null;
+  setExpandedChoreId: (id: string | null) => void;
+  // New: CRUD mutations
+  createChore: (input: CreateChoreInput) => Promise<void>;
+  updateChore: (id: string, input: UpdateChoreInput) => Promise<void>;
+  deleteChore: (id: string) => Promise<void>;
 }
 
 const ChoresContext = createContext<ChoresContextValue | null>(null);
@@ -36,6 +51,7 @@ export function ChoresProvider({
   const [progress, setProgress] = useState<IChoreProgress>(initialProgress);
   const [currentView, setCurrentView] = useState<ChoreViewFilter>("all");
   const [isLoading, setIsLoading] = useState(false);
+  const [expandedChoreId, setExpandedChoreId] = useState<string | null>(null);
 
   const refreshChores = useCallback(async () => {
     setIsLoading(true);
@@ -85,6 +101,59 @@ export function ChoresProvider({
     [familyId, refreshChores]
   );
 
+  const createChore = useCallback(
+    async (input: CreateChoreInput) => {
+      const res = await fetch(`/api/v1/families/${familyId}/chores`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error?.message ?? "Failed to create chore");
+      }
+
+      await refreshChores();
+    },
+    [familyId, refreshChores]
+  );
+
+  const updateChore = useCallback(
+    async (id: string, input: UpdateChoreInput) => {
+      const res = await fetch(`/api/v1/families/${familyId}/chores/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error?.message ?? "Failed to update chore");
+      }
+
+      await refreshChores();
+    },
+    [familyId, refreshChores]
+  );
+
+  const deleteChore = useCallback(
+    async (id: string) => {
+      const res = await fetch(`/api/v1/families/${familyId}/chores/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error?.message ?? "Failed to delete chore");
+      }
+
+      setExpandedChoreId(null);
+      await refreshChores();
+    },
+    [familyId, refreshChores]
+  );
+
   const value: ChoresContextValue = {
     chores,
     members,
@@ -94,6 +163,11 @@ export function ChoresProvider({
     completeChore,
     refreshChores,
     isLoading,
+    expandedChoreId,
+    setExpandedChoreId,
+    createChore,
+    updateChore,
+    deleteChore,
   };
 
   return (
