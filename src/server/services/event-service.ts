@@ -5,6 +5,7 @@ import {
   familyMembers,
   users,
   googleCalendars,
+  accounts,
 } from "@/server/schema";
 import { eq, and, gte, lte, inArray } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
@@ -79,7 +80,8 @@ export interface EventWithParticipants {
 
 export async function getEventsForFamily(
   familyId: string,
-  query?: EventQueryInput
+  query?: EventQueryInput,
+  viewerUserId?: string // NEW: for privacy filtering
 ): Promise<EventWithParticipants[]> {
   const conditions = [eq(events.familyId, familyId)];
 
@@ -97,9 +99,12 @@ export async function getEventsForFamily(
     .select({
       event: events,
       calendar: googleCalendars,
+      calendarIsPrivate: googleCalendars.isPrivate,
+      calendarAccountUserId: accounts.userId,
     })
     .from(events)
     .leftJoin(googleCalendars, eq(events.googleCalendarId, googleCalendars.id))
+    .leftJoin(accounts, eq(googleCalendars.accountId, accounts.id))
     .where(and(...conditions))
     .orderBy(events.startTime);
 
@@ -169,7 +174,22 @@ export async function getEventsForFamily(
     );
   }
 
-  return result;
+  // Apply privacy filtering
+  return result.map((event) => {
+    const eventRow = eventRows.find((r) => r.event.id === event.id);
+    const calendarInfo =
+      eventRow?.calendarIsPrivate !== undefined
+        ? {
+            isPrivate: eventRow.calendarIsPrivate ?? false,
+            accountUserId: eventRow.calendarAccountUserId ?? "",
+          }
+        : null;
+
+    if (shouldRedactEvent({ calendar: calendarInfo }, viewerUserId)) {
+      return redactEventDetails({ ...event, isHidden: true });
+    }
+    return { ...event, isHidden: false };
+  });
 }
 
 export async function getEventById(
