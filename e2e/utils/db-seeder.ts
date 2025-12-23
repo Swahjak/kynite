@@ -43,6 +43,13 @@ export class DbSeeder {
     this.insertedUserIds.push(user.id);
   }
 
+  /**
+   * Track a user ID for cleanup (used when user is created via API)
+   */
+  trackUser(userId: string): void {
+    this.insertedUserIds.push(userId);
+  }
+
   async seedSession(session: TestSession): Promise<void> {
     await this.db.insert(schema.sessions).values({
       id: session.id,

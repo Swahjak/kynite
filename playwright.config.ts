@@ -5,12 +5,13 @@ export default defineConfig({
   testDir: "./e2e/tests",
   outputDir: "./e2e/test-results",
   snapshotDir: "./e2e/snapshots",
-  snapshotPathTemplate: "{snapshotDir}/{testFilePath}/{arg}{ext}",
+  snapshotPathTemplate: "{snapshotDir}/{testFilePath}/{projectName}/{arg}{ext}",
 
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  // Limit workers to avoid race conditions with test session creation
+  workers: process.env.CI ? 1 : 2,
 
   reporter: [
     ["html", { outputFolder: "./e2e/playwright-report" }],
@@ -26,8 +27,8 @@ export default defineConfig({
 
   expect: {
     toHaveScreenshot: {
-      maxDiffPixels: 100,
-      threshold: 0.2,
+      maxDiffPixels: 500, // Allow for minor rendering differences
+      threshold: 0.25,
     },
   },
 

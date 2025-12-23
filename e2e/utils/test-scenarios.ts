@@ -1,8 +1,6 @@
 // e2e/utils/test-scenarios.ts
 import { DbSeeder } from "./db-seeder";
 import {
-  createTestUser,
-  createTestSession,
   createTestFamily,
   createTestFamilyMember,
   createTestFamilyInvite,
@@ -12,6 +10,9 @@ import {
   type TestFamilyMember,
   type TestFamilyInvite,
 } from "./test-data-factory";
+import { randomUUID } from "crypto";
+
+const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || "http://localhost:3000";
 
 export interface TestCookie {
   name: string;
@@ -42,26 +43,116 @@ export interface FamilyWithInviteScenario extends UserWithFamilyScenario {
   invite: TestFamilyInvite;
 }
 
+/**
+ * Parse Set-Cookie header to extract cookie name and value
+ */
+function parseSetCookie(
+  setCookieHeader: string | null
+): Map<string, { value: string; attributes: string }> {
+  const cookies = new Map<string, { value: string; attributes: string }>();
+  if (!setCookieHeader) return cookies;
+
+  // Handle multiple cookies (they may be joined with comma, but we need to be careful)
+  const cookieStrings = setCookieHeader.split(/,(?=[^;]*=)/);
+
+  for (const cookieStr of cookieStrings) {
+    const parts = cookieStr.trim().split(";");
+    const nameValue = parts[0];
+    const [name, ...valueParts] = nameValue.split("=");
+    const value = valueParts.join("="); // Handle values with = in them
+    cookies.set(name.trim(), {
+      value: value.trim(),
+      attributes: parts.slice(1).join(";"),
+    });
+  }
+
+  return cookies;
+}
+
+/**
+ * Create a test user with a signed session via our test API
+ */
+async function createTestSession(
+  email: string,
+  name: string
+): Promise<{ sessionCookie: TestCookie; userId: string }> {
+  const response = await fetch(`${BASE_URL}/api/test/create-session`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email, name }),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(
+      `Failed to create test session: ${response.status} - ${error}`
+    );
+  }
+
+  const setCookieHeader = response.headers.get("set-cookie");
+  const cookies = parseSetCookie(setCookieHeader);
+
+  // Look for session token cookie
+  const sessionCookie =
+    cookies.get("better-auth.session_token") ||
+    cookies.get("__Secure-better-auth.session_token");
+
+  if (!sessionCookie) {
+    throw new Error(
+      `No session cookie in response. Headers: ${JSON.stringify(Object.fromEntries(response.headers))}`
+    );
+  }
+
+  const data = await response.json();
+
+  return {
+    sessionCookie: {
+      name: cookies.has("__Secure-better-auth.session_token")
+        ? "__Secure-better-auth.session_token"
+        : "better-auth.session_token",
+      value: sessionCookie.value,
+    },
+    userId: data.user?.id,
+  };
+}
+
 export async function seedAuthenticatedUser(
   seeder: DbSeeder,
   overrides?: { userName?: string; userEmail?: string }
 ): Promise<AuthenticatedUserScenario> {
-  const user = createTestUser({
-    name: overrides?.userName,
-    email: overrides?.userEmail,
-  });
-  const session = createTestSession(user.id);
+  const id = randomUUID();
+  const email = overrides?.userEmail ?? `test-${id.slice(0, 8)}@example.com`;
+  const name = overrides?.userName ?? `Test User ${id.slice(0, 8)}`;
 
-  await seeder.seedUser(user);
-  await seeder.seedSession(session);
+  // Create session via our test API
+  const { sessionCookie, userId } = await createTestSession(email, name);
+
+  // Create a TestUser object that matches the created user
+  const user: TestUser = {
+    id: userId,
+    name,
+    email,
+    emailVerified: true,
+    image: null,
+  };
+
+  // Create a placeholder session (the real session is managed by better-auth)
+  const session: TestSession = {
+    id: randomUUID(),
+    userId,
+    token: sessionCookie.value,
+    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+  };
+
+  // Track the user for cleanup
+  seeder.trackUser(userId);
 
   return {
     user,
     session,
-    sessionCookie: {
-      name: "better-auth.session_token",
-      value: session.token,
-    },
+    sessionCookie,
   };
 }
 
@@ -110,16 +201,33 @@ export async function seedFamilyWithMembers(
   const additionalMembers: FamilyWithMembersScenario["additionalMembers"] = [];
 
   for (let i = 0; i < memberCount; i++) {
-    const user = createTestUser({
-      name: `Family Member ${i + 1}`,
-    });
-    const session = createTestSession(user.id);
-    await seeder.seedUser(user);
-    await seeder.seedSession(session);
+    // Create additional members via test API
+    const id = randomUUID();
+    const email = `member-${id.slice(0, 8)}@example.com`;
+    const name = `Family Member ${i + 1}`;
+
+    const { sessionCookie, userId } = await createTestSession(email, name);
+
+    const user: TestUser = {
+      id: userId,
+      name,
+      email,
+      emailVerified: true,
+      image: null,
+    };
+
+    const session: TestSession = {
+      id: randomUUID(),
+      userId,
+      token: sessionCookie.value,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    };
+
+    seeder.trackUser(userId);
 
     const membership = createTestFamilyMember(
       managerScenario.family.id,
-      user.id,
+      userId,
       { role: "participant" }
     );
     await seeder.seedFamilyMember(membership);

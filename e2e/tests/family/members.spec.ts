@@ -37,7 +37,9 @@ test.describe("Family Members", () => {
 
     await page.goto("/settings");
 
-    // Should show manager role for the current user
-    await expect(page.getByText(/manager|beheerder/i)).toBeVisible();
+    // Should show manager role for the current user (look for badge specifically)
+    await expect(
+      page.locator('[data-slot="badge"]').getByText(/manager|beheerder/i)
+    ).toBeVisible();
   });
 });

@@ -19,10 +19,11 @@ test.describe("Reward Chart", () => {
       familyWithMembers.familyCookie,
     ]);
 
-    // Create test chart
+    // Create test chart for a child member (participant), not the manager
+    const childMember = familyWithMembers.additionalMembers[0];
     const chart = createTestRewardChart(
       familyWithMembers.family.id,
-      familyWithMembers.membership.id
+      childMember.membership.id
     );
     await seeder.seedRewardChart(chart);
 
@@ -46,11 +47,11 @@ test.describe("Reward Chart", () => {
     // Navigate to chart
     await page.goto("/reward-chart");
 
-    // Verify chart elements are visible
-    await expect(page.getByText("Star Chart")).toBeVisible();
-    await expect(page.getByText("Brush Teeth")).toBeVisible();
-    await expect(page.getByText("Ice Cream Trip")).toBeVisible();
-    await expect(page.getByText("3 / 10")).toBeVisible();
+    // Verify chart elements are visible (use first() for elements that may appear multiple times)
+    await expect(page.getByText("Star Chart").first()).toBeVisible();
+    await expect(page.getByText("Brush Teeth").first()).toBeVisible();
+    await expect(page.getByText("Ice Cream Trip").first()).toBeVisible();
+    await expect(page.getByText("3 / 10").first()).toBeVisible();
   });
 
   test("can complete a task", async ({
@@ -65,9 +66,11 @@ test.describe("Reward Chart", () => {
       familyWithMembers.familyCookie,
     ]);
 
+    // Create chart for child member (participant)
+    const childMember = familyWithMembers.additionalMembers[0];
     const chart = createTestRewardChart(
       familyWithMembers.family.id,
-      familyWithMembers.membership.id
+      childMember.membership.id
     );
     await seeder.seedRewardChart(chart);
 

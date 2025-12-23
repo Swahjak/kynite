@@ -2,7 +2,7 @@ import { test, expect } from "../../fixtures";
 
 test.describe("App Shell", () => {
   test("should show header on all app routes", async ({ familyPage }) => {
-    const routes = ["/dashboard", "/calendar", "/settings/accounts"];
+    const routes = ["/dashboard", "/calendar", "/settings"];
 
     for (const route of routes) {
       await familyPage.goto(route);

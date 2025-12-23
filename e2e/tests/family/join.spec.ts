@@ -51,8 +51,9 @@ test.describe("Join Family", () => {
 
     await page.goto(`/join/${familyScenario.invite.token}`);
 
+    // Check for error message (use first() as there may be title + description)
     await expect(
-      page.getByText(/expired|verlopen|invalid|ongeldig/i)
+      page.getByText(/expired|verlopen|invalid|ongeldig/i).first()
     ).toBeVisible();
   });
 
@@ -70,8 +71,9 @@ test.describe("Join Family", () => {
 
     await page.goto(`/join/${familyScenario.invite.token}`);
 
+    // Check for error message (use first() as there may be title + description)
     await expect(
-      page.getByText(/maximum|limit|invalid|ongeldig/i)
+      page.getByText(/maximum|limit|invalid|ongeldig/i).first()
     ).toBeVisible();
   });
 
@@ -86,6 +88,9 @@ test.describe("Join Family", () => {
 
     await page.goto("/join/invalid-token-12345");
 
-    await expect(page.getByText(/not found|invalid|ongeldig/i)).toBeVisible();
+    // Check for error message (use first() as there may be title + description)
+    await expect(
+      page.getByText(/not found|invalid|ongeldig/i).first()
+    ).toBeVisible();
   });
 });
