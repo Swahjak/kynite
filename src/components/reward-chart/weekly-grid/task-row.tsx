@@ -1,9 +1,11 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { Pencil, Trash2, GripVertical } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { TaskCell } from "./task-cell";
 import { ICON_COLORS, type IconColorKey } from "../constants";
-import type { TaskRow as TaskRowType, WeekDay } from "../interfaces";
+import type { TaskRow as TaskRowType, WeekDay, IRewardChartTask } from "../interfaces";
 
 interface TaskRowProps {
   taskRow: TaskRowType;
@@ -11,6 +13,9 @@ interface TaskRowProps {
   onComplete: (taskId: string) => void;
   onUndo: (taskId: string) => void;
   disabled?: boolean;
+  showControls?: boolean;
+  onEdit?: (task: IRewardChartTask) => void;
+  onDelete?: (taskId: string) => void;
 }
 
 export function TaskRow({
@@ -19,19 +24,27 @@ export function TaskRow({
   onComplete,
   onUndo,
   disabled,
+  showControls,
+  onEdit,
+  onDelete,
 }: TaskRowProps) {
   const { task, cells } = taskRow;
   const colors =
     ICON_COLORS[task.iconColor as IconColorKey] ?? ICON_COLORS.blue;
 
   return (
-    <div className="grid grid-cols-[1.8fr_repeat(7,1fr)] divide-x divide-slate-100 transition-colors hover:bg-slate-50/50 dark:divide-slate-700/50 dark:hover:bg-slate-800/50">
+    <div className="group grid grid-cols-[1.8fr_repeat(7,1fr)] divide-x divide-slate-100 transition-colors hover:bg-slate-50/50 dark:divide-slate-700/50 dark:hover:bg-slate-800/50">
       {/* Task Info */}
       <div className="flex items-center gap-3 px-4 py-2">
+        {/* Drag Handle - only visible in manage mode */}
+        {showControls && (
+          <GripVertical className="h-4 w-4 cursor-grab text-slate-400 opacity-0 transition-opacity group-hover:opacity-100" />
+        )}
+
         {/* Icon */}
         <div
           className={cn(
-            "flex h-10 w-10 items-center justify-center rounded-xl",
+            "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl",
             colors.bg,
             colors.darkBg
           )}
@@ -48,9 +61,31 @@ export function TaskRow({
         </div>
 
         {/* Title */}
-        <span className="text-sm font-semibold text-slate-700 md:text-base dark:text-slate-200">
+        <span className="flex-1 truncate text-sm font-semibold text-slate-700 md:text-base dark:text-slate-200">
           {task.title}
         </span>
+
+        {/* Edit/Delete Controls - only visible in manage mode */}
+        {showControls && (
+          <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => onEdit?.(task)}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-destructive hover:text-destructive"
+              onClick={() => onDelete?.(task.id)}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Cells */}
