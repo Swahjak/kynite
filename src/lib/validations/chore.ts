@@ -84,14 +84,9 @@ export const choreFormSchema = z.object({
     .regex(/^\d{2}:\d{2}$/, "Invalid time")
     .nullable()
     .optional(),
-  recurrence: choreRecurrenceSchema.default("once"),
-  isUrgent: z.boolean().default(false),
-  starReward: z.coerce
-    .number()
-    .int()
-    .min(1, "Min 1 star")
-    .max(50, "Max 50 stars")
-    .default(10),
+  recurrence: choreRecurrenceSchema,
+  isUrgent: z.boolean(),
+  starReward: z.number().int().min(1, "Min 1 star").max(50, "Max 50 stars"),
 });
 
 export type ChoreFormInput = z.infer<typeof choreFormSchema>;

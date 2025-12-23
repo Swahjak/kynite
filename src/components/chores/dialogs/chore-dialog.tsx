@@ -172,7 +172,11 @@ export function ChoreDialog({ open, onOpenChange, chore }: ChoreDialogProps) {
                         min={1}
                         max={50}
                         disabled={isSubmitting}
-                        {...field}
+                        value={field.value}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
+                        onBlur={field.onBlur}
+                        name={field.name}
+                        ref={field.ref}
                       />
                     </FormControl>
                     <FormMessage />
