@@ -43,6 +43,13 @@
       "when": 1766487402699,
       "tag": "0005_greedy_leper_queen",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1766492252904,
+      "tag": "0006_flimsy_bruce_banner",
+      "breakpoints": true
     }
   ]
 }
