@@ -14,7 +14,7 @@ export function FilterTabs() {
   const { currentView, setCurrentView } = useChores();
 
   return (
-    <div className="flex rounded-xl bg-muted p-1">
+    <div className="bg-muted flex rounded-xl p-1">
       {FILTERS.map((filter) => (
         <button
           key={filter.value}

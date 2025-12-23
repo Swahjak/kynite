@@ -16,6 +16,7 @@ import type {
   UpdateRewardChartGoalInput,
   CreateRewardChartMessageInput,
 } from "@/lib/validations/reward-chart";
+import { addStars } from "./star-service";
 
 // =============================================================================
 // CHART OPERATIONS
@@ -332,6 +333,15 @@ export async function completeTask(taskId: string, date: string) {
         .returning();
     }
 
+    // Add stars to member's balance
+    await addStars({
+      memberId: chart.memberId,
+      amount: task.starValue,
+      type: "reward_chart",
+      referenceId: completion.id,
+      description: task.title,
+    });
+
     // Update active goal progress
     const goals = await tx
       .select()
@@ -414,47 +424,61 @@ export async function undoCompletion(taskId: string, date: string) {
       .delete(rewardChartCompletions)
       .where(eq(rewardChartCompletions.id, existing[0].id));
 
-    // Update active goal progress
+    // Get chart for member ID
     const charts = await tx
       .select()
       .from(rewardCharts)
       .where(eq(rewardCharts.id, task.chartId))
       .limit(1);
 
+    if (charts.length === 0) {
+      throw new Error("Chart not found");
+    }
+
+    const chart = charts[0];
+
+    // Remove stars from member's balance (negative amount)
+    await addStars({
+      memberId: chart.memberId,
+      amount: -task.starValue,
+      type: "reward_chart",
+      referenceId: existing[0].id,
+      description: `Undo: ${task.title}`,
+    });
+
+    // Update active goal progress
     let goalProgress = null;
-    if (charts.length > 0) {
-      const goals = await tx
-        .select()
-        .from(rewardChartGoals)
-        .where(
-          and(
-            eq(rewardChartGoals.chartId, charts[0].id),
-            eq(rewardChartGoals.status, "active")
-          )
+    const goals = await tx
+      .select()
+      .from(rewardChartGoals)
+      .where(
+        and(
+          eq(rewardChartGoals.chartId, chart.id),
+          eq(rewardChartGoals.status, "active")
         )
-        .limit(1);
+      )
+      .limit(1);
 
-      if (goals.length > 0) {
-        const goal = goals[0];
-        const newStars = Math.max(0, goal.starsCurrent - task.starValue);
+    if (goals.length > 0) {
+      const goal = goals[0];
+      const newStars = Math.max(0, goal.starsCurrent - task.starValue);
 
-        const [updatedGoal] = await tx
-          .update(rewardChartGoals)
-          .set({
-            starsCurrent: newStars,
-            updatedAt: new Date(),
-          })
-          .where(eq(rewardChartGoals.id, goal.id))
-          .returning();
+      const [updatedGoal] = await tx
+        .update(rewardChartGoals)
+        .set({
+          starsCurrent: newStars,
+          updatedAt: new Date(),
+        })
+        .where(eq(rewardChartGoals.id, goal.id))
+        .returning();
 
-        goalProgress = {
-          starsCurrent: updatedGoal.starsCurrent,
-          starTarget: updatedGoal.starTarget,
-          progressPercent: Math.round(
-            (updatedGoal.starsCurrent / updatedGoal.starTarget) * 100
-          ),
-        };
-      }
+      goalProgress = {
+        starsCurrent: updatedGoal.starsCurrent,
+        starTarget: updatedGoal.starTarget,
+        progressPercent: Math.round(
+          (updatedGoal.starsCurrent / updatedGoal.starTarget) * 100
+        ),
+      };
     }
 
     return { goalProgress, starsRemoved: task.starValue };

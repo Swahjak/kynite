@@ -87,7 +87,9 @@ export function groupChoresByAssignee(
 /**
  * Filter urgent chores
  */
-export function getUrgentChores(chores: IChoreWithAssignee[]): IChoreWithAssignee[] {
+export function getUrgentChores(
+  chores: IChoreWithAssignee[]
+): IChoreWithAssignee[] {
   return chores.filter((c) => {
     const status = getUrgencyStatus(c);
     return status === "urgent" || status === "overdue" || status === "due-soon";
@@ -135,7 +137,11 @@ export function formatDueLabel(chore: IChoreWithAssignee): string | null {
 
   // Format as date
   const date = new Date(chore.dueDate);
-  return date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  return date.toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
 }
 
 /**

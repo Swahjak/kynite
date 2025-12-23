@@ -1,8 +1,15 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { auth } from "@/server/auth";
-import { getUserFamily, getFamilyMembers, isUserFamilyManager } from "@/server/services/family-service";
-import { getChoresForFamily, getChoreProgress } from "@/server/services/chore-service";
+import {
+  getUserFamily,
+  getFamilyMembers,
+  isUserFamilyManager,
+} from "@/server/services/family-service";
+import {
+  getChoresForFamily,
+  getChoreProgress,
+} from "@/server/services/chore-service";
 import { Chores, ChoresProvider } from "@/components/chores";
 import { InteractionModeProvider } from "@/components/calendar/contexts/interaction-mode-context";
 

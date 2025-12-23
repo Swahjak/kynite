@@ -60,8 +60,8 @@ export function ChartSelector({
                 }
               }}
               className={cn(
-                "flex flex-col items-center gap-2 h-auto py-3 px-4 min-w-[100px]",
-                isSelected && "ring-2 ring-primary ring-offset-2"
+                "flex h-auto min-w-[100px] flex-col items-center gap-2 px-4 py-3",
+                isSelected && "ring-primary ring-2 ring-offset-2"
               )}
             >
               <FamilyAvatar
@@ -70,7 +70,7 @@ export function ChartSelector({
                 size="md"
               />
               <div className="flex flex-col items-center gap-1">
-                <span className="text-sm font-medium leading-none">
+                <span className="text-sm leading-none font-medium">
                   {chart.memberName}
                 </span>
                 {hasChart ? (

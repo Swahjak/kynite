@@ -11,7 +11,10 @@ export async function GET(request: Request, { params }: Params) {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session?.user) {
       return NextResponse.json(
-        { success: false, error: { code: "UNAUTHORIZED", message: "Not authenticated" } },
+        {
+          success: false,
+          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
+        },
         { status: 401 }
       );
     }
@@ -21,7 +24,10 @@ export async function GET(request: Request, { params }: Params) {
     const isMember = await isUserFamilyMember(session.user.id, familyId);
     if (!isMember) {
       return NextResponse.json(
-        { success: false, error: { code: "FORBIDDEN", message: "Not a family member" } },
+        {
+          success: false,
+          error: { code: "FORBIDDEN", message: "Not a family member" },
+        },
         { status: 403 }
       );
     }
@@ -33,7 +39,8 @@ export async function GET(request: Request, { params }: Params) {
 
     return NextResponse.json({ success: true, data: { progress } });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to fetch progress";
+    const message =
+      error instanceof Error ? error.message : "Failed to fetch progress";
     return NextResponse.json(
       { success: false, error: { code: "INTERNAL_ERROR", message } },
       { status: 500 }

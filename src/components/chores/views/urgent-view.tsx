@@ -17,8 +17,8 @@ export function UrgentView({ onEdit, onDelete }: UrgentViewProps) {
 
   if (urgentChores.length === 0) {
     return (
-      <div className="text-center py-12 text-muted-foreground">
-        <AlertTriangle className="h-12 w-12 mx-auto mb-4 opacity-50" />
+      <div className="text-muted-foreground py-12 text-center">
+        <AlertTriangle className="mx-auto mb-4 h-12 w-12 opacity-50" />
         <p className="text-lg font-medium">No urgent chores</p>
         <p className="text-sm">Everything is on track!</p>
       </div>

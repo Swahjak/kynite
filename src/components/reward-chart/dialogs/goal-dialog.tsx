@@ -118,9 +118,7 @@ export function GoalDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>
-            {isEditing ? t("editGoal") : t("setGoal")}
-          </DialogTitle>
+          <DialogTitle>{isEditing ? t("editGoal") : t("setGoal")}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form
@@ -189,7 +187,7 @@ export function GoalDialog({
                         onValueChange={(values) => field.onChange(values[0])}
                         className="w-full"
                       />
-                      <div className="flex justify-between text-xs text-muted-foreground">
+                      <div className="text-muted-foreground flex justify-between text-xs">
                         <span>5</span>
                         <span>100</span>
                       </div>

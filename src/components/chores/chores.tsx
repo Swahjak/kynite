@@ -23,8 +23,12 @@ export function Chores({ familyName }: ChoresProps) {
   // Dialog state
   const [choreDialogOpen, setChoreDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [editingChore, setEditingChore] = useState<IChoreWithAssignee | null>(null);
-  const [deletingChore, setDeletingChore] = useState<IChoreWithAssignee | null>(null);
+  const [editingChore, setEditingChore] = useState<IChoreWithAssignee | null>(
+    null
+  );
+  const [deletingChore, setDeletingChore] = useState<IChoreWithAssignee | null>(
+    null
+  );
 
   // Get greeting based on time of day
   const hour = new Date().getHours();
@@ -68,7 +72,9 @@ export function Chores({ familyName }: ChoresProps) {
         <h1 className="text-3xl font-bold">
           {greeting}, {familyName}!
         </h1>
-        <p className="text-muted-foreground">Let&apos;s crush today&apos;s goals.</p>
+        <p className="text-muted-foreground">
+          Let&apos;s crush today&apos;s goals.
+        </p>
       </div>
 
       {/* Progress */}
@@ -78,15 +84,24 @@ export function Chores({ familyName }: ChoresProps) {
       <FilterTabs />
 
       {/* Chore List */}
-      <div className={isLoading ? "opacity-50 pointer-events-none" : ""}>
+      <div className={isLoading ? "pointer-events-none opacity-50" : ""}>
         {currentView === "all" && (
-          <AllChoresView onEdit={canEdit ? handleEdit : undefined} onDelete={canEdit ? handleDelete : undefined} />
+          <AllChoresView
+            onEdit={canEdit ? handleEdit : undefined}
+            onDelete={canEdit ? handleDelete : undefined}
+          />
         )}
         {currentView === "by-person" && (
-          <ByPersonView onEdit={canEdit ? handleEdit : undefined} onDelete={canEdit ? handleDelete : undefined} />
+          <ByPersonView
+            onEdit={canEdit ? handleEdit : undefined}
+            onDelete={canEdit ? handleDelete : undefined}
+          />
         )}
         {currentView === "urgent" && (
-          <UrgentView onEdit={canEdit ? handleEdit : undefined} onDelete={canEdit ? handleDelete : undefined} />
+          <UrgentView
+            onEdit={canEdit ? handleEdit : undefined}
+            onDelete={canEdit ? handleDelete : undefined}
+          />
         )}
       </div>
 

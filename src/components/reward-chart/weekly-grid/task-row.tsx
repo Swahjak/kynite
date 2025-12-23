@@ -5,7 +5,11 @@ import { Pencil, Trash2, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TaskCell } from "./task-cell";
 import { ICON_COLORS, type IconColorKey } from "../constants";
-import type { TaskRow as TaskRowType, WeekDay, IRewardChartTask } from "../interfaces";
+import type {
+  TaskRow as TaskRowType,
+  WeekDay,
+  IRewardChartTask,
+} from "../interfaces";
 
 interface TaskRowProps {
   taskRow: TaskRowType;
@@ -93,7 +97,7 @@ export function TaskRow({
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-destructive hover:text-destructive"
+              className="text-destructive hover:text-destructive h-8 w-8"
               onClick={() => onDelete?.(task.id)}
             >
               <Trash2 className="h-4 w-4" />

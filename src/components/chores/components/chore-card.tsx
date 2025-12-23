@@ -31,7 +31,8 @@ export function ChoreCard({ chore, onEdit, onDelete }: ChoreCardProps) {
   const badgeVariant = getUrgencyVariant(urgency);
 
   const assignee = chore.assignedTo;
-  const displayName = assignee?.displayName ?? assignee?.user.name ?? "Unassigned";
+  const displayName =
+    assignee?.displayName ?? assignee?.user.name ?? "Unassigned";
   const avatarColor = assignee?.avatarColor ?? "gray";
 
   const isExpanded = expandedChoreId === chore.id;
@@ -69,7 +70,7 @@ export function ChoreCard({ chore, onEdit, onDelete }: ChoreCardProps) {
         }
       }}
       className={cn(
-        "group relative rounded-xl border bg-card transition-all duration-200",
+        "group bg-card relative rounded-xl border transition-all duration-200",
         canEdit && "cursor-pointer",
         isExpanded && "border-primary shadow-sm",
         isCompleting && "animate-out slide-out-to-right fade-out duration-300"
@@ -82,25 +83,31 @@ export function ChoreCard({ chore, onEdit, onDelete }: ChoreCardProps) {
           className="h-14 w-14 ring-2 ring-offset-2"
           style={{ "--ring-color": avatarColor } as React.CSSProperties}
         >
-          <AvatarImage src={assignee?.user.image ?? undefined} alt={displayName} />
+          <AvatarImage
+            src={assignee?.user.image ?? undefined}
+            alt={displayName}
+          />
           <AvatarFallback
             style={{ backgroundColor: avatarColor }}
-            className="text-white font-medium"
+            className="font-medium text-white"
           >
             {displayName.slice(0, 2).toUpperCase()}
           </AvatarFallback>
         </Avatar>
 
         {/* Content */}
-        <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-lg truncate">{chore.title}</h3>
-          <div className="flex items-center gap-2 mt-1">
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate text-lg font-semibold">{chore.title}</h3>
+          <div className="mt-1 flex items-center gap-2">
             {dueLabel && (
-              <Badge variant={badgeVariant} className="text-xs font-bold uppercase">
+              <Badge
+                variant={badgeVariant}
+                className="text-xs font-bold uppercase"
+              >
                 {dueLabel}
               </Badge>
             )}
-            <span className="text-sm text-muted-foreground">{displayName}</span>
+            <span className="text-muted-foreground text-sm">{displayName}</span>
           </div>
         </div>
 
@@ -125,17 +132,17 @@ export function ChoreCard({ chore, onEdit, onDelete }: ChoreCardProps) {
 
       {/* Expanded Actions */}
       {isExpanded && canEdit && (
-        <div className="border-t px-4 py-3 flex items-center justify-end gap-2">
+        <div className="flex items-center justify-end gap-2 border-t px-4 py-3">
           <Button variant="outline" size="sm" onClick={handleEdit}>
-            <Pencil className="h-4 w-4 mr-1" />
+            <Pencil className="mr-1 h-4 w-4" />
             Edit
           </Button>
           <Button variant="outline" size="sm" onClick={handleDelete}>
-            <Trash2 className="h-4 w-4 mr-1" />
+            <Trash2 className="mr-1 h-4 w-4" />
             Delete
           </Button>
           <Button size="sm" onClick={handleComplete} disabled={isCompleting}>
-            <Check className="h-4 w-4 mr-1" />
+            <Check className="mr-1 h-4 w-4" />
             Done
           </Button>
         </div>

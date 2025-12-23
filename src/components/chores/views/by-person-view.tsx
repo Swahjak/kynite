@@ -27,17 +27,23 @@ export function ByPersonView({ onEdit, onDelete }: ByPersonViewProps) {
           return (
             <div key={member.id} className="w-80 flex-shrink-0">
               {/* Column Header */}
-              <div className="flex items-center gap-3 mb-4 px-2">
+              <div className="mb-4 flex items-center gap-3 px-2">
                 <Avatar className="h-10 w-10">
-                  <AvatarImage src={member.user.image ?? undefined} alt={displayName} />
-                  <AvatarFallback style={{ backgroundColor: member.avatarColor ?? undefined }}>
+                  <AvatarImage
+                    src={member.user.image ?? undefined}
+                    alt={displayName}
+                  />
+                  <AvatarFallback
+                    style={{ backgroundColor: member.avatarColor ?? undefined }}
+                  >
                     {displayName.slice(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div>
                   <p className="font-semibold">{displayName}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {sortedChores.length} chore{sortedChores.length !== 1 ? "s" : ""}
+                  <p className="text-muted-foreground text-sm">
+                    {sortedChores.length} chore
+                    {sortedChores.length !== 1 ? "s" : ""}
                   </p>
                 </div>
               </div>
@@ -45,7 +51,7 @@ export function ByPersonView({ onEdit, onDelete }: ByPersonViewProps) {
               {/* Chores */}
               <div className="space-y-3">
                 {sortedChores.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground text-sm">
+                  <div className="text-muted-foreground py-8 text-center text-sm">
                     No chores assigned
                   </div>
                 ) : (

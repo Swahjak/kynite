@@ -11,13 +11,13 @@ export function ProgressCard() {
   const streak = 12;
 
   return (
-    <div className="rounded-xl border bg-card p-4">
-      <div className="flex items-center justify-between mb-3">
+    <div className="bg-card rounded-xl border p-4">
+      <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Trophy className="h-5 w-5 text-primary" />
+          <Trophy className="text-primary h-5 w-5" />
           <span className="font-semibold">Daily Streak: {streak} Days</span>
         </div>
-        <span className="text-sm text-muted-foreground">
+        <span className="text-muted-foreground text-sm">
           {progress.completed}/{progress.total} Done
         </span>
       </div>
