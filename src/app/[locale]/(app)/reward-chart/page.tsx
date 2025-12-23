@@ -6,8 +6,12 @@ import {
 import {
   getChartByMemberId,
   getChartWithDetails,
+  getChartsForFamily,
 } from "@/server/services/reward-chart-service";
-import { getFamilyMemberByUserId } from "@/server/services/family-service";
+import {
+  getFamilyMemberByUserId,
+  getFamilyMembers,
+} from "@/server/services/family-service";
 import { getSession } from "@/lib/get-session";
 import {
   startOfWeek,
@@ -25,10 +29,15 @@ import type { GoalStatus, CompletionStatus } from "@/components/reward-chart";
 
 type Props = {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ child?: string }>;
 };
 
-export default async function RewardChartRoute({ params }: Props) {
+export default async function RewardChartRoute({
+  params,
+  searchParams,
+}: Props) {
   const { locale } = await params;
+  const { child: selectedChildId } = await searchParams;
   setRequestLocale(locale as Locale);
 
   // Session and family are guaranteed by (app) layout
@@ -45,22 +54,88 @@ export default async function RewardChartRoute({ params }: Props) {
     );
   }
 
-  // Get chart for this member
-  const chart = await getChartByMemberId(member.id);
+  const isManager = member.role === "manager";
 
-  if (!chart) {
-    return (
-      <div className="flex min-h-[400px] items-center justify-center">
-        <div className="text-center">
-          <p className="text-lg font-medium text-slate-600">
-            No star chart found
-          </p>
-          <p className="mt-1 text-sm text-slate-500">
-            Ask a family manager to create one for you!
-          </p>
+  // Determine which chart to show
+  let chart;
+
+  if (isManager) {
+    // Managers can view any child's chart
+    // Get all family members and charts to find the right one
+    const [allMembers, familyCharts] = await Promise.all([
+      getFamilyMembers(familyId),
+      getChartsForFamily(familyId),
+    ]);
+
+    // Find non-manager members (children/participants)
+    const children = allMembers.filter((m) => m.role !== "manager");
+
+    if (children.length === 0) {
+      return (
+        <div className="flex min-h-[400px] items-center justify-center">
+          <div className="text-center">
+            <p className="text-lg font-medium text-slate-600">
+              No children in family
+            </p>
+            <p className="mt-1 text-sm text-slate-500">
+              Add family members to create star charts for them.
+            </p>
+          </div>
         </div>
-      </div>
+      );
+    }
+
+    // Find which child's chart to show
+    const targetChildId = selectedChildId || children[0]?.id;
+    const targetChild = children.find((c) => c.id === targetChildId);
+
+    if (!targetChild) {
+      return (
+        <div className="flex min-h-[400px] items-center justify-center">
+          <p className="text-lg font-medium text-slate-600">Child not found</p>
+        </div>
+      );
+    }
+
+    // Find chart for this child
+    const childChart = familyCharts.find(
+      (fc) => fc.chart.memberId === targetChild.id
     );
+    chart = childChart?.chart ?? null;
+
+    // If no chart exists for this child, show create option
+    if (!chart) {
+      return (
+        <div className="flex min-h-[400px] items-center justify-center">
+          <div className="text-center">
+            <p className="text-lg font-medium text-slate-600">
+              No star chart for {targetChild.displayName}
+            </p>
+            <p className="mt-1 text-sm text-slate-500">
+              Create a star chart to track their progress!
+            </p>
+          </div>
+        </div>
+      );
+    }
+  } else {
+    // Non-managers can only view their own chart
+    chart = await getChartByMemberId(member.id);
+
+    if (!chart) {
+      return (
+        <div className="flex min-h-[400px] items-center justify-center">
+          <div className="text-center">
+            <p className="text-lg font-medium text-slate-600">
+              No star chart found
+            </p>
+            <p className="mt-1 text-sm text-slate-500">
+              Ask a family manager to create one for you!
+            </p>
+          </div>
+        </div>
+      );
+    }
   }
 
   // Get full chart data
