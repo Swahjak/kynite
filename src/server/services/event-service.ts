@@ -30,6 +30,7 @@ export interface EventWithParticipants {
   calendarName: string | null;
   calendarColor: string | null;
   accessRole: string | null;
+  isHidden: boolean; // true when event is from a private calendar and viewer is not owner
   participants: {
     id: string;
     familyMemberId: string;
@@ -120,6 +121,7 @@ export async function getEventsForFamily(
     calendarName: row.calendar?.name ?? null,
     calendarColor: row.calendar?.color ?? null,
     accessRole: row.calendar?.accessRole ?? null,
+    isHidden: false, // TODO: Implement private calendar logic in Task 3
     participants: participantsByEvent.get(row.event.id) ?? [],
   }));
 
@@ -183,6 +185,7 @@ export async function getEventById(
     calendarName: row.calendar?.name ?? null,
     calendarColor: row.calendar?.color ?? null,
     accessRole: row.calendar?.accessRole ?? null,
+    isHidden: false, // TODO: Implement private calendar logic in Task 3
     participants: participantRows.map((p) => ({
       id: p.eventParticipant.id,
       familyMemberId: p.familyMember.id,

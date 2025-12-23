@@ -16,6 +16,7 @@ export interface IEvent {
   color: TEventColor;
   description: string;
   users: IUser[];
+  isHidden?: boolean;
 }
 
 export interface ICalendarCell {
