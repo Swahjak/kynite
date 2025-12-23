@@ -5,8 +5,8 @@ import { BrandArea } from "../brand-area";
 
 const messages = {
   Header: {
-    brand: "Family Planner",
-    tagline: "FAMILY OS",
+    brand: "Kynite",
+    tagline: "Routines without the friction",
   },
 };
 
@@ -22,11 +22,13 @@ describe("BrandArea", () => {
   it("renders brand name and tagline", () => {
     renderWithProviders(<BrandArea />);
 
-    expect(screen.getByText("Family Planner")).toBeInTheDocument();
-    expect(screen.getByText("FAMILY OS")).toBeInTheDocument();
+    expect(screen.getByText("Kynite")).toBeInTheDocument();
+    expect(
+      screen.getByText("Routines without the friction")
+    ).toBeInTheDocument();
   });
 
-  it("renders home icon in circular container", () => {
+  it("renders logo icon", () => {
     renderWithProviders(<BrandArea />);
 
     const icon = screen.getByTestId("brand-icon");

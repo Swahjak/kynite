@@ -18,12 +18,13 @@ vi.mock("@/i18n/navigation", () => ({
 }));
 
 const messages = {
-  Header: { brand: "Family Planner", tagline: "FAMILY OS" },
+  Header: { brand: "Kynite", tagline: "Routines without the friction" },
   Menu: {
     dashboard: "Dashboard",
     calendar: "Calendar",
     chores: "Chores",
     rewardChart: "Star Chart",
+    rewards: "Rewards",
     settings: "Settings",
     help: "Help",
   },
@@ -47,6 +48,8 @@ describe("NavigationMenu", () => {
     expect(screen.getByText("Dashboard")).toBeInTheDocument();
     expect(screen.getByText("Calendar")).toBeInTheDocument();
     expect(screen.getByText("Chores")).toBeInTheDocument();
+    expect(screen.getByText("Star Chart")).toBeInTheDocument();
+    expect(screen.getByText("Rewards")).toBeInTheDocument();
     expect(screen.getByText("Settings")).toBeInTheDocument();
     expect(screen.getByText("Help")).toBeInTheDocument();
   });
@@ -60,6 +63,8 @@ describe("NavigationMenu", () => {
     expect(screen.getByText("Dashboard")).toBeInTheDocument();
     expect(screen.getByText("Calendar")).toBeInTheDocument();
     expect(screen.queryByText("Chores")).not.toBeInTheDocument();
+    expect(screen.getByText("Star Chart")).toBeInTheDocument();
+    expect(screen.getByText("Rewards")).toBeInTheDocument();
     expect(screen.queryByText("Settings")).not.toBeInTheDocument();
     expect(screen.getByText("Help")).toBeInTheDocument();
   });

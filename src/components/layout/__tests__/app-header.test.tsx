@@ -1,6 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { NextIntlClientProvider } from "next-intl";
 import { AppHeader } from "../app-header";
 import { InteractionModeProvider } from "@/contexts/interaction-mode-context";
@@ -35,9 +34,8 @@ vi.mock("@/lib/auth-client", () => ({
 
 const messages = {
   Header: {
-    brand: "Family Planner",
-    tagline: "FAMILY OS",
-    addEvent: "Add Event",
+    brand: "Kynite",
+    tagline: "Routines without the friction",
   },
   Menu: {
     dashboard: "Dashboard",
@@ -48,33 +46,17 @@ const messages = {
   },
 };
 
-function renderWithProviders(
-  mode: "wall" | "manage" = "manage",
-  props: { onAddEvent?: () => void } = {}
-) {
+function renderWithProviders(mode: "wall" | "manage" = "manage") {
   return render(
     <NextIntlClientProvider locale="en" messages={messages}>
       <InteractionModeProvider initialMode={mode}>
-        <AppHeader {...props} />
+        <AppHeader />
       </InteractionModeProvider>
     </NextIntlClientProvider>
   );
 }
 
 describe("AppHeader", () => {
-  it("shows add event button in manage mode", () => {
-    renderWithProviders("manage", { onAddEvent: vi.fn() });
-    const addButtons = screen.getAllByRole("button", { name: /add event/i });
-    expect(addButtons.length).toBeGreaterThan(0);
-  });
-
-  it("hides add event button in wall mode", () => {
-    renderWithProviders("wall", { onAddEvent: vi.fn() });
-    expect(
-      screen.queryByRole("button", { name: /add event/i })
-    ).not.toBeInTheDocument();
-  });
-
   it("shows avatar in manage mode", () => {
     renderWithProviders("manage");
     expect(screen.getByTestId("user-avatar")).toBeInTheDocument();
@@ -87,6 +69,13 @@ describe("AppHeader", () => {
 
   it("renders brand area", () => {
     renderWithProviders("manage");
-    expect(screen.getByText("Family Planner")).toBeInTheDocument();
+    expect(screen.getByText("Kynite")).toBeInTheDocument();
+  });
+
+  it("renders menu button", () => {
+    renderWithProviders("manage");
+    expect(
+      screen.getByRole("button", { name: /open menu/i })
+    ).toBeInTheDocument();
   });
 });
