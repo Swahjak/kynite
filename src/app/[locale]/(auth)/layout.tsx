@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { unstable_noStore as noStore } from "next/cache";
 import { getSession } from "@/lib/get-session";
 
 interface AuthLayoutProps {
@@ -10,6 +11,8 @@ export default async function AuthLayout({
   children,
   params,
 }: AuthLayoutProps) {
+  noStore(); // Disable caching - session must be checked fresh each request
+
   const { locale } = await params;
 
   // DEBUG: Throw error with session info instead of redirecting
