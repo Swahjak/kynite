@@ -348,6 +348,7 @@ export const googleCalendars = pgTable("google_calendars", {
   color: text("color"),
   accessRole: text("access_role").notNull().default("reader"), // 'owner' | 'writer' | 'reader'
   syncEnabled: boolean("sync_enabled").notNull().default(true),
+  isPrivate: boolean("is_private").notNull().default(false),
   lastSyncedAt: timestamp("last_synced_at", { mode: "date" }),
   syncCursor: text("sync_cursor"), // Google's sync token for incremental updates
   createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
