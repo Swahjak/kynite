@@ -91,12 +91,16 @@ export default async function RewardsRoute({ params }: Props) {
   };
 
   return (
-    <RewardStoreProvider
-      familyId={familyId}
-      memberId={member.id}
-      initialData={initialData}
-    >
-      <RewardStorePage />
-    </RewardStoreProvider>
+    <div className="flex-1 p-4 md:p-6 lg:p-8">
+      <div className="mx-auto max-w-4xl">
+        <RewardStoreProvider
+          familyId={familyId}
+          memberId={member.id}
+          initialData={initialData}
+        >
+          <RewardStorePage />
+        </RewardStoreProvider>
+      </div>
+    </div>
   );
 }

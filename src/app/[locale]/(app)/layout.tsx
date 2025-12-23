@@ -3,7 +3,6 @@ import { setRequestLocale } from "next-intl/server";
 import { getSession } from "@/lib/get-session";
 import { getUserFamily } from "@/server/services/family-service";
 import { InteractionModeProvider } from "@/contexts/interaction-mode-context";
-import { AddEventProvider } from "@/contexts/add-event-context";
 import { AppShell } from "@/components/layout/app-shell";
 import type { Locale } from "@/i18n/routing";
 
@@ -34,9 +33,7 @@ export default async function AppLayout({ children, params }: AppLayoutProps) {
 
   return (
     <InteractionModeProvider>
-      <AddEventProvider>
-        <AppShell isManager={isManager}>{children}</AppShell>
-      </AddEventProvider>
+      <AppShell isManager={isManager}>{children}</AppShell>
     </InteractionModeProvider>
   );
 }

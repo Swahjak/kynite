@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { CalendarBody } from "@/components/calendar/calendar-body";
 import { CalendarProvider } from "@/components/calendar/contexts/calendar-context";
 import { DndProvider } from "@/components/calendar/contexts/dnd-context";
@@ -10,10 +9,9 @@ import type { IEvent, IUser } from "@/components/calendar/interfaces";
 interface CalendarProps {
   events?: IEvent[];
   users?: IUser[];
-  addEventButtonRef?: React.RefObject<HTMLButtonElement | null>;
 }
 
-export function Calendar({ events, users, addEventButtonRef }: CalendarProps) {
+export function Calendar({ events, users }: CalendarProps) {
   // Try to use CalendarDataProvider if props not provided
   let finalEvents: IEvent[] = events ?? [];
   let finalUsers: IUser[] = users ?? [];
@@ -38,7 +36,7 @@ export function Calendar({ events, users, addEventButtonRef }: CalendarProps) {
     <CalendarProvider events={finalEvents} users={finalUsers} view="month">
       <DndProvider showConfirmation={false}>
         <div className="w-full rounded-xl border">
-          <CalendarHeader addEventButtonRef={addEventButtonRef} />
+          <CalendarHeader />
           <CalendarBody />
         </div>
       </DndProvider>

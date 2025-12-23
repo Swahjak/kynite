@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Plus, ShoppingBag, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useInteractionMode } from "@/contexts/interaction-mode-context";
 import { toast } from "sonner";
@@ -129,30 +130,16 @@ export function RewardStorePage() {
 
       {/* Main content with tabs */}
       <Tabs defaultValue="available" className="w-full">
-        <div className="flex items-center justify-between">
-          <TabsList>
-            <TabsTrigger value="available" className="gap-2">
-              <ShoppingBag className="h-4 w-4" />
-              {t("available")}
-            </TabsTrigger>
-            <TabsTrigger value="redeemed" className="gap-2">
-              <CheckCircle className="h-4 w-4" />
-              {t("redeemed")}
-            </TabsTrigger>
-          </TabsList>
-
-          {isManageMode && (
-            <Button
-              onClick={() => {
-                setEditingReward(undefined);
-                setRewardDialogOpen(true);
-              }}
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              {t("createReward")}
-            </Button>
-          )}
-        </div>
+        <TabsList>
+          <TabsTrigger value="available" className="gap-2">
+            <ShoppingBag className="h-4 w-4" />
+            {t("available")}
+          </TabsTrigger>
+          <TabsTrigger value="redeemed" className="gap-2">
+            <CheckCircle className="h-4 w-4" />
+            {t("redeemed")}
+          </TabsTrigger>
+        </TabsList>
 
         <TabsContent value="available" className="mt-6">
           {data.rewards.length === 0 ? (
@@ -222,6 +209,24 @@ export function RewardStorePage() {
           )}
         </TabsContent>
       </Tabs>
+
+      {/* FAB - only visible in manage mode */}
+      {isManageMode && (
+        <Button
+          onClick={() => {
+            setEditingReward(undefined);
+            setRewardDialogOpen(true);
+          }}
+          size="icon"
+          className={cn(
+            "fixed right-6 bottom-6 z-50 h-14 w-14 rounded-full shadow-lg",
+            "transition-transform hover:scale-105 active:scale-95"
+          )}
+          aria-label={t("createReward")}
+        >
+          <Plus className="h-6 w-6" />
+        </Button>
+      )}
 
       {/* Dialogs */}
       <RewardDialog

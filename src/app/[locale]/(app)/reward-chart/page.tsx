@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import {
   RewardChartPage,
@@ -41,12 +42,15 @@ export default async function RewardChartRoute({
   const { child: selectedChildId } = await searchParams;
   setRequestLocale(locale as Locale);
 
-  // Session and family are guaranteed by (app) layout
+  // Session and family are guaranteed by (app) layout, but add defensive check
   const session = await getSession();
-  const familyId = session!.session.familyId!;
+  if (!session?.user || !session.session.familyId) {
+    redirect(`/${locale}/login`);
+  }
+  const familyId = session.session.familyId;
 
   // Get member
-  const member = await getFamilyMemberByUserId(session!.user.id, familyId);
+  const member = await getFamilyMemberByUserId(session.user.id, familyId);
   if (!member) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">

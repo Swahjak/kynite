@@ -99,13 +99,19 @@ export function MonthEventBadge({
   ) as VariantProps<typeof eventBadgeVariants>["color"];
 
   const eventBadgeClasses = cn(
-    eventBadgeVariants({ color, multiDayPosition: position, className })
+    eventBadgeVariants({ color, multiDayPosition: position, className }),
+    event.isHidden && "pointer-events-none opacity-[0.77] select-none"
   );
 
   return (
     <DraggableEvent event={event}>
       <EventDetailsDialog event={event}>
-        <div role="button" tabIndex={0} className={eventBadgeClasses}>
+        <div
+          role="button"
+          tabIndex={0}
+          className={eventBadgeClasses}
+          data-hidden={event.isHidden ? "true" : undefined}
+        >
           <div className="flex items-center gap-1.5 truncate">
             {!["middle", "last"].includes(position) &&
               badgeVariant === "dot" && <EventBullet color={event.color} />}

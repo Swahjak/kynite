@@ -69,42 +69,44 @@ export function EventBlock({ event, className }: IProps) {
 
   const calendarWeekEventCardClasses = cn(
     calendarWeekEventCardVariants({ color, className }),
-    durationInMinutes < 35 && "py-0 justify-center"
+    durationInMinutes < 35 && "py-0 justify-center",
+    event.isHidden &&
+      "pointer-events-none opacity-[0.77] select-none cursor-default"
   );
 
-  return (
+  const eventContent = (
+    <div
+      role="button"
+      tabIndex={0}
+      className={calendarWeekEventCardClasses}
+      style={{ height: `${heightInPixels}px` }}
+      data-hidden={event.isHidden ? "true" : undefined}
+    >
+      <div className="flex items-center gap-1.5 truncate">
+        {badgeVariant === "dot" && (
+          <svg width="8" height="8" viewBox="0 0 8 8" className="shrink-0">
+            <circle cx="4" cy="4" r="4" />
+          </svg>
+        )}
+
+        <p className="truncate font-semibold">{event.title}</p>
+      </div>
+
+      {durationInMinutes > 25 && (
+        <p>
+          {formatTime(start, use24HourFormat)} -{" "}
+          {formatTime(end, use24HourFormat)}
+        </p>
+      )}
+    </div>
+  );
+
+  return event.isHidden ? (
+    <EventDetailsDialog event={event}>{eventContent}</EventDetailsDialog>
+  ) : (
     <ResizableEvent event={event}>
       <DraggableEvent event={event}>
-        <EventDetailsDialog event={event}>
-          <div
-            role="button"
-            tabIndex={0}
-            className={calendarWeekEventCardClasses}
-            style={{ height: `${heightInPixels}px` }}
-          >
-            <div className="flex items-center gap-1.5 truncate">
-              {badgeVariant === "dot" && (
-                <svg
-                  width="8"
-                  height="8"
-                  viewBox="0 0 8 8"
-                  className="shrink-0"
-                >
-                  <circle cx="4" cy="4" r="4" />
-                </svg>
-              )}
-
-              <p className="truncate font-semibold">{event.title}</p>
-            </div>
-
-            {durationInMinutes > 25 && (
-              <p>
-                {formatTime(start, use24HourFormat)} -{" "}
-                {formatTime(end, use24HourFormat)}
-              </p>
-            )}
-          </div>
-        </EventDetailsDialog>
+        <EventDetailsDialog event={event}>{eventContent}</EventDetailsDialog>
       </DraggableEvent>
     </ResizableEvent>
   );

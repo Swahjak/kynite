@@ -1,14 +1,9 @@
 "use client";
 
-import { Monitor, MonitorSmartphone } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useInteractionMode } from "@/contexts/interaction-mode-context";
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 interface ModeToggleProps {
   /** Only render if user is a manager (parent) */
@@ -23,23 +18,22 @@ export function ModeToggle({ isManager }: ModeToggleProps) {
     return null;
   }
 
-  const isWallMode = mode === "wall";
-  const Icon = isWallMode ? MonitorSmartphone : Monitor;
-  const label = isWallMode ? t("switchToManage") : t("switchToWall");
+  const isManageMode = mode === "manage";
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={toggleMode}
-          aria-label={label}
-        >
-          <Icon className="size-5" />
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>{label}</TooltipContent>
-    </Tooltip>
+    <div className="flex items-center gap-2">
+      <Switch
+        id="mode-toggle"
+        checked={isManageMode}
+        onCheckedChange={toggleMode}
+        aria-label={isManageMode ? t("switchToWall") : t("switchToManage")}
+      />
+      <Label
+        htmlFor="mode-toggle"
+        className="text-muted-foreground cursor-pointer text-sm"
+      >
+        {t("manageMode")}
+      </Label>
+    </div>
   );
 }

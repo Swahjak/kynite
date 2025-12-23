@@ -1,7 +1,6 @@
 "use client";
 
-import { Menu, Plus } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { Menu } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
 import { useInteractionMode } from "@/contexts/interaction-mode-context";
 import { Button } from "@/components/ui/button";
@@ -10,17 +9,11 @@ import { ModeToggle } from "./mode-toggle";
 import { UserMenu } from "@/components/auth/user-menu";
 
 interface AppHeaderProps {
-  onAddEvent?: () => void;
   isManager?: boolean;
   onMenuToggle?: () => void;
 }
 
-export function AppHeader({
-  onAddEvent,
-  isManager = false,
-  onMenuToggle,
-}: AppHeaderProps) {
-  const t = useTranslations("Header");
+export function AppHeader({ isManager = false, onMenuToggle }: AppHeaderProps) {
   const { mode } = useInteractionMode();
   const { data: session } = useSession();
 
@@ -47,39 +40,17 @@ export function AppHeader({
         {/* Mode Toggle (managers only) */}
         <ModeToggle isManager={isManager} />
 
-        {isManageMode && (
-          <>
-            {/* Add Event Button */}
-            {onAddEvent && (
-              <>
-                <Button onClick={onAddEvent} className="hidden sm:flex">
-                  <Plus className="size-4" />
-                  {t("addEvent")}
-                </Button>
-                <Button
-                  onClick={onAddEvent}
-                  size="icon"
-                  className="sm:hidden"
-                  aria-label={t("addEvent")}
-                >
-                  <Plus className="size-5" />
-                </Button>
-              </>
-            )}
-
-            {/* User Menu */}
-            {user && (
-              <div data-testid="user-avatar">
-                <UserMenu
-                  user={{
-                    name: user.name || "User",
-                    email: user.email || "",
-                    image: user.image,
-                  }}
-                />
-              </div>
-            )}
-          </>
+        {/* User Menu */}
+        {isManageMode && user && (
+          <div data-testid="user-avatar">
+            <UserMenu
+              user={{
+                name: user.name || "User",
+                email: user.email || "",
+                image: user.image,
+              }}
+            />
+          </div>
         )}
       </div>
     </header>

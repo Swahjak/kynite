@@ -5,6 +5,7 @@ import { Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CalendarToggle } from "./calendar-toggle";
 import { SyncStatusBadge } from "./sync-status-badge";
+import { CalendarPrivacyToggle } from "@/components/settings/calendar-privacy-toggle";
 import { toast } from "sonner";
 import type { GoogleCalendar } from "@/server/schema";
 
@@ -115,6 +116,26 @@ export function CalendarSelectionSection({
     );
   };
 
+  const handlePrivacyChange = async (
+    calendarId: string,
+    isPrivate: boolean
+  ) => {
+    const response = await fetch(`/api/v1/calendars/${calendarId}/privacy`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ isPrivate }),
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.error?.message || "Failed to update privacy");
+    }
+
+    setLinkedCalendars((prev) =>
+      prev.map((c) => (c.id === calendarId ? { ...c, isPrivate } : c))
+    );
+  };
+
   const handleSyncNow = async () => {
     setIsSyncing(true);
     try {
@@ -170,15 +191,23 @@ export function CalendarSelectionSection({
           </div>
           <div className="divide-y rounded-md border">
             {linkedCalendars.map((cal) => (
-              <div
-                key={cal.id}
-                className="flex items-center justify-between px-3 py-2"
-              >
-                <CalendarToggle calendar={cal} onToggle={handleToggleSync} />
-                <SyncStatusBadge
-                  status={cal.lastSyncedAt ? "synced" : "pending"}
-                  lastSyncedAt={cal.lastSyncedAt ?? undefined}
-                />
+              <div key={cal.id} className="space-y-2 px-3 py-3">
+                <div className="flex items-center justify-between">
+                  <CalendarToggle calendar={cal} onToggle={handleToggleSync} />
+                  <SyncStatusBadge
+                    status={cal.lastSyncedAt ? "synced" : "pending"}
+                    lastSyncedAt={cal.lastSyncedAt ?? undefined}
+                  />
+                </div>
+                <div className="pl-7">
+                  <CalendarPrivacyToggle
+                    calendarId={cal.id}
+                    calendarName={cal.name}
+                    isPrivate={cal.isPrivate ?? false}
+                    syncEnabled={cal.syncEnabled}
+                    onPrivacyChange={handlePrivacyChange}
+                  />
+                </div>
               </div>
             ))}
           </div>
