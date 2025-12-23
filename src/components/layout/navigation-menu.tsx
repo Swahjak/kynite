@@ -40,7 +40,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { href: "/dashboard", icon: LayoutDashboard, labelKey: "dashboard" },
-  { href: "/calendar", icon: Calendar, labelKey: "calendar" },
+  { href: "/calendar/today", icon: Calendar, labelKey: "calendar" },
   { href: "/chores", icon: CheckSquare, labelKey: "chores", manageOnly: true },
   { href: "/reward-chart", icon: Star, labelKey: "rewardChart" },
   { href: "/settings", icon: Settings, labelKey: "settings", manageOnly: true },
