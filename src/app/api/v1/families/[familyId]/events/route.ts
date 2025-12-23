@@ -64,7 +64,11 @@ export async function GET(request: Request, { params }: Params) {
       );
     }
 
-    const events = await getEventsForFamily(familyId, parsed.data);
+    const events = await getEventsForFamily(
+      familyId,
+      parsed.data,
+      session.user.id // Pass viewer's user ID for privacy filtering
+    );
 
     return NextResponse.json({
       success: true,
