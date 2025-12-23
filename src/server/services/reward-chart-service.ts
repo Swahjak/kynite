@@ -173,7 +173,7 @@ export async function updateTask(
   taskId: string,
   input: UpdateRewardChartTaskInput
 ) {
-  const updates: Record<string, unknown> = { updatedAt: new Date() };
+  const updates: Record<string, unknown> = {};
 
   if (input.title !== undefined) updates.title = input.title;
   if (input.icon !== undefined) updates.icon = input.icon;
@@ -199,7 +199,7 @@ export async function updateTask(
 export async function deleteTask(taskId: string) {
   await db
     .update(rewardChartTasks)
-    .set({ isActive: false, updatedAt: new Date() })
+    .set({ isActive: false })
     .where(eq(rewardChartTasks.id, taskId));
 }
 

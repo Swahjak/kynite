@@ -237,6 +237,12 @@
     "noChartsMessage": "Stel Sterrenkaarten in voor je kinderen",
     "createChart": "Kaart maken",
     "chartCreated": "Kaart aangemaakt",
-    "chartError": "Kaart aanmaken mislukt"
+    "chartError": "Kaart aanmaken mislukt",
+    "taskDeleted": "Taak verwijderd",
+    "taskUpdated": "Taak bijgewerkt",
+    "taskCreated": "Taak aangemaakt",
+    "taskDeleteError": "Taak verwijderen mislukt",
+    "taskSaveError": "Taak opslaan mislukt",
+    "taskReorderError": "Taken herschikken mislukt"
   }
 }

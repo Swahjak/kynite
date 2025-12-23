@@ -237,6 +237,12 @@
     "noChartsMessage": "Set up Star Charts for your children",
     "createChart": "Create Chart",
     "chartCreated": "Chart created",
-    "chartError": "Failed to create chart"
+    "chartError": "Failed to create chart",
+    "taskDeleted": "Task deleted",
+    "taskUpdated": "Task updated",
+    "taskCreated": "Task created",
+    "taskDeleteError": "Failed to delete task",
+    "taskSaveError": "Failed to save task",
+    "taskReorderError": "Failed to reorder tasks"
   }
 }

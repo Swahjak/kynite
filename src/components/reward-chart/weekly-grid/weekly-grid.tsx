@@ -12,20 +12,32 @@ import { TaskDialog } from "../dialogs/task-dialog";
 import type { TaskFormValues } from "../dialogs/task-dialog";
 import type { IRewardChartTask } from "../interfaces";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 interface WeeklyGridProps {
   className?: string;
 }
 
 export function WeeklyGrid({ className }: WeeklyGridProps) {
-  const { weekData, completeTask, undoCompletion, isLoading, createTask, updateTask, deleteTask, reorderTasks } =
-    useRewardChart();
+  const t = useTranslations("rewardChart");
+  const {
+    weekData,
+    completeTask,
+    undoCompletion,
+    isLoading,
+    createTask,
+    updateTask,
+    deleteTask,
+    reorderTasks,
+  } = useRewardChart();
   const { mode } = useInteractionMode();
   const isManageMode = mode === "manage";
 
   // Task dialog state
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState<IRewardChartTask | undefined>();
+  const [editingTask, setEditingTask] = useState<
+    IRewardChartTask | undefined
+  >();
 
   // Drag state
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
@@ -40,29 +52,39 @@ export function WeeklyGrid({ className }: WeeklyGridProps) {
     setTaskDialogOpen(true);
   }, []);
 
-  const handleDeleteTask = useCallback(async (taskId: string) => {
-    try {
-      await deleteTask(taskId);
-      toast.success("Task deleted");
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to delete task");
-    }
-  }, [deleteTask]);
-
-  const handleTaskSubmit = useCallback(async (values: TaskFormValues) => {
-    try {
-      if (editingTask) {
-        await updateTask(editingTask.id, values);
-        toast.success("Task updated");
-      } else {
-        await createTask(values);
-        toast.success("Task created");
+  const handleDeleteTask = useCallback(
+    async (taskId: string) => {
+      try {
+        await deleteTask(taskId);
+        toast.success(t("taskDeleted"));
+      } catch (error) {
+        toast.error(
+          error instanceof Error ? error.message : t("taskDeleteError")
+        );
       }
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to save task");
-      throw error;
-    }
-  }, [editingTask, createTask, updateTask]);
+    },
+    [deleteTask, t]
+  );
+
+  const handleTaskSubmit = useCallback(
+    async (values: TaskFormValues) => {
+      try {
+        if (editingTask) {
+          await updateTask(editingTask.id, values);
+          toast.success(t("taskUpdated"));
+        } else {
+          await createTask(values);
+          toast.success(t("taskCreated"));
+        }
+      } catch (error) {
+        toast.error(
+          error instanceof Error ? error.message : t("taskSaveError")
+        );
+        throw error;
+      }
+    },
+    [editingTask, createTask, updateTask, t]
+  );
 
   // Drag and drop handlers
   const handleDragStart = useCallback((e: React.DragEvent, taskId: string) => {
@@ -76,29 +98,32 @@ export function WeeklyGrid({ className }: WeeklyGridProps) {
     e.dataTransfer.dropEffect = "move";
   }, []);
 
-  const handleDrop = useCallback(async (e: React.DragEvent, targetTaskId: string) => {
-    e.preventDefault();
-    if (!draggedTaskId || draggedTaskId === targetTaskId || !weekData) return;
+  const handleDrop = useCallback(
+    async (e: React.DragEvent, targetTaskId: string) => {
+      e.preventDefault();
+      if (!draggedTaskId || draggedTaskId === targetTaskId || !weekData) return;
 
-    const tasks = weekData.tasks;
-    const draggedIndex = tasks.findIndex((t) => t.task.id === draggedTaskId);
-    const targetIndex = tasks.findIndex((t) => t.task.id === targetTaskId);
+      const tasks = weekData.tasks;
+      const draggedIndex = tasks.findIndex((t) => t.task.id === draggedTaskId);
+      const targetIndex = tasks.findIndex((t) => t.task.id === targetTaskId);
 
-    if (draggedIndex === -1 || targetIndex === -1) return;
+      if (draggedIndex === -1 || targetIndex === -1) return;
 
-    // Reorder locally first for immediate feedback
-    const newOrder = [...tasks];
-    const [removed] = newOrder.splice(draggedIndex, 1);
-    newOrder.splice(targetIndex, 0, removed);
+      // Reorder locally first for immediate feedback
+      const newOrder = [...tasks];
+      const [removed] = newOrder.splice(draggedIndex, 1);
+      newOrder.splice(targetIndex, 0, removed);
 
-    try {
-      await reorderTasks(newOrder.map((t) => t.task.id));
-    } catch (error) {
-      toast.error("Failed to reorder tasks");
-    }
+      try {
+        await reorderTasks(newOrder.map((tr) => tr.task.id));
+      } catch (error) {
+        toast.error(t("taskReorderError"));
+      }
 
-    setDraggedTaskId(null);
-  }, [draggedTaskId, weekData, reorderTasks]);
+      setDraggedTaskId(null);
+    },
+    [draggedTaskId, weekData, reorderTasks, t]
+  );
 
   if (!weekData) {
     return (
