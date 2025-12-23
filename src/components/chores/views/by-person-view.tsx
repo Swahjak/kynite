@@ -5,8 +5,14 @@ import { ChoreCard } from "../components/chore-card";
 import { groupChoresByAssignee, sortChores } from "../helpers";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import type { IChoreWithAssignee } from "@/types/chore";
 
-export function ByPersonView() {
+interface ByPersonViewProps {
+  onEdit?: (chore: IChoreWithAssignee) => void;
+  onDelete?: (chore: IChoreWithAssignee) => void;
+}
+
+export function ByPersonView({ onEdit, onDelete }: ByPersonViewProps) {
   const { chores, members } = useChores();
   const grouped = groupChoresByAssignee(chores);
 
@@ -44,7 +50,12 @@ export function ByPersonView() {
                   </div>
                 ) : (
                   sortedChores.map((chore) => (
-                    <ChoreCard key={chore.id} chore={chore} />
+                    <ChoreCard
+                      key={chore.id}
+                      chore={chore}
+                      onEdit={onEdit}
+                      onDelete={onDelete}
+                    />
                   ))
                 )}
               </div>
