@@ -14,6 +14,24 @@ import type {
   EventQueryInput,
 } from "@/lib/validations/event";
 
+// Privacy utility functions
+interface EventWithCalendar {
+  calendar: {
+    isPrivate: boolean;
+    accountUserId: string;
+  } | null;
+}
+
+export function shouldRedactEvent(
+  event: EventWithCalendar,
+  viewerUserId?: string
+): boolean {
+  if (!event.calendar) return false;
+  if (!event.calendar.isPrivate) return false;
+  if (!viewerUserId) return true;
+  return event.calendar.accountUserId !== viewerUserId;
+}
+
 export interface EventWithParticipants {
   id: string;
   familyId: string;
