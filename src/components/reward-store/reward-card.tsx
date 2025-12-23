@@ -9,6 +9,13 @@ import { useTranslations } from "next-intl";
 import type { IRewardWithStatus } from "./interfaces";
 import { formatDistanceToNow } from "date-fns";
 
+const LIMIT_TYPE_LABELS = {
+  daily: "limitDaily",
+  weekly: "limitWeekly",
+  monthly: "limitMonthly",
+  once: "limitOnce",
+} as const;
+
 interface RewardCardProps {
   reward: IRewardWithStatus;
   isPrimaryGoal?: boolean;
@@ -76,14 +83,17 @@ export function RewardCard({
               {t("primaryGoal")}
             </Badge>
           )}
-          {reward.limitType !== "none" && (
-            <Badge variant="outline" className="gap-1">
-              <Clock className="h-3 w-3" />
-              {t(
-                `limit${reward.limitType.charAt(0).toUpperCase()}${reward.limitType.slice(1)}`
-              )}
-            </Badge>
-          )}
+          {reward.limitType !== "none" &&
+            reward.limitType in LIMIT_TYPE_LABELS && (
+              <Badge variant="outline" className="gap-1">
+                <Clock className="h-3 w-3" />
+                {t(
+                  LIMIT_TYPE_LABELS[
+                    reward.limitType as keyof typeof LIMIT_TYPE_LABELS
+                  ]
+                )}
+              </Badge>
+            )}
         </div>
       </div>
 

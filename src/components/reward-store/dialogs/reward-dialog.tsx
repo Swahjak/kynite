@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import {
   Dialog,
   DialogContent,
@@ -31,11 +32,22 @@ import {
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import {
-  createRewardSchema,
+  limitTypeSchema,
   type CreateRewardInput,
 } from "@/lib/validations/reward";
 import { REWARD_EMOJIS, LIMIT_OPTIONS } from "../constants";
 import type { IReward } from "../interfaces";
+
+// Local form schema with explicit types (no defaults for form values)
+const rewardFormSchema = z.object({
+  title: z.string().min(1, "Title is required").max(100, "Title too long"),
+  description: z.string().max(500).optional(),
+  emoji: z.string().min(1, "Emoji is required"),
+  starCost: z.number().int().min(1, "Cost must be at least 1").max(100000),
+  limitType: limitTypeSchema,
+});
+
+type RewardFormValues = z.infer<typeof rewardFormSchema>;
 
 interface RewardDialogProps {
   open: boolean;
@@ -53,8 +65,8 @@ export function RewardDialog({
   const t = useTranslations("rewardStore");
   const isEditing = !!reward;
 
-  const form = useForm<CreateRewardInput>({
-    resolver: zodResolver(createRewardSchema),
+  const form = useForm<RewardFormValues>({
+    resolver: zodResolver(rewardFormSchema),
     defaultValues: {
       title: "",
       emoji: "🎮",
@@ -86,8 +98,13 @@ export function RewardDialog({
     }
   }, [open, reward, form]);
 
-  async function handleFormSubmit(values: CreateRewardInput) {
-    await onSubmit(values);
+  async function handleFormSubmit(values: RewardFormValues) {
+    // Convert form values to CreateRewardInput
+    const input: CreateRewardInput = {
+      ...values,
+      description: values.description || null,
+    };
+    await onSubmit(input);
     form.reset();
     onOpenChange(false);
   }
