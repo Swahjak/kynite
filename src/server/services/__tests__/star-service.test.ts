@@ -101,17 +101,17 @@ describe("star-service", () => {
       expect(result.newBalance).toBe(15);
     });
 
-    it("throws when amount is negative", async () => {
+    it("throws when amount is zero", async () => {
       const { addStars } = await import("../star-service");
 
       await expect(
         addStars({
           memberId: "member-123",
-          amount: -5,
+          amount: 0,
           type: "bonus",
           description: "Invalid",
         })
-      ).rejects.toThrow("Amount must be positive");
+      ).rejects.toThrow("Amount cannot be zero");
     });
   });
 

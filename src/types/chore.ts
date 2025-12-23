@@ -14,7 +14,11 @@ export type ChoreRecurrence =
   | "monthly";
 export type UrgencyStatus = "none" | "due-soon" | "urgent" | "overdue";
 
-export const CHORE_STATUSES: ChoreStatus[] = ["pending", "completed", "skipped"];
+export const CHORE_STATUSES: ChoreStatus[] = [
+  "pending",
+  "completed",
+  "skipped",
+];
 export const CHORE_RECURRENCES: ChoreRecurrence[] = [
   "once",
   "daily",

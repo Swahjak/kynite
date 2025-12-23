@@ -40,9 +40,7 @@ export function RewardChartPage() {
       // Refresh to show new chart
       window.location.href = `?child=${memberId}`;
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : t("chartError")
-      );
+      toast.error(error instanceof Error ? error.message : t("chartError"));
     }
   };
 
@@ -50,18 +48,17 @@ export function RewardChartPage() {
   // Note: This is a simplified version. In a full implementation, you would fetch
   // all family members and their charts. For now, we'll show the selector only if
   // we have chart data (meaning we're in manage mode with access to family data).
-  const childCharts =
-    weekData?.chart.member
-      ? [
-          {
-            memberId: weekData.chart.member.id,
-            memberName: weekData.chart.member.displayName || "Child",
-            memberAvatar: weekData.chart.member.avatarColor,
-            chartId: weekData.chart.id,
-            totalStars: weekData.chart.activeGoal?.starsCurrent || 0,
-          },
-        ]
-      : [];
+  const childCharts = weekData?.chart.member
+    ? [
+        {
+          memberId: weekData.chart.member.id,
+          memberName: weekData.chart.member.displayName || "Child",
+          memberAvatar: weekData.chart.member.avatarColor,
+          chartId: weekData.chart.id,
+          totalStars: weekData.chart.activeGoal?.starsCurrent || 0,
+        },
+      ]
+    : [];
 
   if (error) {
     return (
