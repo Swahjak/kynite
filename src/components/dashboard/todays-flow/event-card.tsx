@@ -19,9 +19,9 @@ export function EventCard({ event, state }: EventCardProps) {
     <Card
       className={cn(
         "transition-all",
-        state === "NOW" && "border-l-primary bg-primary/5 border-l-4",
-        state === "NEXT" && "bg-muted/50",
-        state === "LATER" && "opacity-60"
+        state === "now" && "border-l-primary bg-primary/5 border-l-4",
+        state === "upcoming" && "bg-muted/50",
+        state === "past" && "opacity-60"
       )}
     >
       <CardContent className="p-4">
@@ -30,7 +30,7 @@ export function EventCard({ event, state }: EventCardProps) {
             <p
               className={cn(
                 "font-mono tabular-nums",
-                state === "NOW" ? "text-2xl font-bold" : "text-lg"
+                state === "now" ? "text-2xl font-bold" : "text-lg"
               )}
             >
               {formattedTime}
@@ -38,7 +38,7 @@ export function EventCard({ event, state }: EventCardProps) {
             <h3
               className={cn(
                 "truncate font-semibold",
-                state === "NOW" ? "text-xl" : "text-base"
+                state === "now" ? "text-xl" : "text-base"
               )}
             >
               {event.title}

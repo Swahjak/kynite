@@ -28,7 +28,7 @@ export function TodaysFlow() {
             <p className="text-primary mb-1 text-xs font-medium tracking-wide uppercase">
               {t("now")}
             </p>
-            <EventCard event={nowEvent} state="NOW" />
+            <EventCard event={nowEvent} state="now" />
           </div>
         )}
 
@@ -37,7 +37,7 @@ export function TodaysFlow() {
             <p className="text-muted-foreground mb-1 text-xs font-medium tracking-wide uppercase">
               {t("next")}
             </p>
-            <EventCard event={nextEvent} state="NEXT" />
+            <EventCard event={nextEvent} state="upcoming" />
           </div>
         )}
 
@@ -48,7 +48,7 @@ export function TodaysFlow() {
             </p>
             <div className="space-y-2">
               {laterEvents.map((event) => (
-                <EventCard key={event.id} event={event} state="LATER" />
+                <EventCard key={event.id} event={event} state="upcoming" />
               ))}
             </div>
           </div>

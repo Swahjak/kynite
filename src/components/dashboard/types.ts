@@ -1,4 +1,4 @@
-export type EventState = "NOW" | "NEXT" | "LATER";
+export type EventState = "past" | "now" | "upcoming";
 
 export interface DashboardEvent {
   id: string;
