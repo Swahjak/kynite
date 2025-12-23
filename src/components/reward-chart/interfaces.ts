@@ -138,3 +138,38 @@ export interface UndoCompletionResponse {
   goalProgress: GoalProgress | null;
   starsRemoved: number;
 }
+
+// =============================================================================
+// MUTATION INPUTS
+// =============================================================================
+
+export interface CreateTaskInput {
+  title: string;
+  icon: string;
+  iconColor: string;
+  starValue: number;
+  daysOfWeek: number[];
+}
+
+export interface UpdateTaskInput {
+  title?: string;
+  icon?: string;
+  iconColor?: string;
+  starValue?: number;
+  daysOfWeek?: number[];
+}
+
+export interface CreateGoalInput {
+  title: string;
+  emoji: string;
+  starTarget: number;
+  description?: string;
+}
+
+export interface UpdateGoalInput {
+  title?: string;
+  emoji?: string;
+  starTarget?: number;
+  description?: string | null;
+  status?: "active" | "achieved" | "cancelled";
+}

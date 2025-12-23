@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useCalendar } from "@/components/calendar/contexts/calendar-context";
+import { cn } from "@/lib/utils";
 
 export function UserSelect() {
   const { users, selectedUserId, filterEventsBySelectedUser } = useCalendar();
@@ -23,7 +24,9 @@ export function UserSelect() {
             {users.map((user) => (
               <Avatar key={user.id} className="text-xxs size-6">
                 <AvatarImage src={user.avatarUrl} alt={user.name} />
-                <AvatarFallback className="text-xxs">
+                <AvatarFallback
+                  className={cn("text-xxs text-white", user.avatarColor)}
+                >
                   {user.avatarFallback}
                 </AvatarFallback>
               </Avatar>
@@ -41,7 +44,9 @@ export function UserSelect() {
             <div className="flex items-center gap-2">
               <Avatar key={user.id} className="size-6">
                 <AvatarImage src={user.avatarUrl} alt={user.name} />
-                <AvatarFallback className="text-xxs">
+                <AvatarFallback
+                  className={cn("text-xxs text-white", user.avatarColor)}
+                >
                   {user.avatarFallback}
                 </AvatarFallback>
               </Avatar>

@@ -1,16 +1,38 @@
 import type { IEvent, IUser } from "@/components/calendar/interfaces";
 import type { EventWithParticipants } from "@/server/services/event-service";
 import { CALENDAR_ITEMS_MOCK, USERS_MOCK } from "@/components/calendar/mocks";
+import type { TEventColor } from "@/components/calendar/types";
+
+// Map avatar color to event color (handles pink/teal which aren't in TEventColor)
+function avatarColorToEventColor(avatarColor: string | null): TEventColor {
+  const colorMap: Record<string, TEventColor> = {
+    blue: "blue",
+    green: "green",
+    red: "red",
+    yellow: "yellow",
+    purple: "purple",
+    orange: "orange",
+    pink: "red", // Fallback
+    teal: "green", // Fallback
+  };
+  return colorMap[avatarColor ?? ""] ?? "blue";
+}
 
 // Transform API response to calendar IEvent format
 export function transformEventToIEvent(event: EventWithParticipants): IEvent {
+  // Use first participant's avatar color for the event color
+  const firstParticipant = event.participants[0];
+  const eventColor = firstParticipant
+    ? avatarColorToEventColor(firstParticipant.avatarColor)
+    : "blue";
+
   return {
     id: event.id,
     title: event.title,
     description: event.description ?? "",
     startDate: new Date(event.startTime).toISOString(),
     endDate: new Date(event.endTime).toISOString(),
-    color: (event.color as IEvent["color"]) ?? "blue",
+    color: eventColor,
     users: event.participants.map((p) => ({
       id: p.familyMemberId,
       name: p.displayName ?? p.userName,

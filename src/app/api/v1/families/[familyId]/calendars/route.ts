@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/server/auth";
 import { db } from "@/server/db";
-import { googleCalendars, familyMembers } from "@/server/schema";
+import { googleCalendars, familyMembers, accounts } from "@/server/schema";
 import { eq, and } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 
@@ -85,15 +85,14 @@ export async function POST(request: Request, { params }: RouteParams) {
     const body = await request.json();
     const { accountId, googleCalendarId, name, color, accessRole } = body;
 
-    // Verify user is family manager
+    // Verify user is family member
     const membership = await db
       .select()
       .from(familyMembers)
       .where(
         and(
           eq(familyMembers.familyId, familyId),
-          eq(familyMembers.userId, session.user.id),
-          eq(familyMembers.role, "manager")
+          eq(familyMembers.userId, session.user.id)
         )
       )
       .limit(1);
@@ -102,10 +101,36 @@ export async function POST(request: Request, { params }: RouteParams) {
       return NextResponse.json(
         {
           success: false,
-          error: { code: "FORBIDDEN", message: "Manager access required" },
+          error: { code: "FORBIDDEN", message: "Not a family member" },
         },
         { status: 403 }
       );
+    }
+
+    const isManager = membership[0].role === "manager";
+
+    // Verify the account belongs to the user (or user is manager)
+    if (!isManager) {
+      const account = await db
+        .select()
+        .from(accounts)
+        .where(
+          and(eq(accounts.id, accountId), eq(accounts.userId, session.user.id))
+        )
+        .limit(1);
+
+      if (account.length === 0) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: "FORBIDDEN",
+              message: "You can only add calendars from your own accounts",
+            },
+          },
+          { status: 403 }
+        );
+      }
     }
 
     // Check if calendar already linked

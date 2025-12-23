@@ -6,6 +6,10 @@ import type {
   WeeklyChartData,
   CompleteTaskResponse,
   UndoCompletionResponse,
+  CreateTaskInput,
+  UpdateTaskInput,
+  CreateGoalInput,
+  UpdateGoalInput,
 } from "../interfaces";
 
 interface RewardChartContextValue {
@@ -20,6 +24,16 @@ interface RewardChartContextValue {
   refetch: () => Promise<void>;
   familyId: string;
   chartId: string;
+  // Task mutations
+  createTask: (input: CreateTaskInput) => Promise<void>;
+  updateTask: (taskId: string, input: UpdateTaskInput) => Promise<void>;
+  deleteTask: (taskId: string) => Promise<void>;
+  reorderTasks: (taskIds: string[]) => Promise<void>;
+  // Goal mutations
+  createGoal: (input: CreateGoalInput) => Promise<void>;
+  updateGoal: (goalId: string, input: UpdateGoalInput) => Promise<void>;
+  // Message mutation
+  sendMessage: (content: string) => Promise<void>;
 }
 
 const RewardChartContext = createContext<RewardChartContextValue | undefined>(
@@ -115,6 +129,137 @@ export function RewardChartProvider({
     [familyId, chartId, refetch]
   );
 
+  const createTask = useCallback(
+    async (input: CreateTaskInput) => {
+      const response = await fetch(
+        `/api/v1/families/${familyId}/reward-charts/${chartId}/tasks`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(input),
+        }
+      );
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error?.message || "Failed to create task");
+      }
+      await refetch();
+    },
+    [familyId, chartId, refetch]
+  );
+
+  const updateTask = useCallback(
+    async (taskId: string, input: UpdateTaskInput) => {
+      const response = await fetch(
+        `/api/v1/families/${familyId}/reward-charts/${chartId}/tasks/${taskId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(input),
+        }
+      );
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error?.message || "Failed to update task");
+      }
+      await refetch();
+    },
+    [familyId, chartId, refetch]
+  );
+
+  const deleteTask = useCallback(
+    async (taskId: string) => {
+      const response = await fetch(
+        `/api/v1/families/${familyId}/reward-charts/${chartId}/tasks/${taskId}`,
+        {
+          method: "DELETE",
+        }
+      );
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error?.message || "Failed to delete task");
+      }
+      await refetch();
+    },
+    [familyId, chartId, refetch]
+  );
+
+  const reorderTasks = useCallback(
+    async (taskIds: string[]) => {
+      const response = await fetch(
+        `/api/v1/families/${familyId}/reward-charts/${chartId}/tasks/reorder`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ taskIds }),
+        }
+      );
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error?.message || "Failed to reorder tasks");
+      }
+      await refetch();
+    },
+    [familyId, chartId, refetch]
+  );
+
+  const createGoal = useCallback(
+    async (input: CreateGoalInput) => {
+      const response = await fetch(
+        `/api/v1/families/${familyId}/reward-charts/${chartId}/goals`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(input),
+        }
+      );
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error?.message || "Failed to create goal");
+      }
+      await refetch();
+    },
+    [familyId, chartId, refetch]
+  );
+
+  const updateGoal = useCallback(
+    async (goalId: string, input: UpdateGoalInput) => {
+      const response = await fetch(
+        `/api/v1/families/${familyId}/reward-charts/${chartId}/goals/${goalId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(input),
+        }
+      );
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error?.message || "Failed to update goal");
+      }
+      await refetch();
+    },
+    [familyId, chartId, refetch]
+  );
+
+  const sendMessage = useCallback(
+    async (content: string) => {
+      const response = await fetch(
+        `/api/v1/families/${familyId}/reward-charts/${chartId}/messages`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content }),
+        }
+      );
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error?.message || "Failed to send message");
+      }
+      await refetch();
+    },
+    [familyId, chartId, refetch]
+  );
+
   const value: RewardChartContextValue = {
     weekData,
     setWeekData,
@@ -127,6 +272,16 @@ export function RewardChartProvider({
     refetch,
     familyId,
     chartId,
+    // Task mutations
+    createTask,
+    updateTask,
+    deleteTask,
+    reorderTasks,
+    // Goal mutations
+    createGoal,
+    updateGoal,
+    // Message mutation
+    sendMessage,
   };
 
   return (

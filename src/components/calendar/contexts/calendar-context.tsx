@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import { useLocalStorage } from "@/components/calendar/hooks";
 import type { IEvent, IUser } from "@/components/calendar/interfaces";
 import type { TCalendarView, TEventColor } from "@/components/calendar/types";
@@ -89,6 +89,12 @@ export function CalendarProvider({
 
   const [allEvents, setAllEvents] = useState<IEvent[]>(events || []);
   const [filteredEvents, setFilteredEvents] = useState<IEvent[]>(events || []);
+
+  // Sync events prop with state when it changes (e.g., after API fetch completes)
+  useEffect(() => {
+    setAllEvents(events || []);
+    setFilteredEvents(events || []);
+  }, [events]);
 
   const updateSettings = (newPartialSettings: Partial<CalendarSettings>) => {
     setSettings({
