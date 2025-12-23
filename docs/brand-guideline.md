@@ -258,13 +258,14 @@ Based on a 4px base unit:
 
 ### Border Radius
 
-| Token     | Value  | Usage                            |
-| --------- | ------ | -------------------------------- |
-| `default` | 4px    | Subtle rounding                  |
-| `lg`      | 8px    | Buttons, inputs                  |
-| `xl`      | 12px   | Cards, panels                    |
-| `2xl`     | 16px   | Large cards, modals              |
-| `full`    | 9999px | Pills, avatars, circular buttons |
+| Token     | Value  | Usage                        |
+| --------- | ------ | ---------------------------- |
+| `default` | 4px    | Subtle rounding              |
+| `lg`      | 8px    | Small elements               |
+| `xl`      | 12px   | Buttons, inputs, event cards |
+| `2xl`     | 16px   | Cards, panels                |
+| `3xl`     | 20px   | Large cards, modals          |
+| `full`    | 9999px | Pills, chips, avatars        |
 
 ### Shadows
 
@@ -371,6 +372,18 @@ Border Radius: full
 Font: Caption, Bold
 Background: Category color with opacity
 ```
+
+### Status Badges
+
+Status badges use pill shapes with vibrant colors:
+
+| Variant    | Background          | Text Color    | Usage                |
+| ---------- | ------------------- | ------------- | -------------------- |
+| `now`      | `red-500`           | white         | Current/active items |
+| `today`    | Primary             | Dark          | Today indicator      |
+| `overdue`  | `red-100`/`red-900` | `red-700/400` | Past due items       |
+| `due-soon` | `orange-100/900`    | `orange-700`  | Approaching deadline |
+| `success`  | `green-100/900`     | `green-700`   | Completed items      |
 
 ### Progress Indicators
 
