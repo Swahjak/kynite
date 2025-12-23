@@ -16,6 +16,10 @@ interface TaskRowProps {
   showControls?: boolean;
   onEdit?: (task: IRewardChartTask) => void;
   onDelete?: (taskId: string) => void;
+  draggable?: boolean;
+  onDragStart?: (e: React.DragEvent, taskId: string) => void;
+  onDragOver?: (e: React.DragEvent) => void;
+  onDrop?: (e: React.DragEvent, taskId: string) => void;
 }
 
 export function TaskRow({
@@ -27,13 +31,23 @@ export function TaskRow({
   showControls,
   onEdit,
   onDelete,
+  draggable,
+  onDragStart,
+  onDragOver,
+  onDrop,
 }: TaskRowProps) {
   const { task, cells } = taskRow;
   const colors =
     ICON_COLORS[task.iconColor as IconColorKey] ?? ICON_COLORS.blue;
 
   return (
-    <div className="group grid grid-cols-[1.8fr_repeat(7,1fr)] divide-x divide-slate-100 transition-colors hover:bg-slate-50/50 dark:divide-slate-700/50 dark:hover:bg-slate-800/50">
+    <div
+      className="group grid grid-cols-[1.8fr_repeat(7,1fr)] divide-x divide-slate-100 transition-colors hover:bg-slate-50/50 dark:divide-slate-700/50 dark:hover:bg-slate-800/50"
+      draggable={draggable && showControls}
+      onDragStart={(e) => onDragStart?.(e, task.id)}
+      onDragOver={onDragOver}
+      onDrop={(e) => onDrop?.(e, task.id)}
+    >
       {/* Task Info */}
       <div className="flex items-center gap-3 px-4 py-2">
         {/* Drag Handle - only visible in manage mode */}
