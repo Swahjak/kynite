@@ -1,6 +1,6 @@
 {
   "Common": {
-    "appName": "Family Planner",
+    "appName": "Kynite",
     "loading": "Loading...",
     "cancel": "Cancel",
     "save": "Save",
@@ -10,13 +10,91 @@
     "confirm": "Confirm"
   },
   "Metadata": {
-    "title": "Family Planner",
+    "title": "Kynite",
     "description": "Family organizational hub with calendar and tasks"
   },
   "HomePage": {
-    "title": "Family Planner",
-    "subtitle": "Your family's organizational hub",
-    "openCalendar": "Open Calendar"
+    "nav": {
+      "features": "Features",
+      "howItWorks": "How it Works",
+      "plans": "Plans",
+      "signIn": "Sign In",
+      "signUp": "Sign Up"
+    },
+    "hero": {
+      "badge": "The OS for your home",
+      "title": "The Operating System for Your Family",
+      "description": "Reduce mental load, gamify chores, and keep everyone in sync. The proactive dashboard designed specifically for your home's wall hub.",
+      "cta": "Get Started for Free",
+      "ctaSecondary": "View Demo",
+      "previewLabel": "Interactive Dashboard Preview"
+    },
+    "features": {
+      "title": "Everything you need to run your home",
+      "subtitle": "Powerful features designed to replace the sticky notes, mental math, and chaos.",
+      "calendar": {
+        "title": "Unified Calendar",
+        "description": "Syncs seamlessly with Google & Apple calendars. See everyone's schedule in one glance on the wall, color-coded for clarity."
+      },
+      "routines": {
+        "title": "Gamified Routines",
+        "description": "Turn boring chores into streaks. Kids earn points, unlock rewards, and build healthy habits without the nagging."
+      },
+      "meals": {
+        "title": "Meal Planning",
+        "description": "Drag-and-drop meal planner that generates grocery lists automatically. Know exactly \"what's for dinner\" every single night."
+      }
+    },
+    "pricing": {
+      "title": "License Plans",
+      "subtitle": "Choose the perfect tier for your family size.",
+      "mostPopular": "Most Popular",
+      "perMonth": "/month",
+      "free": {
+        "name": "Free",
+        "description": "For getting organized.",
+        "price": "0",
+        "features": [
+          "Shared Calendar (Read-only)",
+          "Basic Todo Lists",
+          "Up to 2 Family Members"
+        ],
+        "cta": "Sign Up Free"
+      },
+      "basic": {
+        "name": "Basic",
+        "description": "For the active household.",
+        "price": "9",
+        "includes": "Everything in Free",
+        "features": [
+          "2-Way Calendar Sync (Google/Apple)",
+          "Meal Planner & Recipe Storage",
+          "Up to 5 Family Members"
+        ],
+        "cta": "Get Basic"
+      },
+      "pro": {
+        "name": "Pro",
+        "description": "For total home automation.",
+        "price": "19",
+        "includes": "Everything in Basic",
+        "features": [
+          "Advanced Chore Analytics & History",
+          "Unlimited Family Members",
+          "Custom Dashboard Themes"
+        ],
+        "cta": "Get Pro"
+      }
+    },
+    "cta": {
+      "title": "Ready to organize your wall?",
+      "description": "Join thousands of families who have reclaimed their time and sanity with Kynite.",
+      "button": "Start Your Free Trial",
+      "note": "No credit card required for 14-day trial."
+    },
+    "footer": {
+      "copyright": "© 2024 Kynite. All rights reserved."
+    }
   },
   "Calendar": {
     "addEvent": "Add Event",
@@ -82,17 +160,19 @@
     "signOut": "Sign out"
   },
   "Header": {
-    "brand": "Family Planner",
-    "tagline": "FAMILY OS",
+    "brand": "Kynite",
+    "tagline": "Routines without the friction",
     "addEvent": "Add Event",
     "switchToManage": "Switch to manage mode",
-    "switchToWall": "Switch to wall display mode"
+    "switchToWall": "Switch to wall display mode",
+    "manageMode": "Edit"
   },
   "Menu": {
     "dashboard": "Dashboard",
     "calendar": "Calendar",
     "chores": "Chores",
     "rewardChart": "Star Chart",
+    "rewards": "Rewards",
     "settings": "Settings",
     "help": "Help"
   },

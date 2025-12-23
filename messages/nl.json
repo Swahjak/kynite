@@ -1,6 +1,6 @@
 {
   "Common": {
-    "appName": "Familie Planner",
+    "appName": "Kynite",
     "loading": "Laden...",
     "cancel": "Annuleren",
     "save": "Opslaan",
@@ -10,13 +10,91 @@
     "confirm": "Bevestigen"
   },
   "Metadata": {
-    "title": "Familie Planner",
+    "title": "Kynite",
     "description": "Gezinsorganisatiehub met kalender en taken"
   },
   "HomePage": {
-    "title": "Familie Planner",
-    "subtitle": "Het organisatiehub van je gezin",
-    "openCalendar": "Open Kalender"
+    "nav": {
+      "features": "Functies",
+      "howItWorks": "Hoe het werkt",
+      "plans": "Abonnementen",
+      "signIn": "Inloggen",
+      "signUp": "Registreren"
+    },
+    "hero": {
+      "badge": "Het OS voor je huis",
+      "title": "Het besturingssysteem voor je gezin",
+      "description": "Verminder mentale belasting, gamificeer klusjes en houd iedereen op de hoogte. Het proactieve dashboard speciaal ontworpen voor je familiehub.",
+      "cta": "Gratis starten",
+      "ctaSecondary": "Demo bekijken",
+      "previewLabel": "Interactief Dashboard Voorbeeld"
+    },
+    "features": {
+      "title": "Alles wat je nodig hebt om je huishouden te runnen",
+      "subtitle": "Krachtige functies ontworpen om de plakbriefjes, hoofdrekenen en chaos te vervangen.",
+      "calendar": {
+        "title": "Geïntegreerde Kalender",
+        "description": "Synchroniseert naadloos met Google & Apple kalenders. Bekijk ieders planning in één oogopslag aan de muur, kleurgecodeerd voor duidelijkheid."
+      },
+      "routines": {
+        "title": "Gamified Routines",
+        "description": "Verander saaie klusjes in streaks. Kinderen verdienen punten, ontgrendelen beloningen en bouwen gezonde gewoontes zonder het zeuren."
+      },
+      "meals": {
+        "title": "Maaltijdplanning",
+        "description": "Sleep-en-drop maaltijdplanner die automatisch boodschappenlijstjes genereert. Weet elke avond precies \"wat eten we vanavond\"."
+      }
+    },
+    "pricing": {
+      "title": "Abonnementen",
+      "subtitle": "Kies het perfecte plan voor je gezinsgrootte.",
+      "mostPopular": "Meest Populair",
+      "perMonth": "/maand",
+      "free": {
+        "name": "Gratis",
+        "description": "Om georganiseerd te raken.",
+        "price": "0",
+        "features": [
+          "Gedeelde Kalender (Alleen lezen)",
+          "Basis Takenlijsten",
+          "Tot 2 Gezinsleden"
+        ],
+        "cta": "Gratis Registreren"
+      },
+      "basic": {
+        "name": "Basis",
+        "description": "Voor het actieve huishouden.",
+        "price": "9",
+        "includes": "Alles in Gratis",
+        "features": [
+          "2-Weg Kalender Sync (Google/Apple)",
+          "Maaltijdplanner & Receptopslag",
+          "Tot 5 Gezinsleden"
+        ],
+        "cta": "Kies Basis"
+      },
+      "pro": {
+        "name": "Pro",
+        "description": "Voor totale huisautomatisering.",
+        "price": "19",
+        "includes": "Alles in Basis",
+        "features": [
+          "Geavanceerde Klusanalyse & Geschiedenis",
+          "Onbeperkt Gezinsleden",
+          "Aangepaste Dashboard Thema's"
+        ],
+        "cta": "Kies Pro"
+      }
+    },
+    "cta": {
+      "title": "Klaar om je muur te organiseren?",
+      "description": "Sluit je aan bij duizenden gezinnen die hun tijd en rust hebben teruggewonnen met Kynite.",
+      "button": "Start Je Gratis Proefperiode",
+      "note": "Geen creditcard nodig voor 14-dagen proefperiode."
+    },
+    "footer": {
+      "copyright": "© 2024 Kynite. Alle rechten voorbehouden."
+    }
   },
   "Calendar": {
     "addEvent": "Evenement Toevoegen",
@@ -82,17 +160,19 @@
     "signOut": "Uitloggen"
   },
   "Header": {
-    "brand": "Family Planner",
-    "tagline": "FAMILIE OS",
+    "brand": "Kynite",
+    "tagline": "Routines zonder wrijving",
     "addEvent": "Afspraak toevoegen",
     "switchToManage": "Schakel naar beheermodus",
-    "switchToWall": "Schakel naar wandweergave"
+    "switchToWall": "Schakel naar wandweergave",
+    "manageMode": "Bewerken"
   },
   "Menu": {
     "dashboard": "Dashboard",
     "calendar": "Kalender",
     "chores": "Taken",
     "rewardChart": "Sterrenkaart",
+    "rewards": "Beloningen",
     "settings": "Instellingen",
     "help": "Help"
   },
