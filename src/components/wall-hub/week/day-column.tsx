@@ -38,11 +38,17 @@ export function DayColumn({
   }, [chores, date]);
 
   const isPastDay = isPast(date) && !isToday(date);
+  const isTodayColumn = isToday(date);
 
   return (
     <div className={cn("flex flex-col gap-3", isPastDay && "opacity-60")}>
       <DayHeader date={date} />
-      <div className="bg-muted/30 flex flex-1 flex-col gap-2 rounded-xl p-2">
+      <div
+        className={cn(
+          "flex flex-1 flex-col gap-2 rounded-xl p-3",
+          isTodayColumn ? "bg-primary/5 dark:bg-primary/10" : "bg-muted/30"
+        )}
+      >
         {dayEvents.map((event) => (
           <ScheduleCard
             key={event.id}

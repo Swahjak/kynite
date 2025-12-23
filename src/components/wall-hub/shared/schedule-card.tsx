@@ -1,7 +1,6 @@
 "use client";
 
 import { format, isWithinInterval, parseISO } from "date-fns";
-import { MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { IEvent } from "@/components/calendar/interfaces";
 
@@ -30,7 +29,7 @@ export function ScheduleCard({ event, showNowBadge }: ScheduleCardProps) {
   return (
     <div
       className={cn(
-        "rounded-lg border-l-4 p-3",
+        "rounded-lg border-l-4 p-3 shadow-sm",
         colorClasses[event.color] || colorClasses.blue
       )}
     >
@@ -45,12 +44,6 @@ export function ScheduleCard({ event, showNowBadge }: ScheduleCardProps) {
         )}
       </div>
       <p className="text-sm font-semibold">{event.title}</p>
-      {event.description && (
-        <div className="text-muted-foreground mt-1 flex items-center gap-1 text-xs">
-          <MapPin className="size-3" />
-          <span>{event.description}</span>
-        </div>
-      )}
     </div>
   );
 }
