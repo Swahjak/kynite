@@ -4,8 +4,14 @@ import { AlertTriangle } from "lucide-react";
 import { useChores } from "../contexts/chores-context";
 import { ChoreCard } from "../components/chore-card";
 import { getUrgentChores, sortChores } from "../helpers";
+import type { IChoreWithAssignee } from "@/types/chore";
 
-export function UrgentView() {
+interface UrgentViewProps {
+  onEdit?: (chore: IChoreWithAssignee) => void;
+  onDelete?: (chore: IChoreWithAssignee) => void;
+}
+
+export function UrgentView({ onEdit, onDelete }: UrgentViewProps) {
   const { chores } = useChores();
   const urgentChores = sortChores(getUrgentChores(chores));
 
@@ -22,7 +28,12 @@ export function UrgentView() {
   return (
     <div className="space-y-3">
       {urgentChores.map((chore) => (
-        <ChoreCard key={chore.id} chore={chore} />
+        <ChoreCard
+          key={chore.id}
+          chore={chore}
+          onEdit={onEdit}
+          onDelete={onDelete}
+        />
       ))}
     </div>
   );
