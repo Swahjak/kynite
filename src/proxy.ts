@@ -3,13 +3,13 @@ import createIntlMiddleware from "next-intl/middleware";
 import { routing } from "@/i18n/routing";
 import { isPublicRoute, isAuthApiRoute, loginRoute } from "@/lib/auth-routes";
 
-// Create next-intl middleware
+// Create next-intl middleware for locale handling
 const intlMiddleware = createIntlMiddleware(routing);
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Skip middleware for static files and Next.js internals
+  // Skip proxy for static files and Next.js internals
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api/auth") ||
@@ -31,7 +31,10 @@ export async function middleware(request: NextRequest) {
 
   // For protected routes, check authentication
   // Better-Auth stores session in cookies
-  const sessionCookie = request.cookies.get("better-auth.session_token");
+  // Note: Cookie name has __Secure- prefix on HTTPS (production)
+  const sessionCookie =
+    request.cookies.get("__Secure-better-auth.session_token") ||
+    request.cookies.get("better-auth.session_token");
 
   if (!sessionCookie?.value) {
     // No session - redirect to login
@@ -42,7 +45,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // User has session cookie - apply intl middleware and continue
-  // Family membership check happens in layouts, not middleware
+  // Family membership check happens in layouts, not proxy
   return intlMiddleware(request);
 }
 

@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
-import { unstable_noStore as noStore } from "next/cache";
 import { getSession } from "@/lib/get-session";
 import { getUserFamily } from "@/server/services/family-service";
 import { InteractionModeProvider } from "@/contexts/interaction-mode-context";
@@ -14,18 +13,14 @@ interface AppLayoutProps {
 }
 
 export default async function AppLayout({ children, params }: AppLayoutProps) {
-  noStore(); // Disable caching - session must be checked fresh each request
-
   const { locale } = await params;
   setRequestLocale(locale as Locale);
 
   const session = await getSession();
 
-  // DEBUG: Throw error with session info instead of redirecting
+  // Middleware handles auth redirect, but keep as fallback
   if (!session?.user) {
-    throw new Error(
-      `[AppLayout] Session check failed. Has session: ${!!session}, BETTER_AUTH_URL: ${process.env.BETTER_AUTH_URL}`
-    );
+    redirect(`/${locale}/login`);
   }
 
   // No family - redirect to onboarding
