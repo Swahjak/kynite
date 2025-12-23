@@ -10,7 +10,7 @@ vi.mock("@/server/db", () => ({
   },
 }));
 
-import { shouldRedactEvent } from "../event-service";
+import { shouldRedactEvent, redactEventDetails } from "../event-service";
 
 describe("shouldRedactEvent", () => {
   const makeEvent = (overrides: {
@@ -66,5 +66,49 @@ describe("shouldRedactEvent", () => {
       const event = makeEvent({});
       expect(shouldRedactEvent(event, "anyone")).toBe(false);
     });
+  });
+});
+
+describe("redactEventDetails", () => {
+  const makeFullEvent = () => ({
+    id: "event-1",
+    familyId: "family-1",
+    title: "Doctor Appointment",
+    description: "Annual checkup",
+    location: "123 Medical Center",
+    startTime: new Date("2025-01-15T10:00:00Z"),
+    endTime: new Date("2025-01-15T11:00:00Z"),
+    allDay: false,
+    color: "blue",
+    calendarColor: "blue",
+    isHidden: false,
+    participants: [],
+  });
+
+  it("replaces title with 'Hidden'", () => {
+    const redacted = redactEventDetails(makeFullEvent());
+    expect(redacted.title).toBe("Hidden");
+  });
+
+  it("nullifies description", () => {
+    const redacted = redactEventDetails(makeFullEvent());
+    expect(redacted.description).toBeNull();
+  });
+
+  it("nullifies location", () => {
+    const redacted = redactEventDetails(makeFullEvent());
+    expect(redacted.location).toBeNull();
+  });
+
+  it("sets isHidden to true", () => {
+    const redacted = redactEventDetails(makeFullEvent());
+    expect(redacted.isHidden).toBe(true);
+  });
+
+  it("preserves timing information", () => {
+    const event = makeFullEvent();
+    const redacted = redactEventDetails(event);
+    expect(redacted.startTime).toEqual(event.startTime);
+    expect(redacted.endTime).toEqual(event.endTime);
   });
 });

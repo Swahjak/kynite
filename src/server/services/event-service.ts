@@ -32,6 +32,23 @@ export function shouldRedactEvent(
   return event.calendar.accountUserId !== viewerUserId;
 }
 
+export function redactEventDetails<
+  T extends {
+    title: string;
+    description: string | null;
+    location: string | null;
+    isHidden: boolean;
+  },
+>(event: T): T {
+  return {
+    ...event,
+    title: "Hidden",
+    description: null,
+    location: null,
+    isHidden: true,
+  };
+}
+
 export interface EventWithParticipants {
   id: string;
   familyId: string;
