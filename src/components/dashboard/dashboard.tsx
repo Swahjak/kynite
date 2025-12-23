@@ -1,4 +1,4 @@
-import { getDashboardData } from "./requests";
+import type { DashboardData } from "./types";
 import { DashboardProvider } from "./contexts/dashboard-context";
 import { GreetingClock } from "./greeting-clock/greeting-clock";
 import { TodaysFlow } from "./todays-flow/todays-flow";
@@ -6,11 +6,13 @@ import { ActiveTimers } from "./active-timers/active-timers";
 import { WeeklyStars } from "./weekly-stars/weekly-stars";
 import { QuickActions } from "./quick-actions/quick-actions";
 
-export async function Dashboard() {
-  const data = await getDashboardData();
+interface DashboardProps {
+  initialData: DashboardData;
+}
 
+export function Dashboard({ initialData }: DashboardProps) {
   return (
-    <DashboardProvider data={data}>
+    <DashboardProvider data={initialData}>
       <div className="flex-1 p-4 md:p-6 lg:p-8">
         <div className="mx-auto max-w-7xl space-y-6">
           <GreetingClock />
