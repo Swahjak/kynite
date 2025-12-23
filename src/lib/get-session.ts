@@ -7,8 +7,24 @@ import { auth } from "@/server/auth";
  * Session includes familyId from customSession plugin
  */
 export async function getSession() {
+  const reqHeaders = await headers();
+
+  // DEBUG: Log cookie presence
+  const cookieHeader = reqHeaders.get("cookie");
+  console.log("[getSession] Cookie header present:", !!cookieHeader);
+  console.log(
+    "[getSession] Has session token:",
+    cookieHeader?.includes("better-auth.session_token") ||
+      cookieHeader?.includes("__Secure-better-auth.session_token")
+  );
+
   const session = await auth.api.getSession({
-    headers: await headers(),
+    headers: reqHeaders,
+  });
+
+  console.log("[getSession] Session result:", {
+    hasSession: !!session,
+    hasUser: !!session?.user,
   });
 
   return session;
