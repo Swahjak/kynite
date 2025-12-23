@@ -19,8 +19,21 @@ const notoSans = Noto_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Family Planner",
-  description: "Family organizational hub with calendar and tasks",
+  title: "Kynite",
+  description: "Routines without the friction",
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "32x32" },
+    ],
+    apple: "/apple-icon.png",
+  },
+  openGraph: {
+    title: "Kynite",
+    description: "Routines without the friction",
+    images: ["/og-image.png"],
+  },
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({
@@ -31,6 +44,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <link rel="manifest" href="/manifest.json" />
         <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
