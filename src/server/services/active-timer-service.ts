@@ -3,6 +3,7 @@ import { activeTimers, timerTemplates } from "@/server/schema";
 import { eq, and } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 import { addStars } from "./star-service";
+import { broadcastToFamily } from "@/lib/pusher";
 import type {
   StartTimerFromTemplateInput,
   StartOneOffTimerInput,
@@ -117,6 +118,8 @@ export async function startTimerFromTemplate(
     })
     .returning();
 
+  broadcastToFamily(familyId, "timer:started", { timer });
+
   return timer;
 }
 
@@ -155,6 +158,8 @@ export async function startOneOffTimer(
     })
     .returning();
 
+  broadcastToFamily(familyId, "timer:started", { timer });
+
   return timer;
 }
 
@@ -185,6 +190,8 @@ export async function pauseTimer(
     .where(eq(activeTimers.id, timerId))
     .returning();
 
+  broadcastToFamily(familyId, "timer:updated", { timer: updated });
+
   return updated;
 }
 
@@ -211,6 +218,8 @@ export async function resumeTimer(
     })
     .where(eq(activeTimers.id, timerId))
     .returning();
+
+  broadcastToFamily(familyId, "timer:updated", { timer: updated });
 
   return updated;
 }
@@ -239,6 +248,8 @@ export async function extendTimer(
     .where(eq(activeTimers.id, timerId))
     .returning();
 
+  broadcastToFamily(familyId, "timer:updated", { timer: updated });
+
   return updated;
 }
 
@@ -260,6 +271,8 @@ export async function cancelTimer(
       updatedAt: new Date(),
     })
     .where(eq(activeTimers.id, timerId));
+
+  broadcastToFamily(familyId, "timer:cancelled", { timerId });
 }
 
 // =============================================================================
@@ -303,6 +316,8 @@ export async function syncTimerState(
     .set(updates)
     .where(eq(activeTimers.id, timerId))
     .returning();
+
+  broadcastToFamily(familyId, "timer:updated", { timer: updated });
 
   return updated;
 }
@@ -388,6 +403,11 @@ export async function confirmTimer(
     });
     starsAwarded = timer.starReward;
   }
+
+  broadcastToFamily(familyId, "timer:completed", {
+    timer: updated,
+    starsAwarded,
+  });
 
   return { timer: updated, starsAwarded };
 }

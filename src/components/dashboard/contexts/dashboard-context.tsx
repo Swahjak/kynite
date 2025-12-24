@@ -20,6 +20,8 @@ import type {
 } from "../types";
 import { useClock } from "../hooks";
 import { getDeviceId } from "@/hooks/use-timer-countdown";
+import { useFamilyChannel } from "@/hooks/use-family-channel";
+import type { ActiveTimer } from "@/server/schema";
 
 interface IDashboardContext {
   familyName: string;
@@ -96,8 +98,7 @@ export function DashboardProvider({ data, children }: DashboardProviderProps) {
       const data = await res.json();
       return data.success ? data.data.timers : [];
     },
-    refetchInterval: 60000, // 60s polling for sync
-    staleTime: 30000,
+    staleTime: Infinity,
   });
 
   // Transform API timers to dashboard format
@@ -200,6 +201,47 @@ export function DashboardProvider({ data, children }: DashboardProviderProps) {
     },
     [extendTimerMutation]
   );
+
+  // Real-time updates via Pusher
+  useFamilyChannel(data.familyId, {
+    "timer:started": (eventData: unknown) => {
+      const { timer } = eventData as { timer: ActiveTimer };
+      queryClient.setQueryData<ActiveTimer[]>(["activeTimers"], (old) => [
+        ...(old ?? []),
+        timer,
+      ]);
+    },
+    "timer:updated": (eventData: unknown) => {
+      const { timer } = eventData as { timer: ActiveTimer };
+      queryClient.setQueryData<ActiveTimer[]>(["activeTimers"], (old) =>
+        (old ?? []).map((t) => (t.id === timer.id ? timer : t))
+      );
+    },
+    "timer:cancelled": (eventData: unknown) => {
+      const { timerId } = eventData as { timerId: string };
+      queryClient.setQueryData<ActiveTimer[]>(["activeTimers"], (old) =>
+        (old ?? []).filter((t) => t.id !== timerId)
+      );
+    },
+    "timer:completed": (eventData: unknown) => {
+      const { timer } = eventData as { timer: ActiveTimer };
+      queryClient.setQueryData<ActiveTimer[]>(["activeTimers"], (old) =>
+        (old ?? []).filter((t) => t.id !== timer.id)
+      );
+    },
+    "timer:expired": (eventData: unknown) => {
+      const { timer } = eventData as { timer: ActiveTimer };
+      queryClient.setQueryData<ActiveTimer[]>(["activeTimers"], (old) =>
+        (old ?? []).map((t) => (t.id === timer.id ? timer : t))
+      );
+    },
+    "stars:updated": () => {
+      queryClient.invalidateQueries({ queryKey: ["weeklyStars"] });
+    },
+    "chore:completed": () => {
+      queryClient.invalidateQueries({ queryKey: ["chores"] });
+    },
+  });
 
   const value: IDashboardContext = {
     familyName: data.familyName,
