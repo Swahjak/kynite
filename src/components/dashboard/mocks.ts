@@ -126,6 +126,7 @@ export const MOCK_QUICK_ACTIONS: QuickAction[] = [
 ];
 
 export const MOCK_DASHBOARD_DATA: DashboardData = {
+  familyId: "mock-family-id",
   familyName: "Familie de Vries",
   todaysEvents: MOCK_EVENTS,
   todaysChores: [],
