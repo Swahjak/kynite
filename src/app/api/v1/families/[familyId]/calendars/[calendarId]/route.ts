@@ -4,6 +4,7 @@ import { auth } from "@/server/auth";
 import { db } from "@/server/db";
 import { googleCalendars, familyMembers } from "@/server/schema";
 import { eq, and } from "drizzle-orm";
+import { stopWatchChannel } from "@/server/services/google-channel-service";
 
 type RouteParams = {
   params: Promise<{ familyId: string; calendarId: string }>;
@@ -125,6 +126,9 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
         { status: 403 }
       );
     }
+
+    // Stop push notification channel
+    await stopWatchChannel(calendarId);
 
     await db
       .delete(googleCalendars)
