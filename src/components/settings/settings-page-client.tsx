@@ -1,12 +1,13 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Users, Link2 } from "lucide-react";
+import { Users, Link2, Tablet } from "lucide-react";
 import type { Family } from "@/server/schema";
 import type { FamilyMemberWithUser, FamilyMemberRole } from "@/types/family";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FamilySettingsClient } from "@/components/family/family-settings-client";
 import { LinkedAccountsSection } from "@/components/settings/linked-accounts-section";
+import { DevicesSection } from "@/components/settings/devices-section";
 
 interface SettingsPageClientProps {
   family: Family & { currentUserRole: FamilyMemberRole };
@@ -34,7 +35,9 @@ export function SettingsPageClient({
         </div>
 
         <Tabs defaultValue="family" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList
+            className={`grid w-full ${isManager ? "grid-cols-3" : "grid-cols-2"}`}
+          >
             <TabsTrigger value="family" className="gap-2">
               <Users className="size-4" />
               {t("tabs.family")}
@@ -43,6 +46,12 @@ export function SettingsPageClient({
               <Link2 className="size-4" />
               {t("tabs.accounts")}
             </TabsTrigger>
+            {isManager && (
+              <TabsTrigger value="devices" className="gap-2">
+                <Tablet className="size-4" />
+                {t("tabs.devices")}
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="family" className="mt-6">
@@ -66,6 +75,12 @@ export function SettingsPageClient({
               <LinkedAccountsSection familyId={family.id} />
             </div>
           </TabsContent>
+
+          {isManager && (
+            <TabsContent value="devices" className="mt-6">
+              <DevicesSection locale={locale} />
+            </TabsContent>
+          )}
         </Tabs>
       </div>
     </div>
