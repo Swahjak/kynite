@@ -77,6 +77,26 @@ The calendar is the core feature, located in `src/components/calendar/`:
 - **Types**: `IEvent`, `IUser` interfaces in `interfaces.ts`, view/color types in `types.ts`
 - Use `useCalendar()` hook to access calendar state and actions
 
+### Google Calendar Push Notifications
+
+Real-time sync using Google Calendar push notifications:
+
+- **Webhook**: `POST /api/webhooks/google-calendar` - Receives Google notifications
+- **Channel Management**: Channels created automatically when calendar linked
+- **Renewal**: Hourly cron job renews channels expiring within 1 hour
+- **Fallback**: Polling still runs every 15 minutes for missed notifications
+
+**Environment Variables**:
+
+- `GOOGLE_WEBHOOK_BASE_URL`: Required in production (e.g., `https://app.vercel.app`)
+
+**Development**: Use ngrok or similar to expose local webhook endpoint:
+
+```bash
+ngrok http 3000
+# Set GOOGLE_WEBHOOK_BASE_URL=https://abc123.ngrok.io
+```
+
 ### Environment Variables
 
 Required in `.env.local`:
