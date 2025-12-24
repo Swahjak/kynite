@@ -354,16 +354,14 @@ describe("reward-store-service", () => {
       vi.mocked(getBalance).mockResolvedValue(100);
       vi.mocked(db.select).mockReturnValue({
         from: vi.fn().mockReturnValue({
-          where: vi
-            .fn()
-            .mockResolvedValue([
-              {
-                id: "reward-1",
-                starCost: 50,
-                limitType: "none",
-                isActive: true,
-              },
-            ]),
+          where: vi.fn().mockResolvedValue([
+            {
+              id: "reward-1",
+              starCost: 50,
+              limitType: "none",
+              isActive: true,
+            },
+          ]),
         }),
       } as never);
 
@@ -381,16 +379,14 @@ describe("reward-store-service", () => {
       vi.mocked(getBalance).mockResolvedValue(30);
       vi.mocked(db.select).mockReturnValue({
         from: vi.fn().mockReturnValue({
-          where: vi
-            .fn()
-            .mockResolvedValue([
-              {
-                id: "reward-1",
-                starCost: 50,
-                limitType: "none",
-                isActive: true,
-              },
-            ]),
+          where: vi.fn().mockResolvedValue([
+            {
+              id: "reward-1",
+              starCost: 50,
+              limitType: "none",
+              isActive: true,
+            },
+          ]),
         }),
       } as never);
 
@@ -454,31 +450,27 @@ describe("reward-store-service", () => {
         return callback({
           select: vi.fn().mockReturnValue({
             from: vi.fn().mockReturnValue({
-              where: vi
-                .fn()
-                .mockResolvedValue([
-                  {
-                    id: "reward-1",
-                    title: "Movie Night",
-                    starCost: 50,
-                    limitType: "none",
-                    isActive: true,
-                  },
-                ]),
+              where: vi.fn().mockResolvedValue([
+                {
+                  id: "reward-1",
+                  title: "Movie Night",
+                  starCost: 50,
+                  limitType: "none",
+                  isActive: true,
+                },
+              ]),
             }),
           }),
           insert: vi.fn().mockReturnValue({
             values: vi.fn().mockReturnValue({
-              returning: vi
-                .fn()
-                .mockResolvedValue([
-                  {
-                    id: "redemption-1",
-                    rewardId: "reward-1",
-                    memberId: "member-1",
-                    starCost: 50,
-                  },
-                ]),
+              returning: vi.fn().mockResolvedValue([
+                {
+                  id: "redemption-1",
+                  rewardId: "reward-1",
+                  memberId: "member-1",
+                  starCost: 50,
+                },
+              ]),
             }),
           }),
         } as never);
@@ -498,16 +490,14 @@ describe("reward-store-service", () => {
       vi.mocked(getBalance).mockResolvedValue(10);
       vi.mocked(db.select).mockReturnValue({
         from: vi.fn().mockReturnValue({
-          where: vi
-            .fn()
-            .mockResolvedValue([
-              {
-                id: "reward-1",
-                starCost: 50,
-                limitType: "none",
-                isActive: true,
-              },
-            ]),
+          where: vi.fn().mockResolvedValue([
+            {
+              id: "reward-1",
+              starCost: 50,
+              limitType: "none",
+              isActive: true,
+            },
+          ]),
         }),
       } as never);
 

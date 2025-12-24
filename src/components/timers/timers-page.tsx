@@ -1,9 +1,10 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Pencil } from "lucide-react";
+import { getDeviceId } from "@/hooks/use-timer-countdown";
 import { cn } from "@/lib/utils";
 import { TimerTemplateCard } from "./timer-template-card";
 import { TimerTemplateForm } from "./timer-template-form";
@@ -24,14 +25,34 @@ async function fetchTemplates(): Promise<TimerTemplate[]> {
 
 export function TimersPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<TimerTemplate | null>(
     null
   );
+  const [deviceId, setDeviceId] = useState("");
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    setDeviceId(getDeviceId());
+  }, []);
 
   const { data: templates = [], refetch } = useQuery({
     queryKey: ["timerTemplates"],
     queryFn: fetchTemplates,
   });
+
+  const handleStartTimer = async (templateId: string) => {
+    await fetch("/api/v1/timers/active", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        templateId,
+        assignedToId: "",
+        deviceId,
+      }),
+    });
+    queryClient.invalidateQueries({ queryKey: ["activeTimers"] });
+  };
 
   const handleCreateSuccess = () => {
     setIsCreateOpen(false);
@@ -49,7 +70,7 @@ export function TimersPage() {
   };
 
   return (
-    <div className="container mx-auto py-6">
+    <div className="container mx-auto px-4 py-6 md:px-6">
       <div className="mb-6">
         <h1 className="text-2xl font-bold">Timers</h1>
       </div>
@@ -59,8 +80,10 @@ export function TimersPage() {
           <TimerTemplateCard
             key={template.id}
             template={template}
+            isEditMode={isEditMode}
             onEdit={() => setEditingTemplate(template)}
             onDelete={() => handleDelete(template.id)}
+            onStart={() => handleStartTimer(template.id)}
           />
         ))}
       </div>
@@ -71,18 +94,32 @@ export function TimersPage() {
         </div>
       )}
 
-      {/* FAB */}
-      <Button
-        size="icon"
-        onClick={() => setIsCreateOpen(true)}
-        className={cn(
-          "fixed right-6 bottom-6 z-50 h-14 w-14 rounded-full shadow-lg",
-          "transition-transform hover:scale-105 active:scale-95"
-        )}
-        aria-label="Nieuwe timer"
-      >
-        <Plus className="h-6 w-6" />
-      </Button>
+      {/* FABs */}
+      <div className="fixed right-6 bottom-6 z-50 flex flex-col gap-3">
+        <Button
+          size="icon"
+          variant={isEditMode ? "default" : "outline"}
+          onClick={() => setIsEditMode(!isEditMode)}
+          className={cn(
+            "h-12 w-12 rounded-full shadow-lg",
+            "transition-transform hover:scale-105 active:scale-95"
+          )}
+          aria-label={isEditMode ? "Klaar met bewerken" : "Bewerken"}
+        >
+          <Pencil className="h-5 w-5" />
+        </Button>
+        <Button
+          size="icon"
+          onClick={() => setIsCreateOpen(true)}
+          className={cn(
+            "h-14 w-14 rounded-full shadow-lg",
+            "transition-transform hover:scale-105 active:scale-95"
+          )}
+          aria-label="Nieuwe timer"
+        >
+          <Plus className="h-6 w-6" />
+        </Button>
+      </div>
 
       {/* Create Dialog */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>

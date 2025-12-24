@@ -1,38 +1,34 @@
-import sharp from 'sharp';
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import sharp from "sharp";
+import { readFileSync } from "fs";
+import { join } from "path";
 
-const publicDir = './public';
+const publicDir = "./public";
 
 async function generateIcons() {
   // Read SVGs
-  const logoSvg = readFileSync(join(publicDir, 'images/logo-icon.svg'));
-  const faviconSvg = readFileSync(join(publicDir, 'favicon.svg'));
+  const logoSvg = readFileSync(join(publicDir, "images/logo-icon.svg"));
+  const faviconSvg = readFileSync(join(publicDir, "favicon.svg"));
 
   // PWA icons from logo
   await sharp(logoSvg)
     .resize(192, 192)
     .png()
-    .toFile(join(publicDir, 'icon-192x192.png'));
+    .toFile(join(publicDir, "icon-192x192.png"));
 
   await sharp(logoSvg)
     .resize(512, 512)
     .png()
-    .toFile(join(publicDir, 'icon-512x512.png'));
+    .toFile(join(publicDir, "icon-512x512.png"));
 
   await sharp(logoSvg)
     .resize(180, 180)
     .png()
-    .toFile(join(publicDir, 'apple-icon.png'));
+    .toFile(join(publicDir, "apple-icon.png"));
 
   // Favicon from star
-  const favicon32 = await sharp(faviconSvg)
-    .resize(32, 32)
-    .png()
-    .toBuffer();
+  const favicon32 = await sharp(faviconSvg).resize(32, 32).png().toBuffer();
 
-  await sharp(favicon32)
-    .toFile(join(publicDir, 'favicon-32x32.png'));
+  await sharp(favicon32).toFile(join(publicDir, "favicon-32x32.png"));
 
   // OG Image
   const ogBackground = Buffer.from(`
@@ -48,9 +44,9 @@ async function generateIcons() {
   await sharp(ogBackground)
     .composite([{ input: logoBuffer, top: 100, left: 460 }])
     .png()
-    .toFile(join(publicDir, 'og-image.png'));
+    .toFile(join(publicDir, "og-image.png"));
 
-  console.log('Icons generated successfully!');
+  console.log("Icons generated successfully!");
 }
 
 generateIcons().catch(console.error);

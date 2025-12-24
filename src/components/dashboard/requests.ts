@@ -4,9 +4,9 @@ import type {
   DashboardChore,
   FamilyMemberStar,
   ChoreUrgency,
+  Timer,
+  QuickAction,
 } from "./types";
-// Keep MOCK_DASHBOARD_DATA for activeTimers and quickActions until those features are implemented
-import { MOCK_DASHBOARD_DATA } from "./mocks";
 import {
   getUserFamily,
   getFamilyMembers,
@@ -14,7 +14,10 @@ import {
 import { getEventsForFamily } from "@/server/services/event-service";
 import { getChartsForFamily } from "@/server/services/reward-chart-service";
 import { getChoresForFamily } from "@/server/services/chore-service";
+import { getQuickActionTemplates } from "@/server/services/timer-template-service";
+import { getAllTimersForFamily } from "@/server/services/active-timer-service";
 import { startOfDay, endOfDay, startOfWeek, endOfWeek, format } from "date-fns";
+import type { TimerTemplate, ActiveTimer } from "@/server/schema";
 import { db } from "@/server/db";
 import { rewardChartTasks, rewardChartCompletions } from "@/server/schema";
 import { eq, and, gte, lte, inArray } from "drizzle-orm";
@@ -112,6 +115,40 @@ function mapChoreToDashboardChore(
   };
 }
 
+// Icon mapping for timer template categories
+const CATEGORY_ICONS: Record<string, string> = {
+  screen: "Monitor",
+  chore: "Sparkles",
+  activity: "Timer",
+};
+
+function mapTemplateToQuickAction(template: TimerTemplate): QuickAction {
+  return {
+    id: template.id,
+    label: template.title,
+    icon: CATEGORY_ICONS[template.category] ?? "Timer",
+    category: template.category,
+    timerDuration: template.durationSeconds,
+  };
+}
+
+function mapActiveTimerToTimer(activeTimer: ActiveTimer): Timer {
+  return {
+    id: activeTimer.id,
+    title: activeTimer.title,
+    subtitle: activeTimer.description ?? "",
+    remainingSeconds: activeTimer.remainingSeconds,
+    totalSeconds: activeTimer.durationSeconds,
+    category: activeTimer.category,
+    status: activeTimer.status as Timer["status"],
+    starReward: activeTimer.starReward,
+    alertMode: activeTimer.alertMode as Timer["alertMode"],
+    cooldownSeconds: activeTimer.cooldownSeconds,
+    assignedToId: activeTimer.assignedToId,
+    ownerDeviceId: activeTimer.ownerDeviceId,
+  };
+}
+
 export async function getDashboardData(userId: string): Promise<DashboardData> {
   const family = await getUserFamily(userId);
 
@@ -135,8 +172,15 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
 
   const today = format(now, "yyyy-MM-dd");
 
-  // Fetch events, chores, and members in parallel
-  const [events, todaysPendingChores, members, chartsData] = await Promise.all([
+  // Fetch events, chores, members, timers, and quick action templates in parallel
+  const [
+    events,
+    todaysPendingChores,
+    members,
+    chartsData,
+    quickActionTemplates,
+    allTimers,
+  ] = await Promise.all([
     getEventsForFamily(family.id, {
       startDate: todayStart,
       endDate: todayEnd,
@@ -148,7 +192,15 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
     }),
     getFamilyMembers(family.id),
     getChartsForFamily(family.id),
+    getQuickActionTemplates(family.id),
+    getAllTimersForFamily(family.id),
   ]);
+
+  // Map timer data
+  const quickActions = quickActionTemplates.map(mapTemplateToQuickAction);
+  const activeTimers = allTimers
+    .filter((t) => t.status === "running" || t.status === "paused")
+    .map(mapActiveTimerToTimer);
 
   // Map chores to dashboard format and sort by urgency
   const todaysChores = todaysPendingChores
@@ -186,9 +238,9 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
         .map((event) => mapEventToDashboardEvent(event, now))
         .sort((a, b) => a.startTime.getTime() - b.startTime.getTime()),
       todaysChores,
-      activeTimers: MOCK_DASHBOARD_DATA.activeTimers,
+      activeTimers,
       familyMembers,
-      quickActions: MOCK_DASHBOARD_DATA.quickActions,
+      quickActions,
     };
   }
 
@@ -280,8 +332,8 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
     familyName: family.name,
     todaysEvents,
     todaysChores,
-    activeTimers: MOCK_DASHBOARD_DATA.activeTimers,
+    activeTimers,
     familyMembers,
-    quickActions: MOCK_DASHBOARD_DATA.quickActions,
+    quickActions,
   };
 }

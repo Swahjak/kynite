@@ -6,6 +6,8 @@ import {
   Droplets,
   Sparkles,
   CheckCircle,
+  Monitor,
+  Timer,
   type LucideIcon,
 } from "lucide-react";
 import { useInteractionMode } from "@/contexts/interaction-mode-context";
@@ -17,6 +19,8 @@ const iconMap: Record<string, LucideIcon> = {
   Droplets,
   Sparkles,
   CheckCircle,
+  Monitor,
+  Timer,
 };
 
 interface ActionButtonProps {

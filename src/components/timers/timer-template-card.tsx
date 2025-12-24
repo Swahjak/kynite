@@ -3,13 +3,15 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit2, Trash2, Zap, Star } from "lucide-react";
+import { Edit2, Trash2, Zap, Star, Play } from "lucide-react";
 import type { TimerTemplate } from "@/server/schema";
 
 interface TimerTemplateCardProps {
   template: TimerTemplate;
+  isEditMode: boolean;
   onEdit: () => void;
   onDelete: () => void;
+  onStart: () => void;
 }
 
 function formatDuration(seconds: number): string {
@@ -28,8 +30,10 @@ const categoryEmoji: Record<string, string> = {
 
 export function TimerTemplateCard({
   template,
+  isEditMode,
   onEdit,
   onDelete,
+  onStart,
 }: TimerTemplateCardProps) {
   return (
     <Card>
@@ -38,12 +42,20 @@ export function TimerTemplateCard({
           {categoryEmoji[template.category] || "⏱"} {template.title}
         </CardTitle>
         <div className="flex gap-1">
-          <Button variant="ghost" size="icon" onClick={onEdit}>
-            <Edit2 className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="icon" onClick={onDelete}>
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          {isEditMode ? (
+            <>
+              <Button variant="ghost" size="icon" onClick={onEdit}>
+                <Edit2 className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="icon" onClick={onDelete}>
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </>
+          ) : (
+            <Button variant="ghost" size="icon" onClick={onStart}>
+              <Play className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </CardHeader>
       <CardContent>
