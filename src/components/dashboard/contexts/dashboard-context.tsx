@@ -10,6 +10,7 @@ import {
 import type {
   DashboardData,
   DashboardEvent,
+  DashboardChore,
   Timer,
   FamilyMemberStar,
   QuickAction,
@@ -20,6 +21,8 @@ interface IDashboardContext {
   familyName: string;
   currentTime: Date;
   todaysEvents: DashboardEvent[];
+  todaysChores: DashboardChore[];
+  choresRemaining: number;
   activeTimers: Timer[];
   familyMembers: FamilyMemberStar[];
   quickActions: QuickAction[];
@@ -106,6 +109,8 @@ export function DashboardProvider({ data, children }: DashboardProviderProps) {
     familyName: data.familyName,
     currentTime,
     todaysEvents: data.todaysEvents,
+    todaysChores: data.todaysChores,
+    choresRemaining: data.todaysChores.length,
     activeTimers: timers,
     familyMembers: data.familyMembers,
     quickActions: data.quickActions,

@@ -1,4 +1,10 @@
-import type { DashboardData, DashboardEvent, FamilyMemberStar } from "./types";
+import type {
+  DashboardData,
+  DashboardEvent,
+  DashboardChore,
+  FamilyMemberStar,
+  ChoreUrgency,
+} from "./types";
 // Keep MOCK_DASHBOARD_DATA for activeTimers and quickActions until those features are implemented
 import { MOCK_DASHBOARD_DATA } from "./mocks";
 import {
@@ -7,10 +13,12 @@ import {
 } from "@/server/services/family-service";
 import { getEventsForFamily } from "@/server/services/event-service";
 import { getChartsForFamily } from "@/server/services/reward-chart-service";
+import { getChoresForFamily } from "@/server/services/chore-service";
 import { startOfDay, endOfDay, startOfWeek, endOfWeek, format } from "date-fns";
 import { db } from "@/server/db";
 import { rewardChartTasks, rewardChartCompletions } from "@/server/schema";
 import { eq, and, gte, lte, inArray } from "drizzle-orm";
+import type { IChoreWithAssignee } from "@/types/chore";
 
 function mapEventToDashboardEvent(
   event: {
@@ -55,6 +63,55 @@ function calculateLevel(starCount: number): {
   return { level: 1, levelTitle: "Beginner" };
 }
 
+function calculateChoreUrgency(
+  chore: IChoreWithAssignee,
+  now: Date
+): ChoreUrgency {
+  if (chore.status !== "pending") return "none";
+  if (chore.isUrgent) return "urgent";
+  if (!chore.dueDate) return "none";
+
+  // Combine date and time for comparison
+  let dueDateTime: Date;
+  if (chore.dueTime) {
+    dueDateTime = new Date(`${chore.dueDate}T${chore.dueTime}:00`);
+  } else {
+    dueDateTime = new Date(`${chore.dueDate}T23:59:59`);
+  }
+
+  if (dueDateTime < now) return "overdue";
+
+  // Due within 4 hours
+  const fourHoursLater = new Date(now.getTime() + 4 * 60 * 60 * 1000);
+  if (dueDateTime < fourHoursLater) return "due-soon";
+
+  return "none";
+}
+
+function mapChoreToDashboardChore(
+  chore: IChoreWithAssignee,
+  now: Date
+): DashboardChore {
+  const urgency = calculateChoreUrgency(chore, now);
+
+  return {
+    id: chore.id,
+    title: chore.title,
+    dueTime: chore.dueTime,
+    urgency,
+    assignee: chore.assignedTo
+      ? {
+          name:
+            chore.assignedTo.displayName ??
+            chore.assignedTo.user.name ??
+            "Unknown",
+          avatarColor: chore.assignedTo.avatarColor ?? "#888888",
+        }
+      : null,
+    starReward: chore.starReward,
+  };
+}
+
 export async function getDashboardData(userId: string): Promise<DashboardData> {
   const family = await getUserFamily(userId);
 
@@ -63,6 +120,7 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
     return {
       familyName: "",
       todaysEvents: [],
+      todaysChores: [],
       activeTimers: [],
       familyMembers: [],
       quickActions: [],
@@ -75,17 +133,41 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
   const weekStart = startOfWeek(now, { weekStartsOn: 1 });
   const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
 
-  // Fetch events
-  const events = await getEventsForFamily(family.id, {
-    startDate: todayStart,
-    endDate: todayEnd,
-  });
+  const today = format(now, "yyyy-MM-dd");
 
-  // Fetch family members
-  const members = await getFamilyMembers(family.id);
+  // Fetch events, chores, and members in parallel
+  const [events, todaysPendingChores, members, chartsData] = await Promise.all([
+    getEventsForFamily(family.id, {
+      startDate: todayStart,
+      endDate: todayEnd,
+    }),
+    getChoresForFamily(family.id, {
+      status: "pending",
+      startDate: today,
+      endDate: today,
+    }),
+    getFamilyMembers(family.id),
+    getChartsForFamily(family.id),
+  ]);
 
-  // Fetch reward charts for family
-  const chartsData = await getChartsForFamily(family.id);
+  // Map chores to dashboard format and sort by urgency
+  const todaysChores = todaysPendingChores
+    .map((chore) => mapChoreToDashboardChore(chore, now))
+    .sort((a, b) => {
+      const urgencyOrder: Record<ChoreUrgency, number> = {
+        overdue: 0,
+        urgent: 1,
+        "due-soon": 2,
+        none: 3,
+      };
+      const orderDiff = urgencyOrder[a.urgency] - urgencyOrder[b.urgency];
+      if (orderDiff !== 0) return orderDiff;
+      // Same urgency: sort by time
+      if (a.dueTime && b.dueTime) {
+        return a.dueTime.localeCompare(b.dueTime);
+      }
+      return 0;
+    });
 
   if (chartsData.length === 0) {
     // No charts, return members with 0 stars
@@ -103,6 +185,7 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
       todaysEvents: events
         .map((event) => mapEventToDashboardEvent(event, now))
         .sort((a, b) => a.startTime.getTime() - b.startTime.getTime()),
+      todaysChores,
       activeTimers: MOCK_DASHBOARD_DATA.activeTimers,
       familyMembers,
       quickActions: MOCK_DASHBOARD_DATA.quickActions,
@@ -196,6 +279,7 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
   return {
     familyName: family.name,
     todaysEvents,
+    todaysChores,
     activeTimers: MOCK_DASHBOARD_DATA.activeTimers,
     familyMembers,
     quickActions: MOCK_DASHBOARD_DATA.quickActions,

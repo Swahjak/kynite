@@ -206,6 +206,17 @@
     },
     "quickActions": {
       "title": "Quick Actions"
+    },
+    "todaysChores": {
+      "title": "Chores",
+      "choresRemaining": "{count, plural, =0 {No chores} =1 {1 chore remaining} other {# chores remaining}}",
+      "urgent": "Urgent",
+      "dueSoon": "Due Soon",
+      "today": "Today",
+      "noChores": "No more chores today",
+      "overdue": "Overdue",
+      "urgentBadge": "Urgent",
+      "dueSoonBadge": "Soon"
     }
   },
   "Family": {

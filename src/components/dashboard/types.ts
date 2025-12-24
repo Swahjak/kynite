@@ -37,9 +37,24 @@ export interface QuickAction {
   timerDuration?: number;
 }
 
+export type ChoreUrgency = "overdue" | "urgent" | "due-soon" | "none";
+
+export interface DashboardChore {
+  id: string;
+  title: string;
+  dueTime: string | null;
+  urgency: ChoreUrgency;
+  assignee: {
+    name: string;
+    avatarColor: string;
+  } | null;
+  starReward: number;
+}
+
 export interface DashboardData {
   familyName: string;
   todaysEvents: DashboardEvent[];
+  todaysChores: DashboardChore[];
   activeTimers: Timer[];
   familyMembers: FamilyMemberStar[];
   quickActions: QuickAction[];

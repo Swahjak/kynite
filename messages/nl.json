@@ -206,6 +206,17 @@
     },
     "quickActions": {
       "title": "Snelle Acties"
+    },
+    "todaysChores": {
+      "title": "Klusjes",
+      "choresRemaining": "{count, plural, =0 {Geen klusjes} =1 {1 klusje over} other {# klusjes over}}",
+      "urgent": "Dringend",
+      "dueSoon": "Binnenkort",
+      "today": "Vandaag",
+      "noChores": "Geen klusjes meer vandaag",
+      "overdue": "Te laat",
+      "urgentBadge": "Dringend",
+      "dueSoonBadge": "Bijna"
     }
   },
   "Family": {
