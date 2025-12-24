@@ -101,7 +101,7 @@ export const familyMembers = pgTable("family_members", {
   userId: text("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  role: text("role").notNull(), // 'manager' | 'participant' | 'caregiver'
+  role: text("role").notNull(), // 'manager' | 'participant' | 'caregiver' | 'device'
   displayName: text("display_name"),
   avatarColor: text("avatar_color"),
   createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),

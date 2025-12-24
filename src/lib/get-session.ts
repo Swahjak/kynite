@@ -64,3 +64,22 @@ export async function getCurrentMemberRole() {
   const session = await getSession();
   return session?.session?.memberRole || null;
 }
+
+/**
+ * Require a non-device session for mutation operations.
+ * Use this in API endpoints that should not be accessible to devices.
+ * @throws Error if not authenticated or if session is a device
+ */
+export async function requireNonDeviceSession() {
+  const session = await getSession();
+
+  if (!session?.user) {
+    throw new Error("Unauthorized");
+  }
+
+  if (session.session?.isDevice === true) {
+    throw new Error("Devices cannot perform this action");
+  }
+
+  return session;
+}

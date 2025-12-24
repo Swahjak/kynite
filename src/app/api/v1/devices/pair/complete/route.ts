@@ -6,14 +6,46 @@ import { createId } from "@paralleldrive/cuid2";
 import {
   consumePairingCode,
   createDeviceUser,
+  DEVICE_SESSION_EXPIRY_DAYS,
 } from "@/server/services/device-service";
 import { completePairingSchema } from "@/lib/validations/device";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
-const DEVICE_SESSION_EXPIRY_DAYS = 90;
+// Rate limit: 10 attempts per minute per IP
+const RATE_LIMIT_MAX = 10;
+const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
 
 // POST /api/v1/devices/pair/complete
 export async function POST(request: Request) {
   try {
+    // Apply rate limiting to prevent brute force attacks
+    const clientIp = getClientIp(request);
+    const rateLimit = checkRateLimit(`device-pair:${clientIp}`, {
+      limit: RATE_LIMIT_MAX,
+      windowMs: RATE_LIMIT_WINDOW_MS,
+    });
+
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "RATE_LIMITED",
+            message: "Too many pairing attempts. Please try again later.",
+          },
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(
+              Math.ceil((rateLimit.resetTime - Date.now()) / 1000)
+            ),
+            "X-RateLimit-Remaining": String(rateLimit.remaining),
+          },
+        }
+      );
+    }
+
     const body = await request.json();
     const parsed = completePairingSchema.safeParse(body);
 

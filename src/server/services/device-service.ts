@@ -1,3 +1,4 @@
+import { randomInt } from "crypto";
 import { db } from "@/server/db";
 import {
   devicePairingCodes,
@@ -8,14 +9,14 @@ import {
 import { eq, and, gt, isNull, sql } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 
-const CODE_EXPIRY_MINUTES = 5;
-const DEVICE_SESSION_EXPIRY_DAYS = 90;
+export const CODE_EXPIRY_MINUTES = 5;
+export const DEVICE_SESSION_EXPIRY_DAYS = 90;
 
 /**
- * Generate a random 6-digit pairing code
+ * Generate a cryptographically secure random 6-digit pairing code
  */
 function generateCode(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  return randomInt(100000, 1000000).toString();
 }
 
 /**
