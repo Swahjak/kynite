@@ -356,6 +356,20 @@ export const googleCalendars = pgTable("google_calendars", {
 });
 
 /**
+ * Google Calendar Webhook Channels table - Tracks active push notification subscriptions
+ */
+export const googleCalendarChannels = pgTable("google_calendar_channels", {
+  id: text("id").primaryKey(), // Our UUID, sent to Google as channel id
+  googleCalendarId: text("google_calendar_id")
+    .notNull()
+    .references(() => googleCalendars.id, { onDelete: "cascade" }),
+  resourceId: text("resource_id").notNull(), // Google's resource identifier (from watch response)
+  token: text("token").notNull(), // Verification token (X-Goog-Channel-Token)
+  expiration: timestamp("expiration", { mode: "date" }).notNull(),
+  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+});
+
+/**
  * Events table - Calendar events with Google sync metadata
  */
 export const events = pgTable("events", {
@@ -443,6 +457,16 @@ export const googleCalendarsRelations = relations(
     account: one(accounts, {
       fields: [googleCalendars.accountId],
       references: [accounts.id],
+    }),
+  })
+);
+
+export const googleCalendarChannelsRelations = relations(
+  googleCalendarChannels,
+  ({ one }) => ({
+    calendar: one(googleCalendars, {
+      fields: [googleCalendarChannels.googleCalendarId],
+      references: [googleCalendars.id],
     }),
   })
 );
@@ -631,6 +655,9 @@ export type FamilyInvite = typeof familyInvites.$inferSelect;
 export type NewFamilyInvite = typeof familyInvites.$inferInsert;
 export type GoogleCalendar = typeof googleCalendars.$inferSelect;
 export type NewGoogleCalendar = typeof googleCalendars.$inferInsert;
+export type GoogleCalendarChannel = typeof googleCalendarChannels.$inferSelect;
+export type NewGoogleCalendarChannel =
+  typeof googleCalendarChannels.$inferInsert;
 export type Event = typeof events.$inferSelect;
 export type NewEvent = typeof events.$inferInsert;
 export type EventParticipant = typeof eventParticipants.$inferSelect;
