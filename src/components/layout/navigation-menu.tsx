@@ -8,6 +8,7 @@ import {
   HelpCircle,
   Star,
   Gift,
+  Timer,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { usePathname } from "@/i18n/navigation";
@@ -34,6 +35,7 @@ interface NavItem {
     | "dashboard"
     | "calendar"
     | "chores"
+    | "timers"
     | "rewardChart"
     | "rewards"
     | "settings"
@@ -45,6 +47,7 @@ const navItems: NavItem[] = [
   { href: "/dashboard", icon: LayoutDashboard, labelKey: "dashboard" },
   { href: "/calendar/today", icon: Calendar, labelKey: "calendar" },
   { href: "/chores", icon: CheckSquare, labelKey: "chores", manageOnly: true },
+  { href: "/timers", icon: Timer, labelKey: "timers", manageOnly: true },
   { href: "/reward-chart", icon: Star, labelKey: "rewardChart" },
   { href: "/rewards", icon: Gift, labelKey: "rewards" },
   { href: "/settings", icon: Settings, labelKey: "settings", manageOnly: true },
