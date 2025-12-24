@@ -6,6 +6,7 @@ import {
 } from "@/server/schema";
 import { eq, and, gte, lte, desc } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
+import { broadcastToFamily } from "@/lib/pusher";
 import type {
   AddStarsInput,
   StarHistoryQueryInput,
@@ -95,6 +96,11 @@ export async function addStars(
         .where(eq(memberStarBalances.memberId, input.memberId));
     }
 
+    broadcastToFamily(familyId, "stars:updated", {
+      memberId: input.memberId,
+      newBalance,
+    });
+
     return { transaction, newBalance };
   });
 }
@@ -179,6 +185,11 @@ export async function removeStars(input: {
       .update(memberStarBalances)
       .set({ balance: newBalance, updatedAt: new Date() })
       .where(eq(memberStarBalances.memberId, input.memberId));
+
+    broadcastToFamily(familyId, "stars:updated", {
+      memberId: input.memberId,
+      newBalance,
+    });
 
     return { transaction, newBalance };
   });

@@ -10,6 +10,11 @@ vi.mock("@/server/db", () => ({
   },
 }));
 
+// Mock Pusher library
+vi.mock("@/lib/pusher", () => ({
+  broadcastToFamily: vi.fn(),
+}));
+
 describe("star-service", () => {
   beforeEach(() => {
     vi.clearAllMocks();
