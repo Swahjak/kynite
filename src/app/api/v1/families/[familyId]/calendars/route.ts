@@ -5,6 +5,7 @@ import { db } from "@/server/db";
 import { googleCalendars, familyMembers, accounts } from "@/server/schema";
 import { eq, and } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
+import { createWatchChannel } from "@/server/services/google-channel-service";
 
 type RouteParams = { params: Promise<{ familyId: string }> };
 
@@ -169,6 +170,16 @@ export async function POST(request: Request, { params }: RouteParams) {
         syncEnabled: true,
       })
       .returning();
+
+    // Create push notification channel for real-time updates
+    const channelResult = await createWatchChannel(newCalendar[0].id);
+    if (!channelResult.success) {
+      console.warn(
+        "Failed to create push notification channel:",
+        channelResult.error
+      );
+      // Continue - calendar is linked, sync will work via polling fallback
+    }
 
     return NextResponse.json({
       success: true,
