@@ -12,7 +12,18 @@
         "postcss.config.mjs",
         "components.json"
       ],
-      "outputs": [".next/**", "!.next/cache/**"]
+      "outputs": [".next/**", "!.next/cache/**"],
+      "env": [
+        "DATABASE_URL",
+        "BETTER_AUTH_SECRET",
+        "BETTER_AUTH_URL",
+        "GOOGLE_CLIENT_ID",
+        "GOOGLE_CLIENT_SECRET",
+        "CRON_SECRET",
+        "PUSHER_APP_ID",
+        "PUSHER_SECRET",
+        "NEXT_PUBLIC_*"
+      ]
     },
     "lint": {
       "inputs": [
