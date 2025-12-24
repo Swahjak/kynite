@@ -159,6 +159,16 @@
     "loginError": "Could not sign in. Please try again.",
     "signOut": "Sign out"
   },
+  "UserMenu": {
+    "settings": "Settings",
+    "logout": "Log out",
+    "theme": {
+      "label": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "auto": "Auto"
+    }
+  },
   "Header": {
     "brand": "Kynite",
     "tagline": "Routines without the friction",
@@ -200,7 +210,8 @@
     "activeTimers": {
       "title": "Active Timers",
       "pause": "Pause",
-      "extend": "+15m"
+      "extend": "+15m",
+      "addTimer": "Add timer"
     },
     "weeklyStars": {
       "title": "Weekly Stars"

@@ -159,6 +159,16 @@
     "loginError": "Kon niet inloggen. Probeer het opnieuw.",
     "signOut": "Uitloggen"
   },
+  "UserMenu": {
+    "settings": "Instellingen",
+    "logout": "Uitloggen",
+    "theme": {
+      "label": "Thema",
+      "light": "Licht",
+      "dark": "Donker",
+      "auto": "Automatisch"
+    }
+  },
   "Header": {
     "brand": "Kynite",
     "tagline": "Routines zonder wrijving",
@@ -200,7 +210,8 @@
     "activeTimers": {
       "title": "Actieve Timers",
       "pause": "Pauze",
-      "extend": "+15m"
+      "extend": "+15m",
+      "addTimer": "Timer toevoegen"
     },
     "weeklyStars": {
       "title": "Wekelijkse Sterren"
