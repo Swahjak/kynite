@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/server/auth";
+import { getNonDeviceSession } from "@/lib/api-auth";
 import {
   isUserFamilyMember,
   isUserFamilyManager,
@@ -88,23 +89,12 @@ export async function GET(request: Request, { params }: Params) {
 
 export async function POST(request: Request, { params }: Params) {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
-
-    if (!session?.user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
-        },
-        { status: 401 }
-      );
-    }
+    const { session, errorResponse } = await getNonDeviceSession();
+    if (errorResponse) return errorResponse;
 
     const { familyId } = await params;
 
-    const isManager = await isUserFamilyManager(session.user.id, familyId);
+    const isManager = await isUserFamilyManager(session!.user.id, familyId);
     if (!isManager) {
       return NextResponse.json(
         {
@@ -134,7 +124,7 @@ export async function POST(request: Request, { params }: Params) {
       );
     }
 
-    const member = await getMemberByUserId(session.user.id, familyId);
+    const member = await getMemberByUserId(session!.user.id, familyId);
     if (!member) {
       return NextResponse.json(
         {

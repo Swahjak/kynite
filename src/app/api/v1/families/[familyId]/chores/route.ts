@@ -80,7 +80,7 @@ export async function POST(request: Request, { params }: Params) {
 
     const { familyId } = await params;
 
-    const isManager = await isUserFamilyManager(session.user.id, familyId);
+    const isManager = await isUserFamilyManager(session!.user.id, familyId);
     if (!isManager) {
       return NextResponse.json(
         {

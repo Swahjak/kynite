@@ -70,7 +70,7 @@ export async function PATCH(request: Request, { params }: Params) {
 
     const { familyId, choreId } = await params;
 
-    const isManager = await isUserFamilyManager(session.user.id, familyId);
+    const isManager = await isUserFamilyManager(session!.user.id, familyId);
     if (!isManager) {
       return NextResponse.json(
         {
@@ -116,7 +116,7 @@ export async function DELETE(_request: Request, { params }: Params) {
 
     const { familyId, choreId } = await params;
 
-    const isManager = await isUserFamilyManager(session.user.id, familyId);
+    const isManager = await isUserFamilyManager(session!.user.id, familyId);
     if (!isManager) {
       return NextResponse.json(
         {

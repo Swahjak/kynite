@@ -12,6 +12,7 @@ import {
   createInvite,
 } from "@/server/services/family-service";
 import { getInviteUrl } from "@/lib/invite-token";
+import { getNonDeviceSession } from "@/lib/api-auth";
 
 type Params = { params: Promise<{ familyId: string }> };
 
@@ -21,23 +22,12 @@ type Params = { params: Promise<{ familyId: string }> };
  */
 export async function POST(request: Request, { params }: Params) {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
-
-    if (!session?.user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
-        },
-        { status: 401 }
-      );
-    }
+    const { session, errorResponse } = await getNonDeviceSession();
+    if (errorResponse) return errorResponse;
 
     const { familyId } = await params;
 
-    const isManager = await isUserFamilyManager(session.user.id, familyId);
+    const isManager = await isUserFamilyManager(session!.user.id, familyId);
     if (!isManager) {
       return NextResponse.json(
         {
@@ -68,7 +58,7 @@ export async function POST(request: Request, { params }: Params) {
       );
     }
 
-    const invite = await createInvite(familyId, session.user.id, {
+    const invite = await createInvite(familyId, session!.user.id, {
       expiresInDays: parsed.data.expiresInDays,
       maxUses: parsed.data.maxUses,
     });
@@ -126,7 +116,7 @@ export async function GET(request: Request, { params }: Params) {
 
     const { familyId } = await params;
 
-    const isManager = await isUserFamilyManager(session.user.id, familyId);
+    const isManager = await isUserFamilyManager(session!.user.id, familyId);
     if (!isManager) {
       return NextResponse.json(
         {
