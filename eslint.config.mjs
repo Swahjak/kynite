@@ -5,7 +5,7 @@ import prettier from "eslint-plugin-prettier";
 
 export default [
   {
-    ignores: [".next/**", "node_modules/**", ".worktrees/**"],
+    ignores: [".next/**", "node_modules/**", ".worktrees/**", ".turbo/**"],
   },
   {
     files: ["**/*.{js,jsx,ts,tsx}"],

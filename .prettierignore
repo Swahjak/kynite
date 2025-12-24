@@ -1,6 +1,7 @@
 node_modules
 .next
 .worktrees
+.turbo
 dist
 build
 pnpm-lock.yaml

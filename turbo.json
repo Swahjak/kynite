@@ -1,0 +1,39 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "build:next": {
+      "inputs": [
+        "src/**",
+        "public/**",
+        "messages/**",
+        "next.config.ts",
+        "tsconfig.json",
+        "package.json",
+        "postcss.config.mjs",
+        "components.json"
+      ],
+      "outputs": [".next/**", "!.next/cache/**"]
+    },
+    "lint": {
+      "inputs": [
+        "src/**/*.{js,jsx,ts,tsx}",
+        "e2e/**/*.{js,jsx,ts,tsx}",
+        "eslint.config.mjs",
+        "tsconfig.json"
+      ],
+      "outputs": []
+    },
+    "format:check": {
+      "inputs": ["src/**", "e2e/**", "messages/**", ".prettierignore"],
+      "outputs": []
+    },
+    "test:run": {
+      "inputs": ["src/**", "vitest.config.mts", "tsconfig.json"],
+      "outputs": []
+    },
+    "typecheck": {
+      "inputs": ["src/**/*.{ts,tsx}", "tsconfig.json"],
+      "outputs": []
+    }
+  }
+}

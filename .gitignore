@@ -45,3 +45,6 @@ next-env.d.ts
 .idea
 .vscode
 .worktrees/
+
+# Turborepo
+.turbo
