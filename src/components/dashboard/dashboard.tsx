@@ -5,7 +5,7 @@ import { TodaysFlow } from "./todays-flow/todays-flow";
 import { TodaysChores } from "./todays-chores/todays-chores";
 import { ActiveTimers } from "./active-timers/active-timers";
 import { WeeklyStars } from "./weekly-stars/weekly-stars";
-import { QuickActions } from "./quick-actions/quick-actions";
+import { QuickActionsFab } from "./quick-actions/quick-actions-fab";
 
 interface DashboardProps {
   initialData: DashboardData;
@@ -27,11 +27,11 @@ export function Dashboard({ initialData }: DashboardProps) {
             <div className="space-y-4 md:col-span-2 md:space-y-5">
               <ActiveTimers />
               <WeeklyStars />
-              <QuickActions />
             </div>
           </div>
         </div>
       </div>
+      <QuickActionsFab />
     </DashboardProvider>
   );
 }

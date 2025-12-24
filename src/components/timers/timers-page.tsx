@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { TimerTemplateCard } from "./timer-template-card";
 import { TimerTemplateForm } from "./timer-template-form";
 import {
@@ -49,12 +50,8 @@ export function TimersPage() {
 
   return (
     <div className="container mx-auto py-6">
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6">
         <h1 className="text-2xl font-bold">Timers</h1>
-        <Button onClick={() => setIsCreateOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Nieuwe timer
-        </Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -73,6 +70,19 @@ export function TimersPage() {
           Nog geen timer templates. Maak er een om te beginnen!
         </div>
       )}
+
+      {/* FAB */}
+      <Button
+        size="icon"
+        onClick={() => setIsCreateOpen(true)}
+        className={cn(
+          "fixed right-6 bottom-6 z-50 h-14 w-14 rounded-full shadow-lg",
+          "transition-transform hover:scale-105 active:scale-95"
+        )}
+        aria-label="Nieuwe timer"
+      >
+        <Plus className="h-6 w-6" />
+      </Button>
 
       {/* Create Dialog */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
