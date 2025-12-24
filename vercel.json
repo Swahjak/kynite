@@ -2,15 +2,15 @@
   "crons": [
     {
       "path": "/api/cron/sync-calendars",
-      "schedule": "*/15 * * * *"
+      "schedule": "0 4 * * *"
     },
     {
       "path": "/api/cron/renew-channels",
-      "schedule": "0 * * * *"
+      "schedule": "0 5 * * *"
     },
     {
       "path": "/api/cron/setup-channels",
-      "schedule": "0 3 * * *"
+      "schedule": "0 6 * * *"
     }
   ]
 }
