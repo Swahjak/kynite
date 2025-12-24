@@ -49,8 +49,6 @@ control_mode: text default "anyone"  -- "parents_only" | "anyone"
 alert_mode: text default "completion"  -- "none" | "completion" | "escalating"
 cooldown_seconds: integer  -- time to confirm for reward, null = no cooldown
 show_as_quick_action: boolean default false  -- display on dashboard
-quick_action_order: integer  -- sorting order on dashboard
-quick_action_icon: text  -- optional icon override
 is_active: boolean default true  -- soft delete / disable
 created_at: timestamp
 updated_at: timestamp
@@ -312,14 +310,12 @@ When starting a reusable timer, show last-used family member first but allow cha
 - Alert mode (none / completion / escalating)
 - Cooldown for confirmation (optional, seconds)
 - **Show as quick action** (toggle) - displays on dashboard
-- Quick action icon (optional override)
 
 ### Quick Action Integration
 
 Templates marked with `show_as_quick_action = true`:
 
 - Appear in dashboard quick actions widget
-- Sorted by `quick_action_order`
 - Clicking opens assignment modal → starts timer
 - Coexist with existing non-timer quick actions
 
