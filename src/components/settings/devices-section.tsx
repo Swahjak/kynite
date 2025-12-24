@@ -387,7 +387,7 @@ export function DevicesSection({ locale }: DevicesSectionProps) {
             <AlertDialogTitle>{t("removeConfirmTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
               {t("removeConfirmDescription", {
-                deviceName: selectedDevice?.displayName,
+                deviceName: selectedDevice?.displayName ?? "",
               })}
             </AlertDialogDescription>
           </AlertDialogHeader>
