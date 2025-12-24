@@ -34,7 +34,7 @@ interface IDashboardContext {
   nextEvent: DashboardEvent | null;
   laterEvents: DashboardEvent[];
   eventsRemaining: number;
-  startQuickAction: (actionId: string) => void;
+  startQuickAction: (actionId: string, memberId: string) => void;
   pauseTimer: (timerId: string) => void;
   extendTimer: (timerId: string, seconds: number) => void;
   isLoadingTimers: boolean;
@@ -168,7 +168,7 @@ export function DashboardProvider({ data, children }: DashboardProviderProps) {
   }, [data.todaysEvents, currentTime]);
 
   const startQuickAction = useCallback(
-    async (actionId: string) => {
+    async (actionId: string, memberId: string) => {
       const action = data.quickActions.find((a) => a.id === actionId);
       if (action?.timerDuration) {
         // Start timer via API using the template
@@ -177,7 +177,7 @@ export function DashboardProvider({ data, children }: DashboardProviderProps) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             templateId: actionId,
-            assignedToId: "", // Would need member selection
+            assignedToId: memberId,
             deviceId,
           }),
         });

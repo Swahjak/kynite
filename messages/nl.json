@@ -217,7 +217,8 @@
       "title": "Wekelijkse Sterren"
     },
     "quickActions": {
-      "title": "Snelle Acties"
+      "title": "Snelle Acties",
+      "selectMember": "Voor wie is deze timer?"
     },
     "todaysChores": {
       "title": "Klusjes",

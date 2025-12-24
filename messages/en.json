@@ -217,7 +217,8 @@
       "title": "Weekly Stars"
     },
     "quickActions": {
-      "title": "Quick Actions"
+      "title": "Quick Actions",
+      "selectMember": "Who is this timer for?"
     },
     "todaysChores": {
       "title": "Chores",
