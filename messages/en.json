@@ -232,6 +232,52 @@
       "dueSoonBadge": "Soon"
     }
   },
+  "DeviceDisconnected": {
+    "title": "Device Disconnected",
+    "description": "Your session has expired or been revoked. Ask a family manager to re-pair this device.",
+    "pairAgain": "Enter Pairing Code"
+  },
+  "DevicePairPage": {
+    "title": "Pair Device",
+    "description": "Enter the 6-digit code shown in your family settings",
+    "codePlaceholder": "000000",
+    "pair": "Pair Device",
+    "pairing": "Pairing...",
+    "success": "Device paired successfully!",
+    "redirecting": "Redirecting to dashboard...",
+    "invalidCode": "Invalid or expired code",
+    "error": "Failed to pair device"
+  },
+  "DevicesPage": {
+    "title": "Devices",
+    "description": "Manage wall-mounted displays and tablets",
+    "addDevice": "Add Device",
+    "noDevices": "No devices paired yet",
+    "noDevicesDescription": "Add a wall-mounted tablet or display to your family hub",
+    "pairedOn": "Paired",
+    "lastActive": "Last active",
+    "active": "Active",
+    "inactive": "Inactive",
+    "rename": "Rename",
+    "remove": "Remove",
+    "removeConfirmTitle": "Remove Device",
+    "removeConfirmDescription": "Are you sure you want to remove {deviceName}? The device will be disconnected and will need to be re-paired.",
+    "addDeviceDialog": {
+      "title": "Add Device",
+      "description": "Enter a name for this device, then enter the code on the tablet",
+      "deviceName": "Device Name",
+      "deviceNamePlaceholder": "Kitchen Tablet",
+      "generate": "Generate Code",
+      "code": "Pairing Code",
+      "codeExpires": "Code expires in {minutes} minutes",
+      "done": "Done"
+    },
+    "renameDialog": {
+      "title": "Rename Device",
+      "newName": "New Name",
+      "save": "Save"
+    }
+  },
   "Family": {
     "title": "Family",
     "familyName": "Family Name",
@@ -257,7 +303,8 @@
     "description": "Manage your family and account settings",
     "tabs": {
       "family": "Family",
-      "accounts": "Linked Accounts"
+      "accounts": "Linked Accounts",
+      "devices": "Devices"
     },
     "family": {
       "title": "Family Settings",
