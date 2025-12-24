@@ -4,7 +4,7 @@
  */
 
 // Routes that don't require authentication
-export const publicRoutes = ["/", "/login"] as const;
+export const publicRoutes = ["/", "/login", "/device/pair"] as const;
 
 // Auth API routes (always public)
 export const authApiPrefix = "/api/auth";
