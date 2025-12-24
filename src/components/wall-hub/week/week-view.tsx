@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   startOfWeek,
   endOfWeek,
@@ -8,6 +8,7 @@ import {
   addWeeks,
   subWeeks,
   format,
+  isToday,
 } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,10 +22,28 @@ export function WeekView() {
     useCalendar();
   const { chores, completeChore } = useChores();
   const [currentDate, setCurrentDate] = useState(new Date());
+  const mobileScrollRef = useRef<HTMLDivElement>(null);
+  const dayRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 }); // Monday
   const weekEnd = endOfWeek(currentDate, { weekStartsOn: 1 });
   const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
+
+  // Find today's index for auto-scroll
+  const todayIndex = weekDays.findIndex((day) => isToday(day));
+
+  // Scroll to today on mobile when week changes
+  useEffect(() => {
+    if (todayIndex < 0 || todayIndex >= weekDays.length) return;
+
+    const targetRef = dayRefs.current[todayIndex];
+    if (targetRef && mobileScrollRef.current) {
+      // Small delay to ensure DOM is ready
+      requestAnimationFrame(() => {
+        targetRef.scrollIntoView({ behavior: "instant", inline: "center" });
+      });
+    }
+  }, [todayIndex, weekDays.length, currentDate]);
 
   const filteredEvents = useMemo(() => {
     if (selectedUserId === "all") return events;
@@ -62,8 +81,35 @@ export function WeekView() {
         </div>
       </div>
 
-      {/* Week grid */}
-      <div className="flex-1 overflow-x-auto">
+      {/* Mobile week view - horizontal scroll */}
+      <div
+        ref={mobileScrollRef}
+        className="min-h-0 flex-1 snap-x snap-mandatory overflow-x-auto md:hidden"
+        role="region"
+        aria-label="Week calendar - swipe to navigate between days"
+      >
+        <div className="flex h-full gap-3 px-1">
+          {weekDays.map((day, index) => (
+            <div
+              key={day.toISOString()}
+              ref={(el) => {
+                dayRefs.current[index] = el;
+              }}
+              className="h-full w-72 flex-shrink-0 snap-center"
+            >
+              <DayColumn
+                date={day}
+                events={filteredEvents}
+                chores={chores}
+                onCompleteChore={completeChore}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Desktop week grid */}
+      <div className="hidden min-h-0 flex-1 overflow-x-auto md:block">
         <div className="grid min-w-[800px] grid-cols-7 gap-4">
           {weekDays.map((day) => (
             <DayColumn
