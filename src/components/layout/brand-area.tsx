@@ -17,7 +17,9 @@ export function BrandArea() {
         />
       </div>
       <div className="flex flex-col">
-        <span className="font-display text-xl font-bold">{t("brand")}</span>
+        <span className="font-display text-xl font-bold text-[#10221a]">
+          {t("brand")}
+        </span>
         <span className="text-primary text-xs font-medium tracking-wider">
           {t("tagline")}
         </span>
