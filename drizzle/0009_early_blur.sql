@@ -1,0 +1,1 @@
+ALTER TABLE "google_calendars" ADD COLUMN "pagination_token" text;

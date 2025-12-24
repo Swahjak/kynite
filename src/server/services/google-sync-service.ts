@@ -6,7 +6,7 @@ import {
   familyMembers,
   users,
 } from "@/server/schema";
-import { eq, and, isNull, or, lt, inArray } from "drizzle-orm";
+import { eq, and, isNull, isNotNull, or, lt, inArray } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 import { getValidAccessToken } from "./google-token-service";
 import {
@@ -22,6 +22,15 @@ const SYNC_RANGE = {
   pastMonths: 3,
   futureMonths: 12,
 };
+
+// Maximum pages to process per sync run to avoid cron timeouts
+// Google returns up to 250 events per page, so 2 pages = ~500 events max per run
+const DEFAULT_MAX_PAGES = 2;
+
+interface SyncOptions {
+  /** Maximum number of API pages to process per run (default: 2) */
+  maxPages?: number;
+}
 
 // Event types that represent status/availability rather than actual events
 const STATUS_EVENT_TYPES: GoogleEventType[] = [
@@ -43,15 +52,22 @@ interface SyncResult {
   eventsCreated: number;
   eventsUpdated: number;
   eventsDeleted: number;
+  /** True if sync completed, false if more pages remain */
+  complete: boolean;
   error?: string;
 }
 
 /**
- * Perform initial sync for a newly linked calendar
+ * Perform initial sync for a newly linked calendar.
+ * Supports pagination limits to avoid cron timeouts - will resume from
+ * stored paginationToken on subsequent runs until complete.
  */
 export async function performInitialSync(
-  calendarId: string
+  calendarId: string,
+  options: SyncOptions = {}
 ): Promise<SyncResult> {
+  const maxPages = options.maxPages ?? DEFAULT_MAX_PAGES;
+
   const calendar = await db
     .select()
     .from(googleCalendars)
@@ -64,6 +80,7 @@ export async function performInitialSync(
       eventsCreated: 0,
       eventsUpdated: 0,
       eventsDeleted: 0,
+      complete: true,
       error: "Calendar not found",
     };
   }
@@ -77,6 +94,7 @@ export async function performInitialSync(
       eventsCreated: 0,
       eventsUpdated: 0,
       eventsDeleted: 0,
+      complete: true,
       error: "Invalid token",
     };
   }
@@ -89,8 +107,10 @@ export async function performInitialSync(
   timeMax.setMonth(timeMax.getMonth() + SYNC_RANGE.futureMonths);
 
   let eventsCreated = 0;
-  let pageToken: string | undefined;
+  // Resume from stored pagination token if available
+  let pageToken: string | undefined = cal.paginationToken ?? undefined;
   let syncToken: string | undefined;
+  let pagesProcessed = 0;
 
   try {
     do {
@@ -110,23 +130,53 @@ export async function performInitialSync(
         eventsCreated++;
       }
 
+      pagesProcessed++;
       pageToken = response.nextPageToken;
+
       if (!pageToken) {
+        // Sync complete - save the sync token
         syncToken = response.nextSyncToken;
+      } else if (pagesProcessed >= maxPages) {
+        // Hit page limit - save progress for next run
+        console.log(
+          `Initial sync paused after ${pagesProcessed} pages for calendar ${calendarId}`
+        );
+        await db
+          .update(googleCalendars)
+          .set({
+            paginationToken: pageToken,
+            updatedAt: new Date(),
+          })
+          .where(eq(googleCalendars.id, calendarId));
+
+        return {
+          calendarId,
+          eventsCreated,
+          eventsUpdated: 0,
+          eventsDeleted: 0,
+          complete: false,
+        };
       }
     } while (pageToken);
 
-    // Save sync token for incremental sync
+    // Sync complete - save sync token and clear pagination token
     await db
       .update(googleCalendars)
       .set({
         syncCursor: syncToken,
+        paginationToken: null,
         lastSyncedAt: new Date(),
         updatedAt: new Date(),
       })
       .where(eq(googleCalendars.id, calendarId));
 
-    return { calendarId, eventsCreated, eventsUpdated: 0, eventsDeleted: 0 };
+    return {
+      calendarId,
+      eventsCreated,
+      eventsUpdated: 0,
+      eventsDeleted: 0,
+      complete: true,
+    };
   } catch (error) {
     console.error("Initial sync failed:", error);
     return {
@@ -134,17 +184,23 @@ export async function performInitialSync(
       eventsCreated,
       eventsUpdated: 0,
       eventsDeleted: 0,
+      complete: true,
       error: error instanceof Error ? error.message : "Unknown error",
     };
   }
 }
 
 /**
- * Perform incremental sync using stored sync token
+ * Perform incremental sync using stored sync token.
+ * Supports pagination limits to avoid cron timeouts - will resume from
+ * stored paginationToken on subsequent runs until complete.
  */
 export async function performIncrementalSync(
-  calendarId: string
+  calendarId: string,
+  options: SyncOptions = {}
 ): Promise<SyncResult> {
+  const maxPages = options.maxPages ?? DEFAULT_MAX_PAGES;
+
   const calendar = await db
     .select()
     .from(googleCalendars)
@@ -157,15 +213,21 @@ export async function performIncrementalSync(
       eventsCreated: 0,
       eventsUpdated: 0,
       eventsDeleted: 0,
+      complete: true,
       error: "Calendar not found",
     };
   }
 
   const cal = calendar[0];
 
-  // No sync token = need initial sync
+  // Has pagination token = resuming mid-initial-sync
+  if (cal.paginationToken && !cal.syncCursor) {
+    return performInitialSync(calendarId, options);
+  }
+
+  // No sync token and no pagination token = need fresh initial sync
   if (!cal.syncCursor) {
-    return performInitialSync(calendarId);
+    return performInitialSync(calendarId, options);
   }
 
   const accessToken = await getValidAccessToken(cal.accountId);
@@ -175,6 +237,7 @@ export async function performIncrementalSync(
       eventsCreated: 0,
       eventsUpdated: 0,
       eventsDeleted: 0,
+      complete: true,
       error: "Invalid token",
     };
   }
@@ -183,13 +246,15 @@ export async function performIncrementalSync(
   let eventsCreated = 0;
   let eventsUpdated = 0;
   let eventsDeleted = 0;
-  let pageToken: string | undefined;
+  // Resume from stored pagination token if available (for incremental sync continuation)
+  let pageToken: string | undefined = cal.paginationToken ?? undefined;
   let syncToken = cal.syncCursor;
+  let pagesProcessed = 0;
 
   try {
     do {
       const response = await client.listEvents(cal.googleCalendarId, {
-        syncToken,
+        syncToken: pageToken ? undefined : syncToken, // Only use syncToken on first request
         pageToken,
       });
 
@@ -211,30 +276,60 @@ export async function performIncrementalSync(
         }
       }
 
+      pagesProcessed++;
       pageToken = response.nextPageToken;
+
       if (!pageToken && response.nextSyncToken) {
         syncToken = response.nextSyncToken;
+      } else if (pageToken && pagesProcessed >= maxPages) {
+        // Hit page limit - save progress for next run
+        console.log(
+          `Incremental sync paused after ${pagesProcessed} pages for calendar ${calendarId}`
+        );
+        await db
+          .update(googleCalendars)
+          .set({
+            paginationToken: pageToken,
+            updatedAt: new Date(),
+          })
+          .where(eq(googleCalendars.id, calendarId));
+
+        return {
+          calendarId,
+          eventsCreated,
+          eventsUpdated,
+          eventsDeleted,
+          complete: false,
+        };
       }
     } while (pageToken);
 
+    // Sync complete - save new sync token and clear pagination token
     await db
       .update(googleCalendars)
       .set({
         syncCursor: syncToken,
+        paginationToken: null,
         lastSyncedAt: new Date(),
         updatedAt: new Date(),
       })
       .where(eq(googleCalendars.id, calendarId));
 
-    return { calendarId, eventsCreated, eventsUpdated, eventsDeleted };
+    return {
+      calendarId,
+      eventsCreated,
+      eventsUpdated,
+      eventsDeleted,
+      complete: true,
+    };
   } catch (error) {
     if (error instanceof GoogleCalendarApiError && error.requiresFullSync) {
       // 410 Gone - need full sync
       await db
         .update(googleCalendars)
-        .set({ syncCursor: null, updatedAt: new Date() })
+        .set({ syncCursor: null, paginationToken: null, updatedAt: new Date() })
         .where(eq(googleCalendars.id, calendarId));
-      return performInitialSync(calendarId);
+      return performInitialSync(calendarId, options);
     }
 
     console.error("Incremental sync failed:", error);
@@ -243,6 +338,7 @@ export async function performIncrementalSync(
       eventsCreated,
       eventsUpdated,
       eventsDeleted,
+      complete: true,
       error: error instanceof Error ? error.message : "Unknown error",
     };
   }
@@ -406,7 +502,10 @@ async function deleteEventByGoogleId(
 }
 
 /**
- * Get calendars that need syncing (older than interval or never synced)
+ * Get calendars that need syncing:
+ * - Calendars with incomplete syncs (paginationToken set) - highest priority
+ * - Calendars never synced
+ * - Calendars synced more than intervalMinutes ago
  */
 export async function getCalendarsNeedingSync(intervalMinutes: number = 15) {
   const threshold = new Date(Date.now() - intervalMinutes * 60 * 1000);
@@ -418,7 +517,11 @@ export async function getCalendarsNeedingSync(intervalMinutes: number = 15) {
       and(
         eq(googleCalendars.syncEnabled, true),
         or(
+          // Incomplete syncs - resume these first
+          isNotNull(googleCalendars.paginationToken),
+          // Never synced
           isNull(googleCalendars.lastSyncedAt),
+          // Stale syncs
           lt(googleCalendars.lastSyncedAt, threshold)
         )
       )

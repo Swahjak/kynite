@@ -8,7 +8,7 @@ import {
 // Vercel cron secret for authentication
 const CRON_SECRET = process.env.CRON_SECRET;
 
-// GET /api/cron/sync-calendars - Triggered by cron every 5 minutes
+// GET /api/cron/sync-calendars - Triggered by cron every hour
 export async function GET(_request: Request) {
   // Verify cron secret
   const headersList = await headers();
@@ -28,7 +28,10 @@ export async function GET(_request: Request) {
     const summary = {
       total: calendars.length,
       successful: results.filter(
-        (r) => r.status === "fulfilled" && !r.value.error
+        (r) => r.status === "fulfilled" && !r.value.error && r.value.complete
+      ).length,
+      incomplete: results.filter(
+        (r) => r.status === "fulfilled" && !r.value.error && !r.value.complete
       ).length,
       failed: results.filter(
         (r) =>

@@ -415,6 +415,7 @@ export const googleCalendars = pgTable("google_calendars", {
   isPrivate: boolean("is_private").notNull().default(false),
   lastSyncedAt: timestamp("last_synced_at", { mode: "date" }),
   syncCursor: text("sync_cursor"), // Google's sync token for incremental updates
+  paginationToken: text("pagination_token"), // Stored pageToken for resuming interrupted syncs
   createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
 });

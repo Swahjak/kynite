@@ -64,6 +64,13 @@
       "when": 1766579360104,
       "tag": "0008_wandering_sprite",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1766591712786,
+      "tag": "0009_early_blur",
+      "breakpoints": true
     }
   ]
 }
