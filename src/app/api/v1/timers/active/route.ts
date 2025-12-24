@@ -44,7 +44,25 @@ export async function GET() {
       );
     }
 
-    const timers = await getActiveTimersForFamily(members[0].familyId);
+    const rawTimers = await getActiveTimersForFamily(members[0].familyId);
+    const now = new Date();
+
+    // Calculate actual remaining time based on elapsed time since last sync
+    const timers = rawTimers.map((timer) => {
+      let remainingSeconds = timer.remainingSeconds;
+
+      if (timer.status === "running" && timer.lastSyncAt) {
+        const elapsedSinceSync = Math.floor(
+          (now.getTime() - timer.lastSyncAt.getTime()) / 1000
+        );
+        remainingSeconds = Math.max(
+          0,
+          timer.remainingSeconds - elapsedSinceSync
+        );
+      }
+
+      return { ...timer, remainingSeconds };
+    });
 
     return NextResponse.json({ success: true, data: { timers } });
   } catch (error) {

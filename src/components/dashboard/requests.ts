@@ -132,12 +132,25 @@ function mapTemplateToQuickAction(template: TimerTemplate): QuickAction {
   };
 }
 
-function mapActiveTimerToTimer(activeTimer: ActiveTimer): Timer {
+function mapActiveTimerToTimer(activeTimer: ActiveTimer, now: Date): Timer {
+  // Calculate actual remaining time based on elapsed time since last sync
+  let remainingSeconds = activeTimer.remainingSeconds;
+
+  if (activeTimer.status === "running" && activeTimer.lastSyncAt) {
+    const elapsedSinceSync = Math.floor(
+      (now.getTime() - activeTimer.lastSyncAt.getTime()) / 1000
+    );
+    remainingSeconds = Math.max(
+      0,
+      activeTimer.remainingSeconds - elapsedSinceSync
+    );
+  }
+
   return {
     id: activeTimer.id,
     title: activeTimer.title,
     subtitle: activeTimer.description ?? "",
-    remainingSeconds: activeTimer.remainingSeconds,
+    remainingSeconds,
     totalSeconds: activeTimer.durationSeconds,
     category: activeTimer.category,
     status: activeTimer.status as Timer["status"],
@@ -200,7 +213,7 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
   const quickActions = quickActionTemplates.map(mapTemplateToQuickAction);
   const activeTimers = allTimers
     .filter((t) => t.status === "running" || t.status === "paused")
-    .map(mapActiveTimerToTimer);
+    .map((t) => mapActiveTimerToTimer(t, now));
 
   // Map chores to dashboard format and sort by urgency
   const todaysChores = todaysPendingChores
