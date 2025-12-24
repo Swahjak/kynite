@@ -408,7 +408,7 @@ async function deleteEventByGoogleId(
 /**
  * Get calendars that need syncing (older than interval or never synced)
  */
-export async function getCalendarsNeedingSync(intervalMinutes: number = 5) {
+export async function getCalendarsNeedingSync(intervalMinutes: number = 15) {
   const threshold = new Date(Date.now() - intervalMinutes * 60 * 1000);
 
   return db
