@@ -5,7 +5,7 @@ import prettier from "eslint-plugin-prettier";
 
 export default [
   {
-    ignores: [".next/**", "node_modules/**"],
+    ignores: [".next/**", "node_modules/**", ".worktrees/**"],
   },
   {
     files: ["**/*.{js,jsx,ts,tsx}"],
@@ -28,6 +28,8 @@ export default [
       ...nextPlugin.configs.recommended.rules,
       ...nextPlugin.configs["core-web-vitals"].rules,
       "prettier/prettier": "warn",
+      // Disable false positive for App Router - rule is designed for Pages Router
+      "@next/next/no-page-custom-font": "off",
     },
   },
 ];

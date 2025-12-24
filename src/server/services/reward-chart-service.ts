@@ -7,7 +7,7 @@ import {
   rewardChartMessages,
   familyMembers,
 } from "@/server/schema";
-import { eq, and, gte, lte, desc, asc } from "drizzle-orm";
+import { eq, and, gte, lte, desc, asc, inArray } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 import type {
   CreateRewardChartTaskInput,
@@ -97,10 +97,10 @@ export async function getChartWithDetails(chartId: string) {
 }
 
 /**
- * Get all charts for a family
+ * Get all charts for a family with active goal data
  */
 export async function getChartsForFamily(familyId: string) {
-  return await db
+  const charts = await db
     .select({
       chart: rewardCharts,
       member: familyMembers,
@@ -110,6 +110,31 @@ export async function getChartsForFamily(familyId: string) {
     .where(
       and(eq(rewardCharts.familyId, familyId), eq(rewardCharts.isActive, true))
     );
+
+  if (charts.length === 0) return [];
+
+  // Fetch active goals for all charts
+  const chartIds = charts.map((c) => c.chart.id);
+  const activeGoals = await db
+    .select()
+    .from(rewardChartGoals)
+    .where(
+      and(
+        eq(rewardChartGoals.status, "active"),
+        inArray(rewardChartGoals.chartId, chartIds)
+      )
+    );
+
+  // Build a map of chartId -> activeGoal for efficient lookup
+  const goalsByChart = new Map<string, (typeof activeGoals)[0]>();
+  for (const goal of activeGoals) {
+    goalsByChart.set(goal.chartId, goal);
+  }
+
+  return charts.map((c) => ({
+    ...c,
+    activeGoal: goalsByChart.get(c.chart.id) ?? null,
+  }));
 }
 
 /**

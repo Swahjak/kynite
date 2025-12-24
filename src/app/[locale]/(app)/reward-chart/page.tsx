@@ -91,7 +91,7 @@ export default async function RewardChartRoute({
         avatarColor: child.avatarColor,
         avatarUrl: child.user?.image,
         chartId: chartData?.chart.id || null,
-        totalStars: chartData?.chart.activeGoal?.starsCurrent || 0,
+        totalStars: chartData?.activeGoal?.starsCurrent || 0,
       };
     });
 
