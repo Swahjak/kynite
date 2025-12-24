@@ -1,5 +1,13 @@
-import { addDays, format, isSameDay, parseISO, startOfWeek } from "date-fns";
+import {
+  addDays,
+  format,
+  isSameDay,
+  isToday,
+  parseISO,
+  startOfWeek,
+} from "date-fns";
 import { motion } from "framer-motion";
+import { useEffect, useRef } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   fadeIn,
@@ -14,7 +22,6 @@ import type { IEvent } from "@/components/calendar/interfaces";
 import { CalendarTimeline } from "@/components/calendar/views/week-and-day-view/calendar-time-line";
 import { RenderGroupedEvents } from "@/components/calendar/views/week-and-day-view/render-grouped-events";
 import { WeekViewMultiDayEventsRow } from "@/components/calendar/views/week-and-day-view/week-view-multi-day-events-row";
-import { AlertCircleIcon } from "lucide-react";
 
 interface IProps {
   singleDayEvents: IEvent[];
@@ -23,10 +30,30 @@ interface IProps {
 
 export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
   const { selectedDate, use24HourFormat } = useCalendar();
+  const mobileScrollRef = useRef<HTMLDivElement>(null);
+  const todayRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const weekStart = startOfWeek(selectedDate);
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   const hours = Array.from({ length: 24 }, (_, i) => i);
+
+  // Find the index of today in the week, or default to selected date's day
+  const todayIndex = weekDays.findIndex((day) => isToday(day));
+  const focusDayIndex =
+    todayIndex >= 0
+      ? todayIndex
+      : weekDays.findIndex((day) => isSameDay(day, selectedDate));
+
+  // Scroll to current day on mobile
+  useEffect(() => {
+    // Guard against invalid index
+    if (focusDayIndex < 0 || focusDayIndex >= weekDays.length) return;
+
+    const targetRef = todayRefs.current[focusDayIndex];
+    if (targetRef && mobileScrollRef.current) {
+      targetRef.scrollIntoView({ behavior: "instant", inline: "center" });
+    }
+  }, [focusDayIndex, weekDays.length]);
 
   return (
     <motion.div
@@ -35,18 +62,133 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
       exit="exit"
       variants={fadeIn}
       transition={transition}
+      className="h-full"
     >
-      <motion.div
-        className="flex flex-col items-center justify-center border-b p-4 text-sm sm:hidden"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={transition}
-      >
-        <p>Weekly view is not recommended on smaller devices.</p>
-        <p>Please switch to a desktop device or use the daily view instead.</p>
-      </motion.div>
+      {/* Mobile horizontal scroll view */}
+      <div className="flex h-full flex-col md:hidden">
+        <WeekViewMultiDayEventsRow
+          selectedDate={selectedDate}
+          multiDayEvents={multiDayEvents}
+        />
 
-      <motion.div className="flex-col sm:flex" variants={staggerContainer}>
+        {/* Scrollable day columns */}
+        <div
+          ref={mobileScrollRef}
+          className="flex-1 snap-x snap-mandatory overflow-x-auto overflow-y-hidden"
+          role="region"
+          aria-label="Week calendar - swipe to navigate between days"
+        >
+          <div className="flex h-full" style={{ width: "560%" }}>
+            {weekDays.map((day, dayIndex) => {
+              const dayEvents = singleDayEvents.filter(
+                (event) =>
+                  isSameDay(parseISO(event.startDate), day) ||
+                  isSameDay(parseISO(event.endDate), day)
+              );
+              const groupedEvents = groupEvents(dayEvents);
+              const isTodayColumn = isToday(day);
+
+              return (
+                <div
+                  key={dayIndex}
+                  ref={(el) => {
+                    todayRefs.current[dayIndex] = el;
+                  }}
+                  className="flex h-full w-[80vw] flex-shrink-0 snap-center flex-col"
+                >
+                  {/* Day header */}
+                  <div
+                    className={`border-b px-3 py-2 text-center ${isTodayColumn ? "bg-primary/10" : ""}`}
+                  >
+                    <span className="text-muted-foreground text-xs font-medium">
+                      {format(day, "EEEE")}
+                    </span>
+                    <span
+                      className={`ml-2 text-sm font-semibold ${isTodayColumn ? "text-primary" : ""}`}
+                    >
+                      {format(day, "d MMM")}
+                    </span>
+                  </div>
+
+                  {/* Day content with vertical scroll */}
+                  <div className="relative flex-1 overflow-y-auto">
+                    <div className="relative">
+                      {hours.map((hour, hourIndex) => (
+                        <div
+                          key={hour}
+                          className="relative flex"
+                          style={{ height: "96px" }}
+                        >
+                          {/* Hour label */}
+                          <div className="w-12 flex-shrink-0 border-r">
+                            {hourIndex !== 0 && (
+                              <span className="text-muted-foreground absolute -top-2.5 left-1 text-xs">
+                                {format(
+                                  new Date().setHours(hour, 0, 0, 0),
+                                  use24HourFormat ? "HH:00" : "h a"
+                                )}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Hour slot */}
+                          <div className="relative flex-1 border-b">
+                            <DroppableArea
+                              date={day}
+                              hour={hour}
+                              minute={0}
+                              className="absolute inset-x-0 top-0 h-[48px]"
+                            >
+                              <AddEditEventDialog
+                                startDate={day}
+                                startTime={{ hour, minute: 0 }}
+                              >
+                                <div className="hover:bg-secondary absolute inset-0 cursor-pointer transition-colors" />
+                              </AddEditEventDialog>
+                            </DroppableArea>
+
+                            <div className="pointer-events-none absolute inset-x-0 top-1/2 border-b border-dashed opacity-50" />
+
+                            <DroppableArea
+                              date={day}
+                              hour={hour}
+                              minute={30}
+                              className="absolute inset-x-0 bottom-0 h-[48px]"
+                            >
+                              <AddEditEventDialog
+                                startDate={day}
+                                startTime={{ hour, minute: 30 }}
+                              >
+                                <div className="hover:bg-secondary absolute inset-0 cursor-pointer transition-colors" />
+                              </AddEditEventDialog>
+                            </DroppableArea>
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* Events overlay */}
+                      <div className="absolute inset-0 left-12">
+                        <RenderGroupedEvents
+                          groupedEvents={groupedEvents}
+                          day={day}
+                        />
+                      </div>
+
+                      <CalendarTimeline />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop view (hidden on mobile) */}
+      <motion.div
+        className="hidden h-full flex-col md:flex"
+        variants={staggerContainer}
+      >
         <div>
           <WeekViewMultiDayEventsRow
             selectedDate={selectedDate}
@@ -91,7 +233,7 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
           </motion.div>
         </div>
 
-        <ScrollArea className="h-[736px]" type="always">
+        <ScrollArea className="h-full" type="always">
           <div className="flex">
             {/* Hours column */}
             <motion.div className="relative w-18" variants={staggerContainer}>
