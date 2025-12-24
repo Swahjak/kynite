@@ -1,4 +1,4 @@
-CREATE TABLE "google_calendar_channels" (
+CREATE TABLE IF NOT EXISTS "google_calendar_channels" (
 	"id" text PRIMARY KEY NOT NULL,
 	"google_calendar_id" text NOT NULL,
 	"resource_id" text NOT NULL,
@@ -7,9 +7,12 @@ CREATE TABLE "google_calendar_channels" (
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-ALTER TABLE "google_calendar_channels" ADD CONSTRAINT "google_calendar_channels_google_calendar_id_google_calendars_id_fk" FOREIGN KEY ("google_calendar_id") REFERENCES "public"."google_calendars"("id") ON DELETE cascade ON UPDATE no action;
+DO $$ BEGIN
+  ALTER TABLE "google_calendar_channels" ADD CONSTRAINT "google_calendar_channels_google_calendar_id_google_calendars_id_fk" FOREIGN KEY ("google_calendar_id") REFERENCES "public"."google_calendars"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 --> statement-breakpoint
-CREATE TABLE "active_timers" (
+CREATE TABLE IF NOT EXISTS "active_timers" (
 	"id" text PRIMARY KEY NOT NULL,
 	"family_id" text NOT NULL,
 	"template_id" text,
@@ -34,7 +37,7 @@ CREATE TABLE "active_timers" (
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "timer_templates" (
+CREATE TABLE IF NOT EXISTS "timer_templates" (
 	"id" text PRIMARY KEY NOT NULL,
 	"family_id" text NOT NULL,
 	"title" text NOT NULL,
@@ -51,9 +54,32 @@ CREATE TABLE "timer_templates" (
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-ALTER TABLE "active_timers" ADD CONSTRAINT "active_timers_family_id_families_id_fk" FOREIGN KEY ("family_id") REFERENCES "public"."families"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "active_timers" ADD CONSTRAINT "active_timers_template_id_timer_templates_id_fk" FOREIGN KEY ("template_id") REFERENCES "public"."timer_templates"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "active_timers" ADD CONSTRAINT "active_timers_assigned_to_id_family_members_id_fk" FOREIGN KEY ("assigned_to_id") REFERENCES "public"."family_members"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "active_timers" ADD CONSTRAINT "active_timers_started_by_id_family_members_id_fk" FOREIGN KEY ("started_by_id") REFERENCES "public"."family_members"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "active_timers" ADD CONSTRAINT "active_timers_confirmed_by_id_family_members_id_fk" FOREIGN KEY ("confirmed_by_id") REFERENCES "public"."family_members"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "timer_templates" ADD CONSTRAINT "timer_templates_family_id_families_id_fk" FOREIGN KEY ("family_id") REFERENCES "public"."families"("id") ON DELETE cascade ON UPDATE no action;
+DO $$ BEGIN
+  ALTER TABLE "active_timers" ADD CONSTRAINT "active_timers_family_id_families_id_fk" FOREIGN KEY ("family_id") REFERENCES "public"."families"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "active_timers" ADD CONSTRAINT "active_timers_template_id_timer_templates_id_fk" FOREIGN KEY ("template_id") REFERENCES "public"."timer_templates"("id") ON DELETE set null ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "active_timers" ADD CONSTRAINT "active_timers_assigned_to_id_family_members_id_fk" FOREIGN KEY ("assigned_to_id") REFERENCES "public"."family_members"("id") ON DELETE set null ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "active_timers" ADD CONSTRAINT "active_timers_started_by_id_family_members_id_fk" FOREIGN KEY ("started_by_id") REFERENCES "public"."family_members"("id") ON DELETE set null ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "active_timers" ADD CONSTRAINT "active_timers_confirmed_by_id_family_members_id_fk" FOREIGN KEY ("confirmed_by_id") REFERENCES "public"."family_members"("id") ON DELETE set null ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "timer_templates" ADD CONSTRAINT "timer_templates_family_id_families_id_fk" FOREIGN KEY ("family_id") REFERENCES "public"."families"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
