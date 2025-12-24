@@ -5,8 +5,11 @@ import {
   useContext,
   useState,
   useMemo,
+  useCallback,
+  useEffect,
   type ReactNode,
 } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type {
   DashboardData,
   DashboardEvent,
@@ -16,6 +19,7 @@ import type {
   QuickAction,
 } from "../types";
 import { useClock } from "../hooks";
+import { getDeviceId } from "@/hooks/use-timer-countdown";
 
 interface IDashboardContext {
   familyName: string;
@@ -33,6 +37,7 @@ interface IDashboardContext {
   startQuickAction: (actionId: string) => void;
   pauseTimer: (timerId: string) => void;
   extendTimer: (timerId: string, seconds: number) => void;
+  isLoadingTimers: boolean;
 }
 
 const DashboardContext = createContext<IDashboardContext | null>(null);
@@ -42,9 +47,100 @@ interface DashboardProviderProps {
   children: ReactNode;
 }
 
+// Transform API timer to dashboard Timer type
+function transformTimer(apiTimer: {
+  id: string;
+  title: string;
+  description: string | null;
+  remainingSeconds: number;
+  durationSeconds: number;
+  category: string;
+  status: string;
+  starReward: number;
+  alertMode: string;
+  cooldownSeconds: number | null;
+  assignedToId: string | null;
+  ownerDeviceId: string | null;
+}): Timer {
+  return {
+    id: apiTimer.id,
+    title: apiTimer.title,
+    subtitle: apiTimer.description || "",
+    remainingSeconds: apiTimer.remainingSeconds,
+    totalSeconds: apiTimer.durationSeconds,
+    category: apiTimer.category,
+    status: apiTimer.status as Timer["status"],
+    starReward: apiTimer.starReward,
+    alertMode: apiTimer.alertMode as Timer["alertMode"],
+    cooldownSeconds: apiTimer.cooldownSeconds,
+    assignedToId: apiTimer.assignedToId,
+    ownerDeviceId: apiTimer.ownerDeviceId,
+  };
+}
+
 export function DashboardProvider({ data, children }: DashboardProviderProps) {
   const currentTime = useClock();
-  const [timers, setTimers] = useState(data.activeTimers);
+  const queryClient = useQueryClient();
+  const [deviceId, setDeviceId] = useState<string>("");
+
+  // Get device ID on mount
+  useEffect(() => {
+    setDeviceId(getDeviceId());
+  }, []);
+
+  // Fetch active timers from API
+  const { data: apiTimers = [], isLoading: isLoadingTimers } = useQuery({
+    queryKey: ["activeTimers"],
+    queryFn: async () => {
+      const res = await fetch("/api/v1/timers/active");
+      const data = await res.json();
+      return data.success ? data.data.timers : [];
+    },
+    refetchInterval: 60000, // 60s polling for sync
+    staleTime: 30000,
+  });
+
+  // Transform API timers to dashboard format
+  const timers: Timer[] = useMemo(
+    () => apiTimers.map(transformTimer),
+    [apiTimers]
+  );
+
+  // Pause timer mutation
+  const pauseTimerMutation = useMutation({
+    mutationFn: async (timerId: string) => {
+      const res = await fetch(`/api/v1/timers/active/${timerId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "pause", deviceId }),
+      });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["activeTimers"] });
+    },
+  });
+
+  // Extend timer mutation
+  const extendTimerMutation = useMutation({
+    mutationFn: async ({
+      timerId,
+      seconds,
+    }: {
+      timerId: string;
+      seconds: number;
+    }) => {
+      const res = await fetch(`/api/v1/timers/active/${timerId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "extend", seconds }),
+      });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["activeTimers"] });
+    },
+  });
 
   const categorizedEvents = useMemo(() => {
     const now = currentTime.getTime();
@@ -71,39 +167,39 @@ export function DashboardProvider({ data, children }: DashboardProviderProps) {
     };
   }, [data.todaysEvents, currentTime]);
 
-  const startQuickAction = (actionId: string) => {
-    const action = data.quickActions.find((a) => a.id === actionId);
-    if (action?.timerDuration) {
-      const newTimer: Timer = {
-        id: `timer-${Date.now()}`,
-        title: action.label,
-        subtitle: "Quick Action",
-        remainingSeconds: action.timerDuration,
-        totalSeconds: action.timerDuration,
-        category: action.category,
-      };
-      setTimers((prev) => [...prev, newTimer]);
-    }
-  };
+  const startQuickAction = useCallback(
+    async (actionId: string) => {
+      const action = data.quickActions.find((a) => a.id === actionId);
+      if (action?.timerDuration) {
+        // Start timer via API using the template
+        await fetch("/api/v1/timers/active", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            templateId: actionId,
+            assignedToId: "", // Would need member selection
+            deviceId,
+          }),
+        });
+        queryClient.invalidateQueries({ queryKey: ["activeTimers"] });
+      }
+    },
+    [data.quickActions, deviceId, queryClient]
+  );
 
-  const pauseTimer = (timerId: string) => {
-    // Mock implementation - would integrate with real timer system
-    console.log("Pause timer:", timerId);
-  };
+  const pauseTimer = useCallback(
+    (timerId: string) => {
+      pauseTimerMutation.mutate(timerId);
+    },
+    [pauseTimerMutation]
+  );
 
-  const extendTimer = (timerId: string, seconds: number) => {
-    setTimers((prev) =>
-      prev.map((t) =>
-        t.id === timerId
-          ? {
-              ...t,
-              remainingSeconds: t.remainingSeconds + seconds,
-              totalSeconds: t.totalSeconds + seconds,
-            }
-          : t
-      )
-    );
-  };
+  const extendTimer = useCallback(
+    (timerId: string, seconds: number) => {
+      extendTimerMutation.mutate({ timerId, seconds });
+    },
+    [extendTimerMutation]
+  );
 
   const value: IDashboardContext = {
     familyName: data.familyName,
@@ -118,6 +214,7 @@ export function DashboardProvider({ data, children }: DashboardProviderProps) {
     startQuickAction,
     pauseTimer,
     extendTimer,
+    isLoadingTimers,
   };
 
   return (
