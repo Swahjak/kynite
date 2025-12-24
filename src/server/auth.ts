@@ -39,16 +39,28 @@ export const auth = betterAuth({
     customSession(async ({ user, session }) => {
       // Query user's family membership
       const membership = await db
-        .select({ familyId: familyMembers.familyId })
+        .select({
+          familyId: familyMembers.familyId,
+          role: familyMembers.role,
+          displayName: familyMembers.displayName,
+          memberId: familyMembers.id,
+        })
         .from(familyMembers)
         .where(eq(familyMembers.userId, user.id))
         .limit(1);
+
+      const member = membership[0];
+      const isDevice = (user as { type?: string }).type === "device";
 
       return {
         user,
         session: {
           ...session,
-          familyId: membership[0]?.familyId ?? null,
+          familyId: member?.familyId ?? null,
+          memberId: member?.memberId ?? null,
+          memberRole: member?.role ?? null,
+          isDevice,
+          deviceName: isDevice ? member?.displayName : null,
         },
       };
     }),

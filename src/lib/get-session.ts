@@ -46,3 +46,21 @@ export async function requireAuth() {
 
   return session;
 }
+
+/**
+ * Check if the current session is a device session
+ * Returns false if not authenticated
+ */
+export async function isDeviceSession() {
+  const session = await getSession();
+  return session?.session?.isDevice === true;
+}
+
+/**
+ * Get the current user's member role from session
+ * Returns null if not authenticated or no family
+ */
+export async function getCurrentMemberRole() {
+  const session = await getSession();
+  return session?.session?.memberRole || null;
+}
