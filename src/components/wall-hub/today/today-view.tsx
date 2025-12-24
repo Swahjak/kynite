@@ -1,19 +1,37 @@
 "use client";
 
+import { useMemo } from "react";
 import { useCalendar } from "@/components/calendar/contexts/calendar-context";
 import { useChores } from "@/components/chores/contexts/chores-context";
 import { PersonColumn } from "./person-column";
+import { PersonFilterChips } from "@/components/wall-hub/shared/person-filter-chips";
 
 export function TodayView() {
-  const { users, events } = useCalendar();
+  const { users, events, selectedUserId, filterEventsBySelectedUser } =
+    useCalendar();
   const { chores, completeChore } = useChores();
+
+  // Filter users based on selection
+  const displayedUsers = useMemo(() => {
+    if (selectedUserId === "all") return users;
+    return users.filter((user) => user.id === selectedUserId);
+  }, [users, selectedUserId]);
 
   return (
     <div className="flex h-full flex-col gap-4 overflow-hidden p-4">
-      {/* Desktop grid */}
+      {/* Header with filters */}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <PersonFilterChips
+          users={users}
+          selectedUserId={selectedUserId}
+          onSelect={filterEventsBySelectedUser}
+        />
+      </div>
+
+      {/* Person columns grid */}
       <div className="min-h-0 flex-1 overflow-x-auto">
         <div className="grid min-w-[600px] grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {users.map((user) => (
+          {displayedUsers.map((user) => (
             <PersonColumn
               key={user.id}
               user={user}
