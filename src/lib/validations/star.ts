@@ -9,6 +9,7 @@ export const starTransactionTypeSchema = z.enum([
   "chore",
   "bonus",
   "redemption",
+  "timer",
 ]);
 export type StarTransactionType = z.infer<typeof starTransactionTypeSchema>;
 
@@ -19,7 +20,7 @@ export type StarTransactionType = z.infer<typeof starTransactionTypeSchema>;
 export const addStarsSchema = z.object({
   memberId: z.string().min(1, "Member ID is required"),
   amount: z.number().int().min(1, "Amount must be at least 1"),
-  type: z.enum(["reward_chart", "chore", "bonus"]),
+  type: z.enum(["reward_chart", "chore", "bonus", "timer"]),
   referenceId: z.string().optional(),
   description: z.string().min(1, "Description is required").max(200),
   awardedById: z.string().optional(),
