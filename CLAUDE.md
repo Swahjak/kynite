@@ -85,6 +85,7 @@ Required in `.env.local`:
 DATABASE_URL=postgresql://...
 BETTER_AUTH_SECRET=<openssl rand -base64 32>
 BETTER_AUTH_URL=http://localhost:3000
+GOOGLE_WEBHOOK_BASE_URL=https://your-app.vercel.app  # Required for push notifications
 ```
 
 ## Code Quality
