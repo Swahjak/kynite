@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { AlertTriangle } from "lucide-react";
 import { useChores } from "../contexts/chores-context";
 import { ChoreCard } from "../components/chore-card";
@@ -12,8 +13,14 @@ interface UrgentViewProps {
 }
 
 export function UrgentView({ onEdit, onDelete }: UrgentViewProps) {
-  const { chores } = useChores();
-  const urgentChores = sortChores(getUrgentChores(chores));
+  const { chores, selectedPersonId } = useChores();
+
+  const filteredChores = useMemo(() => {
+    if (selectedPersonId === "all") return chores;
+    return chores.filter((c) => c.assignedToId === selectedPersonId);
+  }, [chores, selectedPersonId]);
+
+  const urgentChores = sortChores(getUrgentChores(filteredChores));
 
   if (urgentChores.length === 0) {
     return (

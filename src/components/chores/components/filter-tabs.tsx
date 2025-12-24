@@ -6,7 +6,6 @@ import type { ChoreViewFilter } from "@/types/chore";
 
 const FILTERS: { value: ChoreViewFilter; label: string }[] = [
   { value: "all", label: "All Chores" },
-  { value: "by-person", label: "By Person" },
   { value: "urgent", label: "Urgent" },
 ];
 

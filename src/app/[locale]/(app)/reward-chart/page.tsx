@@ -27,7 +27,11 @@ import {
 } from "date-fns";
 import { getCompletionsForDateRange } from "@/server/services/reward-chart-service";
 import type { Locale } from "@/i18n/routing";
-import type { GoalStatus, CompletionStatus } from "@/components/reward-chart";
+import type {
+  GoalStatus,
+  CompletionStatus,
+  ChildChartInfo,
+} from "@/components/reward-chart";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -63,6 +67,7 @@ export default async function RewardChartRoute({
 
   // Determine which chart to show
   let chart;
+  let childrenWithCharts: ChildChartInfo[] | undefined;
 
   if (isManager) {
     // Managers can view any child's chart
@@ -74,6 +79,21 @@ export default async function RewardChartRoute({
 
     // Find non-manager members (children/participants)
     const children = allMembers.filter((m) => m.role !== "manager");
+
+    // Build children with chart info for PersonFilterChips
+    childrenWithCharts = children.map((child) => {
+      const chartData = familyCharts.find(
+        (fc) => fc.chart.memberId === child.id
+      );
+      return {
+        id: child.id,
+        name: child.displayName || child.user?.name || "Child",
+        avatarColor: child.avatarColor,
+        avatarUrl: child.user?.image,
+        chartId: chartData?.chart.id || null,
+        totalStars: chartData?.chart.activeGoal?.starsCurrent || 0,
+      };
+    });
 
     if (children.length === 0) {
       return (
@@ -279,6 +299,7 @@ export default async function RewardChartRoute({
       chartId={chart.id}
       initialData={weekData}
       isManager={isManager}
+      allChildren={childrenWithCharts}
     >
       <RewardChartPage />
     </RewardChartProvider>

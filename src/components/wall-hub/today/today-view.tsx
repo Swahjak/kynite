@@ -22,8 +22,8 @@ export function TodayView() {
       {/* Header with filters */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <PersonFilterChips
-          users={users}
-          selectedUserId={selectedUserId}
+          people={users}
+          selectedId={selectedUserId}
           onSelect={filterEventsBySelectedUser}
         />
       </div>

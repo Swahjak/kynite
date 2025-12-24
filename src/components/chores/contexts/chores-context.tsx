@@ -18,6 +18,8 @@ interface ChoresContextValue {
   progress: IChoreProgress;
   currentView: ChoreViewFilter;
   setCurrentView: (view: ChoreViewFilter) => void;
+  selectedPersonId: string | "all";
+  setSelectedPersonId: (id: string | "all") => void;
   completeChore: (choreId: string) => Promise<void>;
   refreshChores: () => Promise<void>;
   isLoading: boolean;
@@ -50,6 +52,9 @@ export function ChoresProvider({
   const [chores, setChores] = useState<IChoreWithAssignee[]>(initialChores);
   const [progress, setProgress] = useState<IChoreProgress>(initialProgress);
   const [currentView, setCurrentView] = useState<ChoreViewFilter>("all");
+  const [selectedPersonId, setSelectedPersonId] = useState<string | "all">(
+    "all"
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [expandedChoreId, setExpandedChoreId] = useState<string | null>(null);
 
@@ -160,6 +165,8 @@ export function ChoresProvider({
     progress,
     currentView,
     setCurrentView,
+    selectedPersonId,
+    setSelectedPersonId,
     completeChore,
     refreshChores,
     isLoading,

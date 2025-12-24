@@ -79,6 +79,19 @@ export interface IRewardChartMessage {
 }
 
 // =============================================================================
+// CHILD CHART INFO (for person filter chips)
+// =============================================================================
+
+export interface ChildChartInfo {
+  id: string;
+  name: string;
+  avatarUrl?: string | null;
+  avatarColor?: string | null;
+  chartId: string | null;
+  totalStars: number;
+}
+
+// =============================================================================
 // VIEW MODELS
 // =============================================================================
 

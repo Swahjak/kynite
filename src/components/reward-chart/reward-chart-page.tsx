@@ -1,23 +1,43 @@
 "use client";
 
+import { useRouter, useSearchParams } from "next/navigation";
+import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { ChartHeader } from "./chart-header";
 import { WeeklyGrid } from "./weekly-grid";
 import { NextRewardCard, MessageCard } from "./bottom-cards";
-import { ChartSelector } from "./chart-selector";
 import { useRewardChart } from "./contexts/reward-chart-context";
 import { useInteractionMode } from "@/contexts/interaction-mode-context";
-import { useSearchParams } from "next/navigation";
-import { toast } from "sonner";
-import { useTranslations } from "next-intl";
+import { PersonFilterChips } from "@/components/wall-hub/shared/person-filter-chips";
 
 export function RewardChartPage() {
-  const { weekData, isLoading, error, familyId } = useRewardChart();
+  const { weekData, isLoading, error, familyId, allChildren, isManager } =
+    useRewardChart();
   const { mode } = useInteractionMode();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const t = useTranslations("rewardChart");
 
   const isManageMode = mode === "manage";
-  const selectedMemberId = searchParams.get("child");
+  const selectedMemberId = searchParams.get("child") || allChildren?.[0]?.id;
+
+  // Handle selecting a child's chart
+  const handleSelectChild = (childId: string | "all") => {
+    if (childId === "all") return; // We don't use "all" for reward charts
+
+    const child = allChildren?.find((c) => c.id === childId);
+    if (!child) return;
+
+    if (child.chartId) {
+      // Navigate to the child's chart
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("child", childId);
+      router.push(`?${params.toString()}`);
+    } else {
+      // Create chart for child without one
+      handleCreateChart(childId);
+    }
+  };
 
   // Handle chart creation for a child
   const handleCreateChart = async (memberId: string) => {
@@ -38,27 +58,12 @@ export function RewardChartPage() {
 
       toast.success(t("chartCreated"));
       // Refresh to show new chart
-      window.location.href = `?child=${memberId}`;
+      router.push(`?child=${memberId}`);
+      router.refresh();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t("chartError"));
     }
   };
-
-  // Build childCharts array from weekData
-  // Note: This is a simplified version. In a full implementation, you would fetch
-  // all family members and their charts. For now, we'll show the selector only if
-  // we have chart data (meaning we're in manage mode with access to family data).
-  const childCharts = weekData?.chart.member
-    ? [
-        {
-          memberId: weekData.chart.member.id,
-          memberName: weekData.chart.member.displayName || "Child",
-          memberAvatar: weekData.chart.member.avatarColor,
-          chartId: weekData.chart.id,
-          totalStars: weekData.chart.activeGoal?.starsCurrent || 0,
-        },
-      ]
-    : [];
 
   if (error) {
     return (
@@ -101,12 +106,13 @@ export function RewardChartPage() {
   return (
     <div className="flex-1 p-4 md:p-6 lg:p-8">
       <div className="mx-auto max-w-4xl space-y-6">
-        {/* Chart Selector - only show in manage mode and when there are children */}
-        {isManageMode && childCharts.length > 0 && (
-          <ChartSelector
-            charts={childCharts}
-            selectedMemberId={selectedMemberId}
-            onCreateChart={handleCreateChart}
+        {/* Person Filter Chips - only show for managers with multiple children */}
+        {isManager && allChildren && allChildren.length > 1 && (
+          <PersonFilterChips
+            people={allChildren}
+            selectedId={selectedMemberId || "all"}
+            onSelect={handleSelectChild}
+            showEveryone={false}
           />
         )}
 

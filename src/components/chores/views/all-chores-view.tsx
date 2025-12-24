@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { useChores } from "../contexts/chores-context";
 import { ChoreCard } from "../components/chore-card";
 import { sortChores } from "../helpers";
@@ -11,8 +12,14 @@ interface AllChoresViewProps {
 }
 
 export function AllChoresView({ onEdit, onDelete }: AllChoresViewProps) {
-  const { chores } = useChores();
-  const sortedChores = sortChores(chores);
+  const { chores, selectedPersonId } = useChores();
+
+  const filteredChores = useMemo(() => {
+    if (selectedPersonId === "all") return chores;
+    return chores.filter((c) => c.assignedToId === selectedPersonId);
+  }, [chores, selectedPersonId]);
+
+  const sortedChores = sortChores(filteredChores);
 
   if (sortedChores.length === 0) {
     return (

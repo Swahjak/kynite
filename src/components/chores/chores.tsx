@@ -7,9 +7,9 @@ import { ProgressCard } from "./components/progress-card";
 import { FilterTabs } from "./components/filter-tabs";
 import { Fab } from "./components/fab";
 import { AllChoresView } from "./views/all-chores-view";
-import { ByPersonView } from "./views/by-person-view";
 import { UrgentView } from "./views/urgent-view";
 import { ChoreDialog, DeleteChoreDialog } from "./dialogs";
+import { PersonFilterChips } from "@/components/wall-hub/shared/person-filter-chips";
 import type { IChoreWithAssignee } from "@/types/chore";
 
 interface ChoresProps {
@@ -17,8 +17,23 @@ interface ChoresProps {
 }
 
 export function Chores({ familyName }: ChoresProps) {
-  const { currentView, isLoading } = useChores();
+  const {
+    currentView,
+    isLoading,
+    members,
+    selectedPersonId,
+    setSelectedPersonId,
+  } = useChores();
   const { canCreate, canEdit } = useInteractionModeSafe();
+
+  // Map members to PersonChip format
+  const people = members.map((m) => ({
+    id: m.id,
+    name: m.displayName || m.user?.name || "",
+    avatarColor: m.avatarColor,
+    avatarUrl: m.user?.image,
+    avatarFallback: (m.displayName || m.user?.name || "?")[0],
+  }));
 
   // Dialog state
   const [choreDialogOpen, setChoreDialogOpen] = useState(false);
@@ -80,19 +95,20 @@ export function Chores({ familyName }: ChoresProps) {
       {/* Progress */}
       <ProgressCard />
 
-      {/* Filters */}
+      {/* Person Filter Chips */}
+      <PersonFilterChips
+        people={people}
+        selectedId={selectedPersonId}
+        onSelect={setSelectedPersonId}
+      />
+
+      {/* View Tabs */}
       <FilterTabs />
 
       {/* Chore List */}
       <div className={isLoading ? "pointer-events-none opacity-50" : ""}>
         {currentView === "all" && (
           <AllChoresView
-            onEdit={canEdit ? handleEdit : undefined}
-            onDelete={canEdit ? handleDelete : undefined}
-          />
-        )}
-        {currentView === "by-person" && (
-          <ByPersonView
             onEdit={canEdit ? handleEdit : undefined}
             onDelete={canEdit ? handleDelete : undefined}
           />

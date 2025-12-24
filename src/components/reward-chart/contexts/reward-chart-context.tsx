@@ -10,6 +10,7 @@ import type {
   UpdateTaskInput,
   CreateGoalInput,
   UpdateGoalInput,
+  ChildChartInfo,
 } from "../interfaces";
 
 interface RewardChartContextValue {
@@ -25,6 +26,7 @@ interface RewardChartContextValue {
   familyId: string;
   chartId: string;
   isManager: boolean;
+  allChildren?: ChildChartInfo[];
   // Task mutations
   createTask: (input: CreateTaskInput) => Promise<void>;
   updateTask: (taskId: string, input: UpdateTaskInput) => Promise<void>;
@@ -47,6 +49,7 @@ interface RewardChartProviderProps {
   chartId: string;
   initialData: WeeklyChartData | null;
   isManager?: boolean;
+  allChildren?: ChildChartInfo[];
 }
 
 export function RewardChartProvider({
@@ -55,6 +58,7 @@ export function RewardChartProvider({
   chartId,
   initialData,
   isManager = false,
+  allChildren,
 }: RewardChartProviderProps) {
   const [weekData, setWeekData] = useState<WeeklyChartData | null>(initialData);
   const [isLoading, setIsLoading] = useState(false);
@@ -276,6 +280,7 @@ export function RewardChartProvider({
     familyId,
     chartId,
     isManager,
+    allChildren,
     // Task mutations
     createTask,
     updateTask,

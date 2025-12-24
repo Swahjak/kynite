@@ -71,7 +71,7 @@ export interface IChoreStreak {
 // Filter Types
 // =============================================================================
 
-export type ChoreViewFilter = "all" | "by-person" | "urgent";
+export type ChoreViewFilter = "all" | "urgent";
 
 export interface ChoreFilters {
   status?: ChoreStatus;

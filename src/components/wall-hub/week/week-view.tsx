@@ -61,8 +61,8 @@ export function WeekView() {
       {/* Header with filters and navigation */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <PersonFilterChips
-          users={users}
-          selectedUserId={selectedUserId}
+          people={users}
+          selectedId={selectedUserId}
           onSelect={filterEventsBySelectedUser}
         />
         <div className="flex items-center gap-2">
