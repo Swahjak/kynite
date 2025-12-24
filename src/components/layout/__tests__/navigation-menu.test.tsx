@@ -17,6 +17,15 @@ vi.mock("@/i18n/navigation", () => ({
   usePathname: () => "/calendar",
 }));
 
+// Mock ProgressLink to avoid needing NavigationProgressProvider
+vi.mock("@/components/ui/progress-link", () => ({
+  ProgressLink: ({ children, href, ...props }: any) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+}));
+
 const messages = {
   Header: { brand: "Kynite", tagline: "Routines without the friction" },
   Menu: {
