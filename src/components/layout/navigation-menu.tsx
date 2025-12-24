@@ -10,7 +10,8 @@ import {
   Gift,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Link, usePathname } from "@/i18n/navigation";
+import { usePathname } from "@/i18n/navigation";
+import { ProgressLink } from "@/components/ui/progress-link";
 import { cn } from "@/lib/utils";
 import { useInteractionMode } from "@/contexts/interaction-mode-context";
 import { BrandArea } from "./brand-area";
@@ -74,7 +75,7 @@ export function NavigationMenu({ open, onOpenChange }: NavigationMenuProps) {
 
               return (
                 <li key={item.href}>
-                  <Link
+                  <ProgressLink
                     href={item.href}
                     onClick={() => onOpenChange(false)}
                     className={cn(
@@ -87,7 +88,7 @@ export function NavigationMenu({ open, onOpenChange }: NavigationMenuProps) {
                   >
                     <Icon className="size-5" />
                     {t(item.labelKey)}
-                  </Link>
+                  </ProgressLink>
                 </li>
               );
             })}
