@@ -17,6 +17,11 @@ vi.mock("../star-service", () => ({
   }),
 }));
 
+// Mock Pusher library
+vi.mock("@/lib/pusher", () => ({
+  broadcastToFamily: vi.fn(),
+}));
+
 describe("active-timer-service", () => {
   beforeEach(() => {
     vi.clearAllMocks();
