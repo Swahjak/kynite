@@ -15,8 +15,8 @@ export function AppShell({ children, isManager }: AppShellProps) {
   return (
     <div className="bg-background flex min-h-screen flex-col">
       <AppHeader isManager={isManager} onMenuToggle={() => setMenuOpen(true)} />
-      <div className="flex flex-1">
-        <main className="flex-1">{children}</main>
+      <div className="flex min-h-0 flex-1">
+        <main className="flex-1 overflow-hidden">{children}</main>
       </div>
       <NavigationMenu open={menuOpen} onOpenChange={setMenuOpen} />
     </div>
