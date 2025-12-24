@@ -17,6 +17,12 @@ export interface Timer {
   remainingSeconds: number;
   totalSeconds: number;
   category: string;
+  status: "running" | "paused" | "completed" | "expired" | "cancelled";
+  starReward: number;
+  alertMode: "none" | "completion" | "escalating";
+  cooldownSeconds: number | null;
+  assignedToId: string | null;
+  ownerDeviceId: string | null;
 }
 
 export interface FamilyMemberStar {

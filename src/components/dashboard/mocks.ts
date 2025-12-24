@@ -50,6 +50,12 @@ export const MOCK_TIMERS: Timer[] = [
     remainingSeconds: 1200, // 20 min
     totalSeconds: 1800, // 30 min
     category: "screen",
+    status: "running",
+    starReward: 0,
+    alertMode: "completion",
+    cooldownSeconds: null,
+    assignedToId: null,
+    ownerDeviceId: null,
   },
   {
     id: "t2",
@@ -58,6 +64,12 @@ export const MOCK_TIMERS: Timer[] = [
     remainingSeconds: 540, // 9 min
     totalSeconds: 900, // 15 min
     category: "chore",
+    status: "running",
+    starReward: 10,
+    alertMode: "completion",
+    cooldownSeconds: 60,
+    assignedToId: null,
+    ownerDeviceId: null,
   },
 ];
 
