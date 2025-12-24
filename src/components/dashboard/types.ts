@@ -58,6 +58,7 @@ export interface DashboardChore {
 }
 
 export interface DashboardData {
+  familyId: string;
   familyName: string;
   todaysEvents: DashboardEvent[];
   todaysChores: DashboardChore[];

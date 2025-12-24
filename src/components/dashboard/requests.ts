@@ -168,6 +168,7 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
   if (!family) {
     // User has no family - return empty dashboard
     return {
+      familyId: "",
       familyName: "",
       todaysEvents: [],
       todaysChores: [],
@@ -246,6 +247,7 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
     }));
 
     return {
+      familyId: family.id,
       familyName: family.name,
       todaysEvents: events
         .map((event) => mapEventToDashboardEvent(event, now))
@@ -342,6 +344,7 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
     .sort((a, b) => a.startTime.getTime() - b.startTime.getTime());
 
   return {
+    familyId: family.id,
     familyName: family.name,
     todaysEvents,
     todaysChores,
