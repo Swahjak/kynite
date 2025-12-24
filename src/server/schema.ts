@@ -125,6 +125,24 @@ export const familyInvites = pgTable("family_invites", {
   createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
 });
 
+/**
+ * Device Pairing Codes table - Short-lived codes for device pairing
+ */
+export const devicePairingCodes = pgTable("device_pairing_codes", {
+  id: text("id").primaryKey(),
+  familyId: text("family_id")
+    .notNull()
+    .references(() => families.id, { onDelete: "cascade" }),
+  code: text("code").notNull().unique(),
+  deviceName: text("device_name").notNull(),
+  createdById: text("created_by_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  expiresAt: timestamp("expires_at", { mode: "date" }).notNull(),
+  usedAt: timestamp("used_at", { mode: "date" }),
+  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+});
+
 // ============================================================================
 // Reward Charts
 // ============================================================================
@@ -513,6 +531,20 @@ export const familyInvitesRelations = relations(familyInvites, ({ one }) => ({
   }),
 }));
 
+export const devicePairingCodesRelations = relations(
+  devicePairingCodes,
+  ({ one }) => ({
+    family: one(families, {
+      fields: [devicePairingCodes.familyId],
+      references: [families.id],
+    }),
+    createdBy: one(users, {
+      fields: [devicePairingCodes.createdById],
+      references: [users.id],
+    }),
+  })
+);
+
 export const googleCalendarsRelations = relations(
   googleCalendars,
   ({ one }) => ({
@@ -752,6 +784,8 @@ export type FamilyMember = typeof familyMembers.$inferSelect;
 export type NewFamilyMember = typeof familyMembers.$inferInsert;
 export type FamilyInvite = typeof familyInvites.$inferSelect;
 export type NewFamilyInvite = typeof familyInvites.$inferInsert;
+export type DevicePairingCode = typeof devicePairingCodes.$inferSelect;
+export type NewDevicePairingCode = typeof devicePairingCodes.$inferInsert;
 export type GoogleCalendar = typeof googleCalendars.$inferSelect;
 export type NewGoogleCalendar = typeof googleCalendars.$inferInsert;
 export type GoogleCalendarChannel = typeof googleCalendarChannels.$inferSelect;

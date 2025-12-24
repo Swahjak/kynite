@@ -78,6 +78,13 @@
       "when": 1766608859108,
       "tag": "0010_supreme_rockslide",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1766608918296,
+      "tag": "0011_sloppy_dreadnoughts",
+      "breakpoints": true
     }
   ]
 }
