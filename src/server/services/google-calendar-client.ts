@@ -3,6 +3,8 @@ import type {
   GoogleEventsListResponse,
   GoogleCalendarEvent,
   GoogleApiError,
+  GoogleWatchRequest,
+  GoogleWatchResponse,
 } from "@/types/google-calendar";
 
 const CALENDAR_API_BASE = "https://www.googleapis.com/calendar/v3";
@@ -113,6 +115,32 @@ export class GoogleCalendarClient {
       `/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(eventId)}`,
       { method: "DELETE" }
     );
+  }
+
+  /**
+   * Watch a calendar for changes via push notifications
+   */
+  async watchEvents(
+    calendarId: string,
+    watchRequest: GoogleWatchRequest
+  ): Promise<GoogleWatchResponse> {
+    return this.fetch<GoogleWatchResponse>(
+      `/calendars/${encodeURIComponent(calendarId)}/events/watch`,
+      {
+        method: "POST",
+        body: JSON.stringify(watchRequest),
+      }
+    );
+  }
+
+  /**
+   * Stop receiving notifications for a channel
+   */
+  async stopChannel(channelId: string, resourceId: string): Promise<void> {
+    await this.fetch("/channels/stop", {
+      method: "POST",
+      body: JSON.stringify({ id: channelId, resourceId }),
+    });
   }
 }
 

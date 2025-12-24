@@ -78,3 +78,24 @@ export interface GoogleApiError {
 }
 
 export type SyncStatus = "synced" | "pending" | "conflict" | "error";
+
+export interface GoogleWatchRequest {
+  id: string;
+  type: "web_hook";
+  address: string;
+  token?: string;
+  expiration?: string;
+}
+
+export interface GoogleWatchResponse {
+  kind: "api#channel";
+  id: string;
+  resourceId: string;
+  resourceUri: string;
+  expiration: string;
+}
+
+export interface GoogleStopChannelRequest {
+  id: string;
+  resourceId: string;
+}
