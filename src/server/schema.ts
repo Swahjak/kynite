@@ -21,6 +21,7 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").notNull().default(false),
   image: text("image"),
+  type: text("type").notNull().default("human"), // 'human' | 'device'
   createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
 });
@@ -100,7 +101,7 @@ export const familyMembers = pgTable("family_members", {
   userId: text("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  role: text("role").notNull(), // 'manager' | 'participant' | 'caregiver'
+  role: text("role").notNull(), // 'manager' | 'participant' | 'caregiver' | 'device'
   displayName: text("display_name"),
   avatarColor: text("avatar_color"),
   createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
@@ -121,6 +122,24 @@ export const familyInvites = pgTable("family_invites", {
   expiresAt: timestamp("expires_at", { mode: "date" }),
   maxUses: integer("max_uses"),
   useCount: integer("use_count").notNull().default(0),
+  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+});
+
+/**
+ * Device Pairing Codes table - Short-lived codes for device pairing
+ */
+export const devicePairingCodes = pgTable("device_pairing_codes", {
+  id: text("id").primaryKey(),
+  familyId: text("family_id")
+    .notNull()
+    .references(() => families.id, { onDelete: "cascade" }),
+  code: text("code").notNull().unique(),
+  deviceName: text("device_name").notNull(),
+  createdById: text("created_by_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  expiresAt: timestamp("expires_at", { mode: "date" }).notNull(),
+  usedAt: timestamp("used_at", { mode: "date" }),
   createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
 });
 
@@ -512,6 +531,20 @@ export const familyInvitesRelations = relations(familyInvites, ({ one }) => ({
   }),
 }));
 
+export const devicePairingCodesRelations = relations(
+  devicePairingCodes,
+  ({ one }) => ({
+    family: one(families, {
+      fields: [devicePairingCodes.familyId],
+      references: [families.id],
+    }),
+    createdBy: one(users, {
+      fields: [devicePairingCodes.createdById],
+      references: [users.id],
+    }),
+  })
+);
+
 export const googleCalendarsRelations = relations(
   googleCalendars,
   ({ one }) => ({
@@ -751,6 +784,8 @@ export type FamilyMember = typeof familyMembers.$inferSelect;
 export type NewFamilyMember = typeof familyMembers.$inferInsert;
 export type FamilyInvite = typeof familyInvites.$inferSelect;
 export type NewFamilyInvite = typeof familyInvites.$inferInsert;
+export type DevicePairingCode = typeof devicePairingCodes.$inferSelect;
+export type NewDevicePairingCode = typeof devicePairingCodes.$inferInsert;
 export type GoogleCalendar = typeof googleCalendars.$inferSelect;
 export type NewGoogleCalendar = typeof googleCalendars.$inferInsert;
 export type GoogleCalendarChannel = typeof googleCalendarChannels.$inferSelect;

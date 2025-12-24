@@ -232,6 +232,52 @@
       "dueSoonBadge": "Bijna"
     }
   },
+  "DeviceDisconnected": {
+    "title": "Apparaat losgekoppeld",
+    "description": "Je sessie is verlopen of ingetrokken. Vraag een gezinsbeheerder om dit apparaat opnieuw te koppelen.",
+    "pairAgain": "Koppelingscode invoeren"
+  },
+  "DevicePairPage": {
+    "title": "Apparaat koppelen",
+    "description": "Voer de 6-cijferige code in die in je gezinsinstellingen wordt getoond",
+    "codePlaceholder": "000000",
+    "pair": "Apparaat koppelen",
+    "pairing": "Koppelen...",
+    "success": "Apparaat succesvol gekoppeld!",
+    "redirecting": "Doorsturen naar dashboard...",
+    "invalidCode": "Ongeldige of verlopen code",
+    "error": "Koppelen mislukt"
+  },
+  "DevicesPage": {
+    "title": "Apparaten",
+    "description": "Beheer wandschermen en tablets",
+    "addDevice": "Apparaat toevoegen",
+    "noDevices": "Nog geen apparaten gekoppeld",
+    "noDevicesDescription": "Voeg een wandtablet of scherm toe aan je gezinshub",
+    "pairedOn": "Gekoppeld",
+    "lastActive": "Laatst actief",
+    "active": "Actief",
+    "inactive": "Inactief",
+    "rename": "Hernoemen",
+    "remove": "Verwijderen",
+    "removeConfirmTitle": "Apparaat verwijderen",
+    "removeConfirmDescription": "Weet je zeker dat je {deviceName} wilt verwijderen? Het apparaat wordt losgekoppeld en moet opnieuw worden gekoppeld.",
+    "addDeviceDialog": {
+      "title": "Apparaat toevoegen",
+      "description": "Voer een naam in voor dit apparaat en voer de code in op de tablet",
+      "deviceName": "Apparaatnaam",
+      "deviceNamePlaceholder": "Keukentablet",
+      "generate": "Code genereren",
+      "code": "Koppelingscode",
+      "codeExpires": "Code verloopt over {minutes} minuten",
+      "done": "Klaar"
+    },
+    "renameDialog": {
+      "title": "Apparaat hernoemen",
+      "newName": "Nieuwe naam",
+      "save": "Opslaan"
+    }
+  },
   "Family": {
     "title": "Familie",
     "familyName": "Familienaam",
@@ -257,7 +303,8 @@
     "description": "Beheer je familie- en accountinstellingen",
     "tabs": {
       "family": "Familie",
-      "accounts": "Gekoppelde accounts"
+      "accounts": "Gekoppelde accounts",
+      "devices": "Apparaten"
     },
     "family": {
       "title": "Familie-instellingen",
