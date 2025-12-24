@@ -86,15 +86,13 @@ Real-time sync using Google Calendar push notifications:
 - **Renewal**: Hourly cron job renews channels expiring within 1 hour
 - **Fallback**: Polling still runs every 15 minutes for missed notifications
 
-**Environment Variables**:
+**URL Configuration**: Uses `BETTER_AUTH_URL` for webhook address (no additional env var needed).
 
-- `GOOGLE_WEBHOOK_BASE_URL`: Required in production (e.g., `https://app.vercel.app`)
-
-**Development**: Use ngrok or similar to expose local webhook endpoint:
+**Development**: Use ngrok to expose local webhook endpoint:
 
 ```bash
 ngrok http 3000
-# Set GOOGLE_WEBHOOK_BASE_URL=https://abc123.ngrok.io
+# Set BETTER_AUTH_URL=https://abc123.ngrok.io
 ```
 
 ### Environment Variables
@@ -104,8 +102,7 @@ Required in `.env.local`:
 ```
 DATABASE_URL=postgresql://...
 BETTER_AUTH_SECRET=<openssl rand -base64 32>
-BETTER_AUTH_URL=http://localhost:3000
-GOOGLE_WEBHOOK_BASE_URL=https://your-app.vercel.app  # Required for push notifications
+BETTER_AUTH_URL=http://localhost:3000  # Also used for Google Calendar webhooks
 ```
 
 ## Code Quality

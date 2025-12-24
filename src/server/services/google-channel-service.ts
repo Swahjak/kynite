@@ -6,7 +6,8 @@ import { randomBytes } from "crypto";
 import { getValidAccessToken } from "./google-token-service";
 import { GoogleCalendarClient } from "./google-calendar-client";
 
-const WEBHOOK_BASE_URL = process.env.GOOGLE_WEBHOOK_BASE_URL;
+// Use the app's base URL for webhooks (same as auth URL)
+const WEBHOOK_BASE_URL = process.env.BETTER_AUTH_URL;
 
 // Renew channels 1 hour before expiration
 const RENEWAL_BUFFER_MS = 60 * 60 * 1000;
@@ -28,7 +29,7 @@ export async function createWatchChannel(
   calendarId: string
 ): Promise<{ success: boolean; error?: string }> {
   if (!WEBHOOK_BASE_URL) {
-    return { success: false, error: "GOOGLE_WEBHOOK_BASE_URL not configured" };
+    return { success: false, error: "BETTER_AUTH_URL not configured" };
   }
 
   const calendar = await db

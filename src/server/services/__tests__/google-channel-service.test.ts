@@ -42,18 +42,18 @@ describe("google-channel-service", () => {
   });
 
   describe("createWatchChannel", () => {
-    it("returns error when GOOGLE_WEBHOOK_BASE_URL not configured", async () => {
+    it("returns error when BETTER_AUTH_URL not configured", async () => {
       // Dynamically import after mocks are set up
-      const originalEnv = process.env.GOOGLE_WEBHOOK_BASE_URL;
-      delete process.env.GOOGLE_WEBHOOK_BASE_URL;
+      const originalEnv = process.env.BETTER_AUTH_URL;
+      delete process.env.BETTER_AUTH_URL;
 
       const { createWatchChannel } = await import("../google-channel-service");
       const result = await createWatchChannel("cal-123");
 
       expect(result.success).toBe(false);
-      expect(result.error).toContain("GOOGLE_WEBHOOK_BASE_URL");
+      expect(result.error).toContain("BETTER_AUTH_URL");
 
-      process.env.GOOGLE_WEBHOOK_BASE_URL = originalEnv;
+      process.env.BETTER_AUTH_URL = originalEnv;
     });
   });
 
