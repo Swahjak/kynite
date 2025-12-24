@@ -28,9 +28,32 @@ export function TodayView() {
         />
       </div>
 
-      {/* Person columns grid */}
-      <div className="min-h-0 flex-1 overflow-x-auto">
-        <div className="grid min-w-[600px] grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {/* Mobile view - horizontal scroll with snap */}
+      <div
+        className="min-h-0 flex-1 snap-x snap-mandatory overflow-x-auto md:hidden"
+        role="region"
+        aria-label="Today view - swipe to navigate between people"
+      >
+        <div className="flex h-full gap-3 px-1">
+          {displayedUsers.map((user) => (
+            <div
+              key={user.id}
+              className="h-full w-72 flex-shrink-0 snap-center"
+            >
+              <PersonColumn
+                user={user}
+                events={events}
+                chores={chores}
+                onCompleteChore={completeChore}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Desktop view - grid */}
+      <div className="hidden min-h-0 flex-1 overflow-x-auto md:block">
+        <div className="grid min-w-[600px] grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-4">
           {displayedUsers.map((user) => (
             <PersonColumn
               key={user.id}
