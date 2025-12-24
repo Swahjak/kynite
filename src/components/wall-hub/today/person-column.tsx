@@ -2,10 +2,10 @@
 
 import { useMemo } from "react";
 import { isToday, parseISO, compareAsc } from "date-fns";
+import { useTranslations } from "next-intl";
 import { PersonHeader } from "@/components/wall-hub/shared/person-header";
 import { ScheduleCard } from "@/components/wall-hub/shared/schedule-card";
 import { TaskCheckbox } from "@/components/wall-hub/shared/task-checkbox";
-import { cn } from "@/lib/utils";
 import type { IEvent, IUser } from "@/components/calendar/interfaces";
 import type { IChoreWithAssignee } from "@/types/chore";
 
@@ -14,7 +14,6 @@ interface PersonColumnProps {
   events: IEvent[];
   chores: IChoreWithAssignee[];
   onCompleteChore: (choreId: string) => void;
-  isHighlighted?: boolean;
 }
 
 export function PersonColumn({
@@ -22,8 +21,8 @@ export function PersonColumn({
   events,
   chores,
   onCompleteChore,
-  isHighlighted = true,
 }: PersonColumnProps) {
+  const t = useTranslations("WallHub");
   // Filter events for today that include this user
   const todayEvents = useMemo(() => {
     return events
@@ -43,13 +42,8 @@ export function PersonColumn({
 
   return (
     <div className="flex flex-col gap-3">
-      <PersonHeader user={user} isHighlighted={isHighlighted} />
-      <div
-        className={cn(
-          "flex flex-1 flex-col gap-2 rounded-xl p-3",
-          isHighlighted ? "bg-primary/5 dark:bg-primary/10" : "bg-muted/30"
-        )}
-      >
+      <PersonHeader user={user} />
+      <div className="bg-muted/30 flex flex-1 flex-col gap-2 rounded-xl p-3">
         {todayEvents.map((event) => (
           <ScheduleCard key={event.id} event={event} showNowBadge />
         ))}
@@ -66,7 +60,7 @@ export function PersonColumn({
         )}
         {hasNoContent && (
           <div className="text-muted-foreground flex flex-1 items-center justify-center text-xs">
-            No events
+            {t("noEvents")}
           </div>
         )}
       </div>

@@ -180,11 +180,7 @@
     "today": "Today",
     "week": "Week",
     "calendar": "Calendar",
-    "schedule": "Schedule",
-    "tasks": "Tasks",
-    "freeDay": "Free Day!",
-    "noScheduledEvents": "No scheduled events",
-    "done": "Done"
+    "noEvents": "No events"
   },
   "DashboardPage": {
     "greeting": {
