@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -15,10 +16,27 @@ interface TimerCardProps {
 export function TimerCard({ timer }: TimerCardProps) {
   const { mode } = useInteractionMode();
   const { pauseTimer, extendTimer } = useDashboard();
+  const [remaining, setRemaining] = useState(timer.remainingSeconds);
 
-  const minutes = Math.floor(timer.remainingSeconds / 60);
-  const seconds = timer.remainingSeconds % 60;
-  const progress = (timer.remainingSeconds / timer.totalSeconds) * 100;
+  // Sync with server value when it changes
+  useEffect(() => {
+    setRemaining(timer.remainingSeconds);
+  }, [timer.remainingSeconds]);
+
+  // Local countdown for smooth display
+  useEffect(() => {
+    if (timer.status !== "running") return;
+
+    const interval = setInterval(() => {
+      setRemaining((prev) => Math.max(0, prev - 1));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [timer.status]);
+
+  const minutes = Math.floor(remaining / 60);
+  const seconds = remaining % 60;
+  const progress = (remaining / timer.totalSeconds) * 100;
 
   return (
     <Card>
