@@ -53,19 +53,19 @@ describe("updateMemberSchema", () => {
       expect(result.success).toBe(true);
     });
 
-    it("rejects strings over 10KB (10000 chars)", () => {
+    it("rejects strings over 20KB (20000 chars)", () => {
       const result = updateMemberSchema.safeParse({
-        avatarSvg: "a".repeat(10001),
+        avatarSvg: "a".repeat(20001),
       });
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].message).toContain("10KB");
+        expect(result.error.issues[0].message).toContain("20KB");
       }
     });
 
-    it("accepts strings at exactly 10000 chars", () => {
+    it("accepts strings at exactly 20000 chars", () => {
       const result = updateMemberSchema.safeParse({
-        avatarSvg: "a".repeat(10000),
+        avatarSvg: "a".repeat(20000),
       });
       expect(result.success).toBe(true);
     });

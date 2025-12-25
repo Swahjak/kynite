@@ -33,7 +33,7 @@ export const updateMemberSchema = z.object({
     .nullable(),
   avatarSvg: z
     .string()
-    .max(10000, "Avatar SVG must be smaller than 10KB")
+    .max(20000, "Avatar SVG must be smaller than 20KB")
     .optional()
     .nullable(),
   role: z.enum(FAMILY_MEMBER_ROLES as [string, ...string[]]).optional(),

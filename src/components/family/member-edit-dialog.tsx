@@ -53,7 +53,7 @@ const roleLabels: Record<FamilyMemberRole, string> = {
   child: "Child",
 };
 
-const MAX_FILE_SIZE = 10 * 1024; // 10KB
+const MAX_FILE_SIZE = 20 * 1024; // 20KB
 
 export function MemberEditDialog({
   member,

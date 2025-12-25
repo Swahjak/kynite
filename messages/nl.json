@@ -304,7 +304,7 @@
       "upload": "Avatar uploaden",
       "remove": "Avatar verwijderen",
       "createAt": "Maak je avatar op getavataaars.com",
-      "fileTooLarge": "Bestand moet kleiner zijn dan 10KB",
+      "fileTooLarge": "Bestand moet kleiner zijn dan 20KB",
       "invalidFormat": "Alleen SVG-bestanden zijn toegestaan"
     },
     "roles": {
