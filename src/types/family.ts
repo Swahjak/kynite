@@ -4,7 +4,8 @@ export type FamilyMemberRole =
   | "manager"
   | "participant"
   | "caregiver"
-  | "device";
+  | "device"
+  | "child";
 
 export type AvatarColor =
   | "blue"
@@ -31,6 +32,7 @@ export const FAMILY_MEMBER_ROLES: FamilyMemberRole[] = [
   "manager",
   "participant",
   "caregiver",
+  "child",
 ];
 
 export interface FamilyMemberWithUser {
