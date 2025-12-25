@@ -21,15 +21,11 @@ const colorClasses = {
   },
 } as const;
 
-const features: Array<{
-  key: string;
-  icon: LucideIcon;
-  color: keyof typeof colorClasses;
-}> = [
-  { key: "calendar", icon: CalendarDays, color: "primary" },
-  { key: "routines", icon: Gamepad2, color: "purple" },
-  { key: "meals", icon: UtensilsCrossed, color: "orange" },
-];
+const features = [
+  { key: "calendar" as const, icon: CalendarDays, color: "primary" as const },
+  { key: "routines" as const, icon: Gamepad2, color: "purple" as const },
+  { key: "meals" as const, icon: UtensilsCrossed, color: "orange" as const },
+] as const;
 
 export function FeaturesSection() {
   const t = useTranslations("HomePage.features");
