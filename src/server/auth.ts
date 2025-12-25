@@ -103,6 +103,11 @@ export const auth = betterAuth({
       enabled: true,
       maxAge: 60 * 5, // 5 minute cache
     },
+    cookie: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax" as const,
+    },
   },
 
   baseURL: process.env.BETTER_AUTH_URL,
