@@ -1,3 +1,20 @@
+import type { LucideIcon } from "lucide-react";
+import {
+  Backpack,
+  Bed,
+  BookOpen,
+  Dumbbell,
+  GraduationCap,
+  Music,
+  PawPrint,
+  Shirt,
+  ShowerHead,
+  Smile,
+  Sparkles,
+  Utensils,
+  HelpCircle,
+} from "lucide-react";
+
 export const ICON_COLORS = {
   blue: {
     bg: "bg-blue-50",
@@ -51,31 +68,58 @@ export const ICON_COLORS = {
 
 export type IconColorKey = keyof typeof ICON_COLORS;
 
-export const TASK_ICONS = [
-  { icon: "dentistry", label: "Brush Teeth" },
-  { icon: "bed", label: "Make Bed" },
-  { icon: "restaurant", label: "Eat/Table" },
-  { icon: "menu_book", label: "Reading" },
-  { icon: "checkroom", label: "Clothes/PJs" },
-  { icon: "music_note", label: "Practice Music" },
-  { icon: "pets", label: "Pet Care" },
-  { icon: "school", label: "Homework" },
-  { icon: "shower", label: "Shower/Bath" },
-  { icon: "backpack", label: "Pack Bag" },
-  { icon: "fitness_center", label: "Exercise" },
-  { icon: "cleaning_services", label: "Clean Room" },
-] as const;
+export interface TaskIconOption {
+  icon: LucideIcon;
+  key: string;
+  label: string;
+}
+
+export const TASK_ICONS: TaskIconOption[] = [
+  { icon: Smile, key: "smile", label: "Brush Teeth" },
+  { icon: Bed, key: "bed", label: "Make Bed" },
+  { icon: Utensils, key: "utensils", label: "Eat/Table" },
+  { icon: BookOpen, key: "book-open", label: "Reading" },
+  { icon: Shirt, key: "shirt", label: "Clothes/PJs" },
+  { icon: Music, key: "music", label: "Practice Music" },
+  { icon: PawPrint, key: "paw-print", label: "Pet Care" },
+  { icon: GraduationCap, key: "graduation-cap", label: "Homework" },
+  { icon: ShowerHead, key: "shower-head", label: "Shower/Bath" },
+  { icon: Backpack, key: "backpack", label: "Pack Bag" },
+  { icon: Dumbbell, key: "dumbbell", label: "Exercise" },
+  { icon: Sparkles, key: "sparkles", label: "Clean Room" },
+];
+
+// Legacy Material Symbols name to new key mapping
+const LEGACY_ICON_MAP: Record<string, string> = {
+  dentistry: "smile",
+  restaurant: "utensils",
+  menu_book: "book-open",
+  checkroom: "shirt",
+  music_note: "music",
+  pets: "paw-print",
+  school: "graduation-cap",
+  shower: "shower-head",
+  fitness_center: "dumbbell",
+  cleaning_services: "sparkles",
+};
+
+/** Get icon component by key, with legacy Material Symbols fallback */
+export function getTaskIconByKey(iconKey: string): LucideIcon {
+  const normalizedKey = LEGACY_ICON_MAP[iconKey] ?? iconKey;
+  const found = TASK_ICONS.find((item) => item.key === normalizedKey);
+  return found?.icon ?? HelpCircle;
+}
 
 export const DEFAULT_TASKS = [
   {
     title: "Brush Teeth AM",
-    icon: "dentistry",
+    icon: "smile",
     iconColor: "blue",
     daysOfWeek: [1, 2, 3, 4, 5, 6, 0],
   },
   {
     title: "Brush Teeth PM",
-    icon: "dentistry",
+    icon: "smile",
     iconColor: "blue",
     daysOfWeek: [1, 2, 3, 4, 5, 6, 0],
   },
@@ -87,13 +131,13 @@ export const DEFAULT_TASKS = [
   },
   {
     title: "Read 15 Minutes",
-    icon: "menu_book",
+    icon: "book-open",
     iconColor: "orange",
     daysOfWeek: [1, 2, 3, 4, 5, 6, 0],
   },
   {
     title: "PJs On",
-    icon: "checkroom",
+    icon: "shirt",
     iconColor: "pink",
     daysOfWeek: [1, 2, 3, 4, 5, 6, 0],
   },
