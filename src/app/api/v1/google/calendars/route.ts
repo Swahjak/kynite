@@ -6,32 +6,21 @@ import { GoogleCalendarClient } from "@/server/services/google-calendar-client";
 import { db } from "@/server/db";
 import { accounts } from "@/server/schema";
 import { eq, and } from "drizzle-orm";
+import { Errors } from "@/lib/errors";
 
 // GET /api/v1/google/calendars?accountId=xxx
 export async function GET(request: Request) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session?.user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
-        },
-        { status: 401 }
-      );
+      return Errors.unauthorized();
     }
 
     const { searchParams } = new URL(request.url);
     const accountId = searchParams.get("accountId");
 
     if (!accountId) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "BAD_REQUEST", message: "accountId required" },
-        },
-        { status: 400 }
-      );
+      return Errors.badRequest({ message: "accountId required" });
     }
 
     // Verify account belongs to user
@@ -44,24 +33,12 @@ export async function GET(request: Request) {
       .limit(1);
 
     if (account.length === 0) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "NOT_FOUND", message: "Account not found" },
-        },
-        { status: 404 }
-      );
+      return Errors.notFound("Account");
     }
 
     const accessToken = await getValidAccessToken(accountId);
     if (!accessToken) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "TOKEN_ERROR", message: "Could not get valid token" },
-        },
-        { status: 401 }
-      );
+      return Errors.unauthorized({ reason: "Could not get valid token" });
     }
 
     const client = new GoogleCalendarClient(accessToken);
@@ -81,12 +58,6 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     console.error("Error fetching Google calendars:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: { code: "INTERNAL_ERROR", message: "Failed to fetch calendars" },
-      },
-      { status: 500 }
-    );
+    return Errors.googleError(error);
   }
 }

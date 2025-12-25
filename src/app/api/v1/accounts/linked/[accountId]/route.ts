@@ -4,6 +4,7 @@ import { auth } from "@/server/auth";
 import { db } from "@/server/db";
 import { accounts } from "@/server/schema";
 import { and, eq } from "drizzle-orm";
+import { Errors } from "@/lib/errors";
 import type { AccountOperationResponse } from "@/types/accounts";
 
 type RouteParams = {
@@ -23,13 +24,7 @@ export async function DELETE(
     });
 
     if (!session?.user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
-        },
-        { status: 401 }
-      );
+      return Errors.unauthorized();
     }
 
     // Verify the account belongs to this user and is a Google account
@@ -46,13 +41,7 @@ export async function DELETE(
       .limit(1);
 
     if (existingAccount.length === 0) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "NOT_FOUND", message: "Account not found" },
-        },
-        { status: 404 }
-      );
+      return Errors.notFound("Account");
     }
 
     // Prevent unlinking the only Google account
@@ -67,16 +56,9 @@ export async function DELETE(
       );
 
     if (googleAccountCount.length <= 1) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "CANNOT_UNLINK_PRIMARY",
-            message: "Cannot unlink your only Google account",
-          },
-        },
-        { status: 400 }
-      );
+      return Errors.validation({
+        reason: "Cannot unlink your only Google account",
+      });
     }
 
     // Delete the linked account
@@ -92,12 +74,6 @@ export async function DELETE(
     });
   } catch (error) {
     console.error("Error unlinking account:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: { code: "INTERNAL_ERROR", message: "Failed to unlink account" },
-      },
-      { status: 500 }
-    );
+    return Errors.internal(error);
   }
 }

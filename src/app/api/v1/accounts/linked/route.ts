@@ -4,6 +4,7 @@ import { auth } from "@/server/auth";
 import { db } from "@/server/db";
 import { accounts } from "@/server/schema";
 import { eq } from "drizzle-orm";
+import { Errors } from "@/lib/errors";
 import type { LinkedAccountsResponse } from "@/types/accounts";
 
 // GET /api/v1/accounts/linked - List linked Google accounts
@@ -14,13 +15,7 @@ export async function GET(): Promise<NextResponse<LinkedAccountsResponse>> {
     });
 
     if (!session?.user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
-        },
-        { status: 401 }
-      );
+      return Errors.unauthorized();
     }
 
     const linkedAccounts = await db
@@ -53,12 +48,6 @@ export async function GET(): Promise<NextResponse<LinkedAccountsResponse>> {
     });
   } catch (error) {
     console.error("Error fetching linked accounts:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: { code: "INTERNAL_ERROR", message: "Failed to fetch accounts" },
-      },
-      { status: 500 }
-    );
+    return Errors.internal(error);
   }
 }
