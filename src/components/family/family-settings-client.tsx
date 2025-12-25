@@ -29,7 +29,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { FamilyMemberCard } from "./family-member-card";
 import { InviteLinkGenerator } from "./invite-link-generator";
-import { Pencil, Save, X, Loader2 } from "lucide-react";
+import { AddChildDialog } from "./add-child-dialog";
+import { Pencil, Save, X, Loader2, UserPlus } from "lucide-react";
 
 interface FamilySettingsClientProps {
   family: Family & { currentUserRole: FamilyMemberRole };
@@ -51,6 +52,7 @@ export function FamilySettingsClient({
   const [isEditingName, setIsEditingName] = useState(false);
   const [familyName, setFamilyName] = useState(family.name);
   const [isSaving, setIsSaving] = useState(false);
+  const [isAddChildOpen, setIsAddChildOpen] = useState(false);
 
   async function handleSaveName() {
     if (!familyName.trim()) {
@@ -161,6 +163,10 @@ export function FamilySettingsClient({
     }
   }
 
+  function handleChildCreated() {
+    router.refresh();
+  }
+
   return (
     <div className="space-y-6">
       {/* Family Details */}
@@ -223,15 +229,28 @@ export function FamilySettingsClient({
 
       {/* Members */}
       <Card>
-        <CardHeader>
-          <CardTitle>Members ({members.length})</CardTitle>
-          <CardDescription>Manage your family members</CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Members ({members.length})</CardTitle>
+            <CardDescription>Manage your family members</CardDescription>
+          </div>
+          {isManager && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsAddChildOpen(true)}
+            >
+              <UserPlus className="mr-2 h-4 w-4" />
+              Add Child
+            </Button>
+          )}
         </CardHeader>
         <CardContent className="space-y-4">
           {members.map((member) => (
             <FamilyMemberCard
               key={member.id}
               member={member}
+              familyId={family.id}
               isCurrentUser={member.userId === currentUserId}
               canEdit={isManager || member.userId === currentUserId}
               canRemove={isManager && member.userId !== currentUserId}
@@ -287,6 +306,14 @@ export function FamilySettingsClient({
           </AlertDialog>
         </CardContent>
       </Card>
+
+      {/* Add Child Dialog */}
+      <AddChildDialog
+        familyId={family.id}
+        open={isAddChildOpen}
+        onOpenChange={setIsAddChildOpen}
+        onSuccess={handleChildCreated}
+      />
     </div>
   );
 }

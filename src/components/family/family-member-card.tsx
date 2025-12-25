@@ -23,10 +23,12 @@ import {
 import { RoleBadge } from "./role-badge";
 import { FamilyAvatar } from "./family-avatar";
 import { MemberEditDialog } from "./member-edit-dialog";
-import { Pencil, Trash2 } from "lucide-react";
+import { UpgradeTokenDialog } from "./upgrade-token-dialog";
+import { Pencil, Trash2, Link } from "lucide-react";
 
 interface FamilyMemberCardProps {
   member: FamilyMemberWithUser;
+  familyId: string;
   isCurrentUser: boolean;
   canEdit: boolean;
   canRemove: boolean;
@@ -41,6 +43,7 @@ interface FamilyMemberCardProps {
 
 export function FamilyMemberCard({
   member,
+  familyId,
   isCurrentUser,
   canEdit,
   canRemove,
@@ -49,6 +52,9 @@ export function FamilyMemberCard({
   onRemove,
 }: FamilyMemberCardProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
+
+  const isChildMember = member.role === "child";
 
   const displayName = member.displayName || member.user.name;
 
@@ -76,6 +82,17 @@ export function FamilyMemberCard({
       </div>
 
       <div className="flex items-center gap-1">
+        {isChildMember && canChangeRole && (
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => setIsUpgradeDialogOpen(true)}
+            title="Generate account link"
+          >
+            <Link className="h-4 w-4" />
+          </Button>
+        )}
+
         {canEdit && (
           <Button
             size="icon"
@@ -116,6 +133,16 @@ export function FamilyMemberCard({
         onOpenChange={setIsEditDialogOpen}
         onSave={onUpdate}
       />
+
+      {isChildMember && (
+        <UpgradeTokenDialog
+          familyId={familyId}
+          childMemberId={member.id}
+          childName={displayName}
+          open={isUpgradeDialogOpen}
+          onOpenChange={setIsUpgradeDialogOpen}
+        />
+      )}
     </div>
   );
 }
