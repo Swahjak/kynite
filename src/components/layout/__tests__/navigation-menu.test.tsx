@@ -1,11 +1,7 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { NavigationMenu } from "../navigation-menu";
-import {
-  InteractionModeProvider,
-  type InteractionMode,
-} from "@/contexts/interaction-mode-context";
 
 // Mock next-intl navigation
 vi.mock("@/i18n/navigation", () => ({
@@ -26,6 +22,11 @@ vi.mock("@/components/ui/progress-link", () => ({
   ),
 }));
 
+// Mock useIsManager hook
+vi.mock("@/hooks/use-is-manager", () => ({
+  useIsManager: vi.fn(() => true),
+}));
+
 const messages = {
   Header: { brand: "Kynite", tagline: "Routines without the friction" },
   Menu: {
@@ -39,19 +40,23 @@ const messages = {
   },
 };
 
-function renderWithProviders(
-  ui: React.ReactElement,
-  mode: InteractionMode = "manage"
-) {
+function renderWithProviders(ui: React.ReactElement) {
   return render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <InteractionModeProvider initialMode={mode}>{ui}</InteractionModeProvider>
+      {ui}
     </NextIntlClientProvider>
   );
 }
 
 describe("NavigationMenu", () => {
-  it("renders all items in manage mode", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("renders all items when user is manager", async () => {
+    const { useIsManager } = await import("@/hooks/use-is-manager");
+    vi.mocked(useIsManager).mockReturnValue(true);
+
     renderWithProviders(<NavigationMenu open={true} onOpenChange={() => {}} />);
 
     expect(screen.getByText("Dashboard")).toBeInTheDocument();
@@ -63,11 +68,11 @@ describe("NavigationMenu", () => {
     expect(screen.getByText("Help")).toBeInTheDocument();
   });
 
-  it("hides chores and settings in wall mode", () => {
-    renderWithProviders(
-      <NavigationMenu open={true} onOpenChange={() => {}} />,
-      "wall"
-    );
+  it("hides chores and settings when user is not manager", async () => {
+    const { useIsManager } = await import("@/hooks/use-is-manager");
+    vi.mocked(useIsManager).mockReturnValue(false);
+
+    renderWithProviders(<NavigationMenu open={true} onOpenChange={() => {}} />);
 
     expect(screen.getByText("Dashboard")).toBeInTheDocument();
     expect(screen.getByText("Calendar")).toBeInTheDocument();

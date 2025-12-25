@@ -1,8 +1,7 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { AppHeader } from "../app-header";
-import { InteractionModeProvider } from "@/contexts/interaction-mode-context";
 
 // Mock next-intl navigation
 vi.mock("@/i18n/navigation", () => ({
@@ -32,6 +31,11 @@ vi.mock("@/lib/auth-client", () => ({
   }),
 }));
 
+// Mock useIsManager hook
+vi.mock("@/hooks/use-is-manager", () => ({
+  useIsManager: vi.fn(() => true),
+}));
+
 const messages = {
   Header: {
     brand: "Kynite",
@@ -46,34 +50,42 @@ const messages = {
   },
 };
 
-function renderWithProviders(mode: "wall" | "manage" = "manage") {
+function renderWithProviders() {
   return render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <InteractionModeProvider initialMode={mode}>
-        <AppHeader />
-      </InteractionModeProvider>
+      <AppHeader />
     </NextIntlClientProvider>
   );
 }
 
 describe("AppHeader", () => {
-  it("shows avatar in manage mode", () => {
-    renderWithProviders("manage");
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("shows avatar when user is manager", async () => {
+    const { useIsManager } = await import("@/hooks/use-is-manager");
+    vi.mocked(useIsManager).mockReturnValue(true);
+
+    renderWithProviders();
     expect(screen.getByTestId("user-avatar")).toBeInTheDocument();
   });
 
-  it("hides avatar in wall mode", () => {
-    renderWithProviders("wall");
+  it("hides avatar when user is not manager", async () => {
+    const { useIsManager } = await import("@/hooks/use-is-manager");
+    vi.mocked(useIsManager).mockReturnValue(false);
+
+    renderWithProviders();
     expect(screen.queryByTestId("user-avatar")).not.toBeInTheDocument();
   });
 
   it("renders brand area", () => {
-    renderWithProviders("manage");
+    renderWithProviders();
     expect(screen.getByText("Kynite")).toBeInTheDocument();
   });
 
   it("renders menu button", () => {
-    renderWithProviders("manage");
+    renderWithProviders();
     expect(
       screen.getByRole("button", { name: /open menu/i })
     ).toBeInTheDocument();

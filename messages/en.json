@@ -172,10 +172,7 @@
   "Header": {
     "brand": "Kynite",
     "tagline": "Routines without the friction",
-    "addEvent": "Add Event",
-    "switchToManage": "Switch to manage mode",
-    "switchToWall": "Switch to wall display mode",
-    "manageMode": "Edit"
+    "addEvent": "Add Event"
   },
   "Menu": {
     "dashboard": "Dashboard",

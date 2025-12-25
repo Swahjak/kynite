@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useChores } from "./contexts/chores-context";
-import { useInteractionModeSafe } from "@/components/calendar/contexts/interaction-mode-context";
+import { useIsManager } from "@/hooks/use-is-manager";
 import { ProgressCard } from "./components/progress-card";
 import { FilterTabs } from "./components/filter-tabs";
 import { Fab } from "./components/fab";
@@ -20,7 +20,9 @@ export function Chores() {
     selectedPersonId,
     setSelectedPersonId,
   } = useChores();
-  const { canCreate, canEdit } = useInteractionModeSafe();
+  const isManager = useIsManager();
+  const canCreate = isManager;
+  const canEdit = isManager;
 
   // Map members to PersonChip format
   const people = members.map((m) => ({

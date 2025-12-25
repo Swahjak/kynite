@@ -172,10 +172,7 @@
   "Header": {
     "brand": "Kynite",
     "tagline": "Routines zonder wrijving",
-    "addEvent": "Afspraak toevoegen",
-    "switchToManage": "Schakel naar beheermodus",
-    "switchToWall": "Schakel naar wandweergave",
-    "manageMode": "Bewerken"
+    "addEvent": "Afspraak toevoegen"
   },
   "Menu": {
     "dashboard": "Dashboard",
