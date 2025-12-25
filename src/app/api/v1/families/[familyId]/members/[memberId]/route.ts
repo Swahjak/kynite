@@ -14,7 +14,6 @@ import {
 } from "@/server/services/family-service";
 import type { FamilyMemberRole } from "@/types/family";
 import { Errors } from "@/lib/errors";
-import { sanitizeSvg, isValidSvg } from "@/lib/svg-sanitizer";
 
 type Params = { params: Promise<{ familyId: string; memberId: string }> };
 
@@ -64,6 +63,9 @@ export async function PATCH(request: Request, { params }: Params) {
     // Sanitize SVG if provided
     let sanitizedSvg: string | null | undefined = parsed.data.avatarSvg;
     if (parsed.data.avatarSvg) {
+      // Dynamic import to avoid ESM compatibility issues during build
+      const { isValidSvg, sanitizeSvg } = await import("@/lib/svg-sanitizer");
+
       if (!isValidSvg(parsed.data.avatarSvg)) {
         return Errors.validation({
           avatarSvg: "Invalid SVG format",
