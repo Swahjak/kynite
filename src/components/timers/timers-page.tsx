@@ -1,6 +1,5 @@
 "use client";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
@@ -16,13 +15,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { TimerTemplate } from "@/server/schema";
-
-async function fetchTemplates(): Promise<TimerTemplate[]> {
-  const res = await fetch("/api/v1/timers/templates");
-  const data = await res.json();
-  if (!data.success) throw new Error(data.error.message);
-  return data.data.templates;
-}
+import {
+  useTimerTemplates,
+  useStartTimer,
+  useDeleteTimerTemplate,
+} from "@/hooks/use-timers";
 
 export function TimersPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -30,44 +27,37 @@ export function TimersPage() {
     null
   );
   const [deviceId, setDeviceId] = useState("");
-  const queryClient = useQueryClient();
   const isManager = useIsManager();
 
   useEffect(() => {
     setDeviceId(getDeviceId());
   }, []);
 
-  const { data: templates = [], refetch } = useQuery({
-    queryKey: ["timerTemplates"],
-    queryFn: fetchTemplates,
-  });
+  // React Query hooks
+  const { data: templates = [] } = useTimerTemplates();
+  const startTimerMutation = useStartTimer();
+  const deleteTemplateMutation = useDeleteTimerTemplate();
 
-  const handleStartTimer = async (templateId: string) => {
-    await fetch("/api/v1/timers/active", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        templateId,
-        assignedToId: "",
-        deviceId,
-      }),
+  const handleStartTimer = (templateId: string) => {
+    startTimerMutation.mutate({
+      templateId,
+      assignedToId: "",
+      deviceId,
     });
-    queryClient.invalidateQueries({ queryKey: ["activeTimers"] });
   };
 
   const handleCreateSuccess = () => {
     setIsCreateOpen(false);
-    refetch();
+    // No need to refetch - useCreateTimerTemplate hook invalidates the query
   };
 
   const handleEditSuccess = () => {
     setEditingTemplate(null);
-    refetch();
+    // No need to refetch - useUpdateTimerTemplate hook invalidates the query
   };
 
-  const handleDelete = async (templateId: string) => {
-    await fetch(`/api/v1/timers/templates/${templateId}`, { method: "DELETE" });
-    refetch();
+  const handleDelete = (templateId: string) => {
+    deleteTemplateMutation.mutate(templateId);
   };
 
   return (
