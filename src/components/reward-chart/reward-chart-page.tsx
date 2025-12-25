@@ -3,7 +3,6 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
-import { ChartHeader } from "./chart-header";
 import { WeeklyGrid } from "./weekly-grid";
 import { NextRewardCard, MessageCard } from "./bottom-cards";
 import { useRewardChart } from "./contexts/reward-chart-context";
@@ -116,9 +115,6 @@ export function RewardChartPage() {
             showEveryone={false}
           />
         )}
-
-        {/* Header with Goal Progress */}
-        <ChartHeader chart={chart} />
 
         {/* Weekly Grid */}
         <WeeklyGrid
