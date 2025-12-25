@@ -2,11 +2,12 @@ import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 import LinkAccountClient from "./link-account-client";
 import { Loader2 } from "lucide-react";
+import type { Locale } from "@/i18n/routing";
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ locale: string }>;
+  params: Promise<{ locale: Locale }>;
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "LinkAccount" });
