@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
-import { getSession } from "@/lib/get-session";
+import { getSession, isDeviceSession } from "@/lib/get-session";
 import {
   getUserFamily,
   getFamilyMembers,
@@ -20,6 +20,11 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
 
   if (!session?.user) {
     redirect(`/${locale}/login`);
+  }
+
+  // Device accounts cannot access settings
+  if (await isDeviceSession()) {
+    redirect(`/${locale}/dashboard`);
   }
 
   const family = await getUserFamily(session.user.id);

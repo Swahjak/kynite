@@ -26,35 +26,46 @@ interface InteractionModeProviderProps {
   children: ReactNode;
   /** Initial mode - useful for testing. If not provided, reads from localStorage. */
   initialMode?: InteractionMode;
+  /** If true, forces 'wall' mode and disables mode switching (for device sessions) */
+  isDevice?: boolean;
 }
 
 export function InteractionModeProvider({
   children,
   initialMode,
+  isDevice = false,
 }: InteractionModeProviderProps) {
+  // Devices are always locked to 'wall' mode
   const [mode, setModeState] = useState<InteractionMode>(
-    initialMode ?? "manage"
+    isDevice ? "wall" : (initialMode ?? "manage")
   );
-  const [isHydrated, setIsHydrated] = useState(!!initialMode);
+  const [isHydrated, setIsHydrated] = useState(!!initialMode || isDevice);
 
-  // Read from localStorage on mount (skip if initialMode was provided)
+  // Read from localStorage on mount (skip if initialMode was provided or is device)
   useEffect(() => {
-    if (initialMode) return;
+    if (initialMode || isDevice) return;
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored === "wall" || stored === "manage") {
       setModeState(stored);
     }
     setIsHydrated(true);
-  }, [initialMode]);
+  }, [initialMode, isDevice]);
 
-  const setMode = useCallback((newMode: InteractionMode) => {
-    localStorage.setItem(STORAGE_KEY, newMode);
-    setModeState(newMode);
-  }, []);
+  const setMode = useCallback(
+    (newMode: InteractionMode) => {
+      // Devices cannot change mode
+      if (isDevice) return;
+      localStorage.setItem(STORAGE_KEY, newMode);
+      setModeState(newMode);
+    },
+    [isDevice]
+  );
 
   const toggleMode = useCallback(() => {
+    // Devices cannot toggle mode
+    if (isDevice) return;
     setMode(mode === "manage" ? "wall" : "manage");
-  }, [mode, setMode]);
+  }, [mode, setMode, isDevice]);
 
   // Prevent hydration mismatch by rendering children only after hydration
   if (!isHydrated) {

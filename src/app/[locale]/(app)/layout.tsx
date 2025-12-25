@@ -30,9 +30,10 @@ export default async function AppLayout({ children, params }: AppLayoutProps) {
   // Get user's role in the family
   const family = await getUserFamily(session.user.id);
   const isManager = family?.currentUserRole === "manager";
+  const isDevice = session.session?.isDevice === true;
 
   return (
-    <InteractionModeProvider>
+    <InteractionModeProvider isDevice={isDevice}>
       <AppShell isManager={isManager}>{children}</AppShell>
     </InteractionModeProvider>
   );
