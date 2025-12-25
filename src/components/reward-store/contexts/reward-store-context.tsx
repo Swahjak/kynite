@@ -29,6 +29,7 @@ interface ChildInfo {
   id: string;
   name: string;
   avatarColor: string | null;
+  avatarSvg?: string | null;
   avatarUrl?: string | null;
   balance: number;
 }

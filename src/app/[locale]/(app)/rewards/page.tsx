@@ -55,6 +55,8 @@ export default async function RewardsRoute({ params, searchParams }: Props) {
         id: string;
         name: string;
         avatarColor: string | null;
+        avatarSvg: string | null;
+        avatarUrl: string | null;
         balance: number;
       }[]
     | undefined;
@@ -89,7 +91,8 @@ export default async function RewardsRoute({ params, searchParams }: Props) {
         id: child.id,
         name: child.displayName || child.user?.name || "Child",
         avatarColor: child.avatarColor,
-        avatarUrl: child.user?.image,
+        avatarSvg: child.avatarSvg,
+        avatarUrl: child.user?.image ?? null,
         balance: await getBalance(child.id),
       }))
     );

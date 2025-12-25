@@ -87,6 +87,7 @@ export interface ChildChartInfo {
   name: string;
   avatarUrl?: string | null;
   avatarColor?: string | null;
+  avatarSvg?: string | null;
   chartId: string | null;
   totalStars: number;
 }

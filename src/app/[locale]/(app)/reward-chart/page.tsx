@@ -92,6 +92,7 @@ export default async function RewardChartRoute({
         id: child.id,
         name: child.displayName || child.user?.name || "Child",
         avatarColor: child.avatarColor,
+        avatarSvg: child.avatarSvg,
         avatarUrl: child.user?.image,
         chartId: chartData?.chart.id || null,
         totalStars: chartData?.activeGoal?.starsCurrent || 0,

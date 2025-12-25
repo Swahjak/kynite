@@ -29,6 +29,7 @@ export function Chores() {
     id: m.id,
     name: m.displayName || m.user?.name || "",
     avatarColor: m.avatarColor,
+    avatarSvg: m.avatarSvg,
     avatarUrl: m.user?.image,
     avatarFallback: (m.displayName || m.user?.name || "?")[0],
   }));

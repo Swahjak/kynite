@@ -15,6 +15,7 @@ export interface PersonChip {
   name: string;
   avatarUrl?: string | null;
   avatarColor?: string | null;
+  avatarSvg?: string | null;
   avatarFallback?: string;
 }
 
@@ -66,6 +67,7 @@ export function PersonFilterChips({
             <FamilyAvatar
               name={person.name}
               color={person.avatarColor as AvatarColor}
+              avatarSvg={person.avatarSvg}
               googleImage={person.avatarUrl}
               size="sm"
               showRing={false}
