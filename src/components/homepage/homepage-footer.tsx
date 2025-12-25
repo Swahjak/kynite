@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { Icon } from "@/components/ui/icon";
+import { Share2, Code } from "lucide-react";
 
 export function HomepageFooter() {
   const t = useTranslations("HomePage.footer");
@@ -34,14 +35,14 @@ export function HomepageFooter() {
             className="text-muted-foreground hover:text-foreground transition-colors"
             aria-label="Twitter"
           >
-            <Icon name="share" size="md" />
+            <Icon icon={Share2} size="md" />
           </a>
           <a
             href="#"
             className="text-muted-foreground hover:text-foreground transition-colors"
             aria-label="GitHub"
           >
-            <Icon name="code" size="md" />
+            <Icon icon={Code} size="md" />
           </a>
         </div>
       </div>
