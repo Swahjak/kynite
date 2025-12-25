@@ -15,6 +15,7 @@ export function RoleBadge({ role, className }: RoleBadgeProps) {
     participant: "secondary",
     caregiver: "outline",
     device: "outline",
+    child: "secondary",
   };
 
   const roleLabels: Record<FamilyMemberRole, string> = {
@@ -22,6 +23,7 @@ export function RoleBadge({ role, className }: RoleBadgeProps) {
     participant: "Member",
     caregiver: "Caregiver",
     device: "Device",
+    child: "Child",
   };
 
   return (

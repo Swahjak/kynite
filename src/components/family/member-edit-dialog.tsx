@@ -46,6 +46,7 @@ const roleLabels: Record<FamilyMemberRole, string> = {
   participant: "Member",
   caregiver: "Caregiver",
   device: "Device",
+  child: "Child",
 };
 
 export function MemberEditDialog({
