@@ -1,10 +1,29 @@
 import Pusher from "pusher";
 
+// Validate Pusher credentials at module load
+const PUSHER_APP_ID = process.env.PUSHER_APP_ID;
+const PUSHER_KEY = process.env.NEXT_PUBLIC_PUSHER_KEY;
+const PUSHER_SECRET = process.env.PUSHER_SECRET;
+const PUSHER_CLUSTER = process.env.NEXT_PUBLIC_PUSHER_CLUSTER;
+
+if (!PUSHER_APP_ID || !PUSHER_KEY || !PUSHER_SECRET || !PUSHER_CLUSTER) {
+  const missing = [
+    !PUSHER_APP_ID && "PUSHER_APP_ID",
+    !PUSHER_KEY && "NEXT_PUBLIC_PUSHER_KEY",
+    !PUSHER_SECRET && "PUSHER_SECRET",
+    !PUSHER_CLUSTER && "NEXT_PUBLIC_PUSHER_CLUSTER",
+  ].filter(Boolean);
+
+  throw new Error(
+    `Missing Pusher credentials: ${missing.join(", ")}. Check your environment variables.`
+  );
+}
+
 const pusherServer = new Pusher({
-  appId: process.env.PUSHER_APP_ID!,
-  key: process.env.NEXT_PUBLIC_PUSHER_KEY!,
-  secret: process.env.PUSHER_SECRET!,
-  cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER!,
+  appId: PUSHER_APP_ID,
+  key: PUSHER_KEY,
+  secret: PUSHER_SECRET,
+  cluster: PUSHER_CLUSTER,
   useTLS: true,
 });
 
