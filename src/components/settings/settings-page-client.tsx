@@ -27,7 +27,7 @@ export function SettingsPageClient({
   const t = useTranslations("SettingsPage");
 
   return (
-    <div className="container mx-auto max-w-2xl py-8">
+    <div className="container mx-auto max-w-2xl px-4 py-8">
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold">{t("title")}</h1>
