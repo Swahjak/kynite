@@ -94,6 +94,9 @@ export const auth = betterAuth({
       // Allow linking Google accounts with different emails
       allowDifferentEmails: true,
     },
+    // Encrypt OAuth tokens before storing in database
+    // Uses BETTER_AUTH_SECRET for encryption key
+    encryptOAuthTokens: true,
   },
 
   session: {
