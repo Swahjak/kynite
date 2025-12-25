@@ -1,5 +1,6 @@
 "use client";
 
+import { useConfetti } from "@/components/confetti";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import type { IChoreWithAssignee } from "@/types/chore";
@@ -15,14 +16,20 @@ export function TaskCheckbox({
   onComplete,
   disabled,
 }: TaskCheckboxProps) {
+  const { fire } = useConfetti();
   const isCompleted = chore.status === "completed";
+
+  const handleComplete = () => {
+    onComplete(chore.id);
+    fire(chore.starReward);
+  };
 
   return (
     <div className="flex items-center gap-3 rounded-lg border border-dashed p-3">
       <Checkbox
         checked={isCompleted}
         disabled={disabled || isCompleted}
-        onCheckedChange={() => onComplete(chore.id)}
+        onCheckedChange={handleComplete}
         className="size-5"
       />
       <span
