@@ -127,6 +127,18 @@ export function TimerCard({ timer }: TimerCardProps) {
   const { display: timeDisplay, isNegative } = getDisplayTime();
   const progress = (remaining / timer.totalSeconds) * 100;
 
+  // Calculate dynamic extend time based on total duration
+  const getExtendTime = (): { seconds: number; label: string } => {
+    const total = timer.totalSeconds;
+    if (total <= 300) return { seconds: 60, label: "1m" }; // ≤5 min → +1m
+    if (total <= 900) return { seconds: 300, label: "5m" }; // ≤15 min → +5m
+    if (total <= 1800) return { seconds: 600, label: "10m" }; // ≤30 min → +10m
+    if (total <= 3600) return { seconds: 900, label: "15m" }; // ≤60 min → +15m
+    return { seconds: 1800, label: "30m" }; // >60 min → +30m
+  };
+
+  const extendTime = getExtendTime();
+
   const handleConfirm = () => {
     // Use the assigned member as the confirmer (anyone can click, stars go to assigned)
     if (timer.assignedToId) {
@@ -141,7 +153,9 @@ export function TimerCard({ timer }: TimerCardProps) {
 
   const handleAcknowledge = () => {
     acknowledgeTimer(timer.id);
-    if (timer.starReward > 0) {
+    // Only fire confetti for early completion (remaining time > 0)
+    // No celebration when dismissing an expired timer at 0:00
+    if (timer.starReward > 0 && remaining > 0) {
       fire(timer.starReward);
     }
   };
@@ -150,26 +164,38 @@ export function TimerCard({ timer }: TimerCardProps) {
   const renderActions = () => {
     switch (uiState) {
       case "running":
-        if (!isManager) return null;
         return (
           <div className="flex gap-2">
+            {isManager && (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 flex-1 text-xs"
+                  onClick={() => extendTimer(timer.id, extendTime.seconds)}
+                >
+                  <Plus className="mr-1 h-3 w-3" />
+                  {extendTime.label}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 flex-1 text-xs"
+                  onClick={() => pauseTimer(timer.id)}
+                >
+                  <Pause className="mr-1 h-3 w-3" />
+                  {t("pause")}
+                </Button>
+              </>
+            )}
             <Button
-              variant="outline"
+              variant="default"
               size="sm"
               className="h-8 flex-1 text-xs"
-              onClick={() => extendTimer(timer.id, 900)}
+              onClick={handleAcknowledge}
             >
-              <Plus className="mr-1 h-3 w-3" />
-              15m
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 flex-1 text-xs"
-              onClick={() => pauseTimer(timer.id)}
-            >
-              <Pause className="mr-1 h-3 w-3" />
-              {t("pause")}
+              <Check className="mr-1 h-3 w-3" />
+              {t("done")}
             </Button>
           </div>
         );
