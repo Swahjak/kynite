@@ -378,7 +378,18 @@
       "weekdays": "Weekdays",
       "weekend": "Weekend",
       "monthly": "Monthly"
-    }
+    },
+    "take": "Take",
+    "done": "Done",
+    "edit": "Edit",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "takeChore": "Take {title}",
+    "takeTitle": "Take Chore",
+    "takeDescription": "Select who will complete this chore",
+    "takeButton": "Assign & Take",
+    "takeSuccess": "Chore assigned successfully",
+    "selectPerson": "Select a family member"
   },
   "rewardChart": {
     "editTask": "Edit Task",

@@ -266,10 +266,10 @@ export async function completeChore(
     })
     .where(eq(chores.id, choreId));
 
-  // Award stars for completing chore
-  if (existing.starReward > 0) {
+  // Award stars to the assigned person (not the device/person who clicked complete)
+  if (existing.starReward > 0 && existing.assignedToId) {
     await addStars({
-      memberId: completedById,
+      memberId: existing.assignedToId,
       amount: existing.starReward,
       type: "chore",
       referenceId: choreId,
@@ -294,10 +294,10 @@ export async function undoChoreCompletion(
   if (existing.status !== "completed")
     throw new Error("Chore is not completed");
 
-  // Remove stars that were awarded (creates negative transaction)
-  if (existing.starReward > 0 && existing.completedById) {
+  // Remove stars from the assigned person (since that's who received them)
+  if (existing.starReward > 0 && existing.assignedToId) {
     await addStars({
-      memberId: existing.completedById,
+      memberId: existing.assignedToId,
       amount: -existing.starReward,
       type: "chore",
       referenceId: choreId,

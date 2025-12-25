@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Pencil, Trash2 } from "lucide-react";
+import { Check, Hand, Pencil, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { FamilyAvatar } from "@/components/family/family-avatar";
 import type { AvatarColor } from "@/types/family";
@@ -16,6 +17,7 @@ import {
 import { useChores } from "../contexts/chores-context";
 import { useIsManager } from "@/hooks/use-is-manager";
 import { useConfetti } from "@/components/confetti";
+import { TakeChoreDialog } from "./take-chore-dialog";
 
 interface ChoreCardProps {
   chore: IChoreWithAssignee;
@@ -24,10 +26,14 @@ interface ChoreCardProps {
 }
 
 export function ChoreCard({ chore, onEdit, onDelete }: ChoreCardProps) {
+  const t = useTranslations("chores");
   const { completeChore, expandedChoreId, setExpandedChoreId } = useChores();
   const canEdit = useIsManager();
   const [isCompleting, setIsCompleting] = useState(false);
+  const [takeDialogOpen, setTakeDialogOpen] = useState(false);
   const { fire } = useConfetti();
+
+  const isUnassigned = !chore.assignedToId;
 
   const urgency = getUrgencyStatus(chore);
   const dueLabel = formatDueLabel(chore);
@@ -50,6 +56,11 @@ export function ChoreCard({ chore, onEdit, onDelete }: ChoreCardProps) {
     setIsCompleting(true);
     await completeChore(chore.id);
     fire(chore.starReward);
+  };
+
+  const handleTake = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setTakeDialogOpen(true);
   };
 
   const handleEdit = (e: React.MouseEvent) => {
@@ -107,23 +118,38 @@ export function ChoreCard({ chore, onEdit, onDelete }: ChoreCardProps) {
           </div>
         </div>
 
-        {/* Complete Button (hover reveal when not expanded) */}
-        {!isExpanded && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className={cn(
-              "h-12 w-12 rounded-full transition-all duration-200",
-              "bg-muted hover:bg-primary hover:text-primary-foreground",
-              "opacity-0 group-hover:opacity-100"
-            )}
-            onClick={handleComplete}
-            disabled={isCompleting}
-            aria-label={`Mark ${chore.title} as complete`}
-          >
-            <Check className="h-6 w-6" />
-          </Button>
-        )}
+        {/* Action Button (hover reveal when not expanded) */}
+        {!isExpanded &&
+          (isUnassigned ? (
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "h-12 w-12 rounded-full transition-all duration-200",
+                "bg-muted hover:bg-amber-500 hover:text-white",
+                "opacity-0 group-hover:opacity-100"
+              )}
+              onClick={handleTake}
+              aria-label={t("takeChore", { title: chore.title })}
+            >
+              <Hand className="h-6 w-6" />
+            </Button>
+          ) : (
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "h-12 w-12 rounded-full transition-all duration-200",
+                "bg-muted hover:bg-primary hover:text-primary-foreground",
+                "opacity-0 group-hover:opacity-100"
+              )}
+              onClick={handleComplete}
+              disabled={isCompleting}
+              aria-label={`Mark ${chore.title} as complete`}
+            >
+              <Check className="h-6 w-6" />
+            </Button>
+          ))}
       </div>
 
       {/* Expanded Actions */}
@@ -131,18 +157,32 @@ export function ChoreCard({ chore, onEdit, onDelete }: ChoreCardProps) {
         <div className="flex items-center justify-end gap-2 border-t px-4 py-3">
           <Button variant="outline" size="sm" onClick={handleEdit}>
             <Pencil className="mr-1 h-4 w-4" />
-            Edit
+            {t("edit")}
           </Button>
           <Button variant="outline" size="sm" onClick={handleDelete}>
             <Trash2 className="mr-1 h-4 w-4" />
-            Delete
+            {t("delete")}
           </Button>
-          <Button size="sm" onClick={handleComplete} disabled={isCompleting}>
-            <Check className="mr-1 h-4 w-4" />
-            Done
-          </Button>
+          {isUnassigned ? (
+            <Button size="sm" onClick={handleTake}>
+              <Hand className="mr-1 h-4 w-4" />
+              {t("take")}
+            </Button>
+          ) : (
+            <Button size="sm" onClick={handleComplete} disabled={isCompleting}>
+              <Check className="mr-1 h-4 w-4" />
+              {t("done")}
+            </Button>
+          )}
         </div>
       )}
+
+      {/* Take Chore Dialog */}
+      <TakeChoreDialog
+        open={takeDialogOpen}
+        onOpenChange={setTakeDialogOpen}
+        chore={chore}
+      />
     </div>
   );
 }

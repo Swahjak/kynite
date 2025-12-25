@@ -378,7 +378,18 @@
       "weekdays": "Weekdagen",
       "weekend": "Weekend",
       "monthly": "Maandelijks"
-    }
+    },
+    "take": "Neem aan",
+    "done": "Klaar",
+    "edit": "Bewerken",
+    "delete": "Verwijderen",
+    "cancel": "Annuleren",
+    "takeChore": "Neem {title} aan",
+    "takeTitle": "Klusje aannemen",
+    "takeDescription": "Selecteer wie dit klusje gaat doen",
+    "takeButton": "Toewijzen",
+    "takeSuccess": "Klusje succesvol toegewezen",
+    "selectPerson": "Selecteer een gezinslid"
   },
   "rewardChart": {
     "editTask": "Taak bewerken",
