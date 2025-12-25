@@ -43,8 +43,7 @@ export async function POST(_request: Request) {
 
   if (!calendarId) {
     console.warn("Webhook token verification failed:", channelId);
-    // Still return 200 to prevent Google from retrying
-    return new NextResponse(null, { status: 200 });
+    return new NextResponse(null, { status: 401 });
   }
 
   // Handle different resource states
