@@ -3,7 +3,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { customSession } from "better-auth/plugins";
 import { db } from "./db";
 import * as schema from "./schema";
-import { familyMembers } from "./schema";
+import { familyMembers, users } from "./schema";
 import { eq } from "drizzle-orm";
 import { deviceAuth } from "./plugins/device-auth";
 
@@ -39,20 +39,24 @@ export const auth = betterAuth({
   plugins: [
     deviceAuth(),
     customSession(async ({ user, session }) => {
-      // Query user's family membership
+      // Query user's family membership for IDs (not cached, but not used for permissions)
       const membership = await db
         .select({
           familyId: familyMembers.familyId,
-          role: familyMembers.role,
-          displayName: familyMembers.displayName,
           memberId: familyMembers.id,
+          displayName: familyMembers.displayName,
         })
         .from(familyMembers)
         .where(eq(familyMembers.userId, user.id))
         .limit(1);
 
       const member = membership[0];
-      const isDevice = (user as { type?: string }).type === "device";
+      // isDevice and memberRole now come from session additionalFields (cookie cached)
+      const sessionWithFields = session as {
+        isDevice?: boolean;
+        memberRole?: string;
+      };
+      const isDevice = sessionWithFields.isDevice ?? false;
 
       return {
         user,
@@ -60,13 +64,47 @@ export const auth = betterAuth({
           ...session,
           familyId: member?.familyId ?? null,
           memberId: member?.memberId ?? null,
-          memberRole: member?.role ?? null,
-          isDevice,
+          memberRole: sessionWithFields.memberRole ?? null, // Use cached value
+          isDevice, // Use cached value
           deviceName: isDevice ? member?.displayName : null,
         },
       };
     }),
   ],
+
+  databaseHooks: {
+    session: {
+      create: {
+        before: async (session) => {
+          // Get user to check if device
+          const user = await db
+            .select({ type: users.type })
+            .from(users)
+            .where(eq(users.id, session.userId))
+            .limit(1);
+
+          const isDevice = user[0]?.type === "device";
+
+          // Get family membership for role
+          const membership = await db
+            .select({ role: familyMembers.role })
+            .from(familyMembers)
+            .where(eq(familyMembers.userId, session.userId))
+            .limit(1);
+
+          const memberRole = membership[0]?.role ?? null;
+
+          return {
+            data: {
+              ...session,
+              isDevice,
+              memberRole,
+            },
+          };
+        },
+      },
+    },
+  },
 
   // Google OAuth provider for calendar access
   socialProviders: {
@@ -102,6 +140,16 @@ export const auth = betterAuth({
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days
     updateAge: 60 * 60 * 24, // Refresh every 24 hours
+    additionalFields: {
+      isDevice: {
+        type: "boolean",
+        defaultValue: false,
+      },
+      memberRole: {
+        type: "string",
+        required: false,
+      },
+    },
     cookieCache: {
       enabled: true,
       maxAge: 60 * 5, // 5 minute cache
