@@ -1,0 +1,1 @@
+CREATE INDEX "child_upgrade_tokens_child_user_id_idx" ON "child_upgrade_tokens" USING btree ("child_user_id");

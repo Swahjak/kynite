@@ -5,6 +5,7 @@ import {
   boolean,
   integer,
   date,
+  index,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -147,19 +148,25 @@ export const devicePairingCodes = pgTable("device_pairing_codes", {
 /**
  * Child Upgrade Tokens table - One-time tokens for linking a child to an account
  */
-export const childUpgradeTokens = pgTable("child_upgrade_tokens", {
-  id: text("id").primaryKey(),
-  childUserId: text("child_user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  token: text("token").notNull().unique(),
-  createdById: text("created_by_id")
-    .notNull()
-    .references(() => users.id),
-  expiresAt: timestamp("expires_at", { mode: "date" }).notNull(),
-  usedAt: timestamp("used_at", { mode: "date" }),
-  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
-});
+export const childUpgradeTokens = pgTable(
+  "child_upgrade_tokens",
+  {
+    id: text("id").primaryKey(),
+    childUserId: text("child_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    token: text("token").notNull().unique(),
+    createdById: text("created_by_id")
+      .notNull()
+      .references(() => users.id),
+    expiresAt: timestamp("expires_at", { mode: "date" }).notNull(),
+    usedAt: timestamp("used_at", { mode: "date" }),
+    createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("child_upgrade_tokens_child_user_id_idx").on(table.childUserId),
+  ]
+);
 
 // ============================================================================
 // Reward Charts
