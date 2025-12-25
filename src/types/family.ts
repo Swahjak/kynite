@@ -42,6 +42,7 @@ export interface FamilyMemberWithUser {
   role: FamilyMemberRole;
   displayName: string | null;
   avatarColor: string | null;
+  avatarSvg: string | null;
   createdAt: Date;
   user: {
     id: string;
