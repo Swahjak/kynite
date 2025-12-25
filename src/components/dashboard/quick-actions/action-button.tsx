@@ -11,6 +11,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useIsManager } from "@/hooks/use-is-manager";
+import { useIsDevice } from "@/hooks/use-is-device";
 import type { QuickAction } from "../types";
 
 const iconMap: Record<string, LucideIcon> = {
@@ -29,9 +30,11 @@ interface ActionButtonProps {
 
 export function ActionButton({ action, onClick }: ActionButtonProps) {
   const isManager = useIsManager();
+  const isDevice = useIsDevice();
 
   const Icon = iconMap[action.icon] || CheckCircle;
-  const isDisabled = !isManager;
+  // Devices are shared family displays - allow interactions like starting timers
+  const isDisabled = !isManager && !isDevice;
 
   return (
     <Button

@@ -25,12 +25,22 @@ interface RewardStoreData {
   primaryGoal: IReward | null;
 }
 
+interface ChildInfo {
+  id: string;
+  name: string;
+  avatarColor: string | null;
+  avatarUrl?: string | null;
+  balance: number;
+}
+
 interface RewardStoreContextValue {
   familyId: string;
   memberId: string;
   data: RewardStoreData;
   isLoading: boolean;
   error: Error | null;
+  isManager: boolean;
+  allChildren?: ChildInfo[];
   // Actions
   createReward: (input: CreateRewardInput) => Promise<IReward>;
   updateReward: (id: string, input: UpdateRewardInput) => Promise<IReward>;
@@ -48,6 +58,8 @@ interface RewardStoreProviderProps {
   familyId: string;
   memberId: string;
   initialData: RewardStoreData;
+  isManager?: boolean;
+  allChildren?: ChildInfo[];
 }
 
 export function RewardStoreProvider({
@@ -55,6 +67,8 @@ export function RewardStoreProvider({
   familyId,
   memberId,
   initialData,
+  isManager = false,
+  allChildren,
 }: RewardStoreProviderProps) {
   const [data, setData] = useState<RewardStoreData>(initialData);
   const [isLoading, setIsLoading] = useState(false);
@@ -179,7 +193,11 @@ export function RewardStoreProvider({
     async (rewardId: string) => {
       const res = await fetch(
         `/api/v1/families/${familyId}/rewards/${rewardId}/redeem`,
-        { method: "POST" }
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ memberId }),
+        }
       );
 
       if (!res.ok) {
@@ -191,7 +209,7 @@ export function RewardStoreProvider({
       await refreshData();
       return { newBalance: result.newBalance };
     },
-    [familyId, refreshData]
+    [familyId, memberId, refreshData]
   );
 
   const setPrimaryGoalFn = useCallback(
@@ -237,6 +255,8 @@ export function RewardStoreProvider({
         data,
         isLoading,
         error,
+        isManager,
+        allChildren,
         createReward,
         updateReward,
         deleteReward,

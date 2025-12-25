@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useIsManager } from "@/hooks/use-is-manager";
+import { useIsDevice } from "@/hooks/use-is-device";
+import { useRouter, useSearchParams } from "next/navigation";
+import { PersonFilterChips } from "@/components/wall-hub/shared/person-filter-chips";
 import { toast } from "sonner";
 import { useRewardStore } from "./contexts/reward-store-context";
 import { StarBalanceCard } from "./star-balance-card";
@@ -22,6 +25,9 @@ import type {
 export function RewardStorePage() {
   const t = useTranslations("rewardStore");
   const isManager = useIsManager();
+  const isDevice = useIsDevice();
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   const {
     data,
@@ -31,7 +37,11 @@ export function RewardStorePage() {
     deleteReward,
     redeemReward,
     setPrimaryGoal,
+    memberId,
+    allChildren,
   } = useRewardStore();
+
+  const selectedMemberId = searchParams.get("child");
 
   const [rewardDialogOpen, setRewardDialogOpen] = useState(false);
   const [editingReward, setEditingReward] = useState<IReward | undefined>();
@@ -113,8 +123,26 @@ export function RewardStorePage() {
     setRewardDialogOpen(true);
   };
 
+  // Handle selecting a different child's rewards
+  const handleSelectChild = (childId: string | "all") => {
+    if (childId === "all") return;
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("child", childId);
+    router.push(`?${params.toString()}`);
+  };
+
   return (
     <div className="space-y-6">
+      {/* Person Filter Chips - show for managers and devices with multiple children */}
+      {(isManager || isDevice) && allChildren && allChildren.length > 1 && (
+        <PersonFilterChips
+          people={allChildren}
+          selectedId={selectedMemberId || "all"}
+          onSelect={handleSelectChild}
+          showEveryone={false}
+        />
+      )}
+
       {/* Header with balance */}
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>

@@ -8,12 +8,14 @@ import { WeeklyGrid } from "./weekly-grid";
 import { NextRewardCard, MessageCard } from "./bottom-cards";
 import { useRewardChart } from "./contexts/reward-chart-context";
 import { useIsManager } from "@/hooks/use-is-manager";
+import { useIsDevice } from "@/hooks/use-is-device";
 import { PersonFilterChips } from "@/components/wall-hub/shared/person-filter-chips";
 
 export function RewardChartPage() {
   const { weekData, isLoading, error, familyId, allChildren } =
     useRewardChart();
   const isManager = useIsManager();
+  const isDevice = useIsDevice();
   const router = useRouter();
   const searchParams = useSearchParams();
   const t = useTranslations("rewardChart");
@@ -105,8 +107,8 @@ export function RewardChartPage() {
   return (
     <div className="flex-1 p-4 md:p-6 lg:p-8">
       <div className="mx-auto max-w-4xl space-y-6">
-        {/* Person Filter Chips - only show for managers with multiple children */}
-        {isManager && allChildren && allChildren.length > 1 && (
+        {/* Person Filter Chips - show for managers and devices with multiple children */}
+        {(isManager || isDevice) && allChildren && allChildren.length > 1 && (
           <PersonFilterChips
             people={allChildren}
             selectedId={selectedMemberId || "all"}

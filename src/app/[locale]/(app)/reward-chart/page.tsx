@@ -65,13 +65,15 @@ export default async function RewardChartRoute({
   }
 
   const isManager = member.role === "manager";
+  // Devices are shared family displays that can view any child's chart
+  const canViewAllCharts = isManager || member.role === "device";
 
   // Determine which chart to show
   let chart;
   let childrenWithCharts: ChildChartInfo[] | undefined;
 
-  if (isManager) {
-    // Managers can view any child's chart
+  if (canViewAllCharts) {
+    // Managers and devices can view any child's chart
     // Get all family members and charts to find the right one
     const [allMembers, familyCharts] = await Promise.all([
       getFamilyMembers(familyId),

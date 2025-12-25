@@ -16,7 +16,10 @@ type RouteParams = {
 
 /**
  * POST /api/v1/families/[familyId]/rewards/[rewardId]/redeem
- * Redeem a reward (any family member can redeem for themselves)
+ * Redeem a reward for a member.
+ *
+ * - Regular members redeem for themselves
+ * - Managers and devices can redeem on behalf of any child member
  */
 export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
@@ -28,7 +31,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const { familyId, rewardId } = await params;
 
     // Get caller's membership
-    const membership = await db
+    const callerMembership = await db
       .select()
       .from(familyMembers)
       .where(
@@ -38,13 +41,49 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         )
       );
 
-    if (membership.length === 0) {
+    if (callerMembership.length === 0) {
       return Errors.notFamilyMember();
     }
 
-    const memberId = membership[0].id;
+    const caller = callerMembership[0];
+    const canRedeemForOthers =
+      caller.role === "manager" || caller.role === "device";
 
-    const result = await redeemReward(memberId, rewardId);
+    // Parse request body for memberId (optional)
+    let targetMemberId = caller.id;
+
+    try {
+      const body = await request.json();
+      if (body.memberId && typeof body.memberId === "string") {
+        // Validate that caller can redeem on behalf of this member
+        if (!canRedeemForOthers && body.memberId !== caller.id) {
+          return Errors.forbidden("You can only redeem rewards for yourself");
+        }
+
+        // Validate that target member exists and is in the same family
+        if (body.memberId !== caller.id) {
+          const targetMember = await db
+            .select()
+            .from(familyMembers)
+            .where(
+              and(
+                eq(familyMembers.id, body.memberId),
+                eq(familyMembers.familyId, familyId)
+              )
+            );
+
+          if (targetMember.length === 0) {
+            return Errors.notFound("member");
+          }
+
+          targetMemberId = body.memberId;
+        }
+      }
+    } catch {
+      // No body or invalid JSON - use caller's memberId (backward compatible)
+    }
+
+    const result = await redeemReward(targetMemberId, rewardId);
 
     return NextResponse.json({
       success: true,
