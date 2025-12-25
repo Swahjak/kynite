@@ -293,7 +293,14 @@
     "upgradeLinkGenerated": "Account link generated",
     "copyLink": "Copy Link",
     "linkExpires": "Link expires in 24 hours",
-    "maxChildrenReached": "Maximum number of children reached"
+    "maxChildrenReached": "Maximum number of children reached",
+    "roles": {
+      "manager": "Manager",
+      "participant": "Member",
+      "caregiver": "Caregiver",
+      "device": "Device",
+      "child": "Child"
+    }
   },
   "FamilyRoles": {
     "manager": "Manager",

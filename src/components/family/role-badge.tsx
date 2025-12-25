@@ -1,5 +1,8 @@
+"use client";
+
 import { Badge } from "@/components/ui/badge";
 import type { FamilyMemberRole } from "@/types/family";
+import { useTranslations } from "next-intl";
 
 interface RoleBadgeProps {
   role: FamilyMemberRole;
@@ -7,6 +10,8 @@ interface RoleBadgeProps {
 }
 
 export function RoleBadge({ role, className }: RoleBadgeProps) {
+  const t = useTranslations("Family.roles");
+
   const variantMap: Record<
     FamilyMemberRole,
     "default" | "secondary" | "outline"
@@ -18,17 +23,9 @@ export function RoleBadge({ role, className }: RoleBadgeProps) {
     child: "secondary",
   };
 
-  const roleLabels: Record<FamilyMemberRole, string> = {
-    manager: "Manager",
-    participant: "Member",
-    caregiver: "Caregiver",
-    device: "Device",
-    child: "Child",
-  };
-
   return (
     <Badge variant={variantMap[role]} className={className}>
-      {roleLabels[role]}
+      {t(role)}
     </Badge>
   );
 }

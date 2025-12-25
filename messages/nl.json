@@ -293,7 +293,14 @@
     "upgradeLinkGenerated": "Accountlink gegenereerd",
     "copyLink": "Link kopiëren",
     "linkExpires": "Link verloopt over 24 uur",
-    "maxChildrenReached": "Maximum aantal kinderen bereikt"
+    "maxChildrenReached": "Maximum aantal kinderen bereikt",
+    "roles": {
+      "manager": "Beheerder",
+      "participant": "Lid",
+      "caregiver": "Verzorger",
+      "device": "Apparaat",
+      "child": "Kind"
+    }
   },
   "FamilyRoles": {
     "manager": "Beheerder",
