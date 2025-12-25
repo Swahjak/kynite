@@ -2,24 +2,108 @@ import { NextResponse, type NextRequest } from "next/server";
 import createIntlMiddleware from "next-intl/middleware";
 import { routing } from "@/i18n/routing";
 import { isPublicRoute, isAuthApiRoute, loginRoute } from "@/lib/auth-routes";
+import { ErrorCode } from "@/lib/errors/codes";
 
 // Create next-intl middleware for locale handling
 const intlMiddleware = createIntlMiddleware(routing);
+
+// Origins allowed for API requests
+const ALLOWED_ORIGINS = [
+  process.env.BETTER_AUTH_URL,
+  process.env.NEXT_PUBLIC_BETTER_AUTH_URL,
+].filter(Boolean);
+
+// Paths exempt from Content-Type and Origin validation
+const API_SECURITY_EXEMPT_PATHS = [
+  "/api/cron/",
+  "/api/webhooks/",
+  "/api/auth/",
+];
+
+function createApiErrorResponse(
+  code: ErrorCode,
+  status: number,
+  details?: unknown
+) {
+  return NextResponse.json(
+    { success: false, error: { code, details } },
+    { status }
+  );
+}
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Skip proxy for static files and Next.js internals
-  if (
-    pathname.startsWith("/_next") ||
-    pathname.startsWith("/api/auth") ||
-    pathname.includes(".") // Static files like favicon.ico
-  ) {
+  if (pathname.startsWith("/_next") || pathname.includes(".")) {
     return NextResponse.next();
   }
 
-  // Allow API routes through (they handle their own auth)
+  // Handle API routes with security validation
   if (pathname.startsWith("/api/")) {
+    // Skip auth endpoints (better-auth handles its own security)
+    if (pathname.startsWith("/api/auth/")) {
+      return NextResponse.next();
+    }
+
+    // Apply security validation to mutating API requests
+    if (["POST", "PUT", "PATCH", "DELETE"].includes(request.method)) {
+      const isExempt = API_SECURITY_EXEMPT_PATHS.some((path) =>
+        pathname.startsWith(path)
+      );
+
+      if (!isExempt) {
+        // Validate Content-Type for requests with body
+        if (["POST", "PUT", "PATCH"].includes(request.method)) {
+          const contentType = request.headers.get("content-type");
+          const hasJsonContentType =
+            contentType?.includes("application/json") ?? false;
+
+          if (!hasJsonContentType) {
+            return createApiErrorResponse(
+              ErrorCode.BAD_REQUEST,
+              415,
+              "Content-Type must be application/json"
+            );
+          }
+        }
+
+        // Validate Origin header
+        const origin = request.headers.get("origin");
+        if (!origin) {
+          return createApiErrorResponse(
+            ErrorCode.FORBIDDEN,
+            403,
+            "Missing Origin header"
+          );
+        }
+
+        // Validate origin is allowed
+        try {
+          const originUrl = new URL(origin);
+          const isAllowed = ALLOWED_ORIGINS.some((allowed) => {
+            if (!allowed) return false;
+            const allowedUrl = new URL(allowed);
+            return originUrl.host === allowedUrl.host;
+          });
+
+          if (!isAllowed) {
+            return createApiErrorResponse(
+              ErrorCode.FORBIDDEN,
+              403,
+              "Invalid Origin"
+            );
+          }
+        } catch {
+          return createApiErrorResponse(
+            ErrorCode.FORBIDDEN,
+            403,
+            "Invalid Origin format"
+          );
+        }
+      }
+    }
+
     return NextResponse.next();
   }
 
