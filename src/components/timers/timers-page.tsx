@@ -3,8 +3,9 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Pencil } from "lucide-react";
+import { Plus } from "lucide-react";
 import { getDeviceId } from "@/hooks/use-timer-countdown";
+import { useIsManager } from "@/hooks/use-is-manager";
 import { cn } from "@/lib/utils";
 import { TimerTemplateCard } from "./timer-template-card";
 import { TimerTemplateForm } from "./timer-template-form";
@@ -25,12 +26,12 @@ async function fetchTemplates(): Promise<TimerTemplate[]> {
 
 export function TimersPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<TimerTemplate | null>(
     null
   );
   const [deviceId, setDeviceId] = useState("");
   const queryClient = useQueryClient();
+  const isManager = useIsManager();
 
   useEffect(() => {
     setDeviceId(getDeviceId());
@@ -80,7 +81,7 @@ export function TimersPage() {
           <TimerTemplateCard
             key={template.id}
             template={template}
-            isEditMode={isEditMode}
+            isManager={isManager}
             onEdit={() => setEditingTemplate(template)}
             onDelete={() => handleDelete(template.id)}
             onStart={() => handleStartTimer(template.id)}
@@ -94,32 +95,22 @@ export function TimersPage() {
         </div>
       )}
 
-      {/* FABs */}
-      <div className="fixed right-6 bottom-6 z-50 flex flex-col gap-3">
-        <Button
-          size="icon"
-          variant={isEditMode ? "default" : "outline"}
-          onClick={() => setIsEditMode(!isEditMode)}
-          className={cn(
-            "h-12 w-12 rounded-full shadow-lg",
-            "transition-transform hover:scale-105 active:scale-95"
-          )}
-          aria-label={isEditMode ? "Klaar met bewerken" : "Bewerken"}
-        >
-          <Pencil className="h-5 w-5" />
-        </Button>
-        <Button
-          size="icon"
-          onClick={() => setIsCreateOpen(true)}
-          className={cn(
-            "h-14 w-14 rounded-full shadow-lg",
-            "transition-transform hover:scale-105 active:scale-95"
-          )}
-          aria-label="Nieuwe timer"
-        >
-          <Plus className="h-6 w-6" />
-        </Button>
-      </div>
+      {/* FAB - only show for managers */}
+      {isManager && (
+        <div className="fixed right-6 bottom-6 z-50">
+          <Button
+            size="icon"
+            onClick={() => setIsCreateOpen(true)}
+            className={cn(
+              "h-14 w-14 rounded-full shadow-lg",
+              "transition-transform hover:scale-105 active:scale-95"
+            )}
+            aria-label="Nieuwe timer"
+          >
+            <Plus className="h-6 w-6" />
+          </Button>
+        </div>
+      )}
 
       {/* Create Dialog */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>

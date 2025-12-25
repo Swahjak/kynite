@@ -18,7 +18,7 @@ export function RewardChartPage() {
   const searchParams = useSearchParams();
   const t = useTranslations("rewardChart");
 
-  const selectedMemberId = searchParams.get("child") || allChildren?.[0]?.id;
+  const selectedMemberId = searchParams.get("child");
 
   // Handle selecting a child's chart
   const handleSelectChild = (childId: string | "all") => {

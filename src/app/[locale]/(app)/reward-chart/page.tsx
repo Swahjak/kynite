@@ -4,6 +4,7 @@ import {
   RewardChartPage,
   RewardChartProvider,
   EmptyChartState,
+  SelectMemberState,
 } from "@/components/reward-chart";
 import {
   getChartByMemberId,
@@ -110,9 +111,15 @@ export default async function RewardChartRoute({
       );
     }
 
+    // No child selected - show member selection UI
+    if (!selectedChildId) {
+      return (
+        <SelectMemberState familyId={familyId} children={childrenWithCharts} />
+      );
+    }
+
     // Find which child's chart to show
-    const targetChildId = selectedChildId || children[0]?.id;
-    const targetChild = children.find((c) => c.id === targetChildId);
+    const targetChild = children.find((c) => c.id === selectedChildId);
 
     if (!targetChild) {
       return (

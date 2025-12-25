@@ -400,7 +400,9 @@
     "taskSaveError": "Failed to save task",
     "taskReorderError": "Failed to reorder tasks",
     "editChart": "Edit chart",
-    "doneEditing": "Done editing"
+    "doneEditing": "Done editing",
+    "selectMemberTitle": "Select a family member",
+    "selectMemberDescription": "Choose whose star chart you want to view"
   },
   "rewardStore": {
     "title": "Reward Store",

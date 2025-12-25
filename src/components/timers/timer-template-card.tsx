@@ -8,7 +8,7 @@ import type { TimerTemplate } from "@/server/schema";
 
 interface TimerTemplateCardProps {
   template: TimerTemplate;
-  isEditMode: boolean;
+  isManager: boolean;
   onEdit: () => void;
   onDelete: () => void;
   onStart: () => void;
@@ -30,7 +30,7 @@ const categoryEmoji: Record<string, string> = {
 
 export function TimerTemplateCard({
   template,
-  isEditMode,
+  isManager,
   onEdit,
   onDelete,
   onStart,
@@ -42,7 +42,7 @@ export function TimerTemplateCard({
           {categoryEmoji[template.category] || "⏱"} {template.title}
         </CardTitle>
         <div className="flex gap-1">
-          {isEditMode ? (
+          {isManager && (
             <>
               <Button variant="ghost" size="icon" onClick={onEdit}>
                 <Edit2 className="h-4 w-4" />
@@ -51,11 +51,10 @@ export function TimerTemplateCard({
                 <Trash2 className="h-4 w-4" />
               </Button>
             </>
-          ) : (
-            <Button variant="ghost" size="icon" onClick={onStart}>
-              <Play className="h-4 w-4" />
-            </Button>
           )}
+          <Button variant="default" size="icon" onClick={onStart}>
+            <Play className="h-4 w-4" />
+          </Button>
         </div>
       </CardHeader>
       <CardContent>

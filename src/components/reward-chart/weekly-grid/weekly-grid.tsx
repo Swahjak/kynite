@@ -2,8 +2,6 @@
 
 import { useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
-import { Pencil, Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { DayHeader } from "./day-header";
 import { TaskRow } from "./task-row";
 import { AddTaskRow } from "./add-task-row";
@@ -32,9 +30,6 @@ export function WeeklyGrid({ className }: WeeklyGridProps) {
     reorderTasks,
     isManager,
   } = useRewardChart();
-
-  // Local edit mode state (only managers can toggle)
-  const [isEditMode, setIsEditMode] = useState(false);
 
   // Task dialog state
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
@@ -181,10 +176,10 @@ export function WeeklyGrid({ className }: WeeklyGridProps) {
                 onComplete={completeTask}
                 onUndo={undoCompletion}
                 disabled={isLoading}
-                showControls={isEditMode}
+                showControls={isManager}
                 onEdit={handleEditTask}
                 onDelete={handleDeleteTask}
-                draggable={isEditMode}
+                draggable={isManager}
                 onDragStart={handleDragStart}
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
@@ -192,8 +187,8 @@ export function WeeklyGrid({ className }: WeeklyGridProps) {
             ))
           )}
 
-          {/* Add Task Row - only in edit mode */}
-          {isEditMode && <AddTaskRow onClick={handleAddTask} />}
+          {/* Add Task Row - only for managers */}
+          {isManager && <AddTaskRow onClick={handleAddTask} />}
         </div>
 
         {/* Footer */}
@@ -207,27 +202,6 @@ export function WeeklyGrid({ className }: WeeklyGridProps) {
           onSubmit={handleTaskSubmit}
         />
       </div>
-
-      {/* Edit Mode FAB - fixed to viewport bottom-right, only visible to managers */}
-      {isManager && (
-        <Button
-          onClick={() => setIsEditMode(!isEditMode)}
-          size="icon"
-          className={cn(
-            "fixed right-6 bottom-6 z-50 h-14 w-14 rounded-full shadow-lg transition-colors",
-            isEditMode
-              ? "bg-green-600 hover:bg-green-700"
-              : "bg-indigo-600 hover:bg-indigo-700"
-          )}
-          aria-label={isEditMode ? t("doneEditing") : t("editChart")}
-        >
-          {isEditMode ? (
-            <Check className="h-6 w-6 text-white" />
-          ) : (
-            <Pencil className="h-6 w-6 text-white" />
-          )}
-        </Button>
-      )}
     </div>
   );
 }
