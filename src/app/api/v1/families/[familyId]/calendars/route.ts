@@ -6,6 +6,7 @@ import { googleCalendars, familyMembers, accounts } from "@/server/schema";
 import { eq, and } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 import { createWatchChannel } from "@/server/services/google-channel-service";
+import { addCalendarSchema } from "@/lib/validations/calendar";
 
 type RouteParams = { params: Promise<{ familyId: string }> };
 
@@ -84,7 +85,24 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     const { familyId } = await params;
     const body = await request.json();
-    const { accountId, googleCalendarId, name, color, accessRole } = body;
+
+    const parseResult = addCalendarSchema.safeParse(body);
+    if (!parseResult.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "VALIDATION_ERROR",
+            message: "Invalid input",
+            details: parseResult.error.flatten(),
+          },
+        },
+        { status: 400 }
+      );
+    }
+
+    const { accountId, googleCalendarId, name, color, accessRole } =
+      parseResult.data;
 
     // Verify user is family member
     const membership = await db
