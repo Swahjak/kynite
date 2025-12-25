@@ -85,6 +85,13 @@
       "when": 1766608918296,
       "tag": "0011_sloppy_dreadnoughts",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1766661750120,
+      "tag": "0012_curved_ravenous",
+      "breakpoints": true
     }
   ]
 }

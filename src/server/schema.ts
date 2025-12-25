@@ -140,6 +140,7 @@ export const devicePairingCodes = pgTable("device_pairing_codes", {
     .references(() => users.id, { onDelete: "cascade" }),
   expiresAt: timestamp("expires_at", { mode: "date" }).notNull(),
   usedAt: timestamp("used_at", { mode: "date" }),
+  attempts: integer("attempts").notNull().default(0),
   createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
 });
 

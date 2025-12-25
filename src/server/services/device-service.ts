@@ -11,6 +11,7 @@ import { createId } from "@paralleldrive/cuid2";
 
 export const CODE_EXPIRY_MINUTES = 5;
 export const DEVICE_SESSION_EXPIRY_DAYS = 90;
+export const MAX_PAIRING_ATTEMPTS = 5;
 
 /**
  * Generate a cryptographically secure random 6-digit pairing code
@@ -202,4 +203,37 @@ export async function cleanupExpiredPairingCodes(): Promise<number> {
     .returning({ id: devicePairingCodes.id });
 
   return result.length;
+}
+
+/**
+ * Record a failed pairing attempt
+ * Returns false if code is now invalidated (max attempts reached)
+ */
+export async function recordFailedAttempt(code: string): Promise<boolean> {
+  const result = await db
+    .update(devicePairingCodes)
+    .set({
+      attempts: sql`${devicePairingCodes.attempts} + 1`,
+    })
+    .where(eq(devicePairingCodes.code, code))
+    .returning({ attempts: devicePairingCodes.attempts });
+
+  if (result.length === 0) {
+    return false;
+  }
+
+  return result[0].attempts < MAX_PAIRING_ATTEMPTS;
+}
+
+/**
+ * Check if a code has exceeded max attempts
+ */
+export async function isCodeInvalidated(code: string): Promise<boolean> {
+  const [pairingCode] = await db
+    .select({ attempts: devicePairingCodes.attempts })
+    .from(devicePairingCodes)
+    .where(eq(devicePairingCodes.code, code))
+    .limit(1);
+
+  return pairingCode ? pairingCode.attempts >= MAX_PAIRING_ATTEMPTS : true;
 }
