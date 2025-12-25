@@ -5,6 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
+import { CheckCircle } from "lucide-react";
 
 const tiers = [
   { key: "free", featured: false },
@@ -95,7 +96,7 @@ function PricingCard({
         {includesText && (
           <li className="flex items-start text-sm">
             <Icon
-              name="check_circle"
+              icon={CheckCircle}
               className="text-primary mr-3 shrink-0"
               size="sm"
             />
@@ -105,7 +106,7 @@ function PricingCard({
         {features.map((feature, index) => (
           <li key={index} className="flex items-start text-sm">
             <Icon
-              name="check_circle"
+              icon={CheckCircle}
               className="text-primary mr-3 shrink-0"
               size="sm"
             />
