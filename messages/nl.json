@@ -114,7 +114,9 @@
       "red": "Rood",
       "yellow": "Geel",
       "purple": "Paars",
-      "orange": "Oranje"
+      "orange": "Oranje",
+      "pink": "Roze",
+      "teal": "Groenblauw"
     }
   },
   "Settings": {
