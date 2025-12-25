@@ -21,7 +21,8 @@ describe("useTimerTemplates", () => {
     const mockTemplates = [{ id: "1", title: "Screen Time" }];
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve({ success: true, data: { templates: mockTemplates } }),
+      json: () =>
+        Promise.resolve({ success: true, data: { templates: mockTemplates } }),
     });
 
     const { result } = renderHook(() => useTimerTemplates(), {
@@ -41,7 +42,8 @@ describe("useStartTimer", () => {
   it("starts a timer and invalidates cache", async () => {
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve({ success: true, data: { timer: { id: "timer-1" } } }),
+      json: () =>
+        Promise.resolve({ success: true, data: { timer: { id: "timer-1" } } }),
     });
 
     const { result } = renderHook(() => useStartTimer(), {

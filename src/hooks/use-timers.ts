@@ -70,7 +70,13 @@ export function useUpdateTimerTemplate() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, input }: { id: string; input: Partial<TimerTemplate> }) =>
+    mutationFn: ({
+      id,
+      input,
+    }: {
+      id: string;
+      input: Partial<TimerTemplate>;
+    }) =>
       apiFetch(`/api/v1/timers/templates/${id}`, {
         method: "PUT",
         body: JSON.stringify(input),
