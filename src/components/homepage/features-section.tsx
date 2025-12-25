@@ -6,12 +6,6 @@ import { cn } from "@/lib/utils";
 import { CalendarDays, Gamepad2, UtensilsCrossed } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-const features: Array<{ key: string; icon: LucideIcon; color: string }> = [
-  { key: "calendar", icon: CalendarDays, color: "primary" },
-  { key: "routines", icon: Gamepad2, color: "purple" },
-  { key: "meals", icon: UtensilsCrossed, color: "orange" },
-];
-
 const colorClasses = {
   primary: {
     icon: "bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground",
@@ -25,7 +19,17 @@ const colorClasses = {
     icon: "bg-orange-100 text-orange-600 group-hover:bg-orange-600 group-hover:text-white dark:bg-orange-900/50 dark:text-orange-400",
     border: "hover:border-orange-200 dark:hover:border-orange-800",
   },
-};
+} as const;
+
+const features: Array<{
+  key: string;
+  icon: LucideIcon;
+  color: keyof typeof colorClasses;
+}> = [
+  { key: "calendar", icon: CalendarDays, color: "primary" },
+  { key: "routines", icon: Gamepad2, color: "purple" },
+  { key: "meals", icon: UtensilsCrossed, color: "orange" },
+];
 
 export function FeaturesSection() {
   const t = useTranslations("HomePage.features");
