@@ -4,7 +4,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Medal, ChevronRight, Pencil, Target, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useInteractionMode } from "@/contexts/interaction-mode-context";
+import { useIsManager } from "@/hooks/use-is-manager";
 import { useRewardChart } from "../contexts/reward-chart-context";
 import { GoalDialog } from "../dialogs/goal-dialog";
 import {
@@ -37,8 +37,7 @@ export function NextRewardCard({
   className,
 }: NextRewardCardProps) {
   const t = useTranslations("rewardChart");
-  const { mode } = useInteractionMode();
-  const isManageMode = mode === "manage";
+  const isManager = useIsManager();
   const { createGoal, updateGoal } = useRewardChart();
 
   const [goalDialogOpen, setGoalDialogOpen] = useState(false);
@@ -112,7 +111,7 @@ export function NextRewardCard({
               {goal.starTarget} STARS
             </span>
           )}
-          {isManageMode && goal && (
+          {isManager && goal && (
             <div className="flex gap-1">
               <Button
                 variant="ghost"
@@ -191,7 +190,7 @@ export function NextRewardCard({
           </>
         ) : (
           <div className="py-4 text-center">
-            {isManageMode ? (
+            {isManager ? (
               <Button onClick={() => setGoalDialogOpen(true)}>
                 <Target className="mr-2 h-4 w-4" />
                 {t("setGoal")}

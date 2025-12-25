@@ -14,7 +14,7 @@ import { useTranslations } from "next-intl";
 import { usePathname } from "@/i18n/navigation";
 import { ProgressLink } from "@/components/ui/progress-link";
 import { cn } from "@/lib/utils";
-import { useInteractionMode } from "@/contexts/interaction-mode-context";
+import { useIsManager } from "@/hooks/use-is-manager";
 import { BrandArea } from "./brand-area";
 import {
   Sheet,
@@ -56,10 +56,10 @@ const navItems: NavItem[] = [
 export function NavigationMenu({ open, onOpenChange }: NavigationMenuProps) {
   const t = useTranslations("Menu");
   const pathname = usePathname();
-  const { mode } = useInteractionMode();
+  const isManager = useIsManager();
 
   const filteredItems = navItems.filter(
-    (item) => !item.manageOnly || mode === "manage"
+    (item) => !item.manageOnly || isManager
   );
 
   return (

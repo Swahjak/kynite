@@ -11,7 +11,7 @@ import { WallHubHeader } from "@/components/wall-hub/wall-hub-header";
 import { AddEditEventDialog } from "@/components/calendar/dialogs/add-edit-event-dialog";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useInteractionModeSafe } from "@/contexts/interaction-mode-context";
+import { useIsManager } from "@/hooks/use-is-manager";
 import type { FamilyMemberWithUser } from "@/types/family";
 import type { IChoreWithAssignee, IChoreProgress } from "@/types/chore";
 
@@ -25,9 +25,8 @@ interface CalendarLayoutClientProps {
 
 function CalendarLayoutInner({ children }: { children: ReactNode }) {
   const { events, users } = useCalendarData();
-  const { mode } = useInteractionModeSafe();
+  const isManager = useIsManager();
   const t = useTranslations("Calendar");
-  const isManageMode = mode === "manage";
 
   return (
     <CalendarProvider users={users} events={events}>
@@ -36,7 +35,7 @@ function CalendarLayoutInner({ children }: { children: ReactNode }) {
         <div className="flex-1 overflow-hidden">{children}</div>
 
         {/* FAB - only visible in manage mode */}
-        {isManageMode && (
+        {isManager && (
           <AddEditEventDialog>
             <Button
               size="icon"

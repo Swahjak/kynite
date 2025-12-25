@@ -14,13 +14,12 @@ import { TodayButton } from "@/components/calendar/header/today-button";
 import { UserSelect } from "@/components/calendar/header/user-select";
 import { Settings } from "@/components/calendar/settings/settings";
 import { LanguageSwitcher } from "@/components/language-switcher";
-import { useInteractionModeSafe } from "@/contexts/interaction-mode-context";
+import { useIsManager } from "@/hooks/use-is-manager";
 import Views from "./view-tabs";
 
 export function CalendarHeader() {
   const { view, events } = useCalendar();
-  const { mode } = useInteractionModeSafe();
-  const isManageMode = mode === "manage";
+  const isManager = useIsManager();
 
   return (
     <div className="flex flex-col gap-4 border-b p-4 lg:flex-row lg:items-center lg:justify-between">
@@ -47,11 +46,11 @@ export function CalendarHeader() {
           <Views />
         </div>
 
-        {isManageMode && <UserSelect />}
+        {isManager && <UserSelect />}
 
         <div className="flex items-center gap-1.5">
           <LanguageSwitcher />
-          {isManageMode && <Settings />}
+          {isManager && <Settings />}
         </div>
       </motion.div>
     </div>

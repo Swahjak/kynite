@@ -6,7 +6,7 @@ import { MessageCircle, MessageSquarePlus } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { useInteractionMode } from "@/contexts/interaction-mode-context";
+import { useIsManager } from "@/hooks/use-is-manager";
 import { useRewardChart } from "../contexts/reward-chart-context";
 import { MessageDialog } from "../dialogs/message-dialog";
 import { Button } from "@/components/ui/button";
@@ -19,8 +19,7 @@ interface MessageCardProps {
 
 export function MessageCard({ message, className }: MessageCardProps) {
   const t = useTranslations("rewardChart");
-  const { mode } = useInteractionMode();
-  const isManageMode = mode === "manage";
+  const isManager = useIsManager();
   const { sendMessage } = useRewardChart();
 
   const [messageDialogOpen, setMessageDialogOpen] = useState(false);
@@ -48,7 +47,7 @@ export function MessageCard({ message, className }: MessageCardProps) {
             <MessageCircle className="h-5 w-5" />
             <span className="font-display font-bold">{t("parentMessage")}</span>
           </div>
-          {isManageMode && (
+          {isManager && (
             <Button
               variant="ghost"
               size="icon"
@@ -89,7 +88,7 @@ export function MessageCard({ message, className }: MessageCardProps) {
           </div>
           <span className="font-display font-bold">{t("parentMessage")}</span>
         </div>
-        {isManageMode && (
+        {isManager && (
           <Button
             variant="ghost"
             size="icon"

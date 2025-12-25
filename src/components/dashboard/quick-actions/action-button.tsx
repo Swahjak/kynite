@@ -10,7 +10,7 @@ import {
   Timer,
   type LucideIcon,
 } from "lucide-react";
-import { useInteractionMode } from "@/contexts/interaction-mode-context";
+import { useIsManager } from "@/hooks/use-is-manager";
 import type { QuickAction } from "../types";
 
 const iconMap: Record<string, LucideIcon> = {
@@ -28,10 +28,10 @@ interface ActionButtonProps {
 }
 
 export function ActionButton({ action, onClick }: ActionButtonProps) {
-  const { mode } = useInteractionMode();
+  const isManager = useIsManager();
 
   const Icon = iconMap[action.icon] || CheckCircle;
-  const isDisabled = mode === "wall";
+  const isDisabled = !isManager;
 
   return (
     <Button

@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Pause, Plus } from "lucide-react";
-import { useInteractionMode } from "@/contexts/interaction-mode-context";
+import { useIsManager } from "@/hooks/use-is-manager";
 import { useDashboard } from "../contexts/dashboard-context";
 import type { Timer } from "../types";
 
@@ -14,7 +14,7 @@ interface TimerCardProps {
 }
 
 export function TimerCard({ timer }: TimerCardProps) {
-  const { mode } = useInteractionMode();
+  const isManager = useIsManager();
   const { pauseTimer, extendTimer } = useDashboard();
   const [remaining, setRemaining] = useState(timer.remainingSeconds);
 
@@ -57,7 +57,7 @@ export function TimerCard({ timer }: TimerCardProps) {
 
         <Progress value={progress} className="mb-2 h-1.5" />
 
-        {mode === "manage" && (
+        {isManager && (
           <div className="flex gap-2">
             <Button
               variant="outline"

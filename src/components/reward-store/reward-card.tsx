@@ -4,7 +4,7 @@ import { Star, Clock, Target, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { useInteractionMode } from "@/contexts/interaction-mode-context";
+import { useIsManager } from "@/hooks/use-is-manager";
 import { useTranslations } from "next-intl";
 import type { IRewardWithStatus } from "./interfaces";
 import { formatDistanceToNow } from "date-fns";
@@ -36,8 +36,7 @@ export function RewardCard({
   className,
 }: RewardCardProps) {
   const t = useTranslations("rewardStore");
-  const { mode } = useInteractionMode();
-  const isManageMode = mode === "manage";
+  const isManager = useIsManager();
 
   const getButtonContent = () => {
     if (reward.canRedeem) {
@@ -125,7 +124,7 @@ export function RewardCard({
         </div>
 
         <div className="flex gap-2">
-          {isManageMode && (
+          {isManager && (
             <>
               {onSetGoal && !isPrimaryGoal && (
                 <Button variant="ghost" size="sm" onClick={onSetGoal}>

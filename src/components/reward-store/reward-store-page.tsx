@@ -6,7 +6,7 @@ import { Plus, ShoppingBag, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useInteractionMode } from "@/contexts/interaction-mode-context";
+import { useIsManager } from "@/hooks/use-is-manager";
 import { toast } from "sonner";
 import { useRewardStore } from "./contexts/reward-store-context";
 import { StarBalanceCard } from "./star-balance-card";
@@ -21,8 +21,7 @@ import type {
 
 export function RewardStorePage() {
   const t = useTranslations("rewardStore");
-  const { mode } = useInteractionMode();
-  const isManageMode = mode === "manage";
+  const isManager = useIsManager();
 
   const {
     data,
@@ -158,14 +157,12 @@ export function RewardStorePage() {
                   reward={reward}
                   isPrimaryGoal={data.primaryGoal?.id === reward.id}
                   onRedeem={() => openRedeemDialog(reward)}
-                  onEdit={
-                    isManageMode ? () => openEditDialog(reward) : undefined
-                  }
+                  onEdit={isManager ? () => openEditDialog(reward) : undefined}
                   onDelete={
-                    isManageMode ? () => handleDeleteReward(reward) : undefined
+                    isManager ? () => handleDeleteReward(reward) : undefined
                   }
                   onSetGoal={
-                    isManageMode && data.primaryGoal?.id !== reward.id
+                    isManager && data.primaryGoal?.id !== reward.id
                       ? () => handleSetPrimaryGoal(reward)
                       : undefined
                   }
@@ -211,7 +208,7 @@ export function RewardStorePage() {
       </Tabs>
 
       {/* FAB - only visible in manage mode */}
-      {isManageMode && (
+      {isManager && (
         <Button
           onClick={() => {
             setEditingReward(undefined);

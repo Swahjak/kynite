@@ -7,18 +7,17 @@ import { ChartHeader } from "./chart-header";
 import { WeeklyGrid } from "./weekly-grid";
 import { NextRewardCard, MessageCard } from "./bottom-cards";
 import { useRewardChart } from "./contexts/reward-chart-context";
-import { useInteractionMode } from "@/contexts/interaction-mode-context";
+import { useIsManager } from "@/hooks/use-is-manager";
 import { PersonFilterChips } from "@/components/wall-hub/shared/person-filter-chips";
 
 export function RewardChartPage() {
-  const { weekData, isLoading, error, familyId, allChildren, isManager } =
+  const { weekData, isLoading, error, familyId, allChildren } =
     useRewardChart();
-  const { mode } = useInteractionMode();
+  const isManager = useIsManager();
   const router = useRouter();
   const searchParams = useSearchParams();
   const t = useTranslations("rewardChart");
 
-  const isManageMode = mode === "manage";
   const selectedMemberId = searchParams.get("child") || allChildren?.[0]?.id;
 
   // Handle selecting a child's chart
