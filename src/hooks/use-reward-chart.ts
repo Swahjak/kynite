@@ -72,10 +72,10 @@ export function useCreateTask(familyId: string, chartId: string) {
 
   return useMutation({
     mutationFn: (input: CreateTaskInput) =>
-      apiFetch(
-        `/api/v1/families/${familyId}/reward-charts/${chartId}/tasks`,
-        { method: "POST", body: JSON.stringify(input) }
-      ),
+      apiFetch(`/api/v1/families/${familyId}/reward-charts/${chartId}/tasks`, {
+        method: "POST",
+        body: JSON.stringify(input),
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: rewardChartKeys.chart(familyId, chartId),
@@ -88,7 +88,13 @@ export function useUpdateTask(familyId: string, chartId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ taskId, input }: { taskId: string; input: UpdateTaskInput }) =>
+    mutationFn: ({
+      taskId,
+      input,
+    }: {
+      taskId: string;
+      input: UpdateTaskInput;
+    }) =>
       apiFetch(
         `/api/v1/families/${familyId}/reward-charts/${chartId}/tasks/${taskId}`,
         { method: "PUT", body: JSON.stringify(input) }
@@ -140,10 +146,10 @@ export function useCreateGoal(familyId: string, chartId: string) {
 
   return useMutation({
     mutationFn: (input: CreateGoalInput) =>
-      apiFetch(
-        `/api/v1/families/${familyId}/reward-charts/${chartId}/goals`,
-        { method: "POST", body: JSON.stringify(input) }
-      ),
+      apiFetch(`/api/v1/families/${familyId}/reward-charts/${chartId}/goals`, {
+        method: "POST",
+        body: JSON.stringify(input),
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: rewardChartKeys.chart(familyId, chartId),
@@ -156,7 +162,13 @@ export function useUpdateGoal(familyId: string, chartId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ goalId, input }: { goalId: string; input: UpdateGoalInput }) =>
+    mutationFn: ({
+      goalId,
+      input,
+    }: {
+      goalId: string;
+      input: UpdateGoalInput;
+    }) =>
       apiFetch(
         `/api/v1/families/${familyId}/reward-charts/${chartId}/goals/${goalId}`,
         { method: "PUT", body: JSON.stringify(input) }
