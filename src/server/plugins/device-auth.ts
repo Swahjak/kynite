@@ -1,6 +1,7 @@
-import { createAuthEndpoint } from "@better-auth/core/api";
+import { createAuthEndpoint } from "better-auth/api";
 import { setSessionCookie } from "better-auth/cookies";
-import { APIError, type BetterAuthPlugin, z } from "better-auth";
+import { APIError, type BetterAuthPlugin } from "better-auth";
+import { z } from "zod";
 import {
   consumePairingCode,
   DEVICE_SESSION_EXPIRY_DAYS,
