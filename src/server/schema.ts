@@ -39,6 +39,9 @@ export const sessions = pgTable("sessions", {
   expiresAt: timestamp("expires_at", { mode: "date" }).notNull(),
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
+  // Additional fields for cookie cache support
+  isDevice: boolean("is_device").default(false),
+  memberRole: text("member_role"),
   createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
 });
