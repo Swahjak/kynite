@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { db } from "@/server/db";
 import { sessions } from "@/server/schema";
 import { createId } from "@paralleldrive/cuid2";
@@ -10,7 +9,7 @@ import {
 } from "@/server/services/device-service";
 import { completePairingSchema } from "@/lib/validations/device";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
-import { signCookieValue } from "@/lib/signed-cookie";
+import { serializeSignedCookie } from "better-call";
 
 // Rate limit: 10 attempts per minute per IP
 const RATE_LIMIT_MAX = 10;
@@ -100,24 +99,33 @@ export async function POST(request: Request) {
 
     // Set the session cookie with proper signing for better-auth compatibility
     const secret = process.env.BETTER_AUTH_SECRET!;
-    const signedToken = await signCookieValue(sessionToken, secret);
+    const cookieHeader = await serializeSignedCookie(
+      "better-auth.session_token",
+      sessionToken,
+      secret,
+      {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        expires: expiresAt,
+        path: "/",
+      }
+    );
 
-    const cookieStore = await cookies();
-    cookieStore.set("better-auth.session_token", signedToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      expires: expiresAt,
-      path: "/",
-    });
-
-    return NextResponse.json({
-      success: true,
-      data: {
-        deviceName: pairingCode.deviceName,
-        message: "Device paired successfully",
+    return NextResponse.json(
+      {
+        success: true,
+        data: {
+          deviceName: pairingCode.deviceName,
+          message: "Device paired successfully",
+        },
       },
-    });
+      {
+        headers: {
+          "Set-Cookie": cookieHeader,
+        },
+      }
+    );
   } catch (error) {
     console.error("Error completing device pairing:", error);
     return NextResponse.json(
