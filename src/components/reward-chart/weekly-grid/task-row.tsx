@@ -114,6 +114,7 @@ export function TaskRow({
           onComplete={() => onComplete(task.id)}
           onUndo={() => onUndo(task.id)}
           disabled={disabled}
+          starValue={task.starValue}
         />
       ))}
     </div>

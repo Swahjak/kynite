@@ -15,6 +15,7 @@ import {
 } from "../helpers";
 import { useChores } from "../contexts/chores-context";
 import { useIsManager } from "@/hooks/use-is-manager";
+import { useConfetti } from "@/components/confetti";
 
 interface ChoreCardProps {
   chore: IChoreWithAssignee;
@@ -26,6 +27,7 @@ export function ChoreCard({ chore, onEdit, onDelete }: ChoreCardProps) {
   const { completeChore, expandedChoreId, setExpandedChoreId } = useChores();
   const canEdit = useIsManager();
   const [isCompleting, setIsCompleting] = useState(false);
+  const { fire } = useConfetti();
 
   const urgency = getUrgencyStatus(chore);
   const dueLabel = formatDueLabel(chore);
@@ -47,6 +49,7 @@ export function ChoreCard({ chore, onEdit, onDelete }: ChoreCardProps) {
     e.stopPropagation();
     setIsCompleting(true);
     await completeChore(chore.id);
+    fire(chore.starReward);
   };
 
   const handleEdit = (e: React.MouseEvent) => {

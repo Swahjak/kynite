@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Pause, Plus, Check, X, Star } from "lucide-react";
 import { useIsManager } from "@/hooks/use-is-manager";
 import { useDashboard } from "../contexts/dashboard-context";
+import { useConfetti } from "@/components/confetti";
 import type { Timer } from "../types";
 import { cn } from "@/lib/utils";
 
@@ -34,6 +35,7 @@ export function TimerCard({ timer }: TimerCardProps) {
     acknowledgeTimer,
     familyMembers,
   } = useDashboard();
+  const { fire } = useConfetti();
 
   const [remaining, setRemaining] = useState(timer.remainingSeconds);
   const [cooldownElapsed, setCooldownElapsed] = useState(0);
@@ -124,6 +126,7 @@ export function TimerCard({ timer }: TimerCardProps) {
     // Use the assigned member as the confirmer (anyone can click, stars go to assigned)
     if (timer.assignedToId) {
       confirmTimer(timer.id, timer.assignedToId);
+      fire(timer.starReward);
     }
   };
 
@@ -133,6 +136,9 @@ export function TimerCard({ timer }: TimerCardProps) {
 
   const handleAcknowledge = () => {
     acknowledgeTimer(timer.id);
+    if (timer.starReward > 0) {
+      fire(timer.starReward);
+    }
   };
 
   // Render action buttons based on state

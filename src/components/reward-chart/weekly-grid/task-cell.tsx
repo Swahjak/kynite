@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { Check, X } from "lucide-react";
+import { useConfetti } from "@/components/confetti";
 import type { TaskCell as TaskCellType } from "../interfaces";
 
 interface TaskCellProps {
@@ -10,6 +11,7 @@ interface TaskCellProps {
   onComplete: () => void;
   onUndo: () => void;
   disabled?: boolean;
+  starValue?: number;
 }
 
 export function TaskCell({
@@ -18,7 +20,10 @@ export function TaskCell({
   onComplete,
   onUndo,
   disabled,
+  starValue,
 }: TaskCellProps) {
+  const { fire } = useConfetti();
+
   const handleClick = () => {
     if (disabled) return;
 
@@ -26,6 +31,7 @@ export function TaskCell({
       onUndo();
     } else if (cell.status === "pending") {
       onComplete();
+      fire(starValue ?? 1);
     }
   };
 
