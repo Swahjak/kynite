@@ -35,3 +35,15 @@ jobs:
           TURBO_TELEMETRY_DISABLED: 1
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
           TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+          # Required for build (dummy values for CI)
+          DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
+          BETTER_AUTH_SECRET: "ci-test-secret-at-least-32-characters-long"
+          BETTER_AUTH_URL: "http://localhost:3000"
+          NEXT_PUBLIC_BETTER_AUTH_URL: "http://localhost:3000"
+          GOOGLE_CLIENT_ID: "ci-google-client-id"
+          GOOGLE_CLIENT_SECRET: "ci-google-client-secret"
+          PUSHER_APP_ID: "ci-pusher-app-id"
+          PUSHER_SECRET: "ci-pusher-secret"
+          NEXT_PUBLIC_PUSHER_KEY: "ci-pusher-key"
+          NEXT_PUBLIC_PUSHER_CLUSTER: "eu"
+          CRON_SECRET: "ci-cron-secret"
