@@ -56,6 +56,7 @@ export const MOCK_TIMERS: Timer[] = [
     cooldownSeconds: null,
     assignedToId: null,
     ownerDeviceId: null,
+    completedAt: null,
   },
   {
     id: "t2",
@@ -70,6 +71,7 @@ export const MOCK_TIMERS: Timer[] = [
     cooldownSeconds: 60,
     assignedToId: null,
     ownerDeviceId: null,
+    completedAt: null,
   },
 ];
 

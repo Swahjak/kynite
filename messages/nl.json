@@ -208,7 +208,13 @@
       "title": "Actieve Timers",
       "pause": "Pauze",
       "extend": "+15m",
-      "addTimer": "Timer toevoegen"
+      "addTimer": "Timer toevoegen",
+      "claim": "Claim",
+      "done": "Klaar",
+      "dismiss": "Sluiten",
+      "missed": "Gemist!",
+      "minutesLeft": "min over",
+      "cooldown": "claim binnen"
     },
     "weeklyStars": {
       "title": "Wekelijkse Sterren"
@@ -425,6 +431,8 @@
   },
   "rewardStore": {
     "title": "Beloningswinkel",
+    "selectMemberTitle": "Selecteer een gezinslid",
+    "selectMemberDescription": "Kies van wie je de beloningen wilt bekijken",
     "available": "Beschikbaar",
     "redeemed": "Verzilverd",
     "yourBalance": "Jouw Saldo",

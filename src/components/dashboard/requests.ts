@@ -159,6 +159,7 @@ function mapActiveTimerToTimer(activeTimer: ActiveTimer, now: Date): Timer {
     cooldownSeconds: activeTimer.cooldownSeconds,
     assignedToId: activeTimer.assignedToId,
     ownerDeviceId: activeTimer.ownerDeviceId,
+    completedAt: activeTimer.completedAt,
   };
 }
 

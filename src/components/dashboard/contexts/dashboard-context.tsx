@@ -39,6 +39,9 @@ interface IDashboardContext {
   startQuickAction: (actionId: string, memberId: string) => void;
   pauseTimer: (timerId: string) => void;
   extendTimer: (timerId: string, seconds: number) => void;
+  confirmTimer: (timerId: string, confirmedById: string) => void;
+  dismissTimer: (timerId: string) => void;
+  acknowledgeTimer: (timerId: string) => void;
   isLoadingTimers: boolean;
 }
 
@@ -63,6 +66,7 @@ function transformTimer(apiTimer: {
   cooldownSeconds: number | null;
   assignedToId: string | null;
   ownerDeviceId: string | null;
+  completedAt: string | null;
 }): Timer {
   return {
     id: apiTimer.id,
@@ -77,6 +81,7 @@ function transformTimer(apiTimer: {
     cooldownSeconds: apiTimer.cooldownSeconds,
     assignedToId: apiTimer.assignedToId,
     ownerDeviceId: apiTimer.ownerDeviceId,
+    completedAt: apiTimer.completedAt ? new Date(apiTimer.completedAt) : null,
   };
 }
 
@@ -143,6 +148,59 @@ export function DashboardProvider({ data, children }: DashboardProviderProps) {
     },
   });
 
+  // Confirm timer mutation (claim reward)
+  const confirmTimerMutation = useMutation({
+    mutationFn: async ({
+      timerId,
+      confirmedById,
+    }: {
+      timerId: string;
+      confirmedById: string;
+    }) => {
+      const res = await fetch(`/api/v1/timers/active/${timerId}/confirm`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirmedById }),
+      });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["activeTimers"] });
+      queryClient.invalidateQueries({ queryKey: ["weeklyStars"] });
+    },
+  });
+
+  // Dismiss timer mutation (for missed cooldowns)
+  const dismissTimerMutation = useMutation({
+    mutationFn: async (timerId: string) => {
+      const res = await fetch(`/api/v1/timers/active/${timerId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "dismiss" }),
+      });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["activeTimers"] });
+    },
+  });
+
+  // Acknowledge timer mutation (for completed timers without cooldown)
+  const acknowledgeTimerMutation = useMutation({
+    mutationFn: async (timerId: string) => {
+      const res = await fetch(`/api/v1/timers/active/${timerId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "acknowledge" }),
+      });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["activeTimers"] });
+      queryClient.invalidateQueries({ queryKey: ["weeklyStars"] });
+    },
+  });
+
   const categorizedEvents = useMemo(() => {
     const now = currentTime.getTime();
     const upcoming = data.todaysEvents
@@ -202,6 +260,27 @@ export function DashboardProvider({ data, children }: DashboardProviderProps) {
     [extendTimerMutation]
   );
 
+  const confirmTimer = useCallback(
+    (timerId: string, confirmedById: string) => {
+      confirmTimerMutation.mutate({ timerId, confirmedById });
+    },
+    [confirmTimerMutation]
+  );
+
+  const dismissTimer = useCallback(
+    (timerId: string) => {
+      dismissTimerMutation.mutate(timerId);
+    },
+    [dismissTimerMutation]
+  );
+
+  const acknowledgeTimer = useCallback(
+    (timerId: string) => {
+      acknowledgeTimerMutation.mutate(timerId);
+    },
+    [acknowledgeTimerMutation]
+  );
+
   // Real-time updates via Pusher
   useFamilyChannel(data.familyId, {
     "timer:started": (eventData: unknown) => {
@@ -256,6 +335,9 @@ export function DashboardProvider({ data, children }: DashboardProviderProps) {
     startQuickAction,
     pauseTimer,
     extendTimer,
+    confirmTimer,
+    dismissTimer,
+    acknowledgeTimer,
     isLoadingTimers,
   };
 

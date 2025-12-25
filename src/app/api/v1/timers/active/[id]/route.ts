@@ -11,6 +11,8 @@ import {
   extendTimer,
   cancelTimer,
   syncTimerState,
+  dismissTimer,
+  acknowledgeTimer,
 } from "@/server/services/active-timer-service";
 import { syncTimerSchema, extendTimerSchema } from "@/lib/validations/timer";
 import { Errors } from "@/lib/errors";
@@ -97,6 +99,16 @@ export async function PATCH(request: Request, { params }: { params: Params }) {
         }
         timer = await syncTimerState(id, familyId, syncParsed.data);
         break;
+      }
+      case "dismiss":
+        await dismissTimer(id, familyId);
+        return NextResponse.json({ success: true, data: null });
+      case "acknowledge": {
+        const result = await acknowledgeTimer(id, familyId);
+        return NextResponse.json({
+          success: true,
+          data: { timer: result.timer, starsAwarded: result.starsAwarded },
+        });
       }
       default:
         return Errors.badRequest({ action });

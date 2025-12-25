@@ -208,7 +208,13 @@
       "title": "Active Timers",
       "pause": "Pause",
       "extend": "+15m",
-      "addTimer": "Add timer"
+      "addTimer": "Add timer",
+      "claim": "Claim",
+      "done": "Done",
+      "dismiss": "Dismiss",
+      "missed": "Missed!",
+      "minutesLeft": "min left",
+      "cooldown": "claim within"
     },
     "weeklyStars": {
       "title": "Weekly Stars"
@@ -425,6 +431,8 @@
   },
   "rewardStore": {
     "title": "Reward Store",
+    "selectMemberTitle": "Select a family member",
+    "selectMemberDescription": "Choose whose rewards you want to view",
     "available": "Available",
     "redeemed": "Redeemed",
     "yourBalance": "Your Balance",

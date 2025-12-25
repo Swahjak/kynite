@@ -23,6 +23,7 @@ export interface Timer {
   cooldownSeconds: number | null;
   assignedToId: string | null;
   ownerDeviceId: string | null;
+  completedAt: Date | null;
 }
 
 export interface FamilyMemberStar {

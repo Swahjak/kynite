@@ -1,6 +1,6 @@
 import { db } from "@/server/db";
 import { activeTimers, timerTemplates } from "@/server/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, inArray } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 import { addStars } from "./star-service";
 import { broadcastToFamily } from "@/lib/pusher";
@@ -18,7 +18,7 @@ import type { ActiveTimer } from "@/server/schema";
 // =============================================================================
 
 /**
- * Get all active timers for a family
+ * Get all active timers for a family (running, paused, or expired)
  */
 export async function getActiveTimersForFamily(
   familyId: string
@@ -29,7 +29,7 @@ export async function getActiveTimersForFamily(
     .where(
       and(
         eq(activeTimers.familyId, familyId),
-        eq(activeTimers.status, "running")
+        inArray(activeTimers.status, ["running", "paused", "expired"])
       )
     );
 }
@@ -432,4 +432,68 @@ export async function expireTimer(
     .returning();
 
   return updated;
+}
+
+/**
+ * Dismiss a timer (for missed cooldown or cancelled)
+ */
+export async function dismissTimer(
+  timerId: string,
+  familyId: string
+): Promise<void> {
+  const timer = await getTimerById(timerId, familyId);
+  if (!timer) throw new Error("Timer not found");
+
+  await db
+    .update(activeTimers)
+    .set({
+      status: "completed",
+      updatedAt: new Date(),
+    })
+    .where(eq(activeTimers.id, timerId));
+
+  broadcastToFamily(familyId, "timer:completed", {
+    timer: { ...timer, status: "completed" },
+  });
+}
+
+/**
+ * Acknowledge a completed timer (no cooldown, just mark as done)
+ */
+export async function acknowledgeTimer(
+  timerId: string,
+  familyId: string
+): Promise<{ timer: ActiveTimer; starsAwarded: number }> {
+  const timer = await getTimerById(timerId, familyId);
+  if (!timer) throw new Error("Timer not found");
+
+  const [updated] = await db
+    .update(activeTimers)
+    .set({
+      status: "completed",
+      completedAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .where(eq(activeTimers.id, timerId))
+    .returning();
+
+  // Award stars if applicable (for timers without cooldown)
+  let starsAwarded = 0;
+  if (timer.starReward > 0 && timer.assignedToId) {
+    await addStars({
+      memberId: timer.assignedToId,
+      amount: timer.starReward,
+      type: "timer",
+      referenceId: timerId,
+      description: timer.title,
+    });
+    starsAwarded = timer.starReward;
+  }
+
+  broadcastToFamily(familyId, "timer:completed", {
+    timer: updated,
+    starsAwarded,
+  });
+
+  return { timer: updated, starsAwarded };
 }
