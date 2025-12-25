@@ -11,6 +11,7 @@ import {
   deleteInvite,
 } from "@/server/services/family-service";
 import { getNonDeviceSession } from "@/lib/api-auth";
+import { Errors } from "@/lib/errors";
 
 type Params = { params: Promise<{ familyId: string; inviteId: string }> };
 
@@ -27,16 +28,7 @@ export async function DELETE(request: Request, { params }: Params) {
 
     const isManager = await isUserFamilyManager(session!.user.id, familyId);
     if (!isManager) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "FORBIDDEN",
-            message: "Only managers can delete invites",
-          },
-        },
-        { status: 403 }
-      );
+      return Errors.managerRequired();
     }
 
     // Verify invite belongs to this family before deleting
@@ -52,13 +44,7 @@ export async function DELETE(request: Request, { params }: Params) {
       .limit(1);
 
     if (invite.length === 0) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "NOT_FOUND", message: "Invite not found" },
-        },
-        { status: 404 }
-      );
+      return Errors.notFound("invite");
     }
 
     await deleteInvite(inviteId);
@@ -69,12 +55,6 @@ export async function DELETE(request: Request, { params }: Params) {
     });
   } catch (error) {
     console.error("Error deleting invite:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: { code: "INTERNAL_ERROR", message: "Failed to delete invite" },
-      },
-      { status: 500 }
-    );
+    return Errors.internal(error);
   }
 }

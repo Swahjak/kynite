@@ -7,6 +7,7 @@ import { db } from "@/server/db";
 import { families } from "@/server/schema";
 import { eq } from "drizzle-orm";
 import { acceptInvite } from "@/server/services/family-service";
+import { Errors } from "@/lib/errors";
 
 type Params = { params: Promise<{ token: string }> };
 
@@ -21,13 +22,7 @@ export async function POST(request: Request, { params }: Params) {
     });
 
     if (!session?.user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
-        },
-        { status: 401 }
-      );
+      return Errors.unauthorized();
     }
 
     const { token } = await params;
@@ -57,50 +52,13 @@ export async function POST(request: Request, { params }: Params) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
 
-      if (errorMessage.includes("Invite not found")) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: { code: "INVALID_INVITE", message: "Invite not found" },
-          },
-          { status: 400 }
-        );
-      }
-
-      if (errorMessage.includes("has expired")) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: { code: "EXPIRED_INVITE", message: "Invite has expired" },
-          },
-          { status: 400 }
-        );
-      }
-
-      if (errorMessage.includes("maximum uses")) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: {
-              code: "MAX_USES_REACHED",
-              message: "Invite has reached maximum uses",
-            },
-          },
-          { status: 400 }
-        );
-      }
-
-      if (errorMessage.includes("already a member")) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: {
-              code: "ALREADY_MEMBER",
-              message: "You are already a member of this family",
-            },
-          },
-          { status: 400 }
-        );
+      if (
+        errorMessage.includes("Invite not found") ||
+        errorMessage.includes("has expired") ||
+        errorMessage.includes("maximum uses") ||
+        errorMessage.includes("already a member")
+      ) {
+        return Errors.badRequest(errorMessage);
       }
 
       // Unknown error, rethrow to be caught by outer catch
@@ -108,12 +66,6 @@ export async function POST(request: Request, { params }: Params) {
     }
   } catch (error) {
     console.error("Error accepting invite:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: { code: "INTERNAL_ERROR", message: "Failed to accept invite" },
-      },
-      { status: 500 }
-    );
+    return Errors.internal(error);
   }
 }

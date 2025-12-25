@@ -2,6 +2,7 @@
 
 import { NextResponse } from "next/server";
 import { getInviteByToken } from "@/server/services/family-service";
+import { Errors } from "@/lib/errors";
 
 type Params = { params: Promise<{ token: string }> };
 
@@ -58,15 +59,6 @@ export async function GET(request: Request, { params }: Params) {
     });
   } catch (error) {
     console.error("Error validating invite:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: {
-          code: "INTERNAL_ERROR",
-          message: "Failed to validate invite",
-        },
-      },
-      { status: 500 }
-    );
+    return Errors.internal(error);
   }
 }

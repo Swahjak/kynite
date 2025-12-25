@@ -13,6 +13,7 @@ import {
 } from "@/server/services/family-service";
 import { getInviteUrl } from "@/lib/invite-token";
 import { getNonDeviceSession } from "@/lib/api-auth";
+import { Errors } from "@/lib/errors";
 
 type Params = { params: Promise<{ familyId: string }> };
 
@@ -29,33 +30,14 @@ export async function POST(request: Request, { params }: Params) {
 
     const isManager = await isUserFamilyManager(session!.user.id, familyId);
     if (!isManager) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "FORBIDDEN",
-            message: "Only managers can create invites",
-          },
-        },
-        { status: 403 }
-      );
+      return Errors.managerRequired();
     }
 
     const body = await request.json().catch(() => ({}));
     const parsed = createInviteSchema.safeParse(body);
 
     if (!parsed.success) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "VALIDATION_ERROR",
-            message: "Invalid invite data",
-            details: parsed.error.format(),
-          },
-        },
-        { status: 400 }
-      );
+      return Errors.validation(parsed.error.format());
     }
 
     const invite = await createInvite(familyId, session!.user.id, {
@@ -84,13 +66,7 @@ export async function POST(request: Request, { params }: Params) {
     );
   } catch (error) {
     console.error("Error creating invite:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: { code: "INTERNAL_ERROR", message: "Failed to create invite" },
-      },
-      { status: 500 }
-    );
+    return Errors.internal(error);
   }
 }
 
@@ -105,29 +81,14 @@ export async function GET(request: Request, { params }: Params) {
     });
 
     if (!session?.user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
-        },
-        { status: 401 }
-      );
+      return Errors.unauthorized();
     }
 
     const { familyId } = await params;
 
     const isManager = await isUserFamilyManager(session!.user.id, familyId);
     if (!isManager) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "FORBIDDEN",
-            message: "Only managers can view invites",
-          },
-        },
-        { status: 403 }
-      );
+      return Errors.managerRequired();
     }
 
     const now = new Date();
@@ -171,12 +132,6 @@ export async function GET(request: Request, { params }: Params) {
     });
   } catch (error) {
     console.error("Error listing invites:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: { code: "INTERNAL_ERROR", message: "Failed to list invites" },
-      },
-      { status: 500 }
-    );
+    return Errors.internal(error);
   }
 }
