@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { createContext, useContext, useState, useCallback } from "react";
+import { createContext, useContext } from "react";
 import type {
   WeeklyChartData,
   CompleteTaskResponse,
@@ -12,30 +12,35 @@ import type {
   UpdateGoalInput,
   ChildChartInfo,
 } from "../interfaces";
+import {
+  useRewardChartWeek,
+  useCompleteTask,
+  useUndoTaskCompletion,
+  useCreateTask,
+  useUpdateTask,
+  useDeleteTask,
+  useReorderTasks,
+  useCreateGoal,
+  useUpdateGoal,
+  useSendChartMessage,
+} from "@/hooks/use-reward-chart";
 
 interface RewardChartContextValue {
   weekData: WeeklyChartData | null;
-  setWeekData: (data: WeeklyChartData | null) => void;
   isLoading: boolean;
-  setIsLoading: (loading: boolean) => void;
   error: Error | null;
-  setError: (error: Error | null) => void;
   completeTask: (taskId: string) => Promise<CompleteTaskResponse | null>;
   undoCompletion: (taskId: string) => Promise<UndoCompletionResponse | null>;
-  refetch: () => Promise<void>;
   familyId: string;
   chartId: string;
   isManager: boolean;
   allChildren?: ChildChartInfo[];
-  // Task mutations
   createTask: (input: CreateTaskInput) => Promise<void>;
   updateTask: (taskId: string, input: UpdateTaskInput) => Promise<void>;
   deleteTask: (taskId: string) => Promise<void>;
   reorderTasks: (taskIds: string[]) => Promise<void>;
-  // Goal mutations
   createGoal: (input: CreateGoalInput) => Promise<void>;
   updateGoal: (goalId: string, input: UpdateGoalInput) => Promise<void>;
-  // Message mutation
   sendMessage: (content: string) => Promise<void>;
 }
 
@@ -60,236 +65,87 @@ export function RewardChartProvider({
   isManager = false,
   allChildren,
 }: RewardChartProviderProps) {
-  const [weekData, setWeekData] = useState<WeeklyChartData | null>(initialData);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  // React Query hooks
+  const {
+    data: weekData = initialData,
+    isLoading,
+    error,
+  } = useRewardChartWeek(familyId, chartId);
 
-  const refetch = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
+  const completeTaskMutation = useCompleteTask(familyId, chartId);
+  const undoTaskMutation = useUndoTaskCompletion(familyId, chartId);
+  const createTaskMutation = useCreateTask(familyId, chartId);
+  const updateTaskMutation = useUpdateTask(familyId, chartId);
+  const deleteTaskMutation = useDeleteTask(familyId, chartId);
+  const reorderTasksMutation = useReorderTasks(familyId, chartId);
+  const createGoalMutation = useCreateGoal(familyId, chartId);
+  const updateGoalMutation = useUpdateGoal(familyId, chartId);
+  const sendMessageMutation = useSendChartMessage(familyId, chartId);
 
+  const completeTask = async (
+    taskId: string
+  ): Promise<CompleteTaskResponse | null> => {
     try {
-      const res = await fetch(
-        `/api/v1/families/${familyId}/reward-charts/${chartId}/week`
-      );
-      const json = await res.json();
-
-      if (!json.success) {
-        throw new Error(json.error?.message ?? "Failed to fetch chart data");
-      }
-
-      setWeekData(json.data);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error("Unknown error"));
-    } finally {
-      setIsLoading(false);
+      return await completeTaskMutation.mutateAsync(taskId);
+    } catch {
+      return null;
     }
-  }, [familyId, chartId]);
+  };
 
-  const completeTask = useCallback(
-    async (taskId: string): Promise<CompleteTaskResponse | null> => {
-      try {
-        const res = await fetch(
-          `/api/v1/families/${familyId}/reward-charts/${chartId}/tasks/${taskId}/complete`,
-          { method: "POST" }
-        );
-        const json = await res.json();
+  const undoCompletion = async (
+    taskId: string
+  ): Promise<UndoCompletionResponse | null> => {
+    try {
+      return await undoTaskMutation.mutateAsync(taskId);
+    } catch {
+      return null;
+    }
+  };
 
-        if (!json.success) {
-          throw new Error(json.error?.message ?? "Failed to complete task");
-        }
+  const createTask = async (input: CreateTaskInput) => {
+    await createTaskMutation.mutateAsync(input);
+  };
 
-        // Refetch to update UI
-        await refetch();
+  const updateTask = async (taskId: string, input: UpdateTaskInput) => {
+    await updateTaskMutation.mutateAsync({ taskId, input });
+  };
 
-        return json.data;
-      } catch (err) {
-        setError(err instanceof Error ? err : new Error("Unknown error"));
-        return null;
-      }
-    },
-    [familyId, chartId, refetch]
-  );
+  const deleteTask = async (taskId: string) => {
+    await deleteTaskMutation.mutateAsync(taskId);
+  };
 
-  const undoCompletion = useCallback(
-    async (taskId: string): Promise<UndoCompletionResponse | null> => {
-      try {
-        const res = await fetch(
-          `/api/v1/families/${familyId}/reward-charts/${chartId}/tasks/${taskId}/undo`,
-          { method: "POST" }
-        );
-        const json = await res.json();
+  const reorderTasks = async (taskIds: string[]) => {
+    await reorderTasksMutation.mutateAsync(taskIds);
+  };
 
-        if (!json.success) {
-          throw new Error(json.error?.message ?? "Failed to undo completion");
-        }
+  const createGoal = async (input: CreateGoalInput) => {
+    await createGoalMutation.mutateAsync(input);
+  };
 
-        // Refetch to update UI
-        await refetch();
+  const updateGoal = async (goalId: string, input: UpdateGoalInput) => {
+    await updateGoalMutation.mutateAsync({ goalId, input });
+  };
 
-        return json.data;
-      } catch (err) {
-        setError(err instanceof Error ? err : new Error("Unknown error"));
-        return null;
-      }
-    },
-    [familyId, chartId, refetch]
-  );
-
-  const createTask = useCallback(
-    async (input: CreateTaskInput) => {
-      const response = await fetch(
-        `/api/v1/families/${familyId}/reward-charts/${chartId}/tasks`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(input),
-        }
-      );
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error?.message || "Failed to create task");
-      }
-      await refetch();
-    },
-    [familyId, chartId, refetch]
-  );
-
-  const updateTask = useCallback(
-    async (taskId: string, input: UpdateTaskInput) => {
-      const response = await fetch(
-        `/api/v1/families/${familyId}/reward-charts/${chartId}/tasks/${taskId}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(input),
-        }
-      );
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error?.message || "Failed to update task");
-      }
-      await refetch();
-    },
-    [familyId, chartId, refetch]
-  );
-
-  const deleteTask = useCallback(
-    async (taskId: string) => {
-      const response = await fetch(
-        `/api/v1/families/${familyId}/reward-charts/${chartId}/tasks/${taskId}`,
-        {
-          method: "DELETE",
-        }
-      );
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error?.message || "Failed to delete task");
-      }
-      await refetch();
-    },
-    [familyId, chartId, refetch]
-  );
-
-  const reorderTasks = useCallback(
-    async (taskIds: string[]) => {
-      const response = await fetch(
-        `/api/v1/families/${familyId}/reward-charts/${chartId}/tasks/reorder`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ taskIds }),
-        }
-      );
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error?.message || "Failed to reorder tasks");
-      }
-      await refetch();
-    },
-    [familyId, chartId, refetch]
-  );
-
-  const createGoal = useCallback(
-    async (input: CreateGoalInput) => {
-      const response = await fetch(
-        `/api/v1/families/${familyId}/reward-charts/${chartId}/goals`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(input),
-        }
-      );
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error?.message || "Failed to create goal");
-      }
-      await refetch();
-    },
-    [familyId, chartId, refetch]
-  );
-
-  const updateGoal = useCallback(
-    async (goalId: string, input: UpdateGoalInput) => {
-      const response = await fetch(
-        `/api/v1/families/${familyId}/reward-charts/${chartId}/goals/${goalId}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(input),
-        }
-      );
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error?.message || "Failed to update goal");
-      }
-      await refetch();
-    },
-    [familyId, chartId, refetch]
-  );
-
-  const sendMessage = useCallback(
-    async (content: string) => {
-      const response = await fetch(
-        `/api/v1/families/${familyId}/reward-charts/${chartId}/messages`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ content }),
-        }
-      );
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error?.message || "Failed to send message");
-      }
-      await refetch();
-    },
-    [familyId, chartId, refetch]
-  );
+  const sendMessage = async (content: string) => {
+    await sendMessageMutation.mutateAsync(content);
+  };
 
   const value: RewardChartContextValue = {
     weekData,
-    setWeekData,
     isLoading,
-    setIsLoading,
-    error,
-    setError,
+    error: error instanceof Error ? error : null,
     completeTask,
     undoCompletion,
-    refetch,
     familyId,
     chartId,
     isManager,
     allChildren,
-    // Task mutations
     createTask,
     updateTask,
     deleteTask,
     reorderTasks,
-    // Goal mutations
     createGoal,
     updateGoal,
-    // Message mutation
     sendMessage,
   };
 
