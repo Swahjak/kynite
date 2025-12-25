@@ -1,4 +1,4 @@
-import createDOMPurify from "dompurify";
+import createDOMPurify, { type WindowLike } from "dompurify";
 import { JSDOM } from "jsdom";
 
 /**
@@ -13,7 +13,7 @@ export function sanitizeSvg(svgContent: string): string {
   // This ensures proper isolation and avoids state leakage
   const jsdom = new JSDOM("", { contentType: "text/html" });
 
-  const DOMPurify = createDOMPurify(jsdom.window as unknown as Window);
+  const DOMPurify = createDOMPurify(jsdom.window as unknown as WindowLike);
 
   const result = DOMPurify.sanitize(svgContent, {
     USE_PROFILES: { svg: true, svgFilters: true },
