@@ -2,10 +2,19 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
+import type { z } from "zod";
 import type {
-  CreateRewardInput,
-  UpdateRewardInput,
+  createRewardSchema,
+  updateRewardSchema,
 } from "@/lib/validations/reward";
+
+// Use z.input to allow optional fields that have defaults in zod
+type CreateRewardInput = z.input<typeof createRewardSchema>;
+type UpdateRewardInput = z.input<typeof updateRewardSchema>;
+import type {
+  IReward,
+  IStarTransaction,
+} from "@/components/reward-store/interfaces";
 
 interface Reward {
   id: string;
@@ -31,6 +40,12 @@ export const rewardKeys = {
     [...rewardKeys.family(familyId), "stars"] as const,
   redemptions: (familyId: string) =>
     [...rewardKeys.family(familyId), "redemptions"] as const,
+  memberBalance: (familyId: string, memberId: string) =>
+    [...rewardKeys.family(familyId), "balance", memberId] as const,
+  memberHistory: (familyId: string, memberId: string) =>
+    [...rewardKeys.family(familyId), "history", memberId] as const,
+  primaryGoal: (familyId: string, memberId: string) =>
+    [...rewardKeys.family(familyId), "primaryGoal", memberId] as const,
 };
 
 export function useRewards(familyId: string) {
@@ -71,7 +86,7 @@ export function useCreateReward(familyId: string) {
 
   return useMutation({
     mutationFn: (input: CreateRewardInput) =>
-      apiFetch(`/api/v1/families/${familyId}/rewards`, {
+      apiFetch<{ reward: IReward }>(`/api/v1/families/${familyId}/rewards`, {
         method: "POST",
         body: JSON.stringify(input),
       }),
@@ -86,10 +101,13 @@ export function useUpdateReward(familyId: string) {
 
   return useMutation({
     mutationFn: ({ id, input }: { id: string; input: UpdateRewardInput }) =>
-      apiFetch(`/api/v1/families/${familyId}/rewards/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify(input),
-      }),
+      apiFetch<{ reward: IReward }>(
+        `/api/v1/families/${familyId}/rewards/${id}`,
+        {
+          method: "PUT",
+          body: JSON.stringify(input),
+        }
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: rewardKeys.family(familyId) });
     },
@@ -110,23 +128,100 @@ export function useDeleteReward(familyId: string) {
   });
 }
 
-export function useRedeemReward(familyId: string) {
+export function useRedeemReward(familyId: string, memberId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      rewardId,
-      memberId,
-    }: {
-      rewardId: string;
-      memberId: string;
-    }) =>
-      apiFetch(`/api/v1/families/${familyId}/rewards/${rewardId}/redeem`, {
-        method: "POST",
-        body: JSON.stringify({ memberId }),
-      }),
+    mutationFn: (rewardId: string) =>
+      apiFetch<{ newBalance: number }>(
+        `/api/v1/families/${familyId}/rewards/${rewardId}/redeem`,
+        {
+          method: "POST",
+          body: JSON.stringify({ memberId }),
+        }
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: rewardKeys.family(familyId) });
+    },
+  });
+}
+
+// Member-specific queries
+export function useMemberBalance(familyId: string, memberId: string) {
+  return useQuery({
+    queryKey: rewardKeys.memberBalance(familyId, memberId),
+    queryFn: () =>
+      apiFetch<{ balance: number }>(
+        `/api/v1/families/${familyId}/members/${memberId}/stars`
+      ).then((data) => data.balance),
+    enabled: !!familyId && !!memberId,
+  });
+}
+
+export function useMemberStarHistory(
+  familyId: string,
+  memberId: string,
+  limit: number = 10
+) {
+  return useQuery({
+    queryKey: rewardKeys.memberHistory(familyId, memberId),
+    queryFn: () =>
+      apiFetch<{ balance: number; history: IStarTransaction[] }>(
+        `/api/v1/families/${familyId}/members/${memberId}/stars?includeHistory=true&limit=${limit}`
+      ).then((data) => ({
+        balance: data.balance,
+        transactions: data.history,
+      })),
+    enabled: !!familyId && !!memberId,
+  });
+}
+
+export function usePrimaryGoal(familyId: string, memberId: string) {
+  return useQuery({
+    queryKey: rewardKeys.primaryGoal(familyId, memberId),
+    queryFn: () =>
+      apiFetch<{ goal: IReward | null }>(
+        `/api/v1/families/${familyId}/members/${memberId}/primary-goal`
+      ).then((data) => data.goal),
+    enabled: !!familyId && !!memberId,
+  });
+}
+
+export function useSetPrimaryGoal(familyId: string, memberId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (rewardId: string) =>
+      apiFetch(
+        `/api/v1/families/${familyId}/members/${memberId}/primary-goal`,
+        {
+          method: "PUT",
+          body: JSON.stringify({ rewardId }),
+        }
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: rewardKeys.primaryGoal(familyId, memberId),
+      });
+    },
+  });
+}
+
+export function useClearPrimaryGoal(familyId: string, memberId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () =>
+      apiFetch(
+        `/api/v1/families/${familyId}/members/${memberId}/primary-goal`,
+        {
+          method: "DELETE",
+        }
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: rewardKeys.primaryGoal(familyId, memberId),
+      });
     },
   });
 }

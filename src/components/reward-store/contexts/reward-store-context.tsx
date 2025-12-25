@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  type ReactNode,
-} from "react";
+import { createContext, useContext, useMemo, type ReactNode } from "react";
 import type {
   IReward,
   IRewardWithStatus,
@@ -15,6 +9,19 @@ import type {
   CreateRewardInput,
   UpdateRewardInput,
 } from "../interfaces";
+import {
+  useRewards,
+  useCreateReward,
+  useUpdateReward,
+  useDeleteReward,
+  useRedeemReward,
+  useMemberStarHistory,
+  usePrimaryGoal,
+  useSetPrimaryGoal,
+  useClearPrimaryGoal,
+  rewardKeys,
+} from "@/hooks/use-rewards";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface RewardStoreData {
   rewards: IRewardWithStatus[];
@@ -71,182 +78,124 @@ export function RewardStoreProvider({
   isManager = false,
   allChildren,
 }: RewardStoreProviderProps) {
-  const [data, setData] = useState<RewardStoreData>(initialData);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const queryClient = useQueryClient();
 
-  const refreshData = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      // Fetch rewards with status
-      const [rewardsRes, balanceRes, historyRes, goalRes] = await Promise.all([
-        fetch(`/api/v1/families/${familyId}/rewards`),
-        fetch(`/api/v1/families/${familyId}/members/${memberId}/stars`),
-        fetch(
-          `/api/v1/families/${familyId}/members/${memberId}/stars/history?limit=10`
-        ),
-        fetch(`/api/v1/families/${familyId}/members/${memberId}/primary-goal`),
-      ]);
+  // React Query hooks for fetching data
+  const {
+    data: rewards = [],
+    isLoading: isLoadingRewards,
+    error: rewardsError,
+  } = useRewards(familyId);
 
-      const [rewardsData, balanceData, historyData, goalData] =
-        await Promise.all([
-          rewardsRes.json(),
-          balanceRes.json(),
-          historyRes.json(),
-          goalRes.json(),
-        ]);
+  const {
+    data: historyData,
+    isLoading: isLoadingHistory,
+    error: historyError,
+  } = useMemberStarHistory(familyId, memberId, 10);
 
-      // Calculate which rewards can be redeemed
-      const rewardsWithStatus: IRewardWithStatus[] = await Promise.all(
-        rewardsData.rewards.map(async (reward: IReward) => {
-          // Check redemption status
-          const canAfford = balanceData.balance >= reward.starCost;
-          return {
-            ...reward,
-            canRedeem: canAfford, // Simplified - full check happens server-side
-            reason: canAfford ? undefined : "insufficient_stars",
-            starsNeeded: canAfford
-              ? undefined
-              : reward.starCost - balanceData.balance,
-          };
-        })
-      );
+  const {
+    data: primaryGoal = null,
+    isLoading: isLoadingGoal,
+    error: goalError,
+  } = usePrimaryGoal(familyId, memberId);
 
-      // Calculate weekly delta
-      const weekAgo = new Date();
-      weekAgo.setDate(weekAgo.getDate() - 7);
-      const weeklyDelta = (historyData.transactions || [])
-        .filter((t: IStarTransaction) => new Date(t.createdAt) >= weekAgo)
-        .reduce((sum: number, t: IStarTransaction) => sum + t.amount, 0);
+  // Mutation hooks
+  const createRewardMutation = useCreateReward(familyId);
+  const updateRewardMutation = useUpdateReward(familyId);
+  const deleteRewardMutation = useDeleteReward(familyId);
+  const redeemRewardMutation = useRedeemReward(familyId, memberId);
+  const setPrimaryGoalMutation = useSetPrimaryGoal(familyId, memberId);
+  const clearPrimaryGoalMutation = useClearPrimaryGoal(familyId, memberId);
 
-      setData({
-        rewards: rewardsWithStatus,
-        redemptions: [], // Fetch separately if on redeemed tab
-        balance: balanceData.balance,
-        weeklyDelta,
-        recentTransactions: historyData.transactions || [],
-        primaryGoal: goalData.goal,
-      });
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error("Failed to load data"));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [familyId, memberId]);
+  // Derive balance and transactions from history data
+  const balance = historyData?.balance ?? initialData.balance;
+  const recentTransactions =
+    historyData?.transactions ?? initialData.recentTransactions;
 
-  const createReward = useCallback(
-    async (input: CreateRewardInput) => {
-      const res = await fetch(`/api/v1/families/${familyId}/rewards`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(input),
-      });
+  // Calculate weekly delta from transactions
+  const weeklyDelta = useMemo(() => {
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    return recentTransactions
+      .filter((t) => new Date(t.createdAt) >= weekAgo)
+      .reduce((sum, t) => sum + t.amount, 0);
+  }, [recentTransactions]);
 
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to create reward");
-      }
+  // Calculate rewards with status based on balance
+  const rewardsWithStatus: IRewardWithStatus[] = useMemo(() => {
+    return (rewards as IReward[]).map((reward) => {
+      const canAfford = balance >= reward.starCost;
+      return {
+        ...reward,
+        canRedeem: canAfford,
+        reason: canAfford ? undefined : "insufficient_stars",
+        starsNeeded: canAfford ? undefined : reward.starCost - balance,
+      };
+    });
+  }, [rewards, balance]);
 
-      const { reward } = await res.json();
-      await refreshData();
-      return reward;
-    },
-    [familyId, refreshData]
+  // Combine loading and error states
+  const isLoading = isLoadingRewards || isLoadingHistory || isLoadingGoal;
+  const error = rewardsError || historyError || goalError;
+
+  // Build data object
+  const data: RewardStoreData = useMemo(
+    () => ({
+      rewards: rewardsWithStatus,
+      redemptions: initialData.redemptions, // Keep from initial - separate fetch if needed
+      balance,
+      weeklyDelta,
+      recentTransactions,
+      primaryGoal,
+    }),
+    [
+      rewardsWithStatus,
+      initialData.redemptions,
+      balance,
+      weeklyDelta,
+      recentTransactions,
+      primaryGoal,
+    ]
   );
 
-  const updateReward = useCallback(
-    async (id: string, input: UpdateRewardInput) => {
-      const res = await fetch(`/api/v1/families/${familyId}/rewards/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(input),
-      });
+  // Action handlers
+  const createReward = async (input: CreateRewardInput): Promise<IReward> => {
+    const result = await createRewardMutation.mutateAsync(input);
+    return result.reward;
+  };
 
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to update reward");
-      }
+  const updateReward = async (
+    id: string,
+    input: UpdateRewardInput
+  ): Promise<IReward> => {
+    const result = await updateRewardMutation.mutateAsync({ id, input });
+    return result.reward;
+  };
 
-      const { reward } = await res.json();
-      await refreshData();
-      return reward;
-    },
-    [familyId, refreshData]
-  );
+  const deleteReward = async (id: string): Promise<void> => {
+    await deleteRewardMutation.mutateAsync(id);
+  };
 
-  const deleteReward = useCallback(
-    async (id: string) => {
-      const res = await fetch(`/api/v1/families/${familyId}/rewards/${id}`, {
-        method: "DELETE",
-      });
+  const redeemReward = async (
+    rewardId: string
+  ): Promise<{ newBalance: number }> => {
+    const result = await redeemRewardMutation.mutateAsync(rewardId);
+    return { newBalance: result.newBalance };
+  };
 
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to delete reward");
-      }
+  const setPrimaryGoal = async (rewardId: string): Promise<void> => {
+    await setPrimaryGoalMutation.mutateAsync(rewardId);
+  };
 
-      await refreshData();
-    },
-    [familyId, refreshData]
-  );
+  const clearPrimaryGoal = async (): Promise<void> => {
+    await clearPrimaryGoalMutation.mutateAsync();
+  };
 
-  const redeemReward = useCallback(
-    async (rewardId: string) => {
-      const res = await fetch(
-        `/api/v1/families/${familyId}/rewards/${rewardId}/redeem`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ memberId }),
-        }
-      );
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to redeem reward");
-      }
-
-      const result = await res.json();
-      await refreshData();
-      return { newBalance: result.newBalance };
-    },
-    [familyId, memberId, refreshData]
-  );
-
-  const setPrimaryGoalFn = useCallback(
-    async (rewardId: string) => {
-      const res = await fetch(
-        `/api/v1/families/${familyId}/members/${memberId}/primary-goal`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ rewardId }),
-        }
-      );
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to set primary goal");
-      }
-
-      await refreshData();
-    },
-    [familyId, memberId, refreshData]
-  );
-
-  const clearPrimaryGoal = useCallback(async () => {
-    const res = await fetch(
-      `/api/v1/families/${familyId}/members/${memberId}/primary-goal`,
-      { method: "DELETE" }
-    );
-
-    if (!res.ok) {
-      const data = await res.json();
-      throw new Error(data.error || "Failed to clear primary goal");
-    }
-
-    await refreshData();
-  }, [familyId, memberId, refreshData]);
+  const refreshData = async (): Promise<void> => {
+    await queryClient.invalidateQueries({
+      queryKey: rewardKeys.family(familyId),
+    });
+  };
 
   return (
     <RewardStoreContext.Provider
@@ -255,14 +204,14 @@ export function RewardStoreProvider({
         memberId,
         data,
         isLoading,
-        error,
+        error: error instanceof Error ? error : null,
         isManager,
         allChildren,
         createReward,
         updateReward,
         deleteReward,
         redeemReward,
-        setPrimaryGoal: setPrimaryGoalFn,
+        setPrimaryGoal,
         clearPrimaryGoal,
         refreshData,
       }}
