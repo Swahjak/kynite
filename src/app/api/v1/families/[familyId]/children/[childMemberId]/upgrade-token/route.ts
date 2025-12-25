@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/server/auth";
 import { db } from "@/server/db";
-import { familyMembers } from "@/server/schema";
+import { familyMembers, users } from "@/server/schema";
 import { eq, and } from "drizzle-orm";
 import { isUserFamilyManager } from "@/server/services/family-service";
 import { createUpgradeToken } from "@/server/services/child-service";
@@ -47,6 +47,19 @@ export async function POST(request: Request, { params }: Params) {
 
     if (childMember.length === 0) {
       return Errors.notFound("child member");
+    }
+
+    // Verify the user is actually a child type
+    const childUser = await db
+      .select({ type: users.type })
+      .from(users)
+      .where(eq(users.id, childMember[0].userId))
+      .limit(1);
+
+    if (childUser.length === 0 || childUser[0].type !== "child") {
+      return Errors.validation({
+        _errors: ["Can only generate upgrade tokens for child accounts"],
+      });
     }
 
     const upgradeToken = await createUpgradeToken(
