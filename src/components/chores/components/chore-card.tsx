@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { Check, Pencil, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { FamilyAvatar } from "@/components/family/family-avatar";
+import type { AvatarColor } from "@/types/family";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { IChoreWithAssignee } from "@/types/chore";
@@ -79,21 +80,18 @@ export function ChoreCard({ chore, onEdit, onDelete }: ChoreCardProps) {
       {/* Main Content */}
       <div className="flex items-center gap-4 p-4">
         {/* Avatar */}
-        <Avatar
-          className="h-14 w-14 ring-2 ring-offset-2"
-          style={{ "--ring-color": avatarColor } as React.CSSProperties}
+        <div
+          className="rounded-full ring-2 ring-offset-2"
+          style={{ "--tw-ring-color": avatarColor } as React.CSSProperties}
         >
-          <AvatarImage
-            src={assignee?.user.image ?? undefined}
-            alt={displayName}
+          <FamilyAvatar
+            name={displayName}
+            color={avatarColor as AvatarColor}
+            avatarSvg={assignee?.avatarSvg}
+            googleImage={assignee?.user.image}
+            size="lg"
           />
-          <AvatarFallback
-            style={{ backgroundColor: avatarColor }}
-            className="font-medium text-white"
-          >
-            {displayName.slice(0, 2).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
+        </div>
 
         {/* Content */}
         <div className="min-w-0 flex-1">

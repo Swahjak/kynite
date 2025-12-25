@@ -72,6 +72,7 @@ export interface EventWithParticipants {
     familyMemberId: string;
     displayName: string | null;
     avatarColor: string | null;
+    avatarSvg: string | null;
     userName: string;
     userImage: string | null;
     isOwner: boolean;
@@ -139,6 +140,7 @@ export async function getEventsForFamily(
       familyMemberId: row.familyMember.id,
       displayName: row.familyMember.displayName,
       avatarColor: row.familyMember.avatarColor,
+      avatarSvg: row.familyMember.avatarSvg,
       userName: row.user.name,
       userImage: row.user.image,
       isOwner: row.eventParticipant.isOwner,
@@ -250,6 +252,7 @@ export async function getEventById(
       familyMemberId: p.familyMember.id,
       displayName: p.familyMember.displayName,
       avatarColor: p.familyMember.avatarColor,
+      avatarSvg: p.familyMember.avatarSvg,
       userName: p.user.name,
       userImage: p.user.image,
       isOwner: p.eventParticipant.isOwner,

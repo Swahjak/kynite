@@ -40,6 +40,7 @@ interface CalendarDataProviderProps {
     id: string;
     displayName: string | null;
     avatarColor: string | null;
+    avatarSvg: string | null;
     user: { name: string; image: string | null };
   }>;
   children: ReactNode;

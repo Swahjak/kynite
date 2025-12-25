@@ -10,12 +10,19 @@ interface PersonHeaderProps {
 export function PersonHeader({ user }: PersonHeaderProps) {
   return (
     <div className="bg-card border-border flex items-center gap-3 rounded-xl border p-3">
-      <Avatar className="size-10">
-        <AvatarImage src={user.avatarUrl} alt={user.name} />
-        <AvatarFallback style={{ backgroundColor: user.avatarColor }}>
-          {user.avatarFallback}
-        </AvatarFallback>
-      </Avatar>
+      {user.avatarSvg ? (
+        <div
+          className="relative flex size-10 shrink-0 overflow-hidden rounded-full"
+          dangerouslySetInnerHTML={{ __html: user.avatarSvg }}
+        />
+      ) : (
+        <Avatar className="size-10">
+          <AvatarImage src={user.avatarUrl} alt={user.name} />
+          <AvatarFallback style={{ backgroundColor: user.avatarColor }}>
+            {user.avatarFallback}
+          </AvatarFallback>
+        </Avatar>
+      )}
       <span className="text-lg font-semibold">{user.name}</span>
     </div>
   );

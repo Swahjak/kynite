@@ -6,6 +6,7 @@ export interface IUser {
   avatarFallback: string;
   avatarColor: string;
   avatarUrl?: string;
+  avatarSvg?: string | null;
 }
 
 export interface IEvent {

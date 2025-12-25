@@ -39,6 +39,7 @@ export function transformEventToIEvent(event: EventWithParticipants): IEvent {
       avatarFallback: (p.displayName ?? p.userName).slice(0, 2).toUpperCase(),
       avatarColor: p.avatarColor ?? "bg-primary",
       avatarUrl: p.userImage ?? undefined,
+      avatarSvg: p.avatarSvg,
     })),
   };
 }
@@ -48,6 +49,7 @@ export function transformMemberToIUser(member: {
   id: string;
   displayName: string | null;
   avatarColor: string | null;
+  avatarSvg: string | null;
   user: { name: string; image: string | null };
 }): IUser {
   const name = member.displayName ?? member.user.name;
@@ -57,6 +59,7 @@ export function transformMemberToIUser(member: {
     avatarFallback: name.slice(0, 2).toUpperCase(),
     avatarColor: member.avatarColor ?? "bg-primary",
     avatarUrl: member.user.image ?? undefined,
+    avatarSvg: member.avatarSvg,
   };
 }
 

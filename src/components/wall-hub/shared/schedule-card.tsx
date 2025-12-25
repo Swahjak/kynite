@@ -38,20 +38,28 @@ export function ScheduleCard({ event, showNowBadge }: ScheduleCardProps) {
         <div className="flex items-center gap-1.5">
           {event.users.length > 0 && (
             <div className="flex -space-x-1">
-              {event.users.map((user) => (
-                <Avatar
-                  key={user.id}
-                  className="size-4 border border-white dark:border-gray-800"
-                >
-                  <AvatarImage src={user.avatarUrl} alt={user.name} />
-                  <AvatarFallback
-                    style={{ backgroundColor: user.avatarColor }}
-                    className="text-[6px] font-bold"
+              {event.users.map((user) =>
+                user.avatarSvg ? (
+                  <div
+                    key={user.id}
+                    className="relative flex size-4 shrink-0 overflow-hidden rounded-full border border-white dark:border-gray-800"
+                    dangerouslySetInnerHTML={{ __html: user.avatarSvg }}
+                  />
+                ) : (
+                  <Avatar
+                    key={user.id}
+                    className="size-4 border border-white dark:border-gray-800"
                   >
-                    {user.avatarFallback}
-                  </AvatarFallback>
-                </Avatar>
-              ))}
+                    <AvatarImage src={user.avatarUrl} alt={user.name} />
+                    <AvatarFallback
+                      style={{ backgroundColor: user.avatarColor }}
+                      className="text-[6px] font-bold"
+                    >
+                      {user.avatarFallback}
+                    </AvatarFallback>
+                  </Avatar>
+                )
+              )}
             </div>
           )}
           {showNowBadge && isNow && (
