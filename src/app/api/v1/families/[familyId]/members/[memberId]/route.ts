@@ -72,6 +72,13 @@ export async function PATCH(request: Request, { params }: Params) {
         });
       }
       sanitizedSvg = sanitizeSvg(parsed.data.avatarSvg);
+
+      // Verify sanitization produced valid output
+      if (!sanitizedSvg || sanitizedSvg.trim().length === 0) {
+        return Errors.validation({
+          avatarSvg: "SVG content could not be processed",
+        });
+      }
     }
 
     // Non-managers cannot change roles

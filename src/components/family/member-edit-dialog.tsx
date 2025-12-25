@@ -90,8 +90,8 @@ export function MemberEditDialog({
       return;
     }
 
-    // Validate file type
-    if (!file.name.endsWith(".svg") && file.type !== "image/svg+xml") {
+    // Validate file type (must have .svg extension AND correct MIME type)
+    if (!file.name.endsWith(".svg") || file.type !== "image/svg+xml") {
       setUploadError(t("invalidFormat"));
       return;
     }
@@ -105,6 +105,9 @@ export function MemberEditDialog({
       } else {
         setUploadError(t("invalidFormat"));
       }
+    };
+    reader.onerror = () => {
+      setUploadError(t("invalidFormat"));
     };
     reader.readAsText(file);
   }
