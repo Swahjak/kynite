@@ -84,14 +84,19 @@ export function TimerCard({ timer }: TimerCardProps) {
 
   // Determine UI state
   const getUIState = (): TimerUIState => {
-    if (timer.status === "running") return "running";
     if (timer.status === "paused") return "paused";
     if (timer.status === "expired") {
       const cooldownRemaining = (timer.cooldownSeconds ?? 0) - cooldownElapsed;
       return cooldownRemaining > 0 ? "in_cooldown" : "cooldown_expired";
     }
-    // Timer reached 0 without cooldown (locally detected)
-    if (remaining <= 0 && !timer.cooldownSeconds) return "needs_acknowledge";
+    // Timer reached 0 (locally detected or orphaned sync)
+    // Check this BEFORE status === "running" to handle stuck timers
+    if (remaining <= 0) {
+      if (!timer.cooldownSeconds) return "needs_acknowledge";
+      // Has cooldown but status still "running" (orphaned) - allow dismissal
+      return "cooldown_expired";
+    }
+    if (timer.status === "running") return "running";
     return "running";
   };
 
