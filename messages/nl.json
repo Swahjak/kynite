@@ -465,5 +465,29 @@
     "recentActivity": "Recente Activiteit",
     "earned": "Verdiend",
     "spent": "Uitgegeven"
+  },
+  "LinkAccount": {
+    "title": "Koppel je account",
+    "description": "Verbind je kindprofiel met je Google-account",
+    "loading": "Link valideren...",
+    "invalidToken": "Ongeldige link",
+    "invalidDescription": "Deze link is ongeldig, verlopen of is al gebruikt.",
+    "expiredToken": "Link verlopen",
+    "expiredDescription": "Deze link is verlopen. Vraag een ouder om een nieuwe aan te maken.",
+    "validToken": "Klaar om te koppelen",
+    "validDescription": "Klik op de knop hieronder om je kindprofiel te koppelen aan je account.",
+    "linkButton": "Koppel mijn account",
+    "linking": "Koppelen...",
+    "success": "Account gekoppeld!",
+    "successDescription": "Je account is succesvol gekoppeld. Je kunt nu inloggen met je Google-account.",
+    "successRedirect": "Doorsturen naar dashboard...",
+    "error": "Koppelen mislukt",
+    "errorDescription": "Kon je account niet koppelen. Probeer het opnieuw of neem contact op met support.",
+    "emailInUse": "E-mail al in gebruik",
+    "emailInUseDescription": "Dit e-mailadres is al gekoppeld aan een ander account.",
+    "backToHome": "Terug naar Home",
+    "expiresIn": "Deze link verloopt over",
+    "hours": "uur",
+    "minutes": "minuten"
   }
 }

@@ -465,5 +465,29 @@
     "recentActivity": "Recent Activity",
     "earned": "Earned",
     "spent": "Spent"
+  },
+  "LinkAccount": {
+    "title": "Link Your Account",
+    "description": "Connect your child profile to your Google account",
+    "loading": "Validating link...",
+    "invalidToken": "Invalid Link",
+    "invalidDescription": "This link is invalid, expired, or has already been used.",
+    "expiredToken": "Link Expired",
+    "expiredDescription": "This link has expired. Please ask a parent to generate a new one.",
+    "validToken": "Ready to Link",
+    "validDescription": "Click the button below to link your child profile to your account.",
+    "linkButton": "Link My Account",
+    "linking": "Linking...",
+    "success": "Account Linked!",
+    "successDescription": "Your account has been successfully linked. You can now sign in with your Google account.",
+    "successRedirect": "Redirecting to dashboard...",
+    "error": "Link Failed",
+    "errorDescription": "Failed to link your account. Please try again or contact support.",
+    "emailInUse": "Email Already in Use",
+    "emailInUseDescription": "This email is already linked to another account.",
+    "backToHome": "Back to Home",
+    "expiresIn": "This link expires in",
+    "hours": "hours",
+    "minutes": "minutes"
   }
 }
