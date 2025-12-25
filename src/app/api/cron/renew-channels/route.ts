@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
+import { secureCompare } from "@/lib/crypto";
+import "@/lib/env";
 import {
   getChannelsNeedingRenewal,
   createWatchChannel,
@@ -15,8 +17,9 @@ export async function GET(_request: Request) {
   // Verify cron secret
   const headersList = await headers();
   const authHeader = headersList.get("authorization");
+  const providedToken = authHeader?.replace("Bearer ", "") ?? "";
 
-  if (CRON_SECRET && authHeader !== `Bearer ${CRON_SECRET}`) {
+  if (!CRON_SECRET || !secureCompare(providedToken, CRON_SECRET)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
