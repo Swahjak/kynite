@@ -60,20 +60,20 @@ export function FamilyMemberCard({
 
   return (
     <div className="flex items-center justify-between rounded-lg border p-3">
-      <div className="flex items-center gap-3">
+      <div className="flex min-w-0 flex-1 items-center gap-3">
         <FamilyAvatar
           name={displayName}
           color={member.avatarColor as AvatarColor}
         />
-        <div>
+        <div className="min-w-0">
           <div className="flex items-center gap-2">
             <span className="font-medium">{displayName}</span>
             {isCurrentUser && (
               <span className="text-muted-foreground text-xs">(you)</span>
             )}
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground text-sm">
+          <div className="flex items-center gap-2 overflow-hidden">
+            <span className="text-muted-foreground truncate text-sm">
               {member.user.email}
             </span>
             <RoleBadge role={member.role as FamilyMemberRole} />
