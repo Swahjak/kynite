@@ -3,24 +3,14 @@
 import { useTranslations } from "next-intl";
 import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
+import { CalendarDays, Gamepad2, UtensilsCrossed } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
-const features = [
-  {
-    key: "calendar",
-    icon: "calendar_month",
-    color: "primary",
-  },
-  {
-    key: "routines",
-    icon: "stadia_controller",
-    color: "purple",
-  },
-  {
-    key: "meals",
-    icon: "restaurant_menu",
-    color: "orange",
-  },
-] as const;
+const features: Array<{ key: string; icon: LucideIcon; color: string }> = [
+  { key: "calendar", icon: CalendarDays, color: "primary" },
+  { key: "routines", icon: Gamepad2, color: "purple" },
+  { key: "meals", icon: UtensilsCrossed, color: "orange" },
+];
 
 const colorClasses = {
   primary: {
@@ -67,7 +57,7 @@ export function FeaturesSection() {
                   colorClasses[feature.color].icon
                 )}
               >
-                <Icon name={feature.icon} size="lg" />
+                <Icon icon={feature.icon} size="lg" />
               </div>
               <h3 className="font-display mb-3 text-xl font-bold">
                 {t(`${feature.key}.title`)}
