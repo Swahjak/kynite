@@ -14,6 +14,7 @@ import {
 } from "@/server/services/family-service";
 import type { FamilyMemberRole } from "@/types/family";
 import { Errors } from "@/lib/errors";
+import { sanitizeSvg, isValidSvg } from "@/lib/svg-sanitizer";
 
 type Params = { params: Promise<{ familyId: string; memberId: string }> };
 
@@ -60,6 +61,17 @@ export async function PATCH(request: Request, { params }: Params) {
       return Errors.validation(parsed.error.flatten());
     }
 
+    // Sanitize SVG if provided
+    let sanitizedSvg: string | null | undefined = parsed.data.avatarSvg;
+    if (parsed.data.avatarSvg) {
+      if (!isValidSvg(parsed.data.avatarSvg)) {
+        return Errors.validation({
+          avatarSvg: "Invalid SVG format",
+        });
+      }
+      sanitizedSvg = sanitizeSvg(parsed.data.avatarSvg);
+    }
+
     // Non-managers cannot change roles
     if (parsed.data.role && !isManager) {
       return Errors.managerRequired();
@@ -91,6 +103,7 @@ export async function PATCH(request: Request, { params }: Params) {
     const updated = await updateMember(memberId, {
       displayName: parsed.data.displayName,
       avatarColor: parsed.data.avatarColor,
+      avatarSvg: sanitizedSvg,
       role: parsed.data.role as FamilyMemberRole | undefined,
     });
 
