@@ -19,7 +19,11 @@ export function sanitizeSvg(svgContent: string): string {
     USE_PROFILES: { svg: true, svgFilters: true },
     // Allow style elements - needed for avataaars and similar SVGs that use
     // inline stylesheets for colors. Without this, style blocks are stripped.
-    ADD_TAGS: ["style"],
+    ADD_TAGS: ["style", "use"],
+    // Allow xlink:href - needed for <use> elements to reference <defs>.
+    // DOMPurify strips xlink:href by default as a security measure, but for
+    // internal references (starting with #) it's safe and necessary.
+    ADD_ATTR: ["xlink:href"],
   });
 
   // Clean up to avoid memory leaks in serverless
