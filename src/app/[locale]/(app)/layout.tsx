@@ -1,8 +1,6 @@
 import { redirect } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { getSession } from "@/lib/get-session";
-import { getUserFamily } from "@/server/services/family-service";
-import { InteractionModeProvider } from "@/contexts/interaction-mode-context";
 import { AppShell } from "@/components/layout/app-shell";
 import type { Locale } from "@/i18n/routing";
 
@@ -27,14 +25,5 @@ export default async function AppLayout({ children, params }: AppLayoutProps) {
     redirect(`/${locale}/onboarding`);
   }
 
-  // Get user's role in the family
-  const family = await getUserFamily(session.user.id);
-  const isManager = family?.currentUserRole === "manager";
-  const isDevice = session.session?.isDevice === true;
-
-  return (
-    <InteractionModeProvider isDevice={isDevice}>
-      <AppShell isManager={isManager}>{children}</AppShell>
-    </InteractionModeProvider>
-  );
+  return <AppShell>{children}</AppShell>;
 }
