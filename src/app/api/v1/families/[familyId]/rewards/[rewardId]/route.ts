@@ -10,6 +10,7 @@ import {
   deleteReward,
 } from "@/server/services/reward-store-service";
 import { updateRewardSchema } from "@/lib/validations/reward";
+import { Errors } from "@/lib/errors";
 
 type RouteParams = {
   params: Promise<{ familyId: string; rewardId: string }>;
@@ -23,7 +24,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return Errors.unauthorized();
     }
 
     const { familyId, rewardId } = await params;
@@ -40,25 +41,19 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       );
 
     if (membership.length === 0) {
-      return NextResponse.json(
-        { error: "Not a family member" },
-        { status: 403 }
-      );
+      return Errors.notFamilyMember();
     }
 
     const reward = await getRewardById(rewardId);
 
     if (!reward) {
-      return NextResponse.json({ error: "Reward not found" }, { status: 404 });
+      return Errors.notFound("reward");
     }
 
     return NextResponse.json({ reward });
   } catch (error) {
     console.error("Error fetching reward:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch reward" },
-      { status: 500 }
-    );
+    return Errors.internal(error);
   }
 }
 
@@ -70,7 +65,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return Errors.unauthorized();
     }
 
     const { familyId, rewardId } = await params;
@@ -87,20 +82,14 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       );
 
     if (membership.length === 0 || membership[0].role !== "manager") {
-      return NextResponse.json(
-        { error: "Only managers can update rewards" },
-        { status: 403 }
-      );
+      return Errors.managerRequired();
     }
 
     const body = await request.json();
     const parseResult = updateRewardSchema.safeParse(body);
 
     if (!parseResult.success) {
-      return NextResponse.json(
-        { error: "Invalid input", details: parseResult.error.flatten() },
-        { status: 400 }
-      );
+      return Errors.validation(parseResult.error.flatten());
     }
 
     const reward = await updateReward(rewardId, parseResult.data);
@@ -108,10 +97,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ reward });
   } catch (error) {
     console.error("Error updating reward:", error);
-    return NextResponse.json(
-      { error: "Failed to update reward" },
-      { status: 500 }
-    );
+    return Errors.internal(error);
   }
 }
 
@@ -123,7 +109,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return Errors.unauthorized();
     }
 
     const { familyId, rewardId } = await params;
@@ -140,10 +126,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       );
 
     if (membership.length === 0 || membership[0].role !== "manager") {
-      return NextResponse.json(
-        { error: "Only managers can delete rewards" },
-        { status: 403 }
-      );
+      return Errors.managerRequired();
     }
 
     await deleteReward(rewardId);
@@ -151,9 +134,6 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting reward:", error);
-    return NextResponse.json(
-      { error: "Failed to delete reward" },
-      { status: 500 }
-    );
+    return Errors.internal(error);
   }
 }

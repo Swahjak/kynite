@@ -8,6 +8,7 @@ import {
   redeemReward,
   RedemptionError,
 } from "@/server/services/reward-store-service";
+import { Errors } from "@/lib/errors";
 
 type RouteParams = {
   params: Promise<{ familyId: string; rewardId: string }>;
@@ -21,7 +22,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return Errors.unauthorized();
     }
 
     const { familyId, rewardId } = await params;
@@ -38,10 +39,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       );
 
     if (membership.length === 0) {
-      return NextResponse.json(
-        { error: "Not a family member" },
-        { status: 403 }
-      );
+      return Errors.notFamilyMember();
     }
 
     const memberId = membership[0].id;
@@ -56,7 +54,6 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   } catch (error) {
     if (error instanceof RedemptionError) {
       let message = "";
-      let status = 400;
 
       switch (error.reason) {
         case "insufficient_stars":
@@ -68,24 +65,16 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
             : "Limit reached for this period";
           break;
         case "reward_not_found":
-          message = "Reward not found";
-          status = 404;
-          break;
+          return Errors.notFound("reward");
         case "reward_inactive":
           message = "This reward is no longer available";
           break;
       }
 
-      return NextResponse.json(
-        { error: message, reason: error.reason },
-        { status }
-      );
+      return Errors.badRequest({ reason: error.reason, message });
     }
 
     console.error("Error redeeming reward:", error);
-    return NextResponse.json(
-      { error: "Failed to redeem reward" },
-      { status: 500 }
-    );
+    return Errors.internal(error);
   }
 }

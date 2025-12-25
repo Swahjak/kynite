@@ -12,6 +12,7 @@ import {
   isUserFamilyMember,
   isUserFamilyManager,
 } from "@/server/services/family-service";
+import { Errors } from "@/lib/errors";
 
 type Params = { params: Promise<{ familyId: string }> };
 
@@ -22,26 +23,14 @@ export async function GET(request: Request, { params }: Params) {
     });
 
     if (!session?.user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
-        },
-        { status: 401 }
-      );
+      return Errors.unauthorized();
     }
 
     const { familyId } = await params;
 
     const isMember = await isUserFamilyMember(session.user.id, familyId);
     if (!isMember) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "FORBIDDEN", message: "Not a member of this family" },
-        },
-        { status: 403 }
-      );
+      return Errors.notFamilyMember();
     }
 
     const family = await db
@@ -51,13 +40,7 @@ export async function GET(request: Request, { params }: Params) {
       .limit(1);
 
     if (family.length === 0) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "NOT_FOUND", message: "Family not found" },
-        },
-        { status: 404 }
-      );
+      return Errors.notFound("family");
     }
 
     const members = await getFamilyMembers(familyId);
@@ -73,13 +56,7 @@ export async function GET(request: Request, { params }: Params) {
     });
   } catch (error) {
     console.error("Error getting family:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: { code: "INTERNAL_ERROR", message: "Failed to get family" },
-      },
-      { status: 500 }
-    );
+    return Errors.internal();
   }
 }
 
@@ -90,45 +67,21 @@ export async function PATCH(request: Request, { params }: Params) {
     });
 
     if (!session?.user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
-        },
-        { status: 401 }
-      );
+      return Errors.unauthorized();
     }
 
     const { familyId } = await params;
 
     const isManager = await isUserFamilyManager(session.user.id, familyId);
     if (!isManager) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "FORBIDDEN",
-            message: "Only managers can update the family",
-          },
-        },
-        { status: 403 }
-      );
+      return Errors.managerRequired();
     }
 
     const body = await request.json();
     const parsed = updateFamilySchema.safeParse(body);
 
     if (!parsed.success) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "VALIDATION_ERROR",
-            message: parsed.error.issues[0].message,
-          },
-        },
-        { status: 400 }
-      );
+      return Errors.validation(parsed.error);
     }
 
     await db
@@ -148,13 +101,7 @@ export async function PATCH(request: Request, { params }: Params) {
     });
   } catch (error) {
     console.error("Error updating family:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: { code: "INTERNAL_ERROR", message: "Failed to update family" },
-      },
-      { status: 500 }
-    );
+    return Errors.internal();
   }
 }
 
@@ -165,13 +112,7 @@ export async function DELETE(request: Request, { params }: Params) {
     });
 
     if (!session?.user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
-        },
-        { status: 401 }
-      );
+      return Errors.unauthorized();
     }
 
     const { familyId } = await params;
@@ -196,12 +137,6 @@ export async function DELETE(request: Request, { params }: Params) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting family:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: { code: "INTERNAL_ERROR", message: "Failed to delete family" },
-      },
-      { status: 500 }
-    );
+    return Errors.internal();
   }
 }

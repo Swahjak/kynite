@@ -9,6 +9,7 @@ import {
   createReward,
 } from "@/server/services/reward-store-service";
 import { createRewardSchema } from "@/lib/validations/reward";
+import { Errors } from "@/lib/errors";
 
 type RouteParams = {
   params: Promise<{ familyId: string }>;
@@ -22,7 +23,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return Errors.unauthorized();
     }
 
     const { familyId } = await params;
@@ -39,10 +40,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       );
 
     if (membership.length === 0) {
-      return NextResponse.json(
-        { error: "Not a family member" },
-        { status: 403 }
-      );
+      return Errors.notFamilyMember();
     }
 
     const includeInactive =
@@ -52,10 +50,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ rewards });
   } catch (error) {
     console.error("Error fetching rewards:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch rewards" },
-      { status: 500 }
-    );
+    return Errors.internal(error);
   }
 }
 
@@ -67,7 +62,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return Errors.unauthorized();
     }
 
     const { familyId } = await params;
@@ -84,20 +79,14 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       );
 
     if (membership.length === 0 || membership[0].role !== "manager") {
-      return NextResponse.json(
-        { error: "Only managers can create rewards" },
-        { status: 403 }
-      );
+      return Errors.managerRequired();
     }
 
     const body = await request.json();
     const parseResult = createRewardSchema.safeParse(body);
 
     if (!parseResult.success) {
-      return NextResponse.json(
-        { error: "Invalid input", details: parseResult.error.flatten() },
-        { status: 400 }
-      );
+      return Errors.validation(parseResult.error.flatten());
     }
 
     const reward = await createReward(familyId, parseResult.data);
@@ -105,9 +94,6 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ reward }, { status: 201 });
   } catch (error) {
     console.error("Error creating reward:", error);
-    return NextResponse.json(
-      { error: "Failed to create reward" },
-      { status: 500 }
-    );
+    return Errors.internal(error);
   }
 }

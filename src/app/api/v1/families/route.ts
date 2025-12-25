@@ -8,6 +8,7 @@ import { createFamily } from "@/server/services/family-service";
 import { db } from "@/server/db";
 import { families, familyMembers } from "@/server/schema";
 import { eq } from "drizzle-orm";
+import { Errors } from "@/lib/errors";
 
 export async function POST(request: Request) {
   try {
@@ -16,29 +17,14 @@ export async function POST(request: Request) {
     });
 
     if (!session?.user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
-        },
-        { status: 401 }
-      );
+      return Errors.unauthorized();
     }
 
     const body = await request.json();
     const parsed = createFamilySchema.safeParse(body);
 
     if (!parsed.success) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "VALIDATION_ERROR",
-            message: parsed.error.issues[0].message,
-          },
-        },
-        { status: 400 }
-      );
+      return Errors.validation(parsed.error);
     }
 
     const result = await createFamily(session.user.id, parsed.data.name);
@@ -55,13 +41,7 @@ export async function POST(request: Request) {
     );
   } catch (error) {
     console.error("Error creating family:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: { code: "INTERNAL_ERROR", message: "Failed to create family" },
-      },
-      { status: 500 }
-    );
+    return Errors.internal();
   }
 }
 
@@ -72,13 +52,7 @@ export async function GET() {
     });
 
     if (!session?.user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
-        },
-        { status: 401 }
-      );
+      return Errors.unauthorized();
     }
 
     const userFamilies = await db
@@ -99,12 +73,6 @@ export async function GET() {
     });
   } catch (error) {
     console.error("Error listing families:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: { code: "INTERNAL_ERROR", message: "Failed to list families" },
-      },
-      { status: 500 }
-    );
+    return Errors.internal();
   }
 }
