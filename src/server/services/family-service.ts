@@ -56,6 +56,7 @@ export async function getFamilyMembers(
       role: familyMembers.role,
       displayName: familyMembers.displayName,
       avatarColor: familyMembers.avatarColor,
+      avatarSvg: familyMembers.avatarSvg,
       createdAt: familyMembers.createdAt,
       user: {
         id: users.id,
@@ -142,13 +143,14 @@ export async function addMemberToFamily(
 }
 
 /**
- * Update a family member's display name, avatar color, or role
+ * Update a family member's display name, avatar color, avatar SVG, or role
  */
 export async function updateMember(
   memberId: string,
   data: {
     displayName?: string | null;
     avatarColor?: string | null;
+    avatarSvg?: string | null;
     role?: FamilyMemberRole;
   }
 ) {
@@ -159,6 +161,9 @@ export async function updateMember(
   }
   if (data.avatarColor !== undefined) {
     updateData.avatarColor = data.avatarColor;
+  }
+  if (data.avatarSvg !== undefined) {
+    updateData.avatarSvg = data.avatarSvg;
   }
   if (data.role !== undefined) {
     updateData.role = data.role;

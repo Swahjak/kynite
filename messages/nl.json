@@ -300,6 +300,13 @@
     "copyLink": "Link kopiëren",
     "linkExpires": "Link verloopt over 24 uur",
     "maxChildrenReached": "Maximum aantal kinderen bereikt",
+    "avatar": {
+      "upload": "Avatar uploaden",
+      "remove": "Avatar verwijderen",
+      "createAt": "Maak je avatar op getavataaars.com",
+      "fileTooLarge": "Bestand moet kleiner zijn dan 10KB",
+      "invalidFormat": "Alleen SVG-bestanden zijn toegestaan"
+    },
     "roles": {
       "manager": "Beheerder",
       "participant": "Lid",

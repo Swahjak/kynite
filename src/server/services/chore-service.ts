@@ -37,6 +37,7 @@ function buildChoreWithAssignee(row: {
               | "caregiver",
             displayName: row.assignedMember.displayName,
             avatarColor: row.assignedMember.avatarColor,
+            avatarSvg: row.assignedMember.avatarSvg,
             createdAt: row.assignedMember.createdAt,
             user: {
               id: row.assignedUser.id,
@@ -58,6 +59,7 @@ function buildChoreWithAssignee(row: {
               | "caregiver",
             displayName: row.completedMember.displayName,
             avatarColor: row.completedMember.avatarColor,
+            avatarSvg: row.completedMember.avatarSvg,
             createdAt: row.completedMember.createdAt,
             user: {
               id: row.completedUser.id,

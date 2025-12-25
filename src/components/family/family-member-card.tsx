@@ -36,6 +36,7 @@ interface FamilyMemberCardProps {
   onUpdate: (data: {
     displayName?: string | null;
     avatarColor?: AvatarColor | null;
+    avatarSvg?: string | null;
     role?: FamilyMemberRole;
   }) => void;
   onRemove: () => void;
@@ -64,6 +65,8 @@ export function FamilyMemberCard({
         <FamilyAvatar
           name={displayName}
           color={member.avatarColor as AvatarColor}
+          avatarSvg={member.avatarSvg}
+          googleImage={member.user.image}
         />
         <div className="min-w-0">
           <div className="flex items-center gap-2">

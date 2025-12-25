@@ -1,10 +1,12 @@
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import type { AvatarColor } from "@/types/family";
 
 interface FamilyAvatarProps {
   name: string;
   color?: AvatarColor | null;
+  avatarSvg?: string | null;
+  googleImage?: string | null;
   size?: "sm" | "md" | "lg";
   className?: string;
 }
@@ -12,6 +14,8 @@ interface FamilyAvatarProps {
 export function FamilyAvatar({
   name,
   color,
+  avatarSvg,
+  googleImage,
   size = "md",
   className,
 }: FamilyAvatarProps) {
@@ -41,6 +45,38 @@ export function FamilyAvatar({
       .slice(0, 2);
   };
 
+  // Priority 1: Custom SVG avatar
+  if (avatarSvg) {
+    return (
+      <div
+        className={cn(
+          "overflow-hidden rounded-full [&>svg]:h-full [&>svg]:w-full",
+          sizeClasses[size],
+          className
+        )}
+        dangerouslySetInnerHTML={{ __html: avatarSvg }}
+      />
+    );
+  }
+
+  // Priority 2: Google profile image
+  if (googleImage) {
+    return (
+      <Avatar className={cn(sizeClasses[size], className)}>
+        <AvatarImage src={googleImage} alt={name} />
+        <AvatarFallback
+          className={cn(
+            "font-semibold",
+            color ? colorClassMap[color] : "bg-muted text-muted-foreground"
+          )}
+        >
+          {getInitials(name)}
+        </AvatarFallback>
+      </Avatar>
+    );
+  }
+
+  // Priority 3: Initials with color
   return (
     <Avatar className={cn(sizeClasses[size], className)}>
       <AvatarFallback

@@ -105,6 +105,7 @@ export const familyMembers = pgTable("family_members", {
   role: text("role").notNull(), // 'manager' | 'participant' | 'caregiver' | 'device'
   displayName: text("display_name"),
   avatarColor: text("avatar_color"),
+  avatarSvg: text("avatar_svg"),
   createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
 });
 

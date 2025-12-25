@@ -60,6 +60,27 @@ export async function PATCH(request: Request, { params }: Params) {
       return Errors.validation(parsed.error.flatten());
     }
 
+    // Sanitize SVG if provided
+    let sanitizedSvg: string | null | undefined = parsed.data.avatarSvg;
+    if (parsed.data.avatarSvg) {
+      // Dynamic import to avoid ESM compatibility issues during build
+      const { isValidSvg, sanitizeSvg } = await import("@/lib/svg-sanitizer");
+
+      if (!isValidSvg(parsed.data.avatarSvg)) {
+        return Errors.validation({
+          avatarSvg: "Invalid SVG format",
+        });
+      }
+      sanitizedSvg = sanitizeSvg(parsed.data.avatarSvg);
+
+      // Verify sanitization produced valid output
+      if (!sanitizedSvg || sanitizedSvg.trim().length === 0) {
+        return Errors.validation({
+          avatarSvg: "SVG content could not be processed",
+        });
+      }
+    }
+
     // Non-managers cannot change roles
     if (parsed.data.role && !isManager) {
       return Errors.managerRequired();
@@ -91,6 +112,7 @@ export async function PATCH(request: Request, { params }: Params) {
     const updated = await updateMember(memberId, {
       displayName: parsed.data.displayName,
       avatarColor: parsed.data.avatarColor,
+      avatarSvg: sanitizedSvg,
       role: parsed.data.role as FamilyMemberRole | undefined,
     });
 

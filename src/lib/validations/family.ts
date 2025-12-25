@@ -31,6 +31,11 @@ export const updateMemberSchema = z.object({
     .enum(AVATAR_COLORS as [string, ...string[]])
     .optional()
     .nullable(),
+  avatarSvg: z
+    .string()
+    .max(10000, "Avatar SVG must be smaller than 10KB")
+    .optional()
+    .nullable(),
   role: z.enum(FAMILY_MEMBER_ROLES as [string, ...string[]]).optional(),
 });
 

@@ -64,6 +64,7 @@
     "date-fns": "^4.1.0",
     "drizzle-orm": "0.45.1",
     "framer-motion": "^12.23.26",
+    "isomorphic-dompurify": "^2.34.0",
     "lucide-react": "^0.562.0",
     "motion": "^12.23.26",
     "next": "16.1.0",
