@@ -76,7 +76,7 @@ export function TaskDialog({
     resolver: zodResolver(taskFormSchema),
     defaultValues: {
       title: "",
-      icon: "star",
+      icon: "smile",
       iconColor: "blue",
       starValue: 1,
       daysOfWeek: [1, 2, 3, 4, 5],
@@ -96,7 +96,7 @@ export function TaskDialog({
       } else {
         form.reset({
           title: "",
-          icon: "star",
+          icon: "smile",
           iconColor: "blue",
           starValue: 1,
           daysOfWeek: [1, 2, 3, 4, 5],
@@ -144,24 +144,25 @@ export function TaskDialog({
                   <FormLabel>{t("icon")}</FormLabel>
                   <FormControl>
                     <div className="grid grid-cols-6 gap-2">
-                      {TASK_ICONS.map((iconItem) => (
-                        <button
-                          key={iconItem.icon}
-                          type="button"
-                          onClick={() => field.onChange(iconItem.icon)}
-                          className={cn(
-                            "flex h-10 w-10 items-center justify-center rounded-lg border-2 transition-colors",
-                            field.value === iconItem.icon
-                              ? "border-primary bg-primary/10"
-                              : "border-muted hover:border-muted-foreground/50"
-                          )}
-                          title={iconItem.label}
-                        >
-                          <span className="material-symbols-outlined text-xl">
-                            {iconItem.icon}
-                          </span>
-                        </button>
-                      ))}
+                      {TASK_ICONS.map((iconItem) => {
+                        const IconComponent = iconItem.icon;
+                        return (
+                          <button
+                            key={iconItem.key}
+                            type="button"
+                            onClick={() => field.onChange(iconItem.key)}
+                            className={cn(
+                              "flex h-10 w-10 items-center justify-center rounded-lg border-2 transition-colors",
+                              field.value === iconItem.key
+                                ? "border-primary bg-primary/10"
+                                : "border-muted hover:border-muted-foreground/50"
+                            )}
+                            title={iconItem.label}
+                          >
+                            <IconComponent className="size-5" />
+                          </button>
+                        );
+                      })}
                     </div>
                   </FormControl>
                   <FormMessage />
