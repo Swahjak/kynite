@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { Pencil, Trash2, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TaskCell } from "./task-cell";
-import { ICON_COLORS, type IconColorKey } from "../constants";
+import { ICON_COLORS, type IconColorKey, getTaskIconByKey } from "../constants";
 import type {
   TaskRow as TaskRowType,
   WeekDay,
@@ -67,15 +67,14 @@ export function TaskRow({
             colors.darkBg
           )}
         >
-          <span
-            className={cn(
-              "material-symbols-outlined text-xl",
-              colors.text,
-              colors.darkText
-            )}
-          >
-            {task.icon}
-          </span>
+          {(() => {
+            const IconComponent = getTaskIconByKey(task.icon);
+            return (
+              <IconComponent
+                className={cn("size-5", colors.text, colors.darkText)}
+              />
+            );
+          })()}
         </div>
 
         {/* Title */}
