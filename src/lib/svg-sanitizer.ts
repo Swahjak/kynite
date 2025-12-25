@@ -1,13 +1,28 @@
-import DOMPurify from "isomorphic-dompurify";
+import createDOMPurify from "dompurify";
+import { Window } from "happy-dom";
 
 /**
  * Sanitize SVG content by removing potentially dangerous elements
  * Strips scripts, event handlers, and external resource references
+ *
+ * Uses happy-dom instead of jsdom to avoid ESM/CJS compatibility issues
+ * in serverless environments (Vercel Edge, etc.)
  */
 export function sanitizeSvg(svgContent: string): string {
-  return DOMPurify.sanitize(svgContent, {
+  // Create a fresh DOM environment for each sanitization
+  // This ensures proper isolation and avoids state leakage
+  const window = new Window();
+
+  const DOMPurify = createDOMPurify(window as any);
+
+  const result = DOMPurify.sanitize(svgContent, {
     USE_PROFILES: { svg: true, svgFilters: true },
   });
+
+  // Clean up to avoid memory leaks in serverless
+  window.close();
+
+  return result;
 }
 
 /**
