@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
+import { Hand, Plus } from "lucide-react";
 
 export function HeroSection() {
   const t = useTranslations("HomePage.hero");
@@ -47,7 +48,7 @@ export function HeroSection() {
           <DashboardPreview />
           <div className="absolute inset-0 flex items-center justify-center bg-black/5 backdrop-blur-[1px]">
             <p className="text-foreground flex items-center gap-2 rounded-full border border-white/50 bg-white/90 px-6 py-3 text-sm font-semibold shadow-xl backdrop-blur-md">
-              <Icon name="touch_app" className="text-primary" />
+              <Icon icon={Hand} className="text-primary" />
               {t("previewLabel")}
             </p>
           </div>
@@ -99,7 +100,7 @@ function DashboardPreview() {
           <div className="bg-card hidden h-full space-y-2 rounded-lg border p-4 shadow-sm md:block">
             <div className="bg-muted h-3 w-12 rounded" />
             <div className="text-muted-foreground flex h-24 items-center justify-center rounded border border-dashed">
-              <Icon name="add" />
+              <Icon icon={Plus} />
             </div>
           </div>
         </div>
