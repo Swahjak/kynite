@@ -7,6 +7,7 @@ import { Toaster } from "sonner";
 import { routing, type Locale } from "@/i18n/routing";
 import { SetLocale } from "./set-locale";
 import { QueryProvider } from "@/components/providers/query-provider";
+import { ConfettiProvider } from "@/components/confetti";
 
 type Props = {
   children: React.ReactNode;
@@ -52,9 +53,11 @@ export default async function LocaleLayout({ children, params }: Props) {
           enableSystem
           disableTransitionOnChange
         >
-          <SetLocale locale={locale} />
-          {children}
-          <Toaster richColors position="bottom-right" />
+          <ConfettiProvider>
+            <SetLocale locale={locale} />
+            {children}
+            <Toaster richColors position="bottom-right" />
+          </ConfettiProvider>
         </ThemeProvider>
       </QueryProvider>
     </NextIntlClientProvider>
