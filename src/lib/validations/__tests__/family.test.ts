@@ -40,7 +40,8 @@ describe("updateMemberSchema", () => {
   describe("avatarSvg", () => {
     it("accepts valid avatarSvg string", () => {
       const result = updateMemberSchema.safeParse({
-        avatarSvg: '<svg width="100" height="100"><circle cx="50" cy="50" r="40" /></svg>',
+        avatarSvg:
+          '<svg width="100" height="100"><circle cx="50" cy="50" r="40" /></svg>',
       });
       expect(result.success).toBe(true);
     });
