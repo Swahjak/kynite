@@ -5,33 +5,19 @@ import { db } from "@/server/db";
 import { familyMembers } from "@/server/schema";
 import { eq } from "drizzle-orm";
 import { getDevicesForFamily } from "@/server/services/device-service";
+import { Errors } from "@/lib/errors";
 
 // GET /api/v1/devices
 export async function GET() {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session?.user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
-        },
-        { status: 401 }
-      );
+      return Errors.unauthorized();
     }
 
     // Devices can't manage other devices
     if ((session.user as { type?: string }).type === "device") {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "FORBIDDEN",
-            message: "Devices cannot manage devices",
-          },
-        },
-        { status: 403 }
-      );
+      return Errors.forbidden({ reason: "Devices cannot manage devices" });
     }
 
     const [member] = await db
@@ -41,27 +27,12 @@ export async function GET() {
       .limit(1);
 
     if (!member) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "NOT_FOUND", message: "No family found" },
-        },
-        { status: 404 }
-      );
+      return Errors.notFound("family");
     }
 
     // Only managers can view devices
     if (member.role !== "manager") {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "FORBIDDEN",
-            message: "Only managers can view devices",
-          },
-        },
-        { status: 403 }
-      );
+      return Errors.managerRequired();
     }
 
     const devices = await getDevicesForFamily(member.familyId);
@@ -69,12 +40,6 @@ export async function GET() {
     return NextResponse.json({ success: true, data: { devices } });
   } catch (error) {
     console.error("Error fetching devices:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: { code: "INTERNAL_ERROR", message: "Failed to fetch devices" },
-      },
-      { status: 500 }
-    );
+    return Errors.internal(error);
   }
 }

@@ -6,19 +6,14 @@ import { familyMembers } from "@/server/schema";
 import { eq } from "drizzle-orm";
 import { createPairingCode } from "@/server/services/device-service";
 import { generatePairingCodeSchema } from "@/lib/validations/device";
+import { Errors } from "@/lib/errors";
 
 // POST /api/v1/devices/pair/generate
 export async function POST(request: Request) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session?.user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
-        },
-        { status: 401 }
-      );
+      return Errors.unauthorized();
     }
 
     // Get user's family membership
@@ -29,40 +24,19 @@ export async function POST(request: Request) {
       .limit(1);
 
     if (!member) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "NOT_FOUND", message: "No family found" },
-        },
-        { status: 404 }
-      );
+      return Errors.notFound("family");
     }
 
     // Only managers can add devices
     if (member.role !== "manager") {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "FORBIDDEN",
-            message: "Only managers can add devices",
-          },
-        },
-        { status: 403 }
-      );
+      return Errors.managerRequired();
     }
 
     const body = await request.json();
     const parsed = generatePairingCodeSchema.safeParse(body);
 
     if (!parsed.success) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "VALIDATION_ERROR", message: parsed.error.message },
-        },
-        { status: 400 }
-      );
+      return Errors.validation(parsed.error);
     }
 
     const { code, expiresAt } = await createPairingCode(
@@ -77,12 +51,6 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("Error generating pairing code:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: { code: "INTERNAL_ERROR", message: "Failed to generate code" },
-      },
-      { status: 500 }
-    );
+    return Errors.internal(error);
   }
 }

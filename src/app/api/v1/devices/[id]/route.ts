@@ -10,6 +10,7 @@ import {
   verifyDeviceInFamily,
 } from "@/server/services/device-service";
 import { updateDeviceSchema } from "@/lib/validations/device";
+import { Errors } from "@/lib/errors";
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -22,26 +23,11 @@ export async function PATCH(request: Request, context: RouteContext) {
     const session = await auth.api.getSession({ headers: await headers() });
 
     if (!session?.user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
-        },
-        { status: 401 }
-      );
+      return Errors.unauthorized();
     }
 
     if ((session.user as { type?: string }).type === "device") {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "FORBIDDEN",
-            message: "Devices cannot manage devices",
-          },
-        },
-        { status: 403 }
-      );
+      return Errors.forbidden({ reason: "Devices cannot manage devices" });
     }
 
     const [member] = await db
@@ -51,41 +37,20 @@ export async function PATCH(request: Request, context: RouteContext) {
       .limit(1);
 
     if (!member || member.role !== "manager") {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "FORBIDDEN",
-            message: "Only managers can update devices",
-          },
-        },
-        { status: 403 }
-      );
+      return Errors.managerRequired();
     }
 
     // Verify device belongs to this family
     const belongs = await verifyDeviceInFamily(deviceId, member.familyId);
     if (!belongs) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "NOT_FOUND", message: "Device not found" },
-        },
-        { status: 404 }
-      );
+      return Errors.notFound("device");
     }
 
     const body = await request.json();
     const parsed = updateDeviceSchema.safeParse(body);
 
     if (!parsed.success) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "VALIDATION_ERROR", message: parsed.error.message },
-        },
-        { status: 400 }
-      );
+      return Errors.validation(parsed.error);
     }
 
     await updateDeviceName(deviceId, parsed.data.name);
@@ -96,13 +61,7 @@ export async function PATCH(request: Request, context: RouteContext) {
     });
   } catch (error) {
     console.error("Error updating device:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: { code: "INTERNAL_ERROR", message: "Failed to update device" },
-      },
-      { status: 500 }
-    );
+    return Errors.internal(error);
   }
 }
 
@@ -113,26 +72,11 @@ export async function DELETE(request: Request, context: RouteContext) {
     const session = await auth.api.getSession({ headers: await headers() });
 
     if (!session?.user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
-        },
-        { status: 401 }
-      );
+      return Errors.unauthorized();
     }
 
     if ((session.user as { type?: string }).type === "device") {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "FORBIDDEN",
-            message: "Devices cannot manage devices",
-          },
-        },
-        { status: 403 }
-      );
+      return Errors.forbidden({ reason: "Devices cannot manage devices" });
     }
 
     const [member] = await db
@@ -142,27 +86,12 @@ export async function DELETE(request: Request, context: RouteContext) {
       .limit(1);
 
     if (!member || member.role !== "manager") {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "FORBIDDEN",
-            message: "Only managers can remove devices",
-          },
-        },
-        { status: 403 }
-      );
+      return Errors.managerRequired();
     }
 
     const belongs = await verifyDeviceInFamily(deviceId, member.familyId);
     if (!belongs) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "NOT_FOUND", message: "Device not found" },
-        },
-        { status: 404 }
-      );
+      return Errors.notFound("device");
     }
 
     await deleteDevice(deviceId);
@@ -173,12 +102,6 @@ export async function DELETE(request: Request, context: RouteContext) {
     });
   } catch (error) {
     console.error("Error deleting device:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: { code: "INTERNAL_ERROR", message: "Failed to remove device" },
-      },
-      { status: 500 }
-    );
+    return Errors.internal(error);
   }
 }
