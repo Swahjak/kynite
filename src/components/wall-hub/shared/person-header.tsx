@@ -1,7 +1,8 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { FamilyAvatar } from "@/components/family/family-avatar";
 import type { IUser } from "@/components/calendar/interfaces";
+import type { AvatarColor } from "@/types/family";
 
 interface PersonHeaderProps {
   user: IUser;
@@ -10,19 +11,13 @@ interface PersonHeaderProps {
 export function PersonHeader({ user }: PersonHeaderProps) {
   return (
     <div className="bg-card border-border flex items-center gap-3 rounded-xl border p-3">
-      {user.avatarSvg ? (
-        <div
-          className="relative flex size-10 shrink-0 overflow-hidden rounded-full"
-          dangerouslySetInnerHTML={{ __html: user.avatarSvg }}
-        />
-      ) : (
-        <Avatar className="size-10">
-          <AvatarImage src={user.avatarUrl} alt={user.name} />
-          <AvatarFallback style={{ backgroundColor: user.avatarColor }}>
-            {user.avatarFallback}
-          </AvatarFallback>
-        </Avatar>
-      )}
+      <FamilyAvatar
+        name={user.name}
+        color={user.avatarColor as AvatarColor | null}
+        avatarSvg={user.avatarSvg}
+        googleImage={user.avatarUrl}
+        size="md"
+      />
       <span className="text-lg font-semibold">{user.name}</span>
     </div>
   );

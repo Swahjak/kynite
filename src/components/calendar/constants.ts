@@ -7,4 +7,6 @@ export const COLORS: TEventColor[] = [
   "yellow",
   "purple",
   "orange",
+  "pink",
+  "teal",
 ];

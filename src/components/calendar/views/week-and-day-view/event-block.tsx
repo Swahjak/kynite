@@ -26,6 +26,8 @@ const calendarWeekEventCardVariants = cva(
           "border-purple-200 bg-purple-100/50 text-purple-700 hover:bg-purple-100 dark:border-purple-800 dark:bg-purple-950/50 dark:text-purple-300 dark:hover:bg-purple-950",
         orange:
           "border-orange-200 bg-orange-100/50 text-orange-700 hover:bg-orange-100 dark:border-orange-800 dark:bg-orange-950/50 dark:text-orange-300 dark:hover:bg-orange-950",
+        pink: "border-pink-200 bg-pink-100/50 text-pink-700 hover:bg-pink-100 dark:border-pink-800 dark:bg-pink-950/50 dark:text-pink-300 dark:hover:bg-pink-950",
+        teal: "border-teal-200 bg-teal-100/50 text-teal-700 hover:bg-teal-100 dark:border-teal-800 dark:bg-teal-950/50 dark:text-teal-300 dark:hover:bg-teal-950",
 
         // Dot variants
         "blue-dot":
@@ -40,6 +42,10 @@ const calendarWeekEventCardVariants = cva(
           "border-border bg-card text-foreground hover:bg-accent [&_svg]:fill-purple-600 dark:[&_svg]:fill-purple-500",
         "yellow-dot":
           "border-border bg-card text-foreground hover:bg-accent [&_svg]:fill-yellow-600 dark:[&_svg]:fill-yellow-500",
+        "pink-dot":
+          "border-border bg-card text-foreground hover:bg-accent [&_svg]:fill-pink-600 dark:[&_svg]:fill-pink-500",
+        "teal-dot":
+          "border-border bg-card text-foreground hover:bg-accent [&_svg]:fill-teal-600 dark:[&_svg]:fill-teal-500",
       },
     },
     defaultVariants: {

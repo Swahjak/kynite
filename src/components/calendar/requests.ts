@@ -37,7 +37,7 @@ export function transformEventToIEvent(event: EventWithParticipants): IEvent {
       id: p.familyMemberId,
       name: p.displayName ?? p.userName,
       avatarFallback: (p.displayName ?? p.userName).slice(0, 2).toUpperCase(),
-      avatarColor: p.avatarColor ?? "bg-primary",
+      avatarColor: p.avatarColor ?? null,
       avatarUrl: p.userImage ?? undefined,
       avatarSvg: p.avatarSvg,
     })),
@@ -57,7 +57,7 @@ export function transformMemberToIUser(member: {
     id: member.id,
     name,
     avatarFallback: name.slice(0, 2).toUpperCase(),
-    avatarColor: member.avatarColor ?? "bg-primary",
+    avatarColor: member.avatarColor ?? null,
     avatarUrl: member.user.image ?? undefined,
     avatarSvg: member.avatarSvg,
   };

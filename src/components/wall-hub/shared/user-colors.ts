@@ -1,6 +1,18 @@
-// Consistent colors for users across wall-hub components
-// Color is derived from user ID hash - same user = same color everywhere
+/**
+ * @deprecated This module is deprecated. Use @/lib/avatar-colors instead.
+ *
+ * The hash-based color system has been replaced with stored avatarColor values
+ * from family members. Colors are now user-selected, not auto-generated.
+ *
+ * Migration guide:
+ * - Replace getUserColorById() with getAvatarColorClasses(user.avatarColor)
+ * - Replace getEventColorByParticipants() with getAvatarColorClasses(firstUser.avatarColor)
+ */
 
+import { getAvatarColorClasses as newGetAvatarColorClasses } from "@/lib/avatar-colors";
+import type { AvatarColor } from "@/types/family";
+
+// Keep legacy exports for backwards compatibility during migration
 export const USER_COLORS = [
   {
     key: "blue",
@@ -47,31 +59,30 @@ export const USER_COLORS = [
 ] as const;
 
 /**
- * Simple hash of string to number for consistent color assignment
- */
-function hashString(str: string): number {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = (hash << 5) - hash + str.charCodeAt(i);
-    hash |= 0; // Convert to 32bit integer
-  }
-  return Math.abs(hash);
-}
-
-/**
- * Get color for a user based on their ID (consistent across renders)
+ * @deprecated Use getAvatarColorClasses from @/lib/avatar-colors instead.
+ * Pass user.avatarColor directly instead of user.id.
  */
 export function getUserColorById(userId: string) {
-  const index = hashString(userId) % USER_COLORS.length;
-  return USER_COLORS[index];
+  console.warn(
+    "getUserColorById is deprecated. Use getAvatarColorClasses(user.avatarColor) from @/lib/avatar-colors instead."
+  );
+  // Fallback: return blue color classes in legacy format
+  const colors = newGetAvatarColorClasses("blue" as AvatarColor);
+  return {
+    key: "blue",
+    border: colors.ring.replace("ring-", "border-"),
+    bg: colors.bgSubtle,
+    activeBg: colors.bg,
+    ring: colors.ring,
+  };
 }
 
 /**
- * Get color for an event based on its first participant
+ * @deprecated Use getAvatarColorClasses(firstParticipant.avatarColor) from @/lib/avatar-colors instead.
  */
 export function getEventColorByParticipants(participantIds: string[]) {
-  if (participantIds.length === 0) {
-    return USER_COLORS[0]; // Default to blue for events with no participants
-  }
-  return getUserColorById(participantIds[0]);
+  console.warn(
+    "getEventColorByParticipants is deprecated. Use getAvatarColorClasses(user.avatarColor) from @/lib/avatar-colors instead."
+  );
+  return getUserColorById(participantIds[0] ?? "");
 }

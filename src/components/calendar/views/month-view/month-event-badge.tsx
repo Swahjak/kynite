@@ -25,6 +25,8 @@ const eventBadgeVariants = cva(
           "border-purple-200 bg-purple-50 text-purple-700 dark:border-purple-800 dark:bg-purple-950 dark:text-purple-300",
         orange:
           "border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-800 dark:bg-orange-950 dark:text-orange-300",
+        pink: "border-pink-200 bg-pink-50 text-pink-700 dark:border-pink-800 dark:bg-pink-950 dark:text-pink-300",
+        teal: "border-teal-200 bg-teal-50 text-teal-700 dark:border-teal-800 dark:bg-teal-950 dark:text-teal-300",
 
         // Dot variants
         "blue-dot": "bg-bg-secondary text-t-primary [&_svg]:fill-blue-600",
@@ -33,6 +35,8 @@ const eventBadgeVariants = cva(
         "orange-dot": "bg-bg-secondary text-t-primary [&_svg]:fill-orange-600",
         "purple-dot": "bg-bg-secondary text-t-primary [&_svg]:fill-purple-600",
         "yellow-dot": "bg-bg-secondary text-t-primary [&_svg]:fill-yellow-600",
+        "pink-dot": "bg-bg-secondary text-t-primary [&_svg]:fill-pink-600",
+        "teal-dot": "bg-bg-secondary text-t-primary [&_svg]:fill-teal-600",
       },
       multiDayPosition: {
         first: "relative z-10 mr-0 rounded-r-none border-r-0 [&>span]:mr-2.5",

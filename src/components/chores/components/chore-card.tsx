@@ -80,18 +80,13 @@ export function ChoreCard({ chore, onEdit, onDelete }: ChoreCardProps) {
       {/* Main Content */}
       <div className="flex items-center gap-4 p-4">
         {/* Avatar */}
-        <div
-          className="rounded-full ring-2 ring-offset-2"
-          style={{ "--tw-ring-color": avatarColor } as React.CSSProperties}
-        >
-          <FamilyAvatar
-            name={displayName}
-            color={avatarColor as AvatarColor}
-            avatarSvg={assignee?.avatarSvg}
-            googleImage={assignee?.user.image}
-            size="lg"
-          />
-        </div>
+        <FamilyAvatar
+          name={displayName}
+          color={avatarColor as AvatarColor}
+          avatarSvg={assignee?.avatarSvg}
+          googleImage={assignee?.user.image}
+          size="lg"
+        />
 
         {/* Content */}
         <div className="min-w-0 flex-1">

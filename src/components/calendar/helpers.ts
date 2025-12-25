@@ -395,6 +395,8 @@ export const getColorClass = (color: string): string => {
       "border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-800 dark:bg-orange-950 dark:text-orange-300",
     purple:
       "border-purple-200 bg-purple-50 text-purple-700 dark:border-purple-800 dark:bg-purple-950 dark:text-purple-300",
+    pink: "border-pink-200 bg-pink-50 text-pink-700 dark:border-pink-800 dark:bg-pink-950 dark:text-pink-300",
+    teal: "border-teal-200 bg-teal-50 text-teal-700 dark:border-teal-800 dark:bg-teal-950 dark:text-teal-300",
   };
   return colorClasses[color as TEventColor] || "";
 };
@@ -407,6 +409,8 @@ export const getBgColor = (color: string): string => {
     blue: "bg-blue-400 dark:bg-blue-600",
     orange: "bg-orange-400 dark:bg-orange-600",
     purple: "bg-purple-400 dark:bg-purple-600",
+    pink: "bg-pink-400 dark:bg-pink-600",
+    teal: "bg-teal-400 dark:bg-teal-600",
   };
   return colorClasses[color as TEventColor] || "";
 };

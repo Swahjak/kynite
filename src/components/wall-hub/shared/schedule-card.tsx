@@ -1,10 +1,11 @@
 "use client";
 
 import { format, isWithinInterval, parseISO } from "date-fns";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { FamilyAvatar } from "@/components/family/family-avatar";
+import { getAvatarColorClasses } from "@/lib/avatar-colors";
 import type { IEvent } from "@/components/calendar/interfaces";
-import { getEventColorByParticipants } from "./user-colors";
+import type { AvatarColor } from "@/types/family";
 
 interface ScheduleCardProps {
   event: IEvent;
@@ -19,16 +20,18 @@ export function ScheduleCard({ event, showNowBadge }: ScheduleCardProps) {
   const isNow = isWithinInterval(now, { start: startDate, end: endDate });
   const timeDisplay = format(startDate, "h:mm a");
 
-  // Get color based on first participant (consistent via ID hash)
-  const participantIds = event.users.map((u) => u.id);
-  const color = getEventColorByParticipants(participantIds);
+  // Get color based on first participant's avatarColor
+  const firstUser = event.users[0];
+  const color = getAvatarColorClasses(firstUser?.avatarColor as AvatarColor);
+  // Convert ring class to border class for card styling
+  const borderClass = color.ring.replace("ring-", "border-l-");
 
   return (
     <div
       className={cn(
         "rounded-lg border-l-4 p-3 shadow-sm",
-        color.border.replace("border-", "border-l-"),
-        color.bg
+        borderClass,
+        color.bgSubtle
       )}
     >
       <div className="mb-1 flex items-center justify-between gap-2">
@@ -38,28 +41,18 @@ export function ScheduleCard({ event, showNowBadge }: ScheduleCardProps) {
         <div className="flex items-center gap-1.5">
           {event.users.length > 0 && (
             <div className="flex -space-x-1">
-              {event.users.map((user) =>
-                user.avatarSvg ? (
-                  <div
-                    key={user.id}
-                    className="relative flex size-4 shrink-0 overflow-hidden rounded-full border border-white dark:border-gray-800"
-                    dangerouslySetInnerHTML={{ __html: user.avatarSvg }}
-                  />
-                ) : (
-                  <Avatar
-                    key={user.id}
-                    className="size-4 border border-white dark:border-gray-800"
-                  >
-                    <AvatarImage src={user.avatarUrl} alt={user.name} />
-                    <AvatarFallback
-                      style={{ backgroundColor: user.avatarColor }}
-                      className="text-[6px] font-bold"
-                    >
-                      {user.avatarFallback}
-                    </AvatarFallback>
-                  </Avatar>
-                )
-              )}
+              {event.users.map((user) => (
+                <FamilyAvatar
+                  key={user.id}
+                  name={user.name}
+                  color={user.avatarColor as AvatarColor}
+                  avatarSvg={user.avatarSvg}
+                  googleImage={user.avatarUrl}
+                  size="sm"
+                  showRing={false}
+                  className="size-4 border border-white text-[6px] dark:border-gray-800"
+                />
+              ))}
             </div>
           )}
           {showNowBadge && isNow && (

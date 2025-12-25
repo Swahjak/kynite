@@ -1,25 +1,14 @@
 "use client";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Star } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { FamilyAvatar } from "@/components/family/family-avatar";
 import type { FamilyMemberStar } from "../types";
 
 interface MemberRowProps {
   member: FamilyMemberStar;
   rank: number;
 }
-
-const colorMap: Record<string, string> = {
-  purple: "bg-purple-500",
-  blue: "bg-blue-500",
-  pink: "bg-pink-500",
-  green: "bg-green-500",
-  orange: "bg-orange-500",
-  red: "bg-red-500",
-  yellow: "bg-yellow-500",
-  teal: "bg-teal-500",
-};
 
 export function MemberRow({ member, rank }: MemberRowProps) {
   return (
@@ -29,23 +18,7 @@ export function MemberRow({ member, rank }: MemberRowProps) {
         rank === 1 && "bg-primary/5"
       )}
     >
-      <div
-        className={cn(
-          "rounded-full p-0.5",
-          rank === 1 && "ring-primary ring-2"
-        )}
-      >
-        <Avatar className="h-8 w-8">
-          <AvatarFallback
-            className={cn(
-              colorMap[member.avatarColor] || "bg-gray-500",
-              "text-sm text-white"
-            )}
-          >
-            {member.name.charAt(0)}
-          </AvatarFallback>
-        </Avatar>
-      </div>
+      <FamilyAvatar name={member.name} color={member.avatarColor} size="sm" />
 
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium">{member.name}</p>

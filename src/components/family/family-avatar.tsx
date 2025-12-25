@@ -1,14 +1,16 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { getAvatarColorClasses } from "@/lib/avatar-colors";
 import type { AvatarColor } from "@/types/family";
 
 interface FamilyAvatarProps {
   name: string;
-  color?: AvatarColor | null;
+  color?: AvatarColor | string | null;
   avatarSvg?: string | null;
   googleImage?: string | null;
   size?: "sm" | "md" | "lg";
   className?: string;
+  showRing?: boolean;
 }
 
 export function FamilyAvatar({
@@ -18,6 +20,7 @@ export function FamilyAvatar({
   googleImage,
   size = "md",
   className,
+  showRing = true,
 }: FamilyAvatarProps) {
   const sizeClasses = {
     sm: "size-8 text-xs",
@@ -25,16 +28,11 @@ export function FamilyAvatar({
     lg: "size-12 text-base",
   };
 
-  const colorClassMap: Record<AvatarColor, string> = {
-    blue: "bg-[var(--event-blue-border)] text-white",
-    purple: "bg-[var(--event-purple-border)] text-white",
-    orange: "bg-[var(--event-orange-border)] text-white",
-    green: "bg-[var(--event-green-border)] text-white",
-    red: "bg-[var(--event-red-border)] text-white",
-    yellow: "bg-[var(--event-yellow-border)] text-white",
-    pink: "bg-[var(--event-pink-border)] text-white",
-    teal: "bg-[var(--event-teal-border)] text-white",
-  };
+  const colorClasses = getAvatarColorClasses(color);
+
+  const ringClasses = showRing
+    ? cn("ring-2", colorClasses.ring, "ring-offset-2 ring-offset-background")
+    : "";
 
   const getInitials = (name: string): string => {
     return name
@@ -52,6 +50,7 @@ export function FamilyAvatar({
         className={cn(
           "overflow-hidden rounded-full [&>svg]:h-full [&>svg]:w-full",
           sizeClasses[size],
+          ringClasses,
           className
         )}
         dangerouslySetInnerHTML={{ __html: avatarSvg }}
@@ -62,13 +61,10 @@ export function FamilyAvatar({
   // Priority 2: Google profile image
   if (googleImage) {
     return (
-      <Avatar className={cn(sizeClasses[size], className)}>
+      <Avatar className={cn(sizeClasses[size], ringClasses, className)}>
         <AvatarImage src={googleImage} alt={name} />
         <AvatarFallback
-          className={cn(
-            "font-semibold",
-            color ? colorClassMap[color] : "bg-muted text-muted-foreground"
-          )}
+          className={cn("font-semibold", colorClasses.bg, colorClasses.text)}
         >
           {getInitials(name)}
         </AvatarFallback>
@@ -78,12 +74,9 @@ export function FamilyAvatar({
 
   // Priority 3: Initials with color
   return (
-    <Avatar className={cn(sizeClasses[size], className)}>
+    <Avatar className={cn(sizeClasses[size], ringClasses, className)}>
       <AvatarFallback
-        className={cn(
-          "font-semibold",
-          color ? colorClassMap[color] : "bg-muted text-muted-foreground"
-        )}
+        className={cn("font-semibold", colorClasses.bg, colorClasses.text)}
       >
         {getInitials(name)}
       </AvatarFallback>

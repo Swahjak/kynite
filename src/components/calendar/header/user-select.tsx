@@ -1,4 +1,3 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AvatarGroup } from "@/components/ui/avatar-group";
 import {
   Select,
@@ -8,8 +7,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useCalendar } from "@/components/calendar/contexts/calendar-context";
-import { cn } from "@/lib/utils";
+import { FamilyAvatar } from "@/components/family/family-avatar";
 import type { IUser } from "@/components/calendar/interfaces";
+import type { AvatarColor } from "@/types/family";
 
 function CalendarUserAvatar({
   user,
@@ -18,26 +18,15 @@ function CalendarUserAvatar({
   user: IUser;
   className?: string;
 }) {
-  // If user has custom SVG avatar, render it
-  if (user.avatarSvg) {
-    return (
-      <div
-        className={cn(
-          "relative flex shrink-0 overflow-hidden rounded-full",
-          className
-        )}
-        dangerouslySetInnerHTML={{ __html: user.avatarSvg }}
-      />
-    );
-  }
-
   return (
-    <Avatar className={className}>
-      <AvatarImage src={user.avatarUrl} alt={user.name} />
-      <AvatarFallback className={cn("text-xxs text-white", user.avatarColor)}>
-        {user.avatarFallback}
-      </AvatarFallback>
-    </Avatar>
+    <FamilyAvatar
+      name={user.name}
+      color={user.avatarColor as AvatarColor | null}
+      avatarSvg={user.avatarSvg}
+      googleImage={user.avatarUrl}
+      size="sm"
+      className={className}
+    />
   );
 }
 

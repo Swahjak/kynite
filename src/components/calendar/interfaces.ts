@@ -4,7 +4,7 @@ export interface IUser {
   id: string;
   name: string;
   avatarFallback: string;
-  avatarColor: string;
+  avatarColor: string | null;
   avatarUrl?: string;
   avatarSvg?: string | null;
 }
