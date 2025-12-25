@@ -8,8 +8,10 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-// Create postgres connection
-const client = postgres(process.env.DATABASE_URL);
+// Create postgres connection with SSL in production
+const client = postgres(process.env.DATABASE_URL, {
+  ssl: process.env.NODE_ENV === "production" ? "require" : false,
+});
 
 // Create drizzle instance with schema
 export const db = drizzle(client, { schema });
