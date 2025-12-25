@@ -281,7 +281,19 @@
     "familyName": "Familienaam",
     "familySettings": "Familie-instellingen",
     "members": "Leden",
-    "leaveFamily": "Familie verlaten"
+    "leaveFamily": "Familie verlaten",
+    "addChild": "Kind toevoegen",
+    "childName": "Naam van kind",
+    "childNamePlaceholder": "Voer naam van kind in",
+    "selectAvatarColor": "Selecteer avatarkleur",
+    "createChild": "Kind aanmaken",
+    "childCreated": "Kind succesvol toegevoegd",
+    "linkAccount": "Account koppelen",
+    "generateUpgradeLink": "Link genereren",
+    "upgradeLinkGenerated": "Accountlink gegenereerd",
+    "copyLink": "Link kopiëren",
+    "linkExpires": "Link verloopt over 24 uur",
+    "maxChildrenReached": "Maximum aantal kinderen bereikt"
   },
   "FamilyRoles": {
     "manager": "Beheerder",

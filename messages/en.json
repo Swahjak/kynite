@@ -281,7 +281,19 @@
     "familyName": "Family Name",
     "familySettings": "Family Settings",
     "members": "Members",
-    "leaveFamily": "Leave Family"
+    "leaveFamily": "Leave Family",
+    "addChild": "Add Child",
+    "childName": "Child's Name",
+    "childNamePlaceholder": "Enter child's name",
+    "selectAvatarColor": "Select Avatar Color",
+    "createChild": "Create Child",
+    "childCreated": "Child added successfully",
+    "linkAccount": "Link Account",
+    "generateUpgradeLink": "Generate Link",
+    "upgradeLinkGenerated": "Account link generated",
+    "copyLink": "Copy Link",
+    "linkExpires": "Link expires in 24 hours",
+    "maxChildrenReached": "Maximum number of children reached"
   },
   "FamilyRoles": {
     "manager": "Manager",
