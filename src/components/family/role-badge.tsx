@@ -14,12 +14,14 @@ export function RoleBadge({ role, className }: RoleBadgeProps) {
     manager: "default",
     participant: "secondary",
     caregiver: "outline",
+    device: "outline",
   };
 
   const roleLabels: Record<FamilyMemberRole, string> = {
     manager: "Manager",
     participant: "Member",
     caregiver: "Caregiver",
+    device: "Device",
   };
 
   return (

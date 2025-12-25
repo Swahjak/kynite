@@ -5,6 +5,7 @@ import { db } from "./db";
 import * as schema from "./schema";
 import { familyMembers } from "./schema";
 import { eq } from "drizzle-orm";
+import { deviceAuth } from "./plugins/device-auth";
 
 if (!process.env.BETTER_AUTH_SECRET) {
   throw new Error(
@@ -36,6 +37,7 @@ export const auth = betterAuth({
   }),
 
   plugins: [
+    deviceAuth(),
     customSession(async ({ user, session }) => {
       // Query user's family membership
       const membership = await db

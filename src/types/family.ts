@@ -1,6 +1,10 @@
 // src/types/family.ts
 
-export type FamilyMemberRole = "manager" | "participant" | "caregiver";
+export type FamilyMemberRole =
+  | "manager"
+  | "participant"
+  | "caregiver"
+  | "device";
 
 export type AvatarColor =
   | "blue"

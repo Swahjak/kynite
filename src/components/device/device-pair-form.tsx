@@ -32,17 +32,16 @@ export function DevicePairForm({ locale }: DevicePairFormProps) {
     setError(null);
 
     try {
-      const response = await fetch("/api/v1/devices/pair/complete", {
+      const response = await fetch("/api/auth/device/pair/complete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code }),
       });
 
-      const data = await response.json();
-
-      if (!data.success) {
+      if (!response.ok) {
+        const data = await response.json();
         setError(
-          data.error?.code === "INVALID_CODE" ? t("invalidCode") : t("error")
+          data.message?.includes("expired") ? t("invalidCode") : t("error")
         );
         setIsLoading(false);
         return;
