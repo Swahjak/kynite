@@ -28,8 +28,7 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
     redirect(`/${locale}/onboarding`);
   }
 
-  const allMembers = await getFamilyMembers(family.id);
-  const members = allMembers.filter((member) => member.role !== "device");
+  const members = await getFamilyMembers(family.id);
 
   return (
     <SettingsPageClient

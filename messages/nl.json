@@ -218,7 +218,8 @@
     },
     "quickActions": {
       "title": "Snelle Acties",
-      "selectMember": "Voor wie is deze timer?"
+      "selectMember": "Voor wie is deze timer?",
+      "refresh": "Vernieuwen"
     },
     "todaysChores": {
       "title": "Klusjes",

@@ -37,7 +37,7 @@ export default async function ChoresPage() {
           initialProgress={progress}
           members={members}
         >
-          <Chores familyName={family.name} />
+          <Chores />
         </ChoresProvider>
       </div>
     </div>

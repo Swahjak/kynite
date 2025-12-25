@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, RefreshCw } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,13 +23,11 @@ import type { QuickAction } from "../types";
 
 export function QuickActionsFab() {
   const t = useTranslations("DashboardPage.quickActions");
+  const queryClient = useQueryClient();
   const { quickActions, familyMembers, startQuickAction } = useDashboard();
   const [pendingAction, setPendingAction] = useState<QuickAction | null>(null);
   const [popoverOpen, setPopoverOpen] = useState(false);
-
-  if (quickActions.length === 0) {
-    return null;
-  }
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleActionClick = (action: QuickAction) => {
     setPendingAction(action);
@@ -40,6 +39,13 @@ export function QuickActionsFab() {
       await startQuickAction(pendingAction.id, memberId);
       setPendingAction(null);
     }
+  };
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    setPopoverOpen(false);
+    await queryClient.invalidateQueries();
+    setIsRefreshing(false);
   };
 
   return (
@@ -71,6 +77,18 @@ export function QuickActionsFab() {
                 onClick={() => handleActionClick(action)}
               />
             ))}
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+            >
+              <RefreshCw
+                className={cn("h-4 w-4", isRefreshing && "animate-spin")}
+              />
+              {t("refresh")}
+            </Button>
           </div>
         </PopoverContent>
       </Popover>

@@ -218,7 +218,8 @@
     },
     "quickActions": {
       "title": "Quick Actions",
-      "selectMember": "Who is this timer for?"
+      "selectMember": "Who is this timer for?",
+      "refresh": "Refresh"
     },
     "todaysChores": {
       "title": "Chores",

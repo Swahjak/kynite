@@ -42,7 +42,8 @@ export async function getUserFamily(userId: string) {
 }
 
 /**
- * Get all members of a family with user data joined
+ * Get all human members of a family with user data joined
+ * Excludes device accounts - use getDevicesForFamily from device-service for devices
  */
 export async function getFamilyMembers(
   familyId: string
@@ -67,10 +68,12 @@ export async function getFamilyMembers(
     .innerJoin(users, eq(familyMembers.userId, users.id))
     .where(eq(familyMembers.familyId, familyId));
 
-  return members.map((m) => ({
-    ...m,
-    role: m.role as FamilyMemberRole,
-  }));
+  return members
+    .filter((m) => m.role !== "device")
+    .map((m) => ({
+      ...m,
+      role: m.role as FamilyMemberRole,
+    }));
 }
 
 /**
