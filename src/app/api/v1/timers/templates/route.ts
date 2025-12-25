@@ -9,19 +9,14 @@ import {
   createTemplate,
 } from "@/server/services/timer-template-service";
 import { createTimerTemplateSchema } from "@/lib/validations/timer";
+import { Errors } from "@/lib/errors";
 
 // GET /api/v1/timers/templates
 export async function GET() {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session?.user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
-        },
-        { status: 401 }
-      );
+      return Errors.unauthorized();
     }
 
     // Get user's family
@@ -32,13 +27,7 @@ export async function GET() {
       .limit(1);
 
     if (members.length === 0) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "NOT_FOUND", message: "No family found" },
-        },
-        { status: 404 }
-      );
+      return Errors.notFound("family");
     }
 
     const templates = await getTemplatesForFamily(members[0].familyId);
@@ -46,13 +35,7 @@ export async function GET() {
     return NextResponse.json({ success: true, data: { templates } });
   } catch (error) {
     console.error("Error fetching timer templates:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: { code: "INTERNAL_ERROR", message: "Failed to fetch templates" },
-      },
-      { status: 500 }
-    );
+    return Errors.internal(error);
   }
 }
 
@@ -61,13 +44,7 @@ export async function POST(request: Request) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session?.user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
-        },
-        { status: 401 }
-      );
+      return Errors.unauthorized();
     }
 
     const members = await db
@@ -77,26 +54,14 @@ export async function POST(request: Request) {
       .limit(1);
 
     if (members.length === 0) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "NOT_FOUND", message: "No family found" },
-        },
-        { status: 404 }
-      );
+      return Errors.notFound("family");
     }
 
     const body = await request.json();
     const parsed = createTimerTemplateSchema.safeParse(body);
 
     if (!parsed.success) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "VALIDATION_ERROR", message: parsed.error.message },
-        },
-        { status: 400 }
-      );
+      return Errors.validation(parsed.error);
     }
 
     const template = await createTemplate(members[0].familyId, parsed.data);
@@ -107,12 +72,6 @@ export async function POST(request: Request) {
     );
   } catch (error) {
     console.error("Error creating timer template:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: { code: "INTERNAL_ERROR", message: "Failed to create template" },
-      },
-      { status: 500 }
-    );
+    return Errors.internal(error);
   }
 }

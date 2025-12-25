@@ -8,6 +8,7 @@ import {
   performIncrementalSync,
   performInitialSync,
 } from "@/server/services/google-sync-service";
+import { Errors } from "@/lib/errors";
 
 type RouteParams = {
   params: Promise<{ familyId: string; calendarId: string }>;
@@ -18,13 +19,7 @@ export async function POST(_request: Request, { params }: RouteParams) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session?.user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
-        },
-        { status: 401 }
-      );
+      return Errors.unauthorized();
     }
 
     const { familyId, calendarId } = await params;
@@ -42,13 +37,7 @@ export async function POST(_request: Request, { params }: RouteParams) {
       .limit(1);
 
     if (membership.length === 0) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "FORBIDDEN", message: "Not a family member" },
-        },
-        { status: 403 }
-      );
+      return Errors.notFamilyMember();
     }
 
     // Verify calendar exists
@@ -64,13 +53,7 @@ export async function POST(_request: Request, { params }: RouteParams) {
       .limit(1);
 
     if (calendar.length === 0) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "NOT_FOUND", message: "Calendar not found" },
-        },
-        { status: 404 }
-      );
+      return Errors.notFound("calendar");
     }
 
     // Perform sync (initial or incremental based on sync cursor)
@@ -79,13 +62,7 @@ export async function POST(_request: Request, { params }: RouteParams) {
       : await performInitialSync(calendarId);
 
     if (result.error) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "SYNC_ERROR", message: result.error },
-        },
-        { status: 500 }
-      );
+      return Errors.googleError({ syncError: result.error });
     }
 
     return NextResponse.json({
@@ -98,12 +75,6 @@ export async function POST(_request: Request, { params }: RouteParams) {
     });
   } catch (error) {
     console.error("Error triggering sync:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: { code: "INTERNAL_ERROR", message: "Failed to sync" },
-      },
-      { status: 500 }
-    );
+    return Errors.internal(error);
   }
 }

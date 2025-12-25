@@ -10,6 +10,7 @@ import {
   clearPrimaryGoal,
 } from "@/server/services/reward-store-service";
 import { setPrimaryGoalSchema } from "@/lib/validations/reward";
+import { Errors } from "@/lib/errors";
 
 type RouteParams = {
   params: Promise<{ familyId: string; memberId: string }>;
@@ -23,7 +24,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return Errors.unauthorized();
     }
 
     const { familyId, memberId } = await params;
@@ -40,10 +41,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       );
 
     if (membership.length === 0) {
-      return NextResponse.json(
-        { error: "Not a family member" },
-        { status: 403 }
-      );
+      return Errors.notFamilyMember();
     }
 
     const goal = await getPrimaryGoal(memberId);
@@ -51,10 +49,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ goal });
   } catch (error) {
     console.error("Error fetching primary goal:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch primary goal" },
-      { status: 500 }
-    );
+    return Errors.internal("Failed to fetch primary goal");
   }
 }
 
@@ -66,7 +61,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return Errors.unauthorized();
     }
 
     const { familyId, memberId } = await params;
@@ -83,28 +78,19 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       );
 
     if (membership.length === 0) {
-      return NextResponse.json(
-        { error: "Not a family member" },
-        { status: 403 }
-      );
+      return Errors.notFamilyMember();
     }
 
     // Can only set own goal (or manager can set for anyone)
     if (membership[0].role !== "manager" && membership[0].id !== memberId) {
-      return NextResponse.json(
-        { error: "Can only set own primary goal" },
-        { status: 403 }
-      );
+      return Errors.forbidden();
     }
 
     const body = await request.json();
     const parseResult = setPrimaryGoalSchema.safeParse(body);
 
     if (!parseResult.success) {
-      return NextResponse.json(
-        { error: "Invalid input", details: parseResult.error.flatten() },
-        { status: 400 }
-      );
+      return Errors.validation(parseResult.error.flatten());
     }
 
     await setPrimaryGoal(memberId, parseResult.data.rewardId);
@@ -112,10 +98,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error setting primary goal:", error);
-    return NextResponse.json(
-      { error: "Failed to set primary goal" },
-      { status: 500 }
-    );
+    return Errors.internal("Failed to set primary goal");
   }
 }
 
@@ -127,7 +110,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return Errors.unauthorized();
     }
 
     const { familyId, memberId } = await params;
@@ -144,18 +127,12 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       );
 
     if (membership.length === 0) {
-      return NextResponse.json(
-        { error: "Not a family member" },
-        { status: 403 }
-      );
+      return Errors.notFamilyMember();
     }
 
     // Can only clear own goal (or manager can clear for anyone)
     if (membership[0].role !== "manager" && membership[0].id !== memberId) {
-      return NextResponse.json(
-        { error: "Can only clear own primary goal" },
-        { status: 403 }
-      );
+      return Errors.forbidden();
     }
 
     await clearPrimaryGoal(memberId);
@@ -163,9 +140,6 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error clearing primary goal:", error);
-    return NextResponse.json(
-      { error: "Failed to clear primary goal" },
-      { status: 500 }
-    );
+    return Errors.internal("Failed to clear primary goal");
   }
 }

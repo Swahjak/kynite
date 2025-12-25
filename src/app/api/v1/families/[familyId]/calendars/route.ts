@@ -7,6 +7,7 @@ import { eq, and } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 import { createWatchChannel } from "@/server/services/google-channel-service";
 import { addCalendarSchema } from "@/lib/validations/calendar";
+import { Errors, createErrorResponse, ErrorCode } from "@/lib/errors";
 
 type RouteParams = { params: Promise<{ familyId: string }> };
 
@@ -15,13 +16,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session?.user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
-        },
-        { status: 401 }
-      );
+      return Errors.unauthorized();
     }
 
     const { familyId } = await params;
@@ -39,13 +34,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
       .limit(1);
 
     if (membership.length === 0) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "FORBIDDEN", message: "Not a family member" },
-        },
-        { status: 403 }
-      );
+      return Errors.notFamilyMember();
     }
 
     const calendars = await db
@@ -59,13 +48,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
     });
   } catch (error) {
     console.error("Error fetching family calendars:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: { code: "INTERNAL_ERROR", message: "Failed to fetch calendars" },
-      },
-      { status: 500 }
-    );
+    return Errors.internal(error);
   }
 }
 
@@ -74,13 +57,7 @@ export async function POST(request: Request, { params }: RouteParams) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session?.user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
-        },
-        { status: 401 }
-      );
+      return Errors.unauthorized();
     }
 
     const { familyId } = await params;
@@ -88,17 +65,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     const parseResult = addCalendarSchema.safeParse(body);
     if (!parseResult.success) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "VALIDATION_ERROR",
-            message: "Invalid input",
-            details: parseResult.error.flatten(),
-          },
-        },
-        { status: 400 }
-      );
+      return Errors.validation(parseResult.error.flatten());
     }
 
     const { accountId, googleCalendarId, name, color, accessRole } =
@@ -117,13 +84,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       .limit(1);
 
     if (membership.length === 0) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "FORBIDDEN", message: "Not a family member" },
-        },
-        { status: 403 }
-      );
+      return Errors.notFamilyMember();
     }
 
     const isManager = membership[0].role === "manager";
@@ -139,16 +100,9 @@ export async function POST(request: Request, { params }: RouteParams) {
         .limit(1);
 
       if (account.length === 0) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: {
-              code: "FORBIDDEN",
-              message: "You can only add calendars from your own accounts",
-            },
-          },
-          { status: 403 }
-        );
+        return Errors.forbidden({
+          reason: "You can only add calendars from your own accounts",
+        });
       }
     }
 
@@ -166,13 +120,9 @@ export async function POST(request: Request, { params }: RouteParams) {
       .limit(1);
 
     if (existing.length > 0) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "CONFLICT", message: "Calendar already linked" },
-        },
-        { status: 409 }
-      );
+      return createErrorResponse(ErrorCode.ALREADY_EXISTS, {
+        resource: "calendar",
+      });
     }
 
     const newCalendar = await db
@@ -205,12 +155,6 @@ export async function POST(request: Request, { params }: RouteParams) {
     });
   } catch (error) {
     console.error("Error adding calendar:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: { code: "INTERNAL_ERROR", message: "Failed to add calendar" },
-      },
-      { status: 500 }
-    );
+    return Errors.internal(error);
   }
 }

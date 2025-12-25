@@ -3,6 +3,7 @@ import { getBalance, getHistory } from "@/server/services/star-service";
 import { starHistoryQuerySchema } from "@/lib/validations/star";
 import { auth } from "@/server/auth";
 import { headers } from "next/headers";
+import { Errors } from "@/lib/errors";
 
 type RouteParams = {
   params: Promise<{ familyId: string; memberId: string }>;
@@ -16,7 +17,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return Errors.unauthorized();
     }
 
     const { memberId } = await params;
@@ -37,10 +38,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       });
 
       if (!queryResult.success) {
-        return NextResponse.json(
-          { error: "Invalid query parameters" },
-          { status: 400 }
-        );
+        return Errors.validation(queryResult.error.flatten());
       }
 
       const history = await getHistory(memberId, queryResult.data);
@@ -50,9 +48,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ balance });
   } catch (error) {
     console.error("Error fetching star balance:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch star balance" },
-      { status: 500 }
-    );
+    return Errors.internal("Failed to fetch star balance");
   }
 }

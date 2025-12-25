@@ -5,6 +5,7 @@ import { db } from "@/server/db";
 import { familyMembers } from "@/server/schema";
 import { eq, and } from "drizzle-orm";
 import { getRedemptionsForMember } from "@/server/services/reward-store-service";
+import { Errors } from "@/lib/errors";
 
 type RouteParams = {
   params: Promise<{ familyId: string; memberId: string }>;
@@ -18,7 +19,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return Errors.unauthorized();
     }
 
     const { familyId, memberId } = await params;
@@ -35,18 +36,12 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       );
 
     if (membership.length === 0) {
-      return NextResponse.json(
-        { error: "Not a family member" },
-        { status: 403 }
-      );
+      return Errors.notFamilyMember();
     }
 
     // Non-managers can only view their own redemptions
     if (membership[0].role !== "manager" && membership[0].id !== memberId) {
-      return NextResponse.json(
-        { error: "Can only view own redemptions" },
-        { status: 403 }
-      );
+      return Errors.forbidden();
     }
 
     const limit = parseInt(request.nextUrl.searchParams.get("limit") || "50");
@@ -60,9 +55,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ redemptions });
   } catch (error) {
     console.error("Error fetching redemptions:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch redemptions" },
-      { status: 500 }
-    );
+    return Errors.internal("Failed to fetch redemptions");
   }
 }

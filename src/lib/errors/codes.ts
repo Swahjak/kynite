@@ -1,3 +1,5 @@
+// src/lib/errors/codes.ts
+
 /**
  * Structured error codes for API responses.
  * See ADR: docs/adr/20251225-structured-error-codes.md

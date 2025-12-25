@@ -5,6 +5,7 @@ import { db } from "@/server/db";
 import { googleCalendars, familyMembers } from "@/server/schema";
 import { eq, and } from "drizzle-orm";
 import { stopWatchChannel } from "@/server/services/google-channel-service";
+import { Errors } from "@/lib/errors";
 
 type RouteParams = {
   params: Promise<{ familyId: string; calendarId: string }>;
@@ -15,13 +16,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session?.user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
-        },
-        { status: 401 }
-      );
+      return Errors.unauthorized();
     }
 
     const { familyId, calendarId } = await params;
@@ -42,13 +37,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       .limit(1);
 
     if (membership.length === 0) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "FORBIDDEN", message: "Manager access required" },
-        },
-        { status: 403 }
-      );
+      return Errors.managerRequired();
     }
 
     const updated = await db
@@ -63,13 +52,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       .returning();
 
     if (updated.length === 0) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "NOT_FOUND", message: "Calendar not found" },
-        },
-        { status: 404 }
-      );
+      return Errors.notFound("calendar");
     }
 
     return NextResponse.json({
@@ -78,13 +61,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     });
   } catch (error) {
     console.error("Error updating calendar:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: { code: "INTERNAL_ERROR", message: "Failed to update calendar" },
-      },
-      { status: 500 }
-    );
+    return Errors.internal(error);
   }
 }
 
@@ -93,13 +70,7 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session?.user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
-        },
-        { status: 401 }
-      );
+      return Errors.unauthorized();
     }
 
     const { familyId, calendarId } = await params;
@@ -118,13 +89,7 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
       .limit(1);
 
     if (membership.length === 0) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "FORBIDDEN", message: "Manager access required" },
-        },
-        { status: 403 }
-      );
+      return Errors.managerRequired();
     }
 
     // Stop push notification channel
@@ -145,12 +110,6 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
     });
   } catch (error) {
     console.error("Error removing calendar:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: { code: "INTERNAL_ERROR", message: "Failed to remove calendar" },
-      },
-      { status: 500 }
-    );
+    return Errors.internal(error);
   }
 }

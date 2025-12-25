@@ -1,3 +1,4 @@
+// src/lib/errors/api-error.ts
 import { NextResponse } from "next/server";
 import { ErrorCode, ErrorMessages, ErrorStatusCodes } from "./codes";
 

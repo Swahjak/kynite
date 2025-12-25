@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { db } from "@/server/db";
 import { familyMembers } from "@/server/schema";
 import { eq, and } from "drizzle-orm";
+import { Errors } from "@/lib/errors";
 
 type RouteParams = {
   params: Promise<{ familyId: string; memberId: string }>;
@@ -19,7 +20,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return Errors.unauthorized();
     }
 
     const { familyId, memberId } = await params;
@@ -39,20 +40,14 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       callerMembership.length === 0 ||
       callerMembership[0].role !== "manager"
     ) {
-      return NextResponse.json(
-        { error: "Only managers can award bonus stars" },
-        { status: 403 }
-      );
+      return Errors.managerRequired();
     }
 
     const body = await request.json();
     const parseResult = grantBonusStarsSchema.safeParse(body);
 
     if (!parseResult.success) {
-      return NextResponse.json(
-        { error: "Invalid input", details: parseResult.error.flatten() },
-        { status: 400 }
-      );
+      return Errors.validation(parseResult.error.flatten());
     }
 
     const result = await addStars({
@@ -70,9 +65,6 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     });
   } catch (error) {
     console.error("Error awarding bonus stars:", error);
-    return NextResponse.json(
-      { error: "Failed to award bonus stars" },
-      { status: 500 }
-    );
+    return Errors.internal("Failed to award bonus stars");
   }
 }

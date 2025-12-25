@@ -119,16 +119,7 @@ export async function DELETE(request: Request, { params }: Params) {
 
     const isManager = await isUserFamilyManager(session.user.id, familyId);
     if (!isManager) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "FORBIDDEN",
-            message: "Only managers can delete the family",
-          },
-        },
-        { status: 403 }
-      );
+      return Errors.managerRequired();
     }
 
     // Delete family (cascade will delete members and invites)

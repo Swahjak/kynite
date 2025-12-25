@@ -4,13 +4,34 @@
 
 **Goal:** Complete security hardening by implementing OAuth token encryption, structured error codes across all API routes, and Content-Type validation.
 
-**Architecture:** Layer implementation starting with encryption utilities, then create error infrastructure, refactor all 31 API routes to use structured error codes, and finally add Content-Type validation to middleware.
+**Architecture:** Use better-auth's built-in encryption, then create error infrastructure, refactor all 31 API routes to use structured error codes, and finally add Content-Type validation to middleware.
 
-**Tech Stack:** @47ng/cloak for encryption, Zod for error types, Vitest for testing
+**Tech Stack:** better-auth (encryption), Zod for error types, Vitest for testing
 
 ---
 
-## Task 1: Install @47ng/cloak Dependency
+## ~~Tasks 1-6: OAuth Token Encryption~~ (COMPLETED)
+
+**Status:** ✅ COMPLETED
+
+**Implementation:** Used better-auth's built-in `encryptOAuthTokens: true` option instead of custom @47ng/cloak.
+
+**Changes made:**
+
+- Added `encryptOAuthTokens: true` to `src/server/auth.ts`
+- Updated ADR: `docs/adr/20251225-oauth-token-encryption.md`
+- Removed TOKEN_ENCRYPTION_KEY from `.env.example`
+
+**Benefits:**
+
+- No new dependency
+- Uses existing BETTER_AUTH_SECRET
+- Automatic encrypt/decrypt handling
+- No migration script needed
+
+---
+
+## Task 7: Create Error Code Types and Utilities
 
 **Files:**
 

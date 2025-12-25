@@ -13,6 +13,7 @@ import {
   removeMember,
 } from "@/server/services/family-service";
 import type { FamilyMemberRole } from "@/types/family";
+import { Errors } from "@/lib/errors";
 
 type Params = { params: Promise<{ familyId: string; memberId: string }> };
 
@@ -23,13 +24,7 @@ export async function PATCH(request: Request, { params }: Params) {
     });
 
     if (!session?.user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
-        },
-        { status: 401 }
-      );
+      return Errors.unauthorized();
     }
 
     const { familyId, memberId } = await params;
@@ -47,13 +42,7 @@ export async function PATCH(request: Request, { params }: Params) {
       .limit(1);
 
     if (targetMember.length === 0) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "NOT_FOUND", message: "Member not found" },
-        },
-        { status: 404 }
-      );
+      return Errors.notFound("member");
     }
 
     const isManager = await isUserFamilyManager(session.user.id, familyId);
@@ -61,43 +50,19 @@ export async function PATCH(request: Request, { params }: Params) {
 
     // Only managers can edit others, anyone can edit themselves (except role)
     if (!isManager && !isSelf) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "FORBIDDEN", message: "Cannot edit this member" },
-        },
-        { status: 403 }
-      );
+      return Errors.forbidden();
     }
 
     const body = await request.json();
     const parsed = updateMemberSchema.safeParse(body);
 
     if (!parsed.success) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "VALIDATION_ERROR",
-            message: parsed.error.issues[0].message,
-          },
-        },
-        { status: 400 }
-      );
+      return Errors.validation(parsed.error.flatten());
     }
 
     // Non-managers cannot change roles
     if (parsed.data.role && !isManager) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "FORBIDDEN",
-            message: "Only managers can change roles",
-          },
-        },
-        { status: 403 }
-      );
+      return Errors.managerRequired();
     }
 
     // Check last manager constraint
@@ -117,16 +82,9 @@ export async function PATCH(request: Request, { params }: Params) {
         );
 
       if (managerCount.length <= 1) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: {
-              code: "LAST_MANAGER",
-              message: "Cannot demote the last manager",
-            },
-          },
-          { status: 400 }
-        );
+        return Errors.validation({
+          role: "Cannot demote the last manager",
+        });
       }
     }
 
@@ -142,13 +100,7 @@ export async function PATCH(request: Request, { params }: Params) {
     });
   } catch (error) {
     console.error("Error updating member:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: { code: "INTERNAL_ERROR", message: "Failed to update member" },
-      },
-      { status: 500 }
-    );
+    return Errors.internal("Failed to update member");
   }
 }
 
@@ -159,13 +111,7 @@ export async function DELETE(request: Request, { params }: Params) {
     });
 
     if (!session?.user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
-        },
-        { status: 401 }
-      );
+      return Errors.unauthorized();
     }
 
     const { familyId, memberId } = await params;
@@ -183,13 +129,7 @@ export async function DELETE(request: Request, { params }: Params) {
       .limit(1);
 
     if (targetMember.length === 0) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "NOT_FOUND", message: "Member not found" },
-        },
-        { status: 404 }
-      );
+      return Errors.notFound("member");
     }
 
     const isManager = await isUserFamilyManager(session.user.id, familyId);
@@ -197,13 +137,7 @@ export async function DELETE(request: Request, { params }: Params) {
 
     // Only managers can remove others, anyone can leave (remove themselves)
     if (!isManager && !isSelf) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "FORBIDDEN", message: "Cannot remove this member" },
-        },
-        { status: 403 }
-      );
+      return Errors.forbidden();
     }
 
     // Check last manager constraint
@@ -219,17 +153,10 @@ export async function DELETE(request: Request, { params }: Params) {
         );
 
       if (managerCount.length <= 1) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: {
-              code: "LAST_MANAGER",
-              message:
-                "Cannot remove the last manager. Assign another manager first.",
-            },
-          },
-          { status: 400 }
-        );
+        return Errors.validation({
+          member:
+            "Cannot remove the last manager. Assign another manager first.",
+        });
       }
     }
 
@@ -238,12 +165,6 @@ export async function DELETE(request: Request, { params }: Params) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error removing member:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: { code: "INTERNAL_ERROR", message: "Failed to remove member" },
-      },
-      { status: 500 }
-    );
+    return Errors.internal("Failed to remove member");
   }
 }
