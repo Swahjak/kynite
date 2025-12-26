@@ -1,95 +1,184 @@
 "use client";
 
+import { useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
-import { ClipboardList, Star } from "lucide-react";
+import { ClipboardList, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Modal,
+  ModalClose,
+  ModalContent,
+  ModalDescription,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+} from "@/components/ui/responsive-modal";
+import { FamilyAvatar } from "@/components/family/family-avatar";
+import {
+  ChoreCard,
+  type ChoreCardData,
+} from "@/components/chores/components/chore-card";
 import { useDashboard } from "../contexts/dashboard-context";
 import type { DashboardChore, ChoreUrgency } from "../types";
+import type { UrgencyStatus } from "@/types/chore";
+import type { AvatarColor } from "@/types/family";
 
-function getUrgencyVariant(
-  urgency: ChoreUrgency
-): "destructive" | "outline" | "secondary" | "default" {
-  switch (urgency) {
-    case "overdue":
-    case "urgent":
-      return "destructive";
-    case "due-soon":
-      return "outline";
-    default:
-      return "secondary";
+/** Map DashboardChore urgency to UrgencyStatus for ChoreCard */
+function mapUrgency(urgency: ChoreUrgency): UrgencyStatus {
+  return urgency as UrgencyStatus;
+}
+
+/** Format due time for display label */
+function formatDueLabel(
+  chore: DashboardChore,
+  t: ReturnType<typeof useTranslations>
+): string | null {
+  if (chore.urgency === "overdue") return t("overdue");
+  if (chore.urgency === "urgent") return t("urgentBadge");
+  if (chore.urgency === "due-soon") return t("dueSoonBadge");
+
+  if (chore.dueTime) {
+    const [hours, minutes] = chore.dueTime.split(":");
+    const hour = parseInt(hours, 10);
+    const period = hour >= 12 ? "PM" : "AM";
+    const displayHour = hour % 12 || 12;
+    return `${t("today")} • ${displayHour}:${minutes} ${period}`;
   }
+
+  return null;
 }
 
-function formatTime(time: string | null): string | null {
-  if (!time) return null;
-  const [hours, minutes] = time.split(":");
-  const hour = parseInt(hours, 10);
-  const period = hour >= 12 ? "PM" : "AM";
-  const displayHour = hour % 12 || 12;
-  return `${displayHour}:${minutes} ${period}`;
+/** Convert DashboardChore to ChoreCardData */
+function toChoreCardData(chore: DashboardChore): ChoreCardData {
+  return {
+    id: chore.id,
+    title: chore.title,
+    assignedToId: chore.assignee ? chore.id : null, // Use chore id as marker if assigned
+    starReward: chore.starReward,
+    assignee: chore.assignee
+      ? {
+          displayName: chore.assignee.name,
+          avatarColor: chore.assignee.avatarColor,
+        }
+      : null,
+  };
 }
 
-interface ChoreItemProps {
-  chore: DashboardChore;
-  urgencyLabel: string;
+/** Take chore dialog for dashboard (uses familyMembers from dashboard context) */
+interface TakeDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  chore: DashboardChore | null;
 }
 
-function ChoreItem({ chore, urgencyLabel }: ChoreItemProps) {
-  const badgeVariant = getUrgencyVariant(chore.urgency);
-  const formattedTime = formatTime(chore.dueTime);
+function TakeChoreDialogDashboard({
+  open,
+  onOpenChange,
+  chore,
+}: TakeDialogProps) {
+  const t = useTranslations("chores");
+  const { familyMembers, assignChore } = useDashboard();
+  const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleTake = async () => {
+    if (!selectedMemberId || !chore) return;
+
+    setIsSubmitting(true);
+    try {
+      await assignChore(chore.id, selectedMemberId);
+      toast.success(t("takeSuccess"));
+      onOpenChange(false);
+      setSelectedMemberId(null);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to assign chore";
+      toast.error(message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
-    <div className="bg-card flex items-center gap-3 rounded-lg border p-3">
-      {/* Avatar */}
-      {chore.assignee && (
-        <Avatar className="h-10 w-10">
-          <AvatarFallback
-            style={{ backgroundColor: chore.assignee.avatarColor }}
-            className="text-sm font-medium text-white"
+    <Modal open={open} onOpenChange={onOpenChange}>
+      <ModalContent>
+        <ModalHeader>
+          <ModalTitle>{t("takeTitle")}</ModalTitle>
+          <ModalDescription>{t("takeDescription")}</ModalDescription>
+        </ModalHeader>
+
+        <div className="py-4">
+          <Select
+            value={selectedMemberId ?? ""}
+            onValueChange={setSelectedMemberId}
+            disabled={isSubmitting}
           >
-            {chore.assignee.name.slice(0, 2).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
-      )}
-
-      {/* Content */}
-      <div className="min-w-0 flex-1">
-        <h4 className="truncate font-medium">{chore.title}</h4>
-        <div className="mt-0.5 flex items-center gap-2">
-          {chore.urgency !== "none" && (
-            <Badge
-              variant={badgeVariant}
-              className="text-xs font-bold uppercase"
-            >
-              {urgencyLabel}
-            </Badge>
-          )}
-          {formattedTime && (
-            <span className="text-muted-foreground text-xs">
-              {formattedTime}
-            </span>
-          )}
-          {chore.assignee && (
-            <span className="text-muted-foreground text-xs">
-              {chore.assignee.name}
-            </span>
-          )}
+            <SelectTrigger>
+              <SelectValue placeholder={t("selectPerson")} />
+            </SelectTrigger>
+            <SelectContent>
+              {familyMembers.map((member) => (
+                <SelectItem key={member.id} value={member.id}>
+                  <div className="flex items-center gap-2">
+                    <FamilyAvatar
+                      name={member.name}
+                      color={member.avatarColor as AvatarColor}
+                      size="sm"
+                    />
+                    <span>{member.name}</span>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-      </div>
 
-      {/* Star reward */}
-      <div className="flex items-center gap-1 text-amber-500">
-        <Star className="h-4 w-4 fill-current" />
-        <span className="text-sm font-medium">{chore.starReward}</span>
-      </div>
-    </div>
+        <ModalFooter>
+          <ModalClose asChild>
+            <Button type="button" variant="outline" disabled={isSubmitting}>
+              {t("cancel")}
+            </Button>
+          </ModalClose>
+          <Button
+            onClick={handleTake}
+            disabled={isSubmitting || !selectedMemberId}
+          >
+            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {t("takeButton")}
+          </Button>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
   );
 }
 
 export function TodaysChores() {
   const t = useTranslations("DashboardPage.todaysChores");
-  const { todaysChores, choresRemaining } = useDashboard();
+  const { todaysChores, choresRemaining, completeChore } = useDashboard();
+
+  // Take dialog state
+  const [takeDialogOpen, setTakeDialogOpen] = useState(false);
+  const [choreToTake, setChoreToTake] = useState<DashboardChore | null>(null);
+
+  const handleTake = useCallback(
+    (chore: ChoreCardData) => {
+      const dashboardChore = todaysChores.find((c) => c.id === chore.id);
+      if (dashboardChore) {
+        setChoreToTake(dashboardChore);
+        setTakeDialogOpen(true);
+      }
+    },
+    [todaysChores]
+  );
 
   // Group chores by urgency
   const urgentChores = todaysChores.filter(
@@ -97,6 +186,18 @@ export function TodaysChores() {
   );
   const dueSoonChores = todaysChores.filter((c) => c.urgency === "due-soon");
   const regularChores = todaysChores.filter((c) => c.urgency === "none");
+
+  const renderChoreCard = (chore: DashboardChore) => (
+    <ChoreCard
+      key={chore.id}
+      chore={toChoreCardData(chore)}
+      urgency={mapUrgency(chore.urgency)}
+      dueLabel={formatDueLabel(chore, t)}
+      onComplete={completeChore}
+      onTake={handleTake}
+      expandable={false}
+    />
+  );
 
   return (
     <section className="space-y-4">
@@ -116,19 +217,7 @@ export function TodaysChores() {
             <p className="text-destructive mb-1 text-xs font-medium tracking-wide uppercase">
               {t("urgent")}
             </p>
-            <div className="space-y-2">
-              {urgentChores.map((chore) => (
-                <ChoreItem
-                  key={chore.id}
-                  chore={chore}
-                  urgencyLabel={
-                    chore.urgency === "overdue"
-                      ? t("overdue")
-                      : t("urgentBadge")
-                  }
-                />
-              ))}
-            </div>
+            <div className="space-y-2">{urgentChores.map(renderChoreCard)}</div>
           </div>
         )}
 
@@ -138,13 +227,7 @@ export function TodaysChores() {
               {t("dueSoon")}
             </p>
             <div className="space-y-2">
-              {dueSoonChores.map((chore) => (
-                <ChoreItem
-                  key={chore.id}
-                  chore={chore}
-                  urgencyLabel={t("dueSoonBadge")}
-                />
-              ))}
+              {dueSoonChores.map(renderChoreCard)}
             </div>
           </div>
         )}
@@ -155,9 +238,7 @@ export function TodaysChores() {
               {t("today")}
             </p>
             <div className="space-y-2">
-              {regularChores.map((chore) => (
-                <ChoreItem key={chore.id} chore={chore} urgencyLabel="" />
-              ))}
+              {regularChores.map(renderChoreCard)}
             </div>
           </div>
         )}
@@ -168,6 +249,13 @@ export function TodaysChores() {
           </p>
         )}
       </div>
+
+      {/* Take Chore Dialog */}
+      <TakeChoreDialogDashboard
+        open={takeDialogOpen}
+        onOpenChange={setTakeDialogOpen}
+        chore={choreToTake}
+      />
     </section>
   );
 }

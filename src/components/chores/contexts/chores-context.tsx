@@ -118,3 +118,8 @@ export function useChores(): ChoresContextValue {
   }
   return context;
 }
+
+/** Optional version that returns null when used outside ChoresProvider */
+export function useChoresOptional(): ChoresContextValue | null {
+  return useContext(ChoresContext);
+}

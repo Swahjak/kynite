@@ -1,58 +1,129 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Hand, Pencil, Trash2 } from "lucide-react";
+import { Check, Hand, Pencil, Star, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { FamilyAvatar } from "@/components/family/family-avatar";
 import type { AvatarColor } from "@/types/family";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type { IChoreWithAssignee } from "@/types/chore";
+import type { IChoreWithAssignee, UrgencyStatus } from "@/types/chore";
 import {
   getUrgencyStatus,
   formatDueLabel,
   getUrgencyVariant,
 } from "../helpers";
-import { useChores } from "../contexts/chores-context";
+import { useChoresOptional } from "../contexts/chores-context";
 import { useIsManager } from "@/hooks/use-is-manager";
 import { useConfetti } from "@/components/confetti";
 import { TakeChoreDialog } from "./take-chore-dialog";
 
-interface ChoreCardProps {
-  chore: IChoreWithAssignee;
-  onEdit?: (chore: IChoreWithAssignee) => void;
-  onDelete?: (chore: IChoreWithAssignee) => void;
+/** Minimal chore data needed for display */
+export interface ChoreCardData {
+  id: string;
+  title: string;
+  assignedToId: string | null;
+  starReward: number;
+  /** Assignee display info */
+  assignee?: {
+    displayName: string;
+    avatarColor: string;
+    avatarSvg?: string | null;
+    googleImage?: string | null;
+  } | null;
 }
 
-export function ChoreCard({ chore, onEdit, onDelete }: ChoreCardProps) {
+interface ChoreCardProps {
+  /** Full chore data from chores context, or minimal data for dashboard */
+  chore: IChoreWithAssignee | ChoreCardData;
+  /** Pre-calculated urgency status (used by dashboard, otherwise computed from chore) */
+  urgency?: UrgencyStatus;
+  /** Pre-calculated due label (used by dashboard, otherwise computed from chore) */
+  dueLabel?: string | null;
+  /** Called when chore is completed. Falls back to chores context if not provided. */
+  onComplete?: (choreId: string) => Promise<void>;
+  /** Called when take button is clicked. Opens TakeChoreDialog if not provided and context available. */
+  onTake?: (chore: ChoreCardData) => void;
+  /** Called when edit is requested (only shown in expanded view) */
+  onEdit?: (chore: IChoreWithAssignee) => void;
+  /** Called when delete is requested (only shown in expanded view) */
+  onDelete?: (chore: IChoreWithAssignee) => void;
+  /** Whether this card can be expanded for edit/delete actions */
+  expandable?: boolean;
+}
+
+/** Type guard to check if chore is full IChoreWithAssignee */
+function isFullChore(
+  chore: IChoreWithAssignee | ChoreCardData
+): chore is IChoreWithAssignee {
+  return "status" in chore;
+}
+
+export function ChoreCard({
+  chore,
+  urgency: urgencyProp,
+  dueLabel: dueLabelProp,
+  onComplete: onCompleteProp,
+  onTake: onTakeProp,
+  onEdit,
+  onDelete,
+  expandable = true,
+}: ChoreCardProps) {
   const t = useTranslations("chores");
-  const { completeChore, expandedChoreId, setExpandedChoreId } = useChores();
+  const choresContext = useChoresOptional();
   const canEdit = useIsManager();
   const [isCompleting, setIsCompleting] = useState(false);
   const [takeDialogOpen, setTakeDialogOpen] = useState(false);
   const { fire } = useConfetti();
 
-  const isUnassigned = !chore.assignedToId;
+  // Use prop callbacks or fall back to context
+  const completeChore = onCompleteProp ?? choresContext?.completeChore;
+  const expandedChoreId = expandable ? choresContext?.expandedChoreId : null;
+  const setExpandedChoreId = expandable
+    ? choresContext?.setExpandedChoreId
+    : undefined;
 
-  const urgency = getUrgencyStatus(chore);
-  const dueLabel = formatDueLabel(chore);
+  const isUnassigned = !chore.assignedToId;
+  const canExpand =
+    expandable && canEdit && setExpandedChoreId && isFullChore(chore);
+
+  // Use provided urgency/label or compute from full chore data
+  const urgency =
+    urgencyProp ?? (isFullChore(chore) ? getUrgencyStatus(chore) : "none");
+  const dueLabel =
+    dueLabelProp !== undefined
+      ? dueLabelProp
+      : isFullChore(chore)
+        ? formatDueLabel(chore)
+        : null;
   const badgeVariant = getUrgencyVariant(urgency);
 
-  const assignee = chore.assignedTo;
-  const displayName =
-    assignee?.displayName ?? assignee?.user.name ?? "Unassigned";
+  // Get display name and avatar - handle both full and minimal chore types
+  const assignee = isFullChore(chore) ? chore.assignedTo : chore.assignee;
+  const displayName = isFullChore(chore)
+    ? (assignee?.displayName ??
+      (assignee as IChoreWithAssignee["assignedTo"])?.user.name ??
+      "Unassigned")
+    : (assignee?.displayName ?? "Unassigned");
   const avatarColor = assignee?.avatarColor ?? "gray";
+  const avatarSvg = isFullChore(chore)
+    ? chore.assignedTo?.avatarSvg
+    : chore.assignee?.avatarSvg;
+  const googleImage = isFullChore(chore)
+    ? chore.assignedTo?.user.image
+    : chore.assignee?.googleImage;
 
-  const isExpanded = expandedChoreId === chore.id;
+  const isExpanded = canExpand && expandedChoreId === chore.id;
 
   const handleCardClick = () => {
-    if (!canEdit) return;
-    setExpandedChoreId(isExpanded ? null : chore.id);
+    if (!canExpand) return;
+    setExpandedChoreId?.(isExpanded ? null : chore.id);
   };
 
   const handleComplete = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (!completeChore) return;
     setIsCompleting(true);
     await completeChore(chore.id);
     fire(chore.starReward);
@@ -60,33 +131,44 @@ export function ChoreCard({ chore, onEdit, onDelete }: ChoreCardProps) {
 
   const handleTake = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setTakeDialogOpen(true);
+    if (onTakeProp) {
+      onTakeProp(chore);
+    } else {
+      setTakeDialogOpen(true);
+    }
   };
 
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onEdit?.(chore);
+    if (isFullChore(chore)) {
+      onEdit?.(chore);
+    }
   };
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onDelete?.(chore);
+    if (isFullChore(chore)) {
+      onDelete?.(chore);
+    }
   };
+
+  // Determine if we can show the take dialog (need chores context and full chore)
+  const canShowTakeDialog = !onTakeProp && choresContext && isFullChore(chore);
 
   return (
     <div
-      role={canEdit ? "button" : undefined}
-      tabIndex={canEdit ? 0 : undefined}
+      role={canExpand ? "button" : undefined}
+      tabIndex={canExpand ? 0 : undefined}
       onClick={handleCardClick}
       onKeyDown={(e) => {
-        if (canEdit && (e.key === "Enter" || e.key === " ")) {
+        if (canExpand && (e.key === "Enter" || e.key === " ")) {
           e.preventDefault();
           handleCardClick();
         }
       }}
       className={cn(
         "group bg-card relative rounded-xl border transition-all duration-200",
-        canEdit && "cursor-pointer",
+        canExpand && "cursor-pointer",
         isExpanded && "border-primary shadow-sm",
         isCompleting && "animate-out slide-out-to-right fade-out duration-300"
       )}
@@ -97,15 +179,15 @@ export function ChoreCard({ chore, onEdit, onDelete }: ChoreCardProps) {
         <FamilyAvatar
           name={displayName}
           color={avatarColor as AvatarColor}
-          avatarSvg={assignee?.avatarSvg}
-          googleImage={assignee?.user.image}
+          avatarSvg={avatarSvg}
+          googleImage={googleImage}
           size="lg"
         />
 
         {/* Content */}
         <div className="min-w-0 flex-1">
           <h3 className="truncate text-lg font-semibold">{chore.title}</h3>
-          <div className="mt-1 flex items-center gap-2">
+          <div className="mt-1 flex flex-wrap items-center gap-2">
             {dueLabel && (
               <Badge
                 variant={badgeVariant}
@@ -118,6 +200,12 @@ export function ChoreCard({ chore, onEdit, onDelete }: ChoreCardProps) {
           </div>
         </div>
 
+        {/* Star reward */}
+        <div className="flex items-center gap-1 text-amber-500">
+          <Star className="h-4 w-4 fill-current" />
+          <span className="text-sm font-medium">{chore.starReward}</span>
+        </div>
+
         {/* Action Button (always visible for touch devices) */}
         {!isExpanded &&
           (isUnassigned ? (
@@ -125,8 +213,8 @@ export function ChoreCard({ chore, onEdit, onDelete }: ChoreCardProps) {
               variant="ghost"
               size="icon"
               className={cn(
-                "h-10 w-10 shrink-0 rounded-full transition-colors",
-                "text-muted-foreground hover:bg-amber-500 hover:text-white active:bg-amber-600"
+                "h-12 w-12 shrink-0 rounded-full transition-colors",
+                "bg-amber-500/10 text-amber-600 hover:bg-amber-500 hover:text-white active:bg-amber-600"
               )}
               onClick={handleTake}
               aria-label={t("takeChore", { title: chore.title })}
@@ -138,11 +226,11 @@ export function ChoreCard({ chore, onEdit, onDelete }: ChoreCardProps) {
               variant="ghost"
               size="icon"
               className={cn(
-                "h-10 w-10 shrink-0 rounded-full transition-colors",
-                "text-muted-foreground hover:bg-primary hover:text-primary-foreground active:bg-primary/90"
+                "h-12 w-12 shrink-0 rounded-full transition-colors",
+                "bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground active:bg-primary/90"
               )}
               onClick={handleComplete}
-              disabled={isCompleting}
+              disabled={isCompleting || !completeChore}
               aria-label={`Mark ${chore.title} as complete`}
             >
               <Check className="h-5 w-5" />
@@ -167,7 +255,11 @@ export function ChoreCard({ chore, onEdit, onDelete }: ChoreCardProps) {
               {t("take")}
             </Button>
           ) : (
-            <Button size="sm" onClick={handleComplete} disabled={isCompleting}>
+            <Button
+              size="sm"
+              onClick={handleComplete}
+              disabled={isCompleting || !completeChore}
+            >
               <Check className="mr-1 h-4 w-4" />
               {t("done")}
             </Button>
@@ -175,12 +267,14 @@ export function ChoreCard({ chore, onEdit, onDelete }: ChoreCardProps) {
         </div>
       )}
 
-      {/* Take Chore Dialog */}
-      <TakeChoreDialog
-        open={takeDialogOpen}
-        onOpenChange={setTakeDialogOpen}
-        chore={chore}
-      />
+      {/* Take Chore Dialog - only shown when using context with full chore data */}
+      {canShowTakeDialog && isFullChore(chore) && (
+        <TakeChoreDialog
+          open={takeDialogOpen}
+          onOpenChange={setTakeDialogOpen}
+          chore={chore}
+        />
+      )}
     </div>
   );
 }

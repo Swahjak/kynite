@@ -24,6 +24,7 @@ import { useFamilyChannel } from "@/hooks/use-family-channel";
 import type { ActiveTimer } from "@/server/schema";
 
 interface IDashboardContext {
+  familyId: string;
   familyName: string;
   currentTime: Date;
   todaysEvents: DashboardEvent[];
@@ -43,6 +44,8 @@ interface IDashboardContext {
   dismissTimer: (timerId: string) => void;
   acknowledgeTimer: (timerId: string) => void;
   isLoadingTimers: boolean;
+  completeChore: (choreId: string) => Promise<void>;
+  assignChore: (choreId: string, assignedToId: string) => Promise<void>;
 }
 
 const DashboardContext = createContext<IDashboardContext | null>(null);
@@ -201,6 +204,48 @@ export function DashboardProvider({ data, children }: DashboardProviderProps) {
     },
   });
 
+  // Complete chore mutation
+  const completeChoreMutation = useMutation({
+    mutationFn: async (choreId: string) => {
+      const res = await fetch(
+        `/api/v1/families/${data.familyId}/chores/${choreId}/complete`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["chores"] });
+      queryClient.invalidateQueries({ queryKey: ["weeklyStars"] });
+    },
+  });
+
+  // Assign chore mutation (for taking chores)
+  const assignChoreMutation = useMutation({
+    mutationFn: async ({
+      choreId,
+      assignedToId,
+    }: {
+      choreId: string;
+      assignedToId: string;
+    }) => {
+      const res = await fetch(
+        `/api/v1/families/${data.familyId}/chores/${choreId}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ assignedToId }),
+        }
+      );
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["chores"] });
+    },
+  });
+
   const categorizedEvents = useMemo(() => {
     const now = currentTime.getTime();
     const upcoming = data.todaysEvents
@@ -281,6 +326,20 @@ export function DashboardProvider({ data, children }: DashboardProviderProps) {
     [acknowledgeTimerMutation]
   );
 
+  const completeChore = useCallback(
+    async (choreId: string) => {
+      await completeChoreMutation.mutateAsync(choreId);
+    },
+    [completeChoreMutation]
+  );
+
+  const assignChore = useCallback(
+    async (choreId: string, assignedToId: string) => {
+      await assignChoreMutation.mutateAsync({ choreId, assignedToId });
+    },
+    [assignChoreMutation]
+  );
+
   // Real-time updates via Pusher
   useFamilyChannel(data.familyId, {
     "timer:started": (eventData: unknown) => {
@@ -323,6 +382,7 @@ export function DashboardProvider({ data, children }: DashboardProviderProps) {
   });
 
   const value: IDashboardContext = {
+    familyId: data.familyId,
     familyName: data.familyName,
     currentTime,
     todaysEvents: data.todaysEvents,
@@ -339,6 +399,8 @@ export function DashboardProvider({ data, children }: DashboardProviderProps) {
     dismissTimer,
     acknowledgeTimer,
     isLoadingTimers,
+    completeChore,
+    assignChore,
   };
 
   return (
