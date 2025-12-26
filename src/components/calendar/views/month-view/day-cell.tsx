@@ -140,11 +140,11 @@ export function DayCell({ cell, events, eventPositions }: IProps) {
             )}
           >
             {cellEvents.length === 0 && !isMobile ? (
-              <div className="group flex h-full w-full items-center justify-center">
+              <div className="flex h-full w-full items-center justify-center">
                 <AddEditEventDialog startDate={date}>
                   <Button
                     variant="ghost"
-                    className="border opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                    className="text-muted-foreground hover:text-foreground hover:border-border border border-transparent transition-colors"
                   >
                     <Plus className="h-4 w-4" />
                     <span className="max-sm:hidden">Add Event</span>

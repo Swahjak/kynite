@@ -54,9 +54,9 @@ export function TaskRow({
     >
       {/* Task Info */}
       <div className="relative flex min-w-0 items-center gap-3 px-4 py-2">
-        {/* Drag Handle - only visible in manage mode */}
+        {/* Drag Handle - visible in manage mode */}
         {showControls && (
-          <GripVertical className="h-4 w-4 cursor-grab text-slate-400 opacity-0 transition-opacity group-hover:opacity-100" />
+          <GripVertical className="h-4 w-4 cursor-grab text-slate-300 transition-colors hover:text-slate-500 dark:text-slate-600 dark:hover:text-slate-400" />
         )}
 
         {/* Icon */}
@@ -82,13 +82,13 @@ export function TaskRow({
           {task.title}
         </span>
 
-        {/* Edit/Delete Controls - only visible in manage mode, positioned absolutely to float over content */}
+        {/* Edit/Delete Controls - visible in manage mode */}
         {showControls && (
-          <div className="absolute top-1/2 right-2 flex -translate-y-1/2 items-center gap-1 rounded-lg bg-white/90 opacity-0 shadow-sm backdrop-blur-sm transition-opacity group-hover:opacity-100 dark:bg-slate-800/90">
+          <div className="flex shrink-0 items-center gap-1">
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8"
+              className="text-muted-foreground hover:text-foreground h-8 w-8"
               onClick={() => onEdit?.(task)}
             >
               <Pencil className="h-4 w-4" />
@@ -96,7 +96,7 @@ export function TaskRow({
             <Button
               variant="ghost"
               size="icon"
-              className="text-destructive hover:text-destructive h-8 w-8"
+              className="text-muted-foreground hover:text-destructive h-8 w-8"
               onClick={() => onDelete?.(task.id)}
             >
               <Trash2 className="h-4 w-4" />
