@@ -18,6 +18,7 @@ const API_SECURITY_EXEMPT_PATHS = [
   "/api/cron/",
   "/api/webhooks/",
   "/api/auth/",
+  "/api/pusher/", // Pusher sends form-urlencoded, not JSON
   "/api/test/", // E2E test endpoints
 ];
 
