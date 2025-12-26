@@ -1,0 +1,22 @@
+<svg width="264px" height="280px" viewBox="0 0 264 280" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <desc>Created with getavataaars.com</desc>
+  <defs>
+    <circle id="react-path-1" cx="120" cy="120" r="120"></circle>
+    <path d="M124,144 L124,163" id="react-path-3"></path>
+    <path d="M12,12 C12,12 24,0 44,0" id="react-path-hair"></path>
+  </defs>
+  <g id="Avataaar" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+    <g id="Body" transform="translate(32.000000, 36.000000)">
+      <mask id="react-mask-6" fill="white">
+        <use xlink:href="#react-path-3"></use>
+      </mask>
+      <use fill="#D0C6AC" xlink:href="#react-path-3"></use>
+      <g id="Skin" mask="url(#react-mask-6)" fill="#EDB98A">
+        <rect x="0" y="0" width="264" height="280"></rect>
+      </g>
+    </g>
+    <g id="Hair" transform="translate(32.000000, 0.000000)">
+      <use fill="#D6B370" xlink:href="#react-path-hair"></use>
+    </g>
+  </g>
+</svg>

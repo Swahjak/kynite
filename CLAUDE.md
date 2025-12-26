@@ -11,7 +11,8 @@ Family Planner is a Next.js 16 application designed as a family organizational h
 ```bash
 # Development
 pnpm dev              # Start dev server with Turbopack (http://localhost:3000)
-pnpm build            # Production build
+pnpm build            # Production build (runs migrations first)
+pnpm typecheck        # TypeScript type checking
 pnpm lint             # Run ESLint
 pnpm lint:fix         # Fix linting issues
 pnpm format           # Format with Prettier
@@ -76,6 +77,13 @@ The calendar is the core feature, located in `src/components/calendar/`:
 - **DnD**: Drag-and-drop event rescheduling (`dnd/` + `contexts/dnd-context.tsx`)
 - **Types**: `IEvent`, `IUser` interfaces in `interfaces.ts`, view/color types in `types.ts`
 - Use `useCalendar()` hook to access calendar state and actions
+
+### Confetti Celebrations
+
+Celebratory confetti effects in `src/components/confetti/`:
+
+- **ConfettiProvider** - Wrap app to enable confetti globally
+- **useConfetti()** hook - Trigger confetti programmatically with configurable presets
 
 ### Google Calendar Push Notifications
 
