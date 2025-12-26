@@ -118,36 +118,34 @@ export function ChoreCard({ chore, onEdit, onDelete }: ChoreCardProps) {
           </div>
         </div>
 
-        {/* Action Button (hover reveal when not expanded) */}
+        {/* Action Button (always visible for touch devices) */}
         {!isExpanded &&
           (isUnassigned ? (
             <Button
               variant="ghost"
               size="icon"
               className={cn(
-                "h-12 w-12 rounded-full transition-all duration-200",
-                "bg-muted hover:bg-amber-500 hover:text-white",
-                "opacity-0 group-hover:opacity-100"
+                "h-10 w-10 shrink-0 rounded-full transition-colors",
+                "text-muted-foreground hover:bg-amber-500 hover:text-white active:bg-amber-600"
               )}
               onClick={handleTake}
               aria-label={t("takeChore", { title: chore.title })}
             >
-              <Hand className="h-6 w-6" />
+              <Hand className="h-5 w-5" />
             </Button>
           ) : (
             <Button
               variant="ghost"
               size="icon"
               className={cn(
-                "h-12 w-12 rounded-full transition-all duration-200",
-                "bg-muted hover:bg-primary hover:text-primary-foreground",
-                "opacity-0 group-hover:opacity-100"
+                "h-10 w-10 shrink-0 rounded-full transition-colors",
+                "text-muted-foreground hover:bg-primary hover:text-primary-foreground active:bg-primary/90"
               )}
               onClick={handleComplete}
               disabled={isCompleting}
               aria-label={`Mark ${chore.title} as complete`}
             >
-              <Check className="h-6 w-6" />
+              <Check className="h-5 w-5" />
             </Button>
           ))}
       </div>

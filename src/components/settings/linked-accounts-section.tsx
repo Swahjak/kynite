@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
 import { Loader2 } from "lucide-react";
 import { LinkedGoogleAccountCard } from "./linked-google-account-card";
 import { LinkGoogleAccountButton } from "./link-google-account-button";
-import type { LinkedGoogleAccount } from "@/types/accounts";
+import { useLinkedAccounts, useUnlinkAccount } from "@/hooks/use-settings";
 
 interface LinkedAccountsSectionProps {
   familyId?: string;
@@ -13,49 +12,11 @@ interface LinkedAccountsSectionProps {
 export function LinkedAccountsSection({
   familyId,
 }: LinkedAccountsSectionProps = {}) {
-  const [accounts, setAccounts] = useState<LinkedGoogleAccount[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchAccounts = useCallback(async () => {
-    try {
-      const response = await fetch("/api/v1/accounts/linked");
-      const data = await response.json();
-
-      if (data.success) {
-        setAccounts(data.data.accounts);
-        setError(null);
-      } else {
-        setError(data.error?.message || "Failed to load accounts");
-      }
-    } catch (err) {
-      setError("Failed to load linked accounts");
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchAccounts();
-  }, [fetchAccounts]);
+  const { data: accounts = [], isLoading, error } = useLinkedAccounts();
+  const unlinkMutation = useUnlinkAccount();
 
   const handleUnlink = async (accountId: string) => {
-    const response = await fetch(`/api/v1/accounts/linked/${accountId}`, {
-      method: "DELETE",
-    });
-
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.error?.message || "Failed to unlink");
-    }
-
-    const data = await response.json();
-    if (data.success) {
-      setAccounts((prev) => prev.filter((acc) => acc.id !== accountId));
-    } else {
-      throw new Error(data.error?.message || "Failed to unlink");
-    }
+    await unlinkMutation.mutateAsync(accountId);
   };
 
   if (isLoading) {
@@ -69,7 +30,7 @@ export function LinkedAccountsSection({
   if (error) {
     return (
       <div className="border-destructive/50 bg-destructive/10 text-destructive rounded-lg border p-4">
-        {error}
+        {error.message}
       </div>
     );
   }

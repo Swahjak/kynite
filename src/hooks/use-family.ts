@@ -110,25 +110,45 @@ export function useCreateInvite(familyId: string) {
   });
 }
 
+interface AcceptInviteResponse {
+  family: { id: string; name: string };
+  membership: unknown;
+}
+
 export function useAcceptInvite() {
   return useMutation({
     mutationFn: (token: string) =>
-      apiFetch(`/api/v1/invites/${token}/accept`, { method: "POST" }),
+      apiFetch<AcceptInviteResponse>(`/api/v1/invites/${token}/accept`, {
+        method: "POST",
+      }),
   });
+}
+
+interface InviteValidation {
+  valid: boolean;
+  familyName?: string;
+  familyId?: string;
+  reason?: string;
 }
 
 export function useInviteDetails(token: string) {
   return useQuery({
     queryKey: ["invite", token],
-    queryFn: () => apiFetch<{ invite: unknown }>(`/api/v1/invites/${token}`),
+    queryFn: () => apiFetch<InviteValidation>(`/api/v1/invites/${token}`),
     enabled: !!token,
   });
+}
+
+interface UpgradeTokenResponse {
+  token: string;
+  expiresAt: string;
+  linkUrl: string;
 }
 
 export function useGenerateUpgradeToken(familyId: string) {
   return useMutation({
     mutationFn: (childMemberId: string) =>
-      apiFetch<{ upgradeToken: string }>(
+      apiFetch<UpgradeTokenResponse>(
         `/api/v1/families/${familyId}/children/${childMemberId}/upgrade-token`,
         { method: "POST" }
       ),

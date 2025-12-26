@@ -2,17 +2,22 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
-
-interface LinkedAccount {
-  id: string;
-  provider: string;
-  email: string;
-}
+import type { LinkedGoogleAccount } from "@/types/accounts";
 
 interface Device {
   id: string;
   name: string;
+  displayName: string;
+  createdAt: string;
   lastActiveAt: string;
+}
+
+interface Calendar {
+  id: string;
+  name: string;
+  color: string | null;
+  syncEnabled: boolean;
+  isPrivate: boolean;
 }
 
 // Query keys factory
@@ -28,9 +33,9 @@ export function useLinkedAccounts() {
   return useQuery({
     queryKey: settingsKeys.linkedAccounts(),
     queryFn: () =>
-      apiFetch<{ accounts: LinkedAccount[] }>("/api/v1/accounts/linked").then(
-        (data) => data.accounts
-      ),
+      apiFetch<{ accounts: LinkedGoogleAccount[] }>(
+        "/api/v1/accounts/linked"
+      ).then((data) => data.accounts),
   });
 }
 
@@ -99,29 +104,35 @@ export function useAccountCalendars(accountId: string) {
   return useQuery({
     queryKey: settingsKeys.calendars(accountId),
     queryFn: () =>
-      apiFetch<{ calendars: unknown[] }>(
+      apiFetch<{ calendars: Calendar[] }>(
         `/api/v1/accounts/${accountId}/calendars`
       ).then((data) => data.calendars),
     enabled: !!accountId,
   });
 }
 
-export function useUpdateCalendarPrivacy() {
+export function useUpdateCalendarPrivacy(accountId?: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({
       calendarId,
-      hideDetails,
+      isPrivate,
     }: {
       calendarId: string;
-      hideDetails: boolean;
+      isPrivate: boolean;
     }) =>
       apiFetch(`/api/v1/calendars/${calendarId}/privacy`, {
-        method: "PUT",
-        body: JSON.stringify({ hideDetails }),
+        method: "PATCH",
+        body: JSON.stringify({ isPrivate }),
       }),
     onSuccess: () => {
+      // Invalidate the specific account's calendars if accountId provided
+      if (accountId) {
+        queryClient.invalidateQueries({
+          queryKey: settingsKeys.calendars(accountId),
+        });
+      }
       queryClient.invalidateQueries({ queryKey: settingsKeys.all });
     },
   });

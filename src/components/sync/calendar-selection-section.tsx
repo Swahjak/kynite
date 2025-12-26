@@ -142,6 +142,7 @@ export function CalendarSelectionSection({
       for (const cal of linkedCalendars.filter((c) => c.syncEnabled)) {
         await fetch(`/api/v1/families/${familyId}/calendars/${cal.id}/sync`, {
           method: "POST",
+          headers: { "Content-Type": "application/json" },
         });
       }
       toast.success("Sync completed");

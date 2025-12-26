@@ -59,6 +59,7 @@ export function JoinFamilyClient({ token, locale }: JoinFamilyClientProps) {
     try {
       const response = await fetch(`/api/v1/invites/${token}/accept`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
       });
 
       const result = await response.json();

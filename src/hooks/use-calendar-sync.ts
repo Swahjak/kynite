@@ -2,39 +2,34 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
+import type { GoogleCalendar } from "@/server/schema";
 
-interface AvailableCalendar {
+export interface AvailableCalendar {
   id: string;
-  summary: string;
+  name: string;
+  color: string;
+  accessRole: string;
   primary: boolean;
-}
-
-interface LinkedCalendar {
-  id: string;
-  googleCalendarId: string;
-  googleCalendarName: string;
-  syncEnabled: boolean;
-  colorOverride: string | null;
 }
 
 // Query keys factory
 export const calendarSyncKeys = {
   all: ["calendarSync"] as const,
   family: (familyId: string) => [...calendarSyncKeys.all, familyId] as const,
-  available: (familyId: string, accountId: string) =>
-    [...calendarSyncKeys.family(familyId), "available", accountId] as const,
+  googleCalendars: (accountId: string) =>
+    [...calendarSyncKeys.all, "google", accountId] as const,
   linked: (familyId: string) =>
     [...calendarSyncKeys.family(familyId), "linked"] as const,
 };
 
-export function useAvailableCalendars(familyId: string, accountId: string) {
+export function useGoogleCalendars(accountId: string) {
   return useQuery({
-    queryKey: calendarSyncKeys.available(familyId, accountId),
+    queryKey: calendarSyncKeys.googleCalendars(accountId),
     queryFn: () =>
       apiFetch<{ calendars: AvailableCalendar[] }>(
-        `/api/v1/families/${familyId}/calendars/available/${accountId}`
+        `/api/v1/google/calendars?accountId=${accountId}`
       ).then((data) => data.calendars),
-    enabled: !!familyId && !!accountId,
+    enabled: !!accountId,
   });
 }
 
@@ -42,7 +37,7 @@ export function useFamilyCalendars(familyId: string) {
   return useQuery({
     queryKey: calendarSyncKeys.linked(familyId),
     queryFn: () =>
-      apiFetch<{ calendars: LinkedCalendar[] }>(
+      apiFetch<{ calendars: GoogleCalendar[] }>(
         `/api/v1/families/${familyId}/calendars`
       ).then((data) => data.calendars),
     enabled: !!familyId,
@@ -56,11 +51,62 @@ export function useAddCalendar(familyId: string) {
     mutationFn: (input: {
       accountId: string;
       googleCalendarId: string;
-      googleCalendarName: string;
+      name: string;
+      color: string;
+      accessRole: string;
     }) =>
-      apiFetch(`/api/v1/families/${familyId}/calendars`, {
-        method: "POST",
+      apiFetch<{ calendar: GoogleCalendar }>(
+        `/api/v1/families/${familyId}/calendars`,
+        {
+          method: "POST",
+          body: JSON.stringify(input),
+        }
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: calendarSyncKeys.family(familyId),
+      });
+    },
+  });
+}
+
+export function useUpdateCalendar(familyId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      calendarId,
+      input,
+    }: {
+      calendarId: string;
+      input: { syncEnabled?: boolean };
+    }) =>
+      apiFetch(`/api/v1/families/${familyId}/calendars/${calendarId}`, {
+        method: "PATCH",
         body: JSON.stringify(input),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: calendarSyncKeys.family(familyId),
+      });
+    },
+  });
+}
+
+export function useUpdateCalendarPrivacy(familyId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      calendarId,
+      isPrivate,
+    }: {
+      calendarId: string;
+      isPrivate: boolean;
+    }) =>
+      apiFetch(`/api/v1/calendars/${calendarId}/privacy`, {
+        method: "PATCH",
+        body: JSON.stringify({ isPrivate }),
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({

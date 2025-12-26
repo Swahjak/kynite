@@ -15,6 +15,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Copy, Check } from "lucide-react";
+import { useGenerateUpgradeToken } from "@/hooks/use-family";
+import { ApiError } from "@/lib/api";
 
 interface UpgradeTokenDialogProps {
   familyId: string;
@@ -32,35 +34,27 @@ export function UpgradeTokenDialog({
   onOpenChange,
 }: UpgradeTokenDialogProps) {
   const t = useTranslations("Family");
-  const [isGenerating, setIsGenerating] = useState(false);
   const [linkUrl, setLinkUrl] = useState<string | null>(null);
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const generateTokenMutation = useGenerateUpgradeToken(familyId);
+
   async function handleGenerate() {
-    setIsGenerating(true);
     setError(null);
 
     try {
-      const res = await fetch(
-        `/api/v1/families/${familyId}/children/${childMemberId}/upgrade-token`,
-        { method: "POST" }
-      );
-
-      const data = await res.json();
-
-      if (data.success) {
-        const fullUrl = `${window.location.origin}${data.data.linkUrl}`;
-        setLinkUrl(fullUrl);
-        setExpiresAt(new Date(data.data.expiresAt).toLocaleString());
+      const data = await generateTokenMutation.mutateAsync(childMemberId);
+      const fullUrl = `${window.location.origin}${data.linkUrl}`;
+      setLinkUrl(fullUrl);
+      setExpiresAt(new Date(data.expiresAt).toLocaleString());
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.message);
       } else {
-        setError(data.error?.message || "Failed to generate link");
+        setError("Failed to generate link");
       }
-    } catch {
-      setError("Failed to generate link");
-    } finally {
-      setIsGenerating(false);
     }
   }
 
@@ -96,10 +90,10 @@ export function UpgradeTokenDialog({
               {error && <p className="text-destructive text-sm">{error}</p>}
               <Button
                 onClick={handleGenerate}
-                disabled={isGenerating}
+                disabled={generateTokenMutation.isPending}
                 className="w-full"
               >
-                {isGenerating ? (
+                {generateTokenMutation.isPending ? (
                   <>
                     <Loader2 className="mr-2 size-4 animate-spin" />
                     Generating...

@@ -129,7 +129,7 @@ describe("sanitizeSvg color preservation", () => {
   describe("real avataaars.svg file", () => {
     it("preserves all critical elements from actual file", () => {
       const originalSvg = readFileSync(
-        join(process.cwd(), "docs/design/avataaars.svg"),
+        join(__dirname, "fixtures/avataaars.svg"),
         "utf-8"
       );
       const result = sanitizeSvg(originalSvg);
