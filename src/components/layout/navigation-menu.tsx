@@ -98,16 +98,14 @@ export function NavigationMenu({ open, onOpenChange }: NavigationMenuProps) {
           </ul>
 
           <div className="border-t p-2">
-            <button
+            <ProgressLink
+              href="/help"
+              onClick={() => onOpenChange(false)}
               className="text-muted-foreground hover:bg-accent hover:text-accent-foreground flex h-12 w-full items-center gap-3 rounded-md px-4 text-sm font-medium"
-              onClick={() => {
-                // TODO: Open help modal
-                onOpenChange(false);
-              }}
             >
               <HelpCircle className="size-5" />
               {t("help")}
-            </button>
+            </ProgressLink>
           </div>
         </nav>
       </SheetContent>
