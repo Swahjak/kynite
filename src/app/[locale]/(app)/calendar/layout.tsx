@@ -1,5 +1,8 @@
 import { setRequestLocale } from "next-intl/server";
+import { eq } from "drizzle-orm";
 import { getSession } from "@/lib/get-session";
+import { db } from "@/server/db";
+import { users } from "@/server/schema";
 import { getFamilyMembers } from "@/server/services/family-service";
 import {
   getChoresForFamily,
@@ -27,10 +30,15 @@ export default async function CalendarLayout({
     return null;
   }
 
-  const [members, chores, progress] = await Promise.all([
+  const [members, chores, progress, userPrefs] = await Promise.all([
     getFamilyMembers(familyId),
     getChoresForFamily(familyId, { status: "pending" }),
     getChoreProgress(familyId),
+    db
+      .select({ use24HourFormat: users.use24HourFormat })
+      .from(users)
+      .where(eq(users.id, session.user.id))
+      .limit(1),
   ]);
 
   return (
@@ -39,6 +47,7 @@ export default async function CalendarLayout({
       members={members}
       initialChores={chores}
       initialProgress={progress}
+      initialUse24HourFormat={userPrefs[0]?.use24HourFormat ?? true}
     >
       {children}
     </CalendarLayoutClient>

@@ -20,16 +20,27 @@ interface CalendarLayoutClientProps {
   members: FamilyMemberWithUser[];
   initialChores: IChoreWithAssignee[];
   initialProgress: IChoreProgress;
+  initialUse24HourFormat?: boolean;
   children: ReactNode;
 }
 
-function CalendarLayoutInner({ children }: { children: ReactNode }) {
+function CalendarLayoutInner({
+  children,
+  initialUse24HourFormat,
+}: {
+  children: ReactNode;
+  initialUse24HourFormat?: boolean;
+}) {
   const { events, users } = useCalendarData();
   const isManager = useIsManager();
   const t = useTranslations("Calendar");
 
   return (
-    <CalendarProvider users={users} events={events}>
+    <CalendarProvider
+      users={users}
+      events={events}
+      initialUse24HourFormat={initialUse24HourFormat}
+    >
       <div className="flex h-full flex-col">
         <WallHubHeader />
         <div className="flex-1 overflow-hidden">{children}</div>
@@ -59,6 +70,7 @@ export function CalendarLayoutClient({
   members,
   initialChores,
   initialProgress,
+  initialUse24HourFormat,
   children,
 }: CalendarLayoutClientProps) {
   return (
@@ -69,7 +81,9 @@ export function CalendarLayoutClient({
         initialProgress={initialProgress}
         members={members}
       >
-        <CalendarLayoutInner>{children}</CalendarLayoutInner>
+        <CalendarLayoutInner initialUse24HourFormat={initialUse24HourFormat}>
+          {children}
+        </CalendarLayoutInner>
       </ChoresProvider>
     </CalendarDataProvider>
   );

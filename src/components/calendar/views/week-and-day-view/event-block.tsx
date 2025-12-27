@@ -98,12 +98,10 @@ export function EventBlock({ event, className }: IProps) {
         <p className="truncate font-semibold">{event.title}</p>
       </div>
 
-      {durationInMinutes > 25 && (
-        <p>
-          {formatTime(start, use24HourFormat)} -{" "}
-          {formatTime(end, use24HourFormat)}
-        </p>
-      )}
+      <p className={cn(durationInMinutes <= 25 && "text-[10px]")}>
+        {formatTime(start, use24HourFormat)} -{" "}
+        {formatTime(end, use24HourFormat)}
+      </p>
     </div>
   );
 
