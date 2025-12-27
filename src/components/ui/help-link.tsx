@@ -1,7 +1,7 @@
 "use client";
 
 import { HelpCircle } from "lucide-react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import {
@@ -26,12 +26,19 @@ interface HelpLinkProps {
   label?: string;
 }
 
-const pageLabels: Record<HelpPage, string> = {
-  "getting-started": "Getting started help",
-  calendar: "Calendar help",
-  chores: "Chores help",
-  rewards: "Rewards help",
-  "wall-hub": "Wall hub help",
+type HelpTranslationKey =
+  | "gettingStarted"
+  | "calendar"
+  | "chores"
+  | "rewards"
+  | "wallHub";
+
+const pageToTranslationKey: Record<HelpPage, HelpTranslationKey> = {
+  "getting-started": "gettingStarted",
+  calendar: "calendar",
+  chores: "chores",
+  rewards: "rewards",
+  "wall-hub": "wallHub",
 };
 
 export function HelpLink({
@@ -42,12 +49,14 @@ export function HelpLink({
   label,
 }: HelpLinkProps) {
   const locale = useLocale();
+  const t = useTranslations("Help");
 
   const basePath = `/${locale}/help`;
   const pagePath = page ? `${basePath}/${page}` : basePath;
   const href = section ? `${pagePath}#${section}` : pagePath;
 
-  const tooltipLabel = label || (page ? pageLabels[page] : "Help center");
+  const tooltipLabel =
+    label || (page ? t(pageToTranslationKey[page]) : t("title"));
 
   if (variant === "text") {
     return (

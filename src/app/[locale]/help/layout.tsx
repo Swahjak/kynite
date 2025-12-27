@@ -19,7 +19,6 @@ export default async function HelpLayout({ children, params }: Props) {
   return (
     <Layout
       pageMap={pageMap}
-      docsRepositoryBase="https://github.com/your-repo"
       navbar={
         <Navbar
           logo={<span className="font-bold">Kynite Help</span>}
