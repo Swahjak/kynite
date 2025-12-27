@@ -22,7 +22,8 @@ export function ScheduleCard({ event, showNowBadge }: ScheduleCardProps) {
   const now = new Date();
 
   const isNow = isWithinInterval(now, { start: startDate, end: endDate });
-  const timeDisplay = format(startDate, use24HourFormat ? "HH:mm" : "h:mm a");
+  const timeFormat = use24HourFormat ? "HH:mm" : "h:mm a";
+  const timeDisplay = `${format(startDate, timeFormat)} - ${format(endDate, timeFormat)}`;
 
   // Get color based on first participant's avatarColor
   const firstUser = event.users[0];
