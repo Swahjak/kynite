@@ -1,5 +1,5 @@
 import { importPage } from "nextra/pages";
-import { useMDXComponents } from "../../../../../mdx-components";
+import { useMDXComponents } from "../../../../../../mdx-components";
 
 const locales = ["en", "nl"] as const;
 const pages = [

@@ -156,6 +156,58 @@ After implementing the solution, the build succeeds:
 - [GitHub Issue #4343 - Nextra 4 i18n bug](https://github.com/shuding/nextra/issues/4343)
 - [GitHub Issue #3934 - i18n + static website](https://github.com/shuding/nextra/issues/3934)
 
+## Styling Issue: CSS Conflicts
+
+### Problem
+
+After the routing fix, Nextra pages rendered without styling. The content displayed but without the Nextra theme's layout, sidebar, or typography.
+
+### Root Cause
+
+The root layout (`src/app/layout.tsx`) imported `globals.css` which contained Tailwind CSS base layer resets:
+
+```css
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-body);
+  }
+}
+```
+
+These global styles conflicted with Nextra's theme CSS, overriding its styling.
+
+### Solution: Route Groups
+
+Used Next.js Route Groups to isolate the main app and Nextra docs with separate layouts:
+
+```
+src/app/
+├── layout.tsx           # Minimal root layout (html/body only)
+├── globals.css          # Tailwind CSS
+├── (main)/              # Main app route group
+│   ├── layout.tsx       # Imports globals.css, fonts
+│   └── [locale]/        # All locale-based routes
+└── (docs)/              # Docs route group
+    └── help/[locale]/   # Nextra routes
+        └── layout.tsx   # Imports nextra-theme-docs/style.css
+```
+
+**Key changes:**
+
+1. **Root layout** (`src/app/layout.tsx`): Minimal, only provides `<html>` and `<body>` wrapper
+2. **Main layout** (`src/app/(main)/layout.tsx`): Imports fonts and `globals.css`
+3. **Docs layout** (`src/app/(docs)/help/[locale]/layout.tsx`): Imports Nextra CSS, no Tailwind interference
+
+This ensures:
+
+- Main app gets Tailwind CSS and custom fonts
+- Nextra docs get Nextra's styling without CSS conflicts
+- Both share the same root HTML structure
+
 ## Key Learnings
 
 1. Nextra and next-intl have incompatible i18n approaches when routes overlap
@@ -163,3 +215,4 @@ After implementing the solution, the build succeeds:
 3. Nextra expects specific route param naming (`locale`) for i18n
 4. The `i18n` config must be in the Next.js config passed to `withNextra`, not in the `nextra()` options
 5. `unstable_shouldAddLocaleToLinks` is needed for static site generation with i18n
+6. Use Route Groups to isolate different CSS systems (Tailwind vs Nextra theme)

@@ -25,7 +25,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
 
-  const messages = (await import(`../../../messages/${locale}.json`)).default;
+  const messages = (await import(`../../../../messages/${locale}.json`))
+    .default;
 
   return {
     title: messages.Metadata.title,
