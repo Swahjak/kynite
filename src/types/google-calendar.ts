@@ -34,6 +34,12 @@ export interface GoogleCalendarAttendee {
   organizer?: boolean;
 }
 
+export interface GoogleBirthdayProperties {
+  type?: "birthday" | "anniversary" | "self" | "custom" | "other";
+  customTypeName?: string;
+  contact?: string; // People API resource name: 'people/c12345'
+}
+
 export type GoogleEventType =
   | "default"
   | "workingLocation"
@@ -56,6 +62,7 @@ export interface GoogleCalendarEvent {
   colorId?: string;
   recurringEventId?: string;
   attendees?: GoogleCalendarAttendee[];
+  birthdayProperties?: GoogleBirthdayProperties;
 }
 
 export interface GoogleEventsListResponse {
