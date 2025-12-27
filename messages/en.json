@@ -104,6 +104,10 @@
       "week": "Week",
       "month": "Month",
       "year": "Year"
+    },
+    "syncError": {
+      "title": "Some calendars have sync issues.",
+      "hint": "Check Settings → Accounts"
     }
   },
   "Filter": {

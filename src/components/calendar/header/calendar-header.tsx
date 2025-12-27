@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { AlertTriangle } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import {
   slideFromLeft,
@@ -29,6 +30,7 @@ export function CalendarHeader() {
   const { view, events } = useCalendar();
   const isManager = useIsManager();
   const { hasErrors } = useAccountErrors();
+  const t = useTranslations("Calendar.syncError");
 
   return (
     <div className="flex flex-col gap-4 border-b p-4 lg:flex-row lg:items-center lg:justify-between">
@@ -67,10 +69,8 @@ export function CalendarHeader() {
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Some calendars have sync issues.</p>
-                  <p className="text-muted-foreground text-xs">
-                    Check Settings &rarr; Accounts
-                  </p>
+                  <p>{t("title")}</p>
+                  <p className="text-muted-foreground text-xs">{t("hint")}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
