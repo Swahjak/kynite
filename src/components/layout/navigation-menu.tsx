@@ -10,7 +10,7 @@ import {
   Gift,
   Timer,
 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { usePathname } from "@/i18n/navigation";
 import { ProgressLink } from "@/components/ui/progress-link";
 import { cn } from "@/lib/utils";
@@ -57,6 +57,7 @@ export function NavigationMenu({ open, onOpenChange }: NavigationMenuProps) {
   const t = useTranslations("Menu");
   const pathname = usePathname();
   const isManager = useIsManager();
+  const locale = useLocale();
 
   const filteredItems = navItems.filter(
     (item) => !item.manageOnly || isManager
@@ -98,14 +99,14 @@ export function NavigationMenu({ open, onOpenChange }: NavigationMenuProps) {
           </ul>
 
           <div className="border-t p-2">
-            <ProgressLink
-              href="/help"
+            <a
+              href={`/help/${locale}`}
               onClick={() => onOpenChange(false)}
               className="text-muted-foreground hover:bg-accent hover:text-accent-foreground flex h-12 w-full items-center gap-3 rounded-md px-4 text-sm font-medium"
             >
               <HelpCircle className="size-5" />
               {t("help")}
-            </ProgressLink>
+            </a>
           </div>
         </nav>
       </SheetContent>

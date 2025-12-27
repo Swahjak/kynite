@@ -41,6 +41,11 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Skip intl middleware for help docs (Nextra handles its own i18n)
+  if (pathname.startsWith("/help")) {
+    return NextResponse.next();
+  }
+
   // Handle API routes with security validation
   if (pathname.startsWith("/api/")) {
     // Skip auth endpoints (better-auth handles its own security)

@@ -51,7 +51,7 @@ export function HelpLink({
   const locale = useLocale();
   const t = useTranslations("Help");
 
-  const basePath = `/${locale}/help`;
+  const basePath = `/help/${locale}`;
   const pagePath = page ? `${basePath}/${page}` : basePath;
   const href = section ? `${pagePath}#${section}` : pagePath;
 

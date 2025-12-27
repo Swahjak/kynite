@@ -14,11 +14,15 @@ type Props = {
 
 export default async function HelpLayout({ children, params }: Props) {
   const { locale } = await params;
-  const pageMap = await getPageMap(`/${locale}/help`);
+  const pageMap = await getPageMap(`/${locale}`);
 
   return (
     <Layout
       pageMap={pageMap}
+      i18n={[
+        { locale: "en", name: "English" },
+        { locale: "nl", name: "Nederlands" },
+      ]}
       navbar={
         <Navbar
           logo={<span className="font-bold">Kynite Help</span>}

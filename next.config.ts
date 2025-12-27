@@ -6,6 +6,7 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const withNextra = nextra({
   contentDirBasePath: "/help",
+  unstable_shouldAddLocaleToLinks: true,
 });
 
 const securityHeaders = [
@@ -49,6 +50,11 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-};
+  // Nextra i18n configuration (handled by withNextra even in App Router)
+  i18n: {
+    locales: ["en", "nl"],
+    defaultLocale: "en",
+  },
+} as NextConfig & { i18n: { locales: string[]; defaultLocale: string } };
 
 export default withNextIntl(withNextra(nextConfig));
