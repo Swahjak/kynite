@@ -4,6 +4,7 @@ import { Menu } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
 import { useIsManager } from "@/hooks/use-is-manager";
 import { Button } from "@/components/ui/button";
+import { HelpLink } from "@/components/ui/help-link";
 import { BrandArea } from "./brand-area";
 import { CurrentTime } from "./current-time";
 import { UserMenu } from "@/components/auth/user-menu";
@@ -38,8 +39,9 @@ export function AppHeader({ onMenuToggle }: AppHeaderProps) {
         <CurrentTime />
       </div>
 
-      {/* Right: User Menu (managers only) */}
+      {/* Right: Help Link + User Menu (managers only) */}
       <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
+        <HelpLink />
         {isManager && user && (
           <div data-testid="user-avatar">
             <UserMenu

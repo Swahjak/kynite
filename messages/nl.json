@@ -532,5 +532,14 @@
     "expiresIn": "Deze link verloopt over",
     "hours": "uur",
     "minutes": "minuten"
+  },
+  "Help": {
+    "title": "Helpcentrum",
+    "linkLabel": "Help",
+    "gettingStarted": "Aan de slag",
+    "calendar": "Kalender",
+    "chores": "Klusjes & Sterren",
+    "rewards": "Beloningswinkel",
+    "wallHub": "Wandscherm"
   }
 }
