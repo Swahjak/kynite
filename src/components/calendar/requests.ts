@@ -20,11 +20,16 @@ function avatarColorToEventColor(avatarColor: string | null): TEventColor {
 
 // Transform API response to calendar IEvent format
 export function transformEventToIEvent(event: EventWithParticipants): IEvent {
+  const isBirthday = event.eventType === "birthday";
+
   // Use first participant's avatar color for the event color
+  // Birthday events use red (brand: special dates)
   const firstParticipant = event.participants[0];
-  const eventColor = firstParticipant
-    ? avatarColorToEventColor(firstParticipant.avatarColor)
-    : "blue";
+  const eventColor = isBirthday
+    ? "red"
+    : firstParticipant
+      ? avatarColorToEventColor(firstParticipant.avatarColor)
+      : "blue";
 
   return {
     id: event.id,
@@ -33,6 +38,7 @@ export function transformEventToIEvent(event: EventWithParticipants): IEvent {
     startDate: new Date(event.startTime).toISOString(),
     endDate: new Date(event.endTime).toISOString(),
     color: eventColor,
+    eventType: event.eventType,
     users: event.participants.map((p) => ({
       id: p.familyMemberId,
       name: p.displayName ?? p.userName,
