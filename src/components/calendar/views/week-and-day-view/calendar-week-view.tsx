@@ -19,6 +19,7 @@ import { AddEditEventDialog } from "@/components/calendar/dialogs/add-edit-event
 import { DroppableArea } from "@/components/calendar/dnd/droppable-area";
 import { groupEvents } from "@/components/calendar/helpers";
 import type { IEvent } from "@/components/calendar/interfaces";
+import { BirthdayBanner } from "@/components/calendar/views/week-and-day-view/birthday-banner";
 import { CalendarTimeline } from "@/components/calendar/views/week-and-day-view/calendar-time-line";
 import { RenderGroupedEvents } from "@/components/calendar/views/week-and-day-view/render-grouped-events";
 import { WeekViewMultiDayEventsRow } from "@/components/calendar/views/week-and-day-view/week-view-multi-day-events-row";
@@ -66,6 +67,7 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
     >
       {/* Mobile horizontal scroll view */}
       <div className="flex h-full flex-col md:hidden">
+        <BirthdayBanner events={multiDayEvents} />
         <WeekViewMultiDayEventsRow
           selectedDate={selectedDate}
           multiDayEvents={multiDayEvents}
@@ -190,6 +192,7 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
         variants={staggerContainer}
       >
         <div>
+          <BirthdayBanner events={multiDayEvents} />
           <WeekViewMultiDayEventsRow
             selectedDate={selectedDate}
             multiDayEvents={multiDayEvents}

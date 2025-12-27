@@ -21,6 +21,7 @@ export function DayViewMultiDayEventsRow({
   const dayEnd = endOfDay(selectedDate);
 
   const multiDayEventsInDay = multiDayEvents
+    .filter((event) => event.eventType !== "birthday") // Exclude birthdays - shown in banner
     .filter((event) => {
       const eventStart = parseISO(event.startDate);
       const eventEnd = parseISO(event.endDate);

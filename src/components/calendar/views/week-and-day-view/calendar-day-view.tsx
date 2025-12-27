@@ -1,5 +1,5 @@
 import { format, isWithinInterval, parseISO } from "date-fns";
-import { Calendar, Clock, User } from "lucide-react";
+import { Cake, Calendar, Clock, User } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { DayPicker } from "@/components/ui/day-picker";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -9,6 +9,7 @@ import { AddEditEventDialog } from "@/components/calendar/dialogs/add-edit-event
 import { DroppableArea } from "@/components/calendar/dnd/droppable-area";
 import { groupEvents } from "@/components/calendar/helpers";
 import type { IEvent } from "@/components/calendar/interfaces";
+import { BirthdayBanner } from "@/components/calendar/views/week-and-day-view/birthday-banner";
 import { CalendarTimeline } from "@/components/calendar/views/week-and-day-view/calendar-time-line";
 import { DayViewMultiDayEventsRow } from "@/components/calendar/views/week-and-day-view/day-view-multi-day-events-row";
 import { RenderGroupedEvents } from "@/components/calendar/views/week-and-day-view/render-grouped-events";
@@ -82,6 +83,7 @@ export function CalendarDayView({ singleDayEvents, multiDayEvents }: IProps) {
     <div className="flex">
       <div className="flex flex-1 flex-col">
         <div>
+          <BirthdayBanner events={multiDayEvents} />
           <DayViewMultiDayEventsRow
             selectedDate={selectedDate}
             multiDayEvents={multiDayEvents}
@@ -188,14 +190,24 @@ export function CalendarDayView({ singleDayEvents, multiDayEvents }: IProps) {
         <div className="flex-1 space-y-3">
           {currentEvents.length > 0 ? (
             <div className="flex items-start gap-2 px-4 pt-4">
-              <span className="relative mt-[5px] flex size-2.5">
-                <span className="absolute inline-flex size-full animate-ping rounded-full bg-green-400 opacity-75"></span>
-                <span className="relative inline-flex size-2.5 rounded-full bg-green-600"></span>
-              </span>
-
-              <p className="text-t-secondary text-sm font-semibold">
-                Happening now
-              </p>
+              {currentEvents.some((e) => e.eventType === "birthday") ? (
+                <>
+                  <Cake className="mt-0.5 size-4 text-red-500" />
+                  <p className="text-t-secondary text-sm font-semibold">
+                    Birthday today!
+                  </p>
+                </>
+              ) : (
+                <>
+                  <span className="relative mt-[5px] flex size-2.5">
+                    <span className="absolute inline-flex size-full animate-ping rounded-full bg-green-400 opacity-75"></span>
+                    <span className="relative inline-flex size-2.5 rounded-full bg-green-600"></span>
+                  </span>
+                  <p className="text-t-secondary text-sm font-semibold">
+                    Happening now
+                  </p>
+                </>
+              )}
             </div>
           ) : (
             <p className="text-t-tertiary p-4 text-center text-sm italic">

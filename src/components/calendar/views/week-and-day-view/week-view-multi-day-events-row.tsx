@@ -27,6 +27,7 @@ export function WeekViewMultiDayEventsRow({
 
   const processedEvents = useMemo(() => {
     return multiDayEvents
+      .filter((event) => event.eventType !== "birthday") // Exclude birthdays - shown in banner
       .map((event) => {
         const start = parseISO(event.startDate);
         const end = parseISO(event.endDate);
@@ -72,19 +73,21 @@ export function WeekViewMultiDayEventsRow({
   }, [processedEvents]);
 
   const hasEventsInWeek = useMemo(() => {
-    return multiDayEvents.some((event) => {
-      const start = parseISO(event.startDate);
-      const end = parseISO(event.endDate);
+    return multiDayEvents
+      .filter((event) => event.eventType !== "birthday") // Exclude birthdays - shown in banner
+      .some((event) => {
+        const start = parseISO(event.startDate);
+        const end = parseISO(event.endDate);
 
-      return (
-        // Event starts within the week
-        (start >= weekStart && start <= weekEnd) ||
-        // Event ends within the week
-        (end >= weekStart && end <= weekEnd) ||
-        // Event spans the entire week
-        (start <= weekStart && end >= weekEnd)
-      );
-    });
+        return (
+          // Event starts within the week
+          (start >= weekStart && start <= weekEnd) ||
+          // Event ends within the week
+          (end >= weekStart && end <= weekEnd) ||
+          // Event spans the entire week
+          (start <= weekStart && end >= weekEnd)
+        );
+      });
   }, [multiDayEvents, weekStart, weekEnd]);
 
   if (!hasEventsInWeek) {
