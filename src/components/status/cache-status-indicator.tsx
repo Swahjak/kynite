@@ -18,17 +18,17 @@ const statusConfig: Record<
   }
 > = {
   live: {
-    color: "bg-[oklch(var(--status-success))]",
+    color: "bg-[var(--status-success)]",
     label: "Live",
     description: "Connected with fresh data",
   },
   stale: {
-    color: "bg-[oklch(var(--status-warning))]",
+    color: "bg-[var(--status-warning)]",
     label: "Updating",
     description: "Showing cached data, refreshing in background",
   },
   offline: {
-    color: "bg-[oklch(var(--status-error))]",
+    color: "bg-[var(--status-error)]",
     label: "Offline",
     description: "No network connection, showing cached data",
   },
