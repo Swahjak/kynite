@@ -527,5 +527,14 @@
     "expiresIn": "This link expires in",
     "hours": "hours",
     "minutes": "minutes"
+  },
+  "Help": {
+    "title": "Help Center",
+    "linkLabel": "Help",
+    "gettingStarted": "Getting Started",
+    "calendar": "Calendar",
+    "chores": "Chores & Stars",
+    "rewards": "Reward Store",
+    "wallHub": "Wall Hub"
   }
 }
