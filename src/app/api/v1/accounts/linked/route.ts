@@ -25,6 +25,8 @@ export async function GET(): Promise<NextResponse<LinkedAccountsResponse>> {
         providerId: accounts.providerId,
         scope: accounts.scope,
         createdAt: accounts.createdAt,
+        lastSyncError: accounts.lastSyncError,
+        lastSyncErrorAt: accounts.lastSyncErrorAt,
       })
       .from(accounts)
       .where(eq(accounts.userId, session.user.id));
@@ -37,6 +39,8 @@ export async function GET(): Promise<NextResponse<LinkedAccountsResponse>> {
         googleAccountId: acc.accountId,
         scopes: acc.scope?.split(" ") || [],
         linkedAt: acc.createdAt,
+        lastSyncError: acc.lastSyncError,
+        lastSyncErrorAt: acc.lastSyncErrorAt?.toISOString() ?? null,
       }));
 
     return NextResponse.json({
