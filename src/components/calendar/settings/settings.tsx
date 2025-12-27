@@ -23,8 +23,6 @@ export function Settings() {
   const {
     badgeVariant,
     setBadgeVariant,
-    use24HourFormat,
-    toggleTimeFormat,
     view,
     setView,
     agendaModeGroupBy,
@@ -76,15 +74,6 @@ export function Settings() {
                 onCheckedChange={(checked) =>
                   setBadgeVariant(checked ? "dot" : "colored")
                 }
-              />
-            </DropdownMenuShortcut>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            {t("use24Hour")}
-            <DropdownMenuShortcut>
-              <Switch
-                checked={use24HourFormat}
-                onCheckedChange={toggleTimeFormat}
               />
             </DropdownMenuShortcut>
           </DropdownMenuItem>

@@ -2,7 +2,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { LogOut, Settings, Loader2, Sun, Moon, Monitor } from "lucide-react";
+import {
+  LogOut,
+  Settings,
+  Loader2,
+  Sun,
+  Moon,
+  Monitor,
+  Clock,
+} from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
@@ -14,13 +22,19 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
+  DropdownMenuShortcut,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Switch } from "@/components/ui/switch";
 import authClient from "@/lib/auth-client";
+import {
+  useUserPreferences,
+  useUpdatePreferences,
+} from "@/hooks/use-preferences";
 
 interface UserMenuProps {
   user: {
@@ -36,6 +50,9 @@ export function UserMenu({ user }: UserMenuProps) {
   const t = useTranslations("UserMenu");
   const { theme, setTheme } = useTheme();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { data: preferences } = useUserPreferences();
+  const updatePreferences = useUpdatePreferences();
+  const use24HourFormat = preferences?.use24HourFormat ?? true;
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
@@ -104,6 +121,21 @@ export function UserMenu({ user }: UserMenuProps) {
             </DropdownMenuRadioGroup>
           </DropdownMenuSubContent>
         </DropdownMenuSub>
+        <DropdownMenuItem
+          onSelect={(e) => e.preventDefault()}
+          className="cursor-pointer"
+        >
+          <Clock className="mr-2 size-4" />
+          {t("timeFormat.label")}
+          <DropdownMenuShortcut>
+            <Switch
+              checked={use24HourFormat}
+              onCheckedChange={(checked) =>
+                updatePreferences.mutate({ use24HourFormat: checked })
+              }
+            />
+          </DropdownMenuShortcut>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout} disabled={isLoggingOut}>
           {isLoggingOut ? (

@@ -169,6 +169,9 @@
       "light": "Licht",
       "dark": "Donker",
       "auto": "Automatisch"
+    },
+    "timeFormat": {
+      "label": "24-uursklok"
     }
   },
   "Header": {
