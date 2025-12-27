@@ -148,6 +148,13 @@
       "when": 1767139200000,
       "tag": "0020_add_user_locale",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1767225600000,
+      "tag": "0021_add_account_sync_error",
+      "breakpoints": true
     }
   ]
 }

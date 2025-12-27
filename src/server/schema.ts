@@ -68,6 +68,8 @@ export const accounts = pgTable("accounts", {
   scope: text("scope"),
   createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
+  lastSyncError: text("last_sync_error"),
+  lastSyncErrorAt: timestamp("last_sync_error_at", { mode: "date" }),
 });
 
 /**
