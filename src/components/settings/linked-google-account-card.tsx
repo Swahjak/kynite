@@ -8,6 +8,7 @@ import {
   Loader2,
   ChevronDown,
   ChevronUp,
+  AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -84,6 +85,12 @@ export function LinkedGoogleAccountCard({
                   Linked {new Date(account.linkedAt).toLocaleDateString()}
                 </span>
               </div>
+              {account.lastSyncError && (
+                <div className="text-destructive mt-2 flex items-center gap-2 text-sm">
+                  <AlertCircle className="size-4 shrink-0" />
+                  <span>{account.lastSyncError}</span>
+                </div>
+              )}
             </div>
           </div>
 
