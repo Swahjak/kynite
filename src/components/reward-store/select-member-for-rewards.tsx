@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { PersonFilterChips } from "@/components/wall-hub/shared/person-filter-chips";
+import { PersonSelectorCards } from "@/components/shared/person-selector-cards";
 
 interface ChildInfo {
   id: string;
@@ -40,11 +40,10 @@ export function SelectMemberForRewards({
               {t("selectMemberDescription")}
             </p>
           </div>
-          <PersonFilterChips
+          <PersonSelectorCards
             people={children}
             selectedId="all"
             onSelect={handleSelectChild}
-            showEveryone={false}
           />
         </div>
       </div>
