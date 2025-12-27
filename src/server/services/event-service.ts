@@ -63,6 +63,7 @@ export interface EventWithParticipants {
   googleCalendarId: string | null;
   googleEventId: string | null;
   syncStatus: string | null;
+  eventType: string | null;
   calendarName: string | null;
   calendarColor: string | null;
   accessRole: string | null;
@@ -157,6 +158,7 @@ export async function getEventsForFamily(
     endTime: row.event.endTime,
     allDay: row.event.allDay,
     color: row.event.color,
+    eventType: row.event.eventType,
     googleCalendarId: row.event.googleCalendarId,
     googleEventId: row.event.googleEventId,
     syncStatus: row.event.syncStatus,
@@ -240,6 +242,7 @@ export async function getEventById(
     endTime: row.event.endTime,
     allDay: row.event.allDay,
     color: row.event.color,
+    eventType: row.event.eventType,
     googleCalendarId: row.event.googleCalendarId,
     googleEventId: row.event.googleEventId,
     syncStatus: row.event.syncStatus,
