@@ -18,6 +18,7 @@ export interface IEvent {
   description: string;
   users: IUser[];
   isHidden?: boolean;
+  eventType?: string | null;
 }
 
 export interface ICalendarCell {
