@@ -46,3 +46,11 @@ export function isPublicRoute(pathname: string): boolean {
 export function isAuthApiRoute(pathname: string): boolean {
   return pathname.startsWith(authApiPrefix);
 }
+
+/**
+ * Check if pathname is the homepage (with or without locale prefix)
+ */
+export function isHomepage(pathname: string): boolean {
+  const pathWithoutLocale = pathname.replace(/^\/(en|nl)/, "") || "/";
+  return pathWithoutLocale === "/";
+}

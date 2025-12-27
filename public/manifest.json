@@ -2,7 +2,7 @@
   "name": "Kynite",
   "short_name": "Kynite",
   "description": "Routines without the friction",
-  "start_url": "/",
+  "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#10221a",
   "theme_color": "#13ec92",

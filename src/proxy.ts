@@ -1,7 +1,12 @@
 import { NextResponse, type NextRequest } from "next/server";
 import createIntlMiddleware from "next-intl/middleware";
 import { routing } from "@/i18n/routing";
-import { isPublicRoute, isAuthApiRoute, loginRoute } from "@/lib/auth-routes";
+import {
+  isPublicRoute,
+  isAuthApiRoute,
+  loginRoute,
+  isHomepage,
+} from "@/lib/auth-routes";
 import { ErrorCode } from "@/lib/errors/codes";
 
 // Create next-intl middleware for locale handling
@@ -123,6 +128,22 @@ export async function proxy(request: NextRequest) {
 
   // Check if route is public
   if (isPublicRoute(pathname) || isAuthApiRoute(pathname)) {
+    // Redirect authenticated users from homepage to dashboard
+    if (isHomepage(pathname)) {
+      const sessionCookie =
+        request.cookies.get("__Secure-better-auth.session_token") ||
+        request.cookies.get("better-auth.session_token");
+
+      if (sessionCookie?.value) {
+        // Extract locale from path, default to 'nl' if not present
+        const localeMatch = pathname.match(/^\/(en|nl)/);
+        const locale = localeMatch ? localeMatch[1] : routing.defaultLocale;
+        return NextResponse.redirect(
+          new URL(`/${locale}/dashboard`, request.url)
+        );
+      }
+    }
+
     // Apply intl middleware for locale handling
     return intlMiddleware(request);
   }
