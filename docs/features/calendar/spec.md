@@ -23,7 +23,7 @@ The calendar is the core feature of Family Planner, providing a centralized view
 | PRD Requirement                   | Implementation                                           |
 | --------------------------------- | -------------------------------------------------------- |
 | FR2 - Aggregate disparate sources | Events from multiple `google_calendars` merged by family |
-| FR3 - Multiple calendar views     | Day, Week, Month, List views                             |
+| FR3 - Multiple calendar views     | Day, Week, Month, Year, Agenda views                     |
 | FR4 - CRUD operations             | Managers can create/edit/delete events                   |
 | FR14 - Real-time sync             | Events update via polling + optimistic UI                |
 | FR15 - Cached mode                | Events stored locally, offline indicator                 |
@@ -40,15 +40,19 @@ Visual mockups available in `docs/design/calendar/`:
 
 ## Key Features
 
-- Multiple calendar views (Today, Day, Week, Month)
+- Multiple calendar views (Day, Week, Month, Year, Agenda)
 - Family member filtering with color-coded avatars
 - Multi-participant events (events can be assigned to multiple family members)
-- Event color categorization
+- Event color categorization (8 colors: blue, green, red, yellow, purple, orange, pink, teal)
 - Drag-and-drop event rescheduling (Management mode only)
+- Resizable events in Week/Day views
+- Event privacy (per-calendar; private calendar events show as "Hidden" to non-owners)
 - Google Calendar 2-way sync (via Google Sync feature)
 - Offline support with cached events
 - Dark mode support
 - Internationalization (nl/en)
+- 24-hour and 12-hour time format toggle
+- Agenda view grouping by date or color
 
 ## Local Event Creation
 

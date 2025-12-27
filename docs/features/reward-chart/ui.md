@@ -208,16 +208,39 @@ const pendingStyles = cn(
 
 #### Task Icon Colors
 
-| Color Key | Background | Icon Color  | Example Tasks  |
-| --------- | ---------- | ----------- | -------------- |
-| blue      | blue-50    | blue-600    | Brush Teeth    |
-| emerald   | emerald-50 | emerald-600 | Make Bed       |
-| purple    | purple-50  | purple-600  | Clear Table    |
-| orange    | orange-50  | orange-600  | Read           |
-| pink      | pink-50    | pink-600    | PJs On         |
-| amber     | amber-50   | amber-600   | Practice Music |
-| teal      | teal-50    | teal-600    | Feed Pet       |
-| rose      | rose-50    | rose-600    | Homework       |
+Defined in `constants.ts` as `ICON_COLORS`:
+
+| Color Key | Background | Icon Color  | Dark BG     | Dark Text   |
+| --------- | ---------- | ----------- | ----------- | ----------- |
+| blue      | blue-50    | blue-600    | blue-950    | blue-400    |
+| emerald   | emerald-50 | emerald-600 | emerald-950 | emerald-400 |
+| purple    | purple-50  | purple-600  | purple-950  | purple-400  |
+| orange    | orange-50  | orange-600  | orange-950  | orange-400  |
+| pink      | pink-50    | pink-600    | pink-950    | pink-400    |
+| amber     | amber-50   | amber-600   | amber-950   | amber-400   |
+| teal      | teal-50    | teal-600    | teal-950    | teal-400    |
+| rose      | rose-50    | rose-600    | rose-950    | rose-400    |
+
+#### Task Icons
+
+Uses Lucide React icons. Defined in `constants.ts` as `TASK_ICONS`:
+
+| Key            | Icon          | Suggested Use  |
+| -------------- | ------------- | -------------- |
+| smile          | Smile         | Brush Teeth    |
+| bed            | Bed           | Make Bed       |
+| utensils       | Utensils      | Eat/Table      |
+| book-open      | BookOpen      | Reading        |
+| shirt          | Shirt         | Clothes/PJs    |
+| music          | Music         | Practice Music |
+| paw-print      | PawPrint      | Pet Care       |
+| graduation-cap | GraduationCap | Homework       |
+| shower-head    | ShowerHead    | Shower/Bath    |
+| backpack       | Backpack      | Pack Bag       |
+| dumbbell       | Dumbbell      | Exercise       |
+| sparkles       | Sparkles      | Clean Room     |
+
+> **Note:** Legacy Material Symbols names are automatically mapped to Lucide keys via `getTaskIconByKey()` function.
 
 #### Grid Footer
 
@@ -383,42 +406,81 @@ interface MessageCardProps {
 
 ```
 src/components/reward-chart/
-├── reward-chart-page.tsx         # Main page component
+├── reward-chart-page.tsx           # Main page component
+├── empty-chart-state.tsx           # State when no tasks exist
+├── select-member-state.tsx         # State when selecting a child
 ├── contexts/
-│   └── reward-chart-context.tsx  # Chart state management
+│   └── reward-chart-context.tsx    # Chart state + mutation hooks
 ├── chart-header/
-│   ├── chart-header.tsx          # Title + greeting
-│   └── goal-progress-ring.tsx    # Circular progress indicator
+│   ├── index.ts                    # Re-exports
+│   ├── chart-header.tsx            # Title + greeting
+│   └── goal-progress-ring.tsx      # Circular progress indicator
 ├── weekly-grid/
-│   ├── weekly-grid.tsx           # Main grid component
-│   ├── day-header.tsx            # Column header
-│   ├── task-row.tsx              # Row with task + cells
-│   ├── task-cell.tsx             # Individual cell
-│   └── grid-footer.tsx           # Info + today's stats
+│   ├── index.ts                    # Re-exports
+│   ├── weekly-grid.tsx             # Main grid component
+│   ├── day-header.tsx              # Column header
+│   ├── task-row.tsx                # Row with task + cells
+│   ├── task-cell.tsx               # Individual cell
+│   ├── grid-footer.tsx             # Info + today's stats
+│   └── add-task-row.tsx            # "Add task" button row
 ├── bottom-cards/
-│   ├── next-reward-card.tsx      # Goal preview card
-│   └── message-card.tsx          # Parent message card
-├── hooks/
-│   ├── use-reward-chart.ts       # Chart data fetching
-│   └── use-task-completion.ts    # Completion mutations
-├── interfaces.ts                  # TypeScript interfaces
-├── types.ts                       # Type definitions
-├── constants.ts                   # Colors, icons, etc.
-└── animations.ts                  # Framer Motion variants
+│   ├── index.ts                    # Re-exports
+│   ├── next-reward-card.tsx        # Goal preview card
+│   └── message-card.tsx            # Parent message card
+├── dialogs/
+│   ├── index.ts                    # Re-exports
+│   ├── task-dialog.tsx             # Create/edit task dialog
+│   ├── goal-dialog.tsx             # Create/edit goal dialog
+│   └── message-dialog.tsx          # Send message dialog
+├── interfaces.ts                    # TypeScript interfaces
+├── constants.ts                     # Colors, icons, default tasks
+└── index.ts                         # Main export barrel
 ```
+
+### Hooks (in `src/hooks/use-reward-chart.ts`)
+
+React Query hooks for data fetching and mutations:
+
+- `useRewardChartWeek()` - Fetch weekly grid data
+- `useCompleteTask()` - Complete task mutation
+- `useUndoTaskCompletion()` - Undo completion mutation
+- `useCreateTask()` - Create new task
+- `useUpdateTask()` - Update existing task
+- `useDeleteTask()` - Soft delete task
+- `useReorderTasks()` - Reorder tasks (drag-drop)
+- `useCreateGoal()` - Create new goal
+- `useUpdateGoal()` - Update existing goal
+- `useSendChartMessage()` - Send encouragement message
 
 ### State Management
 
 ```typescript
-// Context for chart state
+// Context for chart state (from reward-chart-context.tsx)
 interface RewardChartContextValue {
-  chart: IRewardChart | null;
   weekData: WeeklyChartData | null;
   isLoading: boolean;
   error: Error | null;
-  completeTask: (taskId: string) => Promise<void>;
-  undoCompletion: (taskId: string) => Promise<void>;
-  refetch: () => void;
+  familyId: string;
+  chartId: string;
+  isManager: boolean;
+  allChildren?: ChildChartInfo[];
+
+  // Completion mutations
+  completeTask: (taskId: string) => Promise<CompleteTaskResponse | null>;
+  undoCompletion: (taskId: string) => Promise<UndoCompletionResponse | null>;
+
+  // Task mutations (manager only)
+  createTask: (input: CreateTaskInput) => Promise<void>;
+  updateTask: (taskId: string, input: UpdateTaskInput) => Promise<void>;
+  deleteTask: (taskId: string) => Promise<void>;
+  reorderTasks: (taskIds: string[]) => Promise<void>;
+
+  // Goal mutations (manager only)
+  createGoal: (input: CreateGoalInput) => Promise<void>;
+  updateGoal: (goalId: string, input: UpdateGoalInput) => Promise<void>;
+
+  // Message mutations (manager only)
+  sendMessage: (content: string) => Promise<void>;
 }
 ```
 

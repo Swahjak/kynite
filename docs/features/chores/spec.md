@@ -29,6 +29,8 @@ Visual mockups available in `docs/design/chores/`:
 
 - Display outstanding chores for all family members
 - Single-tap task completion
-- Daily progress tracking and streaks
+- Daily progress tracking
 - Urgent/overdue task highlighting
-- Gamification feedback (XP rewards)
+- Star rewards on completion (integrated with [Reward Store](../reward-store/spec.md))
+- Undo completion (reverses star transaction)
+- Flexible recurrence patterns (once, daily, weekly, weekdays, weekends, monthly)

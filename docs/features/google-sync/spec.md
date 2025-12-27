@@ -40,29 +40,53 @@ Each Google account may have multiple calendars:
 
 Users select which calendars to sync per account.
 
+### Calendar Privacy
+
+Each calendar can be marked as private:
+
+- `isPrivate: true` - Event details hidden in family calendar view
+- Private events show as "Busy" blocks
+- Full details visible only to calendar owner
+- Privacy setting stored per-calendar in `google_calendars.is_private`
+
 ### Sync Strategy
 
-| Direction        | Behavior                                   |
-| ---------------- | ------------------------------------------ |
-| Google → Planner | Pull events every 5 minutes (configurable) |
-| Planner → Google | Push on local change (optimistic)          |
+| Direction        | Behavior                                               |
+| ---------------- | ------------------------------------------------------ |
+| Google → Planner | Push notifications (real-time) + polling fallback (5m) |
+| Planner → Google | Push on local change (optimistic) - future enhancement |
 
 ### Initial Sync
 
 When a calendar is first linked:
 
 - Pull events from 3 months ago to 1 year ahead
-- Show progress indicator during bulk import
-- Subsequent syncs use incremental `syncToken`
+- Paginated import (250 events/page, max 2 pages per cron run)
+- Resume from `paginationToken` on subsequent runs if interrupted
+- Store `syncCursor` token on completion for incremental updates
 
 ### Sync Architecture
 
-Sync runs as a **server-side background job**:
+Sync uses a **hybrid push + pull architecture**:
 
-- Cron job triggers every 5 minutes
-- Processes calendars with `last_synced_at` older than interval
-- Uses job queue for rate limit management
-- Client receives updates via WebSocket push
+**Push Notifications (Primary):**
+
+- Webhook receives Google notifications at `/api/webhooks/google-calendar`
+- Triggers immediate incremental sync when events change
+- Channel stored in `google_calendar_channels` table
+- Channels auto-renewed hourly before expiration (~7 day TTL)
+
+**Polling Fallback (Secondary):**
+
+- Cron job runs every 5-15 minutes via `/api/cron/sync-calendars`
+- Catches any missed push notifications
+- Resumes incomplete syncs (large calendars)
+- Processes calendars with `lastSyncedAt` older than 5 minutes
+
+**Channel Management:**
+
+- `/api/cron/setup-channels` - Daily setup for calendars without channels
+- `/api/cron/renew-channels` - Hourly renewal for expiring channels
 
 ### Conflict Resolution
 
@@ -78,14 +102,38 @@ Sync runs as a **server-side background job**:
 ## Sync Flow
 
 ```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│   Google    │────▶│   Planner   │────▶│   Client    │
-│  Calendar   │◀────│   Backend   │◀────│   (Hub)     │
-└─────────────┘     └─────────────┘     └─────────────┘
-     │                    │                    │
-     │   Pull (5min)      │   Poll (2-5s)      │
-     │   Push (instant)   │   Optimistic UI    │
+┌─────────────────┐     ┌────────────────────────┐     ┌─────────────┐
+│     Google      │     │    Planner Backend     │     │   Client    │
+│    Calendar     │     │                        │     │   (Hub)     │
+└────────┬────────┘     └───────────┬────────────┘     └──────┬──────┘
+         │                          │                         │
+         │  POST /webhooks/google   │                         │
+         │  (push notification)     │                         │
+         │─────────────────────────▶│                         │
+         │                          │  Incremental sync       │
+         │                          │  (background)           │
+         │                          │─────────────────────────│
+         │                          │                         │
+         │  GET /events?syncToken   │                         │
+         │◀─────────────────────────│                         │
+         │                          │                         │
+         │  Changed events          │                         │
+         │─────────────────────────▶│  Update DB + notify     │
+         │                          │─────────────────────────▶
+         │                          │                         │
+   ┌─────┴─────┐              ┌─────┴─────┐                   │
+   │  Polling  │              │   Cron    │                   │
+   │  Fallback │              │  /sync    │                   │
+   └───────────┘              └───────────┘                   │
+         │  Every 5min (if push missed)                       │
+         │◀────────────────────────│                          │
 ```
+
+**Key Points:**
+
+- Push notifications provide near real-time updates
+- Cron polling ensures no events are missed
+- Status events (focus time, out of office) are filtered out
 
 ### Recurring Events (Post-MVP)
 

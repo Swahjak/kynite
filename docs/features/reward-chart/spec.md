@@ -39,15 +39,30 @@ Visual mockups available in `docs/design/reward-chart/`:
 
 ## User Personas
 
-| Persona    | Access                | Actions                                   |
-| ---------- | --------------------- | ----------------------------------------- |
-| **Child**  | Own chart only        | Mark tasks complete, view progress        |
-| **Parent** | All children's charts | Configure tasks, set goals, send messages |
+| Persona    | Role        | Access                | Actions                                        |
+| ---------- | ----------- | --------------------- | ---------------------------------------------- |
+| **Child**  | participant | Own chart only        | Mark tasks complete, view progress             |
+| **Parent** | manager     | All children's charts | Configure tasks, set goals, send messages      |
+| **Device** | device      | Wall display          | View any selected child's chart, mark complete |
 
 ## Relationship to Other Features
 
-| Feature          | Relationship                                                           |
-| ---------------- | ---------------------------------------------------------------------- |
-| **Chores**       | Reward Chart tasks are separate from Chores (simpler, routine-focused) |
-| **Reward Store** | Stars earned here can be spent in the Reward Store                     |
-| **Dashboard**    | Dashboard shows aggregated star counts from this feature               |
+| Feature               | Relationship                                                           |
+| --------------------- | ---------------------------------------------------------------------- |
+| **Chores**            | Reward Chart tasks are separate from Chores (simpler, routine-focused) |
+| **Star Transactions** | Stars earned here are recorded as type `reward_chart`                  |
+| **Reward Store**      | Stars earned here can be spent in the Reward Store                     |
+| **Dashboard**         | Dashboard shows aggregated star counts from this feature               |
+| **Timers**            | Timers also award stars (type `timer`) to the same balance             |
+
+## Implementation Files
+
+| Category   | Location                                                     |
+| ---------- | ------------------------------------------------------------ |
+| Schema     | `src/server/schema.ts` (rewardCharts, rewardChartTasks, etc) |
+| Service    | `src/server/services/reward-chart-service.ts`                |
+| API Routes | `src/app/api/v1/families/[familyId]/reward-charts/`          |
+| Components | `src/components/reward-chart/`                               |
+| Hooks      | `src/hooks/use-reward-chart.ts`                              |
+| Types      | `src/components/reward-chart/interfaces.ts`                  |
+| Validation | `src/lib/validations/reward-chart.ts`                        |

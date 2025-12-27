@@ -12,51 +12,47 @@ export const events = pgTable("events", {
   familyId: text("family_id")
     .notNull()
     .references(() => families.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  description: text("description"),
+  location: text("location"),
+  startTime: timestamp("start_time", { mode: "date" }).notNull(),
+  endTime: timestamp("end_time", { mode: "date" }).notNull(),
+  allDay: boolean("all_day").notNull().default(false),
+  eventType: text("event_type"), // 'default' | 'birthday' | 'fromGmail' | null for manual events
+  color: text("color"),
+  // Google Sync Metadata
   googleCalendarId: text("google_calendar_id").references(
     () => googleCalendars.id,
     { onDelete: "set null" }
   ),
   googleEventId: text("google_event_id"),
-
-  // Event data
-  title: text("title").notNull(),
-  description: text("description"),
-  location: text("location"),
-  startTime: timestamp("start_time").notNull(),
-  endTime: timestamp("end_time").notNull(),
-  isAllDay: boolean("is_all_day").notNull().default(false),
-
-  // Categorization
-  color: text("color"), // Category color override
-
-  // Sync metadata
-  syncStatus: text("sync_status").notNull().default("synced"),
-  localUpdatedAt: timestamp("local_updated_at").notNull().defaultNow(),
-  remoteUpdatedAt: timestamp("remote_updated_at"),
-
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  syncStatus: text("sync_status").default("synced"), // 'synced' | 'pending' | 'conflict' | 'error'
+  localUpdatedAt: timestamp("local_updated_at", { mode: "date" }),
+  remoteUpdatedAt: timestamp("remote_updated_at", { mode: "date" }),
+  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
 });
 ```
 
-| Column               | Type      | Description                                                  |
-| -------------------- | --------- | ------------------------------------------------------------ |
-| `id`                 | text      | Primary key (CUID or UUID)                                   |
-| `family_id`          | text      | FK to `families.id`                                          |
-| `google_calendar_id` | text      | FK to `google_calendars.id` (nullable for local-only events) |
-| `google_event_id`    | text      | Google's event ID for 2-way sync                             |
-| `title`              | text      | Event title                                                  |
-| `description`        | text      | Event description (optional)                                 |
-| `location`           | text      | Event location (optional)                                    |
-| `start_time`         | timestamp | Event start time                                             |
-| `end_time`           | timestamp | Event end time                                               |
-| `is_all_day`         | boolean   | Whether event spans full day(s)                              |
-| `color`              | text      | Category color override (see Event Colors)                   |
-| `sync_status`        | text      | 'synced' \| 'pending' \| 'conflict' \| 'error'               |
-| `local_updated_at`   | timestamp | When event was modified locally                              |
-| `remote_updated_at`  | timestamp | Google's last modified time                                  |
-| `created_at`         | timestamp | When record was created                                      |
-| `updated_at`         | timestamp | Last modification time                                       |
+| Column               | Type      | Description                                                      |
+| -------------------- | --------- | ---------------------------------------------------------------- |
+| `id`                 | text      | Primary key (CUID)                                               |
+| `family_id`          | text      | FK to `families.id`                                              |
+| `title`              | text      | Event title                                                      |
+| `description`        | text      | Event description (optional)                                     |
+| `location`           | text      | Event location (optional)                                        |
+| `start_time`         | timestamp | Event start time                                                 |
+| `end_time`           | timestamp | Event end time                                                   |
+| `all_day`            | boolean   | Whether event spans full day(s)                                  |
+| `event_type`         | text      | 'default' \| 'birthday' \| 'fromGmail' \| null for manual events |
+| `color`              | text      | Category color override (see Event Colors)                       |
+| `google_calendar_id` | text      | FK to `google_calendars.id` (nullable for local-only events)     |
+| `google_event_id`    | text      | Google's event ID for 2-way sync                                 |
+| `sync_status`        | text      | 'synced' \| 'pending' \| 'conflict' \| 'error'                   |
+| `local_updated_at`   | timestamp | When event was modified locally                                  |
+| `remote_updated_at`  | timestamp | Google's last modified time                                      |
+| `created_at`         | timestamp | When record was created                                          |
+| `updated_at`         | timestamp | Last modification time                                           |
 
 ### event_participants
 
@@ -89,7 +85,15 @@ export const eventParticipants = pgTable("event_participants", {
 ### TEventColor
 
 ```typescript
-type TEventColor = "blue" | "green" | "red" | "yellow" | "purple" | "orange";
+type TEventColor =
+  | "blue"
+  | "green"
+  | "red"
+  | "yellow"
+  | "purple"
+  | "orange"
+  | "pink"
+  | "teal";
 ```
 
 ### Event Colors
@@ -104,6 +108,8 @@ Events are color-coded by category:
 | Green  | Family events, meals, gatherings   |
 | Red    | Date nights, special occasions     |
 | Yellow | Celebrations, birthdays, parties   |
+| Pink   | Personal appointments              |
+| Teal   | Work, meetings                     |
 
 ### Google Color Mapping
 
@@ -280,32 +286,93 @@ ORDER BY start_time;
 
 ## TypeScript Interfaces (UI Layer)
 
-For frontend components, use these interfaces:
+For frontend components, use these interfaces from `src/components/calendar/interfaces.ts`:
 
 ```typescript
+interface IUser {
+  id: string;
+  name: string;
+  avatarFallback: string;
+  avatarColor: string | null;
+  avatarUrl?: string;
+  avatarSvg?: string | null;
+}
+
 interface IEvent {
   id: string;
+  startDate: string; // ISO 8601 format
+  endDate: string; // ISO 8601 format
+  title: string;
+  color: TEventColor;
+  description: string;
+  users: IUser[]; // Participants mapped to IUser format
+  isHidden?: boolean; // True when from private calendar and viewer is not owner
+  eventType?: string | null; // 'default' | 'birthday' | 'fromGmail' | null
+}
+```
+
+The API service layer uses `EventWithParticipants` interface from `src/server/services/event-service.ts`:
+
+```typescript
+interface EventWithParticipants {
+  id: string;
+  familyId: string;
   title: string;
   description: string | null;
   location: string | null;
-  startDate: string; // ISO 8601 format
-  endDate: string; // ISO 8601 format
-  isAllDay: boolean;
-  color: TEventColor;
-  participants: IEventParticipant[];
-  calendarName?: string; // From google_calendars.name
-  calendarColor?: string; // From google_calendars.color
-  syncStatus: SyncStatus;
-}
-
-interface IEventParticipant {
-  id: string;
-  familyMemberId: string;
-  displayName: string;
-  avatarColor: string;
-  isOwner: boolean;
+  startTime: Date;
+  endTime: Date;
+  allDay: boolean;
+  color: string | null;
+  googleCalendarId: string | null;
+  googleEventId: string | null;
+  syncStatus: string | null;
+  eventType: string | null;
+  calendarName: string | null;
+  calendarColor: string | null;
+  accessRole: string | null; // 'owner' | 'writer' | 'reader'
+  isHidden: boolean; // True when event is from private calendar and viewer is not owner
+  participants: {
+    id: string;
+    familyMemberId: string;
+    displayName: string | null;
+    avatarColor: string | null;
+    avatarSvg: string | null;
+    userName: string;
+    userImage: string | null;
+    isOwner: boolean;
+  }[];
 }
 ```
+
+## API Endpoints
+
+All event endpoints are under `/api/v1/families/:familyId/events`:
+
+| Method | Path               | Description            | Access  |
+| ------ | ------------------ | ---------------------- | ------- |
+| GET    | `/events`          | List events (filtered) | Member  |
+| POST   | `/events`          | Create new event       | Manager |
+| GET    | `/events/:eventId` | Get event by ID        | Member  |
+| PATCH  | `/events/:eventId` | Update event           | Manager |
+| DELETE | `/events/:eventId` | Delete event           | Manager |
+
+### Query Parameters (GET /events)
+
+| Parameter        | Type     | Description                           |
+| ---------------- | -------- | ------------------------------------- |
+| `startDate`      | ISO date | Filter events starting from this date |
+| `endDate`        | ISO date | Filter events ending before this date |
+| `participantIds` | string[] | Filter by family member IDs (array)   |
+| `colors`         | string[] | Filter by event colors (array)        |
+
+### Privacy Filtering
+
+Events from private calendars (`google_calendars.isPrivate = true`) are automatically redacted for non-owners:
+
+- Title becomes "Hidden"
+- Description and location become null
+- `isHidden` flag is set to true
 
 ## Data Sources
 
@@ -319,15 +386,19 @@ interface IEventParticipant {
 
 The `CalendarProvider` context manages:
 
-- Current view (today/day/week/month)
+- Current view (day/week/month/year/agenda)
 - Selected date
 - Filtered events (by TanStack Query)
 - User filter selection (participant filter)
 - Color filter selection
+- Badge variant (dot or colored)
+- Time format (24-hour or 12-hour)
+- Agenda mode grouping (by date or color)
 - Settings (persisted to localStorage)
 
 The `DndProvider` context manages:
 
-- Drag state
-- Drop target
+- Drag state (draggedEvent, isDragging)
+- Drop handlers
 - Pending confirmation dialog
+- Optional confirmation toggle

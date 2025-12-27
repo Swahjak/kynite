@@ -2,28 +2,28 @@
 
 ## Interaction Modes
 
-| Mode             | Device         | User           | Purpose                              |
-| ---------------- | -------------- | -------------- | ------------------------------------ |
-| **Wall Display** | Mounted tablet | Kids/Family    | View schedule, see timers, see stars |
-| **Management**   | Mobile/Desktop | Parents/Admins | Manage timers, configure actions     |
+| Mode             | Device         | User           | Purpose                                      |
+| ---------------- | -------------- | -------------- | -------------------------------------------- |
+| **Wall Display** | Mounted tablet | Kids/Family    | View schedule, see timers, complete chores   |
+| **Management**   | Mobile/Desktop | Parents/Admins | Full timer controls, configure quick actions |
 
-### Wall Display Mode
+### Wall Display Mode (Device Users)
 
 **Allowed Actions:**
 
-- View clock and greeting
-- View today's schedule
-- View active timers (display only)
+- View greeting and today's events
+- View active timers (display only for running)
+- View and complete chores
 - View weekly stars
-- Tap quick actions to start predefined timers
+- Start quick action timers
+- Claim timer rewards during cooldown
 
 **Hidden/Disabled:**
 
-- Timer pause/extend buttons (display only)
+- Timer pause/extend buttons (managers only)
 - Quick action configuration
-- Sidebar navigation to Settings
 
-**Touch Targets:** 48px minimum
+**Touch Targets:** 44px minimum
 
 ### Management Mode
 
@@ -38,362 +38,315 @@
 
 ## Layout Structure
 
-### Desktop (xl: 1280px+)
+### Desktop/Tablet (md: 768px+)
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│ ┌──────────┐ ┌─────────────────────────────────────────────────┐│
-│ │          │ │ Header (greeting + clock + date/weather)        ││
-│ │ Sidebar  │ ├─────────────────────────────────────────────────┤│
-│ │          │ │ ┌───────────────────────┐ ┌───────────────────┐ ││
-│ │ - Logo   │ │ │                       │ │ Active Timers     │ ││
-│ │ - Nav    │ │ │ Today's Flow          │ ├───────────────────┤ ││
-│ │ - Help   │ │ │ (2/3 width)           │ │ Weekly Stars      │ ││
-│ │          │ │ │                       │ ├───────────────────┤ ││
-│ │          │ │ │                       │ │ Quick Actions     │ ││
-│ └──────────┘ │ └───────────────────────┘ └───────────────────┘ ││
-│              └─────────────────────────────────────────────────┘│
+│ Greeting (time-based message)                                   │
+├─────────────────────────────────────────────────────────────────┤
+│ ┌─────────────────────────────────────┐ ┌─────────────────────┐ │
+│ │                                     │ │ Active Timers       │ │
+│ │ Today's Flow                        │ │                     │ │
+│ │ (3/5 width)                         │ ├─────────────────────┤ │
+│ │                                     │ │ Weekly Stars        │ │
+│ ├─────────────────────────────────────┤ │                     │ │
+│ │ Today's Chores                      │ │                     │ │
+│ │                                     │ │                     │ │
+│ └─────────────────────────────────────┘ └─────────────────────┘ │
+│                                                    [+ FAB]      │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-- **Sidebar**: Fixed 288px (w-72), hidden below xl breakpoint
-- **Main content**: 3-column grid (2:1 ratio)
-- **Max width**: 1600px, centered
+- **Main content**: 5-column grid (3:2 ratio)
+- **Max width**: 1280px (max-w-7xl), centered
+- **Padding**: p-4 md:p-6 lg:p-8
+- **Gap**: gap-6 lg:gap-8
 
-### Tablet/Mobile (< xl: 1280px)
+### Mobile (< md: 768px)
 
 ```
 ┌─────────────────────────────────────────┐
-│ Header (collapsible menu + date/weather)│
-├─────────────────────────────────────────┤
-│ Greeting + Clock                        │
+│ Greeting                                │
 ├─────────────────────────────────────────┤
 │ Today's Flow                            │
-│ (full width, vertical stack)            │
+│ (full width)                            │
+├─────────────────────────────────────────┤
+│ Today's Chores                          │
 ├─────────────────────────────────────────┤
 │ Active Timers                           │
 ├─────────────────────────────────────────┤
 │ Weekly Stars                            │
-├─────────────────────────────────────────┤
-│ Quick Actions (2x2 grid)                │
+│                              [+ FAB]    │
 └─────────────────────────────────────────┘
 ```
 
 - Single column layout
-- Collapsible hamburger menu replaces sidebar
 - Sections stack vertically
-
-### Breakpoint Summary
-
-| Breakpoint   | Sidebar | Grid        | Clock Size | Card Padding |
-| ------------ | ------- | ----------- | ---------- | ------------ |
-| < sm (640px) | Hidden  | 1 col       | 5rem       | 16px         |
-| sm - lg      | Hidden  | 1 col       | 6rem       | 20px         |
-| lg - xl      | Hidden  | 1 col       | 6rem       | 24px         |
-| xl+          | Visible | 3 col (2:1) | 7rem       | 24px         |
+- FAB fixed bottom-right
 
 ---
 
 ## Components
 
-### 1. Header
+### 1. Greeting
 
-#### Desktop Header
+Simple time-based greeting text (no clock display).
 
-Located within the main content area (not in sidebar).
-
-| Element             | Specification                       |
-| ------------------- | ----------------------------------- |
-| Date/Weather widget | Top-right, card style               |
-| Date format         | `Day, Mon DD` (e.g., "Mon, Oct 24") |
-| Weather             | Temperature + condition + icon      |
-| Background          | Surface color with subtle border    |
-| Border radius       | xl (12px)                           |
-
-#### Mobile Header
-
-| Element      | Specification                               |
-| ------------ | ------------------------------------------- |
-| Logo         | Primary icon (home) + "Family Planner" text |
-| Subtitle     | "Tap for Menu" with expand indicator        |
-| Menu         | Dropdown with navigation items              |
-| Date/Weather | Top-right, compact                          |
-
-### 2. Greeting & Clock
-
-The focal point of the dashboard, designed for wall-display visibility.
-
-| Element        | Specification                        |
-| -------------- | ------------------------------------ |
-| Greeting       | Time-based, personalized             |
-| Font           | Text Secondary color, xl-2xl size    |
-| Clock          | Display XL (5rem-7rem), Black weight |
-| Font family    | Lexend                               |
-| Number style   | `tabular-nums` for consistent width  |
-| Letter spacing | `tracking-tight`                     |
-
-#### Greeting Logic
+**File:** `src/components/dashboard/greeting/greeting.tsx`
 
 ```typescript
-function getGreeting(hour: number): string {
-  if (hour >= 5 && hour < 12) return "Good Morning";
-  if (hour >= 12 && hour < 17) return "Good Afternoon";
-  if (hour >= 17 && hour < 21) return "Good Evening";
-  return "Good Night";
+type TimeOfDay = "morning" | "afternoon" | "evening";
+
+function useGreeting(currentTime: Date): TimeOfDay {
+  const hour = currentTime.getHours();
+  if (hour < 12) return "morning";
+  if (hour < 18) return "afternoon";
+  return "evening";
 }
 ```
 
-Display format: `"{Greeting}, {FamilyName}"`
+| Element | Specification                              |
+| ------- | ------------------------------------------ |
+| Text    | "Good Morning/Afternoon/Evening"           |
+| Style   | text-muted-foreground text-base md:text-lg |
 
-### 3. Today's Flow
+### 2. Today's Flow
 
-A timeline view of the day's events, emphasizing temporal context.
+Timeline view of today's calendar events with temporal grouping.
+
+**File:** `src/components/dashboard/todays-flow/todays-flow.tsx`
 
 #### Section Header
 
-| Element      | Specification                       |
-| ------------ | ----------------------------------- |
-| Icon         | `schedule` in Primary color         |
-| Title        | "Today's Flow", H2 Bold             |
-| Badge        | "{n} Events Remaining", pill style  |
-| Badge colors | Primary/10 background, Primary text |
+| Element | Specification                                     |
+| ------- | ------------------------------------------------- |
+| Icon    | `CalendarClock` from lucide-react                 |
+| Title   | "Today's Flow", text-lg font-semibold             |
+| Badge   | "{n} Events Remaining", Badge variant="secondary" |
 
 #### Event Card States
 
 **NOW (Current Event)**
 
-| Property      | Value                 |
-| ------------- | --------------------- | ------------- |
-| Background    | Surface (white)       |
-| Border-left   | 4px solid Primary     |
-| Border radius | 2xl (16px)            |
-| Shadow        | md                    |
-| Layout        | Two-column: time info | event details |
+| Property    | Value                        |
+| ----------- | ---------------------------- |
+| Background  | bg-primary/5                 |
+| Border-left | border-l-4 border-l-primary  |
+| Time        | text-2xl font-bold font-mono |
+| Title       | text-xl font-semibold        |
 
-| Element       | Specification                     |
-| ------------- | --------------------------------- |
-| Status badge  | "NOW" pill, Primary bg, dark text |
-| Time          | 2xl-3xl Bold                      |
-| Duration      | "Until {end time}", Muted text    |
-| Event title   | 2xl Bold                          |
-| Location      | Icon + text, Secondary color      |
-| Category icon | 64px circle, category tint bg     |
+**UPCOMING (Next/Later Events)**
 
-**NEXT (Upcoming Event)**
+| Property   | Value                   |
+| ---------- | ----------------------- |
+| Background | bg-muted/50             |
+| Time       | text-lg font-mono       |
+| Title      | text-base font-semibold |
 
-| Property      | Value                           |
-| ------------- | ------------------------------- |
-| Background    | Surface with 60% opacity        |
-| Border        | Transparent, hover shows border |
-| Border radius | xl (12px)                       |
-| Opacity       | 70% on time section             |
+**PAST (Completed Events)**
 
-| Element       | Specification            |
-| ------------- | ------------------------ |
-| Status label  | "NEXT", uppercase, Muted |
-| Time          | xl Bold                  |
-| Event title   | xl Semibold              |
-| Description   | sm, Secondary color      |
-| Category icon | 48px circle              |
+| Property | Value      |
+| -------- | ---------- |
+| Opacity  | opacity-60 |
 
-**LATER (Future Events)**
+### 3. Today's Chores
 
-| Property        | Value                    |
-| --------------- | ------------------------ |
-| Background      | Surface with 40% opacity |
-| Overall opacity | 80%                      |
+Pending chores for today, grouped by urgency.
 
-Same structure as NEXT but with "LATER" label.
+**File:** `src/components/dashboard/todays-chores/todays-chores.tsx`
 
-#### Event Category Colors
+#### Section Header
 
-| Category          | Icon                    | Background | Icon Color |
-| ----------------- | ----------------------- | ---------- | ---------- |
-| Sports/Activities | `sports_soccer`         | green-50   | #0d9e61    |
-| Meals/Kitchen     | `restaurant`, `skillet` | orange-50  | #FFB84D    |
-| Reading/Quiet     | `auto_stories`          | purple-50  | #9C27B0    |
-| Appointments      | `event`                 | blue-50    | blue-600   |
-| Chores            | `cleaning_services`     | pink-50    | pink-500   |
+| Element | Specification                                     |
+| ------- | ------------------------------------------------- |
+| Icon    | `ClipboardList` from lucide-react                 |
+| Title   | "Today's Chores", text-lg font-semibold           |
+| Badge   | "{n} chores remaining", Badge variant="secondary" |
 
-#### Interaction
+#### Urgency Groups
 
-- **Tap/Click on event**: Navigate to calendar view, focused on event's time slot
-- **Hover** (desktop): Subtle border appears, shadow increases
+| Group    | Label Color           | Chores Included         |
+| -------- | --------------------- | ----------------------- |
+| Urgent   | text-destructive      | overdue + isUrgent      |
+| Due Soon | text-muted-foreground | due within 4 hours      |
+| Today    | text-muted-foreground | all other pending today |
+
+#### Chore Card
+
+Uses shared `ChoreCard` component from `src/components/chores/components/chore-card.tsx`:
+
+- Displays assignee avatar, title, star reward
+- Complete button (triggers confetti)
+- Take button (opens member selection dialog)
 
 ### 4. Active Timers
 
-Displays currently running timers (display-only on Wall Display mode, manageable in Management mode).
+Running and paused timers with countdown display and controls.
+
+**File:** `src/components/dashboard/active-timers/active-timers.tsx`
 
 #### Section Header
 
-| Element | Specification            |
-| ------- | ------------------------ |
-| Icon    | `timer` in orange-500    |
-| Title   | "Active Timers", H2 Bold |
+| Element | Specification                     |
+| ------- | --------------------------------- |
+| Icon    | `Timer` from lucide-react         |
+| Title   | uppercase, text-xs, tracking-wide |
 
-#### Timer Card
+#### Timer Card States
 
-| Property      | Value              |
-| ------------- | ------------------ |
-| Background    | Surface            |
-| Border        | 1px Border Default |
-| Border radius | 2xl (16px)         |
-| Shadow        | sm                 |
-| Padding       | 20px               |
+**File:** `src/components/dashboard/active-timers/timer-card.tsx`
 
-| Element        | Specification                            |
-| -------------- | ---------------------------------------- |
-| Title          | lg Bold (e.g., "Screen Time")            |
-| Subtitle       | sm Secondary (e.g., "Leo's Tablet")      |
-| Time remaining | 5xl Black, `tabular-nums`                |
-| Unit label     | "min left", Muted                        |
-| Progress bar   | Bottom of card, 8px height, Primary fill |
-| Category icon  | Top-right, 40px, tinted background       |
+| UI State          | Description                        | Actions Available    |
+| ----------------- | ---------------------------------- | -------------------- |
+| running           | Timer counting down                | +extend, Pause, Done |
+| paused            | Timer frozen                       | (none currently)     |
+| in_cooldown       | Timer expired, reward claimable    | Claim (+stars)       |
+| cooldown_expired  | Cooldown window missed             | Dismiss              |
+| needs_acknowledge | Timer done, no cooldown configured | Done                 |
 
-#### Timer Controls
+#### Timer Card Layout
 
-| Button  | Style               | Wall Display | Management |
-| ------- | ------------------- | ------------ | ---------- |
-| "+ 15m" | Secondary/outline   | Visual only  | Functional |
-| "Pause" | Destructive outline | Visual only  | Functional |
+| Element       | Specification                               |
+| ------------- | ------------------------------------------- |
+| Avatar        | Assigned member's avatar (if assigned)      |
+| Title         | text-sm font-semibold                       |
+| Subtitle      | text-xs text-muted-foreground               |
+| Time display  | text-3xl md:text-4xl font-bold tabular-nums |
+| Progress bar  | h-1.5, primary fill                         |
+| Negative time | text-destructive animate-pulse              |
+
+#### Dynamic Extend Times
+
+| Total Duration | Extend Button |
+| -------------- | ------------- |
+| <= 5 min       | +1m           |
+| <= 15 min      | +5m           |
+| <= 30 min      | +10m          |
+| <= 60 min      | +15m          |
+| > 60 min       | +30m          |
 
 ### 5. Weekly Stars
 
-Gamification leaderboard showing children's achievement progress.
+Family member leaderboard sorted by weekly star count.
+
+**File:** `src/components/dashboard/weekly-stars/weekly-stars.tsx`
 
 #### Section Header
 
-| Element | Specification                             |
-| ------- | ----------------------------------------- |
-| Label   | "WEEKLY STARS", overline style            |
-| Style   | xs Bold, uppercase, tracking-wider, Muted |
+| Element | Specification                                   |
+| ------- | ----------------------------------------------- |
+| Title   | "Weekly Stars", uppercase text-xs tracking-wide |
 
-#### Family Member Row
+#### Member Row
 
-| Property         | Value     |
-| ---------------- | --------- |
-| Background       | Surface   |
-| Border radius    | xl (12px) |
-| Padding          | 16px      |
-| Gap between rows | 12px      |
+**File:** `src/components/dashboard/weekly-stars/member-row.tsx`
 
-| Element    | Specification                                               |
-| ---------- | ----------------------------------------------------------- |
-| Avatar     | 40-48px, circular, member color, ring                       |
-| Name       | Base Bold                                                   |
-| Level      | xs Muted (e.g., "Level 4 Explorer")                         |
-| Star count | lg-2xl Bold                                                 |
-| Star icon  | `star` filled, yellow-500                                   |
-| Star badge | Pill with border, yellow-50 bg (leader) or gray-50 (others) |
+| Element    | Specification                           |
+| ---------- | --------------------------------------- |
+| Avatar     | FamilyAvatar component, size="sm"       |
+| Name       | text-sm font-medium                     |
+| Level      | "Level {n} {title}", text-xs text-muted |
+| Star count | text-sm font-semibold tabular-nums      |
+| Star icon  | Star filled, yellow-500                 |
+| Leader bg  | bg-primary/5 for rank 1                 |
 
-#### Level Calculation
+### 6. Quick Actions FAB
 
-```typescript
-function getLevel(starCount: number): number {
-  return Math.floor(starCount / 10);
-}
+Floating action button with popover menu to start timer templates.
 
-// Title varies by level
-const levelTitles = ["Beginner", "Explorer", "Artist", "Champion", "Master"];
-```
+**File:** `src/components/dashboard/quick-actions/quick-actions-fab.tsx`
 
-### 6. Quick Actions
+#### FAB Button
 
-A 2x2 grid of frequently used household actions that trigger predefined timers.
+| Property | Value                       |
+| -------- | --------------------------- |
+| Position | fixed right-6 bottom-6 z-50 |
+| Size     | h-14 w-14 rounded-full      |
+| Icon     | Plus from lucide-react      |
+| Shadow   | shadow-lg                   |
+| Hover    | scale-105                   |
+| Active   | scale-95                    |
 
-#### Grid Layout
+#### Popover Content
 
-| Property      | Value                |
-| ------------- | -------------------- |
-| Columns       | 2                    |
-| Gap           | 12px                 |
-| Button height | 80-96px (responsive) |
+| Element        | Specification                         |
+| -------------- | ------------------------------------- |
+| Layout         | 2x2 grid                              |
+| Action buttons | ActionButton component                |
+| Refresh button | variant="outline" with RefreshCw icon |
 
 #### Action Button
 
-| Property      | Value                                 |
-| ------------- | ------------------------------------- |
-| Background    | Surface (white) or Primary (featured) |
-| Border        | 1px Border Default (non-featured)     |
-| Border radius | xl (12px)                             |
-| Shadow        | sm                                    |
-| Transition    | `all 200ms ease`                      |
-| Active        | `scale(0.95)`                         |
+**File:** `src/components/dashboard/quick-actions/action-button.tsx`
 
-| Element | Specification            |
-| ------- | ------------------------ |
-| Icon    | 28-32px, category color  |
-| Label   | sm Bold                  |
-| Layout  | Vertical stack, centered |
+| Property | Value                           |
+| -------- | ------------------------------- |
+| Height   | h-16                            |
+| Layout   | flex-col gap-1                  |
+| Icon     | h-5 w-5                         |
+| Label    | text-xs font-medium             |
+| Disabled | When not manager and not device |
 
-#### Default Actions
+#### Member Selection Dialog
 
-| Action       | Icon                | Color      | Timer Duration    |
-| ------------ | ------------------- | ---------- | ----------------- |
-| Dinner Mode  | `restaurant`        | Primary bg | Configurable      |
-| Water Plants | `water_drop`        | blue-500   | 5 min             |
-| 15m Tidy     | `cleaning_services` | purple-500 | 15 min            |
-| Log Chore    | `favorite`          | pink-500   | N/A (opens modal) |
+When starting a quick action, a dialog prompts for family member selection:
 
-#### Interaction
+| Element      | Specification                    |
+| ------------ | -------------------------------- |
+| Title        | "Select Family Member"           |
+| Buttons      | Member avatar + name, full width |
+| Click action | Starts timer via API             |
 
-- **Tap/Click**: Starts the predefined timer associated with the action
-- **Hover** (desktop): Background shifts to hover state, icon scales 1.1x
+---
 
-### 7. Sidebar (Desktop Only)
+## DashboardContext
 
-Fixed navigation panel on the left side.
+Central state management for the dashboard.
 
-| Property   | Value                        |
-| ---------- | ---------------------------- |
-| Width      | 288px (w-72)                 |
-| Background | Surface                      |
-| Border     | Right border, Border Default |
-| Visibility | xl breakpoint and above      |
+**File:** `src/components/dashboard/contexts/dashboard-context.tsx`
 
-#### Sidebar Sections
+### Context Interface
 
-**Header**
+```typescript
+interface IDashboardContext {
+  familyId: string;
+  familyName: string;
+  currentTime: Date;
+  todaysEvents: DashboardEvent[];
+  todaysChores: DashboardChore[];
+  choresRemaining: number;
+  activeTimers: Timer[];
+  familyMembers: FamilyMemberStar[];
+  quickActions: QuickAction[];
+  nowEvent: DashboardEvent | null;
+  nextEvent: DashboardEvent | null;
+  laterEvents: DashboardEvent[];
+  eventsRemaining: number;
+  startQuickAction: (actionId: string, memberId: string) => void;
+  pauseTimer: (timerId: string) => void;
+  extendTimer: (timerId: string, seconds: number) => void;
+  confirmTimer: (timerId: string, confirmedById: string) => void;
+  dismissTimer: (timerId: string) => void;
+  acknowledgeTimer: (timerId: string) => void;
+  isLoadingTimers: boolean;
+  completeChore: (choreId: string) => Promise<void>;
+  assignChore: (choreId: string, assignedToId: string) => Promise<void>;
+}
+```
 
-| Element      | Specification                 |
-| ------------ | ----------------------------- |
-| Family photo | 48px circle with Primary ring |
-| Title        | "Family Planner", lg Bold     |
-| Subtitle     | "{FamilyName}", sm Muted      |
+### Real-time Updates
 
-**Navigation**
+Uses `useFamilyChannel` hook for Pusher events:
 
-| Item      | Icon                 | State    |
-| --------- | -------------------- | -------- |
-| Dashboard | `dashboard` (filled) | Active   |
-| Schedule  | `calendar_month`     | Inactive |
-| Chore Log | `checklist`          | Inactive |
-| Settings  | `settings`           | Inactive |
-
-**Active nav item**
-
-| Property      | Value          |
-| ------------- | -------------- |
-| Background    | Primary        |
-| Text          | Dark (#10221a) |
-| Icon          | Filled variant |
-| Border radius | xl (12px)      |
-| Shadow        | sm             |
-
-**Inactive nav item**
-
-| Property   | Value            |
-| ---------- | ---------------- |
-| Background | Transparent      |
-| Text       | Text Secondary   |
-| Hover      | Surface Hover bg |
-
-**Footer**
-
-| Element   | Specification              |
-| --------- | -------------------------- |
-| Help link | `help` icon + "Help" label |
-| Position  | Bottom of sidebar          |
+| Event           | Action                        |
+| --------------- | ----------------------------- |
+| timer:started   | Add timer to list             |
+| timer:updated   | Update timer in list          |
+| timer:cancelled | Remove timer from list        |
+| timer:completed | Remove timer from list        |
+| timer:expired   | Update timer status           |
+| stars:updated   | Invalidate weekly stars query |
+| chore:completed | Invalidate chores query       |
 
 ---
 
@@ -411,16 +364,6 @@ The dashboard fully supports dark mode via the `dark` class on `<html>`.
 | Text Secondary  | #618979 | #8baea0             |
 | Borders         | #dbe6e1 | #2a3831             |
 | Primary         | #13ec92 | #13ec92 (unchanged) |
-
-### Transition
-
-```css
-body {
-  transition:
-    background-color 200ms ease,
-    color 200ms ease;
-}
-```
 
 ---
 
@@ -445,81 +388,56 @@ body {
 | Escape      | Close menus/modals                |
 | Arrow keys  | Navigate within menus             |
 
-### Screen Reader Considerations
-
-- Clock announces on focus: "Current time: {time}"
-- Events include full context: "{title} at {time}, {location}"
-- Timers should announce remaining time
-- Star counts labeled: "{name} has {count} stars"
-- All buttons have descriptive aria-labels
-
 ---
 
-## Animations
-
-### Transitions
-
-| Element       | Property                | Duration | Easing   |
-| ------------- | ----------------------- | -------- | -------- |
-| Buttons       | all                     | 200ms    | ease     |
-| Cards (hover) | box-shadow, transform   | 200ms    | ease     |
-| Icons (hover) | transform               | 200ms    | ease     |
-| Color mode    | background-color, color | 200ms    | ease     |
-| Menu appear   | opacity, transform      | 200ms    | ease-out |
-
-### Interactive States
-
-| State          | Effect                           |
-| -------------- | -------------------------------- |
-| Button hover   | Background shifts to hover color |
-| Button active  | `scale(0.95)`                    |
-| Card hover     | Shadow increases to md           |
-| Icon hover     | `scale(1.1)`                     |
-| Nav item hover | Background to Surface Hover      |
-
-### Timer Animation
-
-- Progress bar width transitions smoothly as time decreases
-- Time display updates every second with no visual transition (instant update)
-
----
-
-## Implementation Notes
-
-### Component Structure
+## Component Structure
 
 ```
 src/components/dashboard/
-├── dashboard-page.tsx        # Main page component
-├── greeting-clock.tsx        # Time + greeting display
+├── dashboard.tsx                    # Main wrapper with DashboardProvider
+├── types.ts                         # TypeScript interfaces
+├── requests.ts                      # Server-side data fetching
+├── hooks.ts                         # useClock, useGreeting hooks
+├── mocks.ts                         # Mock data for testing
+├── contexts/
+│   └── dashboard-context.tsx        # Central state management
+├── greeting/
+│   └── greeting.tsx                 # Time-based greeting text
 ├── todays-flow/
-│   ├── todays-flow.tsx       # Section wrapper
-│   ├── event-card-now.tsx    # Current event card
-│   └── event-card-later.tsx  # Next/Later event card
+│   ├── todays-flow.tsx              # Event timeline section
+│   └── event-card.tsx               # Individual event card
+├── todays-chores/
+│   └── todays-chores.tsx            # Chores section with urgency groups
 ├── active-timers/
-│   ├── active-timers.tsx     # Section wrapper
-│   └── timer-card.tsx        # Individual timer display
+│   ├── active-timers.tsx            # Timer section wrapper
+│   └── timer-card.tsx               # Individual timer with controls
 ├── weekly-stars/
-│   ├── weekly-stars.tsx      # Section wrapper
-│   └── member-row.tsx        # Family member row
+│   ├── weekly-stars.tsx             # Leaderboard section
+│   └── member-row.tsx               # Individual member row
 ├── quick-actions/
-│   ├── quick-actions.tsx     # Grid wrapper
-│   └── action-button.tsx     # Individual action button
-└── sidebar/
-    ├── sidebar.tsx           # Desktop sidebar
-    └── mobile-menu.tsx       # Mobile hamburger menu
+│   ├── quick-actions.tsx            # Grid of action buttons
+│   ├── quick-actions-fab.tsx        # Floating action button
+│   └── action-button.tsx            # Individual action button
+└── __tests__/
+    └── ...                          # Unit tests
 ```
 
-### State Management
+---
 
-- Use existing contexts where applicable (e.g., `CalendarContext` for event data)
-- Local state for UI interactions (menu open, etc.)
-- Timer state synced via database or real-time updates
-- Dashboard settings persisted to localStorage
+## State Management
 
-### Performance Considerations
+- **DashboardProvider**: Wraps entire dashboard, provides context
+- **React Query**: Manages timer state with caching and invalidation
+- **Pusher**: Real-time updates for timers, chores, and stars
+- **useClock hook**: Updates current time every second
+- **useGreeting hook**: Derives time-of-day from current time
+
+---
+
+## Performance Considerations
 
 - Clock updates via `setInterval` (1 second)
-- Memoize event filtering and sorting
-- Lazy load non-critical components
-- Use `will-change` for animated elements
+- Timer countdown managed locally with server sync
+- React Query with `staleTime: Infinity` for timer data
+- Memoized event filtering and categorization
+- SSR for initial data load, client hydration for interactivity

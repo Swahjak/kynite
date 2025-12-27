@@ -20,27 +20,72 @@ export const googleCalendars = pgTable("google_calendars", {
   color: text("color"),
   accessRole: text("access_role").notNull().default("reader"), // 'owner' | 'writer' | 'reader'
   syncEnabled: boolean("sync_enabled").notNull().default(true),
-  lastSyncedAt: timestamp("last_synced_at"),
-  syncCursor: text("sync_cursor"), // For incremental sync
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  isPrivate: boolean("is_private").notNull().default(false),
+  lastSyncedAt: timestamp("last_synced_at", { mode: "date" }),
+  syncCursor: text("sync_cursor"), // Google's sync token for incremental updates
+  paginationToken: text("pagination_token"), // Stored pageToken for resuming interrupted syncs
+  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
 });
 ```
 
-| Column               | Type      | Description                                                 |
-| -------------------- | --------- | ----------------------------------------------------------- |
-| `id`                 | text      | Primary key (CUID or UUID)                                  |
-| `family_id`          | text      | FK to `families.id`                                         |
-| `account_id`         | text      | FK to `accounts.id` (Better-Auth OAuth)                     |
-| `google_calendar_id` | text      | Google Calendar ID (e.g., "primary", email, or calendar ID) |
-| `name`               | text      | Display name from Google                                    |
-| `color`              | text      | Google's calendar color hex code                            |
-| `access_role`        | text      | Calendar permission level: 'owner', 'writer', or 'reader'   |
-| `sync_enabled`       | boolean   | Whether to sync this calendar                               |
-| `last_synced_at`     | timestamp | Last successful sync time                                   |
-| `sync_cursor`        | text      | Google's sync token for incremental updates                 |
-| `created_at`         | timestamp | When calendar was linked                                    |
-| `updated_at`         | timestamp | Last modification time                                      |
+| Column               | Type      | Description                                                    |
+| -------------------- | --------- | -------------------------------------------------------------- |
+| `id`                 | text      | Primary key (CUID)                                             |
+| `family_id`          | text      | FK to `families.id`                                            |
+| `account_id`         | text      | FK to `accounts.id` (Better-Auth OAuth)                        |
+| `google_calendar_id` | text      | Google Calendar ID (e.g., "primary", email, or calendar ID)    |
+| `name`               | text      | Display name from Google                                       |
+| `color`              | text      | Google's calendar color hex code                               |
+| `access_role`        | text      | Calendar permission level: 'owner', 'writer', or 'reader'      |
+| `sync_enabled`       | boolean   | Whether to sync this calendar                                  |
+| `is_private`         | boolean   | If true, event details are hidden in family calendar view      |
+| `last_synced_at`     | timestamp | Last successful sync time                                      |
+| `sync_cursor`        | text      | Google's sync token for incremental updates                    |
+| `pagination_token`   | text      | Stored pageToken for resuming interrupted syncs (cron timeout) |
+| `created_at`         | timestamp | When calendar was linked                                       |
+| `updated_at`         | timestamp | Last modification time                                         |
+
+### google_calendar_channels
+
+Tracks active push notification webhook subscriptions for real-time sync.
+
+```typescript
+export const googleCalendarChannels = pgTable("google_calendar_channels", {
+  id: text("id").primaryKey(), // Our UUID, sent to Google as channel id
+  googleCalendarId: text("google_calendar_id")
+    .notNull()
+    .references(() => googleCalendars.id, { onDelete: "cascade" }),
+  resourceId: text("resource_id").notNull(), // Google's resource identifier (from watch response)
+  token: text("token").notNull(), // Verification token (X-Goog-Channel-Token)
+  expiration: timestamp("expiration", { mode: "date" }).notNull(),
+  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+});
+```
+
+| Column               | Type      | Description                                        |
+| -------------------- | --------- | -------------------------------------------------- |
+| `id`                 | text      | Primary key (CUID), sent to Google as channel ID   |
+| `google_calendar_id` | text      | FK to `google_calendars.id`                        |
+| `resource_id`        | text      | Google's resource identifier from watch response   |
+| `token`              | text      | Secure verification token (base64url, 32 bytes)    |
+| `expiration`         | timestamp | When the channel expires (max ~7 days from Google) |
+| `created_at`         | timestamp | When the channel was created                       |
+
+### accounts (Sync Error Tracking)
+
+The Better-Auth `accounts` table includes sync error tracking fields:
+
+```typescript
+// Additional fields on accounts table for sync error tracking
+lastSyncError: text("last_sync_error"),
+lastSyncErrorAt: timestamp("last_sync_error_at", { mode: "date" }),
+```
+
+| Column               | Type      | Description                                |
+| -------------------- | --------- | ------------------------------------------ |
+| `last_sync_error`    | text      | Last sync error message (null if no error) |
+| `last_sync_error_at` | timestamp | When the last sync error occurred          |
 
 ## Relationships
 
@@ -53,38 +98,51 @@ export const googleCalendars = pgTable("google_calendars", {
 │ email           │         │
 └─────────────────┘         │
                             │
-┌─────────────────┐         │
-│    accounts     │  (Better-Auth OAuth)
-├─────────────────┤         │
-│ id            ◄─┼───┐     │
-│ user_id (FK)  ──┼───┼─────┘
-│ provider_id     │   │     (= 'google')
-│ access_token    │   │
-│ refresh_token   │   │
-└─────────────────┘   │
-                      │
-┌─────────────────┐   │
-│    families     │   │
-├─────────────────┤   │
-│ id            ◄─┼───┼───┐
-│ name            │   │   │
-└─────────────────┘   │   │
-                      │   │
-┌─────────────────────┼───┼─────┐
-│  google_calendars   │   │     │
-├─────────────────────┤   │     │
-│ id                  │   │     │
-│ family_id (FK)    ──┼───┼─────┘
-│ account_id (FK)   ──┼───┘
-│ google_calendar_id  │
-│ name                │
-│ color               │
-│ sync_enabled        │
-│ last_synced_at      │
-│ sync_cursor         │
-└─────────────────────┘
-         │
-         │ (referenced by events.google_calendar_id)
+┌─────────────────────────┐ │
+│    accounts             │ │  (Better-Auth OAuth)
+├─────────────────────────┤ │
+│ id                    ◄─┼─┼───┐
+│ user_id (FK)          ──┼─┘   │
+│ provider_id             │     │  (= 'google')
+│ access_token            │     │
+│ refresh_token           │     │
+│ last_sync_error         │     │  (Sync error tracking)
+│ last_sync_error_at      │     │
+└─────────────────────────┘     │
+                                │
+┌─────────────────┐             │
+│    families     │             │
+├─────────────────┤             │
+│ id            ◄─┼─────────────┼───┐
+│ name            │             │   │
+└─────────────────┘             │   │
+                                │   │
+┌───────────────────────────────┼───┼─────┐
+│  google_calendars             │   │     │
+├───────────────────────────────┤   │     │
+│ id                          ◄─┼─┐ │     │
+│ family_id (FK)              ──┼─┼─┼─────┘
+│ account_id (FK)             ──┼─┼─┘
+│ google_calendar_id            │ │
+│ name, color, access_role      │ │
+│ sync_enabled, is_private      │ │
+│ last_synced_at, sync_cursor   │ │
+│ pagination_token              │ │
+└───────────────────────────────┘ │
+         │                        │
+         │                        │
+         ▼                        │
+┌────────────────────────────┐    │
+│  google_calendar_channels  │    │
+├────────────────────────────┤    │
+│ id                         │    │
+│ google_calendar_id (FK)  ──┼────┘
+│ resource_id                │
+│ token                      │
+│ expiration                 │
+└────────────────────────────┘
+
+         │ (google_calendars referenced by events.google_calendar_id)
          ▼
 ┌─────────────────────┐
 │       events        │
@@ -92,6 +150,8 @@ export const googleCalendars = pgTable("google_calendars", {
 │ google_calendar_id  │ (FK, nullable)
 │ google_event_id     │
 │ sync_status         │
+│ local_updated_at    │
+│ remote_updated_at   │
 └─────────────────────┘
 ```
 

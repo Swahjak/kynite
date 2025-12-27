@@ -1,8 +1,93 @@
 # Google Calendar API Reference
 
-Technical reference for integrating with Google Calendar API v3.
+Technical reference for integrating with Google Calendar API v3 and internal Family Planner sync endpoints.
 
-## API Base URL
+## Internal API Endpoints
+
+### Webhook Endpoint
+
+**POST `/api/webhooks/google-calendar`**
+
+Receives push notifications from Google Calendar when events change.
+
+**Headers from Google:**
+
+| Header                  | Description                            |
+| ----------------------- | -------------------------------------- |
+| `X-Goog-Channel-ID`     | Our channel UUID (from watch response) |
+| `X-Goog-Channel-Token`  | Our verification token                 |
+| `X-Goog-Resource-State` | `sync`, `exists`, or `not_exists`      |
+| `X-Goog-Resource-ID`    | Google's resource identifier           |
+| `X-Goog-Message-Number` | Incrementing notification counter      |
+
+**Behavior:**
+
+- `sync`: Initial confirmation message - channel is active
+- `exists`: Events changed - triggers incremental sync in background
+- `not_exists`: Resource deleted - logs warning
+
+**Response:** Always returns 200 status to acknowledge receipt.
+
+### Cron Endpoints
+
+All cron endpoints require `Authorization: Bearer {CRON_SECRET}` header.
+
+**GET `/api/cron/sync-calendars`**
+
+Fallback polling sync for calendars. Runs every 5-15 minutes.
+
+- Syncs calendars with `lastSyncedAt` older than 5 minutes
+- Resumes incomplete syncs (calendars with `paginationToken`)
+- Supports pagination limits to avoid timeout (2 pages max per run)
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "total": 5,
+    "successful": 4,
+    "incomplete": 1,
+    "failed": 0
+  }
+}
+```
+
+**GET `/api/cron/setup-channels`**
+
+Sets up push notification channels for calendars without one. Runs daily.
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": { "created": 2, "failed": 0 }
+}
+```
+
+**GET `/api/cron/renew-channels`**
+
+Renews expiring push notification channels. Runs hourly.
+
+- Renews channels expiring within 1 hour
+- Creates new channel and stops old one
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": { "renewed": 3, "failed": 0 }
+}
+```
+
+---
+
+## Google Calendar API
+
+### API Base URL
 
 ```
 https://www.googleapis.com/calendar/v3

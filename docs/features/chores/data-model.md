@@ -7,17 +7,23 @@ interface IChore {
   id: string;
   familyId: string; // Reference to owning family
   title: string;
-  description?: string;
-  assignedTo: IUser;
-  dueDate?: Date;
-  dueTime?: string; // HH:mm format
+  description: string | null;
+  assignedToId: string | null; // Reference to familyMembers.id
+  dueDate: string | null; // YYYY-MM-DD format
+  dueTime: string | null; // HH:mm format
   recurrence: ChoreRecurrence;
   isUrgent: boolean; // Manual urgency flag
   status: ChoreStatus;
   starReward: number; // Stars earned on completion
+  completedAt: Date | null;
+  completedById: string | null; // Reference to familyMembers.id
   createdAt: Date;
-  completedAt?: Date;
-  completedBy?: IUser;
+  updatedAt: Date;
+}
+
+interface IChoreWithAssignee extends IChore {
+  assignedTo: FamilyMemberWithUser | null;
+  completedBy: FamilyMemberWithUser | null;
 }
 
 type ChoreRecurrence =
@@ -30,12 +36,29 @@ type ChoreRecurrence =
 
 type ChoreStatus = "pending" | "completed" | "skipped";
 
-interface IUser {
+interface FamilyMemberWithUser {
   id: string;
-  name: string;
-  picturePath: string | null;
-  color: string; // For avatar fallback
+  familyId: string;
+  userId: string;
+  role: FamilyMemberRole;
+  displayName: string | null;
+  avatarColor: string | null;
+  avatarSvg: string | null;
+  createdAt: Date;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    image: string | null;
+  };
 }
+
+type FamilyMemberRole =
+  | "manager"
+  | "participant"
+  | "caregiver"
+  | "device"
+  | "child";
 ```
 
 ## Computed Properties
@@ -58,37 +81,84 @@ function getUrgencyStatus(chore: IChore): UrgencyStatus {
 }
 ```
 
-## Database Schema
+## Database Schema (Drizzle)
 
-```sql
-CREATE TABLE chores (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  family_id TEXT NOT NULL REFERENCES families(id),
-  title VARCHAR(255) NOT NULL,
-  description TEXT,
-  assigned_to_id UUID REFERENCES users(id),
-  due_date DATE,
-  due_time TIME,
-  recurrence VARCHAR(20) DEFAULT 'once',
-  is_urgent BOOLEAN DEFAULT false,
-  status VARCHAR(20) DEFAULT 'pending',
-  star_reward INTEGER DEFAULT 10,
-  created_at TIMESTAMP DEFAULT NOW(),
-  completed_at TIMESTAMP,
-  completed_by_id UUID REFERENCES users(id)
-);
+```typescript
+export const chores = pgTable("chores", {
+  id: text("id").primaryKey(),
+  familyId: text("family_id")
+    .notNull()
+    .references(() => families.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  description: text("description"),
+  assignedToId: text("assigned_to_id").references(() => familyMembers.id, {
+    onDelete: "set null",
+  }),
+  dueDate: date("due_date", { mode: "string" }),
+  dueTime: text("due_time"), // HH:mm format
+  recurrence: text("recurrence").notNull().default("once"), // once | daily | weekly | weekdays | weekends | monthly
+  isUrgent: boolean("is_urgent").notNull().default(false),
+  status: text("status").notNull().default("pending"), // pending | completed | skipped
+  starReward: integer("star_reward").notNull().default(10),
+  completedAt: timestamp("completed_at", { mode: "date" }),
+  completedById: text("completed_by_id").references(() => familyMembers.id, {
+    onDelete: "set null",
+  }),
+  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
+});
 ```
 
-> **Note:** User references (`assigned_to_id`, `completed_by_id`) point to `users(id)` rather than `family_members(id)`. The `family_id` column provides family context, ensuring queries scope chores correctly: `WHERE family_id = ? AND assigned_to_id = ?`. See [Families Data Model](../families/data-model.md) for the family membership structure.
+### Column Descriptions
+
+| Column          | Type      | Nullable | Default   | Description                                      |
+| --------------- | --------- | -------- | --------- | ------------------------------------------------ |
+| id              | text      | No       | -         | Primary key (CUID2)                              |
+| family_id       | text      | No       | -         | FK to families.id (cascade delete)               |
+| title           | text      | No       | -         | Chore title                                      |
+| description     | text      | Yes      | null      | Optional description                             |
+| assigned_to_id  | text      | Yes      | null      | FK to family_members.id (set null on delete)     |
+| due_date        | date      | Yes      | null      | Due date in YYYY-MM-DD format                    |
+| due_time        | text      | Yes      | null      | Due time in HH:mm format                         |
+| recurrence      | text      | No       | 'once'    | Recurrence pattern                               |
+| is_urgent       | boolean   | No       | false     | Manual urgency flag                              |
+| status          | text      | No       | 'pending' | Chore status                                     |
+| star_reward     | integer   | No       | 10        | Stars awarded on completion                      |
+| completed_at    | timestamp | Yes      | null      | Completion timestamp                             |
+| completed_by_id | text      | Yes      | null      | FK to family_members.id (who marked it complete) |
+| created_at      | timestamp | No       | now()     | Creation timestamp                               |
+| updated_at      | timestamp | No       | now()     | Last update timestamp                            |
+
+> **Note:** Assignment references (`assigned_to_id`, `completed_by_id`) point to `family_members(id)`, not `users(id)`. This allows assigning chores to family members (including child accounts and devices) rather than user accounts directly. See [Families Data Model](../families/data-model.md) for the family membership structure.
 
 ## API Endpoints
 
-| Endpoint                   | Method | Description              |
-| -------------------------- | ------ | ------------------------ |
-| `/api/chores`              | GET    | Fetch all pending chores |
-| `/api/chores/:id/complete` | POST   | Mark chore as complete   |
-| `/api/chores/streak`       | GET    | Get current streak data  |
-| `/api/chores/progress`     | GET    | Get today's progress     |
+| Endpoint                                              | Method | Description                              |
+| ----------------------------------------------------- | ------ | ---------------------------------------- |
+| `/api/v1/families/:familyId/chores`                   | GET    | List chores with optional filters        |
+| `/api/v1/families/:familyId/chores`                   | POST   | Create a new chore (manager only)        |
+| `/api/v1/families/:familyId/chores/:choreId`          | GET    | Get a single chore by ID                 |
+| `/api/v1/families/:familyId/chores/:choreId`          | PATCH  | Update a chore (manager only)            |
+| `/api/v1/families/:familyId/chores/:choreId`          | DELETE | Delete a chore (manager only)            |
+| `/api/v1/families/:familyId/chores/:choreId/complete` | POST   | Mark chore as complete                   |
+| `/api/v1/families/:familyId/chores/:choreId/complete` | DELETE | Undo chore completion                    |
+| `/api/v1/families/:familyId/chores/progress`          | GET    | Get daily progress (optional date param) |
+
+### Query Parameters (GET /chores)
+
+| Parameter     | Type     | Description                                      |
+| ------------- | -------- | ------------------------------------------------ |
+| status        | string   | Filter by status: pending, completed, skipped    |
+| isUrgent      | boolean  | Filter by urgency flag                           |
+| startDate     | string   | Filter chores due on or after date (YYYY-MM-DD)  |
+| endDate       | string   | Filter chores due on or before date (YYYY-MM-DD) |
+| assignedToIds | string[] | Filter by assigned family member IDs             |
+
+### Authorization
+
+- **GET endpoints**: Require authenticated family member
+- **POST/PATCH/DELETE chores**: Require manager role
+- **POST/DELETE complete**: Require authenticated family member (any role can complete)
 
 ## Data Sources
 

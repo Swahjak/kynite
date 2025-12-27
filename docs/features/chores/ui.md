@@ -35,7 +35,7 @@
 - Delete chores
 - Assign to family members
 - Set recurrence patterns
-- Configure XP rewards
+- Configure star rewards
 
 ---
 

@@ -70,6 +70,8 @@ interface LinkedAccountCardProps {
     email: string;
     image?: string;
     calendars: GoogleCalendar[];
+    syncError?: string | null; // Error message if sync failed
+    syncErrorAt?: Date | null; // When the error occurred
   };
   onRefresh: () => void;
   onUnlink: () => void;
@@ -82,7 +84,26 @@ interface LinkedAccountCardProps {
 | Email          | Account identifier                      |
 | Calendar count | "3 calendars synced"                    |
 | Last sync      | Relative time ("2 min ago")             |
+| Error badge    | Warning icon if `syncError` is set      |
 | Actions        | Refresh, Unlink buttons                 |
+
+### Sync Error Indicator
+
+Displays when an account has a sync error:
+
+```tsx
+interface SyncErrorIndicatorProps {
+  error: string;
+  errorAt: Date;
+}
+```
+
+| Element | Specification                                |
+| ------- | -------------------------------------------- |
+| Icon    | Warning triangle (amber/red)                 |
+| Tooltip | Full error message                           |
+| Time    | "Failed 5 min ago"                           |
+| Action  | "Try Again" button to trigger manual refresh |
 
 ### CalendarToggle
 
@@ -90,15 +111,19 @@ interface LinkedAccountCardProps {
 interface CalendarToggleProps {
   calendar: GoogleCalendar;
   enabled: boolean;
+  isPrivate: boolean;
   onChange: (enabled: boolean) => void;
+  onPrivacyChange: (isPrivate: boolean) => void;
 }
 ```
 
-| Element      | Specification                  |
-| ------------ | ------------------------------ |
-| Color swatch | 16x16 circle with Google color |
-| Name         | Calendar display name          |
-| Toggle       | Switch component               |
+| Element        | Specification                             |
+| -------------- | ----------------------------------------- |
+| Color swatch   | 16x16 circle with Google color            |
+| Name           | Calendar display name                     |
+| Sync toggle    | Switch component for enabling sync        |
+| Privacy toggle | Lock icon button for private mode         |
+| Access role    | Badge showing 'owner', 'writer', 'reader' |
 
 ### SyncStatusBadge
 

@@ -160,22 +160,32 @@ export const rewardChartMessages = pgTable("reward_chart_messages", {
 
 ## TypeScript Interfaces
 
+Located in `src/components/reward-chart/interfaces.ts`:
+
 ```typescript
 // Core types
 type CompletionStatus = "completed" | "missed" | "skipped";
 type GoalStatus = "active" | "achieved" | "cancelled";
 type DayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6; // Sun=0, Sat=6
+type CellStatus =
+  | "completed"
+  | "pending"
+  | "missed"
+  | "future"
+  | "not_applicable";
 
-// Chart configuration
+// Chart configuration (returned by getChartWithDetails)
 interface IRewardChart {
   id: string;
   familyId: string;
   memberId: string;
-  member: IFamilyMember;
+  member: FamilyMember | null;
   isActive: boolean;
   tasks: IRewardChartTask[];
   activeGoal: IRewardChartGoal | null;
   currentMessage: IRewardChartMessage | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 // Task definition
@@ -183,21 +193,23 @@ interface IRewardChartTask {
   id: string;
   chartId: string;
   title: string;
-  icon: string;
-  iconColor: string;
+  icon: string; // Lucide icon key (e.g., "smile", "bed")
+  iconColor: string; // Color key (e.g., "blue", "emerald")
   starValue: number;
-  daysOfWeek: DayOfWeek[];
+  daysOfWeek: DayOfWeek[]; // Parsed from JSON stored in DB
   sortOrder: number;
   isActive: boolean;
+  createdAt: Date;
 }
 
 // Daily completion record
 interface IRewardChartCompletion {
   id: string;
   taskId: string;
-  date: string; // ISO date string
+  date: string; // ISO date string (YYYY-MM-DD)
   status: CompletionStatus;
   completedAt: Date | null;
+  createdAt: Date;
 }
 
 // Goal progress
@@ -205,13 +217,14 @@ interface IRewardChartGoal {
   id: string;
   chartId: string;
   title: string;
-  description?: string;
+  description?: string | null;
   emoji: string;
   starTarget: number;
   starsCurrent: number;
   status: GoalStatus;
   achievedAt: Date | null;
-  progressPercent: number; // Computed: (current / target) * 100
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 // Parent message
@@ -220,19 +233,28 @@ interface IRewardChartMessage {
   chartId: string;
   content: string;
   authorId: string;
-  author: IFamilyMember;
+  author?: FamilyMember | null;
   isActive: boolean;
   createdAt: Date;
 }
 
-// Family member (from families feature)
-interface IFamilyMember {
-  id: string;
-  familyId: string;
-  userId: string;
-  role: "manager" | "participant" | "caregiver";
-  displayName: string | null;
-  avatarColor: string | null;
+// API response types
+interface GoalProgress {
+  starsCurrent: number;
+  starTarget: number;
+  progressPercent: number;
+  achieved?: boolean;
+}
+
+interface CompleteTaskResponse {
+  completion: IRewardChartCompletion;
+  goalProgress: GoalProgress | null;
+  starsEarned: number;
+}
+
+interface UndoCompletionResponse {
+  goalProgress: GoalProgress | null;
+  starsRemoved: number;
 }
 ```
 
@@ -240,20 +262,20 @@ interface IFamilyMember {
 
 ### WeeklyChartData
 
-Data structure for rendering the weekly grid.
+Data structure for rendering the weekly grid. Returned by `/reward-charts/{chartId}/week` endpoint.
 
 ```typescript
 interface WeeklyChartData {
   chart: IRewardChart;
-  weekStart: Date; // Monday of current week
-  weekEnd: Date; // Sunday of current week
+  weekStart: string; // ISO date "YYYY-MM-DD" (Monday)
+  weekEnd: string; // ISO date "YYYY-MM-DD" (Sunday)
   days: WeekDay[];
   tasks: TaskRow[];
   todayStats: TodayStats;
 }
 
 interface WeekDay {
-  date: Date;
+  date: string; // ISO date "YYYY-MM-DD"
   dayOfWeek: DayOfWeek;
   dayName: string; // "Mon", "Tue", etc.
   dayNumber: number; // 12, 13, etc.
@@ -267,7 +289,7 @@ interface TaskRow {
 }
 
 interface TaskCell {
-  date: Date;
+  date: string; // ISO date "YYYY-MM-DD"
   status: CellStatus;
   completion: IRewardChartCompletion | null;
   isApplicable: boolean; // Based on task's daysOfWeek
@@ -283,6 +305,17 @@ type CellStatus =
 interface TodayStats {
   completed: number;
   total: number;
+}
+
+// Additional view model for child selection
+interface ChildChartInfo {
+  id: string; // memberId
+  name: string; // displayName
+  avatarUrl?: string | null;
+  avatarColor?: string | null;
+  avatarSvg?: string | null;
+  chartId: string | null;
+  totalStars: number;
 }
 ```
 
@@ -323,61 +356,111 @@ interface TodayStats {
 
 ## API Endpoints
 
-| Endpoint                                             | Method | Description                     |
-| ---------------------------------------------------- | ------ | ------------------------------- |
-| `/api/reward-charts/:memberId`                       | GET    | Fetch chart for a family member |
-| `/api/reward-charts/:chartId/week`                   | GET    | Fetch weekly grid data          |
-| `/api/reward-charts/:chartId/tasks/:taskId/complete` | POST   | Mark task complete for today    |
-| `/api/reward-charts/:chartId/tasks/:taskId/undo`     | POST   | Undo completion for today       |
-| `/api/reward-charts/:chartId/goals`                  | GET    | Fetch all goals for chart       |
-| `/api/reward-charts/:chartId/messages`               | GET    | Fetch active message            |
+All endpoints are under `/api/v1/families/{familyId}/reward-charts`.
 
-### POST /api/reward-charts/:chartId/tasks/:taskId/complete
+### Chart Operations
 
-**Request:** (no body needed, uses current date)
+| Endpoint                        | Method | Description                                   | Access        |
+| ------------------------------- | ------ | --------------------------------------------- | ------------- |
+| `/reward-charts`                | GET    | List all charts for family (with active goal) | Family member |
+| `/reward-charts`                | POST   | Create chart for a member                     | Manager only  |
+| `/reward-charts/{chartId}`      | GET    | Get chart with details                        | Family member |
+| `/reward-charts/{chartId}/week` | GET    | Get weekly grid data with completions         | Family member |
+
+### Task Operations
+
+| Endpoint                                           | Method | Description                  | Access        |
+| -------------------------------------------------- | ------ | ---------------------------- | ------------- |
+| `/reward-charts/{chartId}/tasks`                   | POST   | Create new task              | Manager only  |
+| `/reward-charts/{chartId}/tasks/{taskId}`          | PUT    | Update task                  | Manager only  |
+| `/reward-charts/{chartId}/tasks/{taskId}`          | DELETE | Delete task (soft delete)    | Manager only  |
+| `/reward-charts/{chartId}/tasks/reorder`           | POST   | Reorder tasks (drag-drop)    | Manager only  |
+| `/reward-charts/{chartId}/tasks/{taskId}/complete` | POST   | Mark task complete for today | Family member |
+| `/reward-charts/{chartId}/tasks/{taskId}/undo`     | POST   | Undo completion for today    | Family member |
+
+### Goal Operations
+
+| Endpoint                                  | Method | Description     | Access        |
+| ----------------------------------------- | ------ | --------------- | ------------- |
+| `/reward-charts/{chartId}/goals`          | GET    | List all goals  | Family member |
+| `/reward-charts/{chartId}/goals`          | POST   | Create new goal | Manager only  |
+| `/reward-charts/{chartId}/goals/{goalId}` | PUT    | Update goal     | Manager only  |
+
+### Message Operations
+
+| Endpoint                            | Method | Description        | Access        |
+| ----------------------------------- | ------ | ------------------ | ------------- |
+| `/reward-charts/{chartId}/messages` | GET    | Get active message | Family member |
+| `/reward-charts/{chartId}/messages` | POST   | Send new message   | Manager only  |
+
+### POST .../tasks/{taskId}/complete
+
+**Request:** No body needed (uses current date automatically)
 
 **Response:**
 
 ```json
 {
   "success": true,
-  "completion": {
-    "id": "comp_123",
-    "taskId": "task_456",
-    "date": "2024-12-13",
-    "status": "completed",
-    "completedAt": "2024-12-13T10:30:00Z"
-  },
-  "goalProgress": {
-    "starsCurrent": 25,
-    "starTarget": 30,
-    "progressPercent": 83
-  },
-  "todayStats": {
-    "completed": 2,
-    "total": 5
+  "data": {
+    "completion": {
+      "id": "comp_abc123",
+      "taskId": "task_456",
+      "date": "2024-12-13",
+      "status": "completed",
+      "completedAt": "2024-12-13T10:30:00Z",
+      "createdAt": "2024-12-13T10:30:00Z"
+    },
+    "goalProgress": {
+      "starsCurrent": 25,
+      "starTarget": 30,
+      "progressPercent": 83,
+      "achieved": false
+    },
+    "starsEarned": 1
   }
 }
 ```
 
-### POST /api/reward-charts/:chartId/tasks/:taskId/undo
+### POST .../tasks/{taskId}/undo
 
-**Request:** (no body needed, uses current date)
+**Request:** No body needed (uses current date automatically)
 
 **Response:**
 
 ```json
 {
   "success": true,
-  "completion": null,
-  "goalProgress": {
-    "starsCurrent": 24,
-    "starTarget": 30,
-    "progressPercent": 80
-  },
-  "todayStats": {
-    "completed": 1,
-    "total": 5
+  "data": {
+    "goalProgress": {
+      "starsCurrent": 24,
+      "starTarget": 30,
+      "progressPercent": 80
+    },
+    "starsRemoved": 1
+  }
+}
+```
+
+### POST .../tasks/reorder
+
+Reorders tasks via drag-and-drop. Updates `sortOrder` for all tasks.
+
+**Request:**
+
+```json
+{
+  "taskIds": ["task_1", "task_3", "task_2", "task_4"]
+}
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "taskIds": ["task_1", "task_3", "task_2", "task_4"]
   }
 }
 ```
@@ -394,42 +477,62 @@ interface TodayStats {
 
 ## Star Integration
 
-When a task is completed, stars are automatically:
+When a task is completed, the service performs these operations atomically in a transaction:
 
-1. Added to the active goal's `stars_current`
-2. Recorded as a Star Transaction (type: `reward_chart`)
+1. Creates a completion record with status "completed"
+2. Calls `addStars()` to record a Star Transaction (type: `reward_chart`)
+3. Updates the member's cached star balance in `member_star_balances`
+4. Updates the active goal's `stars_current` if one exists
+5. Broadcasts real-time update via Pusher (`stars:updated` event)
+
+When a task completion is undone:
+
+1. Deletes the completion record
+2. Calls `addStars()` with negative amount to reverse the transaction
+3. Updates the cached balance and active goal accordingly
+4. Broadcasts real-time update
+
+### Star Transaction Types
+
+The `type` field in `star_transactions` supports these values:
+
+| Type           | Source                       | Amount   |
+| -------------- | ---------------------------- | -------- |
+| `reward_chart` | Reward chart task completion | Positive |
+| `chore`        | Chore completion             | Positive |
+| `bonus`        | Manual bonus from parent     | Positive |
+| `timer`        | Timer completion             | Positive |
+| `redemption`   | Reward store purchase        | Negative |
+
+### Implementation Reference
 
 ```typescript
-// On task completion
-async function completeTask(taskId: string, chartId: string) {
-  const task = await getTask(taskId);
-  const chart = await getChart(chartId);
-  const goal = await getActiveGoal(chartId);
+// In reward-chart-service.ts completeTask()
+await addStars({
+  memberId: chart.memberId,
+  amount: task.starValue,
+  type: "reward_chart",
+  referenceId: completion.id,
+  description: task.title,
+});
 
-  // Create completion record
-  const completion = await createCompletion({
-    taskId,
-    date: today(),
-    status: "completed",
-    completedAt: new Date(),
-  });
-
-  // Update goal progress
-  if (goal) {
-    await updateGoal(goal.id, {
-      starsCurrent: goal.starsCurrent + task.starValue,
-    });
-  }
-
-  // Record star transaction (for Reward Store integration)
-  await createStarTransaction({
-    userId: chart.member.userId,
-    amount: task.starValue,
-    type: "reward_chart",
-    referenceId: completion.id,
-    description: `Completed: ${task.title}`,
-  });
-}
+// In reward-chart-service.ts undoCompletion()
+await addStars({
+  memberId: chart.memberId,
+  amount: -task.starValue, // Negative reverses the transaction
+  type: "reward_chart",
+  referenceId: existing[0].id,
+  description: `Undo: ${task.title}`,
+});
 ```
 
-> **Note:** The `type` field in `star_transactions` table should be extended to include `reward_chart` value.
+### Real-time Updates
+
+Star balance changes are broadcast to all family members via Pusher:
+
+```typescript
+broadcastToFamily(familyId, "stars:updated", {
+  memberId: input.memberId,
+  newBalance,
+});
+```
