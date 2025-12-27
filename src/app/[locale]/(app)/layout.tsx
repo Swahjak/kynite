@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { getSession } from "@/lib/get-session";
 import { AppShell } from "@/components/layout/app-shell";
+import { CacheStatusIndicator } from "@/components/status";
 import type { Locale } from "@/i18n/routing";
 
 interface AppLayoutProps {
@@ -25,5 +26,10 @@ export default async function AppLayout({ children, params }: AppLayoutProps) {
     redirect(`/${locale}/onboarding`);
   }
 
-  return <AppShell>{children}</AppShell>;
+  return (
+    <>
+      <AppShell>{children}</AppShell>
+      <CacheStatusIndicator />
+    </>
+  );
 }

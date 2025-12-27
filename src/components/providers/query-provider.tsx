@@ -8,7 +8,7 @@ import {
   shouldPersistQuery,
 } from "@/lib/query/persister";
 import { CACHE_CONFIG } from "@/lib/query/cache-config";
-import { CacheStatusProvider, CacheStatusIndicator } from "@/components/status";
+import { CacheStatusProvider } from "@/components/status";
 
 interface QueryProviderProps {
   children: ReactNode;
@@ -60,10 +60,7 @@ export function QueryProvider({ children }: QueryProviderProps) {
         buster: String(CACHE_CONFIG.CACHE_VERSION),
       }}
     >
-      <CacheStatusProvider>
-        {children}
-        <CacheStatusIndicator />
-      </CacheStatusProvider>
+      <CacheStatusProvider>{children}</CacheStatusProvider>
     </PersistQueryClientProvider>
   );
 }
