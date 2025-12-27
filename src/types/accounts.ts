@@ -7,6 +7,8 @@ export interface LinkedGoogleAccount {
   email?: string;
   scopes: string[];
   linkedAt: Date;
+  lastSyncError?: string | null;
+  lastSyncErrorAt?: string | null; // ISO string for JSON serialization
 }
 
 /**
