@@ -137,3 +137,16 @@ export function useUpdateCalendarPrivacy(accountId?: string) {
     },
   });
 }
+
+export function useAccountErrors() {
+  const { data: accounts } = useLinkedAccounts();
+
+  const accountsWithErrors =
+    accounts?.filter((account) => account.lastSyncError !== null) ?? [];
+
+  return {
+    hasErrors: accountsWithErrors.length > 0,
+    errorCount: accountsWithErrors.length,
+    accountsWithErrors,
+  };
+}
