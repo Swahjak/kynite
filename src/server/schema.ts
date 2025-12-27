@@ -496,6 +496,7 @@ export const events = pgTable("events", {
   startTime: timestamp("start_time", { mode: "date" }).notNull(),
   endTime: timestamp("end_time", { mode: "date" }).notNull(),
   allDay: boolean("all_day").notNull().default(false),
+  eventType: text("event_type"), // 'default' | 'birthday' | 'fromGmail' | null for manual events
   color: text("color"),
   // Google Sync Metadata
   googleCalendarId: text("google_calendar_id").references(
