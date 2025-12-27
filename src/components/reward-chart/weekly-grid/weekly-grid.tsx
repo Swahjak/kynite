@@ -140,68 +140,70 @@ export function WeeklyGrid({ className }: WeeklyGridProps) {
 
   return (
     <div className="relative">
-      <div
-        className={cn(
-          "grid grid-cols-[minmax(180px,1.5fr)_repeat(7,1fr)] overflow-hidden rounded-3xl bg-white shadow-sm dark:bg-slate-800",
-          className
-        )}
-      >
-        {/* Header Row */}
-        <div className="col-span-full grid grid-cols-subgrid border-b bg-slate-50/50 dark:border-slate-700 dark:bg-slate-800/50">
-          {/* Task/Routine label */}
-          <div className="flex items-center px-4 py-3">
-            <span className="text-xs font-medium tracking-wider text-slate-400 uppercase">
-              Task / Routine
-            </span>
+      <div className="overflow-x-auto rounded-3xl">
+        <div
+          className={cn(
+            "grid min-w-[640px] grid-cols-[minmax(140px,1.5fr)_repeat(7,minmax(56px,1fr))] rounded-3xl bg-white shadow-sm dark:bg-slate-800",
+            className
+          )}
+        >
+          {/* Header Row */}
+          <div className="col-span-full grid grid-cols-subgrid border-b bg-slate-50/50 dark:border-slate-700 dark:bg-slate-800/50">
+            {/* Task/Routine label */}
+            <div className="flex items-center px-4 py-3">
+              <span className="text-xs font-medium tracking-wider text-slate-400 uppercase">
+                Task / Routine
+              </span>
+            </div>
+
+            {/* Day headers */}
+            {days.map((day) => (
+              <DayHeader key={day.date} day={day} />
+            ))}
           </div>
 
-          {/* Day headers */}
-          {days.map((day) => (
-            <DayHeader key={day.date} day={day} />
-          ))}
+          {/* Task Rows */}
+          <div className="col-span-full grid grid-cols-subgrid divide-y divide-slate-100 dark:divide-slate-700/50">
+            {tasks.length === 0 ? (
+              <div className="col-span-full px-6 py-8 text-center text-slate-500">
+                No tasks configured yet
+              </div>
+            ) : (
+              tasks.map((taskRow) => (
+                <TaskRow
+                  key={taskRow.task.id}
+                  taskRow={taskRow}
+                  days={days}
+                  onComplete={completeTask}
+                  onUndo={undoCompletion}
+                  disabled={isLoading}
+                  showControls={isManager}
+                  onEdit={handleEditTask}
+                  onDelete={handleDeleteTask}
+                  draggable={isManager}
+                  onDragStart={handleDragStart}
+                  onDragOver={handleDragOver}
+                  onDrop={handleDrop}
+                />
+              ))
+            )}
+
+            {/* Add Task Row - only for managers */}
+            {isManager && <AddTaskRow onClick={handleAddTask} />}
+          </div>
+
+          {/* Footer */}
+          <GridFooter todayStats={todayStats} />
         </div>
-
-        {/* Task Rows */}
-        <div className="col-span-full grid grid-cols-subgrid divide-y divide-slate-100 dark:divide-slate-700/50">
-          {tasks.length === 0 ? (
-            <div className="col-span-full px-6 py-8 text-center text-slate-500">
-              No tasks configured yet
-            </div>
-          ) : (
-            tasks.map((taskRow) => (
-              <TaskRow
-                key={taskRow.task.id}
-                taskRow={taskRow}
-                days={days}
-                onComplete={completeTask}
-                onUndo={undoCompletion}
-                disabled={isLoading}
-                showControls={isManager}
-                onEdit={handleEditTask}
-                onDelete={handleDeleteTask}
-                draggable={isManager}
-                onDragStart={handleDragStart}
-                onDragOver={handleDragOver}
-                onDrop={handleDrop}
-              />
-            ))
-          )}
-
-          {/* Add Task Row - only for managers */}
-          {isManager && <AddTaskRow onClick={handleAddTask} />}
-        </div>
-
-        {/* Footer */}
-        <GridFooter todayStats={todayStats} />
-
-        {/* Task Dialog */}
-        <TaskDialog
-          open={taskDialogOpen}
-          onOpenChange={setTaskDialogOpen}
-          task={editingTask}
-          onSubmit={handleTaskSubmit}
-        />
       </div>
+
+      {/* Task Dialog */}
+      <TaskDialog
+        open={taskDialogOpen}
+        onOpenChange={setTaskDialogOpen}
+        task={editingTask}
+        onSubmit={handleTaskSubmit}
+      />
     </div>
   );
 }
