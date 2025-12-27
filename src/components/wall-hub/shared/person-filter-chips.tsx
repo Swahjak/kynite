@@ -33,7 +33,7 @@ export function PersonFilterChips({
   showEveryone = true,
 }: PersonFilterChipsProps) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex gap-2 overflow-x-auto pb-1">
       {showEveryone && (
         <button
           onClick={() => onSelect("all")}
