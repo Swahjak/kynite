@@ -1,0 +1,34 @@
+import "nextra-theme-docs/style.css";
+import { Footer, Layout, Navbar } from "nextra-theme-docs";
+import { getPageMap } from "nextra/page-map";
+import type { ReactNode } from "react";
+
+export const metadata = {
+  title: "Help Center",
+};
+
+type Props = {
+  children: ReactNode;
+  params: Promise<{ locale: string }>;
+};
+
+export default async function HelpLayout({ children, params }: Props) {
+  const { locale } = await params;
+  const pageMap = await getPageMap(`/${locale}/help`);
+
+  return (
+    <Layout
+      pageMap={pageMap}
+      docsRepositoryBase="https://github.com/your-repo"
+      navbar={
+        <Navbar
+          logo={<span className="font-bold">Kynite Help</span>}
+          projectLink="/"
+        />
+      }
+      footer={<Footer>© {new Date().getFullYear()} Kynite</Footer>}
+    >
+      {children}
+    </Layout>
+  );
+}
