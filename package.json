@@ -100,6 +100,7 @@
     "@testing-library/react": "^16.3.1",
     "@testing-library/user-event": "^14.6.1",
     "@types/jsdom": "^27.0.0",
+    "@types/mdx": "^2.0.13",
     "@types/node": "^22.15.21",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.1.5",
