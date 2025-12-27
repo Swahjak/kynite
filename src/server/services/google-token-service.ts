@@ -1,6 +1,37 @@
 import { db } from "@/server/db";
 import { accounts } from "@/server/schema";
 import { and, eq } from "drizzle-orm";
+import { symmetricDecrypt } from "better-auth/crypto";
+
+/**
+ * Decrypt a token that was encrypted by better-auth's encryptOAuthTokens option.
+ * Returns the original token if it's not encrypted (for backward compatibility).
+ */
+async function decryptToken(token: string | null): Promise<string | null> {
+  if (!token) return null;
+
+  // Check if token looks encrypted (better-auth uses base64-like format with specific length)
+  // Plain OAuth tokens typically start with known prefixes
+  const looksLikePlainToken =
+    token.startsWith("ya29.") || // Google access token
+    token.startsWith("1//") || // Google refresh token
+    token.startsWith("eyJ"); // JWT format
+
+  if (looksLikePlainToken) {
+    return token;
+  }
+
+  try {
+    return await symmetricDecrypt({
+      key: process.env.BETTER_AUTH_SECRET!,
+      data: token,
+    });
+  } catch {
+    // If decryption fails, assume it's a plain token
+    console.warn("Token decryption failed, assuming plain token");
+    return token;
+  }
+}
 
 export interface TokenResult {
   accessToken: string;
@@ -162,10 +193,14 @@ export async function getValidAccessToken(
 
   const { accessToken, refreshToken, accessTokenExpiresAt } = account[0];
 
+  // Decrypt tokens (handles both encrypted and plain tokens for backward compatibility)
+  const decryptedAccessToken = await decryptToken(accessToken);
+  const decryptedRefreshToken = await decryptToken(refreshToken);
+
   // Check if token needs refresh
-  if (isTokenExpired(accessTokenExpiresAt) && refreshToken) {
+  if (isTokenExpired(accessTokenExpiresAt) && decryptedRefreshToken) {
     try {
-      const refreshed = await refreshGoogleToken(refreshToken);
+      const refreshed = await refreshGoogleToken(decryptedRefreshToken);
       await updateStoredToken(
         accountDbId,
         refreshed.accessToken,
@@ -196,5 +231,5 @@ export async function getValidAccessToken(
     }
   }
 
-  return accessToken;
+  return decryptedAccessToken;
 }
