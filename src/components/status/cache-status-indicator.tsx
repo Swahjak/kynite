@@ -48,7 +48,7 @@ export function CacheStatusIndicator({ className }: CacheStatusIndicatorProps) {
         <TooltipTrigger asChild>
           <div
             className={cn(
-              "fixed right-4 bottom-4 z-50",
+              "fixed bottom-4 left-4 z-50",
               "flex items-center gap-2 rounded-full px-3 py-1.5",
               "bg-card/80 border shadow-sm backdrop-blur-sm",
               "transition-all duration-300 ease-in-out",
