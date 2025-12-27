@@ -123,3 +123,7 @@ BETTER_AUTH_URL=http://localhost:3000  # Also used for Google Calendar webhooks
 ## Commit Guidelines
 
 Do NOT include Co-Authored-By or similar Claude references in commit messages. Use conventional commit format (e.g., `feat: add calendar view`, `fix: resolve sync issue`).
+
+# Notes
+
+- Nextjs 16+ uses proxy.ts instead of middleware.ts

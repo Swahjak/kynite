@@ -12,6 +12,11 @@ vi.mock("@/i18n/navigation", () => ({
     </a>
   ),
   usePathname: () => "/calendar",
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    refresh: vi.fn(),
+  }),
 }));
 
 // Mock Next.js navigation
