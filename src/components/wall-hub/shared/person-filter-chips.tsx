@@ -38,14 +38,14 @@ export function PersonFilterChips({
         <button
           onClick={() => onSelect("all")}
           className={cn(
-            "inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm font-medium transition-colors",
+            "inline-flex h-10 items-center gap-2 rounded-full px-2.5 text-sm font-medium transition-colors sm:px-4",
             selectedId === "all"
-              ? "bg-foreground text-background"
+              ? "bg-primary text-primary-foreground"
               : "bg-background hover:bg-muted border"
           )}
         >
           <Users className="size-4" />
-          Everyone
+          <span className="hidden sm:inline">Everyone</span>
         </button>
       )}
       {people.map((person) => {
