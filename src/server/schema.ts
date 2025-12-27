@@ -24,6 +24,7 @@ export const users = pgTable("users", {
   image: text("image"),
   type: text("type").notNull().default("human"), // 'human' | 'device'
   use24HourFormat: boolean("use_24_hour_format").notNull().default(true),
+  locale: text("locale"), // 'nl' | 'en' - null means use browser default
   createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
 });

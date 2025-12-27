@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, usePathname } from "@/i18n/navigation";
+import type { Locale } from "@/i18n/routing";
 import {
   LogOut,
   Settings,
@@ -10,6 +11,7 @@ import {
   Moon,
   Monitor,
   Clock,
+  Languages,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
@@ -41,13 +43,40 @@ interface UserMenuProps {
 
 export function UserMenu({ user }: UserMenuProps) {
   const router = useRouter();
-  const locale = useLocale();
+  const pathname = usePathname();
+  const locale = useLocale() as Locale;
   const t = useTranslations("UserMenu");
   const { theme, setTheme } = useTheme();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const { data: preferences } = useUserPreferences();
   const updatePreferences = useUpdatePreferences();
   const use24HourFormat = preferences?.use24HourFormat ?? true;
+
+  // Sync database locale preference to cookie and redirect if needed
+  useEffect(() => {
+    const savedLocale = preferences?.locale;
+    if (savedLocale && savedLocale !== locale) {
+      // Set cookie for future visits
+      document.cookie = `NEXT_LOCALE=${savedLocale}; path=/; max-age=31536000; SameSite=Lax`;
+      // Redirect to user's preferred locale
+      router.replace(pathname, { locale: savedLocale as Locale });
+    }
+  }, [preferences?.locale, locale, pathname, router]);
+
+  const cycleLanguage = () => {
+    const locales: Locale[] = ["nl", "en"];
+    const currentIndex = locales.indexOf(locale);
+    const nextLocale = locales[(currentIndex + 1) % locales.length];
+
+    // Save preference to database
+    updatePreferences.mutate({ locale: nextLocale });
+
+    // Set cookie for middleware (persists across sessions)
+    document.cookie = `NEXT_LOCALE=${nextLocale}; path=/; max-age=31536000; SameSite=Lax`;
+
+    // Navigate to same page in new locale
+    router.replace(pathname, { locale: nextLocale });
+  };
 
   const cycleTheme = () => {
     const order = ["system", "light", "dark"] as const;
@@ -98,7 +127,7 @@ export function UserMenu({ user }: UserMenuProps) {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => router.push(`/${locale}/settings`)}>
+        <DropdownMenuItem onClick={() => router.push("/settings")}>
           <Settings className="mr-2 size-4" />
           {t("settings")}
         </DropdownMenuItem>
@@ -110,6 +139,10 @@ export function UserMenu({ user }: UserMenuProps) {
             : theme === "dark"
               ? t("theme.dark")
               : t("theme.auto")}
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={cycleLanguage}>
+          <Languages className="mr-2 size-4" />
+          {t("language.label")}: {t(`language.${locale}`)}
         </DropdownMenuItem>
         <DropdownMenuItem
           onSelect={(e) => e.preventDefault()}

@@ -170,6 +170,11 @@
       "dark": "Donker",
       "auto": "Automatisch"
     },
+    "language": {
+      "label": "Taal",
+      "nl": "Nederlands",
+      "en": "English"
+    },
     "timeFormat": {
       "label": "24-uursklok"
     }

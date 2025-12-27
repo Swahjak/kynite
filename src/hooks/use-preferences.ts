@@ -5,6 +5,7 @@ import { apiFetch } from "@/lib/api";
 
 interface UserPreferences {
   use24HourFormat: boolean;
+  locale: string | null;
 }
 
 export const preferencesKeys = {
