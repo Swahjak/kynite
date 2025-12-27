@@ -108,7 +108,14 @@ export async function refreshGoogleToken(
   });
 
   if (!response.ok) {
-    throw new Error(`Token refresh failed: ${response.status}`);
+    const errorBody = await response.text().catch(() => "");
+    const errorMessage =
+      response.status === 400
+        ? "invalid_grant - token revoked or expired"
+        : `status ${response.status}`;
+    throw new Error(
+      `Token refresh failed: ${errorMessage}${errorBody ? ` - ${errorBody}` : ""}`
+    );
   }
 
   const data = await response.json();
