@@ -41,8 +41,15 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Skip intl middleware for help docs (Nextra handles its own i18n)
+  // Handle help docs (Nextra handles its own i18n)
   if (pathname.startsWith("/help")) {
+    // Redirect /help to /help/{locale} based on user preference
+    if (pathname === "/help" || pathname === "/help/") {
+      const acceptLanguage = request.headers.get("accept-language") || "";
+      const prefersDutch = acceptLanguage.toLowerCase().includes("nl");
+      const locale = prefersDutch ? "nl" : "en";
+      return NextResponse.redirect(new URL(`/help/${locale}`, request.url));
+    }
     return NextResponse.next();
   }
 
