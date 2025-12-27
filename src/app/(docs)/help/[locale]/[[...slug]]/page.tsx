@@ -33,12 +33,17 @@ export async function generateMetadata({ params }: Props) {
   return result.metadata;
 }
 
+// Get the Wrapper component from MDX components - this renders the sidebar and content layout
+const Wrapper = useMDXComponents({}).wrapper;
+
 export default async function HelpPage({ params }: Props) {
   const { locale, slug } = await params;
   const result = await importPage(slug, locale);
   const { default: MDXContent, toc, metadata } = result;
 
   return (
-    <MDXContent {...{ toc, metadata }} components={useMDXComponents({})} />
+    <Wrapper toc={toc} metadata={metadata}>
+      <MDXContent params={{ locale, slug }} />
+    </Wrapper>
   );
 }
