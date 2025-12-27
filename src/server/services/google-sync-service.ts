@@ -5,6 +5,7 @@ import {
   eventParticipants,
   familyMembers,
   users,
+  accounts,
 } from "@/server/schema";
 import { eq, and, isNull, isNotNull, or, lt, inArray } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
@@ -413,28 +414,31 @@ async function upsertEventFromGoogle(
     result = "created";
   }
 
-  // Sync attendees to event participants
-  await syncEventParticipants(eventId, familyId, googleEvent.attendees);
+  // Sync attendees to event participants (always includes calendar owner)
+  await syncEventParticipants(
+    eventId,
+    familyId,
+    googleCalendarId,
+    googleEvent.attendees
+  );
 
   return result;
 }
 
 /**
- * Match Google Calendar attendees to family members and sync participants
+ * Match Google Calendar attendees to family members and sync participants.
+ * Always includes the calendar owner as a participant.
  */
 async function syncEventParticipants(
   eventId: string,
   familyId: string,
+  googleCalendarId: string,
   attendees?: { email: string; organizer?: boolean }[]
 ): Promise<void> {
   // Delete existing participants for this event (we'll recreate from Google data)
   await db
     .delete(eventParticipants)
     .where(eq(eventParticipants.eventId, eventId));
-
-  if (!attendees || attendees.length === 0) {
-    return;
-  }
 
   // Get family members with their user emails
   const members = await db
@@ -446,9 +450,22 @@ async function syncEventParticipants(
     .innerJoin(users, eq(familyMembers.userId, users.id))
     .where(eq(familyMembers.familyId, familyId));
 
-  if (members.length === 0) {
-    return;
-  }
+  // Look up the calendar owner's family member
+  const calendarOwner = await db
+    .select({ memberId: familyMembers.id })
+    .from(googleCalendars)
+    .innerJoin(accounts, eq(googleCalendars.accountId, accounts.id))
+    .innerJoin(
+      familyMembers,
+      and(
+        eq(familyMembers.userId, accounts.userId),
+        eq(familyMembers.familyId, familyId)
+      )
+    )
+    .where(eq(googleCalendars.id, googleCalendarId))
+    .limit(1);
+
+  const calendarOwnerMemberId = calendarOwner[0]?.memberId;
 
   // Create email to member ID map (case-insensitive)
   const emailToMember = new Map(
@@ -462,13 +479,29 @@ async function syncEventParticipants(
     isOwner: boolean;
   }[] = [];
 
-  for (const attendee of attendees) {
-    const memberId = emailToMember.get(attendee.email.toLowerCase());
-    if (memberId) {
+  if (attendees && attendees.length > 0) {
+    for (const attendee of attendees) {
+      const memberId = emailToMember.get(attendee.email.toLowerCase());
+      if (memberId) {
+        participantsToCreate.push({
+          eventId,
+          familyMemberId: memberId,
+          isOwner: attendee.organizer ?? false,
+        });
+      }
+    }
+  }
+
+  // Always include the calendar owner as a participant (if not already matched via email)
+  if (calendarOwnerMemberId) {
+    const alreadyIncluded = participantsToCreate.some(
+      (p) => p.familyMemberId === calendarOwnerMemberId
+    );
+    if (!alreadyIncluded) {
       participantsToCreate.push({
         eventId,
-        familyMemberId: memberId,
-        isOwner: attendee.organizer ?? false,
+        familyMemberId: calendarOwnerMemberId,
+        isOwner: false,
       });
     }
   }

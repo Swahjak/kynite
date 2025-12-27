@@ -33,6 +33,7 @@ const messages = {
     dashboard: "Dashboard",
     calendar: "Calendar",
     chores: "Chores",
+    timers: "Timers",
     rewardChart: "Star Chart",
     rewards: "Rewards",
     settings: "Settings",
@@ -62,13 +63,14 @@ describe("NavigationMenu", () => {
     expect(screen.getByText("Dashboard")).toBeInTheDocument();
     expect(screen.getByText("Calendar")).toBeInTheDocument();
     expect(screen.getByText("Chores")).toBeInTheDocument();
+    expect(screen.getByText("Timers")).toBeInTheDocument();
     expect(screen.getByText("Star Chart")).toBeInTheDocument();
     expect(screen.getByText("Rewards")).toBeInTheDocument();
     expect(screen.getByText("Settings")).toBeInTheDocument();
     expect(screen.getByText("Help")).toBeInTheDocument();
   });
 
-  it("hides chores and settings when user is not manager", async () => {
+  it("hides chores, timers and settings when user is not manager", async () => {
     const { useIsManager } = await import("@/hooks/use-is-manager");
     vi.mocked(useIsManager).mockReturnValue(false);
 
@@ -77,6 +79,7 @@ describe("NavigationMenu", () => {
     expect(screen.getByText("Dashboard")).toBeInTheDocument();
     expect(screen.getByText("Calendar")).toBeInTheDocument();
     expect(screen.queryByText("Chores")).not.toBeInTheDocument();
+    expect(screen.queryByText("Timers")).not.toBeInTheDocument();
     expect(screen.getByText("Star Chart")).toBeInTheDocument();
     expect(screen.getByText("Rewards")).toBeInTheDocument();
     expect(screen.queryByText("Settings")).not.toBeInTheDocument();
