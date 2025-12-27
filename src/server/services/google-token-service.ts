@@ -171,9 +171,27 @@ export async function getValidAccessToken(
         refreshed.accessToken,
         refreshed.expiresAt
       );
+      // Clear any previous error on success
+      await db
+        .update(accounts)
+        .set({ lastSyncError: null, lastSyncErrorAt: null })
+        .where(eq(accounts.id, accountDbId));
       return refreshed.accessToken;
     } catch (error) {
-      console.error("Failed to refresh token:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      console.error(
+        `Failed to refresh token for account ${accountDbId}:`,
+        errorMessage
+      );
+      // Persist error for UI display
+      await db
+        .update(accounts)
+        .set({
+          lastSyncError: "Token refresh failed - please re-link account",
+          lastSyncErrorAt: new Date(),
+        })
+        .where(eq(accounts.id, accountDbId));
       return null;
     }
   }
