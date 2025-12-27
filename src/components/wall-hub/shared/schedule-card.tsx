@@ -4,6 +4,7 @@ import { format, isWithinInterval, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
 import { FamilyAvatar } from "@/components/family/family-avatar";
 import { getAvatarColorClasses } from "@/lib/avatar-colors";
+import { useUserPreferences } from "@/hooks/use-preferences";
 import type { IEvent } from "@/components/calendar/interfaces";
 import type { AvatarColor } from "@/types/family";
 
@@ -13,12 +14,15 @@ interface ScheduleCardProps {
 }
 
 export function ScheduleCard({ event, showNowBadge }: ScheduleCardProps) {
+  const { data: preferences } = useUserPreferences();
+  const use24HourFormat = preferences?.use24HourFormat ?? true;
+
   const startDate = parseISO(event.startDate);
   const endDate = parseISO(event.endDate);
   const now = new Date();
 
   const isNow = isWithinInterval(now, { start: startDate, end: endDate });
-  const timeDisplay = format(startDate, "h:mm a");
+  const timeDisplay = format(startDate, use24HourFormat ? "HH:mm" : "h:mm a");
 
   // Get color based on first participant's avatarColor
   const firstUser = event.users[0];

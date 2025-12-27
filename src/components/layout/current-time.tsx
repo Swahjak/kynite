@@ -1,9 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { format } from "date-fns";
+import { useUserPreferences } from "@/hooks/use-preferences";
 
 export function CurrentTime() {
   const [time, setTime] = useState<Date | null>(null);
+  const { data: preferences } = useUserPreferences();
+  const use24HourFormat = preferences?.use24HourFormat ?? true;
 
   useEffect(() => {
     setTime(new Date());
@@ -18,10 +22,7 @@ export function CurrentTime() {
     return null;
   }
 
-  const formattedTime = time.toLocaleTimeString("nl-NL", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const formattedTime = format(time, use24HourFormat ? "HH:mm" : "h:mm a");
 
   return (
     <time

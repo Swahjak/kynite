@@ -3,6 +3,7 @@
 import type React from "react";
 import { createContext, useContext, useState, useEffect } from "react";
 import { useLocalStorage } from "@/components/calendar/hooks";
+import { useUpdatePreferences } from "@/hooks/use-preferences";
 import type { IEvent, IUser } from "@/components/calendar/interfaces";
 import type { TCalendarView, TEventColor } from "@/components/calendar/types";
 
@@ -33,14 +34,12 @@ interface ICalendarContext {
 interface CalendarSettings {
   badgeVariant: "dot" | "colored";
   view: TCalendarView;
-  use24HourFormat: boolean;
   agendaModeGroupBy: "date" | "color";
 }
 
 const DEFAULT_SETTINGS: CalendarSettings = {
   badgeVariant: "colored",
   view: "day",
-  use24HourFormat: true,
   agendaModeGroupBy: "date",
 };
 
@@ -52,12 +51,14 @@ export function CalendarProvider({
   events,
   badge = "colored",
   view = "day",
+  initialUse24HourFormat = true,
 }: {
   children: React.ReactNode;
   users: IUser[];
   events: IEvent[];
   view?: TCalendarView;
   badge?: "dot" | "colored";
+  initialUse24HourFormat?: boolean;
 }) {
   const [settings, setSettings] = useLocalStorage<CalendarSettings>(
     "calendar-settings",
@@ -68,6 +69,8 @@ export function CalendarProvider({
     }
   );
 
+  const updatePreferencesMutation = useUpdatePreferences();
+
   const [badgeVariant, setBadgeVariantState] = useState<"dot" | "colored">(
     settings.badgeVariant
   );
@@ -75,7 +78,7 @@ export function CalendarProvider({
     settings.view
   );
   const [use24HourFormat, setUse24HourFormatState] = useState<boolean>(
-    settings.use24HourFormat
+    initialUse24HourFormat
   );
   const [agendaModeGroupBy, setAgendaModeGroupByState] = useState<
     "date" | "color"
@@ -116,7 +119,7 @@ export function CalendarProvider({
   const toggleTimeFormat = () => {
     const newValue = !use24HourFormat;
     setUse24HourFormatState(newValue);
-    updateSettings({ use24HourFormat: newValue });
+    updatePreferencesMutation.mutate({ use24HourFormat: newValue });
   };
 
   const setAgendaModeGroupBy = (groupBy: "date" | "color") => {
