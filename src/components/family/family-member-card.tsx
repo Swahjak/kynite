@@ -24,7 +24,7 @@ import { RoleBadge } from "./role-badge";
 import { FamilyAvatar } from "./family-avatar";
 import { MemberEditDialog } from "./member-edit-dialog";
 import { UpgradeTokenDialog } from "./upgrade-token-dialog";
-import { Pencil, Trash2, Link } from "lucide-react";
+import { Pencil, Trash2, Link, Loader2 } from "lucide-react";
 
 interface FamilyMemberCardProps {
   member: FamilyMemberWithUser;
@@ -40,6 +40,8 @@ interface FamilyMemberCardProps {
     role?: FamilyMemberRole;
   }) => void;
   onRemove: () => void;
+  isRemoving?: boolean;
+  isUpdating?: boolean;
 }
 
 export function FamilyMemberCard({
@@ -51,6 +53,8 @@ export function FamilyMemberCard({
   canChangeRole,
   onUpdate,
   onRemove,
+  isRemoving,
+  isUpdating,
 }: FamilyMemberCardProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
@@ -101,16 +105,25 @@ export function FamilyMemberCard({
             size="icon"
             variant="ghost"
             onClick={() => setIsEditDialogOpen(true)}
+            disabled={isUpdating}
           >
-            <Pencil className="h-4 w-4" />
+            {isUpdating ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Pencil className="h-4 w-4" />
+            )}
           </Button>
         )}
 
         {canRemove && (
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button size="icon" variant="ghost">
-                <Trash2 className="text-destructive h-4 w-4" />
+              <Button size="icon" variant="ghost" disabled={isRemoving}>
+                {isRemoving ? (
+                  <Loader2 className="text-destructive h-4 w-4 animate-spin" />
+                ) : (
+                  <Trash2 className="text-destructive h-4 w-4" />
+                )}
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
@@ -121,8 +134,15 @@ export function FamilyMemberCard({
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={onRemove}>Remove</AlertDialogAction>
+                <AlertDialogCancel disabled={isRemoving}>
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction onClick={onRemove} disabled={isRemoving}>
+                  {isRemoving ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : null}
+                  Remove
+                </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
