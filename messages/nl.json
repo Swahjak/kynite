@@ -545,5 +545,16 @@
     "chores": "Klusjes & Sterren",
     "rewards": "Beloningswinkel",
     "wallHub": "Wandscherm"
+  },
+  "Error": {
+    "title": "Er is iets misgegaan",
+    "description": "Er is een onverwachte fout opgetreden.",
+    "tryAgain": "Probeer opnieuw",
+    "goHome": "Naar dashboard"
+  },
+  "NotFound": {
+    "title": "Pagina niet gevonden",
+    "description": "De pagina die je zoekt bestaat niet.",
+    "goHome": "Naar dashboard"
   }
 }
