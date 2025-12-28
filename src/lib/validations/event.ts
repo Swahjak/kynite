@@ -1,5 +1,23 @@
 import { z } from "zod";
 
+export const eventCategorySchema = z.enum([
+  "sports",
+  "work",
+  "school",
+  "family",
+  "social",
+  "home",
+]);
+
+export const eventTypeSchema = z.enum([
+  "event",
+  "birthday",
+  "appointment",
+  "task",
+  "reminder",
+]);
+
+// Keep for backward compatibility during migration
 export const eventColorSchema = z.enum([
   "blue",
   "green",
@@ -17,11 +35,15 @@ export const createEventSchema = z
     startTime: z.coerce.date(),
     endTime: z.coerce.date(),
     allDay: z.boolean().default(false),
-    color: eventColorSchema.nullable().optional(),
+    category: eventCategorySchema.default("family"),
+    eventType: eventTypeSchema.default("event"),
+    isCompleted: z.boolean().default(false),
+    color: eventColorSchema.nullable().optional(), // Deprecated, keep for migration
     googleCalendarId: z.string().nullable().optional(),
     participantIds: z
       .array(z.string())
       .min(1, "At least one participant required"),
+    ownerId: z.string().optional(), // First participant is owner if not specified
   })
   .refine((data) => data.endTime > data.startTime, {
     message: "End time must be after start time",
@@ -35,7 +57,6 @@ export const updateEventSchema = createEventSchema
   })
   .refine(
     (data) => {
-      // Only validate if both are provided
       if (data.startTime && data.endTime) {
         return data.endTime > data.startTime;
       }
@@ -51,7 +72,9 @@ export const eventQuerySchema = z.object({
   startDate: z.coerce.date().optional(),
   endDate: z.coerce.date().optional(),
   participantIds: z.array(z.string()).optional(),
-  colors: z.array(eventColorSchema).optional(),
+  categories: z.array(eventCategorySchema).optional(),
+  eventTypes: z.array(eventTypeSchema).optional(),
+  colors: z.array(eventColorSchema).optional(), // Deprecated
 });
 
 export type CreateEventInput = z.infer<typeof createEventSchema>;
