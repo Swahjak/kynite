@@ -31,7 +31,8 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "setup-channels": "tsx scripts/setup-push-channels.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "cms:migrate-homepage": "tsx scripts/seed-homepage.ts"
   },
   "dependencies": {
     "@47ng/cloak": "^1.2.0",
