@@ -1,5 +1,6 @@
-import { COLORS } from "@/components/calendar/constants";
 import type { IEvent, IUser } from "@/components/calendar/interfaces";
+import { CATEGORIES } from "@/components/calendar/types";
+import type { TEventCategory } from "@/components/calendar/types";
 
 export const USERS_MOCK: IUser[] = [
   {
@@ -137,12 +138,16 @@ const mockGenerator = (numberOfEvents: number): IEvent[] => {
   endRange.setDate(now.getDate() + 30);
 
   // Create an event happening now
-  const currentEvent = {
+  const currentEvent: IEvent = {
     id: String(currentId++),
     startDate: new Date(now.getTime() - 30 * 60000).toISOString(),
     endDate: new Date(now.getTime() + 30 * 60000).toISOString(),
     title: events[Math.floor(Math.random() * events.length)],
-    color: COLORS[Math.floor(Math.random() * COLORS.length)],
+    category: CATEGORIES[
+      Math.floor(Math.random() * CATEGORIES.length)
+    ] as TEventCategory,
+    eventType: "event",
+    allDay: false,
     description:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
     users: [randomUser],
@@ -195,7 +200,11 @@ const mockGenerator = (numberOfEvents: number): IEvent[] => {
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString(),
       title: events[Math.floor(Math.random() * events.length)],
-      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      category: CATEGORIES[
+        Math.floor(Math.random() * CATEGORIES.length)
+      ] as TEventCategory,
+      eventType: "event",
+      allDay: false,
       description:
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
       users: eventUsers,
