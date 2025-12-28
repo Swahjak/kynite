@@ -5,7 +5,12 @@ import { createContext, useContext, useState, useEffect } from "react";
 import { useLocalStorage } from "@/components/calendar/hooks";
 import { useUpdatePreferences } from "@/hooks/use-preferences";
 import type { IEvent, IUser } from "@/components/calendar/interfaces";
-import type { TCalendarView, TEventColor } from "@/components/calendar/types";
+import type {
+  TCalendarView,
+  TEventColor,
+  TRegion,
+} from "@/components/calendar/types";
+import { CATEGORY_COLORS } from "@/components/calendar/types";
 
 interface ICalendarContext {
   selectedDate: Date;
@@ -29,6 +34,8 @@ interface ICalendarContext {
   updateEvent: (event: IEvent) => void;
   removeEvent: (eventId: string) => void;
   clearFilter: () => void;
+  currentUserId: string | null;
+  region: TRegion;
 }
 
 interface CalendarSettings {
@@ -52,6 +59,8 @@ export function CalendarProvider({
   badge = "colored",
   view = "day",
   initialUse24HourFormat = true,
+  currentUserId = null,
+  region = "NL",
 }: {
   children: React.ReactNode;
   users: IUser[];
@@ -59,6 +68,8 @@ export function CalendarProvider({
   view?: TCalendarView;
   badge?: "dot" | "colored";
   initialUse24HourFormat?: boolean;
+  currentUserId?: string | null;
+  region?: TRegion;
 }) {
   const [settings, setSettings] = useLocalStorage<CalendarSettings>(
     "calendar-settings",
@@ -135,7 +146,8 @@ export function CalendarProvider({
 
     if (newColors.length > 0) {
       const filtered = allEvents.filter((event) => {
-        const eventColor = event.color || "blue";
+        // Derive color from category
+        const eventColor = CATEGORY_COLORS[event.category] || "blue";
         return newColors.includes(eventColor);
       });
       setFilteredEvents(filtered);
@@ -214,6 +226,8 @@ export function CalendarProvider({
     updateEvent,
     removeEvent,
     clearFilter,
+    currentUserId,
+    region,
   };
 
   return (
