@@ -1,35 +1,46 @@
 import type { IEvent, IUser } from "@/components/calendar/interfaces";
 import type { EventWithParticipants } from "@/server/services/event-service";
 import { CALENDAR_ITEMS_MOCK, USERS_MOCK } from "@/components/calendar/mocks";
-import type { TEventColor } from "@/components/calendar/types";
+import type { TEventCategory, TEventType } from "@/components/calendar/types";
 
-// Map avatar color to event color (handles pink/teal which aren't in TEventColor)
-function avatarColorToEventColor(avatarColor: string | null): TEventColor {
-  const colorMap: Record<string, TEventColor> = {
-    blue: "blue",
-    green: "green",
-    red: "red",
-    yellow: "yellow",
-    purple: "purple",
-    orange: "orange",
-    pink: "red", // Fallback
-    teal: "green", // Fallback
-  };
-  return colorMap[avatarColor ?? ""] ?? "blue";
+// Map string eventType from database to TEventType
+function normalizeEventType(eventType: string | null): TEventType {
+  const validTypes: TEventType[] = [
+    "event",
+    "birthday",
+    "appointment",
+    "task",
+    "reminder",
+  ];
+  if (eventType && validTypes.includes(eventType as TEventType)) {
+    return eventType as TEventType;
+  }
+  return "event";
+}
+
+// Infer category from eventType (for events from external sources without category)
+function inferCategory(eventType: TEventType): TEventCategory {
+  switch (eventType) {
+    case "birthday":
+      return "family";
+    case "appointment":
+      return "work";
+    case "task":
+      return "home";
+    case "reminder":
+      return "home";
+    default:
+      return "family";
+  }
 }
 
 // Transform API response to calendar IEvent format
 export function transformEventToIEvent(event: EventWithParticipants): IEvent {
-  const isBirthday = event.eventType === "birthday";
+  const eventType = normalizeEventType(event.eventType);
+  const category = inferCategory(eventType);
 
-  // Use first participant's avatar color for the event color
-  // Birthday events use red (brand: special dates)
-  const firstParticipant = event.participants[0];
-  const eventColor = isBirthday
-    ? "red"
-    : firstParticipant
-      ? avatarColorToEventColor(firstParticipant.avatarColor)
-      : "blue";
+  // Find the owner participant for ownerId
+  const ownerParticipant = event.participants.find((p) => p.isOwner);
 
   return {
     id: event.id,
@@ -37,8 +48,12 @@ export function transformEventToIEvent(event: EventWithParticipants): IEvent {
     description: event.description ?? "",
     startDate: new Date(event.startTime).toISOString(),
     endDate: new Date(event.endTime).toISOString(),
-    color: eventColor,
-    eventType: event.eventType,
+    category,
+    eventType,
+    allDay: event.allDay,
+    isCompleted: false, // Events from calendar are not tasks with completion state
+    ownerId: ownerParticipant?.familyMemberId,
+    isHidden: event.isHidden,
     users: event.participants.map((p) => ({
       id: p.familyMemberId,
       name: p.displayName ?? p.userName,

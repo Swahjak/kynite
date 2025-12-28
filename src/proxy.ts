@@ -46,6 +46,11 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Skip proxy for Payload CMS admin (handles its own auth)
+  if (pathname.startsWith("/admin")) {
+    return NextResponse.next();
+  }
+
   // Handle help docs (Nextra handles its own i18n)
   if (pathname.startsWith("/help")) {
     // Redirect /help to /help/{locale} based on user preference

@@ -7,6 +7,7 @@ import { EventDetailsDialog } from "@/components/calendar/dialogs/event-details-
 import { DraggableEvent } from "@/components/calendar/dnd/draggable-event";
 import { formatTime } from "@/components/calendar/helpers";
 import type { IEvent } from "@/components/calendar/interfaces";
+import { CATEGORY_COLORS } from "@/components/calendar/types";
 import { EventBullet } from "@/components/calendar/views/month-view/event-bullet";
 
 const eventBadgeVariants = cva(
@@ -98,8 +99,9 @@ export function MonthEventBadge({
   const renderBadgeText = ["first", "none"].includes(position);
   const renderBadgeTime = ["last", "none"].includes(position);
 
+  const eventColor = CATEGORY_COLORS[event.category];
   const color = (
-    badgeVariant === "dot" ? `${event.color}-dot` : event.color
+    badgeVariant === "dot" ? `${eventColor}-dot` : eventColor
   ) as VariantProps<typeof eventBadgeVariants>["color"];
 
   const eventBadgeClasses = cn(
@@ -118,7 +120,7 @@ export function MonthEventBadge({
         >
           <div className="flex items-center gap-1.5 truncate">
             {!["middle", "last"].includes(position) &&
-              badgeVariant === "dot" && <EventBullet color={event.color} />}
+              badgeVariant === "dot" && <EventBullet color={eventColor} />}
 
             {renderBadgeText && (
               <p className="flex-1 truncate font-semibold">

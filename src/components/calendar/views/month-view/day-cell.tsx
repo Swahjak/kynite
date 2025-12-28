@@ -12,6 +12,7 @@ import { DroppableArea } from "@/components/calendar/dnd/droppable-area";
 import { getMonthCellEvents } from "@/components/calendar/helpers";
 import { useMediaQuery } from "@/components/calendar/hooks";
 import type { ICalendarCell, IEvent } from "@/components/calendar/interfaces";
+import { CATEGORY_COLORS } from "@/components/calendar/types";
 import { EventBullet } from "@/components/calendar/views/month-view/event-bullet";
 import { MonthEventBadge } from "@/components/calendar/views/month-view/month-event-badge";
 import { AddEditEventDialog } from "../../dialogs/add-edit-event-dialog";
@@ -91,7 +92,10 @@ export function DayCell({ cell, events, eventPositions }: IProps) {
         >
           <>
             {showBullet && (
-              <EventBullet className="lg:hidden" color={event.color} />
+              <EventBullet
+                className="lg:hidden"
+                color={CATEGORY_COLORS[event.category]}
+              />
             )}
             <MonthEventBadge
               className="hidden lg:flex"

@@ -1,4 +1,4 @@
-import type { TEventColor } from "@/components/calendar/types";
+import type { TEventCategory, TEventType } from "@/components/calendar/types";
 
 export interface IUser {
   id: string;
@@ -14,11 +14,15 @@ export interface IEvent {
   startDate: string;
   endDate: string;
   title: string;
-  color: TEventColor;
   description: string;
   users: IUser[];
   isHidden?: boolean;
-  eventType?: string | null;
+  // New/updated fields
+  category: TEventCategory;
+  eventType: TEventType;
+  allDay: boolean;
+  isCompleted?: boolean;
+  ownerId?: string;
 }
 
 export interface ICalendarCell {

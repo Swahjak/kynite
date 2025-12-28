@@ -15,6 +15,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Modal,
   ModalClose,
@@ -25,22 +26,23 @@ import {
   ModalTitle,
   ModalTrigger,
 } from "@/components/ui/responsive-modal";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { COLORS } from "@/components/calendar/constants";
+import {
+  MultiSelectCombobox,
+  type MultiSelectOption,
+} from "@/components/ui/multi-select-combobox";
 import { useCalendar } from "@/components/calendar/contexts/calendar-context";
+import { CategorySelect } from "@/components/calendar/fields/category-select";
+import { EventTypeSelect } from "@/components/calendar/fields/event-type-select";
+import { PersonSelect } from "@/components/calendar/fields/person-select";
 import { useDisclosure } from "@/components/calendar/hooks";
 import type { IEvent } from "@/components/calendar/interfaces";
 import {
   eventSchema,
   type TEventFormData,
 } from "@/components/calendar/schemas";
+import type { TEventCategory, TEventType } from "@/components/calendar/types";
 
 interface IProps {
   children: ReactNode;
@@ -56,7 +58,7 @@ export function AddEditEventDialog({
   event,
 }: IProps) {
   const { isOpen, onClose, onToggle } = useDisclosure();
-  const { addEvent, updateEvent } = useCalendar();
+  const { addEvent, updateEvent, users, currentUserId } = useCalendar();
   const t = useTranslations("EventDialog");
   const tCommon = useTranslations("Common");
   const isEditing = !!event;
@@ -84,6 +86,9 @@ export function AddEditEventDialog({
     };
   }, [startDate, startTime, event, isEditing]);
 
+  // Get default owner (current user or first user available)
+  const defaultOwnerId = currentUserId ?? (users.length > 0 ? users[0].id : "");
+
   const form = useForm<TEventFormData>({
     resolver: zodResolver(eventSchema),
     defaultValues: {
@@ -91,7 +96,13 @@ export function AddEditEventDialog({
       description: event?.description ?? "",
       startDate: initialDates.startDate,
       endDate: initialDates.endDate,
-      color: event?.color ?? "blue",
+      category: event?.category ?? "family",
+      eventType: event?.eventType ?? "event",
+      allDay: event?.allDay ?? false,
+      ownerId: event?.ownerId ?? defaultOwnerId,
+      participantIds:
+        event?.users.filter((u) => u.id !== event?.ownerId).map((u) => u.id) ??
+        [],
     },
   });
 
@@ -101,31 +112,51 @@ export function AddEditEventDialog({
       description: event?.description ?? "",
       startDate: initialDates.startDate,
       endDate: initialDates.endDate,
-      color: event?.color ?? "blue",
+      category: event?.category ?? "family",
+      eventType: event?.eventType ?? "event",
+      allDay: event?.allDay ?? false,
+      ownerId: event?.ownerId ?? defaultOwnerId,
+      participantIds:
+        event?.users.filter((u) => u.id !== event?.ownerId).map((u) => u.id) ??
+        [],
     });
-  }, [event, initialDates, form]);
+  }, [event, initialDates, form, defaultOwnerId]);
+
+  const allDay = form.watch("allDay");
+
+  // Build participant options from users (excluding owner)
+  const participantOptions: MultiSelectOption[] = useMemo(() => {
+    const ownerId = form.getValues("ownerId");
+    return users
+      .filter((user) => user.id !== ownerId)
+      .map((user) => ({
+        value: user.id,
+        label: user.name,
+      }));
+  }, [users, form]);
 
   const onSubmit = (values: TEventFormData) => {
     try {
+      // Build users array from ownerId and participantIds
+      const owner = users.find((u) => u.id === values.ownerId);
+      const participants = users.filter((u) =>
+        values.participantIds.includes(u.id)
+      );
+      const eventUsers = owner ? [owner, ...participants] : participants;
+
       const formattedEvent: IEvent = {
-        ...values,
-        startDate: format(values.startDate, "yyyy-MM-dd'T'HH:mm:ss"),
-        endDate: format(values.endDate, "yyyy-MM-dd'T'HH:mm:ss"),
         id: isEditing
           ? event.id
           : Math.floor(Math.random() * 1000000).toString(),
-        users: isEditing
-          ? event.users
-          : [
-              {
-                id: Math.floor(Math.random() * 1000000).toString(),
-                name: "Jeraidi Yassir",
-                avatarFallback: "JY",
-                avatarColor: "bg-primary",
-                avatarUrl: undefined,
-              },
-            ],
-        color: values.color,
+        title: values.title,
+        description: values.description ?? "",
+        startDate: format(values.startDate, "yyyy-MM-dd'T'HH:mm:ss"),
+        endDate: format(values.endDate, "yyyy-MM-dd'T'HH:mm:ss"),
+        category: values.category as TEventCategory,
+        eventType: values.eventType as TEventType,
+        allDay: values.allDay,
+        ownerId: values.ownerId,
+        users: eventUsers,
       };
 
       if (isEditing) {
@@ -161,6 +192,7 @@ export function AddEditEventDialog({
             onSubmit={form.handleSubmit(onSubmit)}
             className="grid gap-4 py-4"
           >
+            {/* Title */}
             <FormField
               control={form.control}
               name="title"
@@ -181,63 +213,142 @@ export function AddEditEventDialog({
                 </FormItem>
               )}
             />
+
+            {/* All Day Toggle */}
+            <FormField
+              control={form.control}
+              name="allDay"
+              render={({ field }) => (
+                <FormItem className="flex items-center justify-between">
+                  <Label htmlFor="allDay">{t("allDayLabel")}</Label>
+                  <FormControl>
+                    <Switch
+                      id="allDay"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            {/* Start Date */}
             <FormField
               control={form.control}
               name="startDate"
               render={({ field }) => (
-                <DateTimePicker form={form} field={field} />
+                <DateTimePicker
+                  form={form}
+                  field={field}
+                  hideTime={allDay}
+                  label={t("startDateLabel")}
+                />
               )}
             />
+
+            {/* End Date */}
             <FormField
               control={form.control}
               name="endDate"
               render={({ field }) => (
-                <DateTimePicker form={form} field={field} />
+                <DateTimePicker
+                  form={form}
+                  field={field}
+                  hideTime={allDay}
+                  label={t("endDateLabel")}
+                />
               )}
             />
+
+            {/* Category */}
             <FormField
               control={form.control}
-              name="color"
-              render={({ field, fieldState }) => (
+              name="category"
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel className="required">
-                    {t("variantLabel")}
+                    {t("categoryLabel")}
                   </FormLabel>
                   <FormControl>
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger
-                        className={`w-full ${
-                          fieldState.invalid ? "border-red-500" : ""
-                        }`}
-                      >
-                        <SelectValue placeholder={t("variantPlaceholder")} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {COLORS.map((color) => (
-                          <SelectItem value={color} key={color}>
-                            <div className="flex items-center gap-2">
-                              <div
-                                className={`size-3.5 rounded-full bg-${color}-600 dark:bg-${color}-700`}
-                              />
-                              {color}
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <CategorySelect
+                      value={field.value as TEventCategory}
+                      onValueChange={field.onChange}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
+            {/* Event Type */}
+            <FormField
+              control={form.control}
+              name="eventType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="required">
+                    {t("eventTypeLabel")}
+                  </FormLabel>
+                  <FormControl>
+                    <EventTypeSelect
+                      value={field.value as TEventType}
+                      onValueChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Owner */}
+            <FormField
+              control={form.control}
+              name="ownerId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="required">
+                    {t("assignedToLabel")}
+                  </FormLabel>
+                  <FormControl>
+                    <PersonSelect
+                      users={users}
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      placeholder={t("assignedToPlaceholder")}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Participants */}
+            <FormField
+              control={form.control}
+              name="participantIds"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("participantsLabel")}</FormLabel>
+                  <FormControl>
+                    <MultiSelectCombobox
+                      options={participantOptions}
+                      selected={field.value}
+                      onChange={field.onChange}
+                      placeholder={t("participantsPlaceholder")}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Description */}
             <FormField
               control={form.control}
               name="description"
               render={({ field, fieldState }) => (
                 <FormItem>
-                  <FormLabel className="required">
-                    {t("descriptionLabel")}
-                  </FormLabel>
+                  <FormLabel>{t("descriptionLabel")}</FormLabel>
                   <FormControl>
                     <Textarea
                       {...field}

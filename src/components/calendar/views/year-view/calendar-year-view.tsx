@@ -6,6 +6,7 @@ import { useCalendar } from "@/components/calendar/contexts/calendar-context";
 import { EventListDialog } from "@/components/calendar/dialogs/events-list-dialog";
 import { getCalendarCells } from "@/components/calendar/helpers";
 import type { IEvent } from "@/components/calendar/interfaces";
+import { CATEGORY_COLORS } from "@/components/calendar/types";
 import { EventBullet } from "@/components/calendar/views/month-view/event-bullet";
 
 interface IProps {
@@ -123,14 +124,16 @@ export function CalendarYearView({ singleDayEvents, multiDayEvents }: IProps) {
                                   .map((event) => (
                                     <EventBullet
                                       key={event.id}
-                                      color={event.color}
+                                      color={CATEGORY_COLORS[event.category]}
                                       className="size-1.5"
                                     />
                                   ))
                               ) : (
                                 <div className="flex flex-col items-center justify-center">
                                   <EventBullet
-                                    color={dayEvents[0].color}
+                                    color={
+                                      CATEGORY_COLORS[dayEvents[0].category]
+                                    }
                                     className="size-1.5"
                                   />
                                   <span className="text-[0.6rem]">
