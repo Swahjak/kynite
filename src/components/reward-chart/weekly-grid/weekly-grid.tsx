@@ -174,8 +174,12 @@ export function WeeklyGrid({ className }: WeeklyGridProps) {
                   key={taskRow.task.id}
                   taskRow={taskRow}
                   days={days}
-                  onComplete={completeTask}
-                  onUndo={undoCompletion}
+                  onComplete={async (taskId) => {
+                    await completeTask(taskId);
+                  }}
+                  onUndo={async (taskId) => {
+                    await undoCompletion(taskId);
+                  }}
                   disabled={isLoading}
                   showControls={isManager}
                   onEdit={handleEditTask}

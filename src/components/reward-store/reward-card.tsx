@@ -1,6 +1,6 @@
 "use client";
 
-import { Star, Clock, Target, Pencil, Trash2 } from "lucide-react";
+import { Star, Clock, Target, Pencil, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -23,6 +23,8 @@ interface RewardCardProps {
   onEdit?: () => void;
   onDelete?: () => void;
   onSetGoal?: () => void;
+  isSettingGoal?: boolean;
+  isDeleting?: boolean;
   className?: string;
 }
 
@@ -33,6 +35,8 @@ export function RewardCard({
   onEdit,
   onDelete,
   onSetGoal,
+  isSettingGoal,
+  isDeleting,
   className,
 }: RewardCardProps) {
   const t = useTranslations("rewardStore");
@@ -127,8 +131,17 @@ export function RewardCard({
           {isManager && (
             <>
               {onSetGoal && !isPrimaryGoal && (
-                <Button variant="ghost" size="sm" onClick={onSetGoal}>
-                  <Target className="h-4 w-4" />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onSetGoal}
+                  disabled={isSettingGoal}
+                >
+                  {isSettingGoal ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Target className="h-4 w-4" />
+                  )}
                 </Button>
               )}
               {onEdit && (
@@ -137,8 +150,17 @@ export function RewardCard({
                 </Button>
               )}
               {onDelete && (
-                <Button variant="ghost" size="sm" onClick={onDelete}>
-                  <Trash2 className="h-4 w-4" />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onDelete}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="h-4 w-4" />
+                  )}
                 </Button>
               )}
             </>

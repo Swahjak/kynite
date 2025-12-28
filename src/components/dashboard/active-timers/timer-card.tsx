@@ -6,7 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Pause, Plus, Check, X, Star } from "lucide-react";
+import { Pause, Plus, Check, X, Star, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { useIsManager } from "@/hooks/use-is-manager";
 import { useDashboard } from "../contexts/dashboard-context";
 import { useConfetti } from "@/components/confetti";
@@ -39,6 +40,21 @@ export function TimerCard({ timer }: TimerCardProps) {
 
   const [remaining, setRemaining] = useState(timer.remainingSeconds);
   const [cooldownElapsed, setCooldownElapsed] = useState(0);
+  const [pendingAction, setPendingAction] = useState<string | null>(null);
+
+  // Helper function to wrap async actions with pending state
+  const withPending =
+    (actionName: string, action: () => Promise<void>) => async () => {
+      if (pendingAction) return;
+      setPendingAction(actionName);
+      try {
+        await action();
+      } catch {
+        toast.error("Action failed");
+      } finally {
+        setPendingAction(null);
+      }
+    };
 
   // Find the assigned member for avatar display
   const assignedMember = timer.assignedToId
@@ -139,26 +155,26 @@ export function TimerCard({ timer }: TimerCardProps) {
 
   const extendTime = getExtendTime();
 
-  const handleConfirm = () => {
+  const handleConfirm = withPending("claim", async () => {
     // Use the assigned member as the confirmer (anyone can click, stars go to assigned)
     if (timer.assignedToId) {
-      confirmTimer(timer.id, timer.assignedToId);
+      await confirmTimer(timer.id, timer.assignedToId);
       fire(timer.starReward);
     }
-  };
+  });
 
-  const handleDismiss = () => {
-    dismissTimer(timer.id);
-  };
+  const handleDismiss = withPending("dismiss", async () => {
+    await dismissTimer(timer.id);
+  });
 
-  const handleAcknowledge = () => {
-    acknowledgeTimer(timer.id);
+  const handleAcknowledge = withPending("acknowledge", async () => {
+    await acknowledgeTimer(timer.id);
     // Only fire confetti for early completion (remaining time > 0)
     // No celebration when dismissing an expired timer at 0:00
     if (timer.starReward > 0 && remaining > 0) {
       fire(timer.starReward);
     }
-  };
+  });
 
   // Render action buttons based on state
   const renderActions = () => {
@@ -172,18 +188,32 @@ export function TimerCard({ timer }: TimerCardProps) {
                   variant="outline"
                   size="sm"
                   className="h-8 flex-1 text-xs"
-                  onClick={() => extendTimer(timer.id, extendTime.seconds)}
+                  onClick={withPending("extend", async () => {
+                    await extendTimer(timer.id, extendTime.seconds);
+                  })}
+                  disabled={!!pendingAction}
                 >
-                  <Plus className="mr-1 h-3 w-3" />
+                  {pendingAction === "extend" ? (
+                    <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                  ) : (
+                    <Plus className="mr-1 h-3 w-3" />
+                  )}
                   {extendTime.label}
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   className="h-8 flex-1 text-xs"
-                  onClick={() => pauseTimer(timer.id)}
+                  onClick={withPending("pause", async () => {
+                    await pauseTimer(timer.id);
+                  })}
+                  disabled={!!pendingAction}
                 >
-                  <Pause className="mr-1 h-3 w-3" />
+                  {pendingAction === "pause" ? (
+                    <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                  ) : (
+                    <Pause className="mr-1 h-3 w-3" />
+                  )}
                   {t("pause")}
                 </Button>
               </>
@@ -193,8 +223,13 @@ export function TimerCard({ timer }: TimerCardProps) {
               size="sm"
               className="h-8 flex-1 text-xs"
               onClick={handleAcknowledge}
+              disabled={!!pendingAction}
             >
-              <Check className="mr-1 h-3 w-3" />
+              {pendingAction === "acknowledge" ? (
+                <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+              ) : (
+                <Check className="mr-1 h-3 w-3" />
+              )}
               {t("done")}
             </Button>
           </div>
@@ -210,8 +245,13 @@ export function TimerCard({ timer }: TimerCardProps) {
             size="sm"
             className="h-10 w-full"
             onClick={handleConfirm}
+            disabled={!!pendingAction}
           >
-            <Star className="mr-2 h-4 w-4" />
+            {pendingAction === "claim" ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Star className="mr-2 h-4 w-4" />
+            )}
             {t("claim")} (+{timer.starReward})
           </Button>
         );
@@ -223,8 +263,13 @@ export function TimerCard({ timer }: TimerCardProps) {
             size="sm"
             className="h-10 w-full"
             onClick={handleDismiss}
+            disabled={!!pendingAction}
           >
-            <X className="mr-2 h-4 w-4" />
+            {pendingAction === "dismiss" ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <X className="mr-2 h-4 w-4" />
+            )}
             {t("dismiss")}
           </Button>
         );
@@ -236,8 +281,13 @@ export function TimerCard({ timer }: TimerCardProps) {
             size="sm"
             className="h-10 w-full"
             onClick={handleAcknowledge}
+            disabled={!!pendingAction}
           >
-            <Check className="mr-2 h-4 w-4" />
+            {pendingAction === "acknowledge" ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Check className="mr-2 h-4 w-4" />
+            )}
             {t("done")}
           </Button>
         );

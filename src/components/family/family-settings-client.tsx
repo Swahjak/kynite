@@ -53,6 +53,9 @@ export function FamilySettingsClient({
   const [familyName, setFamilyName] = useState(family.name);
   const [isSaving, setIsSaving] = useState(false);
   const [isAddChildOpen, setIsAddChildOpen] = useState(false);
+  const [pendingRemoveId, setPendingRemoveId] = useState<string | null>(null);
+  const [isLeaving, setIsLeaving] = useState(false);
+  const [pendingUpdateId, setPendingUpdateId] = useState<string | null>(null);
 
   async function handleSaveName() {
     if (!familyName.trim()) {
@@ -87,6 +90,8 @@ export function FamilySettingsClient({
   }
 
   async function handleRemoveMember(memberId: string) {
+    if (pendingRemoveId || isLeaving) return;
+    setPendingRemoveId(memberId);
     try {
       const response = await fetch(
         `/api/v1/families/${family.id}/members/${memberId}`,
@@ -104,13 +109,16 @@ export function FamilySettingsClient({
       toast.success("Member removed");
     } catch (error) {
       toast.error("Something went wrong");
+    } finally {
+      setPendingRemoveId(null);
     }
   }
 
   async function handleLeaveFamily() {
     const currentMember = members.find((m) => m.userId === currentUserId);
-    if (!currentMember) return;
+    if (!currentMember || isLeaving) return;
 
+    setIsLeaving(true);
     try {
       const response = await fetch(
         `/api/v1/families/${family.id}/members/${currentMember.id}`,
@@ -128,6 +136,8 @@ export function FamilySettingsClient({
       router.push(`/${locale}/onboarding`);
     } catch (error) {
       toast.error("Something went wrong");
+    } finally {
+      setIsLeaving(false);
     }
   }
 
@@ -135,6 +145,8 @@ export function FamilySettingsClient({
     memberId: string,
     data: Partial<FamilyMember>
   ) {
+    if (pendingUpdateId) return;
+    setPendingUpdateId(memberId);
     try {
       const response = await fetch(
         `/api/v1/families/${family.id}/members/${memberId}`,
@@ -160,6 +172,8 @@ export function FamilySettingsClient({
       toast.success("Member updated");
     } catch (error) {
       toast.error("Something went wrong");
+    } finally {
+      setPendingUpdateId(null);
     }
   }
 
@@ -257,6 +271,8 @@ export function FamilySettingsClient({
               canChangeRole={isManager}
               onUpdate={(data) => handleMemberUpdate(member.id, data)}
               onRemove={() => handleRemoveMember(member.id)}
+              isRemoving={pendingRemoveId === member.id}
+              isUpdating={pendingUpdateId === member.id}
             />
           ))}
         </CardContent>
@@ -286,7 +302,16 @@ export function FamilySettingsClient({
         <CardContent>
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="destructive">Leave Family</Button>
+              <Button variant="destructive" disabled={isLeaving}>
+                {isLeaving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Leaving...
+                  </>
+                ) : (
+                  "Leave Family"
+                )}
+              </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
@@ -297,8 +322,16 @@ export function FamilySettingsClient({
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleLeaveFamily}>
+                <AlertDialogCancel disabled={isLeaving}>
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleLeaveFamily}
+                  disabled={isLeaving}
+                >
+                  {isLeaving ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : null}
                   Leave
                 </AlertDialogAction>
               </AlertDialogFooter>

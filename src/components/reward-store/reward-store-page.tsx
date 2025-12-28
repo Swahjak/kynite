@@ -49,6 +49,8 @@ export function RewardStorePage() {
   const [selectedReward, setSelectedReward] =
     useState<IRewardWithStatus | null>(null);
   const [isRedeeming, setIsRedeeming] = useState(false);
+  const [pendingGoalId, setPendingGoalId] = useState<string | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   const handleCreateReward = async (input: CreateRewardInput) => {
     try {
@@ -77,6 +79,7 @@ export function RewardStorePage() {
   };
 
   const handleDeleteReward = async (reward: IReward) => {
+    setPendingDeleteId(reward.id);
     try {
       await deleteReward(reward.id);
       toast.success("Reward deleted");
@@ -84,6 +87,8 @@ export function RewardStorePage() {
       toast.error(
         error instanceof Error ? error.message : "Failed to delete reward"
       );
+    } finally {
+      setPendingDeleteId(null);
     }
   };
 
@@ -103,6 +108,7 @@ export function RewardStorePage() {
   };
 
   const handleSetPrimaryGoal = async (reward: IReward) => {
+    setPendingGoalId(reward.id);
     try {
       await setPrimaryGoal(reward.id);
       toast.success("Primary goal set!");
@@ -110,6 +116,8 @@ export function RewardStorePage() {
       toast.error(
         error instanceof Error ? error.message : "Failed to set goal"
       );
+    } finally {
+      setPendingGoalId(null);
     }
   };
 
@@ -194,6 +202,8 @@ export function RewardStorePage() {
                       ? () => handleSetPrimaryGoal(reward)
                       : undefined
                   }
+                  isSettingGoal={pendingGoalId === reward.id}
+                  isDeleting={pendingDeleteId === reward.id}
                 />
               ))}
             </div>
