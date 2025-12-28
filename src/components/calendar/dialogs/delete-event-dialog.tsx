@@ -1,4 +1,5 @@
-import { TrashIcon } from "lucide-react";
+import { TrashIcon, Loader2 } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -20,13 +21,17 @@ interface DeleteEventDialogProps {
 
 export default function DeleteEventDialog({ eventId }: DeleteEventDialogProps) {
   const { removeEvent } = useCalendar();
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const deleteEvent = () => {
+  const deleteEvent = async () => {
+    if (isDeleting) return;
+    setIsDeleting(true);
     try {
-      removeEvent(eventId);
+      await removeEvent(eventId);
       toast.success("Event deleted successfully.");
     } catch {
       toast.error("Error deleting event.");
+      setIsDeleting(false);
     }
   };
 
@@ -51,8 +56,17 @@ export default function DeleteEventDialog({ eventId }: DeleteEventDialogProps) {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={deleteEvent}>Continue</AlertDialogAction>
+          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={deleteEvent} disabled={isDeleting}>
+            {isDeleting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Deleting...
+              </>
+            ) : (
+              "Continue"
+            )}
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
