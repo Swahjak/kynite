@@ -61,6 +61,8 @@ export const events = pgTable("events", {
   allDay: boolean("all_day").notNull().default(false),
   eventType: text("event_type"), // 'default' | 'birthday' | 'fromGmail' | null for manual events
   color: text("color"),
+  category: text("category"), // 'sports' | 'work' | 'school' | 'family' | 'social' | 'home'
+  isCompleted: boolean("is_completed").notNull().default(false),
   // Google Sync Metadata
   googleCalendarId: text("google_calendar_id").references(
     () => googleCalendars.id,
