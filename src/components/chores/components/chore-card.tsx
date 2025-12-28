@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Hand, Pencil, Star, Trash2 } from "lucide-react";
+import { Check, Hand, Loader2, Pencil, Star, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { FamilyAvatar } from "@/components/family/family-avatar";
@@ -18,6 +18,7 @@ import { useChoresOptional } from "../contexts/chores-context";
 import { useIsManager } from "@/hooks/use-is-manager";
 import { useConfetti } from "@/components/confetti";
 import { TakeChoreDialog } from "./take-chore-dialog";
+import { toast } from "sonner";
 
 /** Minimal chore data needed for display */
 export interface ChoreCardData {
@@ -123,10 +124,15 @@ export function ChoreCard({
 
   const handleComplete = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!completeChore) return;
+    if (!completeChore || isCompleting) return;
     setIsCompleting(true);
-    await completeChore(chore.id);
-    fire(chore.starReward);
+    try {
+      await completeChore(chore.id);
+      fire(chore.starReward);
+    } catch {
+      toast.error("Failed to complete chore");
+      setIsCompleting(false);
+    }
   };
 
   const handleTake = (e: React.MouseEvent) => {
@@ -169,8 +175,7 @@ export function ChoreCard({
       className={cn(
         "group bg-card relative rounded-xl border transition-all duration-200",
         canExpand && "cursor-pointer",
-        isExpanded && "border-primary shadow-sm",
-        isCompleting && "animate-out slide-out-to-right fade-out duration-300"
+        isExpanded && "border-primary shadow-sm"
       )}
     >
       {/* Main Content */}
@@ -227,13 +232,19 @@ export function ChoreCard({
               size="icon"
               className={cn(
                 "h-12 w-12 shrink-0 rounded-full transition-colors",
-                "bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground active:bg-primary/90"
+                isCompleting
+                  ? "bg-emerald-500 text-white"
+                  : "bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground active:bg-primary/90"
               )}
               onClick={handleComplete}
               disabled={isCompleting || !completeChore}
               aria-label={`Mark ${chore.title} as complete`}
             >
-              <Check className="h-5 w-5" />
+              {isCompleting ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <Check className="h-5 w-5" />
+              )}
             </Button>
           ))}
       </div>
@@ -260,7 +271,11 @@ export function ChoreCard({
               onClick={handleComplete}
               disabled={isCompleting || !completeChore}
             >
-              <Check className="mr-1 h-4 w-4" />
+              {isCompleting ? (
+                <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+              ) : (
+                <Check className="mr-1 h-4 w-4" />
+              )}
               {t("done")}
             </Button>
           )}
