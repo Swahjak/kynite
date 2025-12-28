@@ -9,9 +9,13 @@ on:
 
 jobs:
   e2e:
-    name: E2E Tests
+    name: E2E Tests (${{ matrix.project }})
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [chromium, mobile-chrome]
 
     services:
       postgres:
@@ -43,7 +47,19 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(pnpm exec playwright --version | head -n1)" >> $GITHUB_OUTPUT
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+
       - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: pnpm exec playwright install --with-deps chromium
 
       - name: Run database migrations
@@ -52,7 +68,7 @@ jobs:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5434/family_planner_test
 
       - name: Run E2E tests
-        run: pnpm e2e:run
+        run: pnpm e2e:run --project=${{ matrix.project }}
         env:
           CI: true
           DATABASE_URL: postgresql://postgres:postgres@localhost:5434/family_planner_test
@@ -66,7 +82,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.project }}
           path: e2e/playwright-report/
           retention-days: 7
 
@@ -74,7 +90,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: test-artifacts
+          name: test-artifacts-${{ matrix.project }}
           path: |
             e2e/test-results/
             e2e/snapshots/
