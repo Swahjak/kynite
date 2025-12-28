@@ -6,6 +6,7 @@ export type {
   UserWithFamilyScenario,
   FamilyWithMembersScenario,
   FamilyWithInviteScenario,
+  PrivateCalendarScenario,
   TestCookie,
 } from "../utils/test-scenarios";
 export {
@@ -13,4 +14,5 @@ export {
   seedUserWithFamily,
   seedFamilyWithMembers,
   seedFamilyWithInvite,
+  seedPrivateCalendarScenario,
 } from "../utils/test-scenarios";
