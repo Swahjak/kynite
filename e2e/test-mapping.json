@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "description": "Maps source file patterns to relevant E2E tests",
+  "mappings": {
+    "src/app/api/v1/families/*/invites/**": ["e2e/tests/family/join.spec.ts"],
+    "src/app/api/v1/families/*/members/**": [
+      "e2e/tests/family/members.spec.ts",
+      "e2e/tests/family/children.spec.ts"
+    ],
+    "src/app/api/v1/families/*/events/**": ["e2e/tests/calendar/**"],
+    "src/app/api/v1/families/**": ["e2e/tests/family/**"],
+    "src/app/api/webhooks/google-calendar/**": ["e2e/tests/webhooks/**"],
+    "src/components/calendar/**": [
+      "e2e/tests/calendar/**",
+      "e2e/tests/visual/**"
+    ],
+    "src/components/family/**": ["e2e/tests/family/**"],
+    "src/components/reward-chart/**": ["e2e/tests/reward-chart/**"],
+    "src/components/dashboard/**": ["e2e/tests/dashboard/**"],
+    "src/components/auth/**": ["e2e/tests/auth/**"],
+    "src/components/layout/**": ["e2e/tests/layout/**"],
+    "src/components/ui/**": ["e2e/tests/visual/**"],
+    "src/server/schema.ts": ["e2e/tests/**"],
+    "src/server/auth.ts": ["e2e/tests/auth/**", "e2e/tests/family/**"],
+    "src/server/db/**": ["e2e/tests/**"],
+    "src/app/[locale]/(authenticated)/dashboard/**": ["e2e/tests/dashboard/**"],
+    "src/app/[locale]/(authenticated)/family/**": ["e2e/tests/family/**"],
+    "src/app/[locale]/(authenticated)/calendar/**": ["e2e/tests/calendar/**"],
+    "src/app/[locale]/(authenticated)/rewards/**": [
+      "e2e/tests/reward-chart/**"
+    ],
+    "messages/**": ["e2e/tests/**"]
+  },
+  "alwaysRun": [
+    "e2e/tests/auth/session.spec.ts",
+    "e2e/tests/auth/redirect.spec.ts"
+  ],
+  "fullRunTriggers": [
+    "package.json",
+    "pnpm-lock.yaml",
+    "playwright.config.ts",
+    "e2e/fixtures/**",
+    "e2e/utils/**",
+    ".github/workflows/e2e.yml",
+    "next.config.ts",
+    "tsconfig.json"
+  ]
+}
