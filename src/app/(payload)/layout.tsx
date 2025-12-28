@@ -15,8 +15,10 @@ type Args = {
 
 const serverFunctions: ServerFunctionClient = async function (args) {
   "use server";
-  const { default: payload } = await import("payload");
-  return payload.serverFunction({ ...args, config, importMap });
+  const { getPayload } = await import("payload");
+  const payload = await getPayload({ config });
+
+  return (payload as any).serverFunction({ ...args, config, importMap });
 };
 
 const Layout = ({ children }: Args) => (
