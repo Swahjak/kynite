@@ -6,13 +6,17 @@ import { Users } from "./src/payload/collections/Users";
 import { Media } from "./src/payload/collections/Media";
 import { Pages } from "./src/payload/collections/Pages";
 
+if (!process.env.PAYLOAD_SECRET) {
+  throw new Error("PAYLOAD_SECRET environment variable is required");
+}
+
 export default buildConfig({
   admin: {
     user: Users.slug,
   },
   editor: lexicalEditor(),
   collections: [Users, Media, Pages],
-  secret: process.env.PAYLOAD_SECRET || "",
+  secret: process.env.PAYLOAD_SECRET,
   db: postgresAdapter({
     pool: {
       connectionString: process.env.DATABASE_URL_PAYLOAD || "",

@@ -1,13 +1,21 @@
 import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
-import { type Locale } from "@/i18n/routing";
-import { getPageBySlug } from "@/lib/payload";
+import { type Locale, routing } from "@/i18n/routing";
+import { getPageBySlug, getAllPageSlugs } from "@/lib/payload";
 import { HomepageHeader, HomepageFooter } from "@/components/homepage";
 import { RichText, type LexicalEditorState } from "@/components/cms/RichText";
 
 type Props = {
   params: Promise<{ locale: string; slug: string }>;
 };
+
+export async function generateStaticParams() {
+  const slugs = await getAllPageSlugs();
+
+  return routing.locales.flatMap((locale) =>
+    slugs.map((slug) => ({ locale, slug }))
+  );
+}
 
 export default async function Page({ params }: Props) {
   const { locale, slug } = await params;

@@ -45,3 +45,22 @@ export async function getHomepage(
 ): Promise<Page | null> {
   return getPageBySlug("home", locale);
 }
+
+/**
+ * Fetch all published page slugs for static generation
+ * @returns Array of all published page slugs (excluding "home")
+ */
+export async function getAllPageSlugs(): Promise<string[]> {
+  const payload = await getPayloadClient();
+
+  const { docs } = await payload.find({
+    collection: "pages",
+    where: {
+      status: { equals: "published" },
+      slug: { not_equals: "home" }, // Exclude homepage from dynamic routes
+    },
+    limit: 100,
+  });
+
+  return docs.map((page) => page.slug);
+}
