@@ -40,6 +40,102 @@ export interface TestFamilyInvite {
   useCount: number;
 }
 
+export interface TestAccount {
+  id: string;
+  userId: string;
+  providerId: string;
+  accountId: string;
+  accessToken: string | null;
+  refreshToken: string | null;
+  accessTokenExpiresAt: Date | null;
+}
+
+export function createTestAccount(
+  userId: string,
+  overrides: Partial<Omit<TestAccount, "userId">> = {}
+): TestAccount {
+  const id = overrides.id ?? randomUUID();
+  return {
+    id,
+    userId,
+    providerId: "google",
+    accountId: overrides.accountId ?? `google-${randomUUID().slice(0, 12)}`,
+    accessToken: overrides.accessToken ?? null,
+    refreshToken: overrides.refreshToken ?? null,
+    accessTokenExpiresAt: overrides.accessTokenExpiresAt ?? null,
+  };
+}
+
+export interface TestGoogleCalendar {
+  id: string;
+  familyId: string;
+  accountId: string;
+  googleCalendarId: string;
+  name: string;
+  color: string | null;
+  accessRole: string;
+  syncEnabled: boolean;
+  isPrivate: boolean;
+}
+
+export function createTestGoogleCalendar(
+  familyId: string,
+  accountId: string,
+  overrides: Partial<Omit<TestGoogleCalendar, "familyId" | "accountId">> = {}
+): TestGoogleCalendar {
+  const id = overrides.id ?? randomUUID();
+  return {
+    id,
+    familyId,
+    accountId,
+    googleCalendarId:
+      overrides.googleCalendarId ?? `cal-${randomUUID().slice(0, 12)}`,
+    name: overrides.name ?? "Test Calendar",
+    color: overrides.color ?? "#4285f4",
+    accessRole: overrides.accessRole ?? "owner",
+    syncEnabled: overrides.syncEnabled ?? true,
+    isPrivate: overrides.isPrivate ?? false,
+  };
+}
+
+export interface TestEvent {
+  id: string;
+  familyId: string;
+  title: string;
+  description: string | null;
+  location: string | null;
+  startTime: Date;
+  endTime: Date;
+  allDay: boolean;
+  color: string | null;
+  googleCalendarId: string | null;
+  googleEventId: string | null;
+  syncStatus: string;
+}
+
+export function createTestEvent(
+  familyId: string,
+  overrides: Partial<Omit<TestEvent, "familyId">> = {}
+): TestEvent {
+  const id = overrides.id ?? randomUUID();
+  const startTime = overrides.startTime ?? new Date();
+  return {
+    id,
+    familyId,
+    title: overrides.title ?? "Test Event",
+    description: overrides.description ?? null,
+    location: overrides.location ?? null,
+    startTime,
+    endTime:
+      overrides.endTime ?? new Date(startTime.getTime() + 60 * 60 * 1000),
+    allDay: overrides.allDay ?? false,
+    color: overrides.color ?? "blue",
+    googleCalendarId: overrides.googleCalendarId ?? null,
+    googleEventId: overrides.googleEventId ?? null,
+    syncStatus: overrides.syncStatus ?? "synced",
+  };
+}
+
 export function createTestUser(overrides: Partial<TestUser> = {}): TestUser {
   const id = overrides.id || randomUUID();
   return {
