@@ -15,6 +15,7 @@
       "outputs": [".next/**", "!.next/cache/**"],
       "env": [
         "DATABASE_URL",
+        "DATABASE_URL_PAYLOAD",
         "DATABASE_URL_UNPOOLED",
         "POSTGRES_URL",
         "POSTGRES_PRISMA_URL",
