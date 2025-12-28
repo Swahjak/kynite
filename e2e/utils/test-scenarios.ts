@@ -98,17 +98,22 @@ function parseSetCookie(
 
 /**
  * Create a test user with a signed session via our test API
+ * Adds unique suffix to email to prevent race conditions when running parallel workers
  */
 async function createTestSession(
   email: string,
   name: string
 ): Promise<{ sessionCookie: TestCookie; userId: string }> {
+  // Add unique suffix to prevent collisions in parallel execution
+  const uniqueId = randomUUID().slice(0, 8);
+  const uniqueEmail = email.replace("@", `-${uniqueId}@`);
+
   const response = await fetch(`${BASE_URL}/api/test/create-session`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ email, name }),
+    body: JSON.stringify({ email: uniqueEmail, name }),
   });
 
   if (!response.ok) {

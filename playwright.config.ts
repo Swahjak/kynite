@@ -10,8 +10,8 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  // Limit workers to avoid race conditions with test session creation
-  workers: process.env.CI ? 1 : 2,
+  // With unique email suffix in test-scenarios.ts, race conditions are prevented
+  workers: process.env.CI ? 2 : 4,
 
   reporter: [
     ["html", { outputFolder: "./e2e/playwright-report" }],
