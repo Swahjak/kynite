@@ -14,8 +14,8 @@ import type {
 interface TaskRowProps {
   taskRow: TaskRowType;
   days: WeekDay[];
-  onComplete: (taskId: string) => void;
-  onUndo: (taskId: string) => void;
+  onComplete: (taskId: string) => Promise<void>;
+  onUndo: (taskId: string) => Promise<void>;
   disabled?: boolean;
   showControls?: boolean;
   onEdit?: (task: IRewardChartTask) => void;
