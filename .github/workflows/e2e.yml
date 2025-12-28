@@ -115,7 +115,7 @@ jobs:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5434/family_planner_test
 
       - name: Run E2E tests
-        run: pnpm e2e:run --project=${{ matrix.project }} --shard=${{ matrix.shard }}/4 ${{ needs.determine-tests.outputs.test-pattern }}
+        run: pnpm e2e:run --project=${{ matrix.project }} --shard=${{ matrix.shard }}/4 --reporter=blob ${{ needs.determine-tests.outputs.test-pattern }}
         env:
           CI: true
           DATABASE_URL: postgresql://postgres:postgres@localhost:5434/family_planner_test
@@ -125,15 +125,15 @@ jobs:
           GOOGLE_CLIENT_ID: test-client-id
           GOOGLE_CLIENT_SECRET: test-client-secret
 
-      - name: Upload test results
+      - name: Upload blob report
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: playwright-report-${{ matrix.project }}-shard-${{ matrix.shard }}
-          path: e2e/playwright-report/
+          name: blob-report-${{ matrix.project }}-shard-${{ matrix.shard }}
+          path: e2e/blob-report/
           retention-days: 7
 
-      - name: Upload test artifacts
+      - name: Upload test artifacts (on failure)
         uses: actions/upload-artifact@v4
         if: failure()
         with:
@@ -141,6 +141,7 @@ jobs:
           path: |
             e2e/test-results/
             e2e/snapshots/
+            e2e/playwright-report/
           retention-days: 7
 
   merge-reports:
@@ -163,15 +164,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Download all shard reports
+      - name: Download all blob reports
         uses: actions/download-artifact@v4
         with:
-          path: playwright-reports
-          pattern: playwright-report-*
+          path: all-blob-reports
+          pattern: blob-report-*
           merge-multiple: true
 
       - name: Merge reports
-        run: pnpm exec playwright merge-reports --reporter=html ./playwright-reports
+        run: pnpm exec playwright merge-reports --reporter=html ./all-blob-reports
 
       - name: Upload merged report
         uses: actions/upload-artifact@v4
