@@ -16,5 +16,23 @@ services:
       timeout: 5s
       retries: 5
 
+  db-payload:
+    image: postgres:16-alpine
+    container_name: kynite-payload-db
+    environment:
+      POSTGRES_USER: payload
+      POSTGRES_PASSWORD: payload
+      POSTGRES_DB: payload
+    ports:
+      - "5434:5432"
+    volumes:
+      - payload_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U payload"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
 volumes:
   postgres_data:
+  payload_data:

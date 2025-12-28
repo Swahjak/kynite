@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 import nextra from "nextra";
+import { withPayload } from "@payloadcms/next/withPayload";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
@@ -17,7 +18,7 @@ const securityHeaders = [
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
       "worker-src 'self' blob:",
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: https:",
+      "img-src 'self' data: https: blob:",
       "font-src 'self'",
       "connect-src 'self' https://accounts.google.com https://*.googleapis.com wss://*.pusher.com https://*.pusherapp.com",
       "frame-src 'self' https://accounts.google.com",
@@ -57,4 +58,5 @@ const nextConfig: NextConfig = {
   },
 } as NextConfig & { i18n: { locales: string[]; defaultLocale: string } };
 
-export default withNextIntl(withNextra(nextConfig));
+// Note: withPayload must be the outermost wrapper
+export default withPayload(withNextIntl(withNextra(nextConfig)));
