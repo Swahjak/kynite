@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { HeroBlock, FeaturesBlock, PricingBlock, CtaBlock } from "../blocks";
 
 // Reserved slugs that conflict with existing app routes
 const RESERVED_SLUGS = [
@@ -89,6 +90,12 @@ export const Pages: CollectionConfig = {
     {
       name: "content",
       type: "richText",
+      localized: true,
+    },
+    {
+      name: "layout",
+      type: "blocks",
+      blocks: [HeroBlock, FeaturesBlock, PricingBlock, CtaBlock],
       localized: true,
     },
     {
