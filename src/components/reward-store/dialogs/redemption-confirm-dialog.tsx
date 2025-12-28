@@ -10,7 +10,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Star } from "lucide-react";
+import { Loader2, Star } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { IReward } from "../interfaces";
 
@@ -64,7 +64,11 @@ export function RedemptionConfirmDialog({
             {t("cancel")}
           </AlertDialogCancel>
           <AlertDialogAction onClick={onConfirm} disabled={isLoading}>
-            {isLoading ? "..." : t("redeemNow")}
+            {isLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              t("redeemNow")
+            )}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
