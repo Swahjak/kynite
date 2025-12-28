@@ -12,6 +12,9 @@ import type {
   TestRewardChart,
   TestRewardChartTask,
   TestRewardChartGoal,
+  TestAccount,
+  TestGoogleCalendar,
+  TestEvent,
 } from "./test-data-factory";
 
 export class DbSeeder {
@@ -20,6 +23,9 @@ export class DbSeeder {
   private insertedUserIds: string[] = [];
   private insertedFamilyIds: string[] = [];
   private insertedSessionIds: string[] = [];
+  private insertedAccountIds: string[] = [];
+  private insertedCalendarIds: string[] = [];
+  private insertedEventIds: string[] = [];
 
   constructor() {
     const connectionString = process.env.DATABASE_URL;
@@ -99,6 +105,58 @@ export class DbSeeder {
     });
   }
 
+  async seedAccount(account: TestAccount): Promise<void> {
+    await this.db.insert(schema.accounts).values({
+      id: account.id,
+      userId: account.userId,
+      providerId: account.providerId,
+      accountId: account.accountId,
+      accessToken: account.accessToken,
+      refreshToken: account.refreshToken,
+      accessTokenExpiresAt: account.accessTokenExpiresAt,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    this.insertedAccountIds.push(account.id);
+  }
+
+  async seedGoogleCalendar(calendar: TestGoogleCalendar): Promise<void> {
+    await this.db.insert(schema.googleCalendars).values({
+      id: calendar.id,
+      familyId: calendar.familyId,
+      accountId: calendar.accountId,
+      googleCalendarId: calendar.googleCalendarId,
+      name: calendar.name,
+      color: calendar.color,
+      accessRole: calendar.accessRole,
+      syncEnabled: calendar.syncEnabled,
+      isPrivate: calendar.isPrivate,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    this.insertedCalendarIds.push(calendar.id);
+  }
+
+  async seedEvent(event: TestEvent): Promise<void> {
+    await this.db.insert(schema.events).values({
+      id: event.id,
+      familyId: event.familyId,
+      title: event.title,
+      description: event.description,
+      location: event.location,
+      startTime: event.startTime,
+      endTime: event.endTime,
+      allDay: event.allDay,
+      color: event.color,
+      googleCalendarId: event.googleCalendarId,
+      googleEventId: event.googleEventId,
+      syncStatus: event.syncStatus,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    this.insertedEventIds.push(event.id);
+  }
+
   async seedRewardChart(chart: TestRewardChart): Promise<void> {
     await this.db.insert(schema.rewardCharts).values({
       id: chart.id,
@@ -143,7 +201,27 @@ export class DbSeeder {
 
   async cleanup(): Promise<void> {
     // Delete in reverse order to respect FK constraints
-    // Sessions, familyMembers, familyInvites cascade from users/families
+    for (const eventId of this.insertedEventIds) {
+      await this.db
+        .delete(schema.events)
+        .where(eq(schema.events.id, eventId))
+        .catch(() => {});
+    }
+
+    for (const calendarId of this.insertedCalendarIds) {
+      await this.db
+        .delete(schema.googleCalendars)
+        .where(eq(schema.googleCalendars.id, calendarId))
+        .catch(() => {});
+    }
+
+    for (const accountId of this.insertedAccountIds) {
+      await this.db
+        .delete(schema.accounts)
+        .where(eq(schema.accounts.id, accountId))
+        .catch(() => {});
+    }
+
     for (const sessionId of this.insertedSessionIds) {
       await this.db
         .delete(schema.sessions)
@@ -165,6 +243,9 @@ export class DbSeeder {
         .catch(() => {});
     }
 
+    this.insertedEventIds = [];
+    this.insertedCalendarIds = [];
+    this.insertedAccountIds = [];
     this.insertedUserIds = [];
     this.insertedFamilyIds = [];
     this.insertedSessionIds = [];

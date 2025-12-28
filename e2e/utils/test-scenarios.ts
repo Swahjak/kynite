@@ -4,11 +4,17 @@ import {
   createTestFamily,
   createTestFamilyMember,
   createTestFamilyInvite,
+  createTestAccount,
+  createTestGoogleCalendar,
+  createTestEvent,
   type TestUser,
   type TestSession,
   type TestFamily,
   type TestFamilyMember,
   type TestFamilyInvite,
+  type TestAccount,
+  type TestGoogleCalendar,
+  type TestEvent,
 } from "./test-data-factory";
 import { randomUUID } from "crypto";
 
@@ -41,6 +47,27 @@ export interface FamilyWithMembersScenario extends UserWithFamilyScenario {
 
 export interface FamilyWithInviteScenario extends UserWithFamilyScenario {
   invite: TestFamilyInvite;
+}
+
+export interface PrivateCalendarScenario {
+  owner: {
+    user: TestUser;
+    session: TestSession;
+    sessionCookie: TestCookie;
+    membership: TestFamilyMember;
+    account: TestAccount;
+  };
+  nonOwner: {
+    user: TestUser;
+    session: TestSession;
+    sessionCookie: TestCookie;
+    membership: TestFamilyMember;
+  };
+  family: TestFamily;
+  calendar: TestGoogleCalendar;
+  privateEvent: TestEvent;
+  publicEvent: TestEvent;
+  familyCookie: TestCookie;
 }
 
 /**
@@ -263,5 +290,105 @@ export async function seedFamilyWithInvite(
   return {
     ...familyScenario,
     invite,
+  };
+}
+
+export async function seedPrivateCalendarScenario(
+  seeder: DbSeeder
+): Promise<PrivateCalendarScenario> {
+  // Create family
+  const family = createTestFamily({ name: "Privacy Test Family" });
+  await seeder.seedFamily(family);
+
+  // Create owner (User A) with Google account
+  const ownerAuth = await seedAuthenticatedUser(seeder, {
+    userName: "Calendar Owner",
+    userEmail: "owner@example.com",
+  });
+
+  const ownerMembership = createTestFamilyMember(family.id, ownerAuth.user.id, {
+    role: "manager",
+    displayName: "Calendar Owner",
+  });
+  await seeder.seedFamilyMember(ownerMembership);
+
+  // Create Google account for owner
+  const account = createTestAccount(ownerAuth.user.id);
+  await seeder.seedAccount(account);
+
+  // Create private calendar
+  const calendar = createTestGoogleCalendar(family.id, account.id, {
+    name: "Private Work Calendar",
+    isPrivate: true,
+  });
+  await seeder.seedGoogleCalendar(calendar);
+
+  // Create event on private calendar (should be hidden from non-owner)
+  const now = new Date();
+  const privateEvent = createTestEvent(family.id, {
+    title: "Secret Meeting",
+    description: "Confidential discussion",
+    location: "Private Office",
+    startTime: now,
+    endTime: new Date(now.getTime() + 60 * 60 * 1000),
+    googleCalendarId: calendar.id,
+    googleEventId: `private-event-${randomUUID().slice(0, 8)}`,
+  });
+  await seeder.seedEvent(privateEvent);
+
+  // Create non-owner (User B) in same family
+  const nonOwnerAuth = await seedAuthenticatedUser(seeder, {
+    userName: "Family Member",
+    userEmail: "member@example.com",
+  });
+
+  const nonOwnerMembership = createTestFamilyMember(
+    family.id,
+    nonOwnerAuth.user.id,
+    {
+      role: "participant",
+      displayName: "Family Member",
+    }
+  );
+  await seeder.seedFamilyMember(nonOwnerMembership);
+
+  // Create a public calendar for comparison
+  const publicCalendar = createTestGoogleCalendar(family.id, account.id, {
+    name: "Public Family Calendar",
+    isPrivate: false,
+  });
+  await seeder.seedGoogleCalendar(publicCalendar);
+
+  // Create public event (visible to everyone)
+  const publicEvent = createTestEvent(family.id, {
+    title: "Family Dinner",
+    description: "Weekly family dinner",
+    location: "Home",
+    startTime: now,
+    endTime: new Date(now.getTime() + 2 * 60 * 60 * 1000),
+    googleCalendarId: publicCalendar.id,
+    googleEventId: `public-event-${randomUUID().slice(0, 8)}`,
+  });
+  await seeder.seedEvent(publicEvent);
+
+  return {
+    owner: {
+      user: ownerAuth.user,
+      session: ownerAuth.session,
+      sessionCookie: ownerAuth.sessionCookie,
+      membership: ownerMembership,
+      account,
+    },
+    nonOwner: {
+      user: nonOwnerAuth.user,
+      session: nonOwnerAuth.session,
+      sessionCookie: nonOwnerAuth.sessionCookie,
+      membership: nonOwnerMembership,
+    },
+    family,
+    calendar,
+    privateEvent,
+    publicEvent,
+    familyCookie: { name: "has-family", value: "true" },
   };
 }
