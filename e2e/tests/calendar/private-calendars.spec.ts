@@ -1,99 +1,184 @@
-import { test, expect } from "../../fixtures";
+import { test, expect } from "@playwright/test";
+import { DbSeeder } from "../../utils/db-seeder";
+import {
+  seedPrivateCalendarScenario,
+  type PrivateCalendarScenario,
+} from "../../fixtures";
 
 test.describe("Private Calendars", () => {
-  test.describe("Hidden Event Display", () => {
-    test("hidden events show 'Hidden' title", async ({ familyPage }) => {
-      // Navigate to calendar
-      await familyPage.goto("/calendar");
+  let seeder: DbSeeder;
+  let scenario: PrivateCalendarScenario;
 
-      // Check for hidden events (if any exist in test data)
-      const hiddenEvents = familyPage.locator('[data-hidden="true"]');
-      const count = await hiddenEvents.count();
-
-      if (count > 0) {
-        // Verify hidden events display correctly
-        await expect(hiddenEvents.first()).toContainText("Hidden");
-
-        // Verify muted opacity styling (0.77 = roughly 0.77)
-        const opacity = await hiddenEvents
-          .first()
-          .evaluate((el: HTMLElement) => window.getComputedStyle(el).opacity);
-        expect(parseFloat(opacity)).toBeLessThan(1);
-      }
-    });
-
-    test("hidden events are not draggable", async ({ familyPage }) => {
-      await familyPage.goto("/calendar");
-
-      const hiddenEvents = familyPage.locator('[data-hidden="true"]');
-      const count = await hiddenEvents.count();
-
-      if (count > 0) {
-        // Verify pointer-events-none is applied
-        const pointerEvents = await hiddenEvents
-          .first()
-          .evaluate(
-            (el: HTMLElement) => window.getComputedStyle(el).pointerEvents
-          );
-        expect(pointerEvents).toBe("none");
-      }
-    });
+  test.beforeAll(async () => {
+    seeder = new DbSeeder();
+    scenario = await seedPrivateCalendarScenario(seeder);
   });
 
-  test.describe("Privacy Settings", () => {
-    test("can toggle calendar privacy in settings", async ({ familyPage }) => {
-      await familyPage.goto("/settings");
-
-      // Look for privacy toggle switches
-      const privacyToggles = familyPage.locator('[aria-label*="private"]');
-
-      // This test will pass even if no toggles exist (no linked Google accounts)
-      // The test verifies the toggle works when present
-      const count = await privacyToggles.count();
-      if (count > 0) {
-        // Toggle the first privacy switch
-        const firstToggle = privacyToggles.first();
-        const wasChecked = await firstToggle.isChecked();
-        await firstToggle.click();
-
-        // Wait for API response
-        await familyPage.waitForTimeout(500);
-
-        // Verify state changed
-        const isChecked = await firstToggle.isChecked();
-        expect(isChecked).not.toBe(wasChecked);
-      }
-    });
+  test.afterAll(async () => {
+    await seeder.cleanup();
+    await seeder.close();
   });
 
-  test.describe("API Privacy Filtering", () => {
-    test("API returns redacted events for private calendars", async ({
-      familyPage,
-    }) => {
-      // Setup: Navigate to calendar and capture network response
-      const responsePromise = familyPage.waitForResponse(
+  test.describe("Non-Owner View (Security Critical)", () => {
+    test.use({
+      storageState: { cookies: [], origins: [] },
+    });
+
+    test.beforeEach(async ({ context }) => {
+      // Set non-owner session cookie
+      await context.addCookies([
+        {
+          name: scenario.nonOwner.sessionCookie.name,
+          value: scenario.nonOwner.sessionCookie.value,
+          domain: "localhost",
+          path: "/",
+        },
+        {
+          name: scenario.familyCookie.name,
+          value: scenario.familyCookie.value,
+          domain: "localhost",
+          path: "/",
+        },
+      ]);
+    });
+
+    test("API response contains 'Hidden' not real title", async ({ page }) => {
+      // Intercept API response to verify server-side redaction
+      const responsePromise = page.waitForResponse(
         (resp) =>
           resp.url().includes("/api/v1/families/") &&
-          resp.url().includes("/events")
+          resp.url().includes("/events") &&
+          resp.request().method() === "GET"
       );
 
-      await familyPage.goto("/calendar");
+      await page.goto(`/nl/families/${scenario.family.id}/calendar`);
 
       const response = await responsePromise;
       const data = await response.json();
 
-      if (data.success && data.data?.events) {
-        // Check if any events are marked as hidden
-        const hiddenEvents = data.data.events.filter(
-          (e: { isHidden: boolean }) => e.isHidden
-        );
+      expect(data.success).toBe(true);
 
-        // Verify hidden events have redacted content
-        for (const event of hiddenEvents) {
-          expect(event.title).toBe("Hidden");
-          expect(event.description).toBeNull();
-          expect(event.location).toBeNull();
-        }
+      // Find the private event in response
+      const privateEventInResponse = data.data.events.find(
+        (e: { id: string }) => e.id === scenario.privateEvent.id
+      );
+
+      // SECURITY CHECK: Verify title is "Hidden", NOT "Secret Meeting"
+      expect(privateEventInResponse).toBeDefined();
+      expect(privateEventInResponse.title).toBe("Hidden");
+      expect(privateEventInResponse.title).not.toBe("Secret Meeting");
+      expect(privateEventInResponse.description).toBeNull();
+      expect(privateEventInResponse.location).toBeNull();
+      expect(privateEventInResponse.isHidden).toBe(true);
+
+      // Public event should still show full details
+      const publicEventInResponse = data.data.events.find(
+        (e: { id: string }) => e.id === scenario.publicEvent.id
+      );
+      expect(publicEventInResponse.title).toBe("Family Dinner");
+      expect(publicEventInResponse.isHidden).toBe(false);
+    });
+
+    test("DOM never contains real private event title", async ({ page }) => {
+      await page.goto(`/nl/families/${scenario.family.id}/calendar`);
+      await page.waitForLoadState("networkidle");
+
+      // SECURITY CHECK: "Secret Meeting" should NEVER appear in DOM
+      const pageContent = await page.content();
+      expect(pageContent).not.toContain("Secret Meeting");
+      expect(pageContent).not.toContain("Confidential discussion");
+      expect(pageContent).not.toContain("Private Office");
+
+      // But "Hidden" should appear
+      expect(pageContent).toContain("Hidden");
+    });
+
+    test("hidden events have muted styling", async ({ page }) => {
+      await page.goto(`/nl/families/${scenario.family.id}/calendar`);
+      await page.waitForLoadState("networkidle");
+
+      const hiddenEvent = page.locator('[data-hidden="true"]').first();
+      await expect(hiddenEvent).toBeVisible();
+
+      // Verify opacity is reduced (0.77 as per design)
+      const opacity = await hiddenEvent.evaluate(
+        (el) => window.getComputedStyle(el).opacity
+      );
+      expect(parseFloat(opacity)).toBeLessThan(1);
+      expect(parseFloat(opacity)).toBeCloseTo(0.77, 1);
+
+      // Verify pointer-events-none
+      const pointerEvents = await hiddenEvent.evaluate(
+        (el) => window.getComputedStyle(el).pointerEvents
+      );
+      expect(pointerEvents).toBe("none");
+    });
+  });
+
+  test.describe("Owner View", () => {
+    test.use({
+      storageState: { cookies: [], origins: [] },
+    });
+
+    test.beforeEach(async ({ context }) => {
+      // Set owner session cookie
+      await context.addCookies([
+        {
+          name: scenario.owner.sessionCookie.name,
+          value: scenario.owner.sessionCookie.value,
+          domain: "localhost",
+          path: "/",
+        },
+        {
+          name: scenario.familyCookie.name,
+          value: scenario.familyCookie.value,
+          domain: "localhost",
+          path: "/",
+        },
+      ]);
+    });
+
+    test("owner sees full event details", async ({ page }) => {
+      const responsePromise = page.waitForResponse(
+        (resp) =>
+          resp.url().includes("/api/v1/families/") &&
+          resp.url().includes("/events") &&
+          resp.request().method() === "GET"
+      );
+
+      await page.goto(`/nl/families/${scenario.family.id}/calendar`);
+
+      const response = await responsePromise;
+      const data = await response.json();
+
+      // Owner should see full details
+      const privateEventInResponse = data.data.events.find(
+        (e: { id: string }) => e.id === scenario.privateEvent.id
+      );
+
+      expect(privateEventInResponse.title).toBe("Secret Meeting");
+      expect(privateEventInResponse.description).toBe(
+        "Confidential discussion"
+      );
+      expect(privateEventInResponse.location).toBe("Private Office");
+      expect(privateEventInResponse.isHidden).toBe(false);
+    });
+
+    test("owner's events are interactive (not muted)", async ({ page }) => {
+      await page.goto(`/nl/families/${scenario.family.id}/calendar`);
+      await page.waitForLoadState("networkidle");
+
+      // For owner, the private event should NOT have data-hidden="true"
+      const privateEventElement = page.locator(
+        `[data-event-id="${scenario.privateEvent.id}"]`
+      );
+
+      // If event is visible, it should be interactive
+      if (await privateEventElement.isVisible()) {
+        const pointerEvents = await privateEventElement.evaluate(
+          (el) => window.getComputedStyle(el).pointerEvents
+        );
+        expect(pointerEvents).not.toBe("none");
       }
     });
   });
