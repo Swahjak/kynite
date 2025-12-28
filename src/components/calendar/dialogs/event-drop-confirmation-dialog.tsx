@@ -16,6 +16,7 @@ import type { IEvent } from "@/components/calendar/interfaces";
 import { formatTime, getColorClass } from "@/components/calendar/helpers";
 import { cn } from "@/lib/utils";
 import { useCalendar } from "@/components/calendar/contexts/calendar-context";
+import { CATEGORY_COLORS } from "@/components/calendar/types";
 
 interface EventDropConfirmationDialogProps {
   open: boolean;
@@ -69,7 +70,7 @@ export function EventDropConfirmationDialog({
             Are you sure you want to move
             <span
               className={cn(
-                getColorClass(event.color),
+                getColorClass(CATEGORY_COLORS[event.category]),
                 "mx-1 rounded-md px-1 py-0.5"
               )}
             >

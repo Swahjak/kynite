@@ -20,6 +20,7 @@ import {
   getFirstLetters,
   toCapitalize,
 } from "@/components/calendar/helpers";
+import { CATEGORY_COLORS } from "@/components/calendar/types";
 import { EventBullet } from "@/components/calendar/views/month-view/event-bullet";
 
 export const AgendaEvents: FC = () => {
@@ -36,7 +37,7 @@ export const AgendaEvents: FC = () => {
   const agendaEvents = Object.groupBy(monthEvents, (event) => {
     return agendaModeGroupBy === "date"
       ? format(parseISO(event.startDate), "yyyy-MM-dd")
-      : event.color;
+      : event.category;
   });
 
   const groupedAndSortedEvents = Object.entries(agendaEvents).sort(
@@ -55,7 +56,7 @@ export const AgendaEvents: FC = () => {
             heading={
               agendaModeGroupBy === "date"
                 ? format(parseISO(date), "EEEE, MMMM d, yyyy")
-                : toCapitalize(groupedEvents![0].color)
+                : toCapitalize(groupedEvents![0].category)
             }
           >
             {groupedEvents!.map((event) => (
@@ -64,7 +65,8 @@ export const AgendaEvents: FC = () => {
                 className={cn(
                   "data-[selected=true]:bg-bg data-[selected=true]:text-none mb-2 rounded-md border p-4 transition-all hover:cursor-pointer",
                   {
-                    [getColorClass(event.color)]: badgeVariant === "colored",
+                    [getColorClass(CATEGORY_COLORS[event.category])]:
+                      badgeVariant === "colored",
                     "hover:bg-zinc-200 dark:hover:bg-gray-900":
                       badgeVariant === "dot",
                     "hover:opacity-60": badgeVariant === "colored",
@@ -75,11 +77,15 @@ export const AgendaEvents: FC = () => {
                   <div className="flex w-full items-center justify-between gap-4">
                     <div className="flex items-center gap-2">
                       {badgeVariant === "dot" ? (
-                        <EventBullet color={event.color} />
+                        <EventBullet color={CATEGORY_COLORS[event.category]} />
                       ) : (
                         <Avatar>
                           <AvatarImage src="" alt="@shadcn" />
-                          <AvatarFallback className={getBgColor(event.color)}>
+                          <AvatarFallback
+                            className={getBgColor(
+                              CATEGORY_COLORS[event.category]
+                            )}
+                          >
                             {getFirstLetters(event.title)}
                           </AvatarFallback>
                         </Avatar>
