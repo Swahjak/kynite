@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { useCalendar } from "@/components/calendar/contexts/calendar-context";
 import { formatTime } from "@/components/calendar/helpers";
 import type { IEvent } from "@/components/calendar/interfaces";
+import { CATEGORY_COLORS } from "@/components/calendar/types";
 import { dayCellVariants } from "@/components/calendar/views/month-view/day-cell";
 import { EventBullet } from "@/components/calendar/views/month-view/event-bullet";
 import { EventDetailsDialog } from "@/components/calendar/dialogs/event-details-dialog";
@@ -49,7 +50,14 @@ export function EventListDialog({
         <ModalHeader>
           <ModalTitle className="my-2">
             <div className="flex items-center gap-2">
-              <EventBullet color={cellEvents[0]?.color} className="" />
+              <EventBullet
+                color={
+                  cellEvents[0]
+                    ? CATEGORY_COLORS[cellEvents[0].category]
+                    : "blue"
+                }
+                className=""
+              />
               <p className="text-sm font-medium">
                 Events on {format(date, "EEEE, MMMM d, yyyy")}
               </p>
@@ -64,12 +72,13 @@ export function EventListDialog({
                   className={cn(
                     "hover:bg-muted flex cursor-pointer items-center gap-2 rounded-md border p-2",
                     {
-                      [dayCellVariants({ color: event.color })]:
-                        badgeVariant === "colored",
+                      [dayCellVariants({
+                        color: CATEGORY_COLORS[event.category],
+                      })]: badgeVariant === "colored",
                     }
                   )}
                 >
-                  <EventBullet color={event.color} />
+                  <EventBullet color={CATEGORY_COLORS[event.category]} />
                   <div className="flex w-full items-center justify-between">
                     <p className="text-sm font-medium">{event.title}</p>
                     <p className="text-xs">
