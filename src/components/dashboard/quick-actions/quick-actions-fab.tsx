@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, RefreshCw } from "lucide-react";
+import { Plus, RefreshCw, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
@@ -28,6 +29,7 @@ export function QuickActionsFab() {
   const [pendingAction, setPendingAction] = useState<QuickAction | null>(null);
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [startingMemberId, setStartingMemberId] = useState<string | null>(null);
 
   const handleActionClick = (action: QuickAction) => {
     setPendingAction(action);
@@ -35,9 +37,15 @@ export function QuickActionsFab() {
   };
 
   const handleMemberSelect = async (memberId: string) => {
-    if (pendingAction) {
+    if (!pendingAction || startingMemberId) return;
+    setStartingMemberId(memberId);
+    try {
       await startQuickAction(pendingAction.id, memberId);
       setPendingAction(null);
+    } catch {
+      toast.error("Failed to start timer");
+    } finally {
+      setStartingMemberId(null);
     }
   };
 
@@ -108,11 +116,16 @@ export function QuickActionsFab() {
                 variant="outline"
                 className="justify-start gap-3"
                 onClick={() => handleMemberSelect(member.id)}
+                disabled={!!startingMemberId}
               >
-                <span
-                  className="h-8 w-8 rounded-full"
-                  style={{ backgroundColor: member.avatarColor }}
-                />
+                {startingMemberId === member.id ? (
+                  <Loader2 className="h-8 w-8 animate-spin" />
+                ) : (
+                  <span
+                    className="h-8 w-8 rounded-full"
+                    style={{ backgroundColor: member.avatarColor }}
+                  />
+                )}
                 <span>{member.name}</span>
               </Button>
             ))}
