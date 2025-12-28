@@ -25,6 +25,8 @@
     "e2e:teardown": "pnpm e2e:db:down",
     "e2e:run": "dotenv -e .env.test -- playwright test",
     "e2e:full": "pnpm e2e:setup && pnpm e2e:run; pnpm e2e:teardown",
+    "e2e:select": "tsx scripts/select-e2e-tests.ts",
+    "e2e:changed": "pnpm e2e:run $(pnpm e2e:select)",
     "prepare": "husky",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
