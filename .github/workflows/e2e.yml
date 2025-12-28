@@ -8,8 +8,54 @@ on:
     branches: [main]
 
 jobs:
+  determine-tests:
+    name: Determine Tests to Run
+    runs-on: ubuntu-latest
+    outputs:
+      test-pattern: ${{ steps.select.outputs.pattern }}
+      is-full-run: ${{ steps.select.outputs.is-full }}
+      should-run: ${{ steps.select.outputs.should-run }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Need full history for diff
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Determine test selection
+        id: select
+        run: |
+          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "Running full test suite on main branch"
+            echo "pattern=e2e/tests/**/*.spec.ts" >> $GITHUB_OUTPUT
+            echo "is-full=true" >> $GITHUB_OUTPUT
+            echo "should-run=true" >> $GITHUB_OUTPUT
+          else
+            PATTERN=$(pnpm tsx scripts/select-e2e-tests.ts --base=origin/${{ github.base_ref || 'main' }})
+            echo "Selected tests: $PATTERN"
+            echo "pattern=$PATTERN" >> $GITHUB_OUTPUT
+            echo "is-full=false" >> $GITHUB_OUTPUT
+            if [[ -z "$PATTERN" ]]; then
+              echo "should-run=false" >> $GITHUB_OUTPUT
+            else
+              echo "should-run=true" >> $GITHUB_OUTPUT
+            fi
+          fi
+
   e2e:
     name: E2E Tests (${{ matrix.project }}, shard ${{ matrix.shard }})
+    needs: determine-tests
+    if: needs.determine-tests.outputs.should-run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
@@ -69,7 +115,7 @@ jobs:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5434/family_planner_test
 
       - name: Run E2E tests
-        run: pnpm e2e:run --project=${{ matrix.project }} --shard=${{ matrix.shard }}/4
+        run: pnpm e2e:run --project=${{ matrix.project }} --shard=${{ matrix.shard }}/4 ${{ needs.determine-tests.outputs.test-pattern }}
         env:
           CI: true
           DATABASE_URL: postgresql://postgres:postgres@localhost:5434/family_planner_test
@@ -99,8 +145,8 @@ jobs:
 
   merge-reports:
     name: Merge E2E Reports
-    needs: e2e
-    if: always()
+    needs: [determine-tests, e2e]
+    if: always() && needs.determine-tests.outputs.should-run == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
