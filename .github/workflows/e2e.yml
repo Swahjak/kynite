@@ -130,7 +130,7 @@ jobs:
         if: always()
         with:
           name: blob-report-${{ matrix.project }}-shard-${{ matrix.shard }}
-          path: e2e/blob-report/
+          path: blob-report/
           retention-days: 7
 
       - name: Upload test artifacts (on failure)
