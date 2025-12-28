@@ -141,7 +141,18 @@
     "titleLabel": "Title",
     "titlePlaceholder": "Enter a title",
     "descriptionLabel": "Description",
-    "descriptionPlaceholder": "Enter a description",
+    "descriptionPlaceholder": "Enter a description (optional)",
+    "startDateLabel": "Start Date",
+    "endDateLabel": "End Date",
+    "assignedToLabel": "Assigned to",
+    "assignedToPlaceholder": "Select owner",
+    "participantsLabel": "Participants",
+    "participantsPlaceholder": "Add participants (optional)",
+    "eventTypeLabel": "Event Type",
+    "eventTypePlaceholder": "Select type",
+    "categoryLabel": "Category",
+    "categoryPlaceholder": "Select category",
+    "allDayLabel": "All day",
     "variantLabel": "Variant",
     "variantPlaceholder": "Select a variant",
     "createEvent": "Create Event",
@@ -149,7 +160,34 @@
     "successCreate": "Event created successfully",
     "successUpdate": "Event updated successfully",
     "errorCreate": "Failed to add event",
-    "errorUpdate": "Failed to edit event"
+    "errorUpdate": "Failed to edit event",
+    "endBeforeStartError": "End date must be after start date"
+  },
+  "EventTypes": {
+    "event": "Event",
+    "birthday": "Birthday",
+    "appointment": "Appointment",
+    "task": "Task",
+    "reminder": "Reminder"
+  },
+  "Categories": {
+    "sports": "Sports",
+    "work": "Work",
+    "school": "School",
+    "family": "Family",
+    "social": "Social",
+    "home": "Home"
+  },
+  "Regions": {
+    "label": "Region",
+    "US": "United States",
+    "GB": "United Kingdom",
+    "NL": "Netherlands",
+    "DE": "Germany",
+    "FR": "France",
+    "ES": "Spain",
+    "IT": "Italy",
+    "BE": "Belgium"
   },
   "LanguageSwitcher": {
     "label": "Switch language",
