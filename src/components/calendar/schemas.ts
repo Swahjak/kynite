@@ -21,9 +21,9 @@ export const eventSchema = z
     }),
     category: eventCategorySchema,
     eventType: eventTypeSchema,
-    allDay: z.boolean().default(false),
+    allDay: z.boolean(),
     ownerId: z.string().min(1, "Owner is required"),
-    participantIds: z.array(z.string()).default([]),
+    participantIds: z.array(z.string()),
   })
   .refine((data) => data.endDate > data.startDate, {
     message: "End date must be after start date",
