@@ -33,8 +33,7 @@
     "db:studio": "drizzle-kit studio",
     "setup-channels": "tsx scripts/setup-push-channels.ts",
     "typecheck": "tsc --noEmit",
-    "payload": "NODE_OPTIONS=--no-deprecation payload",
-    "cms:migrate-homepage": "tsx scripts/seed-homepage.ts"
+    "payload": "NODE_OPTIONS=--no-deprecation payload"
   },
   "dependencies": {
     "@47ng/cloak": "^1.2.0",
