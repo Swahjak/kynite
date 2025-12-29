@@ -100,3 +100,53 @@ describe("cascade delete behavior", () => {
     expect(eventsAfter).toHaveLength(0);
   });
 });
+
+describe("unique user per family constraint", () => {
+  const testIds = {
+    userId: randomUUID(),
+    familyId1: randomUUID(),
+    familyId2: randomUUID(),
+    memberId1: randomUUID(),
+    memberId2: randomUUID(),
+  };
+
+  beforeEach(async () => {
+    await db.insert(users).values({
+      id: testIds.userId,
+      name: "Test User",
+      email: `unique-test-${testIds.userId}@example.com`,
+    });
+
+    await db.insert(families).values([
+      { id: testIds.familyId1, name: "Family 1" },
+      { id: testIds.familyId2, name: "Family 2" },
+    ]);
+
+    await db.insert(familyMembers).values({
+      id: testIds.memberId1,
+      familyId: testIds.familyId1,
+      userId: testIds.userId,
+      role: "manager",
+    });
+  });
+
+  afterEach(async () => {
+    await db
+      .delete(familyMembers)
+      .where(eq(familyMembers.userId, testIds.userId));
+    await db.delete(families).where(eq(families.id, testIds.familyId1));
+    await db.delete(families).where(eq(families.id, testIds.familyId2));
+    await db.delete(users).where(eq(users.id, testIds.userId));
+  });
+
+  it("should prevent user from being in multiple families", async () => {
+    await expect(
+      db.insert(familyMembers).values({
+        id: testIds.memberId2,
+        familyId: testIds.familyId2,
+        userId: testIds.userId,
+        role: "participant",
+      })
+    ).rejects.toThrow();
+  });
+});
