@@ -46,8 +46,66 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Skip proxy for Payload CMS admin (handles its own auth)
-  if (pathname.startsWith("/admin")) {
+  // Payload CMS routes - apply CSRF protection to API
+  if (pathname.startsWith("/cms")) {
+    // Admin panel (React SPA) - pass through
+    if (pathname.startsWith("/cms/admin")) {
+      return NextResponse.next();
+    }
+
+    // CMS API - CSRF protection on mutating requests
+    if (pathname.startsWith("/cms/api/")) {
+      if (["POST", "PUT", "PATCH", "DELETE"].includes(request.method)) {
+        // Origin validation
+        const origin = request.headers.get("origin");
+        if (!origin) {
+          return createApiErrorResponse(
+            ErrorCode.FORBIDDEN,
+            403,
+            "Missing Origin header"
+          );
+        }
+
+        try {
+          const originUrl = new URL(origin);
+          const isAllowed = ALLOWED_ORIGINS.some((allowed) => {
+            if (!allowed) return false;
+            const allowedUrl = new URL(allowed);
+            return originUrl.host === allowedUrl.host;
+          });
+
+          if (!isAllowed) {
+            return createApiErrorResponse(
+              ErrorCode.FORBIDDEN,
+              403,
+              "Invalid Origin"
+            );
+          }
+        } catch {
+          return createApiErrorResponse(
+            ErrorCode.FORBIDDEN,
+            403,
+            "Invalid Origin format"
+          );
+        }
+
+        // Content-Type whitelist (JSON, multipart uploads, form posts)
+        const contentType = request.headers.get("content-type") || "";
+        const validTypes = [
+          "application/json",
+          "multipart/form-data",
+          "application/x-www-form-urlencoded",
+        ];
+        if (!validTypes.some((t) => contentType.includes(t))) {
+          return createApiErrorResponse(
+            ErrorCode.BAD_REQUEST,
+            415,
+            "Invalid Content-Type"
+          );
+        }
+      }
+    }
+
     return NextResponse.next();
   }
 

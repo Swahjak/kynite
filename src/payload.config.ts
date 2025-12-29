@@ -16,6 +16,10 @@ if (!process.env.PAYLOAD_SECRET) {
 }
 
 export default buildConfig({
+  routes: {
+    admin: "/cms/admin",
+    api: "/cms/api",
+  },
   admin: {
     user: Users.slug,
     importMap: {
