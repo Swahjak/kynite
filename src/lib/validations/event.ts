@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { recurrenceSchema } from "./recurrence";
 
 export const eventCategorySchema = z.enum([
   "sports",
@@ -44,11 +45,17 @@ export const createEventSchema = z
       .array(z.string())
       .min(1, "At least one participant required"),
     ownerId: z.string().optional(), // First participant is owner if not specified
+    // Recurrence support
+    recurrence: recurrenceSchema.nullable().optional(),
   })
   .refine((data) => data.endTime > data.startTime, {
     message: "End time must be after start time",
     path: ["endTime"],
   });
+
+// Edit scope enum for recurring events
+export const editScopeSchema = z.enum(["this", "all"]);
+export type EditScope = z.infer<typeof editScopeSchema>;
 
 export const updateEventSchema = createEventSchema
   .partial()
