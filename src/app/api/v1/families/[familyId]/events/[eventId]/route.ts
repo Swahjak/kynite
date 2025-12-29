@@ -9,8 +9,10 @@ import {
   getEventById,
   updateEvent,
   deleteEvent,
+  updateRecurringEvent,
+  deleteRecurringEvent,
 } from "@/server/services/event-service";
-import { updateEventSchema } from "@/lib/validations/event";
+import { updateEventSchema, editScopeSchema } from "@/lib/validations/event";
 
 type Params = { params: Promise<{ familyId: string; eventId: string }> };
 
@@ -103,7 +105,14 @@ export async function PATCH(request: Request, { params }: Params) {
     }
 
     const body = await request.json();
-    const parsed = updateEventSchema.partial().safeParse(body);
+
+    // Extract scope from body
+    const scope = editScopeSchema.safeParse(body.scope);
+    const editScope = scope.success ? scope.data : "this";
+
+    // Remove scope from validation data
+    const { scope: _, ...eventData } = body;
+    const parsed = updateEventSchema.partial().safeParse(eventData);
 
     if (!parsed.success) {
       return NextResponse.json(
@@ -118,7 +127,12 @@ export async function PATCH(request: Request, { params }: Params) {
       );
     }
 
-    const event = await updateEvent(eventId, familyId, parsed.data);
+    const event = await updateRecurringEvent(
+      eventId,
+      familyId,
+      parsed.data,
+      editScope
+    );
 
     return NextResponse.json({
       success: true,
@@ -181,7 +195,13 @@ export async function DELETE(request: Request, { params }: Params) {
       );
     }
 
-    await deleteEvent(eventId, familyId);
+    // Get scope from query params
+    const { searchParams } = new URL(request.url);
+    const scopeParam = searchParams.get("scope");
+    const scope = editScopeSchema.safeParse(scopeParam);
+    const deleteScope = scope.success ? scope.data : "this";
+
+    await deleteRecurringEvent(eventId, familyId, deleteScope);
 
     return NextResponse.json({ success: true });
   } catch (error) {

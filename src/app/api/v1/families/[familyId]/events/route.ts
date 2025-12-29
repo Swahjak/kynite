@@ -10,6 +10,7 @@ import {
 import {
   getEventsForFamily,
   createEvent,
+  createRecurringEvent,
 } from "@/server/services/event-service";
 import { createEventSchema, eventQuerySchema } from "@/lib/validations/event";
 
@@ -135,6 +136,31 @@ export async function POST(request: Request, { params }: Params) {
       );
     }
 
+    // Check if this is a recurring event
+    if (parsed.data.recurrence) {
+      const result = await createRecurringEvent(
+        familyId,
+        {
+          ...parsed.data,
+          recurrence: parsed.data.recurrence,
+        },
+        member.id
+      );
+
+      return NextResponse.json(
+        {
+          success: true,
+          data: {
+            patternId: result.patternId,
+            eventCount: result.eventCount,
+            message: `Created ${result.eventCount} recurring events`,
+          },
+        },
+        { status: 201 }
+      );
+    }
+
+    // Non-recurring event
     const event = await createEvent(familyId, parsed.data, member.id);
 
     return NextResponse.json(
