@@ -29,6 +29,7 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URL_PAYLOAD || "",
     },
+    migrationDir: path.resolve(dirname, "../migrations/cms"),
   }),
   sharp,
   typescript: {
