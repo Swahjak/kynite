@@ -36,6 +36,7 @@ import { useCalendar } from "@/components/calendar/contexts/calendar-context";
 import { CategorySelect } from "@/components/calendar/fields/category-select";
 import { EventTypeSelect } from "@/components/calendar/fields/event-type-select";
 import { PersonSelect } from "@/components/calendar/fields/person-select";
+import { RecurrenceFields } from "@/components/calendar/fields/recurrence-fields";
 import { useDisclosure } from "@/components/calendar/hooks";
 import type { IEvent } from "@/components/calendar/interfaces";
 import {
@@ -103,6 +104,21 @@ export function AddEditEventDialog({
       participantIds:
         event?.users.filter((u) => u.id !== event?.ownerId).map((u) => u.id) ??
         [],
+      recurrence: event?.recurrence
+        ? {
+            frequency: event.recurrence.frequency,
+            interval: event.recurrence.interval,
+            endType: event.recurrence.endType,
+            endCount: event.recurrence.endCount,
+            endDate: event.recurrence.endDate
+              ? new Date(event.recurrence.endDate)
+              : undefined,
+          }
+        : {
+            frequency: "none" as const,
+            interval: 1,
+            endType: "never" as const,
+          },
     },
   });
 
@@ -119,6 +135,21 @@ export function AddEditEventDialog({
       participantIds:
         event?.users.filter((u) => u.id !== event?.ownerId).map((u) => u.id) ??
         [],
+      recurrence: event?.recurrence
+        ? {
+            frequency: event.recurrence.frequency,
+            interval: event.recurrence.interval,
+            endType: event.recurrence.endType,
+            endCount: event.recurrence.endCount,
+            endDate: event.recurrence.endDate
+              ? new Date(event.recurrence.endDate)
+              : undefined,
+          }
+        : {
+            frequency: "none" as const,
+            interval: 1,
+            endType: "never" as const,
+          },
     });
   }, [event, initialDates, form, defaultOwnerId]);
 
@@ -144,6 +175,8 @@ export function AddEditEventDialog({
       );
       const eventUsers = owner ? [owner, ...participants] : participants;
 
+      const hasRecurrence = values.recurrence?.frequency !== "none";
+
       const formattedEvent: IEvent = {
         id: isEditing
           ? event.id
@@ -157,6 +190,19 @@ export function AddEditEventDialog({
         allDay: values.allDay,
         ownerId: values.ownerId,
         users: eventUsers,
+        recurrence: hasRecurrence
+          ? {
+              frequency: values.recurrence.frequency as
+                | "daily"
+                | "weekly"
+                | "monthly"
+                | "yearly",
+              interval: values.recurrence.interval,
+              endType: values.recurrence.endType,
+              endCount: values.recurrence.endCount,
+              endDate: values.recurrence.endDate?.toISOString(),
+            }
+          : undefined,
       };
 
       if (isEditing) {
@@ -164,7 +210,9 @@ export function AddEditEventDialog({
         toast.success(t("successUpdate"));
       } else {
         addEvent(formattedEvent);
-        toast.success(t("successCreate"));
+        toast.success(
+          hasRecurrence ? t("successCreateRecurring") : t("successCreate")
+        );
       }
 
       onClose();
@@ -259,6 +307,9 @@ export function AddEditEventDialog({
                 />
               )}
             />
+
+            {/* Recurrence - Only show for new events */}
+            {!isEditing && <RecurrenceFields />}
 
             {/* Category */}
             <FormField

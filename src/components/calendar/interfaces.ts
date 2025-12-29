@@ -1,4 +1,5 @@
 import type { TEventCategory, TEventType } from "@/components/calendar/types";
+import type { IRecurrence } from "@/components/calendar/types/recurrence";
 
 export interface IUser {
   id: string;
@@ -23,6 +24,10 @@ export interface IEvent {
   allDay: boolean;
   isCompleted?: boolean;
   ownerId?: string;
+  // Recurrence support
+  recurringPatternId?: string;
+  occurrenceDate?: string;
+  recurrence?: IRecurrence;
 }
 
 export interface ICalendarCell {

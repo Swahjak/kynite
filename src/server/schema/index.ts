@@ -48,10 +48,12 @@ export {
   googleCalendarChannels,
   events,
   eventParticipants,
+  recurringEventPatterns,
   googleCalendarsRelations,
   googleCalendarChannelsRelations,
   eventsRelations,
   eventParticipantsRelations,
+  recurringEventPatternsRelations,
   type GoogleCalendar,
   type NewGoogleCalendar,
   type GoogleCalendarChannel,
@@ -60,6 +62,8 @@ export {
   type NewEvent,
   type EventParticipant,
   type NewEventParticipant,
+  type RecurringEventPattern,
+  type NewRecurringEventPattern,
 } from "./calendars";
 
 // Reward Charts

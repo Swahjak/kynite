@@ -1,4 +1,10 @@
-import { pgTable, text, timestamp, boolean } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  timestamp,
+  boolean,
+  integer,
+} from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { accounts } from "./auth";
 import { families, familyMembers } from "./families";
@@ -46,6 +52,23 @@ export const googleCalendarChannels = pgTable("google_calendar_channels", {
 });
 
 /**
+ * Recurring Event Patterns table - Stores recurrence rules for recurring events
+ */
+export const recurringEventPatterns = pgTable("recurring_event_patterns", {
+  id: text("id").primaryKey(),
+  familyId: text("family_id")
+    .notNull()
+    .references(() => families.id, { onDelete: "cascade" }),
+  frequency: text("frequency").notNull(), // 'daily' | 'weekly' | 'monthly' | 'yearly'
+  interval: integer("interval").notNull().default(1), // e.g., 2 = "every 2 weeks"
+  endType: text("end_type").notNull(), // 'never' | 'count' | 'date'
+  endCount: integer("end_count"), // if endType='count'
+  endDate: timestamp("end_date", { mode: "date" }), // if endType='date'
+  generatedUntil: timestamp("generated_until", { mode: "date" }).notNull(),
+  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+});
+
+/**
  * Events table - Calendar events with Google sync metadata
  */
 export const events = pgTable("events", {
@@ -72,6 +95,12 @@ export const events = pgTable("events", {
   syncStatus: text("sync_status").default("synced"), // 'synced' | 'pending' | 'conflict' | 'error'
   localUpdatedAt: timestamp("local_updated_at", { mode: "date" }),
   remoteUpdatedAt: timestamp("remote_updated_at", { mode: "date" }),
+  // Recurring event reference
+  recurringPatternId: text("recurring_pattern_id").references(
+    () => recurringEventPatterns.id,
+    { onDelete: "cascade" }
+  ),
+  occurrenceDate: timestamp("occurrence_date", { mode: "date" }), // identifies which instance
   createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
 });
@@ -128,6 +157,10 @@ export const eventsRelations = relations(events, ({ one, many }) => ({
     fields: [events.googleCalendarId],
     references: [googleCalendars.id],
   }),
+  recurringPattern: one(recurringEventPatterns, {
+    fields: [events.recurringPatternId],
+    references: [recurringEventPatterns.id],
+  }),
   participants: many(eventParticipants),
 }));
 
@@ -145,6 +178,17 @@ export const eventParticipantsRelations = relations(
   })
 );
 
+export const recurringEventPatternsRelations = relations(
+  recurringEventPatterns,
+  ({ one, many }) => ({
+    family: one(families, {
+      fields: [recurringEventPatterns.familyId],
+      references: [families.id],
+    }),
+    events: many(events),
+  })
+);
+
 // ============================================================================
 // Type Exports
 // ============================================================================
@@ -158,3 +202,6 @@ export type Event = typeof events.$inferSelect;
 export type NewEvent = typeof events.$inferInsert;
 export type EventParticipant = typeof eventParticipants.$inferSelect;
 export type NewEventParticipant = typeof eventParticipants.$inferInsert;
+export type RecurringEventPattern = typeof recurringEventPatterns.$inferSelect;
+export type NewRecurringEventPattern =
+  typeof recurringEventPatterns.$inferInsert;
