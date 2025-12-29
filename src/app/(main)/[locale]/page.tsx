@@ -13,7 +13,12 @@ export default async function Home({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale as Locale);
 
-  const page = await getHomepage(locale as "nl" | "en");
+  let page = null;
+  try {
+    page = await getHomepage(locale as "nl" | "en");
+  } catch {
+    // CMS tables may not exist yet - fall through to HomeContent
+  }
 
   // If CMS content is available, render it with BlockRenderer
   if (page?.layout && page.layout.length > 0) {

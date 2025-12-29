@@ -10,11 +10,15 @@ type Props = {
 };
 
 export async function generateStaticParams() {
-  const slugs = await getAllPageSlugs();
-
-  return routing.locales.flatMap((locale) =>
-    slugs.map((slug) => ({ locale, slug }))
-  );
+  try {
+    const slugs = await getAllPageSlugs();
+    return routing.locales.flatMap((locale) =>
+      slugs.map((slug) => ({ locale, slug }))
+    );
+  } catch {
+    // Tables may not exist during initial build or if CMS is not configured
+    return [];
+  }
 }
 
 export default async function Page({ params }: Props) {
