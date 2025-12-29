@@ -365,6 +365,11 @@
       "caregiver": "Verzorger",
       "device": "Apparaat",
       "child": "Kind"
+    },
+    "dangerZone": {
+      "title": "Gevarenzone",
+      "description": "Verwijder deze familie en alle bijbehorende gegevens permanent. Dit verwijdert ook alle accounts van leden.",
+      "deleteFamily": "Familie verwijderen"
     }
   },
   "FamilyRoles": {
@@ -599,7 +604,10 @@
     "calendar": {
       "title": "Kalender verwijderen",
       "description": "Dit verwijdert permanent <bold>{name}</bold> en alle <bold>{count, plural, =1 {# gebeurtenis} other {# gebeurtenissen}}</bold> die zijn gesynchroniseerd.",
-      "confirm": "Kalender verwijderen"
+      "confirm": "Kalender verwijderen",
+      "success": "Kalender succesvol verwijderd",
+      "error": "Kalender verwijderen mislukt",
+      "loadingEvents": "Aantal gebeurtenissen laden..."
     },
     "member": {
       "title": "Lid verwijderen",

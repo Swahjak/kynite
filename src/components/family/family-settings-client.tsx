@@ -4,6 +4,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import type { Family, FamilyMember } from "@/server/schema";
 import type { FamilyMemberWithUser, FamilyMemberRole } from "@/types/family";
@@ -27,6 +28,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { DeleteConfirmationDialog } from "@/components/ui/delete-confirmation-dialog";
 import { FamilyMemberCard } from "./family-member-card";
 import { InviteLinkGenerator } from "./invite-link-generator";
 import { AddChildDialog } from "./add-child-dialog";
@@ -48,6 +50,8 @@ export function FamilySettingsClient({
   locale,
 }: FamilySettingsClientProps) {
   const router = useRouter();
+  const t = useTranslations("Family.dangerZone");
+  const tDeletion = useTranslations("Deletion.family");
   const [members, setMembers] = useState(initialMembers);
   const [isEditingName, setIsEditingName] = useState(false);
   const [familyName, setFamilyName] = useState(family.name);
@@ -56,6 +60,8 @@ export function FamilySettingsClient({
   const [pendingRemoveId, setPendingRemoveId] = useState<string | null>(null);
   const [isLeaving, setIsLeaving] = useState(false);
   const [pendingUpdateId, setPendingUpdateId] = useState<string | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   async function handleSaveName() {
     if (!familyName.trim()) {
@@ -179,6 +185,32 @@ export function FamilySettingsClient({
 
   function handleChildCreated() {
     router.refresh();
+  }
+
+  async function handleDeleteFamily() {
+    if (isDeleting) return;
+
+    setIsDeleting(true);
+    try {
+      const response = await fetch(`/api/v1/families/${family.id}`, {
+        method: "DELETE",
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        toast.error(result.error?.message || "Failed to delete family");
+        return;
+      }
+
+      // Session will be invalid after deletion, use window.location instead of router
+      window.location.href = "/";
+    } catch (error) {
+      toast.error("Something went wrong");
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteDialogOpen(false);
+    }
   }
 
   return (
@@ -339,6 +371,48 @@ export function FamilySettingsClient({
           </AlertDialog>
         </CardContent>
       </Card>
+
+      {/* Danger Zone - Managers only */}
+      {isManager && (
+        <Card className="border-destructive">
+          <CardHeader>
+            <CardTitle className="text-destructive">{t("title")}</CardTitle>
+            <CardDescription>{t("description")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button
+              variant="destructive"
+              onClick={() => setIsDeleteDialogOpen(true)}
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                t("deleteFamily")
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Delete Family Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        title={tDeletion("title")}
+        description={tDeletion.rich("description", {
+          name: family.name,
+          count: members.length,
+          bold: (chunks) => <strong>{chunks}</strong>,
+        })}
+        confirmText={family.name}
+        onConfirm={handleDeleteFamily}
+        isDeleting={isDeleting}
+        confirmButtonText={tDeletion("confirm")}
+      />
 
       {/* Add Child Dialog */}
       <AddChildDialog
