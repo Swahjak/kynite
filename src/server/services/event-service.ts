@@ -6,14 +6,22 @@ import {
   users,
   googleCalendars,
   accounts,
+  recurringEventPatterns,
 } from "@/server/schema";
+import type { RecurringEventPattern } from "@/server/schema";
 import { eq, and, gte, lte, inArray } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
+import { addYears } from "date-fns";
 import type {
   CreateEventInput,
   UpdateEventInput,
   EventQueryInput,
 } from "@/lib/validations/event";
+import {
+  generateOccurrenceDates,
+  getEventDuration,
+  applyDuration,
+} from "@/server/utils/recurrence";
 
 // Privacy utility functions
 interface EventWithCalendar {
@@ -394,4 +402,229 @@ export async function isEventEditable(
   const event = await getEventById(eventId, familyId);
   if (!event) return false;
   return event.accessRole !== "reader";
+}
+
+// ============================================================================
+// Recurring Event Functions
+// ============================================================================
+
+export interface CreateRecurringEventInput extends CreateEventInput {
+  recurrence: {
+    frequency: "daily" | "weekly" | "monthly" | "yearly";
+    interval: number;
+    endType: "never" | "count" | "date";
+    endCount?: number;
+    endDate?: Date;
+  };
+}
+
+/**
+ * Get a recurring event pattern by ID
+ */
+export async function getRecurringPatternById(
+  patternId: string,
+  familyId: string
+): Promise<RecurringEventPattern | null> {
+  const result = await db
+    .select()
+    .from(recurringEventPatterns)
+    .where(
+      and(
+        eq(recurringEventPatterns.id, patternId),
+        eq(recurringEventPatterns.familyId, familyId)
+      )
+    )
+    .limit(1);
+
+  return result[0] ?? null;
+}
+
+/**
+ * Create a recurring event with all its occurrences
+ */
+export async function createRecurringEvent(
+  familyId: string,
+  input: CreateRecurringEventInput,
+  creatorMemberId: string
+): Promise<{ patternId: string; eventCount: number }> {
+  const { recurrence, ...eventData } = input;
+  const patternId = createId();
+
+  // Calculate generation horizon (1 year from now)
+  const generationHorizon = addYears(new Date(), 1);
+
+  // Generate occurrence dates
+  const occurrenceDates = generateOccurrenceDates({
+    startDate: input.startTime,
+    frequency: recurrence.frequency,
+    interval: recurrence.interval,
+    endType: recurrence.endType,
+    endCount: recurrence.endCount,
+    endDate: recurrence.endDate,
+    untilDate: generationHorizon,
+  });
+
+  if (occurrenceDates.length === 0) {
+    throw new Error("No occurrences generated for recurring event");
+  }
+
+  // Calculate event duration
+  const durationMs = getEventDuration(input.startTime, input.endTime);
+
+  // Use transaction to ensure atomicity
+  await db.transaction(async (tx) => {
+    // Create the pattern
+    await tx.insert(recurringEventPatterns).values({
+      id: patternId,
+      familyId,
+      frequency: recurrence.frequency,
+      interval: recurrence.interval,
+      endType: recurrence.endType,
+      endCount: recurrence.endCount ?? null,
+      endDate: recurrence.endDate ?? null,
+      generatedUntil: generationHorizon,
+    });
+
+    // Create all event occurrences
+    for (const occurrenceDate of occurrenceDates) {
+      const eventId = createId();
+      const endTime = applyDuration(occurrenceDate, durationMs);
+
+      await tx.insert(events).values({
+        id: eventId,
+        familyId,
+        title: eventData.title,
+        description: eventData.description ?? null,
+        location: eventData.location ?? null,
+        startTime: occurrenceDate,
+        endTime,
+        allDay: eventData.allDay,
+        color: eventData.color ?? null,
+        category: eventData.category ?? "family",
+        eventType: eventData.eventType ?? "event",
+        recurringPatternId: patternId,
+        occurrenceDate,
+        syncStatus: "synced",
+        localUpdatedAt: new Date(),
+      });
+
+      // Add participants for each occurrence
+      const participantValues = eventData.participantIds.map((memberId) => ({
+        id: createId(),
+        eventId,
+        familyMemberId: memberId,
+        isOwner: memberId === creatorMemberId,
+      }));
+
+      if (participantValues.length > 0) {
+        await tx.insert(eventParticipants).values(participantValues);
+      }
+    }
+  });
+
+  return { patternId, eventCount: occurrenceDates.length };
+}
+
+/**
+ * Update a recurring event with scope control
+ * @param scope - "this" updates only this occurrence, "all" updates all events in the series
+ */
+export async function updateRecurringEvent(
+  eventId: string,
+  familyId: string,
+  input: Partial<CreateEventInput>,
+  scope: "this" | "all"
+): Promise<EventWithParticipants> {
+  const existing = await getEventById(eventId, familyId);
+  if (!existing) throw new Error("Event not found");
+
+  if (scope === "this") {
+    // Just update this single occurrence
+    return updateEvent(eventId, familyId, input);
+  }
+
+  // scope === "all" - update all events in the series
+  // First, we need to get the recurringPatternId from the event
+  const eventRow = await db
+    .select({ recurringPatternId: events.recurringPatternId })
+    .from(events)
+    .where(and(eq(events.id, eventId), eq(events.familyId, familyId)))
+    .limit(1);
+
+  const recurringPatternId = eventRow[0]?.recurringPatternId;
+
+  if (!recurringPatternId) {
+    // Not a recurring event, just update normally
+    return updateEvent(eventId, familyId, input);
+  }
+
+  // Get all events in this series
+  const seriesEvents = await db
+    .select({ id: events.id })
+    .from(events)
+    .where(eq(events.recurringPatternId, recurringPatternId));
+
+  // Update all events in the series
+  for (const event of seriesEvents) {
+    await db
+      .update(events)
+      .set({
+        ...(input.title !== undefined && { title: input.title }),
+        ...(input.description !== undefined && {
+          description: input.description,
+        }),
+        ...(input.location !== undefined && { location: input.location }),
+        ...(input.allDay !== undefined && { allDay: input.allDay }),
+        ...(input.color !== undefined && { color: input.color }),
+        ...(input.category !== undefined && { category: input.category }),
+        ...(input.eventType !== undefined && { eventType: input.eventType }),
+        updatedAt: new Date(),
+      })
+      .where(eq(events.id, event.id));
+  }
+
+  // Return the updated event
+  const updated = await getEventById(eventId, familyId);
+  if (!updated) throw new Error("Failed to update event");
+  return updated;
+}
+
+/**
+ * Delete a recurring event with scope control
+ * @param scope - "this" deletes only this occurrence, "all" deletes all events in the series
+ */
+export async function deleteRecurringEvent(
+  eventId: string,
+  familyId: string,
+  scope: "this" | "all"
+): Promise<void> {
+  const existing = await getEventById(eventId, familyId);
+  if (!existing) throw new Error("Event not found");
+
+  if (scope === "this") {
+    // Just delete this single occurrence
+    await deleteEvent(eventId, familyId);
+    return;
+  }
+
+  // scope === "all" - delete entire series
+  // First, we need to get the recurringPatternId from the event
+  const eventRow = await db
+    .select({ recurringPatternId: events.recurringPatternId })
+    .from(events)
+    .where(and(eq(events.id, eventId), eq(events.familyId, familyId)))
+    .limit(1);
+
+  const recurringPatternId = eventRow[0]?.recurringPatternId;
+
+  if (!recurringPatternId) {
+    // Not a recurring event, just delete normally
+    await deleteEvent(eventId, familyId);
+    return;
+  }
+
+  // Delete the pattern (cascade will delete all events)
+  await db
+    .delete(recurringEventPatterns)
+    .where(eq(recurringEventPatterns.id, recurringPatternId));
 }
