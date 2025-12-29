@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, RefreshCw } from "lucide-react";
+import { Loader2, RefreshCw, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { DeleteConfirmationDialog } from "@/components/ui/delete-confirmation-dialog";
 import { CalendarToggle } from "./calendar-toggle";
 import { SyncStatusBadge } from "./sync-status-badge";
 import { CalendarPrivacyToggle } from "@/components/settings/calendar-privacy-toggle";
@@ -29,12 +31,22 @@ export function CalendarSelectionSection({
   familyId,
   account,
 }: CalendarSelectionSectionProps) {
+  const t = useTranslations("Deletion.calendar");
+
   const [availableCalendars, setAvailableCalendars] = useState<
     AvailableCalendar[]
   >([]);
   const [linkedCalendars, setLinkedCalendars] = useState<GoogleCalendar[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
+
+  // Deletion state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [calendarToDelete, setCalendarToDelete] =
+    useState<GoogleCalendar | null>(null);
+  const [eventCount, setEventCount] = useState(0);
+  const [isLoadingEventCount, setIsLoadingEventCount] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchCalendars = async () => {
     try {
@@ -154,6 +166,60 @@ export function CalendarSelectionSection({
     }
   };
 
+  const handleDeleteClick = async (calendar: GoogleCalendar) => {
+    setCalendarToDelete(calendar);
+    setIsLoadingEventCount(true);
+    setDeleteDialogOpen(true);
+
+    try {
+      const response = await fetch(
+        `/api/v1/families/${familyId}/calendars/${calendar.id}/event-count`
+      );
+      const data = await response.json();
+
+      if (data.success) {
+        setEventCount(data.data.eventCount);
+      } else {
+        setEventCount(0);
+      }
+    } catch (error) {
+      console.error("Failed to fetch event count:", error);
+      setEventCount(0);
+    } finally {
+      setIsLoadingEventCount(false);
+    }
+  };
+
+  const handleDeleteCalendar = async () => {
+    if (!calendarToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      const response = await fetch(
+        `/api/v1/families/${familyId}/calendars/${calendarToDelete.id}`,
+        { method: "DELETE" }
+      );
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success(t("success"));
+        setLinkedCalendars((prev) =>
+          prev.filter((c) => c.id !== calendarToDelete.id)
+        );
+        setDeleteDialogOpen(false);
+        setCalendarToDelete(null);
+      } else {
+        toast.error(data.error?.message || t("error"));
+      }
+    } catch (error) {
+      console.error("Failed to delete calendar:", error);
+      toast.error(t("error"));
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-4">
@@ -195,10 +261,20 @@ export function CalendarSelectionSection({
               <div key={cal.id} className="space-y-2 px-3 py-3">
                 <div className="flex items-center justify-between">
                   <CalendarToggle calendar={cal} onToggle={handleToggleSync} />
-                  <SyncStatusBadge
-                    status={cal.lastSyncedAt ? "synced" : "pending"}
-                    lastSyncedAt={cal.lastSyncedAt ?? undefined}
-                  />
+                  <div className="flex items-center gap-2">
+                    <SyncStatusBadge
+                      status={cal.lastSyncedAt ? "synced" : "pending"}
+                      lastSyncedAt={cal.lastSyncedAt ?? undefined}
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-muted-foreground hover:text-destructive size-8"
+                      onClick={() => handleDeleteClick(cal)}
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </div>
                 </div>
                 <div className="pl-7">
                   <CalendarPrivacyToggle
@@ -243,6 +319,37 @@ export function CalendarSelectionSection({
           </div>
         </div>
       )}
+
+      {/* Delete Calendar Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={(open) => {
+          setDeleteDialogOpen(open);
+          if (!open) {
+            setCalendarToDelete(null);
+            setEventCount(0);
+          }
+        }}
+        title={t("title")}
+        description={
+          isLoadingEventCount ? (
+            <span className="flex items-center gap-2">
+              <Loader2 className="size-4 animate-spin" />
+              {t("loadingEvents")}
+            </span>
+          ) : (
+            t.rich("description", {
+              name: calendarToDelete?.name ?? "",
+              count: eventCount,
+              bold: (chunks) => <strong>{chunks}</strong>,
+            })
+          )
+        }
+        confirmText={calendarToDelete?.name ?? ""}
+        onConfirm={handleDeleteCalendar}
+        isDeleting={isDeleting}
+        confirmButtonText={t("confirm")}
+      />
     </div>
   );
 }
