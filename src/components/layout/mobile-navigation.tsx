@@ -1,15 +1,5 @@
 "use client";
 
-import {
-  LayoutDashboard,
-  Calendar,
-  CheckSquare,
-  Settings,
-  HelpCircle,
-  Star,
-  Gift,
-  Timer,
-} from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { usePathname } from "@/i18n/navigation";
 import { ProgressLink } from "@/components/ui/progress-link";
@@ -22,38 +12,17 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { navItems, helpItem } from "./nav-items";
 
-interface NavigationMenuProps {
+interface MobileNavigationProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-interface NavItem {
-  href: string;
-  icon: React.ComponentType<{ className?: string }>;
-  labelKey:
-    | "dashboard"
-    | "calendar"
-    | "chores"
-    | "timers"
-    | "rewardChart"
-    | "rewards"
-    | "settings"
-    | "help";
-  manageOnly?: boolean;
-}
-
-const navItems: NavItem[] = [
-  { href: "/dashboard", icon: LayoutDashboard, labelKey: "dashboard" },
-  { href: "/calendar/today", icon: Calendar, labelKey: "calendar" },
-  { href: "/chores", icon: CheckSquare, labelKey: "chores", manageOnly: true },
-  { href: "/timers", icon: Timer, labelKey: "timers", manageOnly: true },
-  { href: "/reward-chart", icon: Star, labelKey: "rewardChart" },
-  { href: "/rewards", icon: Gift, labelKey: "rewards" },
-  { href: "/settings", icon: Settings, labelKey: "settings", manageOnly: true },
-];
-
-export function NavigationMenu({ open, onOpenChange }: NavigationMenuProps) {
+export function MobileNavigation({
+  open,
+  onOpenChange,
+}: MobileNavigationProps) {
   const t = useTranslations("Menu");
   const pathname = usePathname();
   const isManager = useIsManager();
@@ -62,6 +31,8 @@ export function NavigationMenu({ open, onOpenChange }: NavigationMenuProps) {
   const filteredItems = navItems.filter(
     (item) => !item.manageOnly || isManager
   );
+
+  const HelpIcon = helpItem.icon;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -104,7 +75,7 @@ export function NavigationMenu({ open, onOpenChange }: NavigationMenuProps) {
               onClick={() => onOpenChange(false)}
               className="text-muted-foreground hover:bg-accent hover:text-accent-foreground flex h-12 w-full items-center gap-3 rounded-md px-4 text-sm font-medium"
             >
-              <HelpCircle className="size-5" />
+              <HelpIcon className="size-5" />
               {t("help")}
             </a>
           </div>

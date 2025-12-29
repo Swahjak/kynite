@@ -21,17 +21,22 @@ export function AppHeader({ onMenuToggle }: AppHeaderProps) {
 
   return (
     <header className="bg-background flex h-16 items-center justify-between border-b px-4">
-      {/* Left: Menu trigger + Brand */}
+      {/* Left: Menu trigger (mobile only) + Brand */}
       <div className="flex min-w-0 flex-1 items-center gap-2">
+        {/* Mobile only: hamburger menu */}
         <Button
           variant="ghost"
           size="icon"
           onClick={onMenuToggle}
           aria-label="Open menu"
+          className="md:hidden"
         >
           <Menu className="size-5" />
         </Button>
-        <BrandArea />
+        {/* Mobile only: show brand in header */}
+        <div className="md:hidden">
+          <BrandArea />
+        </div>
       </div>
 
       {/* Center: Current Time (hidden on mobile) */}

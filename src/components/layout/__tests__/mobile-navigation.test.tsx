@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
-import { NavigationMenu } from "../navigation-menu";
+import { MobileNavigation } from "../mobile-navigation";
 
 // Mock next-intl navigation
 vi.mock("@/i18n/navigation", () => ({
@@ -49,7 +49,7 @@ function renderWithProviders(ui: React.ReactElement) {
   );
 }
 
-describe("NavigationMenu", () => {
+describe("MobileNavigation", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -58,7 +58,9 @@ describe("NavigationMenu", () => {
     const { useIsManager } = await import("@/hooks/use-is-manager");
     vi.mocked(useIsManager).mockReturnValue(true);
 
-    renderWithProviders(<NavigationMenu open={true} onOpenChange={() => {}} />);
+    renderWithProviders(
+      <MobileNavigation open={true} onOpenChange={() => {}} />
+    );
 
     expect(screen.getByText("Dashboard")).toBeInTheDocument();
     expect(screen.getByText("Calendar")).toBeInTheDocument();
@@ -74,7 +76,9 @@ describe("NavigationMenu", () => {
     const { useIsManager } = await import("@/hooks/use-is-manager");
     vi.mocked(useIsManager).mockReturnValue(false);
 
-    renderWithProviders(<NavigationMenu open={true} onOpenChange={() => {}} />);
+    renderWithProviders(
+      <MobileNavigation open={true} onOpenChange={() => {}} />
+    );
 
     expect(screen.getByText("Dashboard")).toBeInTheDocument();
     expect(screen.getByText("Calendar")).toBeInTheDocument();
