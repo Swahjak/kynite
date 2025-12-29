@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "drizzle-kit migrate && payload migrate && turbo run build:next",
+    "build": "drizzle-kit migrate && pnpm payload migrate && turbo run build:next",
     "build:next": "next build",
     "start": "next start",
     "lint": "eslint .",
@@ -32,7 +32,9 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "setup-channels": "tsx scripts/setup-push-channels.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "payload": "NODE_OPTIONS=--no-deprecation payload",
+    "cms:migrate-homepage": "tsx scripts/seed-homepage.ts"
   },
   "dependencies": {
     "@47ng/cloak": "^1.2.0",
