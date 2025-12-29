@@ -1,14 +1,9 @@
-/**
- * Migration script to seed the homepage with content from translation files
- * Run with: pnpm cms:migrate-homepage
- */
-
 import { getPayload } from "payload";
-import config from "../src/payload.config";
-import nlMessages from "../messages/nl.json" with { type: "json" };
-import enMessages from "../messages/en.json" with { type: "json" };
+import config from "@/payload.config";
+import nlMessages from "@/../messages/nl.json" with { type: "json" };
+import enMessages from "@/../messages/en.json" with { type: "json" };
 
-async function seed() {
+export async function seedHomepage() {
   const payload = await getPayload({ config });
 
   // Check if homepage already exists
@@ -18,14 +13,15 @@ async function seed() {
   });
 
   if (existing.docs.length > 0) {
-    console.log("Homepage already exists, skipping seed");
-    process.exit(0);
+    return {
+      success: true,
+      message: "Homepage already exists, skipping seed",
+      data: { skipped: true, existingId: existing.docs[0].id },
+    };
   }
 
   const nl = nlMessages.HomePage;
   const en = enMessages.HomePage;
-
-  console.log("Creating homepage with Dutch content (default locale)...");
 
   // Create homepage with Dutch content (default locale)
   const page = await payload.create({
@@ -124,9 +120,6 @@ async function seed() {
     },
   });
 
-  console.log(`Homepage created with id: ${page.id}`);
-  console.log("Updating with English translations...");
-
   // Update with English translations
   await payload.update({
     collection: "pages",
@@ -223,12 +216,9 @@ async function seed() {
     },
   });
 
-  console.log("Homepage migrated successfully with nl and en content!");
+  return {
+    success: true,
+    message: "Homepage seeded successfully with nl and en content",
+    data: { pageId: page.id },
+  };
 }
-
-seed()
-  .then(() => process.exit(0))
-  .catch((error) => {
-    console.error("Seed failed:", error);
-    process.exit(1);
-  });

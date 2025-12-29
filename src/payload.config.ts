@@ -1,10 +1,15 @@
+import path from "path";
+import { fileURLToPath } from "url";
 import sharp from "sharp";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import { postgresAdapter } from "@payloadcms/db-postgres";
 import { buildConfig } from "payload";
-import { Users } from "./src/payload/collections/Users";
-import { Media } from "./src/payload/collections/Media";
-import { Pages } from "./src/payload/collections/Pages";
+import { Users } from "./payload/collections/Users";
+import { Media } from "./payload/collections/Media";
+import { Pages } from "./payload/collections/Pages";
+
+const filename = fileURLToPath(import.meta.url);
+const dirname = path.dirname(filename);
 
 if (!process.env.PAYLOAD_SECRET) {
   throw new Error("PAYLOAD_SECRET environment variable is required");
@@ -13,6 +18,9 @@ if (!process.env.PAYLOAD_SECRET) {
 export default buildConfig({
   admin: {
     user: Users.slug,
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
   },
   editor: lexicalEditor(),
   collections: [Users, Media, Pages],
@@ -24,7 +32,7 @@ export default buildConfig({
   }),
   sharp,
   typescript: {
-    outputFile: "src/payload/payload-types.ts",
+    outputFile: path.resolve(dirname, "payload/payload-types.ts"),
   },
   localization: {
     locales: [

@@ -56,6 +56,14 @@ const nextConfig: NextConfig = {
     locales: ["en", "nl"],
     defaultLocale: "en",
   },
+  webpack: (webpackConfig) => {
+    webpackConfig.resolve.extensionAlias = {
+      ".cjs": [".cts", ".cjs"],
+      ".js": [".ts", ".tsx", ".js", ".jsx"],
+      ".mjs": [".mts", ".mjs"],
+    };
+    return webpackConfig;
+  },
 } as NextConfig & { i18n: { locales: string[]; defaultLocale: string } };
 
 // Note: withPayload must be the outermost wrapper
