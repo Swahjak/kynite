@@ -46,8 +46,8 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Skip proxy for Payload CMS admin (handles its own auth)
-  if (pathname.startsWith("/admin")) {
+  // Skip proxy for Payload CMS (handles its own auth)
+  if (pathname.startsWith("/cms")) {
     return NextResponse.next();
   }
 
