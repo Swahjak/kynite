@@ -3,23 +3,14 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import type {
   FamilyMemberWithUser,
   FamilyMemberRole,
   AvatarColor,
 } from "@/types/family";
 import { Button } from "@/components/ui/button";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { DeleteConfirmationDialog } from "@/components/ui/delete-confirmation-dialog";
 import { RoleBadge } from "./role-badge";
 import { FamilyAvatar } from "./family-avatar";
 import { MemberEditDialog } from "./member-edit-dialog";
@@ -39,7 +30,7 @@ interface FamilyMemberCardProps {
     avatarSvg?: string | null;
     role?: FamilyMemberRole;
   }) => void;
-  onRemove: () => void;
+  onRemove: () => void | Promise<void>;
   isRemoving?: boolean;
   isUpdating?: boolean;
 }
@@ -56,12 +47,19 @@ export function FamilyMemberCard({
   isRemoving,
   isUpdating,
 }: FamilyMemberCardProps) {
+  const t = useTranslations("Deletion.member");
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const isChildMember = member.role === "child";
 
   const displayName = member.displayName || member.user.name;
+
+  async function handleConfirmDelete() {
+    await onRemove();
+    setIsDeleteDialogOpen(false);
+  }
 
   return (
     <div className="flex items-center justify-between rounded-lg border p-3">
@@ -116,36 +114,33 @@ export function FamilyMemberCard({
         )}
 
         {canRemove && (
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button size="icon" variant="ghost" disabled={isRemoving}>
-                {isRemoving ? (
-                  <Loader2 className="text-destructive h-4 w-4 animate-spin" />
-                ) : (
-                  <Trash2 className="text-destructive h-4 w-4" />
-                )}
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Remove Member?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Are you sure you want to remove {displayName} from the family?
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel disabled={isRemoving}>
-                  Cancel
-                </AlertDialogCancel>
-                <AlertDialogAction onClick={onRemove} disabled={isRemoving}>
-                  {isRemoving ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : null}
-                  Remove
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <>
+            <Button
+              size="icon"
+              variant="ghost"
+              disabled={isRemoving}
+              onClick={() => setIsDeleteDialogOpen(true)}
+            >
+              {isRemoving ? (
+                <Loader2 className="text-destructive h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="text-destructive h-4 w-4" />
+              )}
+            </Button>
+            <DeleteConfirmationDialog
+              open={isDeleteDialogOpen}
+              onOpenChange={setIsDeleteDialogOpen}
+              title={t("title")}
+              description={t.rich("description", {
+                name: displayName,
+                bold: (chunks) => <strong>{chunks}</strong>,
+              })}
+              confirmText={displayName}
+              onConfirm={handleConfirmDelete}
+              isDeleting={isRemoving}
+              confirmButtonText={t("confirm")}
+            />
+          </>
         )}
       </div>
 
