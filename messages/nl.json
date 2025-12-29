@@ -394,6 +394,11 @@
       "caregiver": "Verzorger",
       "device": "Apparaat",
       "child": "Kind"
+    },
+    "dangerZone": {
+      "title": "Gevarenzone",
+      "description": "Verwijder deze familie en alle bijbehorende gegevens permanent. Dit verwijdert ook alle accounts van leden.",
+      "deleteFamily": "Familie verwijderen"
     }
   },
   "FamilyRoles": {
@@ -623,5 +628,25 @@
     "title": "Pagina niet gevonden",
     "description": "De pagina die je zoekt bestaat niet.",
     "goHome": "Naar dashboard"
+  },
+  "Deletion": {
+    "calendar": {
+      "title": "Kalender verwijderen",
+      "description": "Dit verwijdert permanent <bold>{name}</bold> en alle <bold>{count, plural, =1 {# gebeurtenis} other {# gebeurtenissen}}</bold> die zijn gesynchroniseerd.",
+      "confirm": "Kalender verwijderen",
+      "success": "Kalender succesvol verwijderd",
+      "error": "Kalender verwijderen mislukt",
+      "loadingEvents": "Aantal gebeurtenissen laden..."
+    },
+    "member": {
+      "title": "Lid verwijderen",
+      "description": "Dit verwijdert permanent <bold>{name}</bold> en hun account. Ze kunnen niet meer inloggen.",
+      "confirm": "Lid verwijderen"
+    },
+    "family": {
+      "title": "Familie verwijderen",
+      "description": "Dit verwijdert permanent de <bold>{name}</bold> familie, alle gegevens en alle leden accounts ({count} {count, plural, =1 {lid} other {leden}}). Niemand kan meer inloggen.",
+      "confirm": "Familie verwijderen"
+    }
   }
 }

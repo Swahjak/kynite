@@ -89,7 +89,7 @@ export const events = pgTable("events", {
   // Google Sync Metadata
   googleCalendarId: text("google_calendar_id").references(
     () => googleCalendars.id,
-    { onDelete: "set null" }
+    { onDelete: "cascade" }
   ),
   googleEventId: text("google_event_id"),
   syncStatus: text("sync_status").default("synced"), // 'synced' | 'pending' | 'conflict' | 'error'

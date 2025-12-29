@@ -1,4 +1,11 @@
-import { pgTable, text, timestamp, integer, index } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  timestamp,
+  integer,
+  index,
+  uniqueIndex,
+} from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { users } from "./auth";
 
@@ -19,20 +26,24 @@ export const families = pgTable("families", {
 /**
  * Family Members table - User membership in families with roles
  */
-export const familyMembers = pgTable("family_members", {
-  id: text("id").primaryKey(),
-  familyId: text("family_id")
-    .notNull()
-    .references(() => families.id, { onDelete: "cascade" }),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  role: text("role").notNull(), // 'manager' | 'participant' | 'caregiver' | 'device'
-  displayName: text("display_name"),
-  avatarColor: text("avatar_color"),
-  avatarSvg: text("avatar_svg"),
-  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
-});
+export const familyMembers = pgTable(
+  "family_members",
+  {
+    id: text("id").primaryKey(),
+    familyId: text("family_id")
+      .notNull()
+      .references(() => families.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    role: text("role").notNull(), // 'manager' | 'participant' | 'caregiver' | 'device'
+    displayName: text("display_name"),
+    avatarColor: text("avatar_color"),
+    avatarSvg: text("avatar_svg"),
+    createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [uniqueIndex("family_members_user_id_unique").on(table.userId)]
+);
 
 /**
  * Family Invites table - Shareable invitation links
