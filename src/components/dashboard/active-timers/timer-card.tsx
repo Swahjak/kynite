@@ -310,7 +310,7 @@ export function TimerCard({ timer }: TimerCardProps) {
             {assignedMember && (
               <Avatar className="h-8 w-8">
                 <AvatarImage
-                  src={assignedMember.avatarUrl}
+                  src={assignedMember.avatarUrl ?? undefined}
                   alt={assignedMember.name}
                 />
                 <AvatarFallback

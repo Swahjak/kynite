@@ -29,8 +29,9 @@ export interface Timer {
 export interface FamilyMemberStar {
   id: string;
   name: string;
-  avatarUrl?: string;
+  avatarUrl?: string | null;
   avatarColor: string;
+  avatarSvg?: string | null;
   weeklyStarCount: number;
   level: number;
   levelTitle: string;

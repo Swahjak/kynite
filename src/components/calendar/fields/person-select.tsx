@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { FamilyAvatar } from "@/components/family/family-avatar";
 import type { IUser } from "@/components/calendar/interfaces";
 
 interface PersonSelectProps {
@@ -34,15 +34,15 @@ export function PersonSelect({
         <SelectValue placeholder={placeholder}>
           {selectedUser && (
             <div className="flex items-center gap-2">
-              <Avatar className="h-5 w-5">
-                <AvatarImage src={selectedUser.avatarUrl} />
-                <AvatarFallback
-                  className={selectedUser.avatarColor ?? "bg-primary"}
-                  style={{ fontSize: "0.625rem" }}
-                >
-                  {selectedUser.avatarFallback}
-                </AvatarFallback>
-              </Avatar>
+              <FamilyAvatar
+                name={selectedUser.name}
+                color={selectedUser.avatarColor}
+                avatarSvg={selectedUser.avatarSvg}
+                googleImage={selectedUser.avatarUrl}
+                size="sm"
+                showRing={false}
+                className="size-5"
+              />
               <span>{selectedUser.name}</span>
             </div>
           )}
@@ -52,15 +52,15 @@ export function PersonSelect({
         {users.map((user) => (
           <SelectItem key={user.id} value={user.id}>
             <div className="flex items-center gap-2">
-              <Avatar className="h-5 w-5">
-                <AvatarImage src={user.avatarUrl} />
-                <AvatarFallback
-                  className={user.avatarColor ?? "bg-primary"}
-                  style={{ fontSize: "0.625rem" }}
-                >
-                  {user.avatarFallback}
-                </AvatarFallback>
-              </Avatar>
+              <FamilyAvatar
+                name={user.name}
+                color={user.avatarColor}
+                avatarSvg={user.avatarSvg}
+                googleImage={user.avatarUrl}
+                size="sm"
+                showRing={false}
+                className="size-5"
+              />
               <span>{user.name}</span>
             </div>
           </SelectItem>

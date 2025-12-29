@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { useDashboard } from "../contexts/dashboard-context";
 import { ActionButton } from "./action-button";
+import { FamilyAvatar } from "@/components/family/family-avatar";
 import type { QuickAction } from "../types";
 
 export function QuickActionsFab() {
@@ -121,9 +122,13 @@ export function QuickActionsFab() {
                 {startingMemberId === member.id ? (
                   <Loader2 className="h-8 w-8 animate-spin" />
                 ) : (
-                  <span
-                    className="h-8 w-8 rounded-full"
-                    style={{ backgroundColor: member.avatarColor }}
+                  <FamilyAvatar
+                    name={member.name}
+                    color={member.avatarColor}
+                    avatarSvg={member.avatarSvg}
+                    googleImage={member.avatarUrl}
+                    size="sm"
+                    showRing={false}
                   />
                 )}
                 <span>{member.name}</span>
