@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils";
 import { FamilyAvatar } from "@/components/family/family-avatar";
 import { getAvatarColorClasses } from "@/lib/avatar-colors";
 import { useUserPreferences } from "@/hooks/use-preferences";
+import { useIsManager } from "@/hooks/use-is-manager";
+import { AddEditEventDialog } from "@/components/calendar/dialogs/add-edit-event-dialog";
 import type { IEvent } from "@/components/calendar/interfaces";
 import type { AvatarColor } from "@/types/family";
 
@@ -16,6 +18,7 @@ interface ScheduleCardProps {
 export function ScheduleCard({ event, showNowBadge }: ScheduleCardProps) {
   const { data: preferences } = useUserPreferences();
   const use24HourFormat = preferences?.use24HourFormat ?? true;
+  const isManager = useIsManager();
 
   const startDate = parseISO(event.startDate);
   const endDate = parseISO(event.endDate);
@@ -31,12 +34,13 @@ export function ScheduleCard({ event, showNowBadge }: ScheduleCardProps) {
   // Convert ring class to border class for card styling
   const borderClass = color.ring.replace("ring-", "border-l-");
 
-  return (
+  const cardContent = (
     <div
       className={cn(
         "rounded-lg border-l-4 p-3 shadow-sm",
         borderClass,
-        color.bgSubtle
+        color.bgSubtle,
+        isManager && "cursor-pointer transition-shadow hover:shadow-md"
       )}
     >
       <div className="mb-1 flex items-center justify-between gap-2">
@@ -70,4 +74,11 @@ export function ScheduleCard({ event, showNowBadge }: ScheduleCardProps) {
       <p className="text-sm font-semibold">{event.title}</p>
     </div>
   );
+
+  // Only allow editing in manager mode
+  if (isManager) {
+    return <AddEditEventDialog event={event}>{cardContent}</AddEditEventDialog>;
+  }
+
+  return cardContent;
 }
