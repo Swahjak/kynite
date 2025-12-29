@@ -4,13 +4,12 @@ import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/server/auth";
 import { db } from "@/server/db";
-import { familyMembers } from "@/server/schema";
+import { familyMembers, users } from "@/server/schema";
 import { eq, and } from "drizzle-orm";
 import { updateMemberSchema } from "@/lib/validations/family";
 import {
   isUserFamilyManager,
   updateMember,
-  removeMember,
 } from "@/server/services/family-service";
 import type { FamilyMemberRole } from "@/types/family";
 import { Errors } from "@/lib/errors";
@@ -182,7 +181,16 @@ export async function DELETE(request: Request, { params }: Params) {
       }
     }
 
-    await removeMember(memberId);
+    const userId = targetMember[0].userId;
+
+    // Use transaction to delete member and user atomically
+    await db.transaction(async (tx) => {
+      // Delete family member first (satisfies FK constraint)
+      await tx.delete(familyMembers).where(eq(familyMembers.id, memberId));
+
+      // Delete user account (cascades to sessions, accounts)
+      await tx.delete(users).where(eq(users.id, userId));
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {
