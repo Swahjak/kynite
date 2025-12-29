@@ -594,5 +594,22 @@
     "title": "Page not found",
     "description": "The page you're looking for doesn't exist.",
     "goHome": "Go to dashboard"
+  },
+  "Deletion": {
+    "calendar": {
+      "title": "Delete Calendar",
+      "description": "This will permanently delete <bold>{name}</bold> and all <bold>{count, plural, =1 {# event} other {# events}}</bold> synced from it.",
+      "confirm": "Delete Calendar"
+    },
+    "member": {
+      "title": "Delete Member",
+      "description": "This will permanently delete <bold>{name}</bold> and their account. They will no longer be able to log in.",
+      "confirm": "Delete Member"
+    },
+    "family": {
+      "title": "Delete Family",
+      "description": "This will permanently delete the <bold>{name}</bold> family, all data, and all member accounts ({count} {count, plural, =1 {member} other {members}}). No one will be able to log in.",
+      "confirm": "Delete Family"
+    }
   }
 }
