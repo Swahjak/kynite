@@ -13,6 +13,11 @@ vi.mock("@/server/auth", () => ({
   },
 }));
 
+// Mock next/headers
+vi.mock("next/headers", () => ({
+  headers: vi.fn(() => new Headers()),
+}));
+
 // Mock stopWatchChannel to avoid calling Google API
 vi.mock("@/server/services/google-channel-service", () => ({
   stopWatchChannel: vi.fn().mockResolvedValue(undefined),
