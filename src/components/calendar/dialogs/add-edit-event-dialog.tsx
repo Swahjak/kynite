@@ -224,7 +224,7 @@ export function AddEditEventDialog({
   };
 
   return (
-    <Modal open={isOpen} onOpenChange={onToggle} modal={false}>
+    <Modal open={isOpen} onOpenChange={onToggle}>
       <ModalTrigger asChild>{children}</ModalTrigger>
       <ModalContent>
         <ModalHeader>

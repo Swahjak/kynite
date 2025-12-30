@@ -65,9 +65,11 @@ const ModalContent = ({
     <ModalPortal>
       <ModalOverlay />
       <DialogPrimitive.Content
-        {...props}
         aria-describedby="responsive-modal-description"
         className={cn(ModalVariants({ side }), className)}
+        onInteractOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()}
+        {...props}
       >
         {children}
         <ModalClose className="ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute top-4 right-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:pointer-events-none">
