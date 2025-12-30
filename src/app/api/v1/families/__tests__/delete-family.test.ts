@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { db } from "@/server/db";
-import { users, families, familyMembers } from "@/server/schema";
 import { eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
+
+// Skip these integration tests if no database is available
+const hasDatabase = !!process.env.DATABASE_URL;
 
 // Mock auth
 vi.mock("@/server/auth", () => ({
@@ -23,7 +24,7 @@ vi.mock("@/server/services/google-channel-service", () => ({
   stopWatchChannel: vi.fn().mockResolvedValue(undefined),
 }));
 
-describe("DELETE /api/v1/families/[familyId]", () => {
+describe.skipIf(!hasDatabase)("DELETE /api/v1/families/[familyId]", () => {
   const testIds = {
     ownerId: randomUUID(),
     memberId: randomUUID(),
@@ -33,6 +34,9 @@ describe("DELETE /api/v1/families/[familyId]", () => {
   };
 
   beforeEach(async () => {
+    const { db } = await import("@/server/db");
+    const { users, families, familyMembers } = await import("@/server/schema");
+
     // Create owner user
     await db.insert(users).values({
       id: testIds.ownerId,
@@ -71,6 +75,9 @@ describe("DELETE /api/v1/families/[familyId]", () => {
   });
 
   afterEach(async () => {
+    const { db } = await import("@/server/db");
+    const { users, families, familyMembers } = await import("@/server/schema");
+
     // Clean up any remaining data
     await db
       .delete(familyMembers)
@@ -81,6 +88,9 @@ describe("DELETE /api/v1/families/[familyId]", () => {
   });
 
   it("should delete family and all user accounts", async () => {
+    const { db } = await import("@/server/db");
+    const { users, families } = await import("@/server/schema");
+
     const { auth } = await import("@/server/auth");
     vi.mocked(auth.api.getSession).mockResolvedValue({
       user: { id: testIds.ownerId },
