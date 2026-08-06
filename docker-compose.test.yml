@@ -1,18 +1,19 @@
-# docker-compose.test.yml
 services:
   postgres-test:
-    image: postgres:16-alpine
-    container_name: family-planner-db-test
+    image: postgres:17
+    container_name: kynite-postgres-test
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: family_planner_test
+      POSTGRES_USER: kynite
+      POSTGRES_PASSWORD: kynite
+      POSTGRES_DB: kynite_test
+    # 5435 deliberately avoids the dev database on 5433.
     ports:
-      - "5434:5432"
+      - '5435:5432'
     tmpfs:
       - /var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ['CMD-SHELL', 'pg_isready -U kynite -d kynite_test']
       interval: 2s
       timeout: 3s
-      retries: 10
+      retries: 30

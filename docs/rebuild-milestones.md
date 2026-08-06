@@ -30,7 +30,7 @@ This is the single source of progress truth for the Kynite greenfield rebuild. E
 
 ## M01 — Scaffold + CI
 
-- [ ] Status
+- [x] Status
 - **Scope:** Create the `greenfield` branch and stand up an empty but fully wired Next.js 16 (App Router, Turbopack, `proxy.ts`) application on Node 24 with pnpm. Configure TypeScript strict mode, Tailwind 4, the shadcn CLI targeting Base UI primitives, Drizzle + drizzle-kit against Postgres, ESLint 10 + Prettier, Vitest 4, Playwright 1.62, husky + lint-staged + commitlint. Add a zod-validated `server/env.ts` that refuses to boot on missing secrets, and a single CI script that runs the full gate.
 - **Acceptance criteria:**
   - Branch `greenfield` exists and is checked out; first commit is a conventional commit.
@@ -38,12 +38,12 @@ This is the single source of progress truth for the Kynite greenfield rebuild. E
   - `pnpm typecheck`, `pnpm lint`, `pnpm test:run`, `pnpm build` each exit 0.
   - `pnpm e2e` runs a smoke spec against a booted dev server and passes.
   - `tsconfig.json` has `"strict": true` and `@/*` → `./src/*`.
-  - Files exist: `src/app/[locale]/layout.tsx`, `src/server/env.ts`, `src/server/db/index.ts`, `drizzle.config.ts`, `components.json` (shadcn, new-york, Base UI), `eslint.config.*`, `vitest.config.ts`, `playwright.config.ts`, `.husky/pre-commit`, `.husky/commit-msg`, `commitlint.config.*`.
+  - Files exist: `src/app/[locale]/layout.tsx`, `src/server/env.ts`, `src/server/db/index.ts`, `drizzle.config.ts`, `components.json` (shadcn, `base-nova` preset — shadcn 4.16 removed new-york, Base UI primitives), `eslint.config.*`, `vitest.config.ts`, `playwright.config.ts`, `.husky/pre-commit`, `.husky/commit-msg`, `commitlint.config.*`.
   - `src/server/env.ts` throws at boot when `DATABASE_URL` is unset — covered by a passing Vitest unit test.
   - A commit with a non-conventional message is rejected by commitlint (demonstrable).
   - `pnpm ci` (or documented equivalent) runs typecheck + lint + test:run + build in one command and exits 0.
   - ESLint enforces the module-boundary rule (`no-restricted-imports` banning deep `modules/*/**` imports) with at least one test fixture proving it fires.
-- **Review verdict:** _pending_
+- **Review verdict:** _approved_ — Opus review 2026-08-06: all gates verified independently green; one blocker (workflow ran reserved `pnpm ci`) fixed to `pnpm run ci`. Carry-forwards: relative deep-import escape hatch in boundary rule (close by M03), restore dev docker-compose at M04, eager `getEnv()` in instrumentation.ts at M03, jsdom/Testing Library at M02, CI dummy secret → GitHub secret at M03.
 
 ## M02 — Design system + theming
 

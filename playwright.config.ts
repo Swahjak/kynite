@@ -1,55 +1,33 @@
-// playwright.config.ts
-import { defineConfig, devices } from "@playwright/test";
+import { defineConfig, devices } from '@playwright/test';
+
+const PORT = Number(process.env.E2E_PORT ?? 3100);
+const baseURL = process.env.E2E_BASE_URL ?? `http://127.0.0.1:${PORT}`;
 
 export default defineConfig({
-  testDir: "./e2e/tests",
-  outputDir: "./e2e/test-results",
-  snapshotDir: "./e2e/snapshots",
-  snapshotPathTemplate: "{snapshotDir}/{testFilePath}/{projectName}/{arg}{ext}",
-
+  testDir: './e2e/tests',
+  outputDir: './e2e/test-results',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  // With unique email suffix in test-scenarios.ts, race conditions are prevented
-  workers: process.env.CI ? 2 : 4,
-
-  reporter: [
-    ["html", { outputFolder: "./e2e/playwright-report" }],
-    ["json", { outputFile: "./e2e/test-results/results.json" }],
-  ],
-
+  workers: process.env.CI ? 1 : undefined,
+  reporter: [['list'], ['html', { outputFolder: './e2e/playwright-report', open: 'never' }]],
   use: {
-    baseURL: "http://localhost:3000",
-    trace: "on-first-retry",
-    screenshot: "only-on-failure",
-    video: "retain-on-failure",
+    baseURL,
+    // Deterministic Accept-Language: next-intl negotiates the locale from it,
+    // so without this the default-locale assertions depend on the CI machine.
+    locale: 'nl-NL',
+    trace: 'on-first-retry',
   },
-
-  expect: {
-    toHaveScreenshot: {
-      maxDiffPixels: 500, // Allow for minor rendering differences
-      threshold: 0.25,
-    },
-  },
-
   projects: [
     {
-      name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
-    },
-    {
-      name: "mobile-chrome",
-      use: { ...devices["Pixel 5"] },
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
     },
   ],
-
   webServer: {
-    command: "dotenv -e .env.test -- pnpm dev",
-    url: "http://localhost:3000",
+    command: `pnpm dev --port ${PORT}`,
+    url: baseURL,
     reuseExistingServer: !process.env.CI,
-    timeout: 120000,
+    timeout: 120_000,
   },
-
-  globalSetup: "./e2e/global-setup.ts",
-  globalTeardown: "./e2e/global-teardown.ts",
 });

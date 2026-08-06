@@ -1,20 +1,29 @@
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
-import * as schema from "../schema";
+import { drizzle, type NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { Pool } from 'pg';
+import { env } from '@/server/env';
+import * as schema from './schema';
 
-if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL environment variable is not set. Check your .env.local file."
-  );
+type Database = NodePgDatabase<typeof schema>;
+
+let pool: Pool | undefined;
+let instance: Database | undefined;
+
+/**
+ * Lazily constructs the pool so importing this module (e.g. during
+ * `next build`) never touches the environment.
+ */
+export function getDb(): Database {
+  if (!instance) {
+    pool = new Pool({ connectionString: env.DATABASE_URL });
+    instance = drizzle(pool, { schema });
+  }
+  return instance;
 }
 
-// Create postgres connection with SSL in production
-const client = postgres(process.env.DATABASE_URL, {
-  ssl: process.env.NODE_ENV === "production" ? "require" : false,
+export const db: Database = new Proxy({} as Database, {
+  get(_target, prop: string | symbol) {
+    return Reflect.get(getDb(), prop) as unknown;
+  },
 });
 
-// Create drizzle instance with schema
-export const db = drizzle(client, { schema });
-
-// Export types
-export type Database = typeof db;
+export type { Database };

@@ -107,7 +107,7 @@ These journeys reveal critical capabilities for the system:
 
 Kynite is a Next.js 16 (App Router) application using React 19 and TypeScript, self-hosted on a VPS. These are binding technical constraints, not implementation detail to be revisited per-feature:
 
-- **Framework:** Next.js 16, React 19, TypeScript (strict mode).
+- **Framework:** Next.js 16, React 19, TypeScript (strict mode). TypeScript pinned to 5.9.x, not 7.x: the TS 7 Go binary exposes no JS compiler API, which typescript-eslint requires (decided M01, 2026-08-06).
 - **Data layer:** Drizzle ORM over PostgreSQL.
 - **Auth:** better-auth (email/password), with a separate no-account link-based flow for caregiver views.
 - **i18n:** next-intl, Dutch (`nl`) as default locale, English (`en`) supported.

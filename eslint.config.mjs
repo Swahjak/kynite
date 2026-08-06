@@ -1,35 +1,57 @@
-import nextPlugin from "@next/eslint-plugin-next";
-import tsPlugin from "@typescript-eslint/eslint-plugin";
-import tsParser from "@typescript-eslint/parser";
-import prettier from "eslint-plugin-prettier";
+import js from '@eslint/js';
+import nextCoreWebVitals from 'eslint-config-next/core-web-vitals';
+import nextTypescript from 'eslint-config-next/typescript';
+import prettier from 'eslint-config-prettier';
+import tseslint from 'typescript-eslint';
 
-export default [
+/**
+ * Module boundary rule (docs/architecture.md §2 "Module boundaries"):
+ * cross-module imports must go through `@/modules/<slice>` (its index.ts).
+ * Deep imports such as `@/modules/routines/queries` are banned so slices stay
+ * swappable. Within a slice, use relative imports (`./queries`) instead.
+ */
+const moduleBoundaryRule = [
+  'error',
   {
-    ignores: [".next/**", "node_modules/**", ".worktrees/**", ".turbo/**"],
-  },
-  {
-    files: ["**/*.{js,jsx,ts,tsx}"],
-    plugins: {
-      "@next/next": nextPlugin,
-      "@typescript-eslint": tsPlugin,
-      prettier,
-    },
-    languageOptions: {
-      parser: tsParser,
-      parserOptions: {
-        ecmaVersion: "latest",
-        sourceType: "module",
-        ecmaFeatures: {
-          jsx: true,
-        },
+    patterns: [
+      {
+        group: ['@/modules/*/*', 'src/modules/*/*'],
+        message:
+          'Deep module imports are banned. Import the slice public surface instead: `@/modules/<slice>`.',
       },
-    },
-    rules: {
-      ...nextPlugin.configs.recommended.rules,
-      ...nextPlugin.configs["core-web-vitals"].rules,
-      "prettier/prettier": "warn",
-      // Disable false positive for App Router - rule is designed for Pages Router
-      "@next/next/no-page-custom-font": "off",
-    },
+    ],
   },
 ];
+
+export default tseslint.config(
+  {
+    ignores: [
+      '.next/**',
+      'coverage/**',
+      'docs/**',
+      '.claude/**',
+      '.github/**',
+      'node_modules/**',
+      'next-env.d.ts',
+      'tests/fixtures/**',
+      'e2e/test-results/**',
+      'e2e/playwright-report/**',
+    ],
+  },
+  js.configs.recommended,
+  ...nextCoreWebVitals,
+  ...nextTypescript,
+  {
+    // Pin the React version: eslint-plugin-react's auto-detection is not
+    // ESLint 10 compatible (it calls context.getFilename()).
+    settings: { react: { version: '19.2' } },
+    rules: {
+      'no-restricted-imports': moduleBoundaryRule,
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
+    },
+  },
+  prettier
+);
