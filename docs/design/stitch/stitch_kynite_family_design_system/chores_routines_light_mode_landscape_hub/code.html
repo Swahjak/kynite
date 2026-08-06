@@ -1,0 +1,150 @@
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={theme:{extend:{"colors":{"on-primary":"#ffffff","surface-bright":"#f8f9fa","primary-container":"#2e5bff","on-error-container":"#93000a","background":"#f8f9fa","on-primary-fixed":"#001356","on-primary-fixed-variant":"#0035be","tertiary-fixed":"#71f8e4","on-background":"#191c1d","surface-tint":"#124af0","primary-fixed-dim":"#b8c3ff","tertiary-container":"#007b6e","surface-container":"#edeeef","on-tertiary-fixed":"#00201c","on-secondary-fixed-variant":"#653e00","inverse-on-surface":"#f0f1f2","primary-fixed":"#dde1ff","surface-variant":"#e1e3e4","surface":"#f8f9fa","on-secondary-fixed":"#2a1700","outline-variant":"#c4c5d9","error-container":"#ffdad6","on-surface-variant":"#434656","inverse-primary":"#b8c3ff","on-secondary":"#ffffff","on-surface":"#191c1d","surface-container-lowest":"#ffffff","surface-dim":"#d9dadb","on-error":"#ffffff","surface-container-low":"#f3f4f5","outline":"#747688","inverse-surface":"#2e3132","on-tertiary-fixed-variant":"#005048","on-secondary-container":"#684000","secondary-container":"#fea619","surface-container-high":"#e7e8e9","primary":"#0040e0","secondary-fixed-dim":"#ffb95f","secondary-fixed":"#ffddb8","on-tertiary":"#ffffff","secondary":"#855300","error":"#ba1a1a","on-tertiary-container":"#b1fff1","tertiary-fixed-dim":"#4fdbc8","on-primary-container":"#efefff","tertiary":"#006056"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"touch-target":"48px","unit":"4px","container-margin":"24px","gutter":"16px"},"fontFamily":{"headline-md":["Hanken Grotesk"],"label-caps":["Hanken Grotesk"],"headline-lg-mobile":["Hanken Grotesk"],"body-lg":["Inter"],"headline-lg":["Hanken Grotesk"],"body-md":["Inter"],"tabular-num":["Inter"],"display-hub":["Hanken Grotesk"]},"fontSize":{"headline-md":["20px",{"lineHeight":"28px","fontWeight":"600"}],"label-caps":["12px",{"lineHeight":"16px","letterSpacing":"0.05em","fontWeight":"700"}],"headline-lg-mobile":["24px",{"lineHeight":"32px","fontWeight":"700"}],"body-lg":["18px",{"lineHeight":"28px","fontWeight":"400"}],"headline-lg":["32px",{"lineHeight":"40px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-md":["16px",{"lineHeight":"24px","fontWeight":"400"}],"tabular-num":["16px",{"lineHeight":"24px","fontWeight":"500"}],"display-hub":["72px",{"lineHeight":"80px","letterSpacing":"-0.04em","fontWeight":"800"}]}}}}</script><link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700;800&family=Inter:wght@400;500&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@100..900&family=Inter:wght@100..900&display=swap" rel="stylesheet"/></head><body class="bg-background font-body-md text-on-background min-h-screen"><header class="fixed top-0 w-full h-20 bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex items-center px-container-margin border-b border-outline-variant/30"><div class="flex items-center gap-4"><div class="w-10 h-10 bg-primary-container rounded-lg flex items-center justify-center"><span class="material-symbols-outlined text-on-primary-container">family_restroom</span></div><span class="font-headline-md text-headline-md text-on-surface">Kynite Hub</span></div><nav class="flex-1 flex justify-center items-center gap-gutter" data-active-classes="bg-surface-container-highest text-on-surface font-semibold shadow-sm"><a aria-current="page" class="px-6 h-touch-target flex items-center rounded-full transition-all bg-surface-container-highest text-on-surface font-semibold shadow-sm" data-path="overview" href="#">Overview</a><a class="px-6 h-touch-target flex items-center rounded-full text-on-surface-variant hover:text-on-surface transition-all font-headline-md" data-path="schedules" href="#">Schedules</a><a class="px-6 h-touch-target flex items-center rounded-full text-on-surface-variant hover:text-on-surface transition-all font-headline-md" data-path="family" href="#">Family</a><a class="px-6 h-touch-target flex items-center rounded-full text-on-surface-variant hover:text-on-surface transition-all font-headline-md" data-path="settings" href="#">Settings</a></nav><div class="flex items-center gap-4"><span class="material-symbols-outlined text-on-surface-variant cursor-pointer p-2 hover:bg-surface-container rounded-full">notifications</span><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></header><main class="w-full pt-20 px-container-margin py-container-margin"><div class="flex flex-col w-full h-full gap-gutter" style="height: calc(100vh - 128px); min-height: 600px;">
+<!-- Header / Nav -->
+<div class="flex items-center justify-between pb-6">
+<div class="flex items-end gap-4">
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Routines</h1>
+<span class="font-headline-md text-headline-md text-on-surface-variant pb-1">07:45 AM</span>
+</div>
+<div class="flex items-center bg-surface-container-low rounded-full p-1 shadow-sm">
+<button class="h-touch-target px-6 rounded-full bg-primary text-on-primary font-headline-md shadow-md transition-transform active:scale-95">Everyone</button>
+<button class="h-touch-target px-6 rounded-full text-on-surface-variant hover:text-on-surface font-headline-md transition-colors active:scale-95">Mila</button>
+<button class="h-touch-target px-6 rounded-full text-on-surface-variant hover:text-on-surface font-headline-md transition-colors active:scale-95">Daan</button>
+</div>
+</div>
+<div class="flex flex-1 gap-container-margin min-h-0">
+<!-- Left Navigation Rail (Internal to page) -->
+<nav class="w-24 shrink-0 flex flex-col items-center gap-4 bg-surface-container-lowest shadow-sm rounded-xl py-6">
+<button class="w-16 h-16 rounded-2xl bg-primary-container text-on-primary-container flex flex-col items-center justify-center gap-1 shadow-md transition-transform active:scale-95 group">
+<span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1;">task_alt</span>
+<span class="font-label-caps text-label-caps">Chores</span>
+</button>
+<button class="w-16 h-16 rounded-2xl text-on-surface-variant hover:bg-surface-container flex flex-col items-center justify-center gap-1 transition-colors active:scale-95 group">
+<span class="material-symbols-outlined text-[28px] group-hover:text-primary transition-colors">calendar_month</span>
+<span class="font-label-caps text-[10px] uppercase font-bold tracking-wider">Events</span>
+</button>
+<button class="w-16 h-16 rounded-2xl text-on-surface-variant hover:bg-surface-container flex flex-col items-center justify-center gap-1 transition-colors active:scale-95 group">
+<span class="material-symbols-outlined text-[28px] group-hover:text-primary transition-colors">restaurant</span>
+<span class="font-label-caps text-[10px] uppercase font-bold tracking-wider">Meals</span>
+</button>
+<div class="mt-auto w-10 h-[2px] bg-surface-variant rounded-full"></div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 overflow-y-auto pr-4 space-y-container-margin pb-20">
+<!-- Morning Section -->
+<section class="space-y-4 relative">
+<div class="sticky top-0 bg-background/90 backdrop-blur-md z-10 py-2 flex items-center justify-between">
+<h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary-container" style="font-variation-settings: 'FILL' 1;">wb_sunny</span>
+              Morning
+            </h2>
+<div class="h-1 flex-1 mx-4 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full w-[60%] bg-secondary-container rounded-full"></div>
+</div>
+</div>
+<!-- Active Routine (Expanded) -->
+<div class="bg-surface-container-lowest rounded-xl shadow-md p-6 relative overflow-hidden transition-all hover:shadow-lg">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary-container/20 rounded-bl-full blur-2xl pointer-events-none"></div>
+<div class="flex items-center gap-4 mb-6 relative z-10">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A bright, cheerful portrait illustration of a young girl with brown hair, in a warm, inviting vector art style. Palette features soft primary colors and warm pastels." src="https://lh3.googleusercontent.com/aida-public/AB6AXuASF1h3eo_BIoCa4EUC2rYGrChqPe2LLw6qh5Cr7Db3VPuXMgBZSFtDxmRzhoJjQGEn6Hm5pMV0ZvjlEGMF8B0jq68-KwZA2qICZXcTvxqQh_POtLlplD5NjvQDXxq95uj625xfX1o3JBfBQk-ojnlrfI9IDnLJB4FAX2VapkdZWf3CcrfDXQmwryh86H3FYo1_Mhny3X6VtlVHQu8G19Bh-aJOZTOc67MJFN85l7nTgRpToeL_zIPZ"/>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Getting ready for school</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Mila • 4 Steps</p>
+</div>
+<div class="ml-auto bg-primary-container text-on-primary-container px-4 py-1.5 rounded-full font-label-caps text-label-caps">
+                  IN PROGRESS
+               </div>
+</div>
+<div class="space-y-3 relative z-10">
+<!-- Completed Step -->
+<div class="h-[56px] bg-surface-container-low rounded-lg flex items-center px-4 gap-4 opacity-75 transition-opacity hover:opacity-100">
+<div class="w-8 h-8 rounded-full bg-tertiary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-tertiary-container text-[20px]" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<span class="font-body-lg text-body-lg text-on-surface line-through decoration-on-surface-variant/50">Make bed</span>
+<span class="ml-auto font-label-caps text-label-caps text-tertiary flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">mood</span>
+                     Great job!
+                  </span>
+</div>
+<!-- Active Step -->
+<div class="h-[72px] bg-primary/5 rounded-xl shadow-sm flex items-center px-4 gap-4 border-l-4 border-primary relative overflow-hidden group cursor-pointer active:scale-[0.99] transition-transform">
+<div class="absolute inset-0 bg-primary/10 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500 ease-out pointer-events-none"></div>
+<button class="w-10 h-10 rounded-full border-2 border-primary bg-surface-container-lowest flex items-center justify-center transition-colors group-hover:bg-primary/20 z-10">
+<span class="material-symbols-outlined text-transparent text-[24px]">check</span>
+</button>
+<span class="font-headline-md text-headline-md text-on-surface z-10">Brush teeth</span>
+<div class="ml-auto z-10">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors text-[28px]">arrow_forward</span>
+</div>
+</div>
+<!-- Pending Steps -->
+<div class="h-[56px] bg-surface-container-lowest rounded-lg flex items-center px-4 gap-4 shadow-sm opacity-60">
+<div class="w-8 h-8 rounded-full border-2 border-outline-variant flex items-center justify-center"></div>
+<span class="font-body-lg text-body-lg text-on-surface">Get dressed</span>
+</div>
+<div class="h-[56px] bg-surface-container-lowest rounded-lg flex items-center px-4 gap-4 shadow-sm opacity-60">
+<div class="w-8 h-8 rounded-full border-2 border-outline-variant flex items-center justify-center"></div>
+<span class="font-body-lg text-body-lg text-on-surface">Pack bag</span>
+</div>
+</div>
+</div>
+<!-- Completed Routine (Collapsed) -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-4 flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="A warm, engaging portrait illustration of a young boy with curly hair, in a cozy vector art style. Palette utilizes earthy tones and soft creams." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCue7vPsjSbWyl4k_9LR-Pzv2AQohxOp6i1Bluk0NJzLRbenPFCplDcNyNAmDe92Cy0mKmaN60iZz-dSTyxUil_JyfOpA7NMFljq-rBCsU4UJeerNGiPWbWzxtFxnFtvVuI7V53F82IJm-HP0_qvetNkBAJDwLXW6hdvJztRbCBx6T5tnCGEld20hklQA_qfOeWbQHbTHoSp1oXkUV2Nv957MOKlkgSKiJ5mJpb13tFcey-UI1qNRLv"/>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="font-headline-md text-[18px] text-on-surface truncate">Morning Vitamins</h3>
+<p class="font-body-md text-[14px] text-tertiary flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                    All done — great morning, Daan!
+                 </p>
+</div>
+<div class="w-12 h-12 rounded-full bg-tertiary/10 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-tertiary" style="font-variation-settings: 'FILL' 1;">celebration</span>
+</div>
+</div>
+</section>
+<!-- Afternoon Section -->
+<section class="space-y-4 pt-4">
+<div class="sticky top-0 bg-background/90 backdrop-blur-md z-10 py-2 flex items-center justify-between">
+<h2 class="font-headline-md text-headline-md text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined">light_mode</span>
+              Afternoon
+            </h2>
+<div class="h-1 flex-1 mx-4 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full w-0 bg-secondary-container rounded-full"></div>
+</div>
+</div>
+<!-- Upcoming Routine -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-4 flex items-center gap-4 opacity-70 hover:opacity-100 transition-opacity cursor-pointer">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-surface-variant text-[24px]">menu_book</span>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="font-headline-md text-[18px] text-on-surface truncate">Homework time</h3>
+<p class="font-body-md text-[14px] text-on-surface-variant">Everyone • 3 Steps</p>
+</div>
+<div class="bg-secondary-container/20 text-on-secondary-container px-3 py-1 rounded-full font-label-caps text-label-caps flex items-center gap-1 shrink-0">
+<span class="material-symbols-outlined text-[14px]">schedule</span>
+                 Starts in 15m
+              </div>
+</div>
+</section>
+<!-- Evening Section (Empty state preview) -->
+<section class="space-y-4 pt-4 opacity-50">
+<div class="sticky top-0 bg-background/90 backdrop-blur-md z-10 py-2 flex items-center justify-between">
+<h2 class="font-headline-md text-headline-md text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined">dark_mode</span>
+              Evening
+            </h2>
+<div class="h-1 flex-1 mx-4 bg-surface-container rounded-full overflow-hidden"></div>
+</div>
+</section>
+</div>
+</div>
+</div></main></body></html>
