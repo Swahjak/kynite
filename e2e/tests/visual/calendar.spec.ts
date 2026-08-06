@@ -192,13 +192,23 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
 
       await page.goto(`/nl/hub?date=${FUTURE_ANCHOR}`);
       await expect(page.getByTestId('hub-board')).toBeVisible();
+
+      // The wall clock is the one deliberately live element on the board, so
+      // its *text* is pinned rather than the element being masked.
+      //
+      // Masking looked equivalent and was not: Playwright sizes the mask to the
+      // element, the clock's digits are proportional rather than tabular in the
+      // subset display font, and so the mask rectangle was a different width at
+      // 11:11 than at 00:52 — a snapshot that failed by ~10 pixels depending on
+      // what time the suite ran. Pinning the text makes the comparison
+      // deterministic *and* actually compares the clock instead of blanking it.
+      await page.getByTestId('hub-clock').evaluate((element) => {
+        element.textContent = '00:00';
+      });
+
       await settlePage(page);
 
-      await expect(page).toHaveScreenshot(`hub-${name}.png`, {
-        fullPage: true,
-        // The wall clock is the one deliberately live element on the board.
-        mask: [page.getByTestId('hub-clock')],
-      });
+      await expect(page).toHaveScreenshot(`hub-${name}.png`, { fullPage: true });
     });
   });
 }

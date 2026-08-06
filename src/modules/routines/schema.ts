@@ -95,8 +95,17 @@ export const routineStep = pgTable(
 /**
  * The record that a step was satisfied on a logical day.
  *
- * There is no "uncompleted" state: undo deletes the row within a short window,
- * and a missed task is the *absence* of a row (rendered dimmed, never a red X).
+ * A missed task is the *absence* of a row (rendered dimmed, never a red X).
+ *
+ * Undo is a stamp, not a delete (M10, revising M07's note that it would delete
+ * the row). Deleting was the obvious design and it is wrong here, for a reason
+ * that only shows up two taps later: `clientId` is *derived* from `(member,
+ * step, occurrence date)`, so undoing and re-tapping reuses the same key. With
+ * the row deleted the re-tap inserts cleanly and pays a **second** star, and
+ * the ledger is append-only so nothing can take the first one back. Stamping
+ * `undoneAt` keeps the row — and with it both unique indexes — so the re-tap
+ * still conflicts, clears the stamp, and pays nothing. A step can be ticked and
+ * unticked all afternoon for exactly one star.
  * `unique(memberId, routineStepId, occurrenceDate)` makes a double tap a no-op
  * and `unique(clientId)` makes an offline outbox replay a no-op — the two
  * halves of the optimistic completion flow in §4.
@@ -119,6 +128,12 @@ export const completion = pgTable(
     /** The logical day satisfied — not the wall clock of the tap. */
     occurrenceDate: date('occurrence_date').notNull(),
     completedAt: timestamp('completed_at', { withTimezone: true }).notNull().defaultNow(),
+    /**
+     * Set when the completion was taken back; `null` for a live completion.
+     * Readers filter on it — an undone completion is not "done", but the row
+     * has to stay so a re-tap cannot mint a second star (see above).
+     */
+    undoneAt: timestamp('undone_at', { withTimezone: true }),
     source: completionSource('source').notNull(),
     /** Idempotency key minted by the client before the request leaves the device. */
     clientId: text('client_id').notNull(),

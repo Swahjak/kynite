@@ -224,14 +224,15 @@ describe('every Server Action authorizes first', () => {
     // is exactly the failure mode this suite exists to catch. Counted by hand
     // across the four `'use server'` modules at time of writing:
     // src/modules/google/actions.ts (3) + src/modules/family/actions.ts (6) +
-    // src/modules/calendar/actions.ts (4) + src/modules/routines/actions.ts (5:
-    // create/update/delete routine + setRoutineReward + completeStep) +
+    // src/modules/calendar/actions.ts (4) + src/modules/routines/actions.ts (6:
+    // create/update/delete routine + setRoutineReward + completeStep +
+    // undoCompletion, added in M10 so `completion.undone` has a publisher) +
     // src/modules/rewards/actions.ts (8: create/update/delete reward +
     // awardStars + requestRedemption + decideRedemption + fulfillRedemption +
     // seedRewardPresets) + src/modules/timers/actions.ts (2: startTimer +
-    // stopTimer) = 28. Adding or removing a Server Action must bump this
+    // stopTimer) = 29. Adding or removing a Server Action must bump this
     // number deliberately — that is the point.
-    expect(findings.length).toBe(28);
+    expect(findings.length).toBe(29);
   });
 
   it('reports no unauthorized action anywhere in src/', () => {

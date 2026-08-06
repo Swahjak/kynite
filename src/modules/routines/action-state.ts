@@ -22,6 +22,9 @@ export const actionFailure = (error: string): ActionState => ({ status: 'error',
  * different facts even though both render identically.
  */
 export type CompletionState =
-  { status: 'done'; stars: number; replayed: boolean } | { status: 'error'; error: string };
+  | { status: 'done'; stars: number; replayed: boolean }
+  /** The completion was taken back. `memberId` is whose board has to refresh. */
+  | { status: 'undone'; memberId: string }
+  | { status: 'error'; error: string };
 
 export const completionFailure = (error: string): CompletionState => ({ status: 'error', error });

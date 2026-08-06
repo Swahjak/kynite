@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { getLocale } from 'next-intl/server';
-import { and, eq, notInArray } from 'drizzle-orm';
+import { and, eq, isNotNull, isNull, notInArray } from 'drizzle-orm';
 import { z } from 'zod';
 import { getDb } from '@/server/db';
 // Table objects come from the schema assembly point, not from a slice barrel
@@ -513,7 +513,38 @@ export async function completeStepAction(input: CompleteStepInput): Promise<Comp
       .onConflictDoNothing()
       .returning({ id: completion.id });
 
-    if (!inserted) return { status: 'done', stars: 0, replayed: true } as const;
+    if (!inserted) {
+      // Either a replay (same `clientId`) or a re-tap after an undo. Clearing
+      // the stamp is what makes the second case work; on a replay it updates
+      // nothing, because the row was never undone. Either way **no star is
+      // awarded** — `inserted` is empty, and that is the only thing that pays.
+      const [revived] = await tx
+        .update(completion)
+        .set({ undoneAt: null })
+        .where(
+          and(
+            eq(completion.familyId, principal.familyId),
+            eq(completion.clientId, clientId),
+            isNotNull(completion.undoneAt)
+          )
+        )
+        .returning({ id: completion.id });
+
+      if (revived) {
+        await publish(
+          {
+            familyId: principal.familyId,
+            type: 'completion.created',
+            entity: { id: revived.id },
+            actor: { memberId, clientId, source },
+            patch: { routineId, routineStepId, occurrenceDate, stars: 0 },
+          },
+          tx
+        );
+      }
+
+      return { status: 'done', stars: 0, replayed: true } as const;
+    }
 
     if (stars > 0) {
       await tx.insert(starLedger).values({
@@ -531,7 +562,10 @@ export async function completeStepAction(input: CompleteStepInput): Promise<Comp
         familyId: principal.familyId,
         type: 'completion.created',
         entity: { id: inserted.id },
-        actor: { memberId, source },
+        // `clientId` rides along so the device that tapped can drop its own
+        // echo (§4) — it has already celebrated; re-applying the event would
+        // at best be a no-op and at worst interrupt an animation.
+        actor: { memberId, clientId, source },
         patch: { routineId, routineStepId, occurrenceDate, stars },
       },
       tx
@@ -543,7 +577,7 @@ export async function completeStepAction(input: CompleteStepInput): Promise<Comp
           familyId: principal.familyId,
           type: 'stars.awarded',
           entity: { id: inserted.id },
-          actor: { memberId, source },
+          actor: { memberId, clientId, source },
           patch: { amount: stars, reason: 'routine', routineId },
         },
         tx
@@ -556,5 +590,82 @@ export async function completeStepAction(input: CompleteStepInput): Promise<Comp
   // Outside the transaction: revalidation is a cache concern, not a write, and
   // the hub's own view has already flipped optimistically by the time this runs.
   await revalidateRoutines([memberId]);
+  return result;
+}
+
+const undoSchema = z.object({ clientId: trimmed.min(8).max(200) });
+
+export type UndoCompletionInput = z.infer<typeof undoSchema>;
+
+/**
+ * Take a completion back (the `completion.undone` half of §4's vocabulary).
+ *
+ * Addressed by `clientId` rather than by row id, because that is the key the
+ * device that tapped already holds — an undo is always "the thing I just did",
+ * and it must work from an outbox entry whose server id never came back.
+ *
+ * Three things it deliberately does not do:
+ *
+ * - **It does not delete the row.** See `completion.undoneAt` in `schema.ts`:
+ *   the row is what stops a re-tap from paying a second star.
+ * - **It does not touch the star ledger.** The ledger is append-only and
+ *   `stars:remove` is `deny` in every column of the §7 matrix. Un-ticking a
+ *   step is a correction to *this board*, never a withdrawal from a child's
+ *   history — undo and re-tap nets one star, not zero and not two.
+ * - **It renders nothing on a child surface.** No affordance ships in M10;
+ *   this is the parent's correction path and the event that carries it.
+ */
+export async function undoCompletionAction(input: UndoCompletionInput): Promise<CompletionState> {
+  const principal = await assertCan('completion:write').catch(() => null);
+  if (!principal) return completionFailure('forbidden');
+
+  const parsed = undoSchema.safeParse(input);
+  if (!parsed.success) return completionFailure('invalidInput');
+
+  const { clientId } = parsed.data;
+
+  const result = await getDb().transaction(async (tx): Promise<CompletionState> => {
+    const [undone] = await tx
+      .update(completion)
+      .set({ undoneAt: new Date() })
+      .where(
+        and(
+          // Scope from the principal, never from the input: a `clientId`
+          // guessed from another household addresses nothing.
+          eq(completion.familyId, principal.familyId),
+          eq(completion.clientId, clientId),
+          // Idempotent by predicate: undoing twice stamps one moment.
+          isNull(completion.undoneAt)
+        )
+      )
+      .returning({
+        id: completion.id,
+        memberId: completion.memberId,
+        routineId: completion.routineId,
+        routineStepId: completion.routineStepId,
+        occurrenceDate: completion.occurrenceDate,
+      });
+
+    if (!undone) return completionFailure('completionNotFound');
+
+    await publish(
+      {
+        familyId: principal.familyId,
+        type: 'completion.undone',
+        entity: { id: undone.id },
+        actor: { ...actorOf(principal), clientId, source: 'mobile' },
+        patch: {
+          routineId: undone.routineId,
+          routineStepId: undone.routineStepId,
+          occurrenceDate: undone.occurrenceDate,
+        },
+      },
+      tx
+    );
+
+    return { status: 'undone', memberId: undone.memberId } as const;
+  });
+
+  if (result.status === 'undone') await revalidateRoutines([result.memberId]);
   return result;
 }

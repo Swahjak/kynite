@@ -172,7 +172,7 @@ This is the single source of progress truth for the Kynite greenfield rebuild. E
 
 ## M10 — Realtime SSE
 
-- [ ] Status
+- [x] Status
 - **Scope:** Implement `modules/realtime`: transactional `publish()` writing to `event_log` and issuing `pg_notify` on the per-family channel, a `GET /api/sse` route handler with a dedicated `LISTEN` connection pool, 25s heartbeat and `Last-Event-ID` replay, and a client subscriber that reconciles optimistic state. Retrofit all mutation paths (completions, events, timers, redemptions, sync jobs) onto `publish()`, and land the <100ms optimistic completion flow end to end.
 - **Acceptance criteria:**
   - Route `src/app/api/sse/route.ts` exists, responds `text/event-stream` with `Cache-Control: no-store`, `X-Accel-Buffering: no`, and emits a `: ping` comment every 25s.
@@ -185,7 +185,7 @@ This is the single source of progress truth for the Kynite greenfield rebuild. E
   - Offline tap queues to the IndexedDB outbox, the celebration is never rolled back, and the write lands idempotently on reconnect — test.
   - Every `RealtimeEvent.type` in `docs/architecture.md` §4 is published by its owning slice; asserted by an exhaustiveness test.
   - Gate green: `pnpm typecheck && pnpm lint && pnpm test:run`.
-- **Review verdict:** _pending_
+- **Review verdict:** _approved after fixes_ — Opus review 2026-08-07: all eleven criteria met and independently reproduced (684/684 with DB ×5 zero flake, 96/96 Playwright, build clean with /api/sse dynamic, no drizzle drift); five mutation tests confirmed exhaustiveness scan, transactional rollback, listener-leak guard and <100ms perf guard all non-vacuous (optimism removed → 2174ms vs 100ms budget); cross-family leakage unrepresentable (principal-derived familyId, replay + {ref} read-back family-predicated, neighbour-household test); celebration-never-rolled-back correct against useOptimistic revert semantics (sticky celebrated set); M07 undo correction (undone_at stamp, tick/untick ×4 = one star) proven. Blocker fixed: three new realtime integration suites lacked repo-standard BETTER_AUTH env stubs (DB-only invocation failed 8 tests; now 687/687 with DATABASE_URL alone). Also fixed: heartbeat interval leak on abort-during-replay, parseCursor int8-range check (19-digit cursor no longer errors stream), .catch on {ref} read-back, architecture §4 amended (actor.clientId; per-family-channel LISTEN fan-out, 21st stream 429). Carry-forwards: event_log retention trim job missing (RETENTION_DAYS dead export — wire nightly job); echo suppression tested pure-function only (component test wanted); global unique(client_id) should be (family_id, client_id); undoCompletionAction has no UI caller; timers clientId replay-after-stop still open (M11 outbox); dev-mode "destination stream closed early" noise; M09 realtime-stream flake root-caused (buffer cleared after publish) and fixed — 30+ clean DB runs.
 
 ## M11 — PWA/offline + push
 

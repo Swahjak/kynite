@@ -11,7 +11,8 @@ import { getDb } from '@/server/db';
 // query module — and make this file unimportable from a plain Node test. The
 // barrel is for *behaviour*; `server/db/schema.ts` is for tables (§2).
 import { calendar } from '@/server/db/schema';
-import { assertCan, getFamily, getMember } from '@/modules/family';
+import { assertCan, getFamily, getMember, type Principal } from '@/modules/family';
+import { publish } from '@/modules/realtime';
 import { actionFailure as failure, idleState, type ActionState } from './action-state';
 import {
   RECURRENCE_PRESETS,
@@ -215,11 +216,52 @@ async function resolveInput(
 
 async function revalidateCalendar(): Promise<void> {
   const locale = await getLocale();
-  // No SSE yet (M10 owns realtime), so every surface that renders events is
-  // revalidated explicitly — including the hub board, which is what makes an
-  // edit on the phone appear on the wall display.
+  // Realtime is the mechanism that makes an edit on the phone appear on the
+  // wall display within §4's 2s budget; this revalidation is what keeps the
+  // *server-rendered* surfaces of the editing device itself correct on the
+  // next navigation. Both, not either.
   for (const path of ['/calendar', '/today', '/hub']) {
     revalidatePath(`/${locale}${path}`);
+  }
+}
+
+/**
+ * The realtime `actor` for a principal. A `member` principal names itself; a
+ * paired kiosk names its device (M12). Neither is invented from a form.
+ */
+function actorOf(principal: Principal): { memberId?: string; deviceId?: string } {
+  if (principal.kind === 'member') return { memberId: principal.memberId };
+  if (principal.kind === 'device') return { deviceId: principal.deviceId };
+  return {};
+}
+
+/**
+ * `event.upserted` / `event.deleted` from the *parent's* side (M10 retrofit).
+ *
+ * M05 already published these from the Google sync engine, which meant a
+ * change made in Google reached the hub in seconds while a change made in
+ * Kynite itself waited for a page load. These calls close that asymmetry: the
+ * two paths now emit the same vocabulary, and a client cannot tell — nor need
+ * to — whether an event changed because a parent edited it here or because it
+ * arrived from Google.
+ *
+ * Published after the write rather than inside it, matching
+ * `google/store.ts`'s emitter: each of these writes is a single statement (or
+ * a transaction that has already committed), so there is no window in which a
+ * broadcast could describe a row that never landed.
+ */
+async function publishEvent(
+  principal: Principal,
+  type: 'event.upserted' | 'event.deleted',
+  eventIds: readonly string[]
+): Promise<void> {
+  for (const id of eventIds) {
+    await publish({
+      familyId: principal.familyId,
+      type,
+      entity: { id },
+      actor: { ...actorOf(principal), source: 'mobile' },
+    });
   }
 }
 
@@ -238,6 +280,7 @@ export async function createEventAction(
     .values({ familyId: principal.familyId, ...input.resolved.values })
     .returning({ id: event.id });
 
+  await publishEvent(principal, 'event.upserted', [created.id]);
   await pushToGoogle(created.id);
   await revalidateCalendar();
   return idleState;
@@ -299,7 +342,9 @@ export async function updateEventAction(
       return child.id;
     });
 
-    // Both rows changed, so both push: the parent's new EXDATE and the child.
+    // Both rows changed, so both push — and both broadcast: the parent's new
+    // EXDATE and the child override are two separate facts for a client.
+    await publishEvent(principal, 'event.upserted', [existing.id, childId]);
     await pushToGoogle(existing.id);
     await pushToGoogle(childId);
     await revalidateCalendar();
@@ -320,6 +365,7 @@ export async function updateEventAction(
     })
     .where(and(eq(event.id, eventId), eq(event.familyId, principal.familyId)));
 
+  await publishEvent(principal, 'event.upserted', [eventId]);
   await pushToGoogle(eventId);
   await revalidateCalendar();
   return idleState;
@@ -361,6 +407,10 @@ export async function deleteEventAction(
         updatedAt: new Date(),
       })
       .where(and(eq(event.id, eventId), eq(event.familyId, principal.familyId)));
+
+    // Still an *upsert* of the series row, not a deletion: the series gained
+    // an EXDATE and every other instance of it survives.
+    await publishEvent(principal, 'event.upserted', [eventId]);
   } else {
     // Soft delete: the row stays so the sync engine can echo the tombstone
     // and so a remote resurrection has something to un-delete (§3).
@@ -372,6 +422,8 @@ export async function deleteEventAction(
         updatedAt: new Date(),
       })
       .where(and(eq(event.id, eventId), eq(event.familyId, principal.familyId)));
+
+    await publishEvent(principal, 'event.deleted', [eventId]);
   }
 
   await pushToGoogle(eventId);
@@ -458,6 +510,7 @@ export async function rescheduleEventAction(
       return child.id;
     });
 
+    await publishEvent(principal, 'event.upserted', [existing.id, childId]);
     await pushToGoogle(existing.id);
     await pushToGoogle(childId);
     await revalidateCalendar();
@@ -474,6 +527,7 @@ export async function rescheduleEventAction(
     })
     .where(and(eq(event.id, parsed.data.eventId), eq(event.familyId, principal.familyId)));
 
+  await publishEvent(principal, 'event.upserted', [parsed.data.eventId]);
   await pushToGoogle(parsed.data.eventId);
   await revalidateCalendar();
   return idleState;

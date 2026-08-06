@@ -348,7 +348,8 @@
       "invalidInput": "Controleer de ingevulde gegevens.",
       "memberNotFound": "Dat gezinslid bestaat niet meer.",
       "routineNotFound": "Die routine bestaat niet meer.",
-      "notScheduled": "Deze routine staat niet op de lijst voor die dag."
+      "notScheduled": "Deze routine staat niet op de lijst voor die dag.",
+      "completionNotFound": "Die afronding bestaat niet meer."
     }
   },
   "rewards": {

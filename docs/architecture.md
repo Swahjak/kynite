@@ -422,6 +422,13 @@ type RealtimeEvent = {
 };
 ```
 
+> **Implemented as (M10):** `actor` gained an optional `clientId`. This section's
+> own echo-suppression rule ("the originating device ignores echoes of its own
+> `clientId`") is unimplementable unless the echo carries that id, so the field
+> is required by §4 itself, not an addition to it. It is the same idempotency
+> key the write already used — nothing new is invented, the value just crosses
+> the wire on the way back out.
+
 ### Catch-up: `event_log` + cursor
 
 ```ts
@@ -449,9 +456,19 @@ with its id. Retention: 7 days, trimmed by a nightly pg-boss job.
 
 `GET /api/sse` — `text/event-stream`, `Cache-Control: no-store`,
 `X-Accel-Buffering: no`, 25s heartbeat comment (`: ping`) to defeat idle
-timeouts. One dedicated `pg` client per connection taken from a separate small
-pool (a `LISTEN`ing connection cannot be shared), hard cap ~20 concurrent
-streams per family, released on `AbortSignal`.
+timeouts, released on `AbortSignal`.
+
+> **Implemented as (M10):** not one dedicated `pg` client per SSE connection —
+> one `LISTEN`ing connection *per family channel*, shared by every stream that
+> family currently has open, fanned out to each in process. Twenty devices in
+> one household then cost the listen pool one connection, not twenty; a
+> per-connection client would have made the "hard cap ~20 concurrent streams
+> per family" line above a cap on the listen pool's own size instead of on
+> concurrent devices. The cap is unchanged in effect — it is enforced as a
+> stream count per family, checked before a channel connection is taken — but
+> the 21st stream now gets a `429` rather than being evicted, since the
+> streams a family holds are a wall display and phones that stay open for
+> days, not connections to shed under pressure.
 
 ### Optimistic completion flow (the <100ms NFR)
 

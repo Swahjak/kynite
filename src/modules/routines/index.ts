@@ -104,8 +104,10 @@ export {
   createRoutineAction,
   deleteRoutineAction,
   setRoutineRewardAction,
+  undoCompletionAction,
   updateRoutineAction,
   type CompleteStepInput,
+  type UndoCompletionInput,
 } from './actions';
 
 export {

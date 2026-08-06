@@ -1,8 +1,18 @@
 'use client';
 
-import { useOptimistic, useTransition } from 'react';
+import { useCallback, useOptimistic, useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { fireConfettiBurst } from '@/components/celebration';
+import {
+  dropCompletion,
+  enqueueCompletion,
+  useCompletionOutbox,
+  useRealtime,
+  useRealtimeEvents,
+  useRealtimeResync,
+  type PendingCompletion,
+} from '@/components/realtime';
+import { useRouter } from '@/i18n/navigation';
 import { Icon } from '@/components/ui/icon';
 import { cn } from '@/lib/utils';
 import { completeStepAction } from '../actions';
@@ -29,10 +39,23 @@ import { SECTION_ICONS } from './tokens';
  * next server render simply shows the step as not-done, quietly. A child never
  * sees an animation reversed.
  *
- * Realtime lands in M10. Until then the Server Action revalidates the board's
- * own path, and `publish()` is already called inside the completion
- * transaction — so the stream, when it arrives, replaces the refresh rather
- * than adding a call site.
+ * M10 adds the two halves that make that promise true rather than merely
+ * intended:
+ *
+ * - **The outbox.** The tap is written to IndexedDB *after* the flip and
+ *   *before* the request, so a tap made with no network survives the tab. The
+ *   Server Action is still attempted immediately; if it throws, the entry stays
+ *   queued and is flushed the moment the stream comes back. `clientId` is
+ *   derived from `(member, step, day)`, so the replay lands idempotently —
+ *   `unique(client_id)` turns the second write into a no-op rather than a
+ *   second star.
+ * - **Reconciliation over SSE.** Another device's completion refreshes this
+ *   board; *this* device's own echo is dropped by `clientId` (§4), because it
+ *   has already rendered the result and re-applying it could interrupt an
+ *   animation a child is still watching.
+ *
+ * Nothing in either path can roll a celebration back. There is deliberately no
+ * branch here that clears an optimistic completion on failure.
  */
 
 export function RoutineBoard({ board }: { board: RoutineBoardData }) {
@@ -42,14 +65,72 @@ export function RoutineBoard({ board }: { board: RoutineBoardData }) {
     new Set<string>(),
     (previous, stepId) => new Set(previous).add(stepId)
   );
+  /**
+   * Steps this device has celebrated, which **outlive the transition**.
+   *
+   * `useOptimistic` alone cannot express §4's rule. It reverts by design when
+   * the transition settles, so a tap made with no network flips to done,
+   * celebrates, and then silently flips *back* the moment the failed request
+   * returns — a celebration rolled back under a child's hands, which is the one
+   * thing the research says never to do. This set is what makes it stick: added
+   * before the transition, removed only by an explicit terminal rejection.
+   *
+   * `useOptimistic` still earns its place: it is what carries the flip through
+   * the `router.refresh()` that follows a successful write, before the server's
+   * own render catches up.
+   */
+  const [celebrated, setCelebrated] = useState<ReadonlySet<string>>(new Set());
   const [, startTransition] = useTransition();
+  const router = useRouter();
+  const { markOwn } = useRealtime();
 
-  /** The board with optimistic completions folded in — one source for render. */
+  const sendCompletion = useCallback(
+    (entry: PendingCompletion) =>
+      completeStepAction({
+        routineId: entry.routineId,
+        routineStepId: entry.routineStepId,
+        memberId: entry.memberId,
+        occurrenceDate: entry.occurrenceDate,
+        clientId: entry.clientId,
+        source: entry.source,
+      }),
+    []
+  );
+
+  /** One queued tap → the Server Action. `true` means "settled, stop retrying". */
+  const send = useCallback(
+    async (entry: PendingCompletion) => {
+      const result = await sendCompletion(entry);
+      // `done` covers the replay case too, which is exactly right: a write that
+      // was already there is a write that no longer needs sending. An `error`
+      // is settled as well — a routine that no longer exists never will
+      // succeed, and retrying it forever would be the one way this queue could
+      // become permanent.
+      return result.status !== 'undone';
+    },
+    [sendCompletion]
+  );
+
+  // Anything queued from an earlier session — or from a tap that could not
+  // reach the server — lands as soon as landing it can work.
+  useCompletionOutbox(send, () => router.refresh());
+
+  // Someone else's tap (this device's own echoes never arrive — §4).
+  useRealtimeEvents(['completion.created', 'completion.undone', 'stars.awarded'], () => {
+    router.refresh();
+  });
+
+  // The gap was too big to replay: refetch everything (§4).
+  useRealtimeResync(() => router.refresh());
+
+  /** The board with this device's completions folded in — one source for render. */
   const withOptimistic = (routine: BoardRoutine): BoardRoutine => {
-    if (optimisticDone.size === 0) return routine;
+    if (optimisticDone.size === 0 && celebrated.size === 0) return routine;
 
     const steps = routine.steps.map((step) =>
-      step.done || !optimisticDone.has(step.id) ? step : { ...step, done: true }
+      step.done || !(optimisticDone.has(step.id) || celebrated.has(step.id))
+        ? step
+        : { ...step, done: true }
     );
     const doneCount = steps.filter((step) => step.done).length;
 
@@ -71,18 +152,49 @@ export function RoutineBoard({ board }: { board: RoutineBoardData }) {
     // kind of animation that would make the everyday tap feel unrewarded.
     const lastStep = routine.steps.every((entry) => entry.done || entry.id === stepId);
 
+    const entry: PendingCompletion = {
+      clientId: step.clientId,
+      routineId: routine.id,
+      routineStepId: stepId,
+      memberId: routine.memberId,
+      occurrenceDate: routine.occurrenceDate,
+      source: 'hub',
+    };
+
+    // Both synchronous and both before the flip: the echo of this write must
+    // already be recognisable as our own by the time it can arrive, and the
+    // celebration must already be recorded as permanent before anything can
+    // fail.
+    markOwn(step.clientId);
+    setCelebrated((previous) => new Set(previous).add(stepId));
+
     startTransition(async () => {
       addOptimisticDone(stepId);
       fireConfettiBurst({ intensity: lastStep ? 'standard' : 'gentle', origin });
 
-      await completeStepAction({
-        routineId: routine.id,
-        routineStepId: stepId,
-        memberId: routine.memberId,
-        occurrenceDate: routine.occurrenceDate,
-        clientId: step.clientId,
-        source: 'hub',
-      });
+      // Durable before the request, per §4's timeline. Everything from here on
+      // is retry plumbing — the child has already seen the result.
+      await enqueueCompletion(entry);
+
+      try {
+        const result = await sendCompletion(entry);
+        await dropCompletion(entry.clientId);
+
+        // §4's single exception: "only a hard 4xx (deleted routine) reverts,
+        // and then silently on next render, without a failure animation". A
+        // *network* failure is not that — it throws, and is caught below, and
+        // the celebration stands.
+        if (result.status === 'error') {
+          setCelebrated((previous) => {
+            const next = new Set(previous);
+            next.delete(stepId);
+            return next;
+          });
+        }
+      } catch {
+        // Offline, or the request died in flight. The entry stays queued and
+        // the celebration stays on screen; the flush effect above will land it.
+      }
     });
   };
 

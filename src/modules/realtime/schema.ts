@@ -31,7 +31,19 @@ export type RealtimeEvent = {
   familyId: string;
   type: RealtimeEventType;
   at: string;
-  actor: { memberId?: string; deviceId?: string; source: RealtimeActorSource };
+  /**
+   * `clientId` extends §4's actor shape by exactly one optional field, and it
+   * is §4 itself that forces it: "the originating device ignores echoes of its
+   * own `clientId`" is unimplementable unless the echo carries the id. It is
+   * the same idempotency key the write used, so nothing new is invented — the
+   * value already crossed the wire on the way in.
+   */
+  actor: {
+    memberId?: string;
+    deviceId?: string;
+    clientId?: string;
+    source: RealtimeActorSource;
+  };
   entity: { id: string; version?: number };
   patch?: Record<string, unknown>;
 };

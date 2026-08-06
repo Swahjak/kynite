@@ -1,0 +1,1 @@
+ALTER TABLE "completion" ADD COLUMN "undone_at" timestamp with time zone;

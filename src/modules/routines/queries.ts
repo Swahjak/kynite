@@ -1,5 +1,5 @@
 import 'server-only';
-import { and, asc, eq, inArray } from 'drizzle-orm';
+import { and, asc, eq, inArray, isNull } from 'drizzle-orm';
 import { getDb } from '@/server/db';
 import { orderSteps } from './domain/steps';
 import { completion, routine, routineStep, type Routine, type RoutineStep } from './schema';
@@ -105,6 +105,9 @@ export async function listCompletedSteps(input: {
       and(
         eq(completion.familyId, input.familyId),
         eq(completion.memberId, input.memberId),
+        // An undone completion keeps its row (so a re-tap cannot pay twice)
+        // but is not "done" — see `completion.undoneAt` in `schema.ts`.
+        isNull(completion.undoneAt),
         inArray(completion.occurrenceDate, [...input.occurrenceDates])
       )
     );

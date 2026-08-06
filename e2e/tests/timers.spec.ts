@@ -94,10 +94,11 @@ test.describe('hub timers', () => {
 
     const shown = toSeconds(await page.getByTestId('timer-digits').innerText());
 
-    // Three seconds of slack rather than one: with `Date.now()` frozen the local
-    // tick cannot advance, so the digits are only as fresh as the last poll
-    // (2s). The point of the assertion is that the display follows the
-    // *server's* clock at all — trusting the device would have shown 0:00.
+    // Three seconds of slack rather than one: with `Date.now()` frozen the
+    // local tick cannot advance at all, so the digits are only as fresh as the
+    // measurement taken at mount. The point of the assertion is that the
+    // display follows the *server's* clock — trusting the device would have
+    // shown 0:00.
     expect(Math.abs(shown - expectedRemaining(row))).toBeLessThanOrEqual(3);
     expect(shown).toBeGreaterThan(0);
   });
@@ -173,22 +174,36 @@ test.describe('controller → hub', () => {
     await expect(hub.getByTestId('timer-board-empty')).toBeVisible();
 
     await page.goto('/nl/timers');
+
+    // A warm-up round first, on a generous budget. The e2e server is
+    // `next dev`, so the very first Server Action of a route pays for
+    // compiling it — which has nothing to do with the propagation budget the
+    // next round measures, and is the whole difference between this spec
+    // passing alone and failing under four parallel workers.
+    await page.getByTestId('timer-label-input').fill('Opwarmen');
+    await page.getByTestId('timer-preset-300').click();
+    await expect(hub.getByTestId('timer-tile')).toBeVisible({ timeout: 15_000 });
+    await page.getByTestId('timer-stop').first().click();
+    await expect(hub.getByTestId('timer-board-empty')).toBeVisible({ timeout: 15_000 });
+
+    // The measured round. M10's <2s budget, over SSE — the PRD number itself,
+    // not a poll interval in disguise: the Controller's write publishes
+    // `timer.started` inside its own transaction, the hub's stream delivers it,
+    // and the board refetches. M09 allowed 6s here because the transport was a
+    // 2s poll.
     await page.getByTestId('timer-label-input').fill('Schoenen aan');
     await page.getByTestId('timer-preset-300').click();
 
-    // The realtime path lands in M10; until then the hub polls every 2s, so
-    // this window is the poll interval plus a request, not the <2s target the
-    // milestone verifies against SSE.
-    await expect(hub.getByTestId('timer-tile')).toBeVisible({ timeout: 6000 });
+    await expect(hub.getByTestId('timer-tile')).toBeVisible({ timeout: 2000 });
     await expect(hub.getByTestId('timer-label')).toHaveText('Schoenen aan');
 
     await page.getByTestId('timer-stop').first().click();
 
-    await expect(hub.getByTestId('timer-board-empty')).toBeVisible({ timeout: 6000 });
+    await expect(hub.getByTestId('timer-board-empty')).toBeVisible({ timeout: 2000 });
 
     const rows = await withDb((client) => readTimers(client, family.familyId));
-    expect(rows).toHaveLength(1);
-    expect(rows[0].stopped_at).not.toBeNull();
+    expect(rows).toHaveLength(2);
+    expect(rows.every((row) => row.stopped_at !== null)).toBe(true);
 
     await hub.close();
   });

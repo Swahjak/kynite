@@ -331,11 +331,20 @@ test.describe('per-person columns', () => {
 
 test.describe('private calendars on the hub', () => {
   test('renders busy-only on the hub while the app shows the detail', async ({ page, family }) => {
-    const today = new Date();
-    const at = (hour: number) =>
-      new Date(
-        Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate(), hour)
-      ).toISOString();
+    // The seeded day must be the family's *local* today, not UTC's. Between
+    // midnight and 02:00 Amsterdam time the two disagree, and building the
+    // instant from `getUTCDate()` would seed the event onto yesterday's board —
+    // which is a test that fails for two hours a night and passes for
+    // twenty-two (M06 carry-forward, fixed here because M10 touches this path).
+    const [year, month, day] = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Europe/Amsterdam',
+    })
+      .format(new Date())
+      .split('-')
+      .map(Number);
+    // 09:00 UTC is 10:00 or 11:00 in Amsterdam — comfortably inside the local
+    // day, whichever side of the DST change the run happens on.
+    const at = (hour: number) => new Date(Date.UTC(year, month - 1, day, hour)).toISOString();
 
     await withDb(async (client) => {
       const owner = await ownerMemberOf(client, family.familyId);

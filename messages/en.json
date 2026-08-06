@@ -348,7 +348,8 @@
       "invalidInput": "Please check the details you entered.",
       "memberNotFound": "That family member no longer exists.",
       "routineNotFound": "That routine no longer exists.",
-      "notScheduled": "This routine is not on the list for that day."
+      "notScheduled": "This routine is not on the list for that day.",
+      "completionNotFound": "That completion no longer exists."
     }
   },
   "rewards": {

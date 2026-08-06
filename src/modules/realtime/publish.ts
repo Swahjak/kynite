@@ -42,11 +42,33 @@ export function familyChannel(familyId: string): string {
   return `kynite_family_${familyId.replace(/-/g, '')}`;
 }
 
+/**
+ * NOTIFY payloads are capped at 8000 bytes by Postgres, and exceeding the cap
+ * is an *error* — it would roll the caller's write back. So an oversized event
+ * is notified by reference instead: `{"ref":"<event_log.id>"}`, which the
+ * listener resolves by reading the row it already stored. Below the cap the
+ * full event travels inline and no read is needed at all.
+ *
+ * The threshold is deliberately under 8000: the cap counts bytes, JSON is
+ * measured here in UTF-16 code units, and a payload of emoji-heavy step titles
+ * can be twice its `.length` in bytes.
+ */
+export const MAX_INLINE_NOTIFY_CHARS = 3500;
+
+/** What a `LISTEN` client receives: either the event, or a pointer to it. */
+export type NotifyPayload = RealtimeEvent | { ref: string };
+
 export type PublishInput = {
   familyId: string;
   type: RealtimeEventType;
   entity: { id: string; version?: number };
-  actor?: { memberId?: string; deviceId?: string; source: RealtimeActorSource };
+  actor?: {
+    memberId?: string;
+    deviceId?: string;
+    /** The write's idempotency key, so the originating device can drop its own echo. */
+    clientId?: string;
+    source: RealtimeActorSource;
+  };
   patch?: Record<string, unknown>;
 };
 
@@ -87,9 +109,14 @@ export async function publish(input: PublishInput, executor?: Executor): Promise
     .set({ payload: event })
     .where(sql`${eventLog.id} = ${row.id}`);
 
-  await runner.execute(
-    sql`SELECT pg_notify(${familyChannel(input.familyId)}, ${JSON.stringify(event)})`
-  );
+  const inline = JSON.stringify(event);
+  const payload =
+    inline.length <= MAX_INLINE_NOTIFY_CHARS ? inline : JSON.stringify({ ref: event.id });
+
+  // Same transaction as the INSERT above — and, when `executor` is the
+  // caller's `tx`, as the caller's own write. A rollback takes the notification
+  // with it: `pg_notify` only delivers on commit.
+  await runner.execute(sql`SELECT pg_notify(${familyChannel(input.familyId)}, ${payload})`);
 
   return event;
 }

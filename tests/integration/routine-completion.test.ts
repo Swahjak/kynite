@@ -36,7 +36,8 @@ vi.mock('@/i18n/navigation', () => ({
   },
 }));
 
-const { completeStepAction } = await import('@/modules/routines/actions');
+const { completeStepAction, undoCompletionAction } = await import('@/modules/routines/actions');
+const { listCompletedSteps } = await import('@/modules/routines/queries');
 
 // Integration tests hit a real Postgres instance, so a single slow query
 // (connection setup, a cold Docker volume) is more likely to bump into the
@@ -321,5 +322,146 @@ describe.skipIf(!databaseUrl)('routine completion (integration)', () => {
     };
 
     expect(await tap()).toMatchObject({ status: 'done', stars: 3 });
+  });
+
+  describe('undo (M10)', () => {
+    const clientId = () => `hub:${household.childId}:${stepId}:${dateKey()}`;
+
+    it('takes the completion back without deleting the row or the star', async () => {
+      await tap();
+
+      const result = await undoCompletionAction({ clientId: clientId() });
+      expect(result).toEqual({ status: 'undone', memberId: household.childId });
+
+      const rows = await db
+        .select()
+        .from(completion)
+        .where(eq(completion.familyId, household.familyId));
+
+      // The row survives — that is what makes a re-tap free (see below).
+      expect(rows).toHaveLength(1);
+      expect(rows[0].undoneAt).not.toBeNull();
+
+      // And the star survives, because the ledger is append-only and
+      // `stars:remove` is deny in every column of §7.
+      const ledger = await db
+        .select()
+        .from(starLedger)
+        .where(eq(starLedger.familyId, household.familyId));
+      expect(ledger).toHaveLength(1);
+      expect(ledger[0].amount).toBe(3);
+    });
+
+    it('stops the step reading as done', async () => {
+      await tap();
+      await undoCompletionAction({ clientId: clientId() });
+
+      const done = await listCompletedSteps({
+        familyId: household.familyId,
+        memberId: household.childId,
+        occurrenceDates: [dateKey()],
+      });
+      expect(done).toEqual([]);
+    });
+
+    it('re-tapping after an undo restores it and pays nothing', async () => {
+      await tap();
+      await undoCompletionAction({ clientId: clientId() });
+
+      // The clientId is *derived* from (member, step, day), so the re-tap
+      // reuses it by construction. This is the case that would mint a second
+      // star if undo had deleted the row.
+      const again = await tap();
+      expect(again).toEqual({ status: 'done', stars: 0, replayed: true });
+
+      const done = await listCompletedSteps({
+        familyId: household.familyId,
+        memberId: household.childId,
+        occurrenceDates: [dateKey()],
+      });
+      expect(done).toHaveLength(1);
+
+      const ledger = await db
+        .select()
+        .from(starLedger)
+        .where(eq(starLedger.familyId, household.familyId));
+      expect(ledger).toHaveLength(1);
+      expect(ledger[0].amount).toBe(3);
+    });
+
+    it('ticks and unticks all afternoon for exactly one star', async () => {
+      for (let round = 0; round < 4; round += 1) {
+        await tap();
+        await undoCompletionAction({ clientId: clientId() });
+      }
+      await tap();
+
+      const ledger = await db
+        .select()
+        .from(starLedger)
+        .where(eq(starLedger.familyId, household.familyId));
+      expect(ledger).toHaveLength(1);
+    });
+
+    it('publishes completion.undone, and the revival as completion.created', async () => {
+      await tap();
+      await db.delete(schema.eventLog).where(eq(schema.eventLog.familyId, household.familyId));
+
+      await undoCompletionAction({ clientId: clientId() });
+      await tap();
+
+      const log = await db
+        .select()
+        .from(schema.eventLog)
+        .where(eq(schema.eventLog.familyId, household.familyId))
+        .orderBy(schema.eventLog.id);
+
+      expect(log.map((row) => row.type)).toEqual(['completion.undone', 'completion.created']);
+      // The revival pays nothing, and says so.
+      expect(log[1].payload.patch).toMatchObject({ stars: 0 });
+      // Both carry the clientId, so the device that did it drops its own echo.
+      expect(log.every((row) => row.payload.actor.clientId === clientId())).toBe(true);
+    });
+
+    it('is idempotent — undoing twice stamps one moment', async () => {
+      await tap();
+      const first = await undoCompletionAction({ clientId: clientId() });
+      const second = await undoCompletionAction({ clientId: clientId() });
+
+      expect(first.status).toBe('undone');
+      expect(second).toEqual({ status: 'error', error: 'completionNotFound' });
+    });
+
+    it('cannot reach another family’s completion with a guessed clientId', async () => {
+      await tap();
+      const outsider = await seedHousehold(db, 'Outsider undo');
+
+      stubs.session = {
+        session: { activeFamilyId: outsider.familyId, memberId: outsider.parentId },
+      };
+
+      expect(await undoCompletionAction({ clientId: clientId() })).toEqual({
+        status: 'error',
+        error: 'completionNotFound',
+      });
+
+      const rows = await db
+        .select()
+        .from(completion)
+        .where(eq(completion.familyId, household.familyId));
+      expect(rows[0].undoneAt).toBeNull();
+
+      await db.delete(family).where(eq(family.id, outsider.familyId));
+    });
+
+    it('refuses a caller with no session', async () => {
+      await tap();
+      stubs.session = null;
+
+      expect(await undoCompletionAction({ clientId: clientId() })).toEqual({
+        status: 'error',
+        error: 'forbidden',
+      });
+    });
   });
 });
