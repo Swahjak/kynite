@@ -4,7 +4,8 @@
   },
   "nav": {
     "today": "Today",
-    "family": "Family"
+    "family": "Family",
+    "settings": "Settings"
   },
   "auth": {
     "signOut": "Sign out",
@@ -97,6 +98,43 @@
       "memberNotFound": "That family member no longer exists.",
       "singleOwner": "A family has exactly one owner.",
       "cannotRemoveOwner": "The owner cannot be removed."
+    }
+  },
+  "google": {
+    "title": "Google Calendar",
+    "subtitle": "Link a Google account and choose which calendars appear in Kynite.",
+    "empty": "No Google account is linked yet.",
+    "noCalendars": "No calendars found for this account.",
+    "readOnly": "read-only",
+    "unlink": "Unlink",
+    "syncNow": "Sync now",
+    "linkedNotice": "{email} is linked. The calendars are being imported.",
+    "reauthBanner": "Kynite has lost access to {email}, so that calendar is no longer syncing.",
+    "reauthAction": "Reconnect",
+    "notConfigured": "Linking is switched off on this installation: {missing} is not configured.",
+    "link": {
+      "title": "Link a Google account",
+      "description": "Both parents can link their own account. Kynite reads and writes only the calendars you enable.",
+      "action": "Link Google account"
+    },
+    "status": {
+      "active": "Syncing",
+      "reauthRequired": "Reconnect needed"
+    },
+    "calendar": {
+      "enable": "Sync",
+      "disable": "Stop syncing"
+    },
+    "errors": {
+      "forbidden": "You are not allowed to do that.",
+      "invalidInput": "Please check the details you entered.",
+      "accountNotFound": "That Google account is no longer linked.",
+      "calendarNotFound": "That calendar no longer exists.",
+      "notConfigured": "Google linking is not configured on this installation.",
+      "invalidState": "That link attempt has expired. Please try again.",
+      "consentDenied": "The Google consent screen was cancelled.",
+      "noRefreshToken": "Google did not return a refresh token. Please try again.",
+      "linkFailed": "Could not link the Google account. Please try again."
     }
   }
 }

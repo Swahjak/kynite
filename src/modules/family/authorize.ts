@@ -274,6 +274,21 @@ export function can(principal: Principal, capability: Capability, resource?: Res
   return decide(principal, capability, resource) === 'allow';
 }
 
+/**
+ * `can()` for a capability that grades `own` for the caller's own resources
+ * (`calendar:view_private`, `google:link`, …) — resolves `ownerMemberId` from
+ * the principal itself, so the call site does not have to reconstruct the
+ * "own" resource shape by hand. A non-`member` principal (device, share link)
+ * can never be an owner, so it resolves to `null` — `decide()` treats an
+ * absent `ownerMemberId` as untestable and fails closed regardless, but
+ * `null` makes "there is no member id to be the owner" explicit rather than
+ * relying on `undefined` doing the same thing by accident.
+ */
+export function canOwn(principal: Principal, capability: Capability): boolean {
+  const ownerMemberId = principal.kind === 'member' ? principal.memberId : null;
+  return can(principal, capability, { familyId: principal.familyId, ownerMemberId });
+}
+
 export class ForbiddenError extends Error {
   readonly capability: Capability;
 

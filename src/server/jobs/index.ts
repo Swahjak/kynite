@@ -1,0 +1,31 @@
+import 'server-only';
+import { registerGoogleJobs } from '@/modules/google';
+import { jobsEnabled, startBoss, stopBoss } from './boss';
+
+/**
+ * Worker bootstrap (docs/architecture.md §10: "One process; jobs in-process").
+ *
+ * The registration graph lives here rather than in `boss.ts` so slices can
+ * enqueue work by importing the lifecycle module alone — otherwise every
+ * `enqueue()` would drag in every handler and cycle back on itself.
+ */
+
+let started: Promise<void> | undefined;
+
+export async function startJobs(): Promise<void> {
+  if (!jobsEnabled()) return;
+
+  started ??= (async () => {
+    const boss = await startBoss();
+    await registerGoogleJobs(boss);
+  })();
+
+  return started;
+}
+
+export async function stopJobs(): Promise<void> {
+  started = undefined;
+  await stopBoss();
+}
+
+export { enqueue, getBoss, jobsEnabled } from './boss';

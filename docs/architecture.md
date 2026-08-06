@@ -108,11 +108,19 @@ src/app/
   api/
     sse/route.ts                       # GET, per-family event stream
     webhooks/google-calendar/route.ts  # POST, Google push channel target
+    google/oauth/start/route.ts        # GET, redirects to Google's consent screen
+    google/oauth/callback/route.ts     # GET, exchanges the code, links the account
     push/subscribe/route.ts            # POST, VAPID subscription upsert
     auth/[...all]/route.ts             # better-auth handler
     health/route.ts
   sw.ts                                # Serwist service worker entry
 ```
+
+- **`api/google/oauth/*`, not `[locale]/(auth)/…`** — Google's redirect URI is
+  registered once per OAuth client and must be locale-free, so the OAuth
+  start/callback pair lives under the locale-free `api/` tree rather than
+  inside `[locale]/(auth)/`, even though conceptually they belong to the
+  auth-adjacent flow that group holds.
 
 - **`(hub)` separate from `(app)`** — different session type, different a11y
   budget (48px+ targets, 6-foot legibility), different caching strategy. Sharing
@@ -152,7 +160,6 @@ modules/routines/
   schema.ts   # drizzle tables owned by this slice
   queries.ts  # reads ("server-only")
   actions.ts  # Server Actions — the only mutation entry point
-  events.ts   # realtime event types this slice publishes
   domain/     # pure functions: fade rules, step ordering, star award calc
   ui/         # slice-owned components
   index.ts    # public surface — cross-module imports go through here only
@@ -165,8 +172,15 @@ modules/routines/
 2. `domain/` is pure and framework-free — that's where Vitest earns its keep.
 3. Every mutation is a Server Action that: authorizes → validates (zod) →
    writes in a transaction → `NOTIFY`s → revalidates. No mutation logic in
-   route handlers except webhooks.
+   route handlers except webhooks and the Google OAuth callback (`api/google/
+   oauth/callback`) — a code exchange cannot happen from a Server Action, so
+   that route carries the same authorize-then-write discipline inline instead.
 4. Route files hold no logic; they compose module UI + queries.
+5. Realtime event types are centralized in `modules/realtime` (its own
+   `schema.ts`/public surface), not declared per-slice — there is no
+   `events.ts` inside `modules/routines/`, `modules/google/`, etc. One shared
+   vocabulary keeps a `sync.status` from meaning something different in two
+   slices, and keeps the SSE payload contract in one place.
 
 ---
 
@@ -456,8 +470,10 @@ ignores echoes of its own `clientId`.
 ### OAuth
 
 - Scopes: `openid email profile`, `https://www.googleapis.com/auth/calendar`
-  (read/write; `calendar.events` alone can't manage calendar lists) and
-  `calendar.readonly` fallback for accounts the user only wants mirrored.
+  (read/write; `calendar.events` alone can't manage calendar lists). There is
+  no `calendar.readonly` mirror-only fallback — an earlier draft of this
+  section mentioned one; M05 shipped without it, and every linked calendar
+  gets the same read/write scope.
 - `access_type=offline&prompt=consent` to guarantee a refresh token.
 - Multiple accounts per family: each consent creates a `google_account` row
   owned by a member; better-auth's account linking handles login identity, the
@@ -484,10 +500,16 @@ custody-week recurrence model.
 
 - On calendar link: `events.watch` → store `channelId`, `resourceId`,
   `expiration`. Address is `${BETTER_AUTH_URL}/api/webhooks/google-calendar`.
-- Webhook handler: verify `X-Goog-Channel-Token` (random per channel, stored),
-  match `X-Goog-Resource-ID`, then **enqueue** a `sync:calendar` job and return
-  200 immediately. Rationale: Google retries aggressively on slow webhooks;
-  never sync inline.
+- The channel token is **derived**, not stored:
+  `HMAC(BETTER_AUTH_SECRET, 'kynite.channel:' + channelId)`. Verifiable with
+  one hash and no database round-trip, and it needs no extra column. The
+  trade-off: rotating `BETTER_AUTH_SECRET` invalidates every channel at once;
+  the `google:renew-channels` sweep repairs them within its window (≤30 min,
+  since it runs every 30 min — see the table below).
+- Webhook handler: verify `X-Goog-Channel-Token` against that derived value,
+  match `X-Goog-Resource-ID`, then **enqueue** a `google:sync-calendar` job
+  and return 200 immediately. Rationale: Google retries aggressively on slow
+  webhooks; never sync inline.
 - Notifications are content-free by design — they are a "something changed"
   ping, so the job always does an incremental sync.
 
@@ -508,7 +530,13 @@ immediately:
 2. Same request calls `events.insert/patch/delete` with `If-Match: etag`.
 3. Success → store new `etag`/`googleEventId`. Failure → enqueue
    `google:push-event` for retry with backoff, mark the event `pendingSync`
-   (UI shows a subtle sync pip, never blocks).
+   (UI shows a subtle sync pip, never blocks). **`pendingSync` is not a
+   column today** — M05 ships `enqueueEventPush` unwired (see §2's
+   route-handler carve-out note); M06, which wires it to the write-path
+   Server Actions, must resolve the representation. Suggested shape:
+   `event.pendingSyncAt timestamp`, set on push failure and cleared on the
+   next successful push — a nullable timestamp is enough to drive "show the
+   pip" and needs no separate boolean.
 4. `412 Precondition Failed` → remote changed first → refetch remote and apply
    **last-write-wins by `updated` timestamp** (PRD: LWW). Ties break toward
    Google, since it is the multi-tenant source of truth.
@@ -643,6 +671,18 @@ workers.
   key of `(routineId, occurrenceDate, memberId)` so a restart can't double-notify.
 - Jobs publish realtime events through the same `publish()` used by requests, so
   the hub reacts to sync results identically to user actions.
+- **pg-boss 12 forbids `:` in queue names** (only alphanumerics, `_`, `-`, `.`,
+  `/`), but `:` is the vocabulary this doc, the codebase and the tests all use
+  (`google:sync-calendar`, etc). The colon form is what queue names are
+  *called*; what is actually `createQueue()`d/`send()`/`schedule()`d with
+  pg-boss is the `.`-form (`google.sync-calendar`) via a one-line adapter at
+  the boundary (`queueName()` in `src/modules/google/queues.ts`).
+- **All five Google queues use the `stately` policy** — at most one job per
+  state per `singletonKey`, so a webhook storm for one calendar collapses to
+  "the running sync plus one queued follow-up," not a hundred redundant
+  passes. `google:sync-calendar` and `google:push-event` retry 5× with
+  backoff (Google rate-limits hard); `google:poll`, `google:renew-channels`
+  and `google:refresh-tokens` retry 3×.
 
 ---
 
@@ -651,7 +691,7 @@ workers.
 | Layer | Tool | Scope |
 |---|---|---|
 | Domain units | Vitest 4 | pure functions: RRULE expansion incl. custody patterns, star balance derivation, fade rules, LWW conflict resolution, permission matrix. No DB, no mocks. |
-| Module integration | Vitest + testcontainer Postgres | Server Actions against a real DB: idempotent completions, append-only ledger constraint, sync upserts. Rationale: the invariants that matter are DB-level. |
+| Module integration | Vitest + real Postgres (`docker-compose.test.yml` on 5435), skip-without-`DATABASE_URL` — not testcontainers | Server Actions against a real DB: idempotent completions, append-only ledger constraint, sync upserts. Rationale: the invariants that matter are DB-level; `describe.skipIf(!databaseUrl)` keeps the unit gate runnable without Docker while `pnpm e2e:setup` brings the same container up for the full run. |
 | Realtime | Vitest | `event_log` cursor replay, resync threshold, echo suppression. |
 | Google sync | Vitest + recorded fixtures | sync-token flow, 410 recovery, 412 conflict, tombstones. No live API in CI. |
 | E2E | Playwright 1.62 | per-surface projects: `hub` (tablet viewport, device session), `app` (mobile viewport, account session), `share` (no session). Seeded test DB via `pnpm e2e:setup`. |
@@ -701,7 +741,12 @@ git pull → pnpm install --frozen-lockfile → pnpm drizzle-kit migrate
   reload is not zero-downtime-safe otherwise, and the hub reconnects blindly.
 - Env validated at boot via `server/env.ts` (zod) — the process refuses to start
   on a missing `DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`,
-  `GOOGLE_CLIENT_ID/SECRET`, `VAPID_PUBLIC/PRIVATE_KEY`, `TOKEN_ENCRYPTION_KEY`.
+  `VAPID_PUBLIC/PRIVATE_KEY`. `GOOGLE_CLIENT_ID/SECRET` and
+  `TOKEN_ENCRYPTION_KEY` are **point-of-use required, not boot-required**: an
+  install with none of the three is a working install with Google linking
+  switched off (`isGoogleConfigured()` gates every entry point, and the
+  settings UI explains what's missing), which is what keeps `pnpm build`, the
+  unit gate and the e2e run free of third-party secrets (§9).
 - `BETTER_AUTH_URL` doubles as the Google webhook address (must be public HTTPS;
   ngrok in dev).
 - Health: `/api/health` checks DB + last successful sync; monitored externally.

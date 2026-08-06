@@ -7,6 +7,7 @@ export {
   CAPABILITIES,
   ForbiddenError,
   can,
+  canOwn,
   decide,
   grade,
   type Capability,

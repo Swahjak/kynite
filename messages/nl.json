@@ -4,7 +4,8 @@
   },
   "nav": {
     "today": "Vandaag",
-    "family": "Gezin"
+    "family": "Gezin",
+    "settings": "Instellingen"
   },
   "auth": {
     "signOut": "Uitloggen",
@@ -97,6 +98,43 @@
       "memberNotFound": "Dit gezinslid bestaat niet meer.",
       "singleOwner": "Een gezin heeft precies één beheerder.",
       "cannotRemoveOwner": "De beheerder kan niet verwijderd worden."
+    }
+  },
+  "google": {
+    "title": "Google Agenda",
+    "subtitle": "Koppel een Google-account en kies welke agenda's in Kynite verschijnen.",
+    "empty": "Er is nog geen Google-account gekoppeld.",
+    "noCalendars": "Geen agenda's gevonden voor dit account.",
+    "readOnly": "alleen lezen",
+    "unlink": "Ontkoppelen",
+    "syncNow": "Nu synchroniseren",
+    "linkedNotice": "{email} is gekoppeld. De agenda's worden opgehaald.",
+    "reauthBanner": "Kynite heeft geen toegang meer tot {email}, die agenda synchroniseert niet meer.",
+    "reauthAction": "Opnieuw koppelen",
+    "notConfigured": "Koppelen staat uit op deze installatie: {missing} is niet ingesteld.",
+    "link": {
+      "title": "Google-account koppelen",
+      "description": "Beide ouders kunnen hun eigen account koppelen. Kynite leest en schrijft alleen in de agenda's die je aanzet.",
+      "action": "Google-account koppelen"
+    },
+    "status": {
+      "active": "Synchroniseert",
+      "reauthRequired": "Opnieuw koppelen nodig"
+    },
+    "calendar": {
+      "enable": "Synchroniseren",
+      "disable": "Niet meer synchroniseren"
+    },
+    "errors": {
+      "forbidden": "Dat mag je niet doen.",
+      "invalidInput": "Controleer de ingevulde gegevens.",
+      "accountNotFound": "Dat Google-account is niet meer gekoppeld.",
+      "calendarNotFound": "Die agenda bestaat niet meer.",
+      "notConfigured": "Google-koppeling is niet ingesteld op deze installatie.",
+      "invalidState": "Die koppelpoging is verlopen. Probeer het opnieuw.",
+      "consentDenied": "Het Google-toestemmingsscherm is geannuleerd.",
+      "noRefreshToken": "Google gaf geen refresh-token terug. Probeer het opnieuw.",
+      "linkFailed": "Kon het Google-account niet koppelen. Probeer het opnieuw."
     }
   }
 }

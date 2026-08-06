@@ -14,4 +14,15 @@ export async function register(): Promise<void> {
   if (process.env.NEXT_RUNTIME !== 'nodejs') return;
 
   getEnv();
+
+  // pg-boss workers run in-process (docs/architecture.md §10). Imported lazily
+  // so the edge/build passes above never pull the job graph — and never
+  // require a reachable database.
+  const { startJobs } = await import('@/server/jobs');
+  await startJobs().catch((error: unknown) => {
+    // A queue that cannot start must not stop the web process from serving:
+    // sync degrades to "stale until the worker recovers", which the hub shows
+    // through `sync.status`, while every page keeps rendering.
+    console.error('[jobs] failed to start pg-boss workers', error);
+  });
 }

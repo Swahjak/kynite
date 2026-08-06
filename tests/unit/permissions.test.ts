@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   CAPABILITIES,
   can,
+  canOwn,
   decide,
   grade,
   type Capability,
@@ -180,5 +181,61 @@ describe('resource resolution', () => {
     expect(can(owner, 'member:manage', { familyId: FAMILY })).toBe(true);
     expect(can(adult, 'member:manage', { familyId: FAMILY })).toBe(false);
     expect(can(child, 'member:manage', { familyId: FAMILY })).toBe(false);
+  });
+});
+
+describe('canOwn', () => {
+  // B2 (review fix): the Google settings page (src/app/[locale]/(app)/
+  // settings/google/page.tsx) and GoogleReauthBanner both gate on
+  // `canOwn(principal, 'google:link')` — this exercises that exact helper,
+  // not just the underlying `can()` matrix above, so a regression in the
+  // helper's own resource construction (not just the matrix cell) fails here.
+  const caregiver: Principal = {
+    kind: 'member',
+    familyId: FAMILY,
+    memberId: ME,
+    role: 'caregiver',
+  };
+  const ownerOtherFamily: Principal = {
+    kind: 'member',
+    familyId: OTHER_FAMILY,
+    memberId: ME,
+    role: 'owner',
+  };
+
+  it('allows the owner to link Google', () => {
+    expect(canOwn(owner, 'google:link')).toBe(true);
+  });
+
+  it('allows an adult to see/manage their own linked accounts', () => {
+    expect(canOwn(adult, 'google:link')).toBe(true);
+  });
+
+  it('denies a child login', () => {
+    expect(canOwn(child, 'google:link')).toBe(false);
+  });
+
+  it('denies an account-holding caregiver — the vulnerability B2 closes', () => {
+    // Before the fix, the settings page and reauth banner read linked Google
+    // accounts (emails, calendars) for *any* principal with a session,
+    // including a caregiver login. This is the regression check.
+    expect(canOwn(caregiver, 'google:link')).toBe(false);
+  });
+
+  it('denies a share-link principal (no session, but still a Principal shape)', () => {
+    expect(canOwn(contributor, 'google:link')).toBe(false);
+  });
+
+  it('denies the kiosk device', () => {
+    expect(canOwn(device, 'google:link')).toBe(false);
+  });
+
+  it('still allows an owner in a different family (family scoping is on the resource, not a hardcoded id)', () => {
+    expect(canOwn(ownerOtherFamily, 'google:link')).toBe(true);
+  });
+
+  it('generalizes to the other "own"-graded capability, calendar:view_private', () => {
+    expect(canOwn(adult, 'calendar:view_private')).toBe(true);
+    expect(canOwn(child, 'calendar:view_private')).toBe(false);
   });
 });

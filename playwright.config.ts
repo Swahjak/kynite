@@ -45,6 +45,13 @@ export default defineConfig({
       DATABASE_URL,
       BETTER_AUTH_SECRET,
       BETTER_AUTH_URL: baseURL,
+      // A per-run token key: the Google slice validates it at boot, and no
+      // secret should ever be committed for the e2e database.
+      TOKEN_ENCRYPTION_KEY: randomBytes(32).toString('base64'),
+      // No background workers under test: pg-boss would install its schema in
+      // the throwaway database and add timing nondeterminism for nothing —
+      // every spec drives the app through HTTP (docs/architecture.md §10).
+      JOBS_ENABLED: 'false',
     },
     url: baseURL,
     reuseExistingServer: !process.env.CI,
