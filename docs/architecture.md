@@ -168,7 +168,16 @@ modules/routines/
 **Rules**
 
 1. Cross-module imports must go through `index.ts`; deep imports are lint-banned
-   (`eslint no-restricted-imports`). Rationale: keeps slices swappable.
+   (`eslint no-restricted-imports`). Rationale: keeps slices swappable. Two
+   deep imports are sanctioned exceptions, both narrower than the slice's full
+   surface: a slice `schema.ts` may deep-import another slice's `schema` only
+   (a foreign key needs the referenced table object without dragging the
+   other slice's client/server graph into drizzle-kit's schema resolution);
+   and (M07) a slice `domain/**` may deep-import another slice's `domain/**`
+   only — `domain/` is pure and framework-free, so this is the one place a
+   cross-slice import cannot drag React or `server-only` code along, which is
+   what let the routine scheduler reuse M06's RFC-5545 engine
+   (`modules/calendar/domain/rrule`) instead of re-implementing recurrence.
 2. `domain/` is pure and framework-free — that's where Vitest earns its keep.
 3. Every mutation is a Server Action that: authorizes → validates (zod) →
    writes in a transaction → `NOTIFY`s → revalidates. No mutation logic in

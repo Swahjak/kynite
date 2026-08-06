@@ -61,6 +61,7 @@
   "dependencies": {
     "@base-ui/react": "^1.7.0",
     "better-auth": "1.6.26",
+    "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "drizzle-orm": "0.45.2",
@@ -87,6 +88,7 @@
     "@testing-library/jest-dom": "^7.0.0",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.3",
+    "@types/canvas-confetti": "^1.9.0",
     "@types/node": "^24.13.3",
     "@types/pg": "^8.20.4",
     "@types/react": "^19.2.18",

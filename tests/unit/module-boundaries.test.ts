@@ -66,6 +66,34 @@ describe('module boundary lint rule', () => {
   );
 
   it(
+    'lets a slice domain module import another slice domain — and nothing else',
+    { timeout: 60_000 },
+    async () => {
+      const messages = await boundaryMessages(
+        'domain-cross-import.fixture.ts',
+        'domain/occurrence.ts'
+      );
+
+      // Only the two non-domain deep imports are reported; the pure
+      // `domain/rrule` + `domain/zone` imports are the sanctioned exception.
+      expect(messages).toHaveLength(2);
+      for (const message of messages) {
+        expect(message.message).toMatch(/A slice `domain` module may deep-import/);
+      }
+    }
+  );
+
+  it(
+    'still bans a cross-slice domain import from a non-domain file',
+    { timeout: 60_000 },
+    async () => {
+      const messages = await boundaryMessages('domain-cross-import.fixture.ts');
+
+      expect(messages).toHaveLength(4);
+    }
+  );
+
+  it(
     'still bans a cross-slice schema import from a non-schema file',
     { timeout: 60_000 },
     async () => {

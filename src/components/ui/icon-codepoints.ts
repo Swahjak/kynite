@@ -9,6 +9,8 @@
 
 export const ICON_CODEPOINTS = {
   add: '\ue145',
+  arrow_downward: '\ue5db',
+  arrow_upward: '\ue5d8',
   cake: '\ue7e9',
   calendar_month: '\uebcc',
   check: '\ue668',
@@ -33,6 +35,7 @@ export const ICON_CODEPOINTS = {
   schedule: '\uefd6',
   settings: '\ue8b8',
   star: '\uf09a',
+  task_alt: '\ue2e6',
   timer: '\ue425',
   wb_sunny: '\ue430',
 } as const;

@@ -222,11 +222,12 @@ describe('every Server Action authorizes first', () => {
     // Pinned, not a floor (N13): a `toBeGreaterThanOrEqual` here would stay
     // green even if the auditor silently stopped seeing an entire file, which
     // is exactly the failure mode this suite exists to catch. Counted by hand
-    // across the three `'use server'` modules at time of writing:
+    // across the four `'use server'` modules at time of writing:
     // src/modules/google/actions.ts (3) + src/modules/family/actions.ts (6) +
-    // src/modules/calendar/actions.ts (4) = 13. Adding or removing a Server
-    // Action must bump this number deliberately — that is the point.
-    expect(findings.length).toBe(13);
+    // src/modules/calendar/actions.ts (4) + src/modules/routines/actions.ts (4:
+    // create/update/delete routine + completeStep) = 17. Adding or removing a
+    // Server Action must bump this number deliberately — that is the point.
+    expect(findings.length).toBe(17);
   });
 
   it('reports no unauthorized action anywhere in src/', () => {

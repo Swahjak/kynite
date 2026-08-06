@@ -1,6 +1,8 @@
 {
   "icons": [
     "add",
+    "arrow_downward",
+    "arrow_upward",
     "cake",
     "calendar_month",
     "check",
@@ -25,8 +27,9 @@
     "schedule",
     "settings",
     "star",
+    "task_alt",
     "timer",
     "wb_sunny"
   ],
-  "bytes": 23388
+  "bytes": 24992
 }

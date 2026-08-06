@@ -53,6 +53,45 @@ const schemaBoundaryRule = [
   },
 ];
 
+/**
+ * `domain/` is the second — and last — sanctioned cross-slice deep import.
+ *
+ * Architecture §2 rule 2 makes `domain/` pure and framework-free: no React, no
+ * `server-only`, no database. That is exactly the property a slice `index.ts`
+ * does *not* have — a barrel re-exports the slice's client components, so
+ * routing a domain import through one drags a React client graph (and
+ * `next-intl`'s client navigation) into a plain Node test and makes the
+ * importing domain module untestable. M07's routine scheduler needs M06's
+ * RFC-5545 engine (`modules/calendar/domain/rrule`), and re-implementing
+ * recurrence per slice is precisely the duplication the boundary exists to
+ * prevent.
+ *
+ * The exemption is as narrow as the schema one: a `domain/` module may import
+ * another slice's `domain/`, and nothing else.
+ */
+const domainBoundaryRule = [
+  'error',
+  {
+    patterns: [
+      {
+        group: [
+          '@/modules/*/*',
+          '!@/modules/*/domain',
+          '!@/modules/*/domain/*',
+          'src/modules/*/*',
+          '!src/modules/*/domain',
+          '!src/modules/*/domain/*',
+          '**/modules/*/*',
+          '!**/modules/*/domain',
+          '!**/modules/*/domain/*',
+        ],
+        message:
+          'A slice `domain` module may deep-import another slice `domain` only (pure, framework-free code). Everything else goes through `@/modules/<slice>`.',
+      },
+    ],
+  },
+];
+
 export default tseslint.config(
   {
     ignores: [
@@ -95,6 +134,11 @@ export default tseslint.config(
     // Foreign keys cross slices; see `schemaBoundaryRule` above.
     files: ['src/modules/*/schema.ts'],
     rules: { 'no-restricted-imports': schemaBoundaryRule },
+  },
+  {
+    // Pure domain code crosses slices; see `domainBoundaryRule` above.
+    files: ['src/modules/*/domain/**/*.ts'],
+    rules: { 'no-restricted-imports': domainBoundaryRule },
   },
   {
     // Playwright fixtures take a callback conventionally named `use`, which

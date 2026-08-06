@@ -124,7 +124,7 @@ This is the single source of progress truth for the Kynite greenfield rebuild. E
 
 ## M07 — Routines/chores
 
-- [ ] Status
+- [x] Status
 - **Scope:** Build `modules/routines`: a parent-facing routine builder (title, icon, owner member, schedule RRULE + time of day + grace days, ordered steps with optional timer seconds), and the child-facing hub routine screen with oversized single-tap step completion. Completion feedback leads with specific competence-signalling praise text plus non-strobing confetti; the star lands second. Missed steps render dimmed — never a penalty mark.
 - **Acceptance criteria:**
   - Routes exist: `(app)/routines` (builder), `(hub)/routines/[memberId]` (child screen).
@@ -136,7 +136,7 @@ This is the single source of progress truth for the Kynite greenfield rebuild. E
   - Confetti presets are non-strobing and intensity-configurable; one module per animation under `components/celebration/`.
   - Unit tests cover step ordering, grace-day logic and occurrence-date derivation in `modules/routines/domain/`.
   - Gate green: `pnpm typecheck && pnpm lint && pnpm test:run`.
-- **Review verdict:** _pending_
+- **Review verdict:** _approved after fixes_ — Opus review 2026-08-06: gates verified independently (474/474 with DB, 59 e2e); completion transaction sound (onConflictDoNothing absorbs only PK/uniques, star never double-awarded, fade path proven); psychology sweep independently clean (neutral voice, opacity-60-only missed state, no red confetti); praise DOM-order test real. Blocker fixed: five stale tablet baselines regenerated + visual tolerance tightened (maxDiffPixels 2500→400 — tolerance had swallowed an entire nav item). Also: CI gate job now runs integration tests (postgres service + migrations — proofs previously never ran in CI), midnight-rollover flake frozen, negative-marking scan pin made transitive + variant="destructive" caught, StarPop hydration fix, confetti test seam removed, architecture §2 domain-exemption synced. Notes: completion:write is family-wide per §7 (any member can credit any member) — product decision to revisit before M08 currency; pre-M12 hub carries a parent session (owner-level wall tablet) — M12 exposure; new flake seen once in google-channels integration test (1/476, unreproduced) — watch at M08.
 
 ## M08 — Star ledger + rewards
 

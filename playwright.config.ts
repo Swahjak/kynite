@@ -33,7 +33,7 @@ export default defineConfig({
       // thousands of pixels, enough to hide a genuinely broken component. The
       // absolute cap is what keeps a large page honest; the ratio is what
       // keeps a small one from failing on a single antialiased edge.
-      maxDiffPixels: 2500,
+      maxDiffPixels: 400,
       maxDiffPixelRatio: 0.01,
       animations: 'disabled',
     },

@@ -6,7 +6,8 @@
     "today": "Vandaag",
     "family": "Gezin",
     "settings": "Instellingen",
-    "calendar": "Agenda"
+    "calendar": "Agenda",
+    "routines": "Routines"
   },
   "auth": {
     "signOut": "Uitloggen",
@@ -235,6 +236,113 @@
       "calendarNotFound": "Die agenda bestaat niet meer.",
       "calendarReadOnly": "In die agenda mag Kynite niet schrijven.",
       "memberNotFound": "Dit gezinslid bestaat niet meer."
+    }
+  },
+  "routines": {
+    "title": "Routines",
+    "subtitle": "Vaste volgordes voor de dag, elk van één persoon.",
+    "empty": "Nog geen routines. Maak de eerste aan om de dag vorm te geven.",
+    "graduated": "Gaat nu vanzelf",
+    "starsPerStep": "{count, plural, =0 {Geen sterren} one {# ster per stap} other {# sterren per stap}}",
+    "stepTimer": "{seconds}s",
+    "actions": {
+      "add": "Nieuwe routine",
+      "edit": "Bewerken",
+      "save": "Opslaan",
+      "cancel": "Annuleren",
+      "addStep": "Stap toevoegen",
+      "remove": "Verwijderen",
+      "removeNamed": "{title} verwijderen"
+    },
+    "dialog": {
+      "addTitle": "Nieuwe routine",
+      "editTitle": "Routine bewerken",
+      "description": "Een routine is een korte, vaste reeks stappen op de dagen die je kiest."
+    },
+    "form": {
+      "title": "Naam",
+      "owner": "Van wie",
+      "ownerHint": "Bepaalt op wiens hub-scherm de routine staat en waar herinneringen heen gaan.",
+      "icon": "Pictogram",
+      "days": "Dagen",
+      "daysHint": "De routine verschijnt op de dagen die je hier kiest.",
+      "timeOfDay": "Tijd",
+      "graceDays": "Extra dagen",
+      "graceDaysHint": "Dagen erna waarop een stap nog steeds meetelt.",
+      "starsPerCompletion": "Sterren per stap",
+      "rewardEnabled": "Sterren",
+      "rewardEnabledHint": "Sterren geven voor deze routine",
+      "steps": "Stappen",
+      "stepTitlePlaceholder": "Bijvoorbeeld: tanden poetsen",
+      "stepTimerPlaceholder": "Seconden",
+      "stepNumber": "Stap {number}",
+      "stepTimer": "Timer voor stap {number} in seconden",
+      "moveUp": "Stap {number} eerder zetten",
+      "moveDown": "Stap {number} later zetten",
+      "removeStep": "Stap {number} verwijderen"
+    },
+    "weekdays": {
+      "MO": "ma",
+      "TU": "di",
+      "WE": "wo",
+      "TH": "do",
+      "FR": "vr",
+      "SA": "za",
+      "SU": "zo"
+    },
+    "icons": {
+      "task_alt": "Vinkje",
+      "wb_sunny": "Zon",
+      "dark_mode": "Maan",
+      "schedule": "Klok",
+      "checklist": "Checklist",
+      "star": "Ster",
+      "timer": "Timer",
+      "event_available": "Agenda"
+    },
+    "schedule": {
+      "daily": "Elke dag",
+      "noTime": "Geen vaste tijd",
+      "grace": "{days, plural, one {# extra dag} other {# extra dagen}}"
+    },
+    "sections": {
+      "morning": "Ochtend",
+      "afternoon": "Middag",
+      "evening": "Avond"
+    },
+    "sectionProgress": "{done} van {total} klaar",
+    "sectionEmpty": "Hier staat vandaag niets.",
+    "boardEmpty": "Vandaag staat er niets op de lijst.",
+    "stepCount": "{count, plural, =0 {Geen stappen} one {# stap} other {# stappen}}",
+    "inProgress": "Bezig",
+    "startsIn": "Begint over {minutes} min",
+    "startsInHours": "Begint over {hours} u",
+    "starsEarned": "{count, plural, =0 {Geen sterren} one {# ster verdiend} other {# sterren verdiend}}",
+    "completeStep": "{title} afvinken",
+    "praise": {
+      "byYourself": "Dat heb je helemaal zelf gedaan!",
+      "wellDone": "Goed gedaan!",
+      "niceWork": "Netjes!",
+      "thatWasQuick": "Dat ging snel!",
+      "goodThinking": "Goed bedacht!",
+      "keptGoing": "Je hebt doorgezet!"
+    },
+    "routineDone": {
+      "allDone": "Alles klaar, {name}!",
+      "wholeRoutine": "De hele routine is klaar, {name}!",
+      "everyStep": "Elke stap klaar, {name}!"
+    },
+    "hub": {
+      "title": "Routines van {name}",
+      "unavailableTitle": "Geen routines om te tonen",
+      "unavailableBody": "Dit scherm is nog niet aan een gezinslid gekoppeld."
+    },
+    "errors": {
+      "forbidden": "Dat mag je niet doen.",
+      "invalidInput": "Controleer de ingevulde gegevens.",
+      "memberNotFound": "Dat gezinslid bestaat niet meer.",
+      "routineNotFound": "Die routine bestaat niet meer.",
+      "notScheduled": "Deze routine staat niet op de lijst voor die dag."
     }
   }
 }

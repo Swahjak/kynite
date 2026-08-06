@@ -8,6 +8,26 @@ on:
 jobs:
   gate:
     runs-on: ubuntu-latest
+    # Same throwaway database shape as `pnpm e2e:setup`'s docker-compose.test.yml
+    # (5435, kynite/kynite/kynite_test), so `tests/integration/**` — which
+    # `describe.skipIf(!databaseUrl)` otherwise silently no-ops — actually runs
+    # in the gate that `pnpm run ci` (typecheck/lint/test/build) is meant to be.
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: kynite
+          POSTGRES_PASSWORD: kynite
+          POSTGRES_DB: kynite_test
+        ports:
+          - 5435:5432
+        options: >-
+          --health-cmd "pg_isready -U kynite -d kynite_test"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 30
+    env:
+      DATABASE_URL: postgresql://kynite:kynite@localhost:5435/kynite_test
     steps:
       - uses: actions/checkout@v5
 
@@ -19,6 +39,8 @@ jobs:
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
+
+      - run: pnpm db:migrate
 
       - run: pnpm run ci
 

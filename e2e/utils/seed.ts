@@ -32,16 +32,27 @@ export type SeededMember = { id: string; displayName: string; color: string };
 export async function seedMembers(
   client: Client,
   familyId: string,
-  members: { displayName: string; role: string; color: string; sortOrder: number }[]
+  members: {
+    displayName: string;
+    role: string;
+    color: string;
+    sortOrder: number;
+    /**
+     * A fixed id. Only the visual specs need one: anything derived from an id
+     * (M07 seeds each praise line from `member:step:date`) would otherwise
+     * change on every run and make the snapshot flap.
+     */
+    id?: string;
+  }[]
 ): Promise<SeededMember[]> {
   const seeded: SeededMember[] = [];
 
   for (const member of members) {
     const { rows } = await client.query<{ id: string }>(
-      `insert into member (family_id, display_name, role, color, reward_horizon, sort_order)
-       values ($1, $2, $3, $4, 'instant', $5)
+      `insert into member (family_id, id, display_name, role, color, reward_horizon, sort_order)
+       values ($1, coalesce($2::uuid, gen_random_uuid()), $3, $4, $5, 'instant', $6)
        returning id`,
-      [familyId, member.displayName, member.role, member.color, member.sortOrder]
+      [familyId, member.id ?? null, member.displayName, member.role, member.color, member.sortOrder]
     );
     seeded.push({ id: rows[0].id, displayName: member.displayName, color: member.color });
   }
@@ -182,6 +193,133 @@ export async function childrenOf(client: Client, parentId: string) {
     `select id, title, starts_at, ends_at, rrule from event
       where recurrence_parent_id = $1 order by starts_at`,
     [parentId]
+  );
+  return rows;
+}
+
+export type SeedRoutine = {
+  /** A fixed id, for the same determinism reason as `seedMembers`. */
+  id?: string;
+  title: string;
+  ownerMemberId: string;
+  /** `{ rrule, timeOfDay, graceDays }` — the `routine.schedule` jsonb. */
+  schedule: { rrule: string; timeOfDay?: string; graceDays?: number };
+  icon?: string;
+  starsPerCompletion?: number;
+  rewardEnabled?: boolean;
+  fadedAt?: string | null;
+  /** The series' DTSTART. Backdate it so past occurrences exist at all. */
+  createdAt?: string;
+  steps: { title: string; timerSeconds?: number | null; id?: string }[];
+};
+
+export type SeededRoutine = { id: string; title: string; stepIds: string[] };
+
+/**
+ * A routine with its steps, seeded directly.
+ *
+ * The hub specs need routines whose *occurrences are in the past* (to exercise
+ * the grace/dimmed state) and whose DTSTART predates them. Neither is authorable
+ * through the builder UI, which only ever creates a routine starting now — so
+ * seeding rows is what keeps those specs about the state under test.
+ */
+export async function seedRoutines(
+  client: Client,
+  familyId: string,
+  routines: SeedRoutine[]
+): Promise<SeededRoutine[]> {
+  const seeded: SeededRoutine[] = [];
+
+  for (const [index, routine] of routines.entries()) {
+    const { rows } = await client.query<{ id: string }>(
+      `insert into routine (
+         family_id, id, owner_member_id, title, icon, schedule,
+         stars_per_completion, reward_enabled, faded_at, sort_order, created_at
+       )
+       values (
+         $1, coalesce($11::uuid, gen_random_uuid()), $2, $3, $4, $5, $6, $7, $8, $9,
+         coalesce($10::timestamptz, now())
+       )
+       returning id`,
+      [
+        familyId,
+        routine.ownerMemberId,
+        routine.title,
+        routine.icon ?? 'task_alt',
+        JSON.stringify(routine.schedule),
+        routine.starsPerCompletion ?? 1,
+        routine.rewardEnabled ?? true,
+        routine.fadedAt ?? null,
+        index,
+        routine.createdAt ?? null,
+        routine.id ?? null,
+      ]
+    );
+
+    const stepIds: string[] = [];
+    for (const [order, step] of routine.steps.entries()) {
+      const { rows: stepRows } = await client.query<{ id: string }>(
+        `insert into routine_step (id, routine_id, title, timer_seconds, sort_order)
+         values (coalesce($5::uuid, gen_random_uuid()), $1, $2, $3, $4) returning id`,
+        [rows[0].id, step.title, step.timerSeconds ?? null, order, step.id ?? null]
+      );
+      stepIds.push(stepRows[0].id);
+    }
+
+    seeded.push({ id: rows[0].id, title: routine.title, stepIds });
+  }
+
+  return seeded;
+}
+
+/** Completions for a member, as the hub would have written them. */
+export async function seedCompletions(
+  client: Client,
+  familyId: string,
+  memberId: string,
+  entries: { routineId: string; routineStepId: string; occurrenceDate: string }[]
+): Promise<void> {
+  for (const entry of entries) {
+    await client.query(
+      `insert into completion (
+         family_id, member_id, routine_id, routine_step_id,
+         occurrence_date, source, client_id
+       )
+       values ($1, $2, $3, $4, $5, 'hub', $6)
+       on conflict do nothing`,
+      [
+        familyId,
+        memberId,
+        entry.routineId,
+        entry.routineStepId,
+        entry.occurrenceDate,
+        `seed:${memberId}:${entry.routineStepId}:${entry.occurrenceDate}`,
+      ]
+    );
+  }
+}
+
+export async function readCompletions(client: Client, familyId: string) {
+  const { rows } = await client.query(
+    `select routine_step_id, occurrence_date, source, client_id
+       from completion where family_id = $1 order by created_at`,
+    [familyId]
+  );
+  return rows;
+}
+
+export async function readStarLedger(client: Client, familyId: string) {
+  const { rows } = await client.query(
+    `select amount, reason, routine_id from star_ledger where family_id = $1 order by created_at`,
+    [familyId]
+  );
+  return rows;
+}
+
+export async function readRoutineSteps(client: Client, routineId: string) {
+  const { rows } = await client.query<{ title: string; sort_order: number }>(
+    `select title, sort_order from routine_step where routine_id = $1 order by sort_order`,
+    [routineId]
   );
   return rows;
 }

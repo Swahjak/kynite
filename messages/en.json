@@ -6,7 +6,8 @@
     "today": "Today",
     "family": "Family",
     "settings": "Settings",
-    "calendar": "Calendar"
+    "calendar": "Calendar",
+    "routines": "Routines"
   },
   "auth": {
     "signOut": "Sign out",
@@ -235,6 +236,113 @@
       "calendarNotFound": "That calendar no longer exists.",
       "calendarReadOnly": "Kynite cannot write to that calendar.",
       "memberNotFound": "That family member no longer exists."
+    }
+  },
+  "routines": {
+    "title": "Routines",
+    "subtitle": "Fixed sequences for the day, each owned by one person.",
+    "empty": "No routines yet. Create the first one to give the day its shape.",
+    "graduated": "Runs on its own now",
+    "starsPerStep": "{count, plural, =0 {No stars} one {# star per step} other {# stars per step}}",
+    "stepTimer": "{seconds}s",
+    "actions": {
+      "add": "New routine",
+      "edit": "Edit",
+      "save": "Save",
+      "cancel": "Cancel",
+      "addStep": "Add step",
+      "remove": "Remove",
+      "removeNamed": "Remove {title}"
+    },
+    "dialog": {
+      "addTitle": "New routine",
+      "editTitle": "Edit routine",
+      "description": "A routine is a short, fixed sequence of steps on the days you choose."
+    },
+    "form": {
+      "title": "Name",
+      "owner": "Whose routine",
+      "ownerHint": "Decides whose hub screen it appears on and where reminders go.",
+      "icon": "Icon",
+      "days": "Days",
+      "daysHint": "The routine appears on the days you pick here.",
+      "timeOfDay": "Time",
+      "graceDays": "Extra days",
+      "graceDaysHint": "Days afterwards on which a step still counts.",
+      "starsPerCompletion": "Stars per step",
+      "rewardEnabled": "Stars",
+      "rewardEnabledHint": "Award stars for this routine",
+      "steps": "Steps",
+      "stepTitlePlaceholder": "For example: brush teeth",
+      "stepTimerPlaceholder": "Seconds",
+      "stepNumber": "Step {number}",
+      "stepTimer": "Timer for step {number} in seconds",
+      "moveUp": "Move step {number} earlier",
+      "moveDown": "Move step {number} later",
+      "removeStep": "Remove step {number}"
+    },
+    "weekdays": {
+      "MO": "Mon",
+      "TU": "Tue",
+      "WE": "Wed",
+      "TH": "Thu",
+      "FR": "Fri",
+      "SA": "Sat",
+      "SU": "Sun"
+    },
+    "icons": {
+      "task_alt": "Checkmark",
+      "wb_sunny": "Sun",
+      "dark_mode": "Moon",
+      "schedule": "Clock",
+      "checklist": "Checklist",
+      "star": "Star",
+      "timer": "Timer",
+      "event_available": "Calendar"
+    },
+    "schedule": {
+      "daily": "Every day",
+      "noTime": "No fixed time",
+      "grace": "{days, plural, one {# extra day} other {# extra days}}"
+    },
+    "sections": {
+      "morning": "Morning",
+      "afternoon": "Afternoon",
+      "evening": "Evening"
+    },
+    "sectionProgress": "{done} of {total} done",
+    "sectionEmpty": "Nothing here today.",
+    "boardEmpty": "Nothing on the list today.",
+    "stepCount": "{count, plural, =0 {No steps} one {# step} other {# steps}}",
+    "inProgress": "Underway",
+    "startsIn": "Starts in {minutes} min",
+    "startsInHours": "Starts in {hours} h",
+    "starsEarned": "{count, plural, =0 {No stars} one {# star earned} other {# stars earned}}",
+    "completeStep": "Mark {title} as done",
+    "praise": {
+      "byYourself": "You did that all by yourself!",
+      "wellDone": "Well done!",
+      "niceWork": "Nice work!",
+      "thatWasQuick": "That was quick!",
+      "goodThinking": "Good thinking!",
+      "keptGoing": "You kept going!"
+    },
+    "routineDone": {
+      "allDone": "All done, {name}!",
+      "wholeRoutine": "The whole routine is done, {name}!",
+      "everyStep": "Every step done, {name}!"
+    },
+    "hub": {
+      "title": "{name}'s routines",
+      "unavailableTitle": "No routines to show",
+      "unavailableBody": "This screen is not linked to a family member yet."
+    },
+    "errors": {
+      "forbidden": "You are not allowed to do that.",
+      "invalidInput": "Please check the details you entered.",
+      "memberNotFound": "That family member no longer exists.",
+      "routineNotFound": "That routine no longer exists.",
+      "notScheduled": "This routine is not on the list for that day."
     }
   }
 }
