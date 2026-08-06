@@ -47,7 +47,7 @@ This is the single source of progress truth for the Kynite greenfield rebuild. E
 
 ## M02 — Design system + theming
 
-- [ ] Status
+- [x] Status
 - **Scope:** Implement the Kynite visual language as Tailwind 4 theme tokens and shadcn/Base UI primitives, per `docs/brand-guideline.md` and the Stitch design-system spec. Self-host Lexend (display) and Noto Sans (body) plus Material Symbols Outlined; wire brand primary `#13ec92`, gold `#D4A84B`, the eight category colors, and light/dark theming as CSS variables. Generate the core primitives (button, card, dialog, sheet, avatar, badge, tabs, input, select, toast) with kiosk-grade 48px minimum targets. Ship an internal `/dev/design` demo route rendering every token and primitive in both themes.
 - **Acceptance criteria:**
   - `src/app/globals.css` defines the full token set: primary `#13ec92`, gold `#D4A84B`, and the eight category colors (blue, purple, orange, green, red, yellow, pink, teal) with background/border/text variants in both themes.
@@ -58,7 +58,7 @@ This is the single source of progress truth for the Kynite greenfield rebuild. E
   - An axe accessibility check on `/dev/design` reports zero contrast violations at WCAG AA in both themes.
   - Every interactive primitive renders at ≥48×48px in its hub variant — asserted by an automated target-size audit.
   - Gate green: `pnpm typecheck && pnpm lint && pnpm test:run`.
-- **Review verdict:** _pending_
+- **Review verdict:** _approved_ — Opus review 2026-08-06: gates + all 10 design e2e specs verified independently; axe zero A/AA violations both themes; contrast token deviations endorsed (brand stays #13ec92 as fill, new --brand-ink/--gold-ink for text). Three requested fixes applied: latin-ext font chain (fallback:[] + explicit chain), Badge hub 32→48px, brand-guideline docs synced. Carry-forwards: subset Material Symbols to ~50KB via build-time Icon-usage scan (hard budget, M06/M07); target-size audit doesn't open dialog/sheet/toast/select overlays; rename Icon data-icon→data-icon-name + wire Material Symbols into primitive icon-padding (M06); add maxDiffPixels cap to visual config; replace waitForTimeout(150) with document.fonts.ready; move /dev production gate into dev/layout.tsx.
 
 ## M03 — Auth + family/profiles
 

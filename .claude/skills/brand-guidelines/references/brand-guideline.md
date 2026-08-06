@@ -66,6 +66,7 @@ Background: #10221a (dark green)
 | **Primary**       | `#13ec92` | `--color-primary`       | CTAs, active states, highlights, brand accents |
 | **Primary Hover** | `#0fd683` | `--color-primary-hover` | Button hover states                            |
 | **Primary Dark**  | `#0d9e61` | `--color-primary-dark`  | Icons on light primary backgrounds             |
+| **Gold**          | `#d4a84b` | `--gold`                | Star/celebration accents, `gold` badge variant |
 
 ### Background Colors
 
@@ -81,8 +82,21 @@ Background: #10221a (dark green)
 | Name               | Light Mode | Dark Mode | Usage                          |
 | ------------------ | ---------- | --------- | ------------------------------ |
 | **Text Primary**   | `#111815`  | `#ffffff` | Headings, important content    |
-| **Text Secondary** | `#618979`  | `#8baea0` | Labels, descriptions, metadata |
-| **Text Muted**     | `#9ca3af`  | `#6b7280` | Disabled, placeholder text     |
+| **Text Secondary** | `#42695a`  | `#a8c4b8` | Labels, descriptions, metadata |
+| **Text Muted**     | `#5d6b65`  | `#9dbdb0` | Disabled, placeholder text     |
+
+_Text Secondary (light was `#618979`, dark was `#8baea0`) and Text Muted (light was `#9ca3af`, dark was `#6b7280`) adjusted for WCAG AA, 2026-08-06._
+
+### Text-on-Brand Colors
+
+Dedicated ink tokens for setting body/label text in the brand or gold hue (e.g. links, gold badge text) while keeping WCAG AA contrast — the raw `--color-primary` / `--gold` swatches are tuned for large surfaces, not small text.
+
+| Name          | Light Mode | Dark Mode | CSS Variable   | Usage                                    |
+| ------------- | ---------- | --------- | -------------- | ----------------------------------------- |
+| **Brand Ink** | `#076e42`  | `#13ec92` | `--brand-ink`  | Brand-colored text/links (e.g. `link` badge) |
+| **Gold Ink**  | `#7d5c16`  | `#e2bd72` | `--gold-ink`   | Gold-colored text on light/gold surfaces |
+
+_New tokens documented for WCAG AA, 2026-08-06._
 
 ### Border Colors
 
@@ -104,12 +118,14 @@ A vibrant palette for distinguishing events, family members, and categories. Eac
 | ---------- | ----------------------------- | ------------ | --------------------------- | ---------------------------------- |
 | **Blue**   | `blue-50` / `blue-900/20`     | `blue-400`   | `blue-600` / `blue-400`     | Sports, activities, outdoor events |
 | **Purple** | `purple-50` / `purple-900/20` | `purple-400` | `purple-600` / `purple-400` | Personal, gym, self-care           |
-| **Orange** | `orange-50` / `orange-900/20` | `orange-400` | `orange-600` / `orange-400` | Lessons, learning, education       |
+| **Orange** | `orange-50` / `orange-900/20` | `orange-400` | `orange-700` / `orange-400` | Lessons, learning, education       |
 | **Green**  | `green-50` / `green-900/20`   | `green-500`  | `green-700` / `green-400`   | Family events, meals, gatherings   |
-| **Red**    | `red-50` / `red-900/20`       | `red-400`    | `red-600` / `red-400`       | Date nights, special occasions     |
+| **Red**    | `red-50` / `red-900/20`       | `red-400`    | `red-700` / `red-400`       | Date nights, special occasions     |
 | **Yellow** | `yellow-50` / `yellow-900/20` | `yellow-400` | `yellow-700` / `yellow-400` | Celebrations, birthdays, parties   |
-| **Pink**   | `pink-50` / `pink-900/20`     | `pink-400`   | `pink-600` / `pink-400`     | Creative, arts, hobbies            |
-| **Teal**   | `teal-50` / `teal-900/20`     | `teal-400`   | `teal-600` / `teal-400`     | Health, wellness, appointments     |
+| **Pink**   | `pink-50` / `pink-900/20`     | `pink-400`   | `pink-700` / `pink-400`     | Creative, arts, hobbies            |
+| **Teal**   | `teal-50` / `teal-900/20`     | `teal-400`   | `teal-700` / `teal-400`     | Health, wellness, appointments     |
+
+_Orange/Red/Pink/Teal light-mode text uses Tailwind `-700` (not `-600`) to reach WCAG AA on their `-50` backgrounds — adjusted for WCAG AA, 2026-08-06._
 
 ### Family Member Colors
 
