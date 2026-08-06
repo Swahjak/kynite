@@ -1,7 +1,22 @@
+import { randomBytes } from 'node:crypto';
 import { defineConfig, devices } from '@playwright/test';
 
 const PORT = Number(process.env.E2E_PORT ?? 3100);
 const baseURL = process.env.E2E_BASE_URL ?? `http://127.0.0.1:${PORT}`;
+
+/**
+ * The e2e server talks to the throwaway database from `pnpm e2e:setup` (5435),
+ * never to the developer's dev database (5433) — auth specs write real rows.
+ * The auth secret is generated per run: nothing to commit, nothing to leak.
+ */
+const DATABASE_URL =
+  process.env.DATABASE_URL ?? 'postgresql://kynite:kynite@localhost:5435/kynite_test';
+const BETTER_AUTH_SECRET = process.env.BETTER_AUTH_SECRET ?? randomBytes(32).toString('base64');
+
+// Specs that decode the signed session cookie need the same secret the server
+// booted with; workers inherit this env from the config process.
+process.env.BETTER_AUTH_SECRET = BETTER_AUTH_SECRET;
+process.env.E2E_DATABASE_URL = DATABASE_URL;
 
 export default defineConfig({
   testDir: './e2e/tests',
@@ -26,6 +41,11 @@ export default defineConfig({
   ],
   webServer: {
     command: `pnpm dev --port ${PORT}`,
+    env: {
+      DATABASE_URL,
+      BETTER_AUTH_SECRET,
+      BETTER_AUTH_URL: baseURL,
+    },
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

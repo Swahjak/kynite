@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import { fontVariables } from '@/lib/fonts';
 import '../globals.css';
 
@@ -13,6 +14,13 @@ export const metadata: Metadata = {
 };
 
 export default function DevLayout({ children }: { children: React.ReactNode }) {
+  // Structural production gate for the entire /dev/* tree: every route under
+  // this layout goes through it, so a new page here can't forget to gate
+  // itself the way `dev/tmpsc/page.tsx` did.
+  if (process.env.NODE_ENV === 'production') {
+    notFound();
+  }
+
   return (
     <html lang="en" className={fontVariables} suppressHydrationWarning>
       <body className="min-h-dvh antialiased">{children}</body>

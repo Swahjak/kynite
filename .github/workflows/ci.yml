@@ -39,12 +39,18 @@ jobs:
 
       - run: pnpm exec playwright install --with-deps chromium
 
+      # The e2e run needs *a* valid secret, not a shared one: generate a
+      # throwaway per job instead of committing a plaintext value.
+      - name: Generate ephemeral auth secret
+        run: echo "BETTER_AUTH_SECRET=$(openssl rand -base64 32)" >> "$GITHUB_ENV"
+
       - run: pnpm e2e:setup
+        env:
+          DATABASE_URL: postgresql://kynite:kynite@localhost:5435/kynite_test
 
       - run: pnpm e2e:run
         env:
           DATABASE_URL: postgresql://kynite:kynite@localhost:5435/kynite_test
-          BETTER_AUTH_SECRET: ci-secret-ci-secret-ci-secret-cis
           BETTER_AUTH_URL: http://127.0.0.1:3100
 
       - if: always()

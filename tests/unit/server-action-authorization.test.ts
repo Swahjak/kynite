@@ -1,0 +1,279 @@
+import { readFileSync, readdirSync } from 'node:fs';
+import { dirname, join, relative, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import ts from 'typescript';
+import { describe, expect, it } from 'vitest';
+
+/**
+ * Repo-wide enforcement of docs/architecture.md §7: *every* Server Action goes
+ * through the `can()` chokepoint before it touches data.
+ *
+ * The check is static (TypeScript AST) and structural: for each exported
+ * function in a `'use server'` module it demands an `assertCan(...)` / `can(...)`
+ * call in a statement that precedes the first statement referencing the
+ * database. Actions that legitimately have no principal — sign-up, sign-in,
+ * sign-out — must carry a `@public-action` JSDoc tag *and* appear in the
+ * allowlist below, so a new exemption cannot be added quietly.
+ */
+
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
+
+/** The complete set of Server Actions that may skip authorization. */
+const PUBLIC_ACTIONS = [
+  'src/modules/family/actions.ts::signUpAction',
+  'src/modules/family/actions.ts::signInAction',
+  'src/modules/family/actions.ts::signOutAction',
+];
+
+const AUTHORIZATION_CALLS = new Set(['can', 'assertCan', 'decide']);
+const DATA_ACCESS = new Set(['getDb', 'db', 'tx', 'getAuth', 'auth']);
+
+type Finding = {
+  id: string;
+  exempt: boolean;
+  violation: string | null;
+};
+
+function collectSourceFiles(dir: string, out: string[] = []): string[] {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const path = join(dir, entry.name);
+    if (entry.isDirectory()) collectSourceFiles(path, out);
+    else if (/\.tsx?$/.test(entry.name)) out.push(path);
+  }
+  return out;
+}
+
+function isServerActionModule(text: string): boolean {
+  return /^\s*(['"])use server\1\s*;/.test(text);
+}
+
+/** Identifiers referenced anywhere inside a node. */
+function identifiersIn(node: ts.Node): Set<string> {
+  const names = new Set<string>();
+  const visit = (child: ts.Node) => {
+    if (ts.isIdentifier(child)) names.add(child.text);
+    ts.forEachChild(child, visit);
+  };
+  visit(node);
+  return names;
+}
+
+function calleeNamesIn(node: ts.Node): Set<string> {
+  const names = new Set<string>();
+  const visit = (child: ts.Node) => {
+    if (ts.isCallExpression(child) && ts.isIdentifier(child.expression)) {
+      names.add(child.expression.text);
+    }
+    ts.forEachChild(child, visit);
+  };
+  visit(node);
+  return names;
+}
+
+function hasPublicTag(node: ts.Node, text: string): boolean {
+  const comments = ts.getLeadingCommentRanges(text, node.getFullStart()) ?? [];
+  return comments.some((range) => text.slice(range.pos, range.end).includes('@public-action'));
+}
+
+function isExportedStatement(statement: ts.Statement): boolean {
+  return (
+    ts.canHaveModifiers(statement) &&
+    (ts
+      .getModifiers(statement)
+      ?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword) ??
+      false)
+  );
+}
+
+/**
+ * A named, exported, block-bodied function at the top level of a module.
+ * Covers `export function f() {}`, `export const f = () => {}`, and
+ * `export const f = async function () {}` — the three shapes Server Actions
+ * take in this repo. `commentNode` is what JSDoc/`@public-action` is read off
+ * of: for a `const`, the doc comment sits above the `VariableStatement`, not
+ * the initializer.
+ */
+type NamedFunction = {
+  functionName: string;
+  commentNode: ts.Node;
+  body: ts.NodeArray<ts.Statement>;
+};
+
+function namedFunctionsIn(statement: ts.Statement): NamedFunction[] {
+  if (!isExportedStatement(statement)) return [];
+
+  if (ts.isFunctionDeclaration(statement)) {
+    if (!statement.body || !statement.name) return [];
+    return [
+      {
+        functionName: statement.name.text,
+        commentNode: statement,
+        body: statement.body.statements,
+      },
+    ];
+  }
+
+  if (ts.isVariableStatement(statement)) {
+    return statement.declarationList.declarations.flatMap((declaration): NamedFunction[] => {
+      if (!ts.isIdentifier(declaration.name) || !declaration.initializer) return [];
+      const init = declaration.initializer;
+      const isFunctionLike = ts.isArrowFunction(init) || ts.isFunctionExpression(init);
+      if (!isFunctionLike || !ts.isBlock(init.body)) return [];
+
+      return [
+        { functionName: declaration.name.text, commentNode: statement, body: init.body.statements },
+      ];
+    });
+  }
+
+  return [];
+}
+
+/**
+ * Every exported, top-level, block-bodied function of a `'use server'`
+ * module, audited — `function` declarations *and* `const f = () => {}` /
+ * `const f = async function () {}` assignments alike (docs/architecture.md
+ * §7's `assertCan()` chokepoint applies regardless of which shape a Server
+ * Action is written in).
+ */
+export function auditServerActions(filePath: string, text: string): Finding[] {
+  const source = ts.createSourceFile(filePath, text, ts.ScriptTarget.ESNext, true);
+  const id = relative(root, filePath);
+
+  return source.statements.flatMap((statement): Finding[] =>
+    namedFunctionsIn(statement).map(({ functionName, commentNode, body }): Finding => {
+      const name = `${id}::${functionName}`;
+      const exempt = hasPublicTag(commentNode, text);
+
+      const authIndex = body.findIndex((line) =>
+        [...calleeNamesIn(line)].some((callee) => AUTHORIZATION_CALLS.has(callee))
+      );
+      const dataIndex = body.findIndex((line) =>
+        [...identifiersIn(line)].some((identifier) => DATA_ACCESS.has(identifier))
+      );
+
+      let violation: string | null = null;
+      if (!exempt) {
+        if (authIndex === -1) {
+          violation = `${name} never calls can()/assertCan()`;
+        } else if (dataIndex !== -1 && dataIndex < authIndex) {
+          violation = `${name} touches data before it authorizes`;
+        }
+      }
+
+      return { id: name, exempt, violation };
+    })
+  );
+}
+
+/**
+ * A function-body-level `'use server'` directive (the per-function flavor
+ * Next.js also supports) is invisible to `auditServerActions()`, which only
+ * walks the top level of files that open with a *module*-level `'use server'`
+ * directive. Nothing in this repo uses that shape today; this catches the day
+ * someone reaches for it before the auditor is taught to see it.
+ */
+function functionLevelUseServerDirectives(sourceFile: ts.SourceFile): string[] {
+  const hits: string[] = [];
+
+  const bodyOpensWithUseServer = (body: ts.ConciseBody | undefined): boolean => {
+    if (!body || !ts.isBlock(body)) return false;
+    const first = body.statements[0];
+    return (
+      !!first &&
+      ts.isExpressionStatement(first) &&
+      ts.isStringLiteral(first.expression) &&
+      first.expression.text === 'use server'
+    );
+  };
+
+  const visit = (node: ts.Node): void => {
+    if (ts.isFunctionDeclaration(node) && bodyOpensWithUseServer(node.body)) {
+      hits.push(node.name?.text ?? '<anonymous function declaration>');
+    }
+    if (
+      (ts.isFunctionExpression(node) || ts.isArrowFunction(node)) &&
+      bodyOpensWithUseServer(node.body)
+    ) {
+      hits.push(
+        node.parent && ts.isVariableDeclaration(node.parent) && ts.isIdentifier(node.parent.name)
+          ? node.parent.name.text
+          : '<anonymous inline function>'
+      );
+    }
+    ts.forEachChild(node, visit);
+  };
+
+  visit(sourceFile);
+  return hits;
+}
+
+function auditRepository(): Finding[] {
+  return collectSourceFiles(join(root, 'src'))
+    .map((filePath) => ({ filePath, text: readFileSync(filePath, 'utf8') }))
+    .filter(({ text }) => isServerActionModule(text))
+    .flatMap(({ filePath, text }) => auditServerActions(filePath, text));
+}
+
+describe('every Server Action authorizes first', () => {
+  const findings = auditRepository();
+
+  it('finds Server Actions to audit at all', () => {
+    expect(findings.length).toBeGreaterThanOrEqual(4);
+  });
+
+  it('reports no unauthorized action anywhere in src/', () => {
+    expect(findings.flatMap((finding) => finding.violation ?? [])).toEqual([]);
+  });
+
+  it('pins the exemption list — a new @public-action must be declared here', () => {
+    const exempt = findings.filter((finding) => finding.exempt).map((finding) => finding.id);
+    expect(exempt.sort()).toEqual([...PUBLIC_ACTIONS].sort());
+  });
+
+  it('catches an action that skips authorization (fixture) — function declarations, arrow consts, and function-expression consts alike', () => {
+    const filePath = join(root, 'tests/fixtures/unauthorized-action.fixture.ts');
+    const findings = auditServerActions(filePath, readFileSync(filePath, 'utf8'));
+
+    // Pinning the count is the point: a checker that silently skips a shape
+    // (e.g. only walking `function` declarations) would under-count here
+    // instead of failing loudly.
+    expect(findings.length).toBe(4);
+
+    expect(findings.map((finding) => finding.violation)).toEqual([
+      'tests/fixtures/unauthorized-action.fixture.ts::renameEveryoneAction never calls can()/assertCan()',
+      // The tagged one passes the *call* check but is caught by the allowlist:
+      null,
+      'tests/fixtures/unauthorized-action.fixture.ts::renameEveryoneArrowAction never calls can()/assertCan()',
+      'tests/fixtures/unauthorized-action.fixture.ts::renameEveryoneFunctionExpressionAction never calls can()/assertCan()',
+    ]);
+
+    const sneaky = findings.filter((finding) => finding.exempt).map((finding) => finding.id);
+    expect(PUBLIC_ACTIONS).not.toContain(sneaky[0]);
+  });
+
+  it("has no function-body-level 'use server' directive outside a module-level-directive file", () => {
+    // `auditServerActions()` only walks the top level of files whose *first*
+    // statement is a module-level 'use server' directive. A per-function
+    // inline directive elsewhere is structurally invisible to it. Nothing in
+    // this repo uses that shape today — this guard exists so the day someone
+    // adds one, the suite fails loudly instead of silently never auditing it.
+    const offenders = collectSourceFiles(join(root, 'src'))
+      .map((filePath) => ({ filePath, text: readFileSync(filePath, 'utf8') }))
+      .filter(({ text }) => !isServerActionModule(text))
+      .flatMap(({ filePath, text }) => {
+        const source = ts.createSourceFile(filePath, text, ts.ScriptTarget.ESNext, true);
+        return functionLevelUseServerDirectives(source).map(
+          (functionName) => `${relative(root, filePath)}::${functionName}`
+        );
+      });
+
+    expect(
+      offenders,
+      "Found a function-body-level 'use server' directive. auditServerActions() cannot see these — " +
+        "either hoist the directive to the top of the module (making it a module-level `'use server'` " +
+        'file the auditor already walks), or extend auditServerActions()/namedFunctionsIn() to detect ' +
+        'and audit this shape before adding one.'
+    ).toEqual([]);
+  });
+});

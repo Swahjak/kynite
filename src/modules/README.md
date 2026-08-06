@@ -24,6 +24,12 @@ modules/<slice>/
 3. Every mutation is a Server Action: validate (zod) → authorize → write in a
    transaction → `NOTIFY` → revalidate.
 4. Route files hold no logic; they compose module UI + queries.
+5. **Authorization has exactly one home:** `modules/family/authorize.ts` exports
+   `can(principal, action, resource)` (the §7 permission matrix). Every Server
+   Action calls it — via `assertCan()` — before it touches data. The rule is
+   enforced repo-wide by `tests/unit/server-action-authorization.test.ts`;
+   actions that legitimately have no principal (sign-up, sign-in, sign-out)
+   carry a `@public-action` tag _and_ appear in that test's allowlist.
 
 Planned slices: `family` `calendar` `google` `routines` `rewards` `timers`
 `realtime` `notifications` `devices` `sharing`.

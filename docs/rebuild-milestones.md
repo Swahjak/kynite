@@ -62,7 +62,7 @@ This is the single source of progress truth for the Kynite greenfield rebuild. E
 
 ## M03 — Auth + family/profiles
 
-- [ ] Status
+- [x] Status
 - **Scope:** Wire better-auth (email/password) with the Drizzle adapter, session cookie carrying `activeFamilyId` and `memberId`. Model the `family` and `member` entities including avatar, color, role (`owner`/`adult`/`child`/`caregiver`), `birthDate` and `rewardHorizon`. Build sign-up, sign-in and the first-run family creation flow, plus member CRUD in the parent app. Establish `modules/family/authorize.ts` as the single `can(principal, action, resource)` chokepoint.
 - **Acceptance criteria:**
   - Routes exist and function: `(auth)/sign-in`, `(auth)/sign-up`, `api/auth/[...all]`, `(app)/family`.
@@ -72,7 +72,7 @@ This is the single source of progress truth for the Kynite greenfield rebuild. E
   - Unit tests cover the full permission matrix from `docs/architecture.md` §7, including that no principal can remove stars.
   - An unauthenticated request to any `(app)` route redirects to sign-in.
   - Gate green: `pnpm typecheck && pnpm lint && pnpm test:run`.
-- **Review verdict:** _pending_
+- **Review verdict:** _approved_ — Opus review 2026-08-06: gates verified independently (134/134 with DB, 18/18 e2e); permission matrix verbatim vs architecture §7; session fixation, open redirect, cross-family forgery, SQL injection all clear. Blocker fixed: AST authorization auditor was blind to arrow/function-expression Server Actions — now audits VariableStatement forms + inline-directive guard, fixture asserts 4 findings. Also fixed: scoped-share fail-open on subjectless resources, avatarUrl constrained to known set, sign-up orphan-account compensating delete, /dev tree production-gated in layout + tmpsc scratch page deleted, revocation-lag comment, architecture ordering doc. Carry-forwards: action-level authorization integration tests (adult calling createMemberAction, forged cross-family memberId) at M04; consider `server-only` package for queries.ts.
 
 ## M04 — DB schema + migrations baseline
 

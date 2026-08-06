@@ -25,7 +25,7 @@
     "e2e:visual": "playwright test e2e/tests/visual",
     "e2e:visual:update": "playwright test e2e/tests/visual --update-snapshots",
     "e2e:design": "playwright test e2e/tests/design e2e/tests/visual",
-    "e2e:setup": "docker compose -f docker-compose.test.yml up -d --wait",
+    "e2e:setup": "docker compose -f docker-compose.test.yml up -d --wait && pnpm e2e:migrate",
     "e2e:teardown": "docker compose -f docker-compose.test.yml down -v",
     "e2e:full": "pnpm e2e:setup && pnpm e2e:run; pnpm e2e:teardown",
     "db:generate": "drizzle-kit generate",
@@ -33,7 +33,10 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "ci": "pnpm typecheck && pnpm lint && pnpm test:run && pnpm build",
-    "prepare": "husky"
+    "prepare": "husky",
+    "e2e:migrate": "DATABASE_URL=${DATABASE_URL:-postgresql://kynite:kynite@localhost:5435/kynite_test} drizzle-kit migrate",
+    "db:up": "docker compose up -d --wait",
+    "db:down": "docker compose down"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

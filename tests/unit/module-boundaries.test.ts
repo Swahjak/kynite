@@ -30,6 +30,20 @@ describe('module boundary lint rule', () => {
     }
   });
 
+  it(
+    'fires on relative deep `../modules/<slice>/<file>` imports',
+    { timeout: 60_000 },
+    async () => {
+      const messages = await boundaryMessages('relative-deep-import.fixture.ts');
+
+      expect(messages).toHaveLength(2);
+      for (const message of messages) {
+        expect(message.severity).toBe(2);
+        expect(message.message).toMatch(/Deep module imports are banned/);
+      }
+    }
+  );
+
   it('allows imports through the slice public index', { timeout: 60_000 }, async () => {
     const messages = await boundaryMessages('index-import.fixture.ts');
 

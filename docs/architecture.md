@@ -163,7 +163,7 @@ modules/routines/
 1. Cross-module imports must go through `index.ts`; deep imports are lint-banned
    (`eslint no-restricted-imports`). Rationale: keeps slices swappable.
 2. `domain/` is pure and framework-free — that's where Vitest earns its keep.
-3. Every mutation is a Server Action that: validates (zod) → authorizes →
+3. Every mutation is a Server Action that: authorizes → validates (zod) →
    writes in a transaction → `NOTIFY`s → revalidates. No mutation logic in
    route handlers except webhooks.
 4. Route files hold no logic; they compose module UI + queries.

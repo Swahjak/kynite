@@ -1,5 +1,102 @@
 {
   "common": {
     "appName": "Kynite"
+  },
+  "nav": {
+    "today": "Vandaag",
+    "family": "Gezin"
+  },
+  "auth": {
+    "signOut": "Uitloggen",
+    "fields": {
+      "name": "Jouw naam",
+      "familyName": "Naam van je gezin",
+      "familyNameHint": "Bijvoorbeeld: Familie De Vries",
+      "email": "E-mailadres",
+      "password": "Wachtwoord",
+      "passwordHint": "Minimaal 8 tekens"
+    },
+    "signIn": {
+      "title": "Inloggen",
+      "description": "Welkom terug bij Kynite.",
+      "submit": "Inloggen",
+      "noAccount": "Nog geen account?"
+    },
+    "signUp": {
+      "title": "Account aanmaken",
+      "description": "Maak in één stap je account en je gezin aan.",
+      "submit": "Gezin aanmaken",
+      "haveAccount": "Heb je al een account?"
+    },
+    "errors": {
+      "invalidInput": "Controleer de ingevulde gegevens.",
+      "invalidCredentials": "Dit e-mailadres of wachtwoord klopt niet.",
+      "emailTaken": "Er bestaat al een account met dit e-mailadres.",
+      "signUpFailed": "Aanmaken is niet gelukt. Probeer het opnieuw."
+    }
+  },
+  "family": {
+    "title": "Gezin",
+    "subtitle": "Iedereen in huis, met een eigen kleur en avatar.",
+    "noLogin": "Geen login",
+    "actions": {
+      "add": "Gezinslid toevoegen",
+      "edit": "Bewerken",
+      "removeNamed": "{name} verwijderen",
+      "save": "Opslaan",
+      "cancel": "Annuleren"
+    },
+    "dialog": {
+      "addTitle": "Gezinslid toevoegen",
+      "editTitle": "Gezinslid bewerken",
+      "description": "Kinderen hebben geen login nodig — een naam, kleur en avatar is genoeg."
+    },
+    "form": {
+      "displayName": "Naam",
+      "role": "Rol",
+      "roleHint": "Volwassenen kunnen alles beheren; kinderen vinken alleen taken af.",
+      "color": "Kleur",
+      "avatar": "Avatar",
+      "birthDate": "Geboortedatum",
+      "rewardHorizon": "Beloningen",
+      "rewardHorizonHint": "Jonge kinderen hebben een directe beloning nodig; vanaf ongeveer 8 jaar kunnen ze sparen.",
+      "colors": {
+        "blue": "Blauw",
+        "purple": "Paars",
+        "orange": "Oranje",
+        "green": "Groen",
+        "red": "Rood",
+        "yellow": "Geel",
+        "pink": "Roze",
+        "teal": "Turquoise"
+      },
+      "avatars": {
+        "fox": "Vos",
+        "bear": "Beer",
+        "cat": "Kat",
+        "owl": "Uil",
+        "rocket": "Raket",
+        "star": "Ster",
+        "flower": "Bloem",
+        "dino": "Dino"
+      }
+    },
+    "roles": {
+      "owner": "Beheerder",
+      "adult": "Volwassene",
+      "child": "Kind",
+      "caregiver": "Oppas"
+    },
+    "rewardHorizons": {
+      "instant": "Directe beloning",
+      "savings": "Sparen voor beloning"
+    },
+    "errors": {
+      "forbidden": "Je hebt geen rechten om dit te doen.",
+      "invalidInput": "Controleer de ingevulde gegevens.",
+      "memberNotFound": "Dit gezinslid bestaat niet meer.",
+      "singleOwner": "Een gezin heeft precies één beheerder.",
+      "cannotRemoveOwner": "De beheerder kan niet verwijderd worden."
+    }
   }
 }
