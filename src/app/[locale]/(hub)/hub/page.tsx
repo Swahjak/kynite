@@ -1,5 +1,6 @@
 import { getFormatter, getTranslations } from 'next-intl/server';
 import { PersonColumns, loadCalendarPage } from '@/modules/calendar';
+import { AmbientTimers, loadTimerBoard } from '@/modules/timers';
 
 /** Session-dependent: never prerendered, so `next build` needs no database. */
 export const dynamic = 'force-dynamic';
@@ -20,14 +21,18 @@ export const dynamic = 'force-dynamic';
 export default async function HubPage({
   searchParams,
 }: {
-  searchParams: Promise<{ date?: string }>;
+  searchParams: Promise<{ date?: string; now?: string }>;
 }) {
-  const { date } = await searchParams;
+  const { date, now } = await searchParams;
 
   // The board is an ambient "today" surface; `?date=` renders another day,
   // which is what a tomorrow-preview needs and what makes the board
   // snapshot-testable without freezing a clock.
   const data = await loadCalendarPage({ view: 'day', date, surface: 'hub' });
+  // M09: a running timer is on the board without anyone navigating to it.
+  // Renders nothing when nothing is running, so the board is unchanged the
+  // rest of the day.
+  const timers = await loadTimerBoard({ now });
   const t = await getTranslations('calendar');
   const format = await getFormatter();
 
@@ -59,6 +64,8 @@ export default async function HubPage({
           {format.dateTime(data.now, { hour: '2-digit', minute: '2-digit' })}
         </span>
       </header>
+
+      {timers ? <AmbientTimers board={timers} /> : null}
 
       <PersonColumns
         members={data.members}

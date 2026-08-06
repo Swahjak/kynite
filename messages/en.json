@@ -8,7 +8,8 @@
     "settings": "Settings",
     "calendar": "Calendar",
     "routines": "Routines",
-    "rewards": "Rewards"
+    "rewards": "Rewards",
+    "timers": "Timers"
   },
   "auth": {
     "signOut": "Sign out",
@@ -484,6 +485,52 @@
       "redemptionNotFound": "That ask no longer exists.",
       "alreadyDecided": "This one already has an answer.",
       "notEnoughStars": "There are not enough stars for that yet."
+    }
+  },
+  "timers": {
+    "title": "Timers",
+    "subtitle": "Starting and stopping timers for the board.",
+    "running": "Running now",
+    "empty": "No timer is running.",
+    "minutes": "{minutes} min",
+    "warning": "{label} in {minutes, plural, one {# minute} other {# minutes}}",
+    "overrun": "Time is up.",
+    "remainingLabel": "{time} left",
+    "actions": {
+      "stop": "Stop",
+      "stopNamed": "Stop timer {label}"
+    },
+    "adHoc": {
+      "title": "One-off timer",
+      "label": "Name",
+      "labelPlaceholder": "For example: shoes on",
+      "member": "For whom",
+      "everyone": "The whole family",
+      "duration": "Length"
+    },
+    "fromSteps": {
+      "title": "From a routine step",
+      "empty": "No routine step has a timer yet."
+    },
+    "chime": {
+      "title": "Sound",
+      "off": "Off",
+      "soft": "Soft",
+      "full": "Full",
+      "volume": "Volume"
+    },
+    "hub": {
+      "title": "Timers",
+      "unavailableTitle": "Timers are unavailable",
+      "unavailableBody": "This screen is not linked to a family yet."
+    },
+    "errors": {
+      "forbidden": "This action is not allowed.",
+      "invalidInput": "These details are not valid.",
+      "memberNotFound": "That family member no longer exists.",
+      "stepNotFound": "That routine step no longer exists.",
+      "timerNotFound": "That timer is no longer running.",
+      "alreadyRunning": "That timer is already running."
     }
   }
 }

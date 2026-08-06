@@ -228,9 +228,10 @@ describe('every Server Action authorizes first', () => {
     // create/update/delete routine + setRoutineReward + completeStep) +
     // src/modules/rewards/actions.ts (8: create/update/delete reward +
     // awardStars + requestRedemption + decideRedemption + fulfillRedemption +
-    // seedRewardPresets) = 26. Adding or removing a Server Action must bump
-    // this number deliberately — that is the point.
-    expect(findings.length).toBe(26);
+    // seedRewardPresets) + src/modules/timers/actions.ts (2: startTimer +
+    // stopTimer) = 28. Adding or removing a Server Action must bump this
+    // number deliberately — that is the point.
+    expect(findings.length).toBe(28);
   });
 
   it('reports no unauthorized action anywhere in src/', () => {

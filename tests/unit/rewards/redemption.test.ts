@@ -28,7 +28,8 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 function viewSpendingStatuses(): string[] {
   const source = readFileSync(join(root, 'src/modules/routines/schema.ts'), 'utf8');
   const match = source.match(/where status in \(([^)]+)\)/);
-  if (!match) throw new Error("member_star_balance view's `where status in (...)` clause not found");
+  if (!match)
+    throw new Error("member_star_balance view's `where status in (...)` clause not found");
 
   return match[1].split(',').map((entry) => entry.trim().replace(/^'(.*)'$/, '$1'));
 }

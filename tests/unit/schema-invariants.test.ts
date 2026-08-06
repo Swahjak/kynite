@@ -94,6 +94,7 @@ describe('schema-wide invariants', () => {
         'session',
         'share_link',
         'star_ledger',
+        'timer',
         'user',
         'verification',
       ].sort()

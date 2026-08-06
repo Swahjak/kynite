@@ -33,6 +33,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const CHILD_FACING_ROOTS = [
   'src/modules/routines/ui',
   'src/modules/rewards/ui',
+  'src/modules/timers/ui',
   'src/components/celebration',
   'src/components/hub',
   'src/app/[locale]/(hub)',
@@ -53,6 +54,7 @@ const PARENT_ONLY = [
   'src/modules/rewards/ui/reward-dialog.tsx',
   'src/modules/rewards/ui/reward-list.tsx',
   'src/modules/rewards/ui/seed-presets-button.tsx',
+  'src/modules/timers/ui/timer-controls.tsx',
 ];
 
 type Rule = { id: string; pattern: RegExp };
@@ -286,6 +288,10 @@ describe('no negative marking on any child-facing surface', () => {
     expect(files.map((file) => file.path)).toContain('src/modules/rewards/ui/reward-card.tsx');
     expect(files.map((file) => file.path)).toContain('src/modules/rewards/ui/reward-store.tsx');
     expect(files.map((file) => file.path)).toContain('src/modules/rewards/ui/star-chart.tsx');
+    // M09's child-facing surfaces. A timer that has run out is where an alarm
+    // treatment would be most tempting, so both must be in scope by name.
+    expect(files.map((file) => file.path)).toContain('src/modules/timers/ui/timer-tile.tsx');
+    expect(files.map((file) => file.path)).toContain('src/modules/timers/ui/timer-board.tsx');
   });
 
   it('finds no red X, negative delta, streak loss or sibling comparison', () => {
@@ -371,6 +377,9 @@ describe('the words a child reads', () => {
       // in this product where failure framing would be easiest to write, and
       // "not right now" has to stay "not right now" in both languages.
       walk(messages.rewards, 'rewards');
+      // M09: the other one is a timer that ran out. It is never "missed",
+      // "too late" or "failed" — the board simply says the time is up.
+      walk(messages.timers, 'timers');
       expect(offenders).toEqual([]);
     });
 

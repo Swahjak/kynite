@@ -500,6 +500,21 @@
     'opsz' 24;
 }
 
+/* The only motion an expired timer makes (M09). A 2.4s cycle between full and
+ * 78% opacity: 0.42Hz, far below the 3Hz photosensitivity threshold, and a
+ * brightness change small enough to find from across a room without pulling
+ * the eye away from anything else. Never a flash, never a colour change.
+ * `modules/timers/domain/chime.ts` owns the number; `isNonStrobing()` holds it. */
+@keyframes timer-breath {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.78;
+  }
+}
+
 /* ---------------------------------------------------------------------------
  * Base
  * ------------------------------------------------------------------------- */

@@ -157,7 +157,7 @@ This is the single source of progress truth for the Kynite greenfield rebuild. E
 
 ## M09 — Timers
 
-- [ ] Status
+- [x] Status
 - **Scope:** Build `modules/timers`: server-authoritative start time with local ticking, visual countdown rendering on the hub sized for 6-foot legibility, and routine transition warnings ("Shoes on in 5 minutes") that fire as neutral board copy. Timers start from a routine step's `timerSeconds` or ad hoc from the Controller, and survive a hub reload.
 - **Acceptance criteria:**
   - Route `(hub)/timers` exists; the ambient board renders an active timer without navigation.
@@ -168,7 +168,7 @@ This is the single source of progress truth for the Kynite greenfield rebuild. E
   - Timer chime respects the configurable volume/intensity setting and never strobes.
   - Unit tests cover remaining-time derivation, overrun behaviour and clock skew.
   - Gate green: `pnpm typecheck && pnpm lint && pnpm test:run`.
-- **Review verdict:** _pending_
+- **Review verdict:** _approved_ — Opus review 2026-08-06: all eight criteria met; server-authoritative timers (start+duration rows, state derived from clock, client offset from server echo) with all four psychology-law guards mutation-verified (FR30 voice scan, legibility pin, non-strobing vs real keyframes, negative-marking on timer UI); gates independently reproduced (623/623 with DB ×2, 7/7 timer e2e incl. hub visual); M09 flake not reproduced in 5 DB runs. Carry-forwards: clientId replay-after-stop returns error not idempotent success (fix before M11 outbox); latent step-timer scope bypass — authorize on input.memberId then overwrite with step.ownerMemberId (close before M12 device/share principals); publish-rollback untested (M10 owns); listRunningTimers unbounded WHERE (add startedAt window); isNonStrobing threshold not pinned to 333ms literal; hub stop tagged source:'mobile' (repo-wide convention); ChimeSettings on ambient board (M12); tautological line countdown.test.ts:50. Note: reviewer accidentally reverted messages/nl+en.json and globals.css during mutation testing, recovered fully — diffs re-verified by orchestrator (key parity 14/14, keyframes intact).
 
 ## M10 — Realtime SSE
 

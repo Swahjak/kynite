@@ -8,7 +8,8 @@
     "settings": "Instellingen",
     "calendar": "Agenda",
     "routines": "Routines",
-    "rewards": "Beloningen"
+    "rewards": "Beloningen",
+    "timers": "Timers"
   },
   "auth": {
     "signOut": "Uitloggen",
@@ -484,6 +485,52 @@
       "redemptionNotFound": "Die vraag bestaat niet meer.",
       "alreadyDecided": "Hier is al op geantwoord.",
       "notEnoughStars": "Daar zijn nu nog niet genoeg sterren voor."
+    }
+  },
+  "timers": {
+    "title": "Timers",
+    "subtitle": "Timers voor het bord starten en stoppen.",
+    "running": "Loopt nu",
+    "empty": "Er loopt nu geen timer.",
+    "minutes": "{minutes} min",
+    "warning": "{label} over {minutes, plural, one {# minuut} other {# minuten}}",
+    "overrun": "De tijd is om.",
+    "remainingLabel": "Nog {time}",
+    "actions": {
+      "stop": "Stoppen",
+      "stopNamed": "Timer {label} stoppen"
+    },
+    "adHoc": {
+      "title": "Losse timer",
+      "label": "Naam",
+      "labelPlaceholder": "Bijvoorbeeld: schoenen aan",
+      "member": "Voor wie",
+      "everyone": "Het hele gezin",
+      "duration": "Tijdsduur"
+    },
+    "fromSteps": {
+      "title": "Uit een routinestap",
+      "empty": "Nog geen routinestappen met een timer."
+    },
+    "chime": {
+      "title": "Geluid",
+      "off": "Uit",
+      "soft": "Zacht",
+      "full": "Vol",
+      "volume": "Volume"
+    },
+    "hub": {
+      "title": "Timers",
+      "unavailableTitle": "Timers zijn nu niet beschikbaar",
+      "unavailableBody": "Dit scherm is nog niet aan een gezin gekoppeld."
+    },
+    "errors": {
+      "forbidden": "Deze actie is niet toegestaan.",
+      "invalidInput": "Deze gegevens kloppen niet.",
+      "memberNotFound": "Dit gezinslid bestaat niet meer.",
+      "stepNotFound": "Deze routinestap bestaat niet meer.",
+      "timerNotFound": "Deze timer loopt niet meer.",
+      "alreadyRunning": "Deze timer loopt al."
     }
   }
 }

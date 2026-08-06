@@ -108,6 +108,17 @@ describe.skipIf(!databaseUrl)('family scoping (integration)', () => {
       reason: 'routine',
     });
 
+    await db.insert(schema.timer).values({
+      familyId,
+      memberId: household.childId,
+      routineId: routine.id,
+      routineStepId: step.id,
+      label: 'Aankleden',
+      durationSeconds: 300,
+      warningLeadSeconds: 300,
+      clientId: `outbox-${randomUUID()}`,
+    });
+
     await db.insert(schema.shareLink).values({
       familyId,
       tokenHash: `hash-${randomUUID()}`,

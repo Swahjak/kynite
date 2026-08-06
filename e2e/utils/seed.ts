@@ -491,3 +491,83 @@ export async function readStarBalance(client: Client, memberId: string) {
     available: Number(row?.available_stars ?? 0),
   };
 }
+
+export type SeedTimer = {
+  id?: string;
+  label: string;
+  durationSeconds: number;
+  /**
+   * When the countdown started, as a Postgres expression relative to `now()`
+   * (e.g. `'30 seconds'` = started 30s ago). Relative on purpose: a timer
+   * seeded at a fixed instant would be long over by the time a spec loads the
+   * page, and the whole point is to catch the hub mid-countdown.
+   */
+  startedSecondsAgo?: number;
+  /**
+   * An absolute start instant, for specs that pin the board's clock with
+   * `?now=`. Takes precedence over `startedSecondsAgo`: a start derived from
+   * the *real* clock and rendered at a *pinned* one lands a fraction of a
+   * second either side of the boundary and flips the last digit between runs.
+   */
+  startedAt?: string;
+  memberId?: string | null;
+  warningLeadSeconds?: number | null;
+  stoppedSecondsAgo?: number | null;
+};
+
+export type SeededTimer = { id: string; label: string };
+
+/**
+ * Timers, seeded directly with a server-relative start.
+ *
+ * Starting one through the Controller UI would work, but the specs that matter
+ * need a countdown that is *already* partway through — which no UI can author
+ * without waiting in real time.
+ */
+export async function seedTimers(
+  client: Client,
+  familyId: string,
+  timers: SeedTimer[]
+): Promise<SeededTimer[]> {
+  const seeded: SeededTimer[] = [];
+
+  for (const timer of timers) {
+    const { rows } = await client.query<{ id: string }>(
+      `insert into timer (
+         id, family_id, member_id, label, duration_seconds,
+         started_at, stopped_at, warning_lead_seconds
+       )
+       values (
+         coalesce($7::uuid, gen_random_uuid()), $1, $2, $3, $4,
+         coalesce($9::timestamptz, now() - make_interval(secs => $5::int)),
+         case when $6::int is null then null else now() - make_interval(secs => $6::int) end,
+         $8
+       )
+       returning id`,
+      [
+        familyId,
+        timer.memberId ?? null,
+        timer.label,
+        timer.durationSeconds,
+        timer.startedSecondsAgo ?? 0,
+        timer.stoppedSecondsAgo ?? null,
+        timer.id ?? null,
+        timer.warningLeadSeconds === undefined ? 300 : timer.warningLeadSeconds,
+        timer.startedAt ?? null,
+      ]
+    );
+
+    seeded.push({ id: rows[0].id, label: timer.label });
+  }
+
+  return seeded;
+}
+
+export async function readTimers(client: Client, familyId: string) {
+  const { rows } = await client.query(
+    `select id, label, duration_seconds, started_at, stopped_at, member_id, routine_step_id
+       from timer where family_id = $1 order by started_at`,
+    [familyId]
+  );
+  return rows;
+}
