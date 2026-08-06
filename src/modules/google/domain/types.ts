@@ -38,6 +38,8 @@ export type GoogleCalendarResource = {
   summary?: string;
   summaryOverride?: string;
   backgroundColor?: string;
+  /** IANA zone of the calendar itself — the per-event zone fallback (§5). */
+  timeZone?: string;
   accessRole?: 'freeBusyReader' | 'reader' | 'writer' | 'owner';
   primary?: boolean;
   deleted?: boolean;
@@ -143,6 +145,11 @@ export type CalendarSyncState = {
   familyId: string;
   googleCalendarId: string;
   syncToken: string | null;
+  /**
+   * The calendar's own zone, passed to `fromGoogleEvent()` for events that
+   * carry none. Null falls back to `DEFAULT_TIMEZONE` inside the mapper.
+   */
+  timeZone?: string | null;
 };
 
 /**

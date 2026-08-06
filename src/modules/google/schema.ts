@@ -71,6 +71,14 @@ export const calendar = pgTable(
     googleCalendarId: text('google_calendar_id').notNull(),
     summary: text('summary').notNull(),
     color: text('color'),
+    /**
+     * The calendar's own IANA zone, as Google reports it. It is the fallback
+     * `fromGoogleEvent()` uses for an event that carries no zone of its own —
+     * all-day events usually do not, and defaulting those to Europe/Amsterdam
+     * silently mis-places a family whose calendar lives anywhere else (M05
+     * carry-forward). Null until a discovery pass has seen the calendar.
+     */
+    timeZone: text('time_zone'),
     visibility: calendarVisibility('visibility').notNull().default('family'),
     writable: boolean('writable').notNull().default(false),
     syncEnabled: boolean('sync_enabled').notNull().default(true),

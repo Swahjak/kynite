@@ -195,7 +195,10 @@ async function applyItems({
       continue;
     }
 
-    const mapped: MappedEvent = fromGoogleEvent(item);
+    // The calendar's own zone is the fallback for events that carry none
+    // (all-day events usually do not) — `undefined` lets the mapper apply
+    // DEFAULT_TIMEZONE rather than storing a null zone in a NOT NULL column.
+    const mapped: MappedEvent = fromGoogleEvent(item, calendar.timeZone ?? undefined);
     const known = existing.get(item.id);
 
     if (isEcho(mapped.etag, known?.etag, echo)) {

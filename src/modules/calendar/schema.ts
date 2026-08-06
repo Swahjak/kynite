@@ -31,6 +31,28 @@ export const eventType = pgEnum('event_type', [
 ]);
 
 /**
+ * The eight design-system category colors (src/app/globals.css), as the
+ * *visual* dimension of an event. Deliberately its own enum rather than a
+ * reuse of `member_color`: a member's color is their identity across every
+ * surface, an event's category is a property of the event, and the day one of
+ * the two palettes gains a value the other must not follow.
+ *
+ * Nullable on purpose — an event with no category inherits its calendar's
+ * color (`modules/calendar/domain/category.ts`), so a synced Google event does
+ * not need a per-row decision before it can render.
+ */
+export const eventCategory = pgEnum('event_category', [
+  'blue',
+  'purple',
+  'orange',
+  'green',
+  'red',
+  'yellow',
+  'pink',
+  'teal',
+]);
+
+/**
  * An occurrence *series*, not an instance: RRULE + RDATE/EXDATE are stored
  * verbatim as RFC-5545 strings and expanded on read against a cached view
  * window. Rationale (§3): it round-trips Google losslessly and it is the only
@@ -60,6 +82,8 @@ export const event = pgTable(
     ownerMemberId: uuid('owner_member_id').references(() => member.id, { onDelete: 'set null' }),
     attendeeMemberIds: uuid('attendee_member_ids').array().notNull().default([]),
     eventType: eventType('event_type').notNull().default('appointment'),
+    /** Per-event override of the calendar's color; null = inherit (M06). */
+    category: eventCategory('category'),
     rrule: text('rrule'),
     rdates: text('rdates').array().notNull().default([]),
     exdates: text('exdates').array().notNull().default([]),
@@ -74,6 +98,13 @@ export const event = pgTable(
     deletedAt: timestamp('deleted_at', { withTimezone: true }),
     /** Bumped on every write; carried in the realtime payload for reconciliation. */
     version: integer('version').notNull().default(0),
+    /**
+     * Set when a push to Google failed and the retry job owns the write
+     * (docs/architecture.md §5 "Write path"); cleared on the next success.
+     * A nullable timestamp rather than a boolean: "since when" is the only
+     * extra fact the pip could ever want, and it comes free.
+     */
+    pendingSyncAt: timestamp('pending_sync_at', { withTimezone: true }),
     ...timestamps,
   },
   (table) => [
@@ -88,5 +119,7 @@ export const event = pgTable(
 
 export type Event = typeof event.$inferSelect;
 export type EventType = (typeof eventType.enumValues)[number];
+export type EventCategory = (typeof eventCategory.enumValues)[number];
 
 export const EVENT_TYPES = eventType.enumValues;
+export const EVENT_CATEGORIES = eventCategory.enumValues;

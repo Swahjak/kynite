@@ -26,6 +26,18 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: [['list'], ['html', { outputFolder: './e2e/playwright-report', open: 'never' }]],
+  expect: {
+    toHaveScreenshot: {
+      // Two bounds, not one (M02 carry-forward). The ratio alone scales with
+      // the screenshot: 1% of a full-page design system page is tens of
+      // thousands of pixels, enough to hide a genuinely broken component. The
+      // absolute cap is what keeps a large page honest; the ratio is what
+      // keeps a small one from failing on a single antialiased edge.
+      maxDiffPixels: 2500,
+      maxDiffPixelRatio: 0.01,
+      animations: 'disabled',
+    },
+  },
   use: {
     baseURL,
     // Deterministic Accept-Language: next-intl negotiates the locale from it,

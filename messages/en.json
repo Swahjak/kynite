@@ -5,7 +5,8 @@
   "nav": {
     "today": "Today",
     "family": "Family",
-    "settings": "Settings"
+    "settings": "Settings",
+    "calendar": "Calendar"
   },
   "auth": {
     "signOut": "Sign out",
@@ -135,6 +136,105 @@
       "consentDenied": "The Google consent screen was cancelled.",
       "noRefreshToken": "Google did not return a refresh token. Please try again.",
       "linkFailed": "Could not link the Google account. Please try again."
+    }
+  },
+  "calendar": {
+    "title": "Calendar",
+    "todayTitle": "Today",
+    "busy": "Busy",
+    "empty": "Nothing scheduled in this period.",
+    "freeDay": "Free day",
+    "everyone": "Everyone",
+    "recurring": "Repeats",
+    "pendingSync": "Not synced to Google yet",
+    "eventCount": "{count, plural, =0 {No events} one {# event} other {# events}}",
+    "views": {
+      "day": "Day",
+      "week": "Week",
+      "month": "Month",
+      "agenda": "Agenda"
+    },
+    "actions": {
+      "add": "Event",
+      "edit": "Edit",
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "previous": "Previous period",
+      "next": "Next period",
+      "today": "Today"
+    },
+    "dialog": {
+      "addTitle": "Add event",
+      "editTitle": "Edit event",
+      "description": "Events in a linked Google calendar are pushed there straight away."
+    },
+    "form": {
+      "title": "Title",
+      "allDay": "All day",
+      "startsAt": "Starts",
+      "endsAt": "Ends",
+      "location": "Location",
+      "owner": "Whose event",
+      "ownerHint": "Decides whose column it appears in.",
+      "everyone": "Everyone",
+      "eventType": "Type",
+      "category": "Color",
+      "categoryInherit": "From the calendar",
+      "attendees": "Who is coming",
+      "recurrence": "Repeat",
+      "calendar": "Calendar",
+      "calendarHint": "Kynite only, or pushed to a linked Google calendar.",
+      "nativeCalendar": "Kynite only",
+      "scope": "What do you want to change"
+    },
+    "scope": {
+      "occurrence": "Only this event",
+      "series": "The whole series"
+    },
+    "types": {
+      "appointment": "Appointment",
+      "custody": "Custody",
+      "reward": "Reward",
+      "routine": "Routine",
+      "birthday": "Birthday",
+      "other": "Other"
+    },
+    "categories": {
+      "blue": "Blue",
+      "purple": "Purple",
+      "orange": "Orange",
+      "green": "Green",
+      "red": "Red",
+      "yellow": "Yellow",
+      "pink": "Pink",
+      "teal": "Teal"
+    },
+    "recurrence": {
+      "none": "Does not repeat",
+      "daily": "Every day",
+      "weekdays": "Every weekday",
+      "weekly": "Every week",
+      "biweekly": "Every other week",
+      "monthly": "Every month",
+      "yearly": "Every year",
+      "custody-alternating-weeks": "Custody: alternating weeks (Monday)",
+      "custody-first-third-weekend": "Custody: 1st and 3rd weekend",
+      "custom": "Custom repeat (from Google)"
+    },
+    "hub": {
+      "title": "Today",
+      "unpairedTitle": "This screen is not paired yet",
+      "unpairedBody": "Pair this screen with your family to show the family board."
+    },
+    "errors": {
+      "forbidden": "You are not allowed to do that.",
+      "invalidInput": "Please check the details you entered.",
+      "endBeforeStart": "The end time is before the start time.",
+      "eventNotFound": "That event no longer exists.",
+      "calendarNotFound": "That calendar no longer exists.",
+      "calendarReadOnly": "Kynite cannot write to that calendar.",
+      "memberNotFound": "That family member no longer exists."
     }
   }
 }

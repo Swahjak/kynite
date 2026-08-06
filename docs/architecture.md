@@ -544,6 +544,18 @@ immediately:
 Echo suppression: we compare the incoming `etag` to the one we just wrote and
 skip re-emitting a realtime event for our own writes.
 
+> **Carry-forward (M06 review, open item — gate before M10):** the pull path
+> (`store.ts`'s `upsertEvent`, called from both the sync engine's incremental
+> apply and the push engine's `applyRemote` LWW branch) overwrites the local
+> row unconditionally on every incoming Google change — it never consults
+> `event.pendingSyncAt`. So a row with a local edit still queued for push (or
+> mid-retry) can be clobbered by an unrelated incoming sync pass before its own
+> push ever lands, silently discarding the pending local write with no
+> conflict resolution. M10 (realtime SSE) is the natural point to close this,
+> since it already has to reason about ordering incoming vs. outgoing changes
+> per event; until then, treat `pendingSyncAt` as advisory (drives the UI pip)
+> rather than as a write-ordering guarantee.
+
 ---
 
 ## 6. PWA & offline

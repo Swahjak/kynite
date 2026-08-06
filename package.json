@@ -36,7 +36,10 @@
     "prepare": "husky",
     "e2e:migrate": "DATABASE_URL=${DATABASE_URL:-postgresql://kynite:kynite@localhost:5435/kynite_test} drizzle-kit migrate",
     "db:up": "docker compose up -d --wait",
-    "db:down": "docker compose down"
+    "db:down": "docker compose down",
+    "icons:subset": "node scripts/subset-icons.mjs",
+    "icons:check": "node scripts/check-icons.mjs",
+    "prebuild": "node scripts/check-icons.mjs"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
@@ -100,6 +103,7 @@
     "lint-staged": "17.3.0",
     "prettier": "3.9.6",
     "shadcn": "4.16.2",
+    "subset-font": "^2.5.0",
     "tailwindcss": "4.3.3",
     "typescript": "5.9.3",
     "typescript-eslint": "8.66.0",

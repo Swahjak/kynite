@@ -120,10 +120,13 @@ export { renewExpiringChannels, stopChannel, watchCalendar } from './channels';
 export {
   apiForAccount,
   discoverCalendars,
+  listPendingSyncEventIds,
   listSyncableCalendars,
   pushEventById,
   syncCalendarById,
+  type PushEventOutcome,
 } from './sync';
+export { pushEventWithRetry } from './push';
 export {
   GoogleReauthRequiredError,
   getAccessToken,
@@ -138,6 +141,7 @@ export {
   // that work is a call site, not a new export.
   enqueueEventPush,
   registerGoogleJobs,
+  runPoll,
 } from './jobs';
 
 export { setCalendarSyncAction, syncNowAction, unlinkGoogleAccountAction } from './actions';

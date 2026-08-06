@@ -5,7 +5,8 @@
   "nav": {
     "today": "Vandaag",
     "family": "Gezin",
-    "settings": "Instellingen"
+    "settings": "Instellingen",
+    "calendar": "Agenda"
   },
   "auth": {
     "signOut": "Uitloggen",
@@ -135,6 +136,105 @@
       "consentDenied": "Het Google-toestemmingsscherm is geannuleerd.",
       "noRefreshToken": "Google gaf geen refresh-token terug. Probeer het opnieuw.",
       "linkFailed": "Kon het Google-account niet koppelen. Probeer het opnieuw."
+    }
+  },
+  "calendar": {
+    "title": "Agenda",
+    "todayTitle": "Vandaag",
+    "busy": "Bezet",
+    "empty": "Geen afspraken in deze periode.",
+    "freeDay": "Vrije dag",
+    "everyone": "Iedereen",
+    "recurring": "Herhaalt zich",
+    "pendingSync": "Nog niet gesynchroniseerd met Google",
+    "eventCount": "{count, plural, =0 {Geen afspraken} one {# afspraak} other {# afspraken}}",
+    "views": {
+      "day": "Dag",
+      "week": "Week",
+      "month": "Maand",
+      "agenda": "Agenda"
+    },
+    "actions": {
+      "add": "Afspraak",
+      "edit": "Bewerken",
+      "save": "Opslaan",
+      "cancel": "Annuleren",
+      "delete": "Verwijderen",
+      "previous": "Vorige periode",
+      "next": "Volgende periode",
+      "today": "Vandaag"
+    },
+    "dialog": {
+      "addTitle": "Afspraak toevoegen",
+      "editTitle": "Afspraak bewerken",
+      "description": "Afspraken in een gekoppelde Google-agenda worden meteen doorgestuurd."
+    },
+    "form": {
+      "title": "Titel",
+      "allDay": "Hele dag",
+      "startsAt": "Begint om",
+      "endsAt": "Eindigt om",
+      "location": "Locatie",
+      "owner": "Van wie",
+      "ownerHint": "Bepaalt in wiens kolom de afspraak staat.",
+      "everyone": "Iedereen",
+      "eventType": "Soort",
+      "category": "Kleur",
+      "categoryInherit": "Van de agenda",
+      "attendees": "Wie gaat er mee",
+      "recurrence": "Herhaling",
+      "calendar": "Agenda",
+      "calendarHint": "Alleen in Kynite, of doorsturen naar een gekoppelde Google-agenda.",
+      "nativeCalendar": "Alleen in Kynite",
+      "scope": "Wat wil je aanpassen"
+    },
+    "scope": {
+      "occurrence": "Alleen deze afspraak",
+      "series": "De hele reeks"
+    },
+    "types": {
+      "appointment": "Afspraak",
+      "custody": "Zorgregeling",
+      "reward": "Beloning",
+      "routine": "Routine",
+      "birthday": "Verjaardag",
+      "other": "Overig"
+    },
+    "categories": {
+      "blue": "Blauw",
+      "purple": "Paars",
+      "orange": "Oranje",
+      "green": "Groen",
+      "red": "Rood",
+      "yellow": "Geel",
+      "pink": "Roze",
+      "teal": "Turquoise"
+    },
+    "recurrence": {
+      "none": "Niet herhalen",
+      "daily": "Elke dag",
+      "weekdays": "Elke werkdag",
+      "weekly": "Elke week",
+      "biweekly": "Om de week",
+      "monthly": "Elke maand",
+      "yearly": "Elk jaar",
+      "custody-alternating-weeks": "Zorgregeling: om de week (maandag)",
+      "custody-first-third-weekend": "Zorgregeling: 1e en 3e weekend",
+      "custom": "Eigen herhaling (uit Google)"
+    },
+    "hub": {
+      "title": "Vandaag",
+      "unpairedTitle": "Dit scherm is nog niet gekoppeld",
+      "unpairedBody": "Koppel dit scherm aan je gezin om het gezinsbord te tonen."
+    },
+    "errors": {
+      "forbidden": "Je hebt geen rechten om dit te doen.",
+      "invalidInput": "Controleer de ingevulde gegevens.",
+      "endBeforeStart": "De eindtijd ligt voor de begintijd.",
+      "eventNotFound": "Deze afspraak bestaat niet meer.",
+      "calendarNotFound": "Die agenda bestaat niet meer.",
+      "calendarReadOnly": "In die agenda mag Kynite niet schrijven.",
+      "memberNotFound": "Dit gezinslid bestaat niet meer."
     }
   }
 }

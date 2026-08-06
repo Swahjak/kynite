@@ -43,7 +43,7 @@ This is the single source of progress truth for the Kynite greenfield rebuild. E
   - A commit with a non-conventional message is rejected by commitlint (demonstrable).
   - `pnpm ci` (or documented equivalent) runs typecheck + lint + test:run + build in one command and exits 0.
   - ESLint enforces the module-boundary rule (`no-restricted-imports` banning deep `modules/*/**` imports) with at least one test fixture proving it fires.
-- **Review verdict:** _approved_ — Opus review 2026-08-06: all gates verified independently green; one blocker (workflow ran reserved `pnpm ci`) fixed to `pnpm run ci`. Carry-forwards: relative deep-import escape hatch in boundary rule (close by M03), restore dev docker-compose at M04, eager `getEnv()` in instrumentation.ts at M03, jsdom/Testing Library at M02, CI dummy secret → GitHub secret at M03.
+- **Review verdict:** _approved_ — Opus review 2026-08-06: all gates verified independently green; one blocker (workflow ran reserved `pnpm ci`) fixed to `pnpm run ci`. Carry-forwards: relative deep-import escape hatch in boundary rule (close by M03), restore dev docker-compose at M04, eager `getEnv()` in instrumentation.ts at M03, jsdom/Testing Library at M02, CI dummy secret → GitHub secret at M03. Update (M06 review): icons now render by codepoint, not by ligature — the subset dropped ligatures for the reasons in `scripts/subset-icons.mjs`, and the subset font is ~23 KB.
 
 ## M02 — Design system + theming
 
@@ -108,7 +108,7 @@ This is the single source of progress truth for the Kynite greenfield rebuild. E
 
 ## M06 — Calendar UI
 
-- [ ] Status
+- [x] Status
 - **Scope:** Build the calendar surfaces for both the parent app and the hub: day, week, month and agenda/list views (FR3), a per-person column "today" view for the hub board, full event CRUD from the Controller writing through to Google, drag-and-drop rescheduling, and category color coding per the design system. Recurrence expands on read against a cached per-view window.
 - **Acceptance criteria:**
   - Routes exist: `(app)/calendar`, `(app)/today`, `(hub)/page.tsx` ambient board.
@@ -120,7 +120,7 @@ This is the single source of progress truth for the Kynite greenfield rebuild. E
   - Category colors resolve from the eight-color palette; private calendars render busy-only on the hub.
   - Playwright visual snapshots exist for each view at both hub tablet and mobile viewports.
   - Gate green: `pnpm typecheck && pnpm lint && pnpm test:run`.
-- **Review verdict:** _pending_
+- **Review verdict:** _approved after fixes_ — Opus review 2026-08-06: gates verified independently (364/364 with DB pre-fix, 380/380 post-fix; 47 e2e); recurrence engine passed reviewer's 13 adversarial RFC-5545 cases incl. canonical WKST fixture; DnD e2e non-vacuous (live DB assertion); busy-only redaction confirmed server-side; icon subset 23KB with type-safe names. Three blockers fixed: push-retry worker now shares pushEventWithRetry (pip clears on successful retry), pendingSync set/clear covered both directions by integration tests with fake-api failure injection, ownerMemberId/attendeeMemberIds family-scope-validated with forged-id integration tests. Also: DST autumn-overlap now resolves pre-transition (matches Google), poll worker re-enqueues pending pushes (cap 50), pushed/skipped discriminated outcome, icons source pinned to SHA, exact-count auditor assertion. Bonus catch: enqueueCalendarSync/enqueueEventPush bypassed queueName() — colon names would make pg-boss throw (swallowed) in production; fixed. Carry-forwards: pull path upsert ignores pendingSyncAt (gate before M10, noted in architecture §5); FUTURE_ANCHOR 2027-03-10 snapshot time bomb; EXTRA_ICONS hand-list for indirect icon usages.
 
 ## M07 — Routines/chores
 
@@ -206,7 +206,7 @@ This is the single source of progress truth for the Kynite greenfield rebuild. E
 ## M12 — Hub kiosk mode + device pairing
 
 - [ ] Status
-- **Scope:** Build the device pairing flow and kiosk session model: a parent generates a 6-digit code (10-min TTL) in settings, `(hub)/pair` exchanges it for a `device` + `device_session`, and the opaque token lives in an httpOnly cookie with a 1-year sliding expiry. Finish the wall-display layout — fullscreen, dark-capable, 6-foot type, no browser chrome — and constrain device-session capability to completions, timers and redemption requests only.
+- **Scope:** Build the device pairing flow and kiosk session model: a parent generates a 6-digit code (10-min TTL) in settings, `(hub)/pair` exchanges it for a `device` + `device_session`, and the opaque token lives in an httpOnly cookie with a 1-year sliding expiry. Finish the wall-display layout — fullscreen, dark-capable, 6-foot type, no browser chrome — and constrain device-session capability to completions, timers and redemption requests only. Carry-forward note (M06 review): the hub currently renders light-theme only at `(hub)/hub`, with no kiosk layout of its own — it reuses the app shell. M12 owns making it fullscreen, dark-capable, 6-foot type, and (per this scope) the pairing/addressing that puts a real device session behind it.
 - **Acceptance criteria:**
   - Routes exist: `(app)/settings/devices`, `(hub)/pair`.
   - A generated code pairs a device, expires after 10 minutes, and is single-use — integration tests for all three.

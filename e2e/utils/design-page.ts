@@ -16,7 +16,11 @@ export async function gotoDesignPage(page: Page, theme: Theme) {
     (expected) => document.documentElement.dataset.theme === expected,
     theme
   );
-  await page.waitForFunction(() => document.fonts.status === 'loaded');
+  // `document.fonts.ready` resolves once font loading has *settled*, which is
+  // the actual precondition for a stable screenshot. Polling `status` can
+  // observe a transient 'loaded' between two loads, which is what the old
+  // arbitrary 150ms sleep below was really compensating for.
+  await page.evaluate(() => document.fonts.ready.then(() => undefined));
   await page.addStyleTag({
     content: `*, *::before, *::after {
       animation: none !important;
@@ -26,5 +30,8 @@ export async function gotoDesignPage(page: Page, theme: Theme) {
     /* The Next.js dev-mode indicator is not part of the design system. */
     nextjs-portal { display: none !important; }`,
   });
-  await page.waitForTimeout(150);
+
+  // Nothing arbitrary left to wait for: fonts have settled and animations are
+  // off, so the next paint is the one we screenshot.
+  await page.evaluate(() => document.fonts.ready.then(() => undefined));
 }

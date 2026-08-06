@@ -97,6 +97,13 @@ export default tseslint.config(
     rules: { 'no-restricted-imports': schemaBoundaryRule },
   },
   {
+    // Playwright fixtures take a callback conventionally named `use`, which
+    // the React hooks plugin reads as React 19's `use()` and then insists is
+    // called unconditionally from a component. There is no React in this tree.
+    files: ['e2e/**/*.ts'],
+    rules: { 'react-hooks/rules-of-hooks': 'off' },
+  },
+  {
     // The drizzle schema barrel is the schema *assembly point*, not a consumer:
     // drizzle-kit needs one module that sees every slice's tables, and it must
     // not pull in a slice's `index.ts` (which re-exports server-only code).

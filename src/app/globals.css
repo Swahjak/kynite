@@ -481,7 +481,9 @@
   white-space: nowrap;
   word-wrap: normal;
   direction: ltr;
-  font-feature-settings: 'liga';
+  /* No `font-feature-settings: 'liga'`: icons render by codepoint, not by the
+     ligature feature, because the ligature form cannot be subset (see
+     scripts/subset-icons.mjs). The subset font ships no usable GSUB. */
   -webkit-font-smoothing: antialiased;
   font-variation-settings:
     'FILL' 0,

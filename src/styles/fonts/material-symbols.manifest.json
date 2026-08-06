@@ -1,0 +1,32 @@
+{
+  "icons": [
+    "add",
+    "cake",
+    "calendar_month",
+    "check",
+    "checklist",
+    "chevron_left",
+    "chevron_right",
+    "dark_mode",
+    "dashboard",
+    "delete",
+    "event",
+    "event_available",
+    "family_home",
+    "family_restroom",
+    "label",
+    "light_mode",
+    "local_fire_department",
+    "location_on",
+    "notifications",
+    "palette",
+    "redeem",
+    "repeat",
+    "schedule",
+    "settings",
+    "star",
+    "timer",
+    "wb_sunny"
+  ],
+  "bytes": 23388
+}

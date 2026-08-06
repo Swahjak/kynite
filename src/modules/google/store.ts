@@ -1,7 +1,18 @@
 import 'server-only';
 import { and, eq, inArray, isNull, sql } from 'drizzle-orm';
 import { getDb } from '@/server/db';
-import { event } from '@/modules/calendar';
+// The `event` *table*, from the schema assembly point rather than from
+// `@/modules/calendar`. Two reasons, and the second is the load-bearing one:
+//
+//  1. It is the table object a query needs, which is exactly what
+//     `server/db/schema.ts` exists to collect (§2 names it the schema assembly
+//     point, and the boundary lint already exempts it).
+//  2. `@/modules/calendar` re-exports that slice's client components, which
+//     pull `next-intl`'s client navigation. Importing the barrel here made the
+//     Google slice — and every Node test that touches it — drag a React client
+//     graph into a plain server module, and created a genuine import cycle
+//     (calendar barrel → actions → google barrel → store → calendar barrel).
+import { event } from '@/server/db/schema';
 import { publish } from '@/modules/realtime';
 import { createEchoRegistry } from './domain/echo';
 import type { PushStore } from './domain/push-engine';
