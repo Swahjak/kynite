@@ -43,6 +43,12 @@ export async function seedMembers(
      * change on every run and make the snapshot flap.
      */
     id?: string;
+    /**
+     * `instant` (ages ~4–7) or `savings` (ages ~8–12) — the per-child setting
+     * that decides which reward UI the hub renders (M08). Defaults to
+     * `instant`, matching the column default.
+     */
+    rewardHorizon?: 'instant' | 'savings';
   }[]
 ): Promise<SeededMember[]> {
   const seeded: SeededMember[] = [];
@@ -50,9 +56,17 @@ export async function seedMembers(
   for (const member of members) {
     const { rows } = await client.query<{ id: string }>(
       `insert into member (family_id, id, display_name, role, color, reward_horizon, sort_order)
-       values ($1, coalesce($2::uuid, gen_random_uuid()), $3, $4, $5, 'instant', $6)
+       values ($1, coalesce($2::uuid, gen_random_uuid()), $3, $4, $5, $7, $6)
        returning id`,
-      [familyId, member.id ?? null, member.displayName, member.role, member.color, member.sortOrder]
+      [
+        familyId,
+        member.id ?? null,
+        member.displayName,
+        member.role,
+        member.color,
+        member.sortOrder,
+        member.rewardHorizon ?? 'instant',
+      ]
     );
     seeded.push({ id: rows[0].id, displayName: member.displayName, color: member.color });
   }
@@ -322,4 +336,158 @@ export async function readRoutineSteps(client: Client, routineId: string) {
     [routineId]
   );
   return rows;
+}
+
+/* -------------------------------------------------------------------------- */
+/* rewards (M08)                                                              */
+/* -------------------------------------------------------------------------- */
+
+export type SeedReward = {
+  /** A fixed id, for the same determinism reason as `seedMembers`. */
+  id?: string;
+  title: string;
+  costStars: number;
+  category: 'privilege' | 'experience' | 'treat';
+  icon?: string;
+  /** Empty (the default) puts the reward on every child's shelf. */
+  availableToMemberIds?: string[];
+  active?: boolean;
+};
+
+export type SeededReward = { id: string; title: string; costStars: number };
+
+/**
+ * A reward catalogue, seeded directly.
+ *
+ * The store specs need a shelf with a *known* spread of prices around a known
+ * balance — one affordable, one just out of reach, one already asked for — and
+ * authoring that through the parent dialog would be a dozen interactions per
+ * spec that assert nothing about the store.
+ */
+export async function seedRewards(
+  client: Client,
+  familyId: string,
+  rewards: SeedReward[]
+): Promise<SeededReward[]> {
+  const seeded: SeededReward[] = [];
+
+  for (const [index, reward] of rewards.entries()) {
+    const { rows } = await client.query<{ id: string }>(
+      `insert into reward (
+         family_id, id, title, icon, cost_stars, category,
+         available_to_member_ids, active, sort_order
+       )
+       values ($1, coalesce($2::uuid, gen_random_uuid()), $3, $4, $5, $6, $7, $8, $9)
+       returning id`,
+      [
+        familyId,
+        reward.id ?? null,
+        reward.title,
+        reward.icon ?? 'redeem',
+        reward.costStars,
+        reward.category,
+        reward.availableToMemberIds ?? [],
+        reward.active ?? true,
+        index,
+      ]
+    );
+    seeded.push({ id: rows[0].id, title: reward.title, costStars: reward.costStars });
+  }
+
+  return seeded;
+}
+
+/**
+ * Stars in the ledger, as the completion path would have written them.
+ *
+ * Always an insert, never an update: the table is append-only, and a seed
+ * helper that could rewrite a row would be the first exception to a rule the
+ * whole product rests on.
+ */
+export async function seedStars(
+  client: Client,
+  familyId: string,
+  memberId: string,
+  entries: {
+    amount: number;
+    reason?: string;
+    note?: string;
+    /**
+     * When the star was awarded. The visual specs pin this so the star chart's
+     * week window (seven bars ending on a pinned `?date=`) contains the same
+     * awards on every run — a ledger written at `now()` would fall outside a
+     * fixed window and render seven empty bars.
+     */
+    createdAt?: string;
+  }[]
+): Promise<void> {
+  for (const entry of entries) {
+    await client.query(
+      `insert into star_ledger (family_id, member_id, amount, reason, note, created_at)
+       values ($1, $2, $3, $4, $5, coalesce($6::timestamptz, now()))`,
+      [
+        familyId,
+        memberId,
+        entry.amount,
+        entry.reason ?? 'routine',
+        entry.note ?? null,
+        entry.createdAt ?? null,
+      ]
+    );
+  }
+}
+
+export async function seedRedemptions(
+  client: Client,
+  familyId: string,
+  memberId: string,
+  entries: { rewardId: string; costStars: number; status?: string }[]
+): Promise<string[]> {
+  const ids: string[] = [];
+
+  for (const entry of entries) {
+    const { rows } = await client.query<{ id: string }>(
+      `insert into redemption (family_id, member_id, reward_id, cost_stars, status, client_id)
+       values ($1, $2, $3, $4, $5, $6)
+       returning id`,
+      [
+        familyId,
+        memberId,
+        entry.rewardId,
+        entry.costStars,
+        entry.status ?? 'requested',
+        `seed:${memberId}:${entry.rewardId}:${entry.status ?? 'requested'}`,
+      ]
+    );
+    ids.push(rows[0].id);
+  }
+
+  return ids;
+}
+
+export async function readRedemptions(client: Client, familyId: string) {
+  const { rows } = await client.query(
+    `select id, member_id, reward_id, cost_stars, status, client_id
+       from redemption where family_id = $1 order by requested_at`,
+    [familyId]
+  );
+  return rows;
+}
+
+export async function readStarBalance(client: Client, memberId: string) {
+  const { rows } = await client.query<{
+    earned_stars: string;
+    spent_stars: string;
+    available_stars: string;
+  }>(
+    `select earned_stars, spent_stars, available_stars from member_star_balance where member_id = $1`,
+    [memberId]
+  );
+
+  const row = rows[0];
+  return {
+    earned: Number(row?.earned_stars ?? 0),
+    spent: Number(row?.spent_stars ?? 0),
+    available: Number(row?.available_stars ?? 0),
+  };
 }

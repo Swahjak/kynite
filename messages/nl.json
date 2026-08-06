@@ -7,7 +7,8 @@
     "family": "Gezin",
     "settings": "Instellingen",
     "calendar": "Agenda",
-    "routines": "Routines"
+    "routines": "Routines",
+    "rewards": "Beloningen"
   },
   "auth": {
     "signOut": "Uitloggen",
@@ -252,7 +253,11 @@
       "cancel": "Annuleren",
       "addStep": "Stap toevoegen",
       "remove": "Verwijderen",
-      "removeNamed": "{title} verwijderen"
+      "removeNamed": "{title} verwijderen",
+      "graduate": "Gaat nu vanzelf",
+      "graduateNamed": "{title} gaat nu vanzelf",
+      "resumeStars": "Weer sterren",
+      "resumeStarsNamed": "Weer sterren voor {title}"
     },
     "dialog": {
       "addTitle": "Nieuwe routine",
@@ -343,6 +348,142 @@
       "memberNotFound": "Dat gezinslid bestaat niet meer.",
       "routineNotFound": "Die routine bestaat niet meer.",
       "notScheduled": "Deze routine staat niet op de lijst voor die dag."
+    }
+  },
+  "rewards": {
+    "title": "Beloningen",
+    "subtitle": "De winkel met privileges en uitjes, en de vragen die er binnenkomen.",
+    "catalogueTitle": "In de winkel",
+    "empty": "Nog niets in de winkel. Begin met een paar voorstellen en pas ze aan.",
+    "inactive": "Uit de winkel",
+    "availableToEveryone": "Voor iedereen",
+    "starsCost": "{count, plural, one {# ster} other {# sterren}}",
+    "plusStars": "{count, plural, one {+# ster} other {+# sterren}}",
+    "actions": {
+      "add": "Nieuwe beloning",
+      "edit": "Bewerken",
+      "save": "Opslaan",
+      "cancel": "Annuleren",
+      "remove": "Verwijderen",
+      "removeNamed": "{title} verwijderen",
+      "seedPresets": "Voorstellen toevoegen",
+      "approve": "Goedkeuren",
+      "deny": "Nu even niet",
+      "fulfill": "Gegeven",
+      "awardStars": "Ster geven",
+      "award": "Geven"
+    },
+    "dialog": {
+      "addTitle": "Nieuwe beloning",
+      "editTitle": "Beloning bewerken",
+      "description": "Een beloning is iets leuks om samen te doen, of iets wat je mag."
+    },
+    "form": {
+      "title": "Naam",
+      "category": "Soort",
+      "categoryHint": "Iets mogen, iets samen doen, of een traktatie.",
+      "costStars": "Sterren",
+      "costStarsHint": "Hoeveel sterren het kost.",
+      "icon": "Pictogram",
+      "availableTo": "Voor wie",
+      "availableToHint": "Niets gekozen betekent: voor alle kinderen."
+    },
+    "categories": {
+      "privilege": "Mogen",
+      "experience": "Samen doen",
+      "treat": "Traktatie"
+    },
+    "statuses": {
+      "requested": "Gevraagd",
+      "approved": "Goedgekeurd",
+      "denied": "Nu even niet",
+      "fulfilled": "Gegeven"
+    },
+    "reasons": {
+      "routine": "Routine afgerond",
+      "bonus": "Extra ster",
+      "manual": "Ster van een ouder",
+      "surprise": "Verrassingsster"
+    },
+    "icons": {
+      "redeem": "Cadeau",
+      "restaurant": "Eten",
+      "menu_book": "Boek",
+      "movie": "Film",
+      "sports_esports": "Spelen",
+      "cookie": "Koekje",
+      "pets": "Dieren",
+      "pool": "Zwemmen",
+      "diversity_3": "Vriendjes",
+      "icecream": "IJsje",
+      "park": "Park",
+      "palette": "Knutselen"
+    },
+    "presets": {
+      "chooseDinner": "Jij kiest het eten",
+      "extraStory": "Extra verhaaltje",
+      "pickMovie": "Jij kiest de film",
+      "extraPlayTime": "Half uur langer spelen",
+      "bakeTogether": "Samen bakken",
+      "zooTrip": "Naar de dierentuin",
+      "swimming": "Naar het zwembad",
+      "friendOver": "Vriendje komt spelen",
+      "favouriteSnack": "Jouw lievelingssnack"
+    },
+    "queue": {
+      "pendingTitle": "Vragen",
+      "pendingEmpty": "Er staan nu geen vragen open.",
+      "outstandingTitle": "Goedgekeurd",
+      "outstandingHint": "Goedgekeurd, nog niet gegeven.",
+      "historyTitle": "Eerder"
+    },
+    "award": {
+      "title": "Een ster geven",
+      "description": "Onverwachte sterren werken het best. Zeg er vooral bij waarvoor.",
+      "member": "Voor wie",
+      "amount": "Hoeveel",
+      "reason": "Waarvoor",
+      "note": "Wat je zegt",
+      "noteHint": "Bijvoorbeeld: dat heb je helemaal zelf bedacht!"
+    },
+    "store": {
+      "title": "De winkel van {name}",
+      "subtitle": "Alles wat je met je sterren kunt kiezen.",
+      "shelf": "Kiezen",
+      "empty": "Er staat nog niets in de winkel.",
+      "availableStars": "Sterren om te kiezen",
+      "chooseMember": "Kies wie",
+      "asked": "Gevraagd — wachten op antwoord",
+      "askFor": "{title} vragen",
+      "moreStars": "{count, plural, one {Nog # ster} other {Nog # sterren}}",
+      "currentGoal": "Waar je voor spaart",
+      "starsToGo": "{count, plural, one {Nog # ster} other {Nog # sterren}}",
+      "goalProgress": "{have} / {need}",
+      "unavailableTitle": "Nog geen winkel om te tonen",
+      "unavailableBody": "Dit scherm is nog niet aan een gezinslid gekoppeld."
+    },
+    "chart": {
+      "title": "De sterren van {name}",
+      "subtitle": "Alles wat je hebt verdiend.",
+      "earnedStars": "Sterren verdiend",
+      "availableStars": "Sterren om te kiezen",
+      "thisWeek": "Deze week",
+      "weekTotal": "{count, plural, one {# ster deze week} other {# sterren deze week}}",
+      "history": "Hoe je ze verdiende",
+      "historyEmpty": "Hier komen je sterren te staan.",
+      "graduatedTitle": "Gaat nu vanzelf",
+      "graduatedBody": "Deze doe je zelf, zonder sterren.",
+      "unavailableTitle": "Geen sterrenkaart om te tonen",
+      "unavailableBody": "Dit scherm is nog niet aan een gezinslid gekoppeld."
+    },
+    "errors": {
+      "forbidden": "Dat mag je niet doen.",
+      "invalidInput": "Controleer de ingevulde gegevens.",
+      "memberNotFound": "Dat gezinslid bestaat niet meer.",
+      "rewardNotFound": "Die beloning bestaat niet meer.",
+      "redemptionNotFound": "Die vraag bestaat niet meer.",
+      "alreadyDecided": "Hier is al op geantwoord.",
+      "notEnoughStars": "Daar zijn nu nog niet genoeg sterren voor."
     }
   }
 }

@@ -80,6 +80,20 @@ const EXTRA_ICONS = [
   'timer',
   'light_mode',
   'dark_mode',
+  // modules/rewards/ui/tokens.ts — REWARD_ICONS, rendered through
+  // `rewardIconOf(reward.icon)` so no literal `name="…"` appears in source.
+  // `redeem` and `star` are already above.
+  'restaurant',
+  'menu_book',
+  'movie',
+  'sports_esports',
+  'cookie',
+  'pets',
+  'pool',
+  'diversity_3',
+  'icecream',
+  'park',
+  'palette',
 ];
 
 const ICON_USAGE = /<Icon\b[^>]*?\bname=(?:"([a-z0-9_]+)"|\{'([a-z0-9_]+)'\}|'([a-z0-9_]+)')/g;

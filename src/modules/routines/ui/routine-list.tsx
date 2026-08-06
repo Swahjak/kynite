@@ -7,6 +7,7 @@ import { hasGraduated } from '../domain/stars';
 import { weekdaysOfRule } from '../domain/schedule';
 import type { RoutineWithSteps } from '../queries';
 import { DeleteRoutineButton } from './delete-routine-button';
+import { GraduateRoutineButton } from './graduate-routine-button';
 import { RoutineDialog } from './routine-dialog';
 import { routineIconOf } from './tokens';
 
@@ -106,6 +107,11 @@ export async function RoutineList({
                 {canWrite ? (
                   <span className="flex shrink-0 flex-wrap items-center gap-2 max-sm:w-full">
                     <RoutineDialog members={members} routine={routine} timeZone={timeZone} />
+                    <GraduateRoutineButton
+                      routineId={routine.id}
+                      title={routine.title}
+                      graduated={hasGraduated(routine)}
+                    />
                     <DeleteRoutineButton routineId={routine.id} title={routine.title} />
                   </span>
                 ) : null}

@@ -1,0 +1,63 @@
+import { getTranslations } from 'next-intl/server';
+import { RewardStore, loadStore } from '@/modules/rewards';
+
+/** Session-dependent: never prerendered, so `next build` needs no database. */
+export const dynamic = 'force-dynamic';
+
+/**
+ * The child-facing reward store on the hub (M08, FR16).
+ *
+ * Everything about this page is the child's own shelf, in the board's neutral
+ * voice (research §"Nagging / device as messenger"): it names the child, states
+ * what they have, and never issues an instruction or speaks for a parent. It
+ * shows exactly one child's stars — the chips switch between shelves, they do
+ * not combine them, and there is no arrangement of this route that renders two
+ * (§Decisions 3).
+ *
+ * `?member=` picks the shelf and `?date=` pins the derived day so the visual
+ * snapshot is deterministic; the latter affects display only (see
+ * `page-data.ts` — the Server Action re-derives nothing from it).
+ *
+ * Addressed `/hub/store` rather than §2's `(hub)/store`, for the same reason
+ * the routine board is at `/hub/routines/[memberId]`: M01 put the ambient board
+ * at `(hub)/hub` instead of `(hub)/`, so every hub URL carries the `/hub`
+ * prefix, and `(app)/rewards` already owns the parent side. M12 owns resolving
+ * the hub's addressing along with device pairing; until then the tree stays
+ * internally consistent.
+ */
+export default async function HubStorePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ member?: string; date?: string }>;
+}) {
+  const { member, date } = await searchParams;
+
+  const store = await loadStore({ memberId: member, date });
+  const t = await getTranslations('rewards');
+
+  if (!store) {
+    return (
+      <main className="flex min-h-dvh flex-col items-center justify-center gap-2 p-8 text-center">
+        <h1 className="font-display text-h1 font-bold">{t('store.unavailableTitle')}</h1>
+        <p className="text-body-lg text-ink-secondary">{t('store.unavailableBody')}</p>
+      </main>
+    );
+  }
+
+  return (
+    <main
+      className="flex min-h-dvh flex-col gap-6 bg-background p-6"
+      data-testid="hub-store"
+      data-member-id={store.member.id}
+    >
+      <header>
+        <h1 className="font-display text-display-md font-extrabold">
+          {t('store.title', { name: store.member.displayName })}
+        </h1>
+        <p className="text-body-lg text-ink-secondary">{t('store.subtitle')}</p>
+      </header>
+
+      <RewardStore store={store} />
+    </main>
+  );
+}

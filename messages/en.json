@@ -7,7 +7,8 @@
     "family": "Family",
     "settings": "Settings",
     "calendar": "Calendar",
-    "routines": "Routines"
+    "routines": "Routines",
+    "rewards": "Rewards"
   },
   "auth": {
     "signOut": "Sign out",
@@ -252,7 +253,11 @@
       "cancel": "Cancel",
       "addStep": "Add step",
       "remove": "Remove",
-      "removeNamed": "Remove {title}"
+      "removeNamed": "Remove {title}",
+      "graduate": "Runs on its own now",
+      "graduateNamed": "{title} runs on its own now",
+      "resumeStars": "Award stars again",
+      "resumeStarsNamed": "Award stars for {title} again"
     },
     "dialog": {
       "addTitle": "New routine",
@@ -343,6 +348,142 @@
       "memberNotFound": "That family member no longer exists.",
       "routineNotFound": "That routine no longer exists.",
       "notScheduled": "This routine is not on the list for that day."
+    }
+  },
+  "rewards": {
+    "title": "Rewards",
+    "subtitle": "The shelf of privileges and outings, and the asks that come in.",
+    "catalogueTitle": "On the shelf",
+    "empty": "Nothing on the shelf yet. Start from a few suggestions and edit them.",
+    "inactive": "Off the shelf",
+    "availableToEveryone": "For everyone",
+    "starsCost": "{count, plural, one {# star} other {# stars}}",
+    "plusStars": "{count, plural, one {+# star} other {+# stars}}",
+    "actions": {
+      "add": "New reward",
+      "edit": "Edit",
+      "save": "Save",
+      "cancel": "Cancel",
+      "remove": "Remove",
+      "removeNamed": "Remove {title}",
+      "seedPresets": "Add suggestions",
+      "approve": "Approve",
+      "deny": "Not right now",
+      "fulfill": "Handed over",
+      "awardStars": "Give a star",
+      "award": "Give"
+    },
+    "dialog": {
+      "addTitle": "New reward",
+      "editTitle": "Edit reward",
+      "description": "A reward is something nice to do together, or something to be allowed."
+    },
+    "form": {
+      "title": "Name",
+      "category": "Kind",
+      "categoryHint": "Something to be allowed, something to do together, or a treat.",
+      "costStars": "Stars",
+      "costStarsHint": "How many stars it costs.",
+      "icon": "Icon",
+      "availableTo": "Who it is for",
+      "availableToHint": "Pick nobody and it is on every child's shelf."
+    },
+    "categories": {
+      "privilege": "Allowed to",
+      "experience": "Do together",
+      "treat": "Treat"
+    },
+    "statuses": {
+      "requested": "Asked",
+      "approved": "Approved",
+      "denied": "Not right now",
+      "fulfilled": "Handed over"
+    },
+    "reasons": {
+      "routine": "Routine finished",
+      "bonus": "Extra star",
+      "manual": "Star from a grown-up",
+      "surprise": "Surprise star"
+    },
+    "icons": {
+      "redeem": "Gift",
+      "restaurant": "Food",
+      "menu_book": "Book",
+      "movie": "Film",
+      "sports_esports": "Playing",
+      "cookie": "Cookie",
+      "pets": "Animals",
+      "pool": "Swimming",
+      "diversity_3": "Friends",
+      "icecream": "Ice cream",
+      "park": "Park",
+      "palette": "Crafting"
+    },
+    "presets": {
+      "chooseDinner": "You pick dinner",
+      "extraStory": "Extra bedtime story",
+      "pickMovie": "You pick the film",
+      "extraPlayTime": "Half an hour more play",
+      "bakeTogether": "Bake together",
+      "zooTrip": "Trip to the zoo",
+      "swimming": "Trip to the pool",
+      "friendOver": "A friend comes over",
+      "favouriteSnack": "Your favourite snack"
+    },
+    "queue": {
+      "pendingTitle": "Asks",
+      "pendingEmpty": "Nothing is waiting for an answer.",
+      "outstandingTitle": "Approved",
+      "outstandingHint": "Approved, not handed over yet.",
+      "historyTitle": "Earlier"
+    },
+    "award": {
+      "title": "Give a star",
+      "description": "Unexpected stars work best. Say what it is for.",
+      "member": "Who it is for",
+      "amount": "How many",
+      "reason": "What for",
+      "note": "What you say",
+      "noteHint": "For example: you worked that out all by yourself!"
+    },
+    "store": {
+      "title": "{name}'s shelf",
+      "subtitle": "Everything you can choose with your stars.",
+      "shelf": "Choose",
+      "empty": "Nothing on the shelf yet.",
+      "availableStars": "Stars to spend",
+      "chooseMember": "Choose who",
+      "asked": "Asked — waiting for an answer",
+      "askFor": "Ask for {title}",
+      "moreStars": "{count, plural, one {# more star} other {# more stars}}",
+      "currentGoal": "What you are saving for",
+      "starsToGo": "{count, plural, one {# star to go} other {# stars to go}}",
+      "goalProgress": "{have} / {need}",
+      "unavailableTitle": "No shelf to show yet",
+      "unavailableBody": "This screen is not linked to a family member yet."
+    },
+    "chart": {
+      "title": "{name}'s stars",
+      "subtitle": "Everything you have earned.",
+      "earnedStars": "Stars earned",
+      "availableStars": "Stars to spend",
+      "thisWeek": "This week",
+      "weekTotal": "{count, plural, one {# star this week} other {# stars this week}}",
+      "history": "How you earned them",
+      "historyEmpty": "Your stars will show up here.",
+      "graduatedTitle": "Runs on its own now",
+      "graduatedBody": "You do these yourself, without stars.",
+      "unavailableTitle": "No star chart to show",
+      "unavailableBody": "This screen is not linked to a family member yet."
+    },
+    "errors": {
+      "forbidden": "You are not allowed to do that.",
+      "invalidInput": "Check the details you entered.",
+      "memberNotFound": "That family member no longer exists.",
+      "rewardNotFound": "That reward no longer exists.",
+      "redemptionNotFound": "That ask no longer exists.",
+      "alreadyDecided": "This one already has an answer.",
+      "notEnoughStars": "There are not enough stars for that yet."
     }
   }
 }

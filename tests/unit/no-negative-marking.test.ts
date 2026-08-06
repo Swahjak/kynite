@@ -44,8 +44,15 @@ const CHILD_FACING_ROOTS = [
  */
 const PARENT_ONLY = [
   'src/modules/routines/ui/delete-routine-button.tsx',
+  'src/modules/routines/ui/graduate-routine-button.tsx',
   'src/modules/routines/ui/routine-dialog.tsx',
   'src/modules/routines/ui/routine-list.tsx',
+  'src/modules/rewards/ui/approval-queue.tsx',
+  'src/modules/rewards/ui/award-stars-dialog.tsx',
+  'src/modules/rewards/ui/delete-reward-button.tsx',
+  'src/modules/rewards/ui/reward-dialog.tsx',
+  'src/modules/rewards/ui/reward-list.tsx',
+  'src/modules/rewards/ui/seed-presets-button.tsx',
 ];
 
 type Rule = { id: string; pattern: RegExp };
@@ -274,6 +281,11 @@ describe('no negative marking on any child-facing surface', () => {
     expect(files.map((file) => file.path)).toContain('src/modules/routines/ui/step-row.tsx');
     expect(files.map((file) => file.path)).toContain('src/modules/routines/ui/routine-card.tsx');
     expect(files.map((file) => file.path)).toContain('src/modules/routines/ui/routine-board.tsx');
+    // M08's child-facing surfaces. The store is where a "you cannot afford
+    // this" mark would be most tempting, so it must be in scope by name.
+    expect(files.map((file) => file.path)).toContain('src/modules/rewards/ui/reward-card.tsx');
+    expect(files.map((file) => file.path)).toContain('src/modules/rewards/ui/reward-store.tsx');
+    expect(files.map((file) => file.path)).toContain('src/modules/rewards/ui/star-chart.tsx');
   });
 
   it('finds no red X, negative delta, streak loss or sibling comparison', () => {
@@ -335,7 +347,7 @@ describe('no negative marking on any child-facing surface', () => {
 
 describe('the words a child reads', () => {
   const BANNED_COPY =
-    /\b(?:streak lost|broken|missed|too late|failed|verloren|kwijt|gemist|te laat|mislukt|niet gedaan|slecht)\b/i;
+    /\b(?:streak lost|broken|missed|too late|failed|rejected|denied|weigeren|geweigerd|verloren|kwijt|gemist|te laat|mislukt|afgewezen|niet gedaan|slecht)\b/i;
 
   for (const locale of ['nl', 'en']) {
     it(`keeps the ${locale} routine copy free of loss and failure framing`, () => {
@@ -355,6 +367,36 @@ describe('the words a child reads', () => {
       };
 
       walk(messages.routines, 'routines');
+      // The reward copy is scanned alongside it: a denial is the single place
+      // in this product where failure framing would be easiest to write, and
+      // "not right now" has to stay "not right now" in both languages.
+      walk(messages.rewards, 'rewards');
+      expect(offenders).toEqual([]);
+    });
+
+    it(`keeps the ${locale} reward copy free of money framing`, () => {
+      const messages = JSON.parse(
+        readFileSync(join(root, `messages/${locale}.json`), 'utf8')
+      ) as Record<string, unknown>;
+
+      // FR16 / research §Decisions 8: no currency symbol and no money noun
+      // reaches a family, in either language. The enum already makes a money
+      // *category* impossible; this covers the words around it.
+      const MONEY_COPY =
+        /[€$£]|\b(?:euro|dollar|geld|zakgeld|money|allowance|cash|pocket money|betaal\w*|salaris)\b/i;
+
+      const offenders: string[] = [];
+      const walk = (node: unknown, path: string) => {
+        if (typeof node === 'string') {
+          if (MONEY_COPY.test(node)) offenders.push(`${path}: ${node}`);
+          return;
+        }
+        if (node && typeof node === 'object') {
+          for (const [key, value] of Object.entries(node)) walk(value, `${path}.${key}`);
+        }
+      };
+
+      walk(messages.rewards, 'rewards');
       expect(offenders).toEqual([]);
     });
 

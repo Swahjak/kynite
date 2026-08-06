@@ -40,6 +40,9 @@ export default async function AppLayout({
           <Link href="/routines" className="px-2 py-1 font-display text-sm font-medium">
             {t('routines')}
           </Link>
+          <Link href="/rewards" className="px-2 py-1 font-display text-sm font-medium">
+            {t('rewards')}
+          </Link>
           <Link href="/family" className="px-2 py-1 font-display text-sm font-medium">
             {t('family')}
           </Link>

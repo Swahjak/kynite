@@ -341,6 +341,80 @@ export async function deleteRoutineAction(
   return idleState;
 }
 
+const fadeSchema = z.object({
+  routineId: z.uuid(),
+  rewardEnabled: z.boolean(),
+});
+
+/**
+ * The fade path, as a one-tap control (research §Decisions 7, FR17).
+ *
+ * The same state transition `updateRoutineAction` performs through its
+ * checkbox, extracted so graduating a routine does not require opening the
+ * whole builder and re-saving every step. It is the same three facts either
+ * way:
+ *
+ * - `rewardEnabled = false` **stamps** `fadedAt` (and re-enabling clears it),
+ *   so "when did this become a habit" is a recorded moment rather than an
+ *   inference from a boolean;
+ * - the routine keeps working — it still appears, still completes, still
+ *   celebrates. Only `starsFor()` returns 0, and only for *this* routine;
+ * - **no star is touched.** The ledger is append-only, so everything the child
+ *   earned from this routine while it paid is still theirs, forever. Fading is
+ *   the system becoming unnecessary, not a reward being withdrawn — which is
+ *   exactly the distinction the token-economy literature says decides whether
+ *   the behaviour survives the token going away.
+ */
+export async function setRoutineRewardAction(
+  _previous: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const principal = await assertCan('routine:write').catch(() => null);
+  if (!principal) return failure('forbidden');
+
+  const parsed = fadeSchema.safeParse({
+    routineId: read(formData, 'routineId'),
+    rewardEnabled: read(formData, 'rewardEnabled') === 'true',
+  });
+  if (!parsed.success) return failure('invalidInput');
+
+  const { routineId, rewardEnabled } = parsed.data;
+  const db = getDb();
+
+  const [existing] = await db
+    .select({ id: routine.id, ownerMemberId: routine.ownerMemberId, fadedAt: routine.fadedAt })
+    .from(routine)
+    .where(and(eq(routine.id, routineId), eq(routine.familyId, principal.familyId)))
+    .limit(1);
+
+  if (!existing) return failure('routineNotFound');
+
+  await db.transaction(async (tx) => {
+    await tx
+      .update(routine)
+      .set({
+        rewardEnabled,
+        fadedAt: rewardEnabled ? null : (existing.fadedAt ?? new Date()),
+        updatedAt: new Date(),
+      })
+      .where(and(eq(routine.id, routineId), eq(routine.familyId, principal.familyId)));
+
+    await publish(
+      {
+        familyId: principal.familyId,
+        type: 'routine.updated',
+        entity: { id: routineId },
+        actor: { ...actorOf(principal), source: 'mobile' },
+        patch: { rewardEnabled },
+      },
+      tx
+    );
+  });
+
+  await revalidateRoutines([existing.ownerMemberId]);
+  return idleState;
+}
+
 const completeSchema = z.object({
   routineId: z.uuid(),
   routineStepId: z.uuid(),

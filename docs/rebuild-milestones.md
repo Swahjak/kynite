@@ -140,7 +140,7 @@ This is the single source of progress truth for the Kynite greenfield rebuild. E
 
 ## M08 — Star ledger + rewards
 
-- [ ] Status
+- [x] Status
 - **Scope:** Build `modules/rewards` on the append-only ledger: stars awarded on completion and via manual/bonus/surprise parent actions; a per-child reward catalogue defaulting to privilege/experience presets with no money category; redemption requests from the hub with parent approval/denial; savings-goal progress for the `savings` horizon and instant redemption for `instant`; and the per-routine fade/graduation path.
 - **Acceptance criteria:**
   - Routes exist: `(app)/rewards` (catalogue + approvals), `(hub)/store`, per-member star chart on the hub.
@@ -153,7 +153,7 @@ This is the single source of progress truth for the Kynite greenfield rebuild. E
   - Flipping `routine.rewardEnabled = false` sets `fadedAt`, stops star awards for that routine only, and renders a graduation badge; other routines are unaffected — integration test.
   - No screen renders more than one child's totals together — Playwright assertion across all reward surfaces.
   - Gate green: `pnpm typecheck && pnpm lint && pnpm test:run`.
-- **Review verdict:** _pending_
+- **Review verdict:** _approved after fixes_ — Opus review 2026-08-06: gates verified independently (565/565 with DB after fixes, 82 e2e); migration 0003 (redemption client_id unique + partial unique (member,reward) WHERE requested) proven against live Postgres — denied rows don't block re-request; append-only AST scan and money-framing rule mutation-verified real; psychology sweep independently clean (neutral denial "Not right now"/"Nu even niet", denial never reaches child surface, no sibling comparison, hopeful dimmed state, no currency). Blockers fixed: concurrent-approval double-spend (lock was on redemption row, not member — reproduced earned 10/spent 20/available −10; now member-row FOR UPDATE + race integration test) and vacuous spendsStars-vs-view pin (compared constant to itself; now regex-extracts view where-clause from schema source, mutation-verified). Also fixed: append-only scan extended to drizzle/*.sql migrations incl. drop-constraint, denial vocabulary added to negative-marking wordlist (mutation-verified). Carry-forwards: redemption:request family-wide per §7 — child can drain sibling's balance (worse than completion:write; amend §7 to own-scope before M12); requiresApproval dead column (wire to instant-horizon auto-approve or drop); reward hard-delete un-spends fulfilled redemptions (consider soft-delete); en "Stars to spend" should match nl framing; instant store leads with available not cumulative total (research Decision 2); no praise moment on approval; google-channels flake unreproduced (9 clean runs).
 
 ## M09 — Timers
 

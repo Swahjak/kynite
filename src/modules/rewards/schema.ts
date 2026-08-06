@@ -8,6 +8,7 @@ import {
   pgTable,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
 import { primaryId, timestamps } from '@/server/db/columns';
@@ -81,12 +82,35 @@ export const redemption = pgTable(
     }),
     /** An approved reward can land on the calendar as a real event. */
     createdEventId: uuid('created_event_id').references(() => event.id, { onDelete: 'set null' }),
+    /**
+     * Idempotency key minted by the client before the request leaves the
+     * device — the same construction `completion.clientId` uses (§4), so the
+     * outbox has one shape rather than two. Nullable because a redemption may
+     * also be written by a path that has no device behind it (seed data, a
+     * future job); `NULLS DISTINCT` makes those rows exempt rather than
+     * colliding with each other.
+     */
+    clientId: text('client_id'),
     ...timestamps,
   },
   (table) => [
     index('redemption_family_status_idx').on(table.familyId, table.status),
     index('redemption_family_member_idx').on(table.familyId, table.memberId),
     check('redemption_cost_stars_non_negative', sql`${table.costStars} >= 0`),
+    // A replayed request (offline outbox, a retried Server Action) is absorbed
+    // by the database, not by a read-then-write check — same as completions.
+    uniqueIndex('redemption_client_id_unique').on(table.clientId),
+    /**
+     * At most one *open* request per (child, reward). This is the double-tap
+     * guard that does not depend on the client remembering anything: two taps
+     * a second apart mint the same `clientId` and collide there, and two taps
+     * from two different devices collide here. Partial on purpose — a reward
+     * that was denied, or already approved, must be requestable again, so only
+     * `requested` rows participate.
+     */
+    uniqueIndex('redemption_open_request_unique')
+      .on(table.memberId, table.rewardId)
+      .where(sql`${table.status} = 'requested'`),
   ]
 );
 

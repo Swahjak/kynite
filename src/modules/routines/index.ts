@@ -103,6 +103,7 @@ export {
   completeStepAction,
   createRoutineAction,
   deleteRoutineAction,
+  setRoutineRewardAction,
   updateRoutineAction,
   type CompleteStepInput,
 } from './actions';
@@ -118,6 +119,7 @@ export {
   type RoutinesPageData,
 } from './page-data';
 
+export { GraduateRoutineButton } from './ui/graduate-routine-button';
 export { RoutineBoard } from './ui/routine-board';
 export { RoutineCard } from './ui/routine-card';
 export { RoutineDialog } from './ui/routine-dialog';
