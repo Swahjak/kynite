@@ -25,6 +25,34 @@ const moduleBoundaryRule = [
   },
 ];
 
+/**
+ * Slice `schema.ts` files are the one place a cross-slice *deep* import is
+ * legitimate: a foreign key needs the referenced table object, and routing that
+ * through a slice's `index.ts` would drag server-only and client code into
+ * drizzle-kit's schema graph (and create import cycles). The exemption is
+ * deliberately narrow — a schema file may import another slice's `schema`, and
+ * nothing else.
+ */
+const schemaBoundaryRule = [
+  'error',
+  {
+    patterns: [
+      {
+        group: [
+          '@/modules/*/*',
+          '!@/modules/*/schema',
+          'src/modules/*/*',
+          '!src/modules/*/schema',
+          '**/modules/*/*',
+          '!**/modules/*/schema',
+        ],
+        message:
+          'A slice schema may deep-import another slice `schema` only (foreign keys). Everything else goes through `@/modules/<slice>`.',
+      },
+    ],
+  },
+];
+
 export default tseslint.config(
   {
     ignores: [
@@ -62,6 +90,11 @@ export default tseslint.config(
     // server-only and client code.
     files: ['tests/**/*.ts', 'tests/**/*.tsx'],
     rules: { 'no-restricted-imports': 'off' },
+  },
+  {
+    // Foreign keys cross slices; see `schemaBoundaryRule` above.
+    files: ['src/modules/*/schema.ts'],
+    rules: { 'no-restricted-imports': schemaBoundaryRule },
   },
   {
     // The drizzle schema barrel is the schema *assembly point*, not a consumer:

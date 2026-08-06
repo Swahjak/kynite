@@ -9,10 +9,10 @@ const fixture = (name: string) => readFileSync(resolve(root, 'tests/fixtures', n
 
 const eslint = new ESLint({ cwd: root });
 
-async function boundaryMessages(fixtureName: string) {
+async function boundaryMessages(fixtureName: string, probe = 'probe.ts') {
   const [result] = await eslint.lintText(fixture(fixtureName), {
     // A path inside src/ so the project config applies (tests/fixtures is ignored).
-    filePath: resolve(root, 'src/modules/__boundary_probe__/probe.ts'),
+    filePath: resolve(root, `src/modules/__boundary_probe__/${probe}`),
     warnIgnored: false,
   });
 
@@ -49,4 +49,29 @@ describe('module boundary lint rule', () => {
 
     expect(messages).toEqual([]);
   });
+
+  it(
+    'lets a slice schema import another slice schema — and nothing else',
+    { timeout: 60_000 },
+    async () => {
+      const messages = await boundaryMessages('schema-cross-import.fixture.ts', 'schema.ts');
+
+      // Only the two non-schema deep imports are reported; the foreign-key
+      // imports of `@/modules/*/schema` are the sanctioned exception.
+      expect(messages).toHaveLength(2);
+      for (const message of messages) {
+        expect(message.message).toMatch(/A slice schema may deep-import another slice `schema`/);
+      }
+    }
+  );
+
+  it(
+    'still bans a cross-slice schema import from a non-schema file',
+    { timeout: 60_000 },
+    async () => {
+      const messages = await boundaryMessages('schema-cross-import.fixture.ts');
+
+      expect(messages).toHaveLength(4);
+    }
+  );
 });

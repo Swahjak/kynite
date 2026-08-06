@@ -76,7 +76,7 @@ This is the single source of progress truth for the Kynite greenfield rebuild. E
 
 ## M04 — DB schema + migrations baseline
 
-- [ ] Status
+- [x] Status
 - **Scope:** Land the complete Drizzle schema from `docs/architecture.md` §3 as slice-owned `modules/*/schema.ts` files with a single generated migration baseline. Covers devices, google accounts, calendars, events (RRULE/RDATE/EXDATE, `recurrenceParentId`, etag, version, soft delete), routines, routine steps, completions, star ledger, rewards, redemptions, share links, push subscriptions, device sessions and `event_log`. Enforce the hard invariants at the database level, not in application code.
 - **Acceptance criteria:**
   - `pnpm db:generate` produces no diff on a clean tree (schema and migrations are in sync).
@@ -89,7 +89,7 @@ This is the single source of progress truth for the Kynite greenfield rebuild. E
   - `event_log` uses `bigserial` primary key with `index(familyId, id)`.
   - Integration tests run against a real Postgres (testcontainer or `pnpm e2e:setup` DB), skipping cleanly when `DATABASE_URL` is absent.
   - Gate green: `pnpm typecheck && pnpm lint && pnpm test:run`.
-- **Review verdict:** _pending_
+- **Review verdict:** _approved_ — Opus review 2026-08-06: all ten criteria verified independently (190/190 with DB; migration idempotent on fresh PG 17; view definition, CHECK constraint, uniques/indexes confirmed by live introspection; architecture §3 fidelity table-by-table with only additive deviations). Test quality praised: exemption-list honesty test, non-vacuous cascade seeding, real-action authorization tests (M03 carry-forward closed). Folded in per review preference: google_account unique relaxed to (familyId, googleUserId) + architecture §3 amended + integration test. Carry-forwards: cross-family composite FK integrity (unique member(family_id,id) + composite FKs) is hard prerequisite before any RLS milestone; M05 OAuth "already linked" lookup must scope by activeFamilyId; NULLS DISTINCT on (calendarId, googleEventId) permits local-not-yet-pushed duplicates — M05 push path must handle.
 
 ## M05 — Google Calendar sync engine
 

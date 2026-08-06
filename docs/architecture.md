@@ -204,10 +204,11 @@ device        = { id, familyId, name, kind:'hub'|'mobile',
                   pairedAt, lastSeenAt, revokedAt|null }   // secret lives in device_session
 
 googleAccount = { id, familyId, ownerMemberId->member,
-                  googleUserId unique, email,
+                  googleUserId, email,
                   accessToken, refreshToken,               // encrypted at rest
                   scopes[], tokenExpiresAt,
-                  status:'active'|'reauth_required' }
+                  status:'active'|'reauth_required',
+                  unique(familyId, googleUserId) }         // (same Google identity may serve multiple families; relaxed M04)
 
 calendar      = { id, familyId, googleAccountId->google_account,
                   googleCalendarId, summary, color,

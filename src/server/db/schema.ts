@@ -10,3 +10,11 @@
  */
 export * from './auth-schema';
 export * from '@/modules/family/schema';
+export * from '@/modules/devices/schema';
+export * from '@/modules/google/schema';
+export * from '@/modules/calendar/schema';
+export * from '@/modules/rewards/schema';
+export * from '@/modules/routines/schema';
+export * from '@/modules/sharing/schema';
+export * from '@/modules/notifications/schema';
+export * from '@/modules/realtime/schema';

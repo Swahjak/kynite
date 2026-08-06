@@ -1,8 +1,14 @@
+import 'server-only';
 import { asc, eq } from 'drizzle-orm';
 import { getDb } from '@/server/db';
 import { family, member, type Family, type Member } from './schema';
 
-/** Reads for the family slice. Server-side only — never imported by a client component. */
+/**
+ * Reads for the family slice. Server-side only — the `server-only` import makes
+ * that a build error rather than a convention: pulling this into a client
+ * component would ship the database client (and its connection string) to the
+ * browser.
+ */
 
 export async function getFamily(familyId: string): Promise<Family | null> {
   const [row] = await getDb().select().from(family).where(eq(family.id, familyId)).limit(1);
