@@ -32,7 +32,7 @@ export default function manifest(): MetadataRoute.Manifest {
     display: 'standalone',
     orientation: 'portrait',
     background_color: '#ffffff',
-    theme_color: '#13ec92',
+    theme_color: '#0040e0',
     lang: routing.defaultLocale,
     dir: 'ltr',
     categories: ['productivity', 'lifestyle'],

@@ -6,7 +6,7 @@ import { DESIGN_ROUTE } from '@e2e/utils/design-page';
  * M02 acceptance criterion: fonts are self-hosted. Nothing may hit
  * fonts.googleapis.com or fonts.gstatic.com at runtime.
  */
-test('serves Lexend, Noto Sans and Material Symbols from our own origin', async ({ page }) => {
+test('serves Hanken Grotesk, Inter and Material Symbols from our own origin', async ({ page }) => {
   const external: string[] = [];
   const fontRequests: string[] = [];
 

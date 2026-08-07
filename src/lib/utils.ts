@@ -21,6 +21,7 @@ import { extendTailwindMerge } from 'tailwind-merge';
  * has to be added here too (asserted by a unit test that reads the stylesheet).
  */
 export const FONT_SIZE_TOKENS = [
+  'display-hub',
   'display-xl',
   'display-lg',
   'display-md',

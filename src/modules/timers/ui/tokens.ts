@@ -11,7 +11,7 @@ import { OVERRUN_PULSE_MS } from '../domain/chime';
 
 /**
  * The countdown digits. `tabular-time` is the design-system utility that sets
- * `font-variant-numeric: tabular-nums` on Lexend (globals.css) — without it
+ * `font-variant-numeric: tabular-nums` on Hanken Grotesk (globals.css) — without it
  * every tick reflows as the glyph widths change, which at this size is the
  * most distracting thing on a wall.
  *

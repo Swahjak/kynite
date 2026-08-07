@@ -25,8 +25,11 @@ export const CELEBRATION_INTENSITIES = ['gentle', 'standard', 'big'] as const;
 
 export type CelebrationIntensity = (typeof CELEBRATION_INTENSITIES)[number];
 
-/** Brand green, brand-dark, gold and two warm neutrals. No red, no white flash. */
-export const CELEBRATION_COLORS = ['#13ec92', '#0d9e61', '#d4a84b', '#a8c4b8', '#e2fbef'] as const;
+/**
+ * Brand indigo, its container tone, the amber accent and two of its light tints
+ * (M19: the stitch palette). No red, no white flash.
+ */
+export const CELEBRATION_COLORS = ['#0040e0', '#2e5bff', '#fea619', '#ffddb8', '#b8c3ff'] as const;
 
 export type CelebrationPreset = {
   particleCount: number;

@@ -6,14 +6,24 @@
 export type Swatch = { name: string; cssVar: string; className: string; note?: string };
 
 export const BRAND_SWATCHES: Swatch[] = [
-  { name: 'brand', cssVar: '--brand', className: 'bg-brand', note: 'Primary #13ec92' },
+  { name: 'brand', cssVar: '--brand', className: 'bg-brand', note: 'Primary indigo #0040e0' },
   { name: 'brand-hover', cssVar: '--brand-hover', className: 'bg-brand-hover' },
   { name: 'brand-dark', cssVar: '--brand-dark', className: 'bg-brand-dark' },
-  { name: 'brand-ink', cssVar: '--brand-ink', className: 'bg-brand-ink', note: 'AA text green' },
+  {
+    name: 'brand-ink',
+    cssVar: '--brand-ink',
+    className: 'bg-brand-ink',
+    note: 'AA on-light brand ink',
+  },
   { name: 'brand-foreground', cssVar: '--brand-foreground', className: 'bg-brand-foreground' },
-  { name: 'gold', cssVar: '--gold', className: 'bg-gold', note: 'Gold #D4A84B' },
+  { name: 'gold', cssVar: '--gold', className: 'bg-gold', note: 'Amber accent #FEA619' },
   { name: 'gold-hover', cssVar: '--gold-hover', className: 'bg-gold-hover' },
-  { name: 'gold-ink', cssVar: '--gold-ink', className: 'bg-gold-ink', note: 'AA text gold' },
+  {
+    name: 'gold-ink',
+    cssVar: '--gold-ink',
+    className: 'bg-gold-ink',
+    note: 'AA on-light amber ink',
+  },
 ];
 
 export const SURFACE_SWATCHES: Swatch[] = [

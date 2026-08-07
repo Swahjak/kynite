@@ -157,7 +157,7 @@ export function DesignShowcase({ initialTheme = 'light' }: { initialTheme?: 'lig
           <Section
             id="brand"
             title="Brand colours"
-            description="Primary #13ec92 and gold #D4A84B, plus the accessible on-light ink variants."
+            description="Primary indigo #0040e0 and amber #FEA619, plus the accessible on-light ink variants."
           >
             <Panel>
               <SwatchGrid swatches={BRAND_SWATCHES} />
@@ -228,7 +228,7 @@ export function DesignShowcase({ initialTheme = 'light' }: { initialTheme?: 'lig
           <Section
             id="typography"
             title="Typography"
-            description="Lexend for display, Noto Sans for body — both self-hosted via next/font."
+            description="Hanken Grotesk for display, Inter for body — both self-hosted via next/font."
           >
             <Panel className="space-y-5">
               {TYPE_SCALE.map((t) => (

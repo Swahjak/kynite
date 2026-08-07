@@ -1,157 +1,76 @@
 'use client';
 
-import { useState } from 'react';
-import {
-  BellIcon,
-  CalendarIcon,
-  HomeIcon,
-  ListChecksIcon,
-  MenuIcon,
-  SettingsIcon,
-  Share2Icon,
-  StarIcon,
-  TabletSmartphoneIcon,
-  TimerIcon,
-  UsersIcon,
-} from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
+import { Icon } from '@/components/ui/icon';
 import { cn } from '@/lib/utils';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet';
-
-type OverflowLink = { href: string; label: string; icon: typeof TimerIcon };
-
-type MobileNavProps = {
-  labels: {
-    today: string;
-    calendar: string;
-    routines: string;
-    rewards: string;
-    settings: string;
-    timers: string;
-    family: string;
-    notifications: string;
-    devices: string;
-    sharing: string;
-    /** The 5th tab and its sheet's title — distinct from `settings`, which
-     *  is only one of the destinations the sheet opens onto. */
-    more: string;
-    /** The `<nav>` landmark's accessible name — a screen reader announcing
-     *  "Settings, navigation" for the whole bottom bar was never right. */
-    mainNavigation: string;
-  };
-};
+import { NavOverflowSheet } from './nav-overflow-sheet';
+import { PRIMARY_NAV, isActiveHref, type NavLabels } from './nav-items';
 
 /**
- * Segment-aware active match: `pathname` carries the locale prefix
- * (`/nl/calendar/week`) while `href` never does (`/calendar`), and a plain
- * `pathname.endsWith(href)` only matches the destination's own root — a week
- * or day sub-route falls out of "active" the moment it grows a segment past
- * the tab's href. Stripping the two-letter locale prefix and requiring a
- * whole-segment match (`===` or a `/`-bounded prefix) keeps every sub-route
- * under a tab active without matching an unrelated route that merely shares a
- * prefix (`/calendar` must not light up for a hypothetical `/calendarish`).
+ * The phone bottom tab bar — `home_light_mode/code.html`.
+ *
+ * Five tabs, glass (`bg-surface/80 backdrop-blur-xl` + `pb-safe`, so it does
+ * not sit under an iOS home indicator), Material Symbols filled on the active
+ * tab, label in caps micro-type.
+ *
+ * M15/NB-6: the parent app's header used to be ten flat links, which overflow a
+ * 390px phone viewport. Below `sm` that nav is replaced by this bar — the four
+ * destinations a parent reaches for daily plus a "More" sheet holding
+ * everything else. M19 restyled it to the mockups and moved it onto the house
+ * icon system: it was the last lucide holdout in the product, and it is the
+ * most-seen nav on phones (docs/rebuild-design-gaps.md §5 root cause 3).
  */
-function isActiveHref(pathname: string, href: string): boolean {
-  const withoutLocale = pathname.replace(/^\/[a-z]{2}(?=\/|$)/, '') || '/';
-  return withoutLocale === href || withoutLocale.startsWith(`${href}/`);
-}
-
-/**
- * M15/NB-6: the parent app's header used to be ten flat links, which overflow
- * a 390px phone viewport (carried forward from M13). Below `sm`, that nav is
- * replaced by a fixed bottom bar with the five destinations a parent reaches
- * for daily (Home, Calendar, Routines, Rewards) plus a "More" sheet holding
- * everything else (Timers, Family, and the settings sub-pages) — the same
- * primary-vs-overflow split the Stitch parent-mobile design uses.
- */
-export function MobileNav({ labels }: MobileNavProps) {
-  const [open, setOpen] = useState(false);
+export function MobileNav({ labels }: { labels: NavLabels }) {
   const pathname = usePathname();
-
-  const overflowLinks: OverflowLink[] = [
-    { href: '/timers', label: labels.timers, icon: TimerIcon },
-    { href: '/family', label: labels.family, icon: UsersIcon },
-    // M16: the settings hub, above the three deep links it also contains.
-    { href: '/settings', label: labels.settings, icon: SettingsIcon },
-    { href: '/settings/notifications', label: labels.notifications, icon: BellIcon },
-    { href: '/settings/devices', label: labels.devices, icon: TabletSmartphoneIcon },
-    { href: '/settings/sharing', label: labels.sharing, icon: Share2Icon },
-  ];
-
-  const primary = [
-    { href: '/today', label: labels.today, icon: HomeIcon },
-    { href: '/calendar', label: labels.calendar, icon: CalendarIcon },
-    { href: '/routines', label: labels.routines, icon: ListChecksIcon },
-    { href: '/rewards', label: labels.rewards, icon: StarIcon },
-  ];
-
-  const isOverflowActive = overflowLinks.some((link) => isActiveHref(pathname, link.href));
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 flex items-stretch justify-around border-t border-border bg-background sm:hidden"
+      className="glass pb-safe fixed inset-x-0 bottom-0 z-40 flex items-stretch justify-around border-t border-border sm:hidden"
       aria-label={labels.mainNavigation}
       data-testid="mobile-nav"
     >
-      {primary.map(({ href, label, icon: Icon }) => {
+      {PRIMARY_NAV.map(({ href, label, icon }) => {
         const active = isActiveHref(pathname, href);
         return (
           <Link
             key={href}
             href={href}
-            className={cn(
-              'flex min-h-12 flex-1 flex-col items-center justify-center gap-0.5 py-2 text-xs font-medium',
-              // `text-brand-ink`, not `text-primary`: the brand green (#13ec92)
-              // is a *fill* colour and reaches 1.46:1 as text on a light
-              // surface. `button.tsx` already made this call for link buttons;
-              // M17's axe sweep found the mobile nav still doing it the wrong
-              // way, because until M17 nothing ran axe at 390px.
-              active ? 'text-brand-ink' : 'text-ink-secondary'
-            )}
+            className={cn(tabClass, active ? tabActiveClass : tabIdleClass)}
             aria-current={active ? 'page' : undefined}
           >
-            <Icon aria-hidden="true" className="size-5" />
-            {label}
+            <Icon name={icon} size="md" filled={active} />
+            <span className="label-overline w-full truncate text-center">{labels[label]}</span>
           </Link>
         );
       })}
-      <Sheet open={open} onOpenChange={setOpen}>
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className={cn(
-            'flex min-h-12 flex-1 flex-col items-center justify-center gap-0.5 py-2 text-xs font-medium',
-            isOverflowActive ? 'text-brand-ink' : 'text-ink-secondary'
-          )}
-          aria-haspopup="dialog"
-          data-testid="mobile-nav-more"
-        >
-          <MenuIcon aria-hidden="true" className="size-5" />
-          {labels.more}
-        </button>
-        <SheetContent side="bottom" data-testid="mobile-nav-sheet">
-          <SheetHeader>
-            <SheetTitle>{labels.more}</SheetTitle>
-          </SheetHeader>
-          <div className="flex flex-col gap-1 p-4 pt-0">
-            {overflowLinks.map(({ href, label, icon: Icon }) => (
-              <SheetClose
-                key={href}
-                render={
-                  <Link
-                    href={href}
-                    className="flex min-h-12 items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-muted"
-                  />
-                }
-              >
-                <Icon aria-hidden="true" className="size-4" />
-                {label}
-              </SheetClose>
-            ))}
-          </div>
-        </SheetContent>
-      </Sheet>
+      <NavOverflowSheet
+        labels={labels}
+        renderTrigger={({ onClick, active }) => (
+          <button
+            type="button"
+            onClick={onClick}
+            className={cn(tabClass, active ? tabActiveClass : tabIdleClass)}
+            aria-haspopup="dialog"
+            data-testid="mobile-nav-more"
+          >
+            <Icon name="more_horiz" size="md" filled={active} />
+            <span className="label-overline w-full truncate text-center">{labels.more}</span>
+          </button>
+        )}
+      />
     </nav>
   );
 }
+
+const tabClass =
+  'flex min-h-14 flex-1 flex-col items-center justify-center gap-1 px-1 py-2 transition-colors duration-200 ease-brand';
+/**
+ * `text-primary`, which the mockups use, is now legible as text: the stitch
+ * indigo is 7.47:1 on the bar's surface where the old brand green was 1.46:1
+ * and had to be swapped for `text-brand-ink` (M17's axe sweep at 390px).
+ * Both tokens now resolve to the same colour, and `text-primary` is the one the
+ * mockup names.
+ */
+const tabActiveClass = 'font-bold text-primary';
+const tabIdleClass = 'text-ink-secondary';

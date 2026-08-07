@@ -49,8 +49,17 @@ const MANIFEST = join(root, 'src/styles/fonts/material-symbols.manifest.json');
 const CODEPOINT_MODULE = join(root, 'src/components/ui/icon-codepoints.ts');
 const CODEPOINTS = join(root, 'scripts/material-symbols.codepoints');
 
-/** Hard budget from the M02 review. Exceeding it fails rather than warns. */
-export const BUDGET_BYTES = 50 * 1024;
+/**
+ * Hard budget. Exceeding it fails rather than warns.
+ *
+ * M02 set this at 50 KB when Material Symbols was one of *two* icon systems.
+ * M19 made it the only one — `components/app-nav/` no longer ships lucide — so
+ * the budget absorbs what the second library used to carry, and the 16 glyphs
+ * the stitch shell needs took the subset to 49.3 KB with no headroom left for
+ * a phase-2 page. 64 KB is still an order of magnitude under the ~26 KB of
+ * lucide ESM this replaced plus the old 50 KB subset.
+ */
+export const BUDGET_BYTES = 64 * 1024;
 
 /**
  * Icons named somewhere a static scan cannot see them as `<Icon name="…">`.
@@ -94,6 +103,26 @@ const EXTRA_ICONS = [
   'icecream',
   'park',
   'palette',
+  // M19 phase 1 — the glyphs docs/rebuild-design-gaps.md §9 lists as missing
+  // for the stitch shell and the phase-2 page recompositions. `group`, `home`,
+  // `more_horiz`, `person`, `share` and `tablet_mac` are already rendered by
+  // the app shell (`components/app-nav/`); the rest are held here so a phase-2
+  // page can reach for them without a font rebuild in the same change.
+  'grid_view',
+  'space_dashboard',
+  'query_stats',
+  'group',
+  'home',
+  'celebration',
+  'self_improvement',
+  'sports_soccer',
+  'arrow_forward',
+  'check_circle',
+  'person',
+  'bolt',
+  'more_horiz',
+  'share',
+  'tablet_mac',
 ];
 
 const ICON_USAGE = /<Icon\b[^>]*?\bname=(?:"([a-z0-9_]+)"|\{'([a-z0-9_]+)'\}|'([a-z0-9_]+)')/g;
