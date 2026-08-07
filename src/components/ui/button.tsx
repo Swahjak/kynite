@@ -18,8 +18,10 @@ const buttonVariants = cva(
           'hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50',
         destructive:
           'bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/15 dark:hover:bg-destructive/25 dark:focus-visible:ring-destructive/40',
-        // `text-primary` is #13ec92, which cannot reach AA on a light surface —
-        // link/quiet text uses the accessible brand ink token instead.
+        // The accessible on-light brand token. Since M19 it resolves to the
+        // primary indigo itself (7.47:1 on white); it stayed a separate token
+        // because it is the one that is *guaranteed* legible as text, and the
+        // brand fill is not obliged to be.
         link: 'text-brand-ink underline-offset-4 hover:underline',
       },
       size: {

@@ -5,7 +5,32 @@
 @custom-variant dark (&:is(.dark *));
 
 /* ---------------------------------------------------------------------------
- * Kynite design tokens — docs/brand-guideline.md (M02).
+ * Kynite design tokens — `docs/design/stitch/` (M19 phase 1).
+ *
+ * DESIGN AUTHORITY / PRIMARY-COLOUR DECISION (M19)
+ * ------------------------------------------------
+ * The stitch mockups are the design authority (owner decision, M19). Their two
+ * `DESIGN.md` sidecars disagree on the primary: `kynite/DESIGN.md` says
+ * **#0040e0** (indigo), `vibrant_kynite/DESIGN.md` says #402ae7 (violet).
+ *
+ * Resolved by majority usage across the mockups themselves:
+ *   #0040e0 → 24 files (23 × `code.html`, incl. every "vibrant_*" screen, + 1 sidecar)
+ *   #402ae7 →  1 file  (`vibrant_kynite/DESIGN.md`, which has no `code.html`)
+ * **#0040e0 wins.** The `vibrant_kynite` sidecar is a stale label: the vibrant
+ * mockups' own embedded Tailwind config emits `"primary":"#0040e0"`.
+ *
+ * The palette below is the Material-3 tonal scheme those mockups embed
+ * (indigo primary #0040e0 / primary-container #2e5bff, amber accent #fea619 /
+ * #855300, 5-step `surface-container-*` ramp on a #f8f9fa background). It is
+ * mapped **onto the existing token names** — `--brand*`, `--gold*`, `--ink*`,
+ * `--line*`, `--cat-*` — so every shadcn/Base-UI component and all 400+ brand
+ * utility call sites restyle without churn.
+ *
+ * Dark mode: the mockups ship no dark palette (every "dark mode" screen embeds
+ * the light config verbatim). It is derived from the M3 *fixed* roles in the
+ * light scheme — the canonical way to obtain the dark scheme from the same
+ * tonal palettes — over the "Deep Charcoal, not pure black" neutral base the
+ * `kynite/DESIGN.md` prose specifies (#0f172a / #1e293b).
  *
  * Layering:
  *   1. `:root` / `.dark`   raw brand tokens + shadcn semantic aliases.
@@ -14,99 +39,110 @@
  *                          `.dark` keeps working at runtime.
  *
  * Contrast: every token pair that carries text is verified at >= 4.5:1 (WCAG
- * AA) against every surface it is used on, in both themes. Where the brand
- * guideline named a shade that fails, the token is darkened/lightened and the
- * deviation is noted inline.
+ * AA) against every surface it is used on, in both themes. Where the mockup
+ * named a shade that fails, the token is darkened/lightened and the deviation
+ * is noted inline.
  * ------------------------------------------------------------------------- */
 
 :root {
-  /* -- Brand ------------------------------------------------------------- */
-  --brand: #13ec92;
-  --brand-hover: #0fd683;
-  --brand-dark: #0d9e61;
-  /* Brand green as *text* on a light surface. #13ec92 and #0d9e61 both fail AA
-     on white (1.6:1 / 3.45:1), so on-light brand text uses this darker green. */
-  --brand-ink: #076e42;
-  --brand-foreground: #10221a;
+  /* -- Brand — M3 primary (indigo) --------------------------------------- */
+  --brand: #0040e0;
+  --brand-hover: #0035be; /* on-primary-fixed-variant */
+  --brand-dark: #001356; /* on-primary-fixed */
+  --brand-container: #2e5bff; /* primary-container */
+  --brand-container-ink: #efefff; /* on-primary-container */
+  /* Unlike the old brand green, indigo *is* legible as text: 7.47:1 on white,
+     so `--brand-ink` is the brand colour itself rather than a darker stand-in.
+     The token is kept because ~100 call sites name it. */
+  --brand-ink: #0040e0;
+  --brand-foreground: #ffffff; /* on-primary */
 
-  --gold: #d4a84b;
-  --gold-hover: #c1953a;
-  --gold-foreground: #10221a;
-  /* Gold as text on a light surface (#d4a84b is 2.2:1 on white). */
-  --gold-ink: #7d5c16;
+  /* -- Accent — M3 secondary (amber). Rewards, streaks, celebration only. -- */
+  --gold: #fea619; /* secondary-container */
+  --gold-hover: #e59200;
+  --gold-foreground: #684000; /* on-secondary-container, 4.60:1 on --gold */
+  --gold-ink: #855300; /* M3 secondary; 6.49:1 on white */
 
-  /* -- Surfaces ---------------------------------------------------------- */
-  --background: #f6f8f7;
+  /* -- Surfaces — M3 5-step tonal ramp ----------------------------------- */
+  --background: #f8f9fa;
   --surface: #ffffff;
   --surface-elevated: #ffffff;
-  --surface-hover: #f0f4f3;
+  --surface-hover: #edeeef;
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #f3f4f5;
+  --surface-container: #edeeef;
+  --surface-container-high: #e7e8e9;
+  --surface-container-highest: #e1e3e4;
 
   /* -- Ink --------------------------------------------------------------- */
-  --ink: #111815;
-  /* Guideline says #618979 (3.67:1) — darkened to reach AA. */
-  --ink-secondary: #42695a;
-  /* Guideline says #9ca3af (2.38:1) — darkened to reach AA. */
-  --ink-muted: #5d6b65;
+  --ink: #191c1d; /* on-surface */
+  --ink-secondary: #434656; /* on-surface-variant */
+  /* M3 `outline` (#747688) is 4.48:1 on white — one notch short of AA, so the
+     muted ink is darkened. `--line` still carries the literal outline tone. */
+  --ink-muted: #63657a;
 
   /* -- Lines ------------------------------------------------------------- */
-  --line: #dbe6e1;
-  --line-subtle: #e6e8e7;
-  --line-focus: #13ec92;
+  --line: #c4c5d9; /* outline-variant */
+  --line-subtle: #e1e3e4; /* surface-variant */
+  --line-focus: #0040e0;
 
   /* -- Status ------------------------------------------------------------ */
-  --success: #15803d;
-  --warning: #c2410c;
-  --error: #b91c1c;
-  --info: #1d4ed8;
-  /* "Happening now" pill. Guideline says red-500 + white (3.76:1) — darkened
-     to red-600 so the white label reaches AA. */
-  --now: #dc2626;
+  --success: #006056; /* M3 tertiary */
+  --warning: #855300; /* M3 secondary */
+  --error: #ba1a1a;
+  --info: #0040e0;
+  --now: #ba1a1a;
   --now-foreground: #ffffff;
 
-  /* -- Category palette (8 colours x bg / border / text / solid) ---------- */
-  --cat-blue-surface: #eff6ff;
-  --cat-blue-border: #60a5fa;
-  --cat-blue-fg: #1d4ed8;
-  --cat-blue-solid: #3b82f6;
+  /* -- Category palette (8 colours x surface / border / text / solid) -----
+     Re-tuned onto the stitch ramp: four categories are anchored on the M3
+     roles the mockups' own "Category Colors" swatch uses (blue = primary,
+     orange = secondary/amber, teal = tertiary, red = error); the other four
+     are generated at the same tones from their hue. Each `surface` is the
+     solid mixed 12% into white, each `border` is the solid itself (the
+     mockups' 4px left rule is a *solid* colour — `event-chip.tsx` keeps the
+     `rounded-lg border-l-4` + tint treatment unchanged), and each `fg` is
+     darkened until it clears AA on its own tint, on `--surface` and on
+     `--background`. */
+  --cat-blue-surface: #e0e8fb;
+  --cat-blue-border: #0040e0;
+  --cat-blue-fg: #0040e0;
+  --cat-blue-solid: #0040e0;
 
-  --cat-purple-surface: #faf5ff;
-  --cat-purple-border: #c084fc;
-  --cat-purple-fg: #7e22ce;
-  --cat-purple-solid: #a855f7;
+  --cat-purple-surface: #ede8fa;
+  --cat-purple-border: #6d3fd4;
+  --cat-purple-fg: #6d3fd4;
+  --cat-purple-solid: #6d3fd4;
 
-  --cat-orange-surface: #fff7ed;
-  --cat-orange-border: #fb923c;
-  /* orange-600 is 3.35:1 on orange-50 — orange-700 used instead. */
-  --cat-orange-fg: #c2410c;
-  --cat-orange-solid: #f97316;
+  --cat-orange-surface: #faf0e0;
+  --cat-orange-border: #d98300;
+  --cat-orange-fg: #9e6000;
+  --cat-orange-solid: #d98300;
 
-  --cat-green-surface: #f0fdf4;
-  --cat-green-border: #22c55e;
-  --cat-green-fg: #15803d;
-  --cat-green-solid: #22c55e;
+  --cat-green-surface: #e6f3ea;
+  --cat-green-border: #2e9b4f;
+  --cat-green-fg: #257c3f;
+  --cat-green-solid: #2e9b4f;
 
-  --cat-red-surface: #fef2f2;
-  --cat-red-border: #f87171;
-  /* red-600 is 4.41:1 on red-50 — red-700 used instead. */
-  --cat-red-fg: #b91c1c;
-  --cat-red-solid: #ef4444;
+  --cat-red-surface: #f7e4e4;
+  --cat-red-border: #ba1a1a;
+  --cat-red-fg: #ba1a1a;
+  --cat-red-solid: #ba1a1a;
 
-  --cat-yellow-surface: #fefce8;
-  --cat-yellow-border: #facc15;
-  --cat-yellow-fg: #a16207;
-  --cat-yellow-solid: #eab308;
+  --cat-yellow-surface: #eef2e0;
+  --cat-yellow-border: #6f8f00;
+  --cat-yellow-fg: #5b7500;
+  --cat-yellow-solid: #6f8f00;
 
-  --cat-pink-surface: #fdf2f8;
-  --cat-pink-border: #f472b6;
-  /* pink-600 is 4.21:1 on pink-50 — pink-700 used instead. */
-  --cat-pink-fg: #be185d;
-  --cat-pink-solid: #ec4899;
+  --cat-pink-surface: #f8e3eb;
+  --cat-pink-border: #c2185b;
+  --cat-pink-fg: #c2185b;
+  --cat-pink-solid: #c2185b;
 
-  --cat-teal-surface: #f0fdfa;
-  --cat-teal-border: #2dd4bf;
-  /* teal-600 is 3.59:1 on teal-50 — teal-700 used instead. */
-  --cat-teal-fg: #0f766e;
-  --cat-teal-solid: #14b8a6;
+  --cat-teal-surface: #e0efee;
+  --cat-teal-border: #007b6e;
+  --cat-teal-fg: #00776b;
+  --cat-teal-solid: #007b6e;
 
   /* -- shadcn / Base UI semantic aliases ---------------------------------- */
   --foreground: var(--ink);
@@ -116,12 +152,13 @@
   --popover-foreground: var(--ink);
   --primary: var(--brand);
   --primary-foreground: var(--brand-foreground);
-  --secondary: #eef3f1;
+  --secondary: var(--surface-container-high);
   --secondary-foreground: var(--ink);
-  --muted: var(--surface-hover);
+  --muted: var(--surface-container);
   --muted-foreground: var(--ink-muted);
-  --accent: #e2fbef;
-  --accent-foreground: var(--brand-ink);
+  /* M3 primary-fixed / on-primary-fixed-variant — 7.23:1. */
+  --accent: #dde1ff;
+  --accent-foreground: #0035be;
   --destructive: var(--error);
   --border: var(--line);
   --input: var(--line);
@@ -142,7 +179,9 @@
   --sidebar-border: var(--line);
   --sidebar-ring: var(--line-focus);
 
-  /* Buttons/inputs/event cards = 12px; cards derive up from there. */
+  /* Buttons/inputs = 12px. The rest of the scale is *explicit* in
+     `@theme inline` below rather than a multiplier of this — see the note
+     there. */
   --radius: 0.75rem;
 
   /* -- Motion durations (docs/brand-guideline.md "Duration Scale") -------- */
@@ -153,82 +192,93 @@
 }
 
 .dark {
-  --brand: #13ec92;
-  --brand-hover: #0fd683;
-  --brand-dark: #0d9e61;
-  --brand-ink: #13ec92;
-  --brand-foreground: #10221a;
+  /* M3 dark roles derived from the light scheme's *fixed* tones:
+     dark primary = inverse-primary, dark on-primary = on-primary-fixed,
+     dark primary-container = on-primary-fixed-variant, and so on. */
+  --brand: #b8c3ff; /* inverse-primary */
+  --brand-hover: #dde1ff;
+  --brand-dark: #8fa0f5;
+  --brand-container: #0035be;
+  --brand-container-ink: #dde1ff;
+  --brand-ink: #b8c3ff;
+  --brand-foreground: #001356; /* on-primary-fixed */
 
-  --gold: #d4a84b;
-  --gold-hover: #c1953a;
-  --gold-foreground: #10221a;
-  --gold-ink: #e2bd72;
+  --gold: #ffb95f; /* secondary-fixed-dim */
+  --gold-hover: #ffddb8;
+  --gold-foreground: #2a1700; /* on-secondary-fixed */
+  --gold-ink: #ffb95f;
 
-  --background: #10221a;
-  --surface: #1c2e26;
-  --surface-elevated: #253830;
-  --surface-hover: #2f453b;
+  /* "Deep Charcoal base rather than pure black … Surfaces use #1E293B"
+     (docs/design/stitch/.../kynite/DESIGN.md, "Neutral Logic"). */
+  --background: #0f172a;
+  --surface: #1e293b;
+  --surface-elevated: #273347;
+  --surface-hover: #273347;
+  --surface-container-lowest: #0b1220;
+  --surface-container-low: #172033;
+  --surface-container: #1e293b;
+  --surface-container-high: #273347;
+  --surface-container-highest: #313d52;
 
-  --ink: #ffffff;
-  /* Guideline says #8baea0 — 4.25:1 on --surface-hover, lifted to pass AA. */
-  --ink-secondary: #a8c4b8;
-  /* Guideline says #6b7280 — 2.96:1 on --surface, lifted to pass AA. */
-  --ink-muted: #9dbdb0;
+  --ink: #e6e8ef;
+  --ink-secondary: #c4c5d9;
+  --ink-muted: #a3a6bd;
 
-  --line: #2a3831;
-  --line-subtle: #374740;
-  --line-focus: #13ec92;
+  --line: #33415a;
+  --line-subtle: #273347;
+  --line-focus: #b8c3ff;
 
-  --success: #4ade80;
-  --warning: #fb923c;
-  --error: #f87171;
-  --info: #60a5fa;
-  /* Dark "now" pill flips to dark-on-light rather than white-on-red. */
-  --now: #f87171;
-  --now-foreground: #10221a;
+  --success: #4fdbc8; /* tertiary-fixed-dim */
+  --warning: #ffb95f;
+  --error: #ffb4ab;
+  --info: #b8c3ff;
+  /* The dark "now" marker flips to dark-on-light rather than white-on-red. */
+  --now: #ffb4ab;
+  --now-foreground: #690005;
 
-  /* Dark category surfaces are the `-900 / 20%` tints from the guideline,
-     pre-composited over --surface so they stay deterministic for contrast
-     tooling and for stacking on either --background or --card. */
-  --cat-blue-surface: #1c303a;
-  --cat-blue-border: #60a5fa;
-  --cat-blue-fg: #60a5fa;
-  --cat-blue-solid: #3b82f6;
+  /* Dark category tints are the solid mixed 80% into --surface, kept as literal
+     hexes (not `color-mix`) so they stay deterministic for contrast tooling and
+     for stacking on either --background or --card. Each `fg` is lightened until
+     it clears AA on its own tint, on --surface and on --background. */
+  --cat-blue-surface: #182e5c;
+  --cat-blue-border: #4070e8;
+  --cat-blue-fg: #7094ee;
+  --cat-blue-solid: #0040e0;
 
-  --cat-purple-surface: #282a39;
-  --cat-purple-border: #c084fc;
-  --cat-purple-fg: #c084fc;
-  --cat-purple-solid: #a855f7;
+  --cat-purple-surface: #2e2d5a;
+  --cat-purple-border: #926fdf;
+  --cat-purple-fg: #a68ae5;
+  --cat-purple-solid: #6d3fd4;
 
-  --cat-orange-surface: #2f2e22;
-  --cat-orange-border: #fb923c;
-  --cat-orange-fg: #fb923c;
-  --cat-orange-solid: #f97316;
+  --cat-orange-surface: #433b2f;
+  --cat-orange-border: #e2a240;
+  --cat-orange-fg: #df9729;
+  --cat-orange-solid: #d98300;
 
-  --cat-green-surface: #1a3527;
-  --cat-green-border: #4ade80;
-  --cat-green-fg: #4ade80;
-  --cat-green-solid: #22c55e;
+  --cat-green-surface: #21403f;
+  --cat-green-border: #62b47b;
+  --cat-green-fg: #64b57d;
+  --cat-green-solid: #2e9b4f;
 
-  --cat-red-surface: #302b24;
-  --cat-red-border: #f87171;
-  --cat-red-fg: #f87171;
-  --cat-red-solid: #ef4444;
+  --cat-red-surface: #3d2634;
+  --cat-red-border: #cb5353;
+  --cat-red-fg: #d77a7a;
+  --cat-red-solid: #ba1a1a;
 
-  --cat-yellow-surface: #2d3122;
-  --cat-yellow-border: #facc15;
-  --cat-yellow-fg: #facc15;
-  --cat-yellow-solid: #eab308;
+  --cat-yellow-surface: #2e3d2f;
+  --cat-yellow-border: #93ab40;
+  --cat-yellow-fg: #94ac42;
+  --cat-yellow-solid: #6f8f00;
 
-  --cat-pink-surface: #312a2c;
-  --cat-pink-border: #f472b6;
-  --cat-pink-fg: #f472b6;
-  --cat-pink-solid: #ec4899;
+  --cat-pink-surface: #3f2641;
+  --cat-pink-border: #d15284;
+  --cat-pink-fg: #db779e;
+  --cat-pink-solid: #c2185b;
 
-  --cat-teal-surface: #1a342d;
-  --cat-teal-border: #2dd4bf;
-  --cat-teal-fg: #2dd4bf;
-  --cat-teal-solid: #14b8a6;
+  --cat-teal-surface: #183945;
+  --cat-teal-border: #409c92;
+  --cat-teal-fg: #5caba2;
+  --cat-teal-solid: #007b6e;
 
   --foreground: var(--ink);
   --card: var(--surface);
@@ -237,15 +287,14 @@
   --popover-foreground: var(--ink);
   --primary: var(--brand);
   --primary-foreground: var(--brand-foreground);
-  --secondary: var(--surface-elevated);
+  --secondary: var(--surface-container-high);
   --secondary-foreground: var(--ink);
-  --muted: var(--surface-hover);
+  --muted: var(--surface-container-high);
   --muted-foreground: var(--ink-muted);
-  --accent: #17352a;
-  --accent-foreground: var(--brand-ink);
-  /* Not var(--error): destructive text sits on a 15% tint of itself, where
-     #f87171 only reaches 3.9:1. #fecaca (red-200) clears AA on every surface. */
-  --destructive: #fecaca;
+  /* M3 dark primary-container / on-primary-container — 7.23:1. */
+  --accent: #0035be;
+  --accent-foreground: #dde1ff;
+  --destructive: var(--error);
   --border: var(--line);
   --input: var(--line-subtle);
   --ring: var(--line-focus);
@@ -267,23 +316,36 @@
 @theme {
   /* Fonts. The `--font-*-src` vars are injected by next/font (src/lib/fonts.ts);
      the `-ext` families are per-glyph fallbacks for Latin Extended. */
-  --font-sans:
-    var(--font-noto-sans), var(--font-noto-sans-ext), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), var(--font-inter-ext), ui-sans-serif, system-ui, sans-serif;
   --font-body: var(--font-sans);
-  --font-display: var(--font-lexend), var(--font-lexend-ext), ui-sans-serif, system-ui, sans-serif;
+  --font-display:
+    var(--font-hanken-grotesk), var(--font-hanken-grotesk-ext), ui-sans-serif, system-ui, sans-serif;
   --font-heading: var(--font-display);
   --font-icon: var(--font-material-symbols);
 
-  /* Type scale — docs/brand-guideline.md "Type Scale". */
+  /* Type scale — the stitch `fontSize` map, keeping this codebase's token
+     *names* so no page code churns:
+       display-hub ← display-hub 72px   h2       ← headline-lg-mobile 24px
+       h1          ← headline-lg 32px   h3       ← headline-md 20px
+       body-lg/body/body-sm ← body-lg 18 / body-md 16 / UI label 14
+       overline    ← label-caps 12px/0.05em
+     `display-xl`/`display-lg`/`display-md` stay as the wall-hub steps above
+     `h1` (DESIGN.md "Display L 48 / Display M 36" are the *mobile* sizes;
+     `display-md` is pinned at 36px by tests/unit/timers/legibility.test.ts). */
+  --text-display-hub: 4.5rem;
+  --text-display-hub--line-height: 1.111;
+  --text-display-hub--font-weight: 800;
+  --text-display-hub--letter-spacing: -0.04em;
+
   --text-display-xl: 5rem;
   --text-display-xl--line-height: 1;
-  --text-display-xl--font-weight: 900;
-  --text-display-xl--letter-spacing: -0.03em;
+  --text-display-xl--font-weight: 800;
+  --text-display-xl--letter-spacing: -0.04em;
 
   --text-display-lg: 4rem;
   --text-display-lg--line-height: 1.1;
   --text-display-lg--font-weight: 800;
-  --text-display-lg--letter-spacing: -0.025em;
+  --text-display-lg--letter-spacing: -0.03em;
 
   --text-display-md: 2.25rem;
   --text-display-md--line-height: 1.15;
@@ -291,12 +353,12 @@
   --text-display-md--letter-spacing: -0.02em;
 
   --text-h1: 2rem;
-  --text-h1--line-height: 1.2;
+  --text-h1--line-height: 1.25;
   --text-h1--font-weight: 700;
   --text-h1--letter-spacing: -0.02em;
 
   --text-h2: 1.5rem;
-  --text-h2--line-height: 1.3;
+  --text-h2--line-height: 1.333;
   --text-h2--font-weight: 700;
   --text-h2--letter-spacing: -0.01em;
 
@@ -305,7 +367,7 @@
   --text-h3--font-weight: 600;
 
   --text-body-lg: 1.125rem;
-  --text-body-lg--line-height: 1.5;
+  --text-body-lg--line-height: 1.556;
   --text-body-lg--font-weight: 400;
 
   --text-body: 1rem;
@@ -317,19 +379,22 @@
   --text-body-sm--font-weight: 400;
 
   --text-caption: 0.75rem;
-  --text-caption--line-height: 1.4;
+  --text-caption--line-height: 1.333;
   --text-caption--font-weight: 500;
 
-  --text-overline: 0.625rem;
-  --text-overline--line-height: 1.2;
+  --text-overline: 0.75rem;
+  --text-overline--line-height: 1.333;
   --text-overline--font-weight: 700;
-  --text-overline--letter-spacing: 0.08em;
+  --text-overline--letter-spacing: 0.05em;
 
-  /* Shadows. */
-  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px rgb(0 0 0 / 0.1);
-  --shadow-2xl: 0 25px 50px rgb(0 0 0 / 0.25);
+  /* Elevation — the stitch "Tonal Layering + Soft Ambient Shadows" scale.
+     Level 1 (cards) is a 4px blur; level 2 (modals/popovers) a 12px blur at
+     0.1 with a 4px Y-offset; the glass header carries `--shadow-glass`. */
+  --shadow-sm: 0 1px 2px rgb(15 23 42 / 0.04), 0 2px 4px rgb(15 23 42 / 0.04);
+  --shadow-md: 0 2px 4px rgb(15 23 42 / 0.04), 0 4px 12px rgb(15 23 42 / 0.1);
+  --shadow-lg: 0 4px 12px rgb(15 23 42 / 0.1), 0 12px 32px rgb(15 23 42 / 0.12);
+  --shadow-2xl: 0 25px 50px rgb(15 23 42 / 0.25);
+  --shadow-glass: 0 1px 8px rgb(15 23 42 / 0.04);
 
   /* Motion. */
   --ease-brand: ease;
@@ -365,6 +430,8 @@
   --color-brand-dark: var(--brand-dark);
   --color-brand-ink: var(--brand-ink);
   --color-brand-foreground: var(--brand-foreground);
+  --color-brand-container: var(--brand-container);
+  --color-brand-container-ink: var(--brand-container-ink);
 
   --color-gold: var(--gold);
   --color-gold-hover: var(--gold-hover);
@@ -374,6 +441,11 @@
   --color-surface: var(--surface);
   --color-surface-elevated: var(--surface-elevated);
   --color-surface-hover: var(--surface-hover);
+  --color-surface-container-lowest: var(--surface-container-lowest);
+  --color-surface-container-low: var(--surface-container-low);
+  --color-surface-container: var(--surface-container);
+  --color-surface-container-high: var(--surface-container-high);
+  --color-surface-container-highest: var(--surface-container-highest);
 
   --color-ink: var(--ink);
   --color-ink-secondary: var(--ink-secondary);
@@ -438,13 +510,17 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  /* Radius. Explicit values, not multipliers of `--radius`: the multiplier
+     scale drifted to 21.6 / 26.4 / 31.2px where the mockups use 16 / 24px and
+     every chip is a pill (docs/rebuild-design-gaps.md S6). Cards sit at `xl`
+     (16px), hero/feature cards at `2xl` (24px), pills at `4xl`. */
+  --radius-sm: 0.25rem; /* 4px  — checkboxes, tiny tags */
+  --radius-md: 0.5rem; /* 8px  — inputs, small buttons */
+  --radius-lg: 0.75rem; /* 12px — buttons, event chips (= --radius) */
+  --radius-xl: 1rem; /* 16px — cards */
+  --radius-2xl: 1.5rem; /* 24px — hero cards, sheets, the FAB */
+  --radius-3xl: 2rem; /* 32px — full-bleed panels */
+  --radius-4xl: 9999px; /* pill — chips, avatars, segmented controls */
 }
 
 /* ---------------------------------------------------------------------------
@@ -467,6 +543,39 @@
   font-weight: var(--text-overline--font-weight);
   letter-spacing: var(--text-overline--letter-spacing);
   text-transform: uppercase;
+}
+
+/* Safe-area insets for the fixed chrome on a notched phone (the mockups'
+ * `pt-safe` / `pb-safe`). Without these the bottom tab bar sits under the home
+ * indicator on iOS. */
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Glassmorphic chrome. The mockups use this for exactly two things — the
+ * sticky top header and the mobile bottom bar — so it is a utility rather than
+ * a per-component class soup: `background: rgba(surface, .8); backdrop-filter:
+ * blur(12px)` (docs/design/stitch/.../code.html `.glass`, and DESIGN.md
+ * "Elevation & Depth → Glassmorphism").
+ *
+ * `color-mix` rather than a hard-coded rgba so the same utility works in both
+ * themes off `--surface`; the `@supports` fallback is opaque, because a blurred
+ * transparent bar with no blur is unreadable. */
+@utility glass {
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-glass);
+}
+
+@supports not (backdrop-filter: blur(12px)) {
+  .glass {
+    background: var(--surface);
+  }
 }
 
 /* Material Symbols Outlined — outlined (default) and filled variants. */

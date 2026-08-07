@@ -1,7 +1,13 @@
 import localFont from 'next/font/local';
 
 /**
- * Self-hosted brand fonts (docs/brand-guideline.md "Typography"/"Iconography").
+ * Self-hosted brand fonts — `docs/design/stitch/` (M19 phase 1).
+ *
+ * **Hanken Grotesk** for structural elements (display, headings, labels,
+ * buttons, tabular clocks) and **Inter** for reading copy, as declared by every
+ * stitch mockup's embedded `fontFamily` map and by `kynite/DESIGN.md`. These
+ * replace Lexend / Noto Sans, which came from the superseded green design
+ * system (docs/rebuild-design-gaps.md §1).
  *
  * The .woff2 files live in `src/styles/fonts` and are served from our own
  * origin — the app never issues a runtime request to fonts.googleapis.com or
@@ -14,16 +20,17 @@ import localFont from 'next/font/local';
  *
  * The main display/body fonts set `fallback: []` and `adjustFontFallback: false`
  * so next/font doesn't embed a generic (or metric-adjusted) fallback inside the
- * `--font-lexend` / `--font-noto-sans` CSS variables themselves. If it did, the
- * embedded generic would sit *before* the `-ext` family once globals.css chains
- * `var(--font-lexend), var(--font-lexend-ext), ui-sans-serif, ...` — making the
- * ext family (and its latin-ext woff2) unreachable by the CSS font-matching
- * algorithm. The full fallback chain is built explicitly in globals.css instead.
+ * `--font-hanken-grotesk` / `--font-inter` CSS variables themselves. If it did,
+ * the embedded generic would sit *before* the `-ext` family once globals.css
+ * chains `var(--font-hanken-grotesk), var(--font-hanken-grotesk-ext), …` —
+ * making the ext family (and its latin-ext woff2) unreachable by the CSS
+ * font-matching algorithm. The full fallback chain is built explicitly in
+ * globals.css instead.
  */
 
 export const fontDisplay = localFont({
-  src: './../styles/fonts/lexend-latin.woff2',
-  variable: '--font-lexend',
+  src: './../styles/fonts/hanken-grotesk-latin.woff2',
+  variable: '--font-hanken-grotesk',
   weight: '100 900',
   style: 'normal',
   display: 'swap',
@@ -33,8 +40,8 @@ export const fontDisplay = localFont({
 });
 
 export const fontDisplayExt = localFont({
-  src: './../styles/fonts/lexend-latin-ext.woff2',
-  variable: '--font-lexend-ext',
+  src: './../styles/fonts/hanken-grotesk-latin-ext.woff2',
+  variable: '--font-hanken-grotesk-ext',
   weight: '100 900',
   style: 'normal',
   display: 'swap',
@@ -43,8 +50,8 @@ export const fontDisplayExt = localFont({
 });
 
 export const fontBody = localFont({
-  src: './../styles/fonts/noto-sans-latin.woff2',
-  variable: '--font-noto-sans',
+  src: './../styles/fonts/inter-latin.woff2',
+  variable: '--font-inter',
   weight: '100 900',
   style: 'normal',
   display: 'swap',
@@ -54,8 +61,8 @@ export const fontBody = localFont({
 });
 
 export const fontBodyExt = localFont({
-  src: './../styles/fonts/noto-sans-latin-ext.woff2',
-  variable: '--font-noto-sans-ext',
+  src: './../styles/fonts/inter-latin-ext.woff2',
+  variable: '--font-inter-ext',
   weight: '100 900',
   style: 'normal',
   display: 'swap',

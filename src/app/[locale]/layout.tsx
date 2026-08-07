@@ -28,7 +28,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   // Matches both manifests, so the installed title bar is brand green.
-  themeColor: '#13ec92',
+  themeColor: '#0040e0',
   // A wall tablet and a phone both want the full display; neither wants a
   // pinch-zoom that a small hand can trigger by accident.
   width: 'device-width',

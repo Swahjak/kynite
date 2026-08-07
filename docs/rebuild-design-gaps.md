@@ -263,3 +263,13 @@ diagnosis is actually true.
 4. Root cause #4 (marketing/auth/share) — cheap, high first-impression value.
 5. Root causes #5, #6 as a single pass over `card.tsx` and the radius scale.
 6. Root cause #7 last, and only after a product call.
+
+---
+
+**M19 decision (phase 1):** the stitch mockups are the design authority, and the
+primary is **#0040e0** — it appears in 24 files under `docs/design/stitch/`
+(23 × `code.html`, including every `vibrant_*` screen, plus `kynite/DESIGN.md`)
+against 1 for #402ae7 (`vibrant_kynite/DESIGN.md`, which ships no `code.html`).
+Implemented in `src/app/globals.css` with Hanken Grotesk / Inter
+(`src/lib/fonts.ts`), a fixed 4/8/12/16/24/32/pill radius scale, and the
+category ramp re-tuned onto it.

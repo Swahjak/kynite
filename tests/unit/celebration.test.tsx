@@ -73,8 +73,8 @@ describe('presets', () => {
       const red = Number.parseInt(r, 16);
       const green = Number.parseInt(g, 16);
       const blue = Number.parseInt(b, 16);
-      // Red hue = dominant red with both other channels dark. Gold
-      // (#d4a84b) has a bright green channel and is not that.
+      // Red hue = dominant red with both other channels dark. Amber
+      // (#fea619) has a bright green channel and is not that.
       expect(red > 150 && green < 110 && blue < 110).toBe(false);
     }
   });
