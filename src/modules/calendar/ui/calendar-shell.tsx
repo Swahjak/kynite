@@ -105,6 +105,21 @@ export function CalendarShell({
 
   const onSelect = canWrite ? openEdit : undefined;
 
+  /**
+   * Month "+N" → that day, in day view (M18).
+   *
+   * A real navigation rather than a client-side view switch, because the day
+   * the parent tapped is almost never the anchor the month view is centred on
+   * — `?date=` is what moves it, and that needs the server round trip the
+   * arrows already pay for.
+   */
+  const openDay = useCallback(
+    (dayKey: string) => {
+      router.push(`/calendar?view=day&date=${dayKey}`);
+    },
+    [router]
+  );
+
   const heading =
     view === 'month'
       ? format.dateTime(anchor, { month: 'long', year: 'numeric' })
@@ -186,6 +201,7 @@ export function CalendarShell({
             anchor={anchor}
             today={now}
             onSelect={onSelect}
+            onOpenDay={openDay}
           />
         ) : view === 'agenda' ? (
           <AgendaView

@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { getSessionCookie } from 'better-auth/cookies';
 import createMiddleware from 'next-intl/middleware';
+import { CALLBACK_URL_PARAM, sanitizeCallbackUrl } from '@/lib/callback-url';
 import { DEVICE_SESSION_COOKIE } from '@/lib/device-session';
 import { routing } from '@/i18n/routing';
 
@@ -130,8 +131,22 @@ export default function proxy(request: NextRequest): NextResponse {
 
   if (section && PROTECTED_SECTIONS.has(section) && !getSessionCookie(request)) {
     const url = request.nextUrl.clone();
+    const intended = `${request.nextUrl.pathname}${request.nextUrl.search}`;
     url.pathname = `/${locale}/sign-in`;
+    // M18: the sign-in URL starts with an empty query — the intended URL's
+    // parameters have no business sitting loose on the sign-in form — and the
+    // whole intended destination, *query string included*, is then carried
+    // across inside `?callbackUrl=`. Preserving it is the point: a parent
+    // deep-linked to `/today?date=2026-08-14` has to land back on that day and
+    // not on today. It is re-validated as a relative path on the
+    // way out (`lib/callback-url.ts`), which is what keeps a value this proxy
+    // wrote and a value an attacker put in a link indistinguishable *and*
+    // harmless.
     url.search = '';
+    const callbackUrl = sanitizeCallbackUrl(intended);
+    if (callbackUrl && callbackUrl !== `/${locale}/sign-in`) {
+      url.searchParams.set(CALLBACK_URL_PARAM, callbackUrl);
+    }
     return NextResponse.redirect(url);
   }
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useFormatter } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { dayKeysOf } from '../domain/expand';
 import { toDateKey, toWall } from '../domain/zone';
@@ -23,11 +23,29 @@ export type MonthViewProps = {
   anchor: Date;
   today?: Date | null;
   onSelect?: (event: CalendarEvent) => void;
+  /**
+   * "+N" opens that day (M18). The count used to be a static `<span>`, which
+   * made every event past the third row unreachable from month view — there
+   * was no gesture, anywhere, that revealed them. Rather than reproduce
+   * legacy's "all events for this day" modal, the count navigates to the day
+   * view, which is the surface that already renders exactly that and does it
+   * at full size.
+   */
+  onOpenDay?: (dayKey: string) => void;
 };
 
 const MAX_ROWS_PER_CELL = 3;
 
-export function MonthView({ days, events, timeZone, anchor, today, onSelect }: MonthViewProps) {
+export function MonthView({
+  days,
+  events,
+  timeZone,
+  anchor,
+  today,
+  onSelect,
+  onOpenDay,
+}: MonthViewProps) {
+  const t = useTranslations('calendar');
   const format = useFormatter();
   const anchorMonth = toWall(anchor, timeZone).month;
   const todayKey = today ? toDateKey(toWall(today, timeZone)) : null;
@@ -88,11 +106,25 @@ export function MonthView({ days, events, timeZone, anchor, today, onSelect }: M
                 >
                   {format.dateTime(day, { day: 'numeric' })}
                 </span>
-                {dayEvents.length > MAX_ROWS_PER_CELL && (
-                  <span className="text-caption text-ink-muted">
-                    +{dayEvents.length - MAX_ROWS_PER_CELL}
-                  </span>
-                )}
+                {dayEvents.length > MAX_ROWS_PER_CELL &&
+                  (onOpenDay ? (
+                    <button
+                      type="button"
+                      data-testid="month-more"
+                      data-day={key}
+                      aria-label={t('month.openDay', {
+                        date: format.dateTime(day, { day: 'numeric', month: 'long' }),
+                      })}
+                      onClick={() => onOpenDay(key)}
+                      className="rounded px-1 text-caption text-ink-muted underline-offset-2 hover:text-ink hover:underline focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
+                    >
+                      {t('month.more', { count: dayEvents.length - MAX_ROWS_PER_CELL })}
+                    </button>
+                  ) : (
+                    <span className="text-caption text-ink-muted">
+                      {t('month.more', { count: dayEvents.length - MAX_ROWS_PER_CELL })}
+                    </span>
+                  ))}
               </div>
 
               <div className="flex min-w-0 flex-col gap-0.5">

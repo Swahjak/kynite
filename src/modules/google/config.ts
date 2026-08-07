@@ -16,12 +16,9 @@ import { parseEncryptionKey } from './crypto';
  * list*, which `calendar.events` alone cannot do. `openid email profile`
  * identifies the linked account.
  */
-export const GOOGLE_SCOPES = [
-  'openid',
-  'email',
-  'profile',
-  'https://www.googleapis.com/auth/calendar',
-] as const;
+export const CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar';
+
+export const GOOGLE_SCOPES = ['openid', 'email', 'profile', CALENDAR_SCOPE] as const;
 
 /**
  * Google's endpoints — or, when `GOOGLE_API_BASE_URL` is set, the same paths

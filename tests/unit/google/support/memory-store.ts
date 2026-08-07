@@ -78,6 +78,8 @@ const emptyMapped = (googleEventId: string): MappedEvent => ({
   recurringEventId: null,
   etag: null,
   updatedAtRemote: null,
+  ownerMemberId: null,
+  attendeeMemberIds: [],
 });
 
 export function createMemoryStore(log: CallLog = []): MemoryStore {
@@ -133,7 +135,16 @@ export function createMemoryStore(log: CallLog = []): MemoryStore {
       const existing = findRow(calendar.id, input.googleEventId);
 
       if (existing) {
-        existing.mapped = input;
+        existing.mapped = {
+          ...input,
+          // Mirrors the drizzle store's additive rule (`store.ts`): a pass that
+          // resolved nobody leaves the existing attribution alone.
+          ownerMemberId: input.ownerMemberId ?? existing.mapped.ownerMemberId,
+          attendeeMemberIds:
+            input.attendeeMemberIds.length > 0
+              ? input.attendeeMemberIds
+              : existing.mapped.attendeeMemberIds,
+        };
         existing.etag = input.etag;
         existing.updatedAtRemote = input.updatedAtRemote;
         existing.deletedAt = null;

@@ -146,16 +146,59 @@ test.describe('signed-in redirect', () => {
 });
 
 test.describe('app guard', () => {
-  test('sends an unauthenticated visitor to sign-in', async ({ page }) => {
+  test('sends an unauthenticated visitor to sign-in, remembering where they were going', async ({
+    page,
+  }) => {
     await page.goto('/nl/family');
 
-    await expect(page).toHaveURL(/\/nl\/sign-in$/);
+    // M18: the destination survives the bounce. Before this the proxy cleared
+    // the query string outright (`url.search = ''`), so a parent who tapped a
+    // link to a settings page from an email signed in and landed somewhere
+    // else entirely.
+    await expect(page).toHaveURL(/\/nl\/sign-in\?callbackUrl=%2Fnl%2Ffamily$/);
     await expect(page.getByRole('heading', { name: 'Inloggen' })).toBeVisible();
+    await expect(page.getByTestId('callback-url')).toHaveValue('/nl/family');
   });
 
   test('keeps every (app) section closed', async ({ page }) => {
     await page.goto('/nl/today');
 
-    await expect(page).toHaveURL(/\/nl\/sign-in$/);
+    await expect(page).toHaveURL(/\/nl\/sign-in\?callbackUrl=%2Fnl%2Ftoday$/);
+  });
+
+  test('returns the parent to the page they asked for after signing in', async ({ page }) => {
+    const email = await signUp(page, `Familie Callback ${Date.now()}`);
+    await expect(page).toHaveURL(/\/nl\/family$/);
+
+    // Sign out by hand rather than through the button: this test is about the
+    // *guard*, and the fastest honest way to be anonymous again is to be
+    // anonymous again.
+    await page.context().clearCookies();
+
+    await page.goto('/nl/settings/devices');
+    await expect(page).toHaveURL(/callbackUrl=%2Fnl%2Fsettings%2Fdevices$/);
+
+    await page.getByLabel('E-mailadres').fill(email);
+    await page.getByLabel('Wachtwoord').fill(PASSWORD);
+    await page.getByRole('button', { name: 'Inloggen' }).click();
+
+    await expect(page).toHaveURL(/\/nl\/settings\/devices$/);
+  });
+
+  test('refuses a callbackUrl pointing at another origin', async ({ page }) => {
+    const email = await signUp(page, `Familie OpenRedirect ${Date.now()}`);
+    await page.context().clearCookies();
+
+    // The parameter is attacker-controllable — anybody can send a household a
+    // link with any value on it — so an absolute URL must be dropped rather
+    // than followed.
+    await page.goto('/nl/sign-in?callbackUrl=https%3A%2F%2Fevil.example%2Ftake-over');
+    await expect(page.getByTestId('callback-url')).toHaveCount(0);
+
+    await page.getByLabel('E-mailadres').fill(email);
+    await page.getByLabel('Wachtwoord').fill(PASSWORD);
+    await page.getByRole('button', { name: 'Inloggen' }).click();
+
+    await expect(page).toHaveURL(/\/nl\/family$/);
   });
 });

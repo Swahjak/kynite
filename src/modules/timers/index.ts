@@ -14,6 +14,7 @@ export { timer, type Timer } from './schema';
 export {
   DEFAULT_WARNING_LEAD_SECONDS,
   DURATION_PRESETS,
+  EXTEND_PRESET_MINUTES,
   MAX_DURATION_SECONDS,
   OVERRUN_VISIBLE_SECONDS,
   WARNING_LEAD_PRESETS,
@@ -61,13 +62,16 @@ export {
 export {
   idleState,
   type ActionState,
+  type ExtendTimerState,
   type StartTimerState,
   type StopTimerState,
 } from './action-state';
 
 export {
+  extendTimerAction,
   startTimerAction,
   stopTimerAction,
+  type ExtendTimerInput,
   type StartTimerInput,
   type StopTimerInput,
 } from './actions';

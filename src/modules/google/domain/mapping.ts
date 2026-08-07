@@ -1,9 +1,12 @@
 import { parseRecurrence, serializeRecurrence } from './recurrence';
 import type {
+  CalendarSyncState,
   GoogleEventDateTime,
+  GoogleEventPerson,
   GoogleEventResource,
   GoogleEventWrite,
   MappedEvent,
+  MemberDirectory,
 } from './types';
 
 /**
@@ -52,6 +55,105 @@ function parseInstant(value: GoogleEventDateTime | undefined, label: string): Da
 }
 
 /**
+ * Google `eventType` values that are a person's *status*, not an appointment
+ * (M18): "working from home this week", "focus time 09:00–11:00", "out of
+ * office". Google emits them into the ordinary events feed, so without this
+ * filter a parent with a corporate calendar puts a full-width "Working
+ * location: Home" block on the family's wall board every single day.
+ *
+ * The set is closed and named from Google's documented enum rather than
+ * inferred from a shape, because the alternative — guessing from a missing
+ * `summary` or a transparent event — would also drop real all-day events.
+ */
+export const STATUS_ONLY_EVENT_TYPES: ReadonlySet<string> = new Set([
+  'workingLocation',
+  'focusTime',
+  'outOfOffice',
+]);
+
+/** True for an entry that must never become a wall-board event. */
+export function isStatusOnly(resource: GoogleEventResource): boolean {
+  return !!resource.eventType && STATUS_ONLY_EVENT_TYPES.has(resource.eventType);
+}
+
+/** The two attribution columns, as `fromGoogleEvent` receives them. */
+export type EventAttribution = {
+  ownerMemberId: string | null;
+  attendeeMemberIds: string[];
+};
+
+/**
+ * What an unattributed pass produces — the push echo path, which re-maps our
+ * *own* write and must not be allowed to overwrite the attribution the parent
+ * chose in the event form. `modules/google/store.ts` reads the empty shape as
+ * "leave the existing columns alone".
+ */
+export const NO_ATTRIBUTION: EventAttribution = { ownerMemberId: null, attendeeMemberIds: [] };
+
+function personEmail(person: GoogleEventPerson | undefined): string | null {
+  if (!person || person.resource) return null;
+  const email = person.email?.trim().toLowerCase();
+  return email && email.length > 0 ? email : null;
+}
+
+/**
+ * Google attendees → this household's members (M18, legacy parity).
+ *
+ * Three rules, and each of them is a decision:
+ *
+ * - **Case-insensitive match, unmatched addresses ignored.** A Google event
+ *   routinely carries colleagues, a dentist and a room; none of them is a
+ *   family member and none of them should invent one.
+ * - **The organizer, if we know them, owns the row.** `ownerMemberId` is what
+ *   routes reminders (§6 step 4) and what the person columns key off, so it has
+ *   to be the person whose event it is rather than whoever happens to be listed
+ *   first.
+ * - **The owner of the account's *primary* calendar is always a participant.**
+ *   This is the rule that makes the feature visible at all: most events on a
+ *   parent's personal calendar list no attendees whatsoever, and without it
+ *   every one of them would still land unattributed, in nobody's column —
+ *   which is exactly the gap this closes.
+ *
+ *   It applies to the primary calendar and to nothing else. A Google account
+ *   also carries subscriptions ("Nederlandse feestdagen") and colleagues'
+ *   shared diaries, and the account holder is not a participant of those: the
+ *   fallback there would put every national holiday and every colleague's
+ *   dentist appointment in one parent's person column. Non-primary calendars
+ *   attribute from matched organizer/attendees only, and land unattributed
+ *   when nobody matches — which is the honest answer.
+ * - **A declined attendee is not a participant.** Somebody who said no to the
+ *   invitation is not going, so they do not belong in that day's column.
+ */
+export function attributeEvent(
+  resource: GoogleEventResource,
+  calendar: Pick<CalendarSyncState, 'ownerMemberId' | 'isPrimary'>,
+  directory: MemberDirectory
+): EventAttribution {
+  const calendarOwnerId = calendar.isPrimary ? (calendar.ownerMemberId ?? null) : null;
+
+  const attendeeIds = new Set<string>();
+  for (const attendee of resource.attendees ?? []) {
+    if (attendee.responseStatus === 'declined') continue;
+    const email = personEmail(attendee);
+    if (!email) continue;
+    const memberId = directory.memberIdFor(email);
+    if (memberId) attendeeIds.add(memberId);
+  }
+  if (calendarOwnerId) attendeeIds.add(calendarOwnerId);
+
+  const organizerEmail = personEmail(resource.organizer) ?? personEmail(resource.creator);
+  const organizerId = organizerEmail ? directory.memberIdFor(organizerEmail) : null;
+
+  // A resolved owner is a participant of their own event even when Google's
+  // attendee list omits them — which it routinely does for an event somebody
+  // created on their own calendar without inviting anybody.
+  const ownerMemberId = organizerId ?? calendarOwnerId;
+  if (ownerMemberId) attendeeIds.add(ownerMemberId);
+
+  return { ownerMemberId, attendeeMemberIds: [...attendeeIds] };
+}
+
+/**
  * Google → row. `fallbackTimeZone` is the calendar's own zone, used when the
  * event carries none (all-day events usually do not).
  *
@@ -61,13 +163,15 @@ function parseInstant(value: GoogleEventDateTime | undefined, label: string): Da
  */
 export function fromGoogleEvent(
   resource: GoogleEventResource,
-  fallbackTimeZone: string = DEFAULT_TIMEZONE
+  fallbackTimeZone: string = DEFAULT_TIMEZONE,
+  attribution: EventAttribution = NO_ATTRIBUTION
 ): MappedEvent {
   const allDay = !!resource.start?.date && !resource.start?.dateTime;
   const recurrence = parseRecurrence(resource.recurrence);
   const updated = resource.updated ? new Date(resource.updated) : null;
 
   return {
+    ...attribution,
     googleEventId: resource.id,
     title: resource.summary?.trim() ? resource.summary : UNTITLED,
     description: resource.description ?? null,

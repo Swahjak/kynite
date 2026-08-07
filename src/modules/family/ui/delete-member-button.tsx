@@ -2,11 +2,20 @@
 
 import { useActionState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Button } from '@/components/ui/button';
+import { ConfirmButton } from '@/components/ui/confirm-button';
 import { Icon } from '@/components/ui/icon';
 import { idleState } from '../action-state';
 import { deleteMemberAction } from '../actions';
 
+/**
+ * Removing someone from the household (M18: asks first).
+ *
+ * The most consequential of the three list deletions and the one that was
+ * previously a single icon tap: a member row takes its routines, its
+ * completions and its whole star history with it (`onDelete: 'cascade'`), and
+ * a bare trash glyph next to an avatar is exactly the control a thumb finds by
+ * accident on a phone.
+ */
 export function DeleteMemberButton({
   memberId,
   displayName,
@@ -20,16 +29,22 @@ export function DeleteMemberButton({
   return (
     <form action={formAction} className="contents">
       <input type="hidden" name="memberId" value={memberId} />
-      <Button
-        type="submit"
-        variant="destructive"
-        size="icon-hub"
-        disabled={pending}
-        aria-label={t('actions.removeNamed', { name: displayName })}
-        title={state.status === 'error' ? t(`errors.${state.error}`) : undefined}
+      <ConfirmButton
+        triggerLabel={t('actions.removeNamed', { name: displayName })}
+        question={t('actions.removeConfirm')}
+        confirmLabel={t('actions.removeConfirmYes')}
+        pending={pending}
+        testId="delete-member"
       >
         <Icon name="delete" size="md" />
-      </Button>
+      </ConfirmButton>
+      {/* The error had nowhere to go but a `title` on the old icon button,
+          which a touch device never shows. */}
+      {state.status === 'error' ? (
+        <span role="alert" className="text-body-sm text-destructive">
+          {t(`errors.${state.error}`)}
+        </span>
+      ) : null}
     </form>
   );
 }

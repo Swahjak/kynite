@@ -3,7 +3,14 @@
     "appName": "Kynite",
     "tagline": "Eén overzicht voor het hele gezin.",
     "close": "Sluiten",
-    "closeToast": "Melding sluiten"
+    "closeToast": "Melding sluiten",
+    "saved": "Opgeslagen",
+    "greeting": {
+      "morning": "Goedemorgen, {name}",
+      "afternoon": "Goedemiddag, {name}",
+      "evening": "Goedenavond, {name}"
+    },
+    "cancel": "Annuleren"
   },
   "nav": {
     "today": "Vandaag",
@@ -57,7 +64,9 @@
       "edit": "Bewerken",
       "removeNamed": "{name} verwijderen",
       "save": "Opslaan",
-      "cancel": "Annuleren"
+      "cancel": "Annuleren",
+      "removeConfirm": "Deze persoon uit het gezin halen?",
+      "removeConfirmYes": "Ja, weghalen"
     },
     "dialog": {
       "addTitle": "Gezinslid toevoegen",
@@ -194,7 +203,12 @@
     },
     "calendar": {
       "enable": "Synchroniseren",
-      "disable": "Niet meer synchroniseren"
+      "disable": "Niet meer synchroniseren",
+      "remove": "Uit Kynite halen",
+      "removeTitle": "Deze agenda uit Kynite halen?",
+      "removeBody": "{summary} verdwijnt uit Kynite. {count, plural, =0 {Er staan nog geen afspraken uit deze agenda in Kynite} one {# afspraak verdwijnt mee} other {# afspraken verdwijnen mee}}. Bij Google zelf verandert er niets.",
+      "removeConfirm": "Ja, uit Kynite halen",
+      "removeCancel": "Annuleren"
     },
     "errors": {
       "forbidden": "Dat mag je niet doen.",
@@ -206,6 +220,19 @@
       "consentDenied": "Het Google-toestemmingsscherm is geannuleerd.",
       "noRefreshToken": "Google gaf geen refresh-token terug. Probeer het opnieuw.",
       "linkFailed": "Kon het Google-account niet koppelen. Probeer het opnieuw."
+    },
+    "linkedSince": "Gekoppeld sinds {date}",
+    "calendarAccess": "Agenda-toegang",
+    "noCalendarAccess": "Nog geen agenda-toegang",
+    "sync": {
+      "lastSynced": "Bijgewerkt {when}",
+      "never": "Nog niet bijgewerkt"
+    },
+    "unlinkConfirm": {
+      "title": "Dit Google-account ontkoppelen?",
+      "body": "Kynite verliest de toegang tot de agenda’s van {email}. {count, plural, =0 {Er staan nog geen afspraken uit dit account in Kynite} one {# afspraak uit dit account verdwijnt uit Kynite} other {# afspraken uit dit account verdwijnen uit Kynite}}. Bij Google zelf verandert er niets.",
+      "confirm": "Ja, ontkoppelen",
+      "cancel": "Annuleren"
     }
   },
   "calendar": {
@@ -233,7 +260,10 @@
       "delete": "Verwijderen",
       "previous": "Vorige periode",
       "next": "Volgende periode",
-      "today": "Vandaag"
+      "today": "Vandaag",
+      "deleteConfirmTitle": "Afspraak verwijderen?",
+      "deleteConfirmBody": "{title} verdwijnt uit de agenda van het gezin.",
+      "deleteConfirmYes": "Ja, verwijderen"
     },
     "dialog": {
       "addTitle": "Afspraak toevoegen",
@@ -257,7 +287,9 @@
       "calendar": "Agenda",
       "calendarHint": "Alleen in Kynite, of doorsturen naar een gekoppelde Google-agenda.",
       "nativeCalendar": "Alleen in Kynite",
-      "scope": "Wat wil je aanpassen"
+      "scope": "Wat wil je aanpassen",
+      "description": "Notitie",
+      "descriptionHint": "Extra informatie bij deze afspraak."
     },
     "scope": {
       "occurrence": "Alleen deze afspraak",
@@ -306,6 +338,10 @@
       "calendarNotFound": "Die agenda bestaat niet meer.",
       "calendarReadOnly": "In die agenda mag Kynite niet schrijven.",
       "memberNotFound": "Dit gezinslid bestaat niet meer."
+    },
+    "month": {
+      "more": "Nog {count}",
+      "openDay": "Alles van {date} bekijken"
     }
   },
   "routines": {
@@ -326,7 +362,9 @@
       "graduate": "Gaat nu vanzelf",
       "graduateNamed": "{title} gaat nu vanzelf",
       "resumeStars": "Weer sterren",
-      "resumeStarsNamed": "Weer sterren voor {title}"
+      "resumeStarsNamed": "Weer sterren voor {title}",
+      "removeConfirm": "Deze routine verwijderen?",
+      "removeConfirmYes": "Ja, verwijderen"
     },
     "dialog": {
       "addTitle": "Nieuwe routine",
@@ -441,7 +479,9 @@
       "deny": "Nu even niet",
       "fulfill": "Gegeven",
       "awardStars": "Ster geven",
-      "award": "Geven"
+      "award": "Geven",
+      "removeConfirm": "Deze beloning van de plank halen?",
+      "removeConfirmYes": "Ja, weghalen"
     },
     "dialog": {
       "addTitle": "Nieuwe beloning",
@@ -567,7 +607,9 @@
     "remainingLabel": "Nog {time}",
     "actions": {
       "stop": "Stoppen",
-      "stopNamed": "Timer {label} stoppen"
+      "stopNamed": "Timer {label} stoppen",
+      "extend": "+{minutes} min",
+      "extendNamed": "Timer {label} {minutes} minuten langer laten lopen"
     },
     "adHoc": {
       "title": "Losse timer",
@@ -626,6 +668,10 @@
       "unsupported": "Deze browser ondersteunt geen pushmeldingen.",
       "unconfigured": "Meldingen zijn op deze installatie niet ingesteld.",
       "error": "Het lukte niet om de meldingen bij te werken."
+    },
+    "completion": {
+      "title": "Afgevinkt",
+      "body": "{name} heeft {step} gedaan"
     }
   },
   "devices": {
@@ -649,7 +695,12 @@
       "revoke": "Toegang intrekken",
       "revokeConfirm": "Toegang van dit scherm intrekken?",
       "revokeConfirmYes": "Ja, intrekken",
-      "revokeConfirmCancel": "Annuleren"
+      "revokeConfirmCancel": "Annuleren",
+      "pairedAt": "Gekoppeld op {date}",
+      "rename": "Naam wijzigen",
+      "renameLabel": "Naam van het scherm",
+      "renameSave": "Opslaan",
+      "renameCancel": "Annuleren"
     },
     "pending": {
       "title": "Wachten op koppeling",
@@ -842,7 +893,9 @@
       "errors": {
         "forbidden": "Je kunt alleen je eigen meldingen instellen.",
         "invalidInput": "Controleer de ingevulde gegevens."
-      }
+      },
+      "completionUpdates": "Berichten als er iets is afgevinkt",
+      "completionUpdatesHint": "Een kort bericht als iemand thuis een stap van een routine heeft gedaan."
     },
     "calendars": {
       "title": "Agenda's en wandscherm",
@@ -898,6 +951,22 @@
         "familyNotFound": "Dit gezin bestaat niet meer.",
         "confirmationMismatch": "De ingevulde naam komt niet overeen."
       }
+    }
+  },
+  "errors": {
+    "title": "Er ging iets mis",
+    "body": "Deze pagina kon niet worden geladen. Probeer het opnieuw.",
+    "retry": "Opnieuw proberen",
+    "home": "Naar het overzicht",
+    "reference": "Referentie: {digest}",
+    "hub": {
+      "title": "Een moment",
+      "body": "Het bord wordt zo opnieuw geladen."
+    },
+    "notFound": {
+      "title": "Deze pagina bestaat niet",
+      "body": "De link klopt niet meer, of de pagina is verplaatst.",
+      "home": "Naar het overzicht"
     }
   }
 }

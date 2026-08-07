@@ -32,7 +32,7 @@ export const TIMER_POLL_INTERVAL_MS = 2000;
 export const TIMER_CHANNEL_ENDPOINT = '/api/timers';
 
 /** The event types that change what is on the timer board. */
-const TIMER_EVENT_TYPES = ['timer.started', 'timer.stopped'] as const;
+const TIMER_EVENT_TYPES = ['timer.started', 'timer.stopped', 'timer.extended'] as const;
 
 export type TimerChannel = {
   timers: TimerView[];

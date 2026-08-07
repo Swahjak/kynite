@@ -18,6 +18,12 @@ import { createTestDb, databaseUrl, seedHousehold, type Household } from './supp
 const stubs = vi.hoisted(() => ({
   db: undefined as unknown as ReturnType<typeof createTestDb>['db'],
   session: null as { session: { activeFamilyId?: string; memberId?: string } } | null,
+  /**
+   * FR22's fan-out, captured rather than executed (M18). The bridge exists
+   * partly to be this seam — see `modules/routines/notify-bridge.ts` — so the
+   * completion path can be asserted without a push service or a queue.
+   */
+  notified: [] as { memberName: string; stepTitle: string; clientId: string }[],
 }));
 
 vi.mock('@/server/db', () => ({ getDb: () => stubs.db }));
@@ -40,6 +46,12 @@ vi.mock('next-intl/server', () => ({ getLocale: async () => 'nl' }));
 vi.mock('@/i18n/navigation', () => ({
   redirect: () => {
     throw new Error('NEXT_REDIRECT');
+  },
+}));
+vi.mock('@/modules/routines/notify-bridge', () => ({
+  notifyCompletion: async (input: { memberName: string; stepTitle: string; clientId: string }) => {
+    stubs.notified.push(input);
+    return 1;
   },
 }));
 
@@ -186,6 +198,20 @@ describe.skipIf(!databaseUrl)('routine completion (integration)', () => {
       .where(eq(schema.eventLog.familyId, household.familyId));
 
     expect(log.map((row) => row.type).sort()).toEqual(['completion.created', 'stars.awarded']);
+  });
+
+  it('notifies the other adults once — and not again on a replay (FR22)', async () => {
+    stubs.notified.length = 0;
+    const clientId = `notify:${household.childId}:${stepId}:${dateKey()}`;
+
+    await tap({ clientId });
+    expect(stubs.notified).toHaveLength(1);
+    expect(stubs.notified[0]).toMatchObject({ clientId, stepTitle: 'Tanden poetsen' });
+
+    // The offline outbox replays taps routinely. A second buzz for one tap is
+    // exactly the nagging this product exists to remove.
+    await tap({ clientId });
+    expect(stubs.notified).toHaveLength(1);
   });
 
   it('awards nothing on a replayed clientId — the star cannot be minted twice', async () => {

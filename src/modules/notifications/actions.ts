@@ -16,6 +16,7 @@ import { upsertNotificationPreferences } from './queries';
 const preferencesSchema = z.object({
   routineReminders: z.boolean(),
   redemptionRequests: z.boolean(),
+  completionUpdates: z.boolean(),
 });
 
 function checked(formData: FormData, key: string): boolean {
@@ -57,6 +58,7 @@ export async function updateNotificationPreferencesAction(
   const parsed = preferencesSchema.safeParse({
     routineReminders: checked(formData, 'routineReminders'),
     redemptionRequests: checked(formData, 'redemptionRequests'),
+    completionUpdates: checked(formData, 'completionUpdates'),
   });
   if (!parsed.success) return failure('invalidInput');
 

@@ -4,6 +4,15 @@ import { useActionState, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
+import {
+  AlertDialog,
+  AlertDialogClose,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -17,6 +26,8 @@ import {
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
 import { Icon } from '@/components/ui/icon';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { useSubmitGuard } from '@/components/ui/use-submit-guard';
 import {
   Select,
   SelectContent,
@@ -91,6 +102,9 @@ export function EventDialog({
   // it and every field re-seeds — no state-syncing effect required.
   const [allDay, setAllDay] = useState(event?.allDay ?? false);
   const [scope, setScope] = useState<'series' | 'occurrence'>('occurrence');
+  // M18: a delete is confirmed rather than performed on the first tap.
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const deleteGuard = useSubmitGuard(deletePending);
 
   const wasPending = useRef(false);
 
@@ -192,6 +206,22 @@ export function EventDialog({
               defaultValue={event?.location ?? ''}
               autoComplete="off"
             />
+          </Field>
+
+          {/* M18. The column has existed since M03 and `actions.ts` has
+              validated it since M06 — there was simply no input, so a note a
+              parent added in Google could be read by the sync and never
+              written or edited here. */}
+          <Field>
+            <FieldLabel>{t('form.description')}</FieldLabel>
+            <Textarea
+              name="description"
+              size="hub"
+              maxLength={4000}
+              defaultValue={event?.description ?? ''}
+              data-testid="event-description"
+            />
+            <FieldDescription>{t('form.descriptionHint')}</FieldDescription>
           </Field>
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -369,27 +399,73 @@ export function EventDialog({
         </form>
 
         {/* A separate form: a delete must not carry the edit form's fields, and
-            nesting forms is invalid HTML. */}
+            nesting forms is invalid HTML.
+
+            M18: the button opens a confirmation rather than deleting. A single
+            mis-tap used to remove a custody arrangement or a whole recurring
+            series from the household's calendar with no way back — the one
+            destructive action in this product that a parent is most likely to
+            reach for while holding a phone in one hand. */}
         {isEdit && (
-          <form action={deleteAction} className="flex justify-start">
-            <input type="hidden" name="eventId" value={event.seriesId} />
-            {event.recurring && (
-              <>
-                <input type="hidden" name="scope" value={scope} />
-                <input type="hidden" name="occurrenceStart" value={event.startsAt.toISOString()} />
-              </>
-            )}
+          <div className="flex justify-start">
             <Button
-              type="submit"
+              type="button"
               variant="destructive"
               size="hub"
               disabled={deletePending}
+              onClick={() => setConfirmingDelete(true)}
               data-testid="event-delete"
             >
               <Icon name="delete" size="sm" inline="start" />
               {t('actions.delete')}
             </Button>
-          </form>
+
+            <AlertDialog open={confirmingDelete} onOpenChange={setConfirmingDelete}>
+              <AlertDialogContent size="hub" data-testid="event-delete-confirm">
+                <form
+                  action={deleteAction}
+                  onSubmit={deleteGuard.lock}
+                  className="flex flex-col gap-4"
+                >
+                  <input type="hidden" name="eventId" value={event.seriesId} />
+                  {event.recurring && (
+                    <>
+                      <input type="hidden" name="scope" value={scope} />
+                      <input
+                        type="hidden"
+                        name="occurrenceStart"
+                        value={event.startsAt.toISOString()}
+                      />
+                    </>
+                  )}
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>{t('actions.deleteConfirmTitle')}</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {t('actions.deleteConfirmBody', { title: event.title })}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogClose
+                      render={
+                        <Button type="button" variant="ghost" size="hub">
+                          {t('actions.cancel')}
+                        </Button>
+                      }
+                    />
+                    <Button
+                      type="submit"
+                      variant="destructive"
+                      size="hub"
+                      disabled={deleteGuard.locked}
+                      data-testid="event-delete-confirm-yes"
+                    >
+                      {t('actions.deleteConfirmYes')}
+                    </Button>
+                  </AlertDialogFooter>
+                </form>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         )}
       </DialogContent>
     </Dialog>

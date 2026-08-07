@@ -1,0 +1,43 @@
+# Build context hygiene (M18).
+#
+# The two entries that matter for correctness are `.env*` — a secret must reach
+# the container through the platform, never through a layer — and `node_modules`,
+# which would otherwise shadow the stage's own `pnpm install` with the host's
+# (glibc) binaries inside an Alpine image.
+#
+# **Every pattern here is anchored unless it starts with `**/`.** Docker's
+# ignore syntax is not gitignore's: a bare `node_modules` matches only the one
+# at the context root, so a nested `packages/*/node_modules` — or, far worse, a
+# nested `.env` — would be copied straight into the image. Anything that can
+# legitimately appear at more than one depth is written `**/…`.
+
+.git
+.github
+.husky
+**/node_modules
+.next
+.next-e2e-google
+out
+build
+coverage
+
+# secrets
+**/.env
+**/.env.*
+!.env.example
+
+# test artefacts
+e2e/.auth
+e2e/test-results
+e2e/playwright-report
+**/*.tsbuildinfo
+
+# local tooling
+.idea
+.vscode
+.claude
+.worktrees
+docker-compose.yml
+docker-compose.test.yml
+Dockerfile
+.dockerignore

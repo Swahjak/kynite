@@ -10,6 +10,7 @@ import { completion, routine, routineStep, starLedger } from '@/server/db/schema
 import { can, getFamily, getMember, type Principal } from '@/modules/family';
 import { publish } from '@/modules/realtime';
 import { completionFailure, type CompletionState } from './action-state';
+import { notifyCompletion } from './notify-bridge';
 import { isCompletableOn } from './domain/occurrence';
 import { starsFor } from './domain/stars';
 
@@ -134,7 +135,11 @@ export async function recordCompletion(
   if (!target) return completionFailure('routineNotFound');
 
   // The completing member must be in this family; a forged id addresses nothing.
-  if (!(await getMember(principal.familyId, memberId))) {
+  // The row is kept rather than discarded: FR22's notification names the person
+  // whose step it was, and this is the one place that already proved who that
+  // is.
+  const subject = await getMember(principal.familyId, memberId);
+  if (!subject) {
     return completionFailure('memberNotFound');
   }
 
@@ -244,6 +249,29 @@ export async function recordCompletion(
 
     return { status: 'done', stars, replayed: false } as const;
   });
+
+  /**
+   * PRD FR22 (M18): the other adults hear about it.
+   *
+   * After the commit, and only for a completion that was genuinely *new* —
+   * `replayed` is true for an outbox replay and for a re-tap after an undo,
+   * and neither is news. That is the idempotency guarantee, and it is the
+   * database's `ON CONFLICT DO NOTHING` above rather than a check here.
+   *
+   * The failure is swallowed for the same reason the redemption fan-out
+   * swallows its own: a push queue having a bad minute must never turn a
+   * child's tap into an error on a wall tablet, and the completion is already
+   * on every screen in the house through `publish()`.
+   */
+  if (result.status === 'done' && !result.replayed) {
+    await notifyCompletion({
+      familyId: principal.familyId,
+      memberName: subject.displayName,
+      stepTitle: target.step.title,
+      clientId,
+      actorMemberId: principal.kind === 'member' ? principal.memberId : null,
+    }).catch(() => 0);
+  }
 
   // Outside the transaction: revalidation is a cache concern, not a write, and
   // the hub's own view has already flipped optimistically by the time this runs.

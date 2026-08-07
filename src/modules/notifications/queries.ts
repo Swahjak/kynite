@@ -1,5 +1,5 @@
 import 'server-only';
-import { and, eq, inArray, isNull, lt, or, sql } from 'drizzle-orm';
+import { and, eq, inArray, isNull, lt, ne, or, sql } from 'drizzle-orm';
 import { getDb } from '@/server/db';
 // Table objects come from the schema assembly point, not from a slice barrel
 // (the same note `modules/timers/queries.ts` carries): `queries.ts` is not a
@@ -345,6 +345,7 @@ export async function countActiveSubscriptions(
 export type NotificationPreferences = {
   routineReminders: boolean;
   redemptionRequests: boolean;
+  completionUpdates: boolean;
 };
 
 /**
@@ -357,6 +358,7 @@ export type NotificationPreferences = {
 export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
   routineReminders: true,
   redemptionRequests: true,
+  completionUpdates: true,
 };
 
 export async function getNotificationPreferences(
@@ -367,6 +369,7 @@ export async function getNotificationPreferences(
     .select({
       routineReminders: notificationPreference.routineReminders,
       redemptionRequests: notificationPreference.redemptionRequests,
+      completionUpdates: notificationPreference.completionUpdates,
     })
     .from(notificationPreference)
     .where(
@@ -393,12 +396,14 @@ export async function upsertNotificationPreferences(input: {
       memberId: input.memberId,
       routineReminders: input.preferences.routineReminders,
       redemptionRequests: input.preferences.redemptionRequests,
+      completionUpdates: input.preferences.completionUpdates,
     })
     .onConflictDoUpdate({
       target: notificationPreference.memberId,
       set: {
         routineReminders: input.preferences.routineReminders,
         redemptionRequests: input.preferences.redemptionRequests,
+        completionUpdates: input.preferences.completionUpdates,
         updatedAt: new Date(),
       },
     });
@@ -422,6 +427,40 @@ export async function listRedemptionRecipients(familyId: string): Promise<string
         eq(member.familyId, familyId),
         inArray(member.role, ['owner', 'adult']),
         or(isNull(notificationPreference.id), eq(notificationPreference.redemptionRequests, true))
+      )
+    );
+
+  return rows.map((row) => row.id);
+}
+
+/**
+ * Every adult who has not switched completion updates off, minus whoever just
+ * tapped (PRD FR22, M18).
+ *
+ * The exclusion is the interesting half. A parent who ticks a step off on
+ * their own phone does not need a push telling them they did — and on the hub
+ * the tap has no member behind it at all (a device principal), so *every*
+ * adult is a recipient in the case the feature actually exists for: a child
+ * pressing "done" on the wall tablet while one parent is at work.
+ *
+ * Same `leftJoin` + `or(isNull(...))` shape as `listRedemptionRecipients`, and
+ * for the same reason: an absent preference row *is* the default, so it has to
+ * be part of the predicate the database evaluates.
+ */
+export async function listCompletionRecipients(
+  familyId: string,
+  excludeMemberId?: string | null
+): Promise<string[]> {
+  const rows = await getDb()
+    .select({ id: member.id })
+    .from(member)
+    .leftJoin(notificationPreference, eq(notificationPreference.memberId, member.id))
+    .where(
+      and(
+        eq(member.familyId, familyId),
+        inArray(member.role, ['owner', 'adult']),
+        or(isNull(notificationPreference.id), eq(notificationPreference.completionUpdates, true)),
+        excludeMemberId ? ne(member.id, excludeMemberId) : undefined
       )
     );
 

@@ -23,6 +23,14 @@ const nextConfig: NextConfig = {
    * for pointer events too, where CSS injected after load is too late.
    */
   devIndicators: process.env.E2E === 'true' ? false : undefined,
+  /**
+   * M18: the deploy target is a container (Railway), so the build has to emit
+   * a self-contained server — `.next/standalone/server.js` plus a traced
+   * `node_modules` — rather than something that needs the repo and a full
+   * install beside it. The output is *additive*: `next start` and the e2e run
+   * keep working off `.next/` exactly as before.
+   */
+  output: 'standalone',
   reactStrictMode: true,
   typedRoutes: true,
   // Playwright drives the dev server over 127.0.0.1.

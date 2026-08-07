@@ -3,7 +3,14 @@
     "appName": "Kynite",
     "tagline": "One view for the whole family.",
     "close": "Close",
-    "closeToast": "Close toast"
+    "closeToast": "Close toast",
+    "saved": "Saved",
+    "greeting": {
+      "morning": "Good morning, {name}",
+      "afternoon": "Good afternoon, {name}",
+      "evening": "Good evening, {name}"
+    },
+    "cancel": "Cancel"
   },
   "nav": {
     "today": "Today",
@@ -57,7 +64,9 @@
       "edit": "Edit",
       "removeNamed": "Remove {name}",
       "save": "Save",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "removeConfirm": "Remove this person from the family?",
+      "removeConfirmYes": "Yes, remove"
     },
     "dialog": {
       "addTitle": "Add family member",
@@ -194,7 +203,12 @@
     },
     "calendar": {
       "enable": "Sync",
-      "disable": "Stop syncing"
+      "disable": "Stop syncing",
+      "remove": "Remove from Kynite",
+      "removeTitle": "Remove this calendar from Kynite?",
+      "removeBody": "{summary} disappears from Kynite. {count, plural, =0 {No events from this calendar are in Kynite yet} one {# event goes with it} other {# events go with it}}. Nothing changes at Google itself.",
+      "removeConfirm": "Yes, remove it",
+      "removeCancel": "Cancel"
     },
     "errors": {
       "forbidden": "You are not allowed to do that.",
@@ -206,6 +220,19 @@
       "consentDenied": "The Google consent screen was cancelled.",
       "noRefreshToken": "Google did not return a refresh token. Please try again.",
       "linkFailed": "Could not link the Google account. Please try again."
+    },
+    "linkedSince": "Linked since {date}",
+    "calendarAccess": "Calendar access",
+    "noCalendarAccess": "No calendar access yet",
+    "sync": {
+      "lastSynced": "Updated {when}",
+      "never": "Not updated yet"
+    },
+    "unlinkConfirm": {
+      "title": "Unlink this Google account?",
+      "body": "Kynite loses access to the calendars of {email}. {count, plural, =0 {No events from this account are in Kynite yet} one {# event from this account disappears from Kynite} other {# events from this account disappear from Kynite}}. Nothing changes at Google itself.",
+      "confirm": "Yes, unlink",
+      "cancel": "Cancel"
     }
   },
   "calendar": {
@@ -233,7 +260,10 @@
       "delete": "Delete",
       "previous": "Previous period",
       "next": "Next period",
-      "today": "Today"
+      "today": "Today",
+      "deleteConfirmTitle": "Delete this event?",
+      "deleteConfirmBody": "{title} disappears from the family calendar.",
+      "deleteConfirmYes": "Yes, delete"
     },
     "dialog": {
       "addTitle": "Add event",
@@ -257,7 +287,9 @@
       "calendar": "Calendar",
       "calendarHint": "Kynite only, or pushed to a linked Google calendar.",
       "nativeCalendar": "Kynite only",
-      "scope": "What do you want to change"
+      "scope": "What do you want to change",
+      "description": "Note",
+      "descriptionHint": "Extra detail for this event."
     },
     "scope": {
       "occurrence": "Only this event",
@@ -306,6 +338,10 @@
       "calendarNotFound": "That calendar no longer exists.",
       "calendarReadOnly": "Kynite cannot write to that calendar.",
       "memberNotFound": "That family member no longer exists."
+    },
+    "month": {
+      "more": "{count} more",
+      "openDay": "See everything on {date}"
     }
   },
   "routines": {
@@ -326,7 +362,9 @@
       "graduate": "Runs on its own now",
       "graduateNamed": "{title} runs on its own now",
       "resumeStars": "Award stars again",
-      "resumeStarsNamed": "Award stars for {title} again"
+      "resumeStarsNamed": "Award stars for {title} again",
+      "removeConfirm": "Delete this routine?",
+      "removeConfirmYes": "Yes, delete"
     },
     "dialog": {
       "addTitle": "New routine",
@@ -441,7 +479,9 @@
       "deny": "Not right now",
       "fulfill": "Handed over",
       "awardStars": "Give a star",
-      "award": "Give"
+      "award": "Give",
+      "removeConfirm": "Take this reward off the shelf?",
+      "removeConfirmYes": "Yes, take it off"
     },
     "dialog": {
       "addTitle": "New reward",
@@ -567,7 +607,9 @@
     "remainingLabel": "{time} left",
     "actions": {
       "stop": "Stop",
-      "stopNamed": "Stop timer {label}"
+      "stopNamed": "Stop timer {label}",
+      "extend": "+{minutes} min",
+      "extendNamed": "Let timer {label} run {minutes} minutes longer"
     },
     "adHoc": {
       "title": "One-off timer",
@@ -626,6 +668,10 @@
       "unsupported": "This browser does not support push notifications.",
       "unconfigured": "Notifications are not configured on this install.",
       "error": "The notification settings could not be updated."
+    },
+    "completion": {
+      "title": "Ticked off",
+      "body": "{name} did {step}"
     }
   },
   "devices": {
@@ -649,7 +695,12 @@
       "revoke": "Revoke access",
       "revokeConfirm": "Revoke this screen's access?",
       "revokeConfirmYes": "Yes, revoke",
-      "revokeConfirmCancel": "Cancel"
+      "revokeConfirmCancel": "Cancel",
+      "pairedAt": "Paired on {date}",
+      "rename": "Rename",
+      "renameLabel": "Screen name",
+      "renameSave": "Save",
+      "renameCancel": "Cancel"
     },
     "pending": {
       "title": "Waiting to be paired",
@@ -842,7 +893,9 @@
       "errors": {
         "forbidden": "You can only set your own notifications.",
         "invalidInput": "Check the details you entered."
-      }
+      },
+      "completionUpdates": "Updates when something is ticked off",
+      "completionUpdatesHint": "A short message when someone at home finishes a routine step."
     },
     "calendars": {
       "title": "Calendars and wall display",
@@ -898,6 +951,22 @@
         "familyNotFound": "This household no longer exists.",
         "confirmationMismatch": "The name you entered does not match."
       }
+    }
+  },
+  "errors": {
+    "title": "Something went wrong",
+    "body": "This page could not be loaded. Try again.",
+    "retry": "Try again",
+    "home": "Go to overview",
+    "reference": "Reference: {digest}",
+    "hub": {
+      "title": "One moment",
+      "body": "The board is reloading."
+    },
+    "notFound": {
+      "title": "This page does not exist",
+      "body": "The link is no longer valid, or the page has moved.",
+      "home": "Go to overview"
     }
   }
 }

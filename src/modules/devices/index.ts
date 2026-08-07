@@ -32,6 +32,7 @@ export {
   listDevices,
   listPendingPairingCodes,
   redeemPairingCode,
+  renameDevice,
   revokeDevice,
   trimDeviceSessions,
   type CreatePairingCodeResult,
@@ -56,10 +57,12 @@ export {
   cancelPairingCodeAction,
   createPairingCodeAction,
   pairDeviceAction,
+  renameDeviceAction,
   revokeDeviceAction,
   type CancelPairingCodeInput,
   type CreatePairingCodeInput,
   type PairDeviceInput,
+  type RenameDeviceInput,
   type RevokeDeviceInput,
 } from './actions';
 

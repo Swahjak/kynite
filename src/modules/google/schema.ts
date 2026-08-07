@@ -81,6 +81,18 @@ export const calendar = pgTable(
     timeZone: text('time_zone'),
     visibility: calendarVisibility('visibility').notNull().default('family'),
     writable: boolean('writable').notNull().default(false),
+    /**
+     * Google's `primary` flag from the calendar list — "this is the account
+     * holder's own calendar", exactly one per account.
+     *
+     * It is persisted rather than derived because attribution keys off it
+     * (M18): the account owner is a participant of everything on *their own*
+     * calendar, and of nothing on the subscriptions and colleagues' diaries
+     * that hang off the same account. Without the distinction, "Nederlandse
+     * feestdagen" put a national holiday in one parent's person column every
+     * single time.
+     */
+    isPrimary: boolean('is_primary').notNull().default(false),
     syncEnabled: boolean('sync_enabled').notNull().default(true),
     /** Google's incremental cursor; null forces the next sync to be a full one. */
     syncToken: text('sync_token'),

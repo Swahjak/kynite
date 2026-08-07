@@ -4,9 +4,10 @@ import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { Icon } from '@/components/ui/icon';
 import { cn } from '@/lib/utils';
-import { startTimerAction, stopTimerAction } from '../actions';
+import { extendTimerAction, startTimerAction, stopTimerAction } from '../actions';
 import {
   DURATION_PRESETS,
+  EXTEND_PRESET_MINUTES,
   formatCountdown,
   minutesRemaining,
   remainingSeconds,
@@ -55,6 +56,12 @@ export function TimerControls({ page }: { page: TimersPageData }) {
     });
   };
 
+  const extend = (timerId: string, minutes: number) => {
+    startTransition(async () => {
+      await extendTimerAction({ timerId, minutes });
+    });
+  };
+
   const copyFor = (timer: TimerView) => ({
     warning: t('warning', { label: timer.label, minutes: minutesRemaining(timer, now) }),
     overrun: t('overrun'),
@@ -80,6 +87,16 @@ export function TimerControls({ page }: { page: TimersPageData }) {
                 copy={copyFor(timer)}
                 compact
                 onStop={() => stop(timer.id)}
+                extendOptions={
+                  page.canControl
+                    ? EXTEND_PRESET_MINUTES.map((minutes) => ({
+                        minutes,
+                        label: t('actions.extend', { minutes }),
+                        ariaLabel: t('actions.extendNamed', { label: timer.label, minutes }),
+                      }))
+                    : undefined
+                }
+                onExtend={page.canControl ? (minutes) => extend(timer.id, minutes) : undefined}
               />
             ))}
           </div>

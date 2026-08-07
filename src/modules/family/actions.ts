@@ -12,6 +12,7 @@ import { getAuth } from '@/server/auth';
 import { getDb } from '@/server/db';
 import { user } from '@/server/db/auth-schema';
 import { env } from '@/server/env';
+import { sanitizeCallbackUrl, withoutLocalePrefix } from '@/lib/callback-url';
 import { hashInviteToken, inviteUrlFor } from '@/lib/invite-token';
 import { publish } from '@/modules/realtime';
 import {
@@ -198,7 +199,16 @@ export async function signInAction(
     return failure('invalidCredentials');
   }
 
-  redirect({ href: '/family', locale: await getLocale() });
+  // M18: back to whatever the proxy interrupted, or the default landing.
+  // `sanitizeCallbackUrl` runs here as well as in the page that rendered the
+  // hidden input — a Server Action is a POST endpoint anybody can call with any
+  // body, so the form is not where this value is made safe.
+  const callbackUrl = sanitizeCallbackUrl(read(formData, 'callbackUrl'));
+
+  redirect({
+    href: callbackUrl ? withoutLocalePrefix(callbackUrl) : '/family',
+    locale: await getLocale(),
+  });
   // `redirect()` throws — unreachable, but the signature must stay total.
   return idleState;
 }

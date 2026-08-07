@@ -1,19 +1,44 @@
 'use client';
 
-import { useActionState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useActionState, useState } from 'react';
+import { useFormatter, useTranslations } from 'next-intl';
+import {
+  AlertDialog,
+  AlertDialogClose,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { useSubmitGuard } from '@/components/ui/use-submit-guard';
 import { idleState, type ActionState } from '../action-state';
-import { setCalendarSyncAction, syncNowAction, unlinkGoogleAccountAction } from '../actions';
-import type { LinkedAccount } from '../queries';
+import {
+  removeCalendarAction,
+  setCalendarSyncAction,
+  syncNowAction,
+  unlinkGoogleAccountAction,
+} from '../actions';
+import type { LinkedAccount, LinkedCalendar } from '../queries';
 
 /**
- * The Google settings surface (milestone M05, minimal by design — the full
- * settings experience is M16). It has to do exactly three things: start a real
- * OAuth link, let a parent choose which calendars sync, and make a
- * `reauth_required` account impossible to miss.
+ * The Google settings surface (M05, extended in M18).
+ *
+ * It has to do exactly three things: start a real OAuth link, let a parent
+ * choose which calendars sync, and make a `reauth_required` account impossible
+ * to miss. M18 adds the two facts a parent could previously only guess at —
+ * *when* an account was linked and what it may actually read, and *when* its
+ * calendars last synced — and puts a confirmation in front of the two actions
+ * that take data with them.
+ *
+ * The confirmations are `AlertDialog`, not the two-tap pattern the device list
+ * uses, and the reason is the event count: "unlink" and "remove" each destroy
+ * an amount of data the parent cannot see from the button, so the dialog exists
+ * to *state the number* before it is agreed to. A second tap in place could not
+ * carry that sentence.
  */
 
 export type GoogleAccountsPanelProps = {
@@ -91,30 +116,86 @@ export function GoogleAccountsPanel({
 
 function AccountCard({ account }: { account: LinkedAccount }) {
   const t = useTranslations('google');
+  const format = useFormatter();
   const [state, action, pending] = useActionState<ActionState, FormData>(
     unlinkGoogleAccountAction,
     idleState
   );
+  const [confirming, setConfirming] = useState(false);
+  const { locked, lock } = useSubmitGuard(pending);
 
   return (
-    <Card className="flex flex-col gap-4 p-4">
+    <Card className="flex flex-col gap-4 p-4" data-testid="google-account-card">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-col gap-1">
           <span className="font-medium">{account.email}</span>
-          {account.status === 'reauth_required' ? (
-            <Badge variant="destructive">{t('status.reauthRequired')}</Badge>
-          ) : (
-            <Badge variant="secondary">{t('status.active')}</Badge>
-          )}
+          <div className="flex flex-wrap items-center gap-2">
+            {account.status === 'reauth_required' ? (
+              <Badge variant="destructive">{t('status.reauthRequired')}</Badge>
+            ) : (
+              <Badge variant="secondary">{t('status.active')}</Badge>
+            )}
+            {/* M18: whether the grant actually covers calendars. An account
+                linked without the scope looks identical to one that has it,
+                right up until nothing ever syncs. */}
+            <Badge variant="outline" data-testid="calendar-access-badge">
+              {account.hasCalendarAccess ? t('calendarAccess') : t('noCalendarAccess')}
+            </Badge>
+          </div>
+          <span className="text-xs text-muted-foreground" data-testid="linked-since">
+            {t('linkedSince', {
+              date: format.dateTime(account.linkedAt, { dateStyle: 'medium' }),
+            })}
+          </span>
+          <span className="text-xs text-muted-foreground" data-testid="account-last-sync">
+            {account.lastSyncedAt
+              ? t('sync.lastSynced', { when: format.relativeTime(account.lastSyncedAt) })
+              : t('sync.never')}
+          </span>
         </div>
 
-        <form action={action}>
-          <input type="hidden" name="accountId" value={account.id} />
-          <Button type="submit" variant="ghost" disabled={pending}>
-            {t('unlink')}
-          </Button>
-        </form>
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={() => setConfirming(true)}
+          disabled={pending}
+          data-testid="unlink-account"
+        >
+          {t('unlink')}
+        </Button>
       </div>
+
+      <AlertDialog open={confirming} onOpenChange={setConfirming}>
+        <AlertDialogContent size="hub" data-testid="unlink-confirm">
+          <form action={action} onSubmit={lock} className="flex flex-col gap-4">
+            <input type="hidden" name="accountId" value={account.id} />
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t('unlinkConfirm.title')}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {t('unlinkConfirm.body', { email: account.email, count: account.eventCount })}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogClose
+                render={
+                  <Button type="button" variant="ghost" size="hub">
+                    {t('unlinkConfirm.cancel')}
+                  </Button>
+                }
+              />
+              <Button
+                type="submit"
+                variant="destructive"
+                size="hub"
+                disabled={locked}
+                data-testid="unlink-confirm-yes"
+              >
+                {t('unlinkConfirm.confirm')}
+              </Button>
+            </AlertDialogFooter>
+          </form>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {state.status === 'error' ? (
         <p role="alert" className="text-sm text-destructive">
@@ -124,26 +205,119 @@ function AccountCard({ account }: { account: LinkedAccount }) {
 
       <ul className="flex flex-col gap-2">
         {account.calendars.map((calendar) => (
-          <li key={calendar.id} className="flex items-center justify-between gap-3">
-            <span className="flex items-center gap-2 text-sm">
-              <span
-                aria-hidden
-                className="size-3 rounded-full border border-border"
-                style={calendar.color ? { backgroundColor: calendar.color } : undefined}
-              />
-              {calendar.summary}
-              {calendar.writable ? null : (
-                <span className="text-xs text-muted-foreground">{t('readOnly')}</span>
-              )}
-            </span>
-            <CalendarToggle calendarId={calendar.id} enabled={calendar.syncEnabled} />
-          </li>
+          <CalendarRow key={calendar.id} calendar={calendar} />
         ))}
         {account.calendars.length === 0 ? (
           <li className="text-sm text-muted-foreground">{t('noCalendars')}</li>
         ) : null}
       </ul>
     </Card>
+  );
+}
+
+function CalendarRow({ calendar }: { calendar: LinkedCalendar }) {
+  const t = useTranslations('google');
+  const format = useFormatter();
+
+  return (
+    <li
+      className="flex flex-wrap items-center justify-between gap-3"
+      data-testid="google-calendar-row"
+      data-calendar-id={calendar.id}
+    >
+      <span className="flex min-w-0 flex-col gap-0.5 text-sm">
+        <span className="flex items-center gap-2">
+          <span
+            aria-hidden
+            className="size-3 shrink-0 rounded-full border border-border"
+            style={calendar.color ? { backgroundColor: calendar.color } : undefined}
+          />
+          {calendar.summary}
+          {calendar.writable ? null : (
+            <span className="text-xs text-muted-foreground">{t('readOnly')}</span>
+          )}
+        </span>
+        {/* M18: `calendar.syncedAt` has been written since M05 and rendered
+            nowhere, which made a silently-stalled calendar indistinguishable
+            from a quiet one. */}
+        <span className="text-xs text-muted-foreground" data-testid="calendar-last-sync">
+          {calendar.syncedAt
+            ? t('sync.lastSynced', { when: format.relativeTime(calendar.syncedAt) })
+            : t('sync.never')}
+        </span>
+      </span>
+
+      <span className="flex items-center gap-2">
+        <CalendarToggle calendarId={calendar.id} enabled={calendar.syncEnabled} />
+        <RemoveCalendarButton calendar={calendar} />
+      </span>
+    </li>
+  );
+}
+
+function RemoveCalendarButton({ calendar }: { calendar: LinkedCalendar }) {
+  const t = useTranslations('google');
+  const [state, action, pending] = useActionState<ActionState, FormData>(
+    removeCalendarAction,
+    idleState
+  );
+  const [confirming, setConfirming] = useState(false);
+  const { locked, lock } = useSubmitGuard(pending);
+
+  return (
+    <>
+      <Button
+        type="button"
+        size="sm"
+        variant="ghost"
+        onClick={() => setConfirming(true)}
+        disabled={pending}
+        data-testid="remove-calendar"
+      >
+        {t('calendar.remove')}
+      </Button>
+
+      <AlertDialog open={confirming} onOpenChange={setConfirming}>
+        <AlertDialogContent size="hub" data-testid="remove-calendar-confirm">
+          <form action={action} onSubmit={lock} className="flex flex-col gap-4">
+            <input type="hidden" name="calendarId" value={calendar.id} />
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t('calendar.removeTitle')}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {t('calendar.removeBody', {
+                  summary: calendar.summary,
+                  count: calendar.eventCount,
+                })}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogClose
+                render={
+                  <Button type="button" variant="ghost" size="hub">
+                    {t('calendar.removeCancel')}
+                  </Button>
+                }
+              />
+              <Button
+                type="submit"
+                variant="destructive"
+                size="hub"
+                disabled={locked}
+                data-testid="remove-calendar-confirm-yes"
+              >
+                {t('calendar.removeConfirm')}
+              </Button>
+            </AlertDialogFooter>
+          </form>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {state.status === 'error' ? (
+        <span role="alert" className="text-xs text-destructive">
+          {t(`errors.${state.error}` as 'errors.forbidden')}
+        </span>
+      ) : null}
+    </>
   );
 }
 

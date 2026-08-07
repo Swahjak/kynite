@@ -38,6 +38,18 @@ export const MAX_DURATION_SECONDS = 4 * 60 * 60;
 /** What the Controller offers with one tap. Seconds, ascending. */
 export const DURATION_PRESETS = [60, 120, 300, 600, 900] as const;
 
+/**
+ * What "a bit longer" offers (M18, FR7). Minutes, ascending.
+ *
+ * Small and closed on purpose. The legacy app scaled the offer to the timer's
+ * own length (+1/+5/+10/+15/+30), which meant the buttons under a two-minute
+ * tooth-brushing timer and a ninety-minute homework timer were different every
+ * time — a control that moves is a control a child has to re-read. Three fixed
+ * choices are enough to say "not yet" without turning the extension into a
+ * negotiation.
+ */
+export const EXTEND_PRESET_MINUTES = [1, 5, 10] as const;
+
 /** Transition-warning lead times a routine step can carry. */
 export const WARNING_LEAD_PRESETS = [60, 120, 300, 600] as const;
 

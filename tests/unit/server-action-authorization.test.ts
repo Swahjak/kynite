@@ -255,7 +255,12 @@ describe('every Server Action authorizes first', () => {
     // createPairingCode + pairDevice + revokeDevice, plus cancelPairingCode
     // added in the brute-force/lockout review pass) +
     // src/modules/sharing/actions.ts (2, added in M13: createShareLink +
-    // revokeShareLink) = 44. Self-unpair
+    // revokeShareLink) = 44, plus M18's three: google's removeCalendar (one
+    // calendar out of Kynite, with the event-count confirmation that made the
+    // count worth reading), devices' renameDevice (a tablet named wrong at
+    // pairing time was previously only fixable by revoking and re-pairing it)
+    // and timers' extendTimer (PRD FR7's "a bit longer", server-authoritative
+    // in exactly the way start/stop already are) = 47. Self-unpair
     // (`POST /api/devices/session/unpair`) is deliberately *not* here: it is
     // a route handler, not a `'use server'` module, so this auditor never
     // sees it — see that file's doc comment for why it needs no `assertCan`.
@@ -267,7 +272,7 @@ describe('every Server Action authorizes first', () => {
     // rather than at each entry point.
     // Adding or removing a Server Action must bump this number deliberately —
     // that is the point.
-    expect(findings.length).toBe(44);
+    expect(findings.length).toBe(47);
   });
 
   it('reports no unauthorized action anywhere in src/', () => {

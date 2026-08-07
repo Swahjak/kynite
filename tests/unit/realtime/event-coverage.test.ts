@@ -60,6 +60,8 @@ const OWNERS: Record<RealtimeEventType, string> = {
   'routine.updated': 'routines',
   'timer.started': 'timers',
   'timer.stopped': 'timers',
+  // M18 (PRD FR7): `extendTimerAction` moves `durationSeconds` and says so.
+  'timer.extended': 'timers',
   'device.revoked': 'devices',
   // M16. The household's own settings are the family slice's writes; the
   // calendar slice publishes it too when a calendar's colour or visibility

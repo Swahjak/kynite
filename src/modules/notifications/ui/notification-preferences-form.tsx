@@ -3,15 +3,16 @@
 import { useActionState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
+import { useActionToast } from '@/components/ui/use-action-toast';
 import { idleState } from '../action-state';
 import { updateNotificationPreferencesAction } from '../actions';
 
 /**
  * Which notifications *this* parent wants (M16).
  *
- * Per person, not per household: the two switches below are the two things
- * this product sends (§6), and two parents routinely disagree about both — one
- * wants every "may I spend my stars", the other wants none. `member:self` is
+ * Per person, not per household: the three switches below are the three things
+ * this product sends (§6, PRD FR22), and two parents routinely disagree about
+ * all of them — one wants every "may I spend my stars", the other wants none. `member:self` is
  * what makes that answerable individually, and it is why this form carries no
  * member field at all: the action takes the subject from the principal.
  *
@@ -22,13 +23,19 @@ import { updateNotificationPreferencesAction } from '../actions';
 export function NotificationPreferencesForm({
   preferences,
 }: {
-  preferences: { routineReminders: boolean; redemptionRequests: boolean };
+  preferences: {
+    routineReminders: boolean;
+    redemptionRequests: boolean;
+    completionUpdates: boolean;
+  };
 }) {
   const t = useTranslations('settings.notifications');
+  const tCommon = useTranslations('common');
   const [state, formAction, pending] = useActionState(
     updateNotificationPreferencesAction,
     idleState
   );
+  useActionToast(state, pending, { success: tCommon('saved') });
 
   return (
     <form
@@ -61,6 +68,20 @@ export function NotificationPreferencesForm({
         <span className="flex flex-col gap-0.5">
           <span className="font-display text-sm font-medium">{t('redemptionRequests')}</span>
           <span className="text-xs text-muted-foreground">{t('redemptionRequestsHint')}</span>
+        </span>
+      </label>
+
+      <label className="flex items-start gap-3">
+        <input
+          type="checkbox"
+          name="completionUpdates"
+          defaultChecked={preferences.completionUpdates}
+          className="mt-1 size-5 accent-primary"
+          data-testid="pref-completion-updates"
+        />
+        <span className="flex flex-col gap-0.5">
+          <span className="font-display text-sm font-medium">{t('completionUpdates')}</span>
+          <span className="text-xs text-muted-foreground">{t('completionUpdatesHint')}</span>
         </span>
       </label>
 

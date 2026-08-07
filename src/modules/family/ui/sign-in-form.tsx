@@ -10,7 +10,14 @@ import { Link } from '@/i18n/navigation';
 import { idleState } from '../action-state';
 import { signInAction } from '../actions';
 
-export function SignInForm() {
+/**
+ * `callbackUrl` is already sanitized by the page that renders this
+ * (`(auth)/sign-in/page.tsx`) and sanitized *again* by `signInAction` before it
+ * is redirected to. Two checks, because this value crosses a trust boundary
+ * twice: once from the URL into the DOM, once from the DOM back into a
+ * `Location` header.
+ */
+export function SignInForm({ callbackUrl }: { callbackUrl?: string | null }) {
   const t = useTranslations('auth');
   const [state, formAction, pending] = useActionState(signInAction, idleState);
 
@@ -24,6 +31,15 @@ export function SignInForm() {
       </CardHeader>
       <CardContent>
         <form action={formAction} className="flex flex-col gap-4">
+          {callbackUrl ? (
+            <input
+              type="hidden"
+              name="callbackUrl"
+              value={callbackUrl}
+              data-testid="callback-url"
+            />
+          ) : null}
+
           <Field>
             <FieldLabel>{t('fields.email')}</FieldLabel>
             <Input name="email" type="email" size="hub" required autoComplete="email" />

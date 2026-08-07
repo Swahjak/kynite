@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { getLocale } from 'next-intl/server';
-import { and, desc, eq, isNull } from 'drizzle-orm';
+import { and, desc, eq, isNull, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { getDb } from '@/server/db';
 // Table objects come from the schema assembly point, not from a slice barrel
@@ -12,25 +12,33 @@ import { routine, routineStep, timer } from '@/server/db/schema';
 import { assertCan, can, getMember, type Principal } from '@/modules/family';
 import { publish } from '@/modules/realtime';
 import {
+  extendFailure,
   startFailure,
   stopFailure,
+  type ExtendTimerState,
   type StartTimerState,
   type StopTimerState,
 } from './action-state';
-import { DEFAULT_WARNING_LEAD_SECONDS, MAX_DURATION_SECONDS } from './domain/countdown';
+import {
+  DEFAULT_WARNING_LEAD_SECONDS,
+  EXTEND_PRESET_MINUTES,
+  MAX_DURATION_SECONDS,
+} from './domain/countdown';
 
 /**
  * Mutations for the timers slice (M09).
  *
- * Two actions, because a timer has exactly two things a person can do to it.
- * Both open with `assertCan('timer:control')` — the §7 capability that already
- * exists for "Start/stop timers", granted to owners, adults, children on the
- * hub, contributor caregivers and paired devices — before any database
- * identifier is referenced, which is what
+ * Three actions, because a timer has exactly three things a person can do to
+ * it: start it, give it a bit longer, and stop it. All three open with
+ * `assertCan('timer:control')` — the §7 capability that already exists for
+ * "Start/stop timers", granted to owners, adults, children on the hub,
+ * contributor caregivers and paired devices — before any database identifier
+ * is referenced, which is what
  * `tests/unit/server-action-authorization.test.ts` audits structurally.
  *
  * **Nothing here writes a remaining time.** `startedAt` is stamped from the
- * server's clock and `durationSeconds` is fixed; every reader derives the rest
+ * server's clock and `durationSeconds` is the only thing an extension moves;
+ * every reader derives the rest
  * (`domain/countdown.ts`). A client that lies about what time it is therefore
  * cannot lengthen or shorten a countdown — it can only be wrong on its own
  * screen for as long as it takes the next server echo to correct it.
@@ -313,6 +321,125 @@ export async function stopTimerAction(input: StopTimerInput): Promise<StopTimerS
     );
 
     return { status: 'stopped' };
+  });
+
+  await revalidateTimers();
+  return outcome;
+}
+
+const extendSchema = z.object({
+  timerId: z.uuid(),
+  /**
+   * Minutes, from the closed preset list — not a free number. A client that
+   * could post any integer could hand a wall tablet a four-hour countdown one
+   * `+1` at a time, and there is no interaction in this product that wants
+   * that. `MAX_DURATION_SECONDS` still caps the total below.
+   */
+  minutes: z
+    .number()
+    .int()
+    .refine((value) => (EXTEND_PRESET_MINUTES as readonly number[]).includes(value)),
+});
+
+export type ExtendTimerInput = z.infer<typeof extendSchema>;
+
+/**
+ * Give a running timer longer (PRD FR7, M18).
+ *
+ * Server-authoritative like everything else in this slice: the *duration*
+ * moves, `startedAt` never does, so every device's countdown lengthens by
+ * exactly the same amount on the next echo without any of them having to agree
+ * about what time it is. A client that posts a longer duration than the cap
+ * gets the cap, computed in SQL — `least(duration + n, max)` — so two taps
+ * racing cannot add up past it.
+ *
+ * The `stopped_at is null` predicate is the whole idempotency story: a timer
+ * that has already ended cannot be extended into life, which is what keeps
+ * "extend" a modification of something on the wall rather than a second way to
+ * start one.
+ *
+ * **An overrun timer can still be extended, and that is deliberate.** "Stopped"
+ * and "past its duration" are different states: a countdown that has run out is
+ * still on the wall, still counting up, still the thing everyone is looking at —
+ * and "five more minutes" is precisely what a parent says at that moment. Only
+ * `stopped_at` ends a timer, and only a person sets it.
+ *
+ * A timer already at `MAX_DURATION_SECONDS` returns `atMaximum` and publishes
+ * nothing. `least()` would happily "extend" it to the same number it already
+ * had; saying `extended` and broadcasting `timer.extended` over a duration that
+ * did not move would wake every hub in the house to redraw an identical tile.
+ *
+ * It is not a reward and not a reprieve: nothing is marked, nothing is logged
+ * against a child, and the tile looks identical afterwards except for the
+ * number (FR11).
+ */
+export async function extendTimerAction(input: ExtendTimerInput): Promise<ExtendTimerState> {
+  const principal = await assertCan('timer:control').catch(() => null);
+  if (!principal) return extendFailure('forbidden');
+
+  const parsed = extendSchema.safeParse(input);
+  if (!parsed.success) return extendFailure('invalidInput');
+
+  const { timerId, minutes } = parsed.data;
+  const added = minutes * 60;
+
+  const outcome = await getDb().transaction(async (tx): Promise<ExtendTimerState> => {
+    // Read the current duration under a row lock first: the cap is enforced in
+    // SQL below regardless, but "did this actually change anything" cannot be
+    // answered by an UPDATE that returns only the new value.
+    const [current] = await tx
+      .select({ durationSeconds: timer.durationSeconds })
+      .from(timer)
+      .where(
+        and(
+          eq(timer.id, timerId),
+          eq(timer.familyId, principal.familyId),
+          // Same predicate as the update: a stopped timer is not "at maximum",
+          // it is gone, and must fall through to `timerNotFound`.
+          isNull(timer.stoppedAt)
+        )
+      )
+      .limit(1)
+      .for('update');
+
+    if (current && current.durationSeconds >= MAX_DURATION_SECONDS) {
+      return { status: 'atMaximum', durationSeconds: current.durationSeconds };
+    }
+
+    const [extended] = await tx
+      .update(timer)
+      .set({
+        durationSeconds: sql`least(${timer.durationSeconds} + ${added}, ${MAX_DURATION_SECONDS})`,
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(timer.id, timerId),
+          eq(timer.familyId, principal.familyId),
+          // Only something still on the wall can be given longer.
+          isNull(timer.stoppedAt)
+        )
+      )
+      .returning({
+        id: timer.id,
+        memberId: timer.memberId,
+        durationSeconds: timer.durationSeconds,
+      });
+
+    if (!extended) return extendFailure('timerNotFound');
+
+    await publish(
+      {
+        familyId: principal.familyId,
+        type: 'timer.extended',
+        entity: { id: timerId },
+        actor: { ...actorOf(principal), source: 'mobile' },
+        patch: { memberId: extended.memberId, durationSeconds: extended.durationSeconds },
+      },
+      tx
+    );
+
+    return { status: 'extended', durationSeconds: extended.durationSeconds };
   });
 
   await revalidateTimers();

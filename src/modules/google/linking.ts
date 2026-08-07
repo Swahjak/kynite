@@ -5,7 +5,7 @@ import { stopChannel, watchCalendar } from './channels';
 import { enqueueCalendarSync } from './jobs';
 import type { GoogleIdentity, TokenResponse } from './oauth';
 import { findAccountByGoogleUserId } from './queries';
-import { calendar, googleAccount, type GoogleAccount } from './schema';
+import { calendar, googleAccount, type Calendar, type GoogleAccount } from './schema';
 import { discoverCalendars } from './sync';
 import { encryptForStorage } from './tokens';
 
@@ -98,6 +98,27 @@ export async function bootstrapAccount(accountId: string): Promise<{ calendars: 
 }
 
 /** Unlink: the row's calendars and their events cascade away with it (§3). */
+/**
+ * Remove a single calendar from Kynite (M18).
+ *
+ * Channel first, row second, and the order is the same one `unlinkGoogleAccount`
+ * uses for the same reason: a channel outliving the row it points at means
+ * Google keeps posting notifications for a calendar we can no longer resolve,
+ * which the webhook then answers 200 to forever.
+ *
+ * The events go with it through `event.calendar_id`'s `onDelete: 'cascade'`
+ * (`modules/calendar/schema.ts`) — a hard delete rather than a tombstone,
+ * because a tombstone exists so *sync* can echo a deletion, and there is no
+ * sync left to echo to.
+ */
+export async function removeCalendar(row: Calendar): Promise<void> {
+  if (row.channelId && row.channelResourceId) {
+    await stopChannel(row).catch(() => {});
+  }
+
+  await getDb().delete(calendar).where(eq(calendar.id, row.id));
+}
+
 export async function unlinkGoogleAccount(accountId: string): Promise<void> {
   const db = getDb();
   const rows = await db.select().from(calendar).where(eq(calendar.googleAccountId, accountId));

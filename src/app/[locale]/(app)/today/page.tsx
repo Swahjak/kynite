@@ -1,5 +1,6 @@
 import { getFormatter, getTranslations } from 'next-intl/server';
 import { PersonColumns, loadCalendarPage } from '@/modules/calendar';
+import { firstNameOf, getMember, getPrincipal, greetingSlotFor, hourIn } from '@/modules/family';
 import { redirect } from '@/i18n/navigation';
 
 /** Session-dependent: never prerendered, so `next build` needs no database. */
@@ -27,12 +28,33 @@ export default async function TodayPage({
   if (!data) return null;
 
   const t = await getTranslations('calendar');
+  const tCommon = await getTranslations('common');
   const format = await getFormatter();
+
+  /**
+   * The greeting (M18).
+   *
+   * `/today` is the first screen a signed-in parent lands on, and until now it
+   * opened with the word "Vandaag" and a date — true, and completely
+   * anonymous. The slot is resolved against the *household's* timezone
+   * (`data.timeZone`), not the server's: a family in Curaçao must not be wished
+   * a good evening over breakfast.
+   *
+   * It degrades rather than fails: a principal with no member row, or a member
+   * with a blank display name, simply keeps the plain title.
+   */
+  const principal = await getPrincipal();
+  const viewer =
+    principal?.kind === 'member' ? await getMember(principal.familyId, principal.memberId) : null;
+  const firstName = viewer ? firstNameOf(viewer.displayName) : '';
+  const slot = greetingSlotFor(hourIn(data.now, data.timeZone));
 
   return (
     <main className="flex min-h-0 flex-1 flex-col gap-3 p-3" data-testid="today-board">
       <header className="flex flex-col gap-1">
-        <h1 className="font-display text-h1 font-bold">{t('todayTitle')}</h1>
+        <h1 className="font-display text-h1 font-bold" data-testid="today-greeting">
+          {firstName ? tCommon(`greeting.${slot}`, { name: firstName }) : t('todayTitle')}
+        </h1>
         <p className="text-body text-ink-secondary">
           {format.dateTime(data.anchor, { dateStyle: 'full' })}
         </p>

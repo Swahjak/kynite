@@ -106,6 +106,24 @@ export async function listEvents(options: ListEventsOptions): Promise<CalendarEv
       and(
         eq(event.familyId, familyId),
         isNull(event.deletedAt),
+        /**
+         * M18 safety net: a calendar with sync switched off shows nothing.
+         *
+         * The *mechanism* is in `modules/google/actions.ts` — disabling a
+         * calendar deletes its events and clears its cursor in one
+         * transaction, so in the ordinary case there is nothing here to
+         * filter. This predicate covers the gap that mechanism cannot: a row
+         * that arrives from a sync pass racing the disable, or from any future
+         * write path that forgets the rule. One `AND` on a query that already
+         * joins `calendar`, against a class of bug whose symptom is a
+         * household's colleague's diary reappearing on their kitchen wall.
+         *
+         * The `isNull` arm is load-bearing: a Kynite-native event has no
+         * calendar row at all, and the `leftJoin` gives it a null
+         * `syncEnabled`, which a bare `eq(calendar.syncEnabled, true)` would
+         * read as "off" and hide every locally-created event in the app.
+         */
+        or(isNull(event.calendarId), eq(calendar.syncEnabled, true)),
         lt(event.startsAt, window.to),
         or(
           // Recurring rows are expanded, so their stored end says nothing

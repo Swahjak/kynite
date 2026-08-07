@@ -22,14 +22,21 @@ import {
   type PairingCodeState,
 } from './action-state';
 import { DEVICE_KINDS } from './schema';
-import { cancelPairingCode, createPairingCode, redeemPairingCode, revokeDevice } from './queries';
+import {
+  cancelPairingCode,
+  createPairingCode,
+  redeemPairingCode,
+  renameDevice,
+  revokeDevice,
+} from './queries';
 
 /**
  * Mutations for the devices slice (M12, docs/architecture.md §7 "Kiosk device
  * pairing").
  *
- * Four actions and exactly one exemption. `createPairingCodeAction`,
- * `cancelPairingCodeAction` and `revokeDeviceAction` open with
+ * Five actions and exactly one exemption. `createPairingCodeAction`,
+ * `cancelPairingCodeAction`, `renameDeviceAction` and `revokeDeviceAction`
+ * open with
  * `assertCan('device:manage')` — the §7 matrix cell granted to owners and
  * adults and to nobody else, devices included, so a paired kiosk can never
  * pair, cancel or revoke another. `pairDeviceAction` is the exemption: it is
@@ -206,6 +213,45 @@ export async function revokeDeviceAction(input: RevokeDeviceInput): Promise<Acti
       source: 'mobile',
     },
   });
+
+  await revalidateDevices();
+
+  return { status: 'idle' };
+}
+
+const renameSchema = z.object({
+  deviceId: z.uuid(),
+  /**
+   * Same bound as the name a device is *paired* with (`createSchema` above) —
+   * one rule for one column, so a name that could be typed at pairing time can
+   * still be typed a month later.
+   */
+  name: trimmed.min(1).max(60),
+});
+
+export type RenameDeviceInput = z.infer<typeof renameSchema>;
+
+/**
+ * Rename a paired device (M18).
+ *
+ * `device:manage`, the same §7 cell as pairing and revoking one: renaming is
+ * an act on *another* device, which is exactly what that capability is about.
+ *
+ * There is no realtime publish and deliberately so. The name is a label a
+ * parent reads in settings to tell two tablets apart; the wall display renders
+ * the household's schedule, not its own name, so nothing on the kiosk changes
+ * and a `device.*` event would wake every open stream in the family for a
+ * string only one screen will ever look at.
+ */
+export async function renameDeviceAction(input: RenameDeviceInput): Promise<ActionState> {
+  const principal = await assertCan('device:manage').catch(() => null);
+  if (!principal) return actionFailure('forbidden');
+
+  const parsed = renameSchema.safeParse(input);
+  if (!parsed.success) return actionFailure('invalidInput');
+
+  const renamed = await renameDevice(principal.familyId, parsed.data.deviceId, parsed.data.name);
+  if (!renamed) return actionFailure('deviceNotFound');
 
   await revalidateDevices();
 

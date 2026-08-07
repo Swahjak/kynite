@@ -121,9 +121,10 @@ export const reminderDispatch = pgTable(
  * that says no" rather than "is there a row that says yes". A member who has
  * never opened the settings page has no row and is notified exactly as before.
  *
- * The two switches are the two notifications this product actually sends
- * (docs/architecture.md §6): the routine reminder that goes to a routine's
- * owner, and the redemption request that fans out to every adult.
+ * The three switches are the three notifications this product sends
+ * (docs/architecture.md §6, PRD FR22): the routine reminder that goes to a
+ * routine's owner, the redemption request that fans out to every adult, and
+ * the completion update that tells the *other* adults a step was ticked off.
  */
 export const notificationPreference = pgTable(
   'notification_preference',
@@ -139,6 +140,24 @@ export const notificationPreference = pgTable(
     routineReminders: boolean('routine_reminders').notNull().default(true),
     /** §6 step 4: "may I spend my stars", to every adult. */
     redemptionRequests: boolean('redemption_requests').notNull().default(true),
+    /**
+     * PRD FR22 (M18): "a significant participant action", which in this
+     * product means a routine step being ticked off — to every adult *other
+     * than whoever tapped*.
+     *
+     * A third column rather than a reuse of `routineReminders`, and the
+     * distinction is not pedantic: a reminder is addressed to the person who
+     * owns the routine and arrives *before* it, while this is addressed to the
+     * other adults and arrives *after* — the second parent who is not at home
+     * and would otherwise learn nothing. A household that wants the first and
+     * not the second is a completely ordinary household, and one switch could
+     * not express it.
+     *
+     * Defaults `true`, and — like its two neighbours — an absent row means on,
+     * so this migration turns the notification on for existing families
+     * without anybody having to opt in to the feature FR22 already promised.
+     */
+    completionUpdates: boolean('completion_updates').notNull().default(true),
     ...timestamps,
   },
   (table) => [

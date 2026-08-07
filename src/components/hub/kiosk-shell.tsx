@@ -47,10 +47,21 @@ export function KioskShell({
   children,
   device,
   chimeSettings,
+  brand,
 }: {
   children: React.ReactNode;
   /** The timers slice's chime control — see `HubSettings`. */
   chimeSettings?: React.ReactNode;
+  /**
+   * The Kynite mark (M18), passed in as a node rather than imported: this is a
+   * client component and `BrandMark` is an async server one, so the layout
+   * renders it and hands it down — the same seam `chimeSettings` uses.
+   *
+   * It is the icon variant and it is *small*. The wall's job is the family's
+   * day, not the product's name; the mark is there so a visitor can tell what
+   * the screen in the hallway is, and for no other reason.
+   */
+  brand?: React.ReactNode;
   /**
    * `null` on the pair screen — the one hub surface that exists precisely
    * because there is no device yet. It still gets the fullscreen frame, the
@@ -109,7 +120,8 @@ export function KioskShell({
       {device ? <SettingsWatcher /> : null}
 
       <header className="flex shrink-0 items-center justify-between gap-4 px-6 pt-4 pb-2">
-        <div className="flex items-baseline gap-4">
+        <div className="flex items-center gap-4">
+          {brand}
           {device ? (
             <span className="text-body-lg text-ink-secondary" data-testid="hub-device-name">
               {t('deviceName', { name: device.name })}

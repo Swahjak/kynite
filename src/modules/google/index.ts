@@ -4,6 +4,7 @@
  */
 
 export {
+  CALENDAR_SCOPE,
   GOOGLE_SCOPES,
   GoogleNotConfiguredError,
   OAUTH_CALLBACK_PATH,
@@ -113,9 +114,11 @@ export {
   findAccountByGoogleUserId,
   findCalendarByChannelId,
   listFamilyCalendars,
+  countEventsByCalendar,
   listLinkedAccounts,
   listReauthRequiredAccounts,
   type LinkedAccount,
+  type LinkedCalendar,
 } from './queries';
 
 export { bootstrapAccount, linkGoogleAccount, unlinkGoogleAccount } from './linking';
@@ -147,7 +150,12 @@ export {
   runPoll,
 } from './jobs';
 
-export { setCalendarSyncAction, syncNowAction, unlinkGoogleAccountAction } from './actions';
+export {
+  removeCalendarAction,
+  setCalendarSyncAction,
+  syncNowAction,
+  unlinkGoogleAccountAction,
+} from './actions';
 
 export { actionFailure, idleState, type ActionState } from './action-state';
 

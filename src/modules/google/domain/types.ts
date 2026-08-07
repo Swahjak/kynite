@@ -23,6 +23,38 @@ export type GoogleEventResource = {
   /** Set on an override instance; points at the series master's event id. */
   recurringEventId?: string;
   originalStartTime?: GoogleEventDateTime;
+  /**
+   * Google's own classification. `default` and `birthday` are real events;
+   * `workingLocation`, `focusTime` and `outOfOffice` are *status* entries a
+   * parent's work calendar emits constantly, and they must never reach the wall
+   * board (see `isStatusOnly`). Typed as a union plus `(string & {})` because
+   * Google adds values to this enum without notice and an unknown one has to
+   * stay an ordinary event rather than crash the mapper.
+   */
+  eventType?: GoogleEventType;
+  /** Who Google says owns the event. Matched against linked accounts (§5). */
+  organizer?: GoogleEventPerson;
+  creator?: GoogleEventPerson;
+  attendees?: GoogleEventPerson[];
+};
+
+export type GoogleEventType =
+  | 'default'
+  | 'birthday'
+  | 'focusTime'
+  | 'fromGmail'
+  | 'outOfOffice'
+  | 'workingLocation'
+  | (string & NonNullable<unknown>);
+
+/** The subset of Google's attendee/organizer shape attribution needs. */
+export type GoogleEventPerson = {
+  email?: string;
+  displayName?: string;
+  self?: boolean;
+  /** Google emits placeholder rows for rooms and equipment; never a person. */
+  resource?: boolean;
+  responseStatus?: 'needsAction' | 'declined' | 'tentative' | 'accepted';
 };
 
 export type GoogleEventDateTime = {
@@ -126,6 +158,14 @@ export type MappedEvent = {
   recurringEventId: string | null;
   etag: string | null;
   updatedAtRemote: Date | null;
+  /**
+   * Attribution (M18). Both are *resolved member ids*, not emails: the mapper
+   * produces them from `attributeEvent()`, and a pass with no directory (the
+   * push echo path) leaves them `null`/`[]`, which the store reads as "keep
+   * whatever is already there" rather than as "nobody".
+   */
+  ownerMemberId: string | null;
+  attendeeMemberIds: string[];
 };
 
 /** The local row shape the engine needs — a narrow read of `event`. */
@@ -150,7 +190,37 @@ export type CalendarSyncState = {
    * carry none. Null falls back to `DEFAULT_TIMEZONE` inside the mapper.
    */
   timeZone?: string | null;
+  /**
+   * The member who owns the Google account this calendar hangs off
+   * (`google_account.owner_member_id`). Legacy parity: the owner is a
+   * participant of everything on their *own* calendar, matched attendee list or
+   * not — which is what puts a parent's imported work meeting in that parent's
+   * column rather than in nobody's.
+   *
+   * Only consulted when `isPrimary` is true (see `attributeEvent`).
+   */
+  ownerMemberId?: string | null;
+  /**
+   * Google's `primary` flag: the account holder's own calendar. False for the
+   * subscriptions and shared diaries that hang off the same account, where the
+   * owner fallback above would be the wrong person entirely.
+   */
+  isPrimary?: boolean;
 };
+
+/**
+ * Email → member id, for attendee attribution (M18).
+ *
+ * A port rather than a query, for the same reason `SyncStore` is one: the
+ * matching rule (case-insensitive, unmatched addresses ignored) is policy and
+ * belongs in the pure layer, while "which addresses does this household own" is
+ * a database read. The production implementation is built by
+ * `modules/google/sync.ts`; the fixture suite passes a `Map`.
+ */
+export interface MemberDirectory {
+  /** `null` when the address belongs to nobody in this family. */
+  memberIdFor(email: string): string | null;
+}
 
 /**
  * Persistence port. The production implementation is `modules/google/store.ts`

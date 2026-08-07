@@ -149,6 +149,7 @@ describe.skipIf(!databaseUrl)('notification preferences (integration)', () => {
       expect(await getNotificationPreferences(household.familyId, household.parentId)).toEqual({
         routineReminders: true,
         redemptionRequests: true,
+        completionUpdates: true,
       });
 
       await subscribe(household.parentId, 'https://push.example/parent');
@@ -162,7 +163,7 @@ describe.skipIf(!databaseUrl)('notification preferences (integration)', () => {
       await upsertNotificationPreferences({
         familyId: household.familyId,
         memberId: household.parentId,
-        preferences: { routineReminders: false, redemptionRequests: true },
+        preferences: { routineReminders: false, redemptionRequests: true, completionUpdates: true },
       });
 
       expect(await runReminderDispatch(reminderJob(), DUE_AT)).toBe(0);
@@ -178,14 +179,14 @@ describe.skipIf(!databaseUrl)('notification preferences (integration)', () => {
       await upsertNotificationPreferences({
         familyId: household.familyId,
         memberId: household.parentId,
-        preferences: { routineReminders: false, redemptionRequests: true },
+        preferences: { routineReminders: false, redemptionRequests: true, completionUpdates: true },
       });
       await runReminderDispatch(reminderJob(), DUE_AT);
 
       await upsertNotificationPreferences({
         familyId: household.familyId,
         memberId: household.parentId,
-        preferences: { routineReminders: true, redemptionRequests: true },
+        preferences: { routineReminders: true, redemptionRequests: true, completionUpdates: true },
       });
 
       expect(await runReminderDispatch(reminderJob(), DUE_AT)).toBe(1);
@@ -198,7 +199,11 @@ describe.skipIf(!databaseUrl)('notification preferences (integration)', () => {
       await upsertNotificationPreferences({
         familyId: household.familyId,
         memberId: otherAdultId,
-        preferences: { routineReminders: false, redemptionRequests: false },
+        preferences: {
+          routineReminders: false,
+          redemptionRequests: false,
+          completionUpdates: true,
+        },
       });
 
       expect(await runReminderDispatch(reminderJob(), DUE_AT)).toBe(1);
@@ -230,7 +235,7 @@ describe.skipIf(!databaseUrl)('notification preferences (integration)', () => {
       await upsertNotificationPreferences({
         familyId: household.familyId,
         memberId: otherAdultId,
-        preferences: { routineReminders: true, redemptionRequests: false },
+        preferences: { routineReminders: true, redemptionRequests: false, completionUpdates: true },
       });
 
       expect(await listRedemptionRecipients(household.familyId)).toEqual([household.parentId]);
@@ -252,7 +257,7 @@ describe.skipIf(!databaseUrl)('notification preferences (integration)', () => {
       await upsertNotificationPreferences({
         familyId: household.familyId,
         memberId: household.childId,
-        preferences: { routineReminders: true, redemptionRequests: true },
+        preferences: { routineReminders: true, redemptionRequests: true, completionUpdates: true },
       });
 
       expect(await listRedemptionRecipients(household.familyId)).not.toContain(household.childId);

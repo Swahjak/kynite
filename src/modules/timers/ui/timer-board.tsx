@@ -2,8 +2,14 @@
 
 import { useEffect, useRef, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
-import { stopTimerAction } from '../actions';
-import { formatCountdown, minutesRemaining, phaseOf, remainingSeconds } from '../domain/countdown';
+import { extendTimerAction, stopTimerAction } from '../actions';
+import {
+  EXTEND_PRESET_MINUTES,
+  formatCountdown,
+  minutesRemaining,
+  phaseOf,
+  remainingSeconds,
+} from '../domain/countdown';
 import type { TimerBoardData, TimerView } from '../page-data';
 import { TimerTile } from './timer-tile';
 import { useChime } from './use-chime';
@@ -64,6 +70,22 @@ export function TimerBoard({ board }: { board: TimerBoardData }) {
     });
   };
 
+  // FR7 (M18): "a bit longer", from the wall itself. `timer:control` already
+  // grades `allow` for a device and for a child on the hub, so this needs no
+  // new capability — it is the same authority that stops one.
+  const extend = (timerId: string, minutes: number) => {
+    startTransition(async () => {
+      await extendTimerAction({ timerId, minutes });
+    });
+  };
+
+  const extendOptionsFor = (timer: TimerView) =>
+    EXTEND_PRESET_MINUTES.map((minutes) => ({
+      minutes,
+      label: t('actions.extend', { minutes }),
+      ariaLabel: t('actions.extendNamed', { label: timer.label, minutes }),
+    }));
+
   const copyFor = (timer: TimerView) => ({
     warning: t('warning', { label: timer.label, minutes: minutesRemaining(timer, now) }),
     overrun: t('overrun'),
@@ -86,6 +108,8 @@ export function TimerBoard({ board }: { board: TimerBoardData }) {
               nowMs={now}
               copy={copyFor(timer)}
               onStop={() => stop(timer.id)}
+              extendOptions={extendOptionsFor(timer)}
+              onExtend={(minutes) => extend(timer.id, minutes)}
             />
           ))}
         </div>

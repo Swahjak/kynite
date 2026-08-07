@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
+import { useActionToast } from '@/components/ui/use-action-toast';
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
 import {
   Select,
@@ -25,7 +26,9 @@ import { HUB_VIEWS, type HubView } from '../schema';
  */
 export function HubDisplayForm({ defaultView }: { defaultView: HubView }) {
   const t = useTranslations('settings.hub');
+  const tCommon = useTranslations('common');
   const [state, formAction, pending] = useActionState(setHubDisplayAction, idleState);
+  useActionToast(state, pending, { success: tCommon('saved') });
 
   return (
     <form action={formAction} className="flex flex-col gap-4" data-testid="hub-display-form">

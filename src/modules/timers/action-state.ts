@@ -25,3 +25,21 @@ export const startFailure = (error: string): StartTimerState => ({ status: 'erro
 export type StopTimerState = { status: 'stopped' } | { status: 'error'; error: string };
 
 export const stopFailure = (error: string): StopTimerState => ({ status: 'error', error });
+
+/**
+ * What extending a timer gets back (M18). The new total duration rides along
+ * so a caller can reconcile without a refetch — every countdown in this slice
+ * is derived from `startedAt + durationSeconds`, and this is the only value
+ * that changes.
+ *
+ * `atMaximum` is a *successful no-op*: the timer is already at
+ * `MAX_DURATION_SECONDS`, so nothing moved and nothing was broadcast. It is not
+ * an error — the parent did nothing wrong — but reporting it as `extended`
+ * would be a lie a caller could act on, so it is its own status.
+ */
+export type ExtendTimerState =
+  | { status: 'extended'; durationSeconds: number }
+  | { status: 'atMaximum'; durationSeconds: number }
+  | { status: 'error'; error: string };
+
+export const extendFailure = (error: string): ExtendTimerState => ({ status: 'error', error });

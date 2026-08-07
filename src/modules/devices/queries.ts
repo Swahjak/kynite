@@ -435,6 +435,31 @@ export async function revokeDevice(
   return true;
 }
 
+/**
+ * Rename a paired device (M18).
+ *
+ * Family-scoped and *live*-scoped: `revoked_at is null` means a screen whose
+ * access was withdrawn keeps the name it had, so the audit trail in the list
+ * ("Keuken — toegang ingetrokken") does not quietly change under a parent.
+ *
+ * Returns false when nothing matched, which the action turns into
+ * `deviceNotFound` rather than a silent success.
+ */
+export async function renameDevice(
+  familyId: string,
+  deviceId: string,
+  name: string,
+  now: Date = new Date()
+): Promise<boolean> {
+  const [renamed] = await getDb()
+    .update(device)
+    .set({ name, updatedAt: now })
+    .where(and(eq(device.id, deviceId), eq(device.familyId, familyId), isNull(device.revokedAt)))
+    .returning({ id: device.id });
+
+  return !!renamed;
+}
+
 /** One device, family-scoped. Null for another family's id — never a leak. */
 export async function getDevice(familyId: string, deviceId: string): Promise<Device | null> {
   const [row] = await getDb()

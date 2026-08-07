@@ -14,6 +14,8 @@ import { getDb } from '@/server/db';
 //     (calendar barrel → actions → google barrel → store → calendar barrel).
 import { event } from '@/server/db/schema';
 import { createGoogleCalendarApi } from './api';
+import { loadMemberDirectory } from './directory';
+import { initialSyncEnabled } from './domain/calendar-list';
 import { syncCalendar, type SyncResult } from './domain/sync-engine';
 import { pushEvent, type PushResult, type PushableEvent } from './domain/push-engine';
 import type { CalendarSyncState, GoogleCalendarApi, GoogleCalendarResource } from './domain/types';
@@ -33,13 +35,15 @@ export function apiForAccount(googleAccountId: string): GoogleCalendarApi {
   return createGoogleCalendarApi({ getAccessToken: accessTokenProvider(googleAccountId) });
 }
 
-function syncState(row: Calendar): CalendarSyncState {
+function syncState(row: Calendar, ownerMemberId: string | null = null): CalendarSyncState {
   return {
     id: row.id,
     familyId: row.familyId,
     googleCalendarId: row.googleCalendarId,
     syncToken: row.syncToken,
     timeZone: row.timeZone,
+    ownerMemberId,
+    isPrimary: row.isPrimary,
   };
 }
 
@@ -48,17 +52,41 @@ async function loadCalendar(calendarId: string): Promise<Calendar | null> {
   return row ?? null;
 }
 
+/**
+ * The member behind a calendar's Google account (M18) — one join, because
+ * attribution needs "whose calendar is this" and the calendar row only knows
+ * which *account* it hangs off.
+ */
+async function calendarOwnerMemberId(googleAccountId: string): Promise<string | null> {
+  const [row] = await getDb()
+    .select({ ownerMemberId: googleAccount.ownerMemberId })
+    .from(googleAccount)
+    .where(eq(googleAccount.id, googleAccountId))
+    .limit(1);
+
+  return row?.ownerMemberId ?? null;
+}
+
 /** One calendar, one incremental (or full) pass. The `google:sync-calendar` job body. */
 export async function syncCalendarById(calendarId: string): Promise<SyncResult | null> {
   const row = await loadCalendar(calendarId);
   if (!row || !row.syncEnabled) return null;
 
+  // M18: both halves of attribution are resolved once, here, and handed to the
+  // pure engine — "whose calendar is this" and "which addresses does this
+  // household own".
+  const [ownerMemberId, directory] = await Promise.all([
+    calendarOwnerMemberId(row.googleAccountId),
+    loadMemberDirectory(row.familyId),
+  ]);
+
   return syncCalendar({
-    calendar: syncState(row),
+    calendar: syncState(row, ownerMemberId),
     api: apiForAccount(row.googleAccountId),
     store: syncStore,
     emit: publishEmitter,
     echo: echoRegistry,
+    directory,
   });
 }
 
@@ -78,13 +106,22 @@ export async function listSyncableCalendars(): Promise<Calendar[]> {
 /**
  * Calendar discovery (§5): the account's calendar list, upserted.
  *
- * New calendars arrive with `syncEnabled` at its column default, which is
- * `true` (docs/architecture.md §3) — linking an account syncs every calendar
- * it can see from the start; the settings surface is where a parent turns
- * one off, not where they turn one on. `summary`/`color`/`writable` are
- * refreshed on every pass; `syncEnabled` and `visibility` are never
- * overwritten once set, because from that point on they are the parent's
- * choices, not Google's.
+ * **What a new calendar arrives switched on (M18).** Until now every
+ * discovered calendar took the column default, `true`, so linking a work
+ * account put fifteen calendars — every colleague's shared diary, every room,
+ * every subscribed holiday feed — onto the family's wall board in one tap, and
+ * the parent's first experience of the feature was turning most of it off.
+ * A new row now takes its initial state from Google's own answer to the same
+ * question: `primary` (the account's own calendar, always wanted) or
+ * `selected` (the flag Google sets for the calendars a person actually has
+ * ticked in their own Calendar UI). Anything else lands off, visible in
+ * settings, one tap from on.
+ *
+ * `summary`/`color`/`writable`/`timeZone` are refreshed on every pass;
+ * `syncEnabled` and `visibility` are never overwritten once the row exists,
+ * because from that point on they are the parent's choices, not Google's —
+ * which is why the flag below is in `values` and deliberately *not* in the
+ * conflict `set`.
  */
 export async function discoverCalendars(googleAccountId: string): Promise<Calendar[]> {
   const [account] = await getDb()
@@ -119,6 +156,11 @@ export async function discoverCalendars(googleAccountId: string): Promise<Calend
       color: resource.backgroundColor ?? null,
       timeZone: resource.timeZone ?? null,
       writable: resource.accessRole === 'owner' || resource.accessRole === 'writer',
+      // Google's own answer to "is this the account holder's calendar" — the
+      // input to attribution's owner fallback (M18, `attributeEvent`). Refreshed
+      // on every pass like the other Google-owned facts, because it is one.
+      isPrimary: resource.primary === true,
+      syncEnabled: initialSyncEnabled(resource),
     };
 
     const [row] = await db
@@ -131,6 +173,7 @@ export async function discoverCalendars(googleAccountId: string): Promise<Calend
           color: values.color,
           timeZone: values.timeZone,
           writable: values.writable,
+          isPrimary: values.isPrimary,
           updatedAt: new Date(),
         },
       })

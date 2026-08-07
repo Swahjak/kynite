@@ -2,7 +2,7 @@ import 'server-only';
 import type { PgBoss } from 'pg-boss';
 import { enqueue } from '@/server/jobs/boss';
 import { isPushConfigured } from './config';
-import { redemptionRequestPayload, reminderPayload } from './copy';
+import { redemptionRequestPayload, reminderPayload, routineCompletedPayload } from './copy';
 import { dueReminders, minutesUntil } from './domain/reminder-window';
 import {
   QUEUE,
@@ -21,6 +21,7 @@ import {
   getPushSubscription,
   getReminderRoutine,
   listActiveSubscriptions,
+  listCompletionRecipients,
   listRedemptionRecipients,
   listScannableFamilies,
 } from './queries';
@@ -113,6 +114,51 @@ export async function notifyRedemptionRequested(input: {
     childName: input.childName,
     rewardTitle: input.rewardTitle,
     redemptionId: input.redemptionId,
+  });
+
+  return fanOutPush(input.familyId, adults, payload);
+}
+
+/**
+ * `completion.created` → every *other* adult (PRD FR22, M18).
+ *
+ * The notification Journey 1 always promised and never had: a child taps
+ * "done" on the hall tablet and the parent who is not in the room finds out.
+ *
+ * Three properties, each of them load-bearing:
+ *
+ * - **Best-effort, never awaited into the tap.** The whole point of the
+ *   completion path is the <100ms optimistic tick (§4); a push queue having a
+ *   bad minute must never be able to make a child's tap feel slow or fail. The
+ *   caller (`modules/routines/notify-bridge.ts`) fires this and moves on.
+ * - **Idempotent per completion.** It is called only from the branch that
+ *   actually *inserted* a row (`recordCompletion`), so a replayed `clientId`
+ *   notifies nobody a second time. The payload's `tag` carries the same key,
+ *   which collapses any duplicate that somehow arrives at the device anyway.
+ * - **One `push:send` job per endpoint**, via `fanOutPush` — the §8 fan-out
+ *   shape, so one dead phone costs only its own retries.
+ *
+ * Returns the number of endpoints notified, which is 0 for a household with no
+ * push keypair, no subscriptions, or nobody left after the preference filter.
+ */
+export async function notifyRoutineCompleted(input: {
+  familyId: string;
+  memberName: string;
+  stepTitle: string;
+  clientId: string;
+  /** Whoever tapped, when that was a member — they need no push about it. */
+  actorMemberId?: string | null;
+}): Promise<number> {
+  if (!isPushConfigured()) return 0;
+
+  const adults = await listCompletionRecipients(input.familyId, input.actorMemberId ?? null);
+  if (adults.length === 0) return 0;
+
+  const payload = await routineCompletedPayload({
+    locale: await getFamilyLocale(input.familyId),
+    memberName: input.memberName,
+    stepTitle: input.stepTitle,
+    clientId: input.clientId,
   });
 
   return fanOutPush(input.familyId, adults, payload);

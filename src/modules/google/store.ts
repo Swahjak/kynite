@@ -57,6 +57,10 @@ function upsertValues(
     rdates: input.rdates,
     exdates: input.exdates,
     recurrenceParentId: parentId,
+    // M18 attribution. On an *insert* these are simply what the pass resolved;
+    // the conflict branch below is where the interesting rule lives.
+    ownerMemberId: input.ownerMemberId,
+    attendeeMemberIds: input.attendeeMemberIds,
     etag: input.etag,
     updatedAtRemote: input.updatedAtRemote,
     // A remote resurrection un-deletes the local row: Google is the source of
@@ -82,6 +86,40 @@ async function upsertEvent(
         // Keep the parent link when this pass did not resolve one (an override
         // whose master arrives in a later page).
         recurrenceParentId: parentId ?? sql`${event.recurrenceParentId}`,
+        /**
+         * Attribution is **never destructive on update** (M18).
+         *
+         * Sync is not the authority on who an event belongs to; the parent who
+         * assigned it in the event form is. So on an update:
+         *
+         *  - `owner_member_id` is only ever *filled in*, never replaced. A
+         *    non-null owner survives every subsequent pass — a remote edit with
+         *    a fresh etag, a 410 full resync, a calendar switched off and back
+         *    on. `coalesce(existing, resolved)` is the whole rule.
+         *  - `attendee_member_ids` is a **union**: sync may add participants it
+         *    matched, and removes nobody.
+         *
+         * The earlier `?? keep-existing` guard did not do this. `attributeEvent`
+         * almost always resolves *something* (organizer, else the calendar
+         * owner), so the guard only ever fired on the push-echo path and every
+         * ordinary Google pass overwrote the parent's choice with Google's.
+         * That path still behaves identically: `applyRemote` re-maps our own
+         * write, which carries no attribution at all, and `coalesce` of a null
+         * is the existing value.
+         *
+         * The insert path is untouched — a brand-new row has nothing to protect,
+         * so it simply takes what the pass resolved (see `upsertValues`).
+         */
+        ownerMemberId: sql`coalesce(${event.ownerMemberId}, ${input.ownerMemberId}::uuid)`,
+        attendeeMemberIds:
+          input.attendeeMemberIds.length > 0
+            ? sql`(
+                select coalesce(array_agg(distinct m), '{}'::uuid[])
+                from unnest(
+                  ${event.attendeeMemberIds} || ${sql.param(input.attendeeMemberIds)}::uuid[]
+                ) as m
+              )`
+            : sql`${event.attendeeMemberIds}`,
         version: sql`${event.version} + 1`,
         updatedAt: new Date(),
       },

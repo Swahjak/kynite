@@ -3,6 +3,7 @@
 import { useActionState, useId, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
+import { useActionToast } from '@/components/ui/use-action-toast';
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import {
@@ -37,7 +38,9 @@ const WEEK_STARTS = [1, 7] as const;
  */
 export function FamilySettingsForm({ family }: { family: Family }) {
   const t = useTranslations('settings.family');
+  const tCommon = useTranslations('common');
   const [state, formAction, pending] = useActionState(updateFamilyAction, idleState);
+  useActionToast(state, pending, { success: tCommon('saved') });
   const zoneListId = useId();
 
   const zones = useMemo(() => {

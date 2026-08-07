@@ -16,6 +16,12 @@ export const REALTIME_EVENT_TYPES = [
   'routine.updated',
   'timer.started',
   'timer.stopped',
+  // M18 (PRD FR7). A third timer verb rather than a second `timer.started`:
+  // the board's reaction is the same (re-read `/api/timers`), but a consumer
+  // that treated an extension as a *start* would re-arm the chime's
+  // "already-sounded" bookkeeping and could ring a second time for one timer.
+  // `entity.id` is the timer; the patch carries the new `durationSeconds`.
+  'timer.extended',
   // M12. Not a data change: it tells a wall tablet that its own credential is
   // gone, so it can drop to the pair screen without waiting for somebody to
   // touch it (§7 "revocation drops the hub to a pair screen on the next

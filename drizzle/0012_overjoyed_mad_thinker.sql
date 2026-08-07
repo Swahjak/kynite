@@ -1,0 +1,1 @@
+ALTER TABLE "notification_preference" ADD COLUMN "completion_updates" boolean DEFAULT true NOT NULL;

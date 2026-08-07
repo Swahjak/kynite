@@ -48,6 +48,15 @@ export {
   type InviteState,
 } from './domain/invite';
 
+export {
+  AFTERNOON_FROM_HOUR,
+  EVENING_FROM_HOUR,
+  firstNameOf,
+  greetingSlotFor,
+  hourIn,
+  type GreetingSlot,
+} from './domain/greeting';
+
 export { getFamily, getMember, getMemberByUserId, listMembers } from './queries';
 
 export {

@@ -70,6 +70,7 @@ export {
   getPushSubscription,
   getReminderRoutine,
   listActiveSubscriptions,
+  listCompletionRecipients,
   listRedemptionRecipients,
   listScannableFamilies,
   trimReminderDispatch,
@@ -80,7 +81,12 @@ export {
   type SubscriptionUpsert,
 } from './queries';
 
-export { redemptionRequestPayload, reminderPayload, resolveLocale } from './copy';
+export {
+  redemptionRequestPayload,
+  reminderPayload,
+  routineCompletedPayload,
+  resolveLocale,
+} from './copy';
 
 export {
   sendToSubscription,
@@ -96,6 +102,7 @@ export {
   enqueueReminderDispatch,
   fanOutPush,
   notifyRedemptionRequested,
+  notifyRoutineCompleted,
   registerNotificationJobs,
   runPushSend,
   runReminderDispatch,

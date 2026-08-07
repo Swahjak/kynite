@@ -6,6 +6,7 @@ import {
   HUB_THEME_STORAGE_KEY,
   KioskShell,
 } from '@/components/hub';
+import { BrandMark } from '@/components/brand';
 import { HubReloadController, ServiceWorkerRegistrar } from '@/components/offline';
 import { RealtimeProvider } from '@/components/realtime';
 import { getFamily, getPrincipal } from '@/modules/family';
@@ -110,6 +111,7 @@ export default async function HubLayout({
         <KioskShell
           device={paired ? { id: paired.id, name: paired.name } : null}
           chimeSettings={<ChimeSettingsPanel />}
+          brand={<BrandMark variant="icon" className="h-7" />}
         >
           {children}
         </KioskShell>

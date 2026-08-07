@@ -85,6 +85,42 @@ export async function reminderPayload(input: {
   };
 }
 
+/**
+ * The fan-out the *other* adults get when a routine step is ticked off
+ * (PRD FR22, M18).
+ *
+ * The voice is the hardest part of this one and it is settled here. It states
+ * what happened and who did it — "Sofie heeft tanden poetsen gedaan" — and
+ * that is the whole message. It is not a progress report, it carries no count,
+ * no "still to do", and no comparison with yesterday or with a sibling, all of
+ * which would turn a parent's lock screen into the scoreboard FR13 and FR11
+ * exist to prevent. It is also never sent for a *missed* step: a missed step
+ * is the absence of a row (§3), and there is nothing to say about an absence.
+ *
+ * `tag` is the completion's `clientId`, which is the same idempotency key the
+ * write used — so a replayed tap from an offline outbox replaces the
+ * notification on the lock screen instead of stacking a second one beside it.
+ */
+export async function routineCompletedPayload(input: {
+  locale: string | null | undefined;
+  memberName: string;
+  stepTitle: string;
+  clientId: string;
+}): Promise<PushPayload> {
+  const locale = resolveLocale(input.locale);
+  const t = await translator(locale);
+
+  return {
+    title: t('notifications.completion.title'),
+    body: t('notifications.completion.body', {
+      name: input.memberName,
+      step: input.stepTitle,
+    }),
+    url: `/${locale}/routines`,
+    tag: `completion:${input.clientId}`,
+  };
+}
+
 /** The fan-out every adult gets when a child asks to spend stars (§6, FR19). */
 export async function redemptionRequestPayload(input: {
   locale: string | null | undefined;

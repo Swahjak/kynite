@@ -110,8 +110,12 @@ test.describe('event CRUD', () => {
     expect(edited.version).toBe(1);
 
     // Delete: a soft delete, so the row survives for the sync engine (§3).
+    // M18: it is confirmed first — one stray tap on a phone used to be enough
+    // to take a custody arrangement off the household's calendar.
     await page.getByText('Zwemles gevorderden').first().click();
     await page.getByTestId('event-delete').click();
+    await expect(page.getByTestId('event-delete-confirm')).toBeVisible();
+    await page.getByTestId('event-delete-confirm-yes').click();
 
     await expect(page.getByText('Zwemles gevorderden')).toHaveCount(0);
 

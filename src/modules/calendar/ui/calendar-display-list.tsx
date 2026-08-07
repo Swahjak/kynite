@@ -3,6 +3,7 @@
 import { useActionState, useId, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
+import { useActionToast } from '@/components/ui/use-action-toast';
 import { Field, FieldGroupLabel, FieldLabel } from '@/components/ui/field';
 import {
   Select,
@@ -80,7 +81,9 @@ export function CalendarDisplayList({ calendars }: { calendars: CalendarDisplayV
 
 function CalendarDisplayRow({ calendar }: { calendar: CalendarDisplayView }) {
   const t = useTranslations('settings.calendars');
+  const tCommon = useTranslations('common');
   const [state, formAction, pending] = useActionState(setCalendarDisplayAction, idleState);
+  useActionToast(state, pending, { success: tCommon('saved') });
   const [category, setCategory] = useState<string>(calendar.category ?? '');
   const labelId = useId();
 

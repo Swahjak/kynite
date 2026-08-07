@@ -112,13 +112,27 @@ export function AgendaView({
 
             <div className={cn('flex min-w-0 flex-1 flex-col gap-1.5', hub && 'gap-2')}>
               {group.events.map((event) => (
-                <EventChip
-                  key={event.key}
-                  event={event}
-                  variant="row"
-                  hub={hub}
-                  onSelect={onSelect}
-                />
+                <div key={event.key} className="flex min-w-0 flex-col gap-0.5">
+                  <EventChip event={event} variant="row" hub={hub} onSelect={onSelect} />
+                  {/* M18: the note, where there is room to read one. The
+                      agenda is the only view whose rows are full-width prose
+                      rather than a slot in a grid, so it is the only view a
+                      description can appear on without pushing an event chip
+                      out of its own hour. Redacted (busy-only) events carry no
+                      description at all — `queries.ts` strips it — so nothing
+                      private leaks through this line. */}
+                  {event.description ? (
+                    <p
+                      data-testid="agenda-description"
+                      className={cn(
+                        'line-clamp-2 pl-3 text-ink-secondary',
+                        hub ? 'text-body' : 'text-caption'
+                      )}
+                    >
+                      {event.description}
+                    </p>
+                  ) : null}
+                </div>
               ))}
             </div>
           </section>

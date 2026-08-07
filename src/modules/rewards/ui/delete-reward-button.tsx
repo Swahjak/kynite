@@ -2,13 +2,14 @@
 
 import { useActionState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Button } from '@/components/ui/button';
+import { ConfirmButton } from '@/components/ui/confirm-button';
 import { idleState } from '../action-state';
 import { deleteRewardAction } from '../actions';
 
 /**
  * Removing a reward is a *parent* action on the parent surface, so it behaves
- * like every other destructive control in the app.
+ * like every other destructive control in the app — which since M18 means it
+ * asks first (`ConfirmButton`, the M12 two-tap shape).
  *
  * Note what it is not: there is no equivalent anywhere on the hub, and taking a
  * reward off the shelf never touches the star ledger. If anything, it gives
@@ -25,15 +26,15 @@ export function DeleteRewardButton({ rewardId, title }: { rewardId: string; titl
       <input type="hidden" name="rewardId" value={rewardId} />
       {/* Short visible label, full accessible name: a shelf of rewards would
           otherwise be a column of long, near-identical buttons. */}
-      <Button
-        type="submit"
-        variant="destructive"
-        size="hub"
-        aria-label={t('actions.removeNamed', { title })}
-        disabled={pending}
+      <ConfirmButton
+        triggerLabel={t('actions.removeNamed', { title })}
+        question={t('actions.removeConfirm')}
+        confirmLabel={t('actions.removeConfirmYes')}
+        pending={pending}
+        testId="delete-reward"
       >
         {t('actions.remove')}
-      </Button>
+      </ConfirmButton>
       {state.status === 'error' ? (
         <span role="alert" className="sr-only">
           {t(`errors.${state.error}`)}

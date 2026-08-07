@@ -48,15 +48,41 @@ export type TimerTileCopy = {
   stopLabel?: string;
 };
 
+/**
+ * One "a bit longer" control (M18, FR7). Already-translated, like everything
+ * else this component takes — the tile renders, it does not look copy up.
+ */
+export type TimerExtendOption = {
+  minutes: number;
+  /** Short face of the button, e.g. "+5 min". */
+  label: string;
+  /** The full sentence a screen reader gets. */
+  ariaLabel: string;
+};
+
 export type TimerTileProps = {
   timer: TimerView;
   nowMs: number;
   copy: TimerTileCopy;
   compact?: boolean;
   onStop?: () => void;
+  /**
+   * "A bit longer" (M18). Absent, the tile renders exactly as it did before —
+   * a surface that cannot control timers passes neither this nor `onStop`.
+   */
+  extendOptions?: readonly TimerExtendOption[];
+  onExtend?: (minutes: number) => void;
 };
 
-export function TimerTile({ timer, nowMs, copy, compact = false, onStop }: TimerTileProps) {
+export function TimerTile({
+  timer,
+  nowMs,
+  copy,
+  compact = false,
+  onStop,
+  extendOptions,
+  onExtend,
+}: TimerTileProps) {
   const phase = phaseOf(timer, nowMs);
   const left = remainingSeconds(timer, nowMs);
   const warning = isWarningDue(timer, nowMs);
@@ -128,20 +154,48 @@ export function TimerTile({ timer, nowMs, copy, compact = false, onStop }: Timer
         </p>
       ) : null}
 
-      {onStop && copy.stopLabel ? (
-        <button
-          type="button"
-          data-testid="timer-stop"
-          aria-label={copy.stopLabel}
-          onClick={onStop}
-          className={cn(
-            TIMER_TAP_TARGET_CLASS,
-            'mt-1 self-start rounded-lg bg-surface-hover px-5 text-body-lg font-medium ring-1 ring-foreground/10',
-            'transition-colors duration-200 ease-brand hover:bg-accent focus-visible:ring-3 focus-visible:ring-ring/50'
-          )}
-        >
-          {copy.stopLabel}
-        </button>
+      {(onStop && copy.stopLabel) || (onExtend && extendOptions?.length) ? (
+        <div className="mt-1 flex flex-wrap items-center gap-2">
+          {onStop && copy.stopLabel ? (
+            <button
+              type="button"
+              data-testid="timer-stop"
+              aria-label={copy.stopLabel}
+              onClick={onStop}
+              className={cn(
+                TIMER_TAP_TARGET_CLASS,
+                'rounded-lg bg-surface-hover px-5 text-body-lg font-medium ring-1 ring-foreground/10',
+                'transition-colors duration-200 ease-brand hover:bg-accent focus-visible:ring-3 focus-visible:ring-ring/50'
+              )}
+            >
+              {copy.stopLabel}
+            </button>
+          ) : null}
+
+          {/* "A bit longer" sits *next to* stop, in the same weight and the
+              same colours. It is not an escape hatch and not a reward: the
+              board offers more time the way it offers less, and neither
+              choice is marked (FR11). */}
+          {onExtend
+            ? extendOptions?.map((option) => (
+                <button
+                  key={option.minutes}
+                  type="button"
+                  data-testid="timer-extend"
+                  data-minutes={option.minutes}
+                  aria-label={option.ariaLabel}
+                  onClick={() => onExtend(option.minutes)}
+                  className={cn(
+                    TIMER_TAP_TARGET_CLASS,
+                    'tabular-time rounded-lg bg-surface-hover px-4 text-body font-medium ring-1 ring-foreground/10',
+                    'transition-colors duration-200 ease-brand hover:bg-accent focus-visible:ring-3 focus-visible:ring-ring/50'
+                  )}
+                >
+                  {option.label}
+                </button>
+              ))
+            : null}
+        </div>
       ) : null}
     </article>
   );
