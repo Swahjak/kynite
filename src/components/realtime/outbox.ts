@@ -18,7 +18,14 @@
  * whenever the network returns, because `clientId` is a unique index.
  */
 
-const DB_NAME = 'kynite-realtime';
+/**
+ * Exported so sign-out can delete the database by name
+ * (`@/components/offline/clear-user-caches`): a queued tap belongs to the
+ * person who made it, so it must not survive into the next session.
+ */
+export const OUTBOX_DB_NAME = 'kynite-realtime';
+
+const DB_NAME = OUTBOX_DB_NAME;
 const DB_VERSION = 1;
 const STORE = 'completion-outbox';
 

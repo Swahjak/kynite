@@ -9,7 +9,8 @@
     "calendar": "Agenda",
     "routines": "Routines",
     "rewards": "Beloningen",
-    "timers": "Timers"
+    "timers": "Timers",
+    "notifications": "Meldingen"
   },
   "auth": {
     "signOut": "Uitloggen",
@@ -532,6 +533,32 @@
       "stepNotFound": "Deze routinestap bestaat niet meer.",
       "timerNotFound": "Deze timer loopt niet meer.",
       "alreadyRunning": "Deze timer loopt al."
+    }
+  },
+  "offline": {
+    "lastKnown": "Laatst bekende planning"
+  },
+  "notifications": {
+    "reminder": {
+      "soon": "{title} over {minutes} {minutes, plural, one {minuut} other {minuten}}",
+      "now": "{title} staat nu op de planning"
+    },
+    "redemption": {
+      "title": "Sterrenverzoek",
+      "body": "{name} vraagt om {reward}"
+    },
+    "settings": {
+      "pageTitle": "Meldingen",
+      "pageSubtitle": "Kies of dit apparaat berichten van de planning krijgt.",
+      "title": "Pushmeldingen",
+      "description": "Herinneringen gaan naar wie de routine heeft. Sterrenverzoeken gaan naar alle volwassenen.",
+      "enable": "Meldingen aanzetten",
+      "disable": "Meldingen uitzetten",
+      "deviceCount": "{count, plural, =0 {Nog geen apparaten} one {1 apparaat} other {# apparaten}}",
+      "denied": "De browser laat meldingen niet toe. Dat is een instelling van de browser zelf.",
+      "unsupported": "Deze browser ondersteunt geen pushmeldingen.",
+      "unconfigured": "Meldingen zijn op deze installatie niet ingesteld.",
+      "error": "Het lukte niet om de meldingen bij te werken."
     }
   }
 }

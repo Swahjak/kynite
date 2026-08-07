@@ -22,6 +22,7 @@ export {
 export { OWN_CLIENT_ID_MEMORY, OwnClientIds, isOwnEcho } from './echo';
 
 export {
+  OUTBOX_DB_NAME,
   OUTBOX_RETRY_INTERVAL_MS,
   dropCompletion,
   enqueueCompletion,

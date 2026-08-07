@@ -88,6 +88,7 @@ describe('schema-wide invariants', () => {
         'member',
         'push_subscription',
         'redemption',
+        'reminder_dispatch',
         'reward',
         'routine',
         'routine_step',

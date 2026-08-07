@@ -157,6 +157,40 @@ describe.skipIf(!databaseUrl)('timers (integration)', () => {
       expect(await rowsOf(household.familyId)).toHaveLength(1);
     });
 
+    /**
+     * M09 review carry-forward, closed in M11.
+     *
+     * `timer_client_id_unique` is not partial, so a replay of a tap whose
+     * timer has since been stopped still conflicts. The recovery lookup used
+     * to filter `stopped_at IS NULL`, found nothing, and returned
+     * `alreadyRunning` — an *error* for a request that had already succeeded.
+     * The offline outbox makes exactly that sequence ordinary: queue a start,
+     * lose the network, stop the timer by hand, reconnect, flush.
+     */
+    it('replays a start idempotently even after the timer was stopped', async () => {
+      const first = await startTimerAction({
+        label: 'Schoenen aan',
+        durationSeconds: 300,
+        clientId: 'timer-replay-after-stop',
+      });
+      if (first.status !== 'started') {
+        throw new Error(`expected a started timer, got ${JSON.stringify(first)}`);
+      }
+
+      await stopTimerAction({ timerId: first.timerId });
+
+      const replay = await startTimerAction({
+        label: 'Schoenen aan',
+        durationSeconds: 300,
+        clientId: 'timer-replay-after-stop',
+      });
+
+      expect(replay).toMatchObject({ status: 'started', replayed: true });
+      if (replay.status === 'started') expect(replay.timerId).toBe(first.timerId);
+      // And still exactly one row: the replay minted nothing.
+      expect(await rowsOf(household.familyId)).toHaveLength(1);
+    });
+
     it('absorbs a second device starting the same step with its own key', async () => {
       const first = await startTimerAction({ routineStepId: stepId, clientId: 'timer-device-a' });
       const second = await startTimerAction({ routineStepId: stepId, clientId: 'timer-device-b' });

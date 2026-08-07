@@ -9,7 +9,8 @@
     "calendar": "Calendar",
     "routines": "Routines",
     "rewards": "Rewards",
-    "timers": "Timers"
+    "timers": "Timers",
+    "notifications": "Notifications"
   },
   "auth": {
     "signOut": "Sign out",
@@ -532,6 +533,32 @@
       "stepNotFound": "That routine step no longer exists.",
       "timerNotFound": "That timer is no longer running.",
       "alreadyRunning": "That timer is already running."
+    }
+  },
+  "offline": {
+    "lastKnown": "Last known schedule"
+  },
+  "notifications": {
+    "reminder": {
+      "soon": "{title} in {minutes} {minutes, plural, one {minute} other {minutes}}",
+      "now": "{title} is on the schedule now"
+    },
+    "redemption": {
+      "title": "Star request",
+      "body": "{name} is asking for {reward}"
+    },
+    "settings": {
+      "pageTitle": "Notifications",
+      "pageSubtitle": "Choose whether this device gets messages from the schedule.",
+      "title": "Push notifications",
+      "description": "Reminders go to whoever owns the routine. Star requests go to every adult.",
+      "enable": "Turn on notifications",
+      "disable": "Turn off notifications",
+      "deviceCount": "{count, plural, =0 {No devices yet} one {1 device} other {# devices}}",
+      "denied": "The browser is blocking notifications. That is a browser setting.",
+      "unsupported": "This browser does not support push notifications.",
+      "unconfigured": "Notifications are not configured on this install.",
+      "error": "The notification settings could not be updated."
     }
   }
 }

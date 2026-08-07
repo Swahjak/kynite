@@ -65,6 +65,8 @@ export {
   latestEventId,
   oldestRetainedEventId,
   replayEvents,
+  retentionCutoff,
+  trimEventLog,
 } from './queries';
 
 export { openFamilyStream, planReplay, type FamilyStreamOptions } from './stream';

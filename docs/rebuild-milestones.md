@@ -189,7 +189,7 @@ This is the single source of progress truth for the Kynite greenfield rebuild. E
 
 ## M11 — PWA/offline + push
 
-- [ ] Status
+- [x] Status
 - **Scope:** Add the Serwist service worker (`src/app/sw.ts`) with scope-aware runtime rules: precache + StaleWhileRevalidate app shell and CacheFirst assets for the hub, NetworkFirst for the parent app. Mirror family state to IndexedDB and boot the hub from IDB before reconciling. Implement VAPID web push end to end: subscription upsert, `push:send` fan-out per endpoint, and reminder routing to the task **owner**.
 - **Acceptance criteria:**
   - Files exist: `src/app/sw.ts`, web app manifest; both hub and parent app are installable (Lighthouse PWA installability passes).
@@ -201,7 +201,7 @@ This is the single source of progress truth for the Kynite greenfield rebuild. E
   - Push opt-in is never prompted on first load — asserted by a Playwright test on cold entry.
   - Service worker skip-waiting posts `RELOAD_HUB`; the hub reloads only when idle >5 min or nightly — unit test on the reload gate.
   - Gate green: `pnpm typecheck && pnpm lint && pnpm test:run`.
-- **Review verdict:** _pending_
+- **Review verdict:** _approved after fixes_ — Opus review 2026-08-07: all nine criteria met and independently reproduced (794/794 with DATABASE_URL alone, 114/114 Playwright, secret-free build, precache stable across builds, no drizzle drift); 12/12 mutations caught (delivery truth table, claim-before-send, owner-not-creator, reload gate, NetworkFirst-2s pin, manifest contract, neutral-voice scan); serwist route traversal-safe, VAPID keys absent from client bundle, push payload minimal. Two blockers fixed: (1) SW page caches + IDB survived sign-out (shared device could serve previous account's HTML) — clearUserCaches() now wipes page/hub/data caches + kynite-offline/kynite-realtime IDB before signOutAction, assets cache kept, 2s fuse, unit + e2e tests; (2) IDB mirror was write-only ("boot hub from IDB before reconciling" silently unimplemented) — useMirroredHubState now reads-then-writes, adopts same-family fresh strictly-newer snapshot by generatedAt, hub-board client component swaps atomically, e2e proves read path live (mutated snapshot renders; forged familyId rejected non-vacuously). Also fixed: cross-family push-endpoint takeover (setWhere family guard, no existence oracle), abandoned running timers now auto-stopped by trim (honest end time, frees step unique), reminder narration corrected to ~1 minute, restart test now injects real crash after claim, trims use rowCount. Post-fix gates: 803/803 with DB, 118/118 Playwright. Carry-forwards: FR22 push-on-participant-action unimplemented (no milestone owns it — assign before M18); HubReloadController gate-level only; PushOptIn no component test; notificationclick + SW push handler unexercised; install prompt untested (headless); deviceId null until M12; trim doesn't prune device sessions (table lands M12); dev SSE close noise.
 
 ## M12 — Hub kiosk mode + device pairing
 

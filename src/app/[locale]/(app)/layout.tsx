@@ -55,6 +55,14 @@ export default async function AppLayout({
             <Link href="/settings/google" className="px-2 py-1 font-display text-sm font-medium">
               {t('settings')}
             </Link>
+            {/* M11: push opt-in has to be reachable by deliberate navigation —
+                §6 step 1 forbids prompting on a page load. */}
+            <Link
+              href="/settings/notifications"
+              className="px-2 py-1 font-display text-sm font-medium"
+            >
+              {t('notifications')}
+            </Link>
           </nav>
           <SignOutButton />
         </header>

@@ -93,7 +93,11 @@ export async function loadTimerBoard(
   if (!principal) return null;
 
   const { serverNow, frozen } = resolveNow(options);
-  const running = await listRunningTimers(principal.familyId);
+  // The window `listRunningTimers` applies is relative to the *board's* clock,
+  // not the process's: `?now=` pins what the board renders as now, and a
+  // snapshot pinned to another day must still see the timers that belong to
+  // that day (M09 carry-forward — the bound was added in M11).
+  const running = await listRunningTimers(principal.familyId, new Date(serverNow));
 
   return {
     familyId: principal.familyId,

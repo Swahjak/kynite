@@ -1,7 +1,7 @@
 import 'server-only';
-import { and, asc, eq, gt, sql } from 'drizzle-orm';
+import { and, asc, eq, gt, lt, sql } from 'drizzle-orm';
 import { getDb } from '@/server/db';
-import { MAX_REPLAY_ROWS } from './domain/cursor';
+import { MAX_REPLAY_ROWS, RETENTION_DAYS } from './domain/cursor';
 import { eventLog, type RealtimeEvent } from './schema';
 
 /**
@@ -98,4 +98,32 @@ export async function getEvent(familyId: string, id: bigint): Promise<RealtimeEv
     .limit(1);
 
   return row ? { ...row.payload, id: String(row.id) } : null;
+}
+
+/**
+ * The nightly retention trim (§4: "Retention is 7 days, trimmed by a nightly
+ * job"; §8's `maintenance:trim`).
+ *
+ * Install-wide, not family-scoped — it is a job body with no principal, and
+ * the one read in this module that deliberately crosses families. Deleting by
+ * `created_at` uses `event_log_created_at_idx`, which exists for exactly this
+ * predicate.
+ *
+ * Trimming is what makes `decideReplay`'s `resync` branch reachable: a client
+ * that was away longer than retention finds its cursor below
+ * `oldestRetainedEventId` and is told to refetch instead of being replayed a
+ * gap that no longer exists.
+ */
+export async function trimEventLog(before: Date): Promise<number> {
+  // `rowCount` rather than `.returning({ id })`: the caller wants a count, and
+  // returning a column would ship every deleted id back over the wire — a
+  // fortnight of a busy household's events — to be thrown away after `.length`.
+  const result = await getDb().delete(eventLog).where(lt(eventLog.createdAt, before));
+
+  return result.rowCount ?? 0;
+}
+
+/** `now` minus the retention window — the cutoff `trimEventLog` takes. */
+export function retentionCutoff(now: Date = new Date()): Date {
+  return new Date(now.getTime() - RETENTION_DAYS * 86_400_000);
 }

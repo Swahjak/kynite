@@ -42,6 +42,29 @@ export const envSchema = z.object({
   TOKEN_ENCRYPTION_KEY: base64Key32.optional(),
 
   /**
+   * VAPID keypair for Web Push (§6 "Web push (parents only)", M11).
+   *
+   * Optional at boot for the same reason the Google credentials are: an
+   * install without a keypair is a *working* install with push switched off
+   * (`isPushConfigured()` gates every entry point, and the notification
+   * settings panel says which variables are missing), which is what keeps
+   * `pnpm build`, the unit gate and the e2e run free of secrets (§9).
+   * Architecture §10 lists these as boot-required; that is the production
+   * deployment posture and is enforced by `assertPushConfigured()` at the
+   * point of use instead.
+   *
+   * There is deliberately **no** `NEXT_PUBLIC_VAPID_PUBLIC_KEY`: a
+   * `NEXT_PUBLIC_` variable is inlined at *build* time, and this repo's build
+   * runs without secrets. The public key reaches the browser as a prop from a
+   * server component instead (`loadNotificationsPage()`), which is one read of
+   * the same env at request time and no new public surface.
+   */
+  VAPID_PUBLIC_KEY: z.string().min(1).optional(),
+  VAPID_PRIVATE_KEY: z.string().min(1).optional(),
+  /** `mailto:` or `https:` contact the push service can reach us on (RFC 8292). */
+  VAPID_SUBJECT: z.string().min(1).optional(),
+
+  /**
    * In-process pg-boss workers (§10 "One process; jobs in-process"). Set to
    * `false` for a second web-only process, and in test runs where a worker
    * would only add nondeterminism.

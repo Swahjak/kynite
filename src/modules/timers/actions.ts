@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { getLocale } from 'next-intl/server';
-import { and, eq, isNull } from 'drizzle-orm';
+import { and, desc, eq, isNull } from 'drizzle-orm';
 import { z } from 'zod';
 import { getDb } from '@/server/db';
 // Table objects come from the schema assembly point, not from a slice barrel
@@ -170,25 +170,59 @@ export async function startTimerAction(input: StartTimerInput): Promise<StartTim
       .returning({ id: timer.id });
 
     if (!inserted) {
-      // Nothing was inserted, so a timer for this tap is already running. The
-      // wall already shows it; report the one that exists rather than an error.
+      // Nothing was inserted, so this tap already has a row. Report it rather
+      // than an error — but *which* row depends on which unique index bit,
+      // and the two are not symmetrical (M09 review carry-forward).
+      //
+      // `timer_client_id_unique` is a plain unique index over the whole
+      // table; `timer_running_step_unique` is partial (`WHERE stopped_at IS
+      // NULL`). Recovering both with `stoppedAt IS NULL` was therefore wrong
+      // for the clientId case: replaying a tap whose timer had since been
+      // stopped conflicted on an index that still saw the stopped row, then
+      // found nothing to report and returned `alreadyRunning` — an *error*
+      // for a request that had already succeeded. M11's outbox makes that
+      // replay routine rather than theoretical, so idempotency has to hold
+      // regardless of the timer's current state.
+      //
+      // So: the clientId lookup ignores `stoppedAt` (the key identifies one
+      // tap for all time), and the step lookup keeps it (the partial index
+      // only ever blocks a *running* timer, and yesterday's stopped one must
+      // not be reported for today's tap).
       const [existing] = await tx
         .select({ id: timer.id })
         .from(timer)
         .where(
           and(
             eq(timer.familyId, principal.familyId),
-            isNull(timer.stoppedAt),
-            routineStepId
-              ? eq(timer.routineStepId, routineStepId)
-              : eq(timer.clientId, clientId ?? '')
+            clientId
+              ? eq(timer.clientId, clientId)
+              : and(isNull(timer.stoppedAt), eq(timer.routineStepId, routineStepId ?? ''))!
           )
         )
+        .orderBy(desc(timer.startedAt))
         .limit(1);
 
-      return existing
-        ? { status: 'started', timerId: existing.id, replayed: true }
-        : startFailure('alreadyRunning');
+      if (existing) return { status: 'started', timerId: existing.id, replayed: true };
+
+      // No clientId row: the conflict was the running-step guard against a
+      // timer this tap did not mint. That one *is* "already running".
+      if (routineStepId) {
+        const [running] = await tx
+          .select({ id: timer.id })
+          .from(timer)
+          .where(
+            and(
+              eq(timer.familyId, principal.familyId),
+              isNull(timer.stoppedAt),
+              eq(timer.routineStepId, routineStepId)
+            )
+          )
+          .limit(1);
+
+        if (running) return { status: 'started', timerId: running.id, replayed: true };
+      }
+
+      return startFailure('alreadyRunning');
     }
 
     await publish(

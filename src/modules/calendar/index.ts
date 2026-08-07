@@ -115,6 +115,7 @@ export { AgendaView } from './ui/agenda-view';
 export { CalendarShell } from './ui/calendar-shell';
 export { EventChip } from './ui/event-chip';
 export { EventDialog, type WritableCalendar } from './ui/event-dialog';
+export { HubBoard, type HubBoardSnapshot } from './ui/hub-board';
 export { MonthView } from './ui/month-view';
 export { PersonColumns } from './ui/person-columns';
 export { TimeGrid } from './ui/time-grid';

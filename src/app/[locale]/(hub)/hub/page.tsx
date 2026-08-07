@@ -1,5 +1,5 @@
-import { getFormatter, getTranslations } from 'next-intl/server';
-import { PersonColumns, loadCalendarPage } from '@/modules/calendar';
+import { getTranslations } from 'next-intl/server';
+import { HubBoard, loadCalendarPage } from '@/modules/calendar';
 import { AmbientTimers, loadTimerBoard } from '@/modules/timers';
 
 /** Session-dependent: never prerendered, so `next build` needs no database. */
@@ -29,12 +29,10 @@ export default async function HubPage({
   // which is what a tomorrow-preview needs and what makes the board
   // snapshot-testable without freezing a clock.
   const data = await loadCalendarPage({ view: 'day', date, surface: 'hub' });
-  // M09: a running timer is on the board without anyone navigating to it.
   // Renders nothing when nothing is running, so the board is unchanged the
   // rest of the day.
   const timers = await loadTimerBoard({ now });
   const t = await getTranslations('calendar');
-  const format = await getFormatter();
 
   if (!data) {
     // No paired device session exists until M12; until then an unauthenticated
@@ -49,32 +47,32 @@ export default async function HubPage({
 
   return (
     <main className="flex min-h-dvh flex-col gap-4 bg-background p-6" data-testid="hub-board">
-      <header className="flex items-baseline justify-between gap-4">
-        <div>
-          <h1 className="font-display text-display-md font-extrabold">{t('hub.title')}</h1>
-          <p className="text-body-lg text-ink-secondary">
-            {format.dateTime(data.anchor, { dateStyle: 'full' })}
-          </p>
-        </div>
-        {/* A real wall clock — the one deliberately live thing on the board. */}
-        <span
-          data-testid="hub-clock"
-          className="tabular-time text-display-md font-extrabold text-brand-ink"
-        >
-          {format.dateTime(data.now, { hour: '2-digit', minute: '2-digit' })}
-        </span>
-      </header>
+      {/* §6: family state is mirrored to IndexedDB on every load and every SSE
+          event, and a boot renders from IDB then reconciles. Both halves live
+          in `HubBoard`, because the reconcile has to swap the heading, the day
+          and the columns together or the wall contradicts itself.
 
-      {timers ? <AmbientTimers board={timers} /> : null}
-
-      <PersonColumns
-        members={data.members}
-        events={data.events}
-        timeZone={data.timeZone}
-        day={data.anchor}
-        now={data.now}
-        hub
-      />
+          `generatedAt` is the server's render instant and the only thing the
+          mirror compares: a snapshot is adopted over this document strictly
+          when it is newer, from the same family, and the stream is not up. */}
+      <HubBoard
+        familyId={data.familyId}
+        snapshot={{
+          // The server's own render instant, not `Date.now()` in a client
+          // component: two snapshots must be comparable across devices.
+          generatedAt: data.now.getTime(),
+          anchor: data.anchor,
+          now: data.now,
+          timeZone: data.timeZone,
+          members: data.members,
+          events: data.events,
+        }}
+      >
+        {/* M09: a running timer is on the board without anyone navigating to
+            it. Passed as a child rather than mirrored — a countdown comes from
+            the server's clock, and a cached one would be a wrong number. */}
+        {timers ? <AmbientTimers board={timers} /> : null}
+      </HubBoard>
     </main>
   );
 }

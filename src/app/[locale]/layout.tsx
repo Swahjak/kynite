@@ -1,7 +1,8 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { notFound } from 'next/navigation';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
+import { ServiceWorkerRegistrar } from '@/components/offline';
 import { fontVariables } from '@/lib/fonts';
 import { routing } from '@/i18n/routing';
 import '../globals.css';
@@ -9,7 +10,26 @@ import '../globals.css';
 export const metadata: Metadata = {
   title: 'Kynite',
   description: 'Family planning that actually gets done.',
-  icons: { icon: '/favicon.svg' },
+  // The parent-app manifest (`src/app/manifest.ts`). The hub tree overrides
+  // this with its own (§6: two installable surfaces, one service worker).
+  manifest: '/manifest.webmanifest',
+  applicationName: 'Kynite',
+  appleWebApp: { capable: true, statusBarStyle: 'default', title: 'Kynite' },
+  // iOS ignores the manifest's icons and reads this instead.
+  icons: {
+    icon: '/favicon.svg',
+    apple: [{ url: '/icons/apple-touch-icon.png', sizes: '180x180' }],
+  },
+};
+
+export const viewport: Viewport = {
+  // Matches both manifests, so the installed title bar is brand green.
+  themeColor: '#13ec92',
+  // A wall tablet and a phone both want the full display; neither wants a
+  // pinch-zoom that a small hand can trigger by accident.
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
 };
 
 export function generateStaticParams() {
@@ -32,7 +52,12 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} className={fontVariables}>
       <body className="min-h-dvh antialiased">
-        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        <NextIntlClientProvider>
+          {/* Registers the worker and nothing else — no permission prompt is
+              reachable from a page load (§6 step 1, M11 cold-entry test). */}
+          <ServiceWorkerRegistrar />
+          {children}
+        </NextIntlClientProvider>
       </body>
     </html>
   );

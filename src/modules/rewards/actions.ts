@@ -19,6 +19,7 @@ import {
   type RedemptionState,
 } from './action-state';
 import { canAfford, starTotals } from './domain/economy';
+import { notifyRedemption } from './notify-bridge';
 import { isOpen, statusForDecision, REDEMPTION_DECISIONS } from './domain/redemption';
 import { REWARD_CATEGORIES } from './schema';
 import { isRewardIcon } from './ui/tokens';
@@ -340,7 +341,8 @@ export async function requestRedemptionAction(
 
   const db = getDb();
 
-  if (!(await getMember(principal.familyId, memberId))) {
+  const child = await getMember(principal.familyId, memberId);
+  if (!child) {
     return redemptionFailure('memberNotFound');
   }
 
@@ -381,6 +383,11 @@ export async function requestRedemptionAction(
     return redemptionFailure('notEnoughStars');
   }
 
+  // Captured out of the transaction so the notification fan-out below can run
+  // *after* the commit: a push about a request that then rolled back would be
+  // a parent looking for something that does not exist.
+  let requestedId: string | null = null;
+
   const result = await db.transaction(async (tx): Promise<RedemptionState> => {
     const [inserted] = await tx
       .insert(redemption)
@@ -400,6 +407,8 @@ export async function requestRedemptionAction(
 
     if (!inserted) return { status: 'requested', replayed: true } as const;
 
+    requestedId = inserted.id;
+
     await publish(
       {
         familyId: principal.familyId,
@@ -413,6 +422,22 @@ export async function requestRedemptionAction(
 
     return { status: 'requested', replayed: false } as const;
   });
+
+  // §6 step 4: "Redemption requests fan out to all adults" — one `push:send`
+  // job per endpoint (§8), so a parent's dead phone blocks nobody else's.
+  //
+  // Never awaited into the child's critical path in any meaningful sense: it
+  // is after the commit, and a failure is swallowed. A queue outage must not
+  // turn "may I spend my stars" into an error on a hub, and the request is
+  // already on every screen through `publish()`.
+  if (requestedId) {
+    await notifyRedemption({
+      familyId: principal.familyId,
+      redemptionId: requestedId,
+      childName: child.displayName,
+      rewardTitle: target.title,
+    }).catch(() => 0);
+  }
 
   await revalidateRewards([memberId]);
   return result;

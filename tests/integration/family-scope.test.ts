@@ -134,6 +134,12 @@ describe.skipIf(!databaseUrl)('family scoping (integration)', () => {
       p256dh: 'key',
       auth: 'auth',
     });
+    await db.insert(schema.reminderDispatch).values({
+      familyId,
+      routineId: routine.id,
+      occurrenceDate: '2026-03-02',
+      memberId: household.childId,
+    });
     await db.insert(schema.eventLog).values({
       familyId,
       type: 'completion.created',

@@ -33,5 +33,8 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "docs", "tests/fixtures", ".next", "coverage"]
+  // `src/app/sw.ts` is a service worker: its globals need `lib.webworker`,
+  // which cannot coexist with `lib.dom` in one program. It is typechecked by
+  // `tsconfig.sw.json`, which `pnpm typecheck` also runs.
+  "exclude": ["node_modules", "docs", "tests/fixtures", ".next", "coverage", "src/app/sw.ts"]
 }

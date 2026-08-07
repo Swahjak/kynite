@@ -1,6 +1,8 @@
 import 'server-only';
 import { registerGoogleJobs } from '@/modules/google';
+import { registerNotificationJobs } from '@/modules/notifications';
 import { jobsEnabled, startBoss, stopBoss } from './boss';
+import { registerMaintenanceJobs } from './maintenance';
 
 /**
  * Worker bootstrap (docs/architecture.md §10: "One process; jobs in-process").
@@ -18,6 +20,8 @@ export async function startJobs(): Promise<void> {
   started ??= (async () => {
     const boss = await startBoss();
     await registerGoogleJobs(boss);
+    await registerNotificationJobs(boss);
+    await registerMaintenanceJobs(boss);
   })();
 
   return started;

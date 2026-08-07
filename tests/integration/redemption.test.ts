@@ -30,6 +30,7 @@ import { createTestDb, databaseUrl, seedHousehold, type Household } from './supp
 const stubs = vi.hoisted(() => ({
   db: undefined as unknown as ReturnType<typeof createTestDb>['db'],
   session: null as { session: { activeFamilyId?: string; memberId?: string } } | null,
+  enqueued: [] as { name: string; data: unknown; options: unknown }[],
 }));
 
 vi.mock('@/server/db', () => ({ getDb: () => stubs.db }));
@@ -46,6 +47,23 @@ vi.mock('@/i18n/navigation', () => ({
     throw new Error('NEXT_REDIRECT');
   },
 }));
+// M11: a request fans out to every adult. The queue boundary is captured, not
+// driven — what matters is the *shape* (one `push:send` per endpoint), and no
+// test may reach a real push service.
+vi.mock('@/server/jobs/boss', () => ({
+  enqueue: async (name: string, data: unknown, options: unknown) => {
+    stubs.enqueued.push({ name, data, options });
+    return 'job-id';
+  },
+}));
+
+// `isPushConfigured()` reads the whole server env, which this suite otherwise
+// never touches (it mocks `getDb`). The repo-standard stubs, same as
+// `tests/integration/realtime-publish.test.ts`.
+process.env.BETTER_AUTH_SECRET ??= 'x'.repeat(32);
+process.env.BETTER_AUTH_URL ??= 'http://localhost:3000';
+process.env.VAPID_PUBLIC_KEY ??= 'test-public-key';
+process.env.VAPID_PRIVATE_KEY ??= 'test-private-key';
 
 const {
   awardStarsAction,
@@ -574,6 +592,98 @@ describe.skipIf(!databaseUrl)('redemption (integration)', () => {
     expect(theirs).toEqual([]);
 
     await db.delete(family).where(eq(family.id, outsider.familyId));
+  });
+
+  describe('notification fan-out (M11)', () => {
+    it('notifies every adult once per endpoint, and no child', async () => {
+      const { upsertPushSubscription } = await import('@/modules/notifications');
+      const { pushSubscription, member } = schema;
+
+      // A second adult, so "all adults" is more than one person.
+      const [secondParent] = await db
+        .insert(member)
+        .values({
+          familyId: household.familyId,
+          displayName: 'Tom',
+          role: 'adult',
+          color: 'blue',
+          sortOrder: 3,
+        })
+        .returning({ id: member.id });
+
+      // Two devices for the owner, one for the second parent, one for the
+      // child who is doing the asking.
+      const devices: [string, string][] = [
+        [household.parentId, 'https://push.example/parent-phone'],
+        [household.parentId, 'https://push.example/parent-tablet'],
+        [secondParent.id, 'https://push.example/second-parent-phone'],
+        [household.childId, 'https://push.example/child-tablet'],
+      ];
+      for (const [memberId, endpoint] of devices) {
+        await upsertPushSubscription({
+          familyId: household.familyId,
+          memberId,
+          endpoint,
+          p256dh: 'p',
+          auth: 'a',
+        });
+      }
+
+      // A still-open request for the same reward would collide on the partial
+      // unique index and make this a *replay*, which deliberately notifies
+      // nobody — clear the slate so the fan-out is the thing under test.
+      await db.delete(redemption).where(eq(redemption.familyId, household.familyId));
+      await award(household.childId, 10);
+      stubs.enqueued.length = 0;
+
+      const result = await ask({ clientId: `redeem:fanout:${Date.now()}` });
+      expect(result).toMatchObject({ status: 'requested', replayed: false });
+
+      const jobs = stubs.enqueued.filter((job) => job.name === 'push.send');
+      // Three adult endpoints. Never four: the child who asked is not told
+      // about their own request.
+      expect(jobs).toHaveLength(3);
+
+      // One job per *endpoint* (§8) — a dead phone blocks nobody.
+      const keys = jobs.map((job) => (job.options as { singletonKey: string }).singletonKey);
+      expect(new Set(keys).size).toBe(3);
+
+      const bodies = jobs.map((job) => (job.data as { payload: { body: string } }).payload.body);
+      for (const body of bodies) {
+        expect(body).toContain('Bram');
+        expect(body).toContain('Extra verhaaltje');
+        // Neutral: a statement of what was asked, not an instruction to a parent.
+        expect(body).not.toMatch(/!|moet|must/i);
+      }
+
+      await db.delete(pushSubscription).where(eq(pushSubscription.familyId, household.familyId));
+      await db.delete(member).where(eq(member.id, secondParent.id));
+    });
+
+    it('enqueues nothing for a replayed request', async () => {
+      const { upsertPushSubscription } = await import('@/modules/notifications');
+      const { pushSubscription } = schema;
+
+      await upsertPushSubscription({
+        familyId: household.familyId,
+        memberId: household.parentId,
+        endpoint: 'https://push.example/replay-parent',
+        p256dh: 'p',
+        auth: 'a',
+      });
+      await db.delete(redemption).where(eq(redemption.familyId, household.familyId));
+      await award(household.childId, 10);
+
+      const clientId = `redeem:replay:${Date.now()}`;
+      await ask({ clientId });
+      stubs.enqueued.length = 0;
+
+      // The same tap arriving twice must not notify the household twice.
+      await ask({ clientId });
+      expect(stubs.enqueued.filter((job) => job.name === 'push.send')).toHaveLength(0);
+
+      await db.delete(pushSubscription).where(eq(pushSubscription.familyId, household.familyId));
+    });
   });
 
   it('does not let a child award themselves a star', async () => {

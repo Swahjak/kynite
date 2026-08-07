@@ -49,7 +49,14 @@ export {
   type ChimeSetting,
 } from './domain/chime';
 
-export { getTimer, listRecentTimers, listRunningTimers, type TimerWithMember } from './queries';
+export {
+  RUNNING_TIMER_WINDOW_MS,
+  getTimer,
+  listRecentTimers,
+  listRunningTimers,
+  trimFinishedTimers,
+  type TimerWithMember,
+} from './queries';
 
 export {
   idleState,

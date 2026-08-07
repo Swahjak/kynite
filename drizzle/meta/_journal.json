@@ -43,6 +43,13 @@
       "when": 1786052937420,
       "tag": "0005_parched_ghost_rider",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1786057962798,
+      "tag": "0006_colorful_blur",
+      "breakpoints": true
     }
   ]
 }
