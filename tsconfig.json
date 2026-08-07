@@ -20,7 +20,12 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      // M17: the e2e tree is organised by *surface* (`tests/app`, `tests/hub`,
+      // `tests/share`) at varying depths, so a relative import of a shared
+      // fixture would be `../../..` in one file and `../..` in the next — and
+      // would need rewriting every time a spec moves between surfaces.
+      "@e2e/*": ["./e2e/*"]
     }
   },
   "include": [
@@ -31,7 +36,9 @@
     "e2e/**/*.ts",
     "*.config.ts",
     ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts"
+    ".next/dev/types/**/*.ts",
+    ".next-e2e-google/types/**/*.ts",
+    ".next-e2e-google/dev/types/**/*.ts"
   ],
   // `src/app/sw.ts` is a service worker: its globals need `lib.webworker`,
   // which cannot coexist with `lib.dom` in one program. It is typechecked by

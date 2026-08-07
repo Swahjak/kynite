@@ -199,6 +199,8 @@ export default tseslint.config(
   {
     ignores: [
       '.next/**',
+      // M17: the second e2e dev server's build directory (see next.config.ts).
+      '.next-e2e-google/**',
       'coverage/**',
       'docs/**',
       '.claude/**',
@@ -257,6 +259,34 @@ export default tseslint.config(
       'src/modules/sharing/resolve.ts',
     ],
     rules: { 'no-restricted-imports': shareViewBoundaryRule },
+  },
+  {
+    /**
+     * The e2e tree may deep-import a slice's `domain/` modules (M17).
+     *
+     * `domain/` is the architecture's own name for the pure layer: no database,
+     * no `server-only`, no Server Actions — which is exactly why a Playwright
+     * worker can load one. The alternative was worse in both directions: going
+     * through the slice barrel would pull Server Actions and `@/server/env`
+     * into the test process, and copying the function into `e2e/` would let the
+     * copy drift from the implementation it exists to agree with (the praise
+     * hash, which decides the words a visual baseline pins).
+     */
+    files: ['e2e/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              regex: '^@/modules/[^/]+$',
+              message:
+                'The e2e tree may not import a slice barrel — it re-exports Server Actions and server-only code into the test process. Import `@/modules/<slice>/domain/<module>` if you need pure logic.',
+            },
+          ],
+        },
+      ],
+    },
   },
   {
     // Playwright fixtures take a callback conventionally named `use`, which

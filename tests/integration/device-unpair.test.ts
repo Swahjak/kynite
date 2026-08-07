@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm';
+import { and, desc, eq } from 'drizzle-orm';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as schema from '@/server/db/schema';
 import { DEVICE_SESSION_COOKIE, deviceSessionExpiry, hashDeviceToken } from '@/lib/device-session';
@@ -126,10 +126,20 @@ describe.skipIf(!databaseUrl)('self-unpair (integration)', () => {
     const [row] = await db.select().from(device).where(eq(device.id, deviceId));
     expect(row.revokedAt).not.toBeNull();
 
+    // `deviceSession.deviceId` is a plain index, not a unique one, so this
+    // filter is multi-row-capable by schema. Without an order and a bound,
+    // `const [session]` means "whichever row Postgres happened to hand back
+    // first", which under the shared integration database (every file in
+    // `tests/integration/` runs concurrently against one `DATABASE_URL`) is
+    // not stable. Newest-first + `limit(1)` names the row this assertion is
+    // actually about: the session that was just revoked. (M17 carry-forward
+    // from M16.)
     const [session] = await db
       .select()
       .from(deviceSession)
-      .where(eq(deviceSession.deviceId, deviceId));
+      .where(eq(deviceSession.deviceId, deviceId))
+      .orderBy(desc(deviceSession.createdAt))
+      .limit(1);
     expect(session.revokedAt).not.toBeNull();
 
     // Not just "the cookie is gone" — the credential itself no longer
@@ -137,6 +147,10 @@ describe.skipIf(!databaseUrl)('self-unpair (integration)', () => {
     stubs.cookies.set(DEVICE_SESSION_COOKIE, token);
     expect(await getPrincipal()).toBeNull();
 
+    // Same reason, one table further out and worse: `event_log` is append-only
+    // and *every* integration file writes to it, so an unordered read of a
+    // filtered scan is at the mercy of concurrent inserts and vacuum. Scoped
+    // to this family, newest first, one row.
     const [published] = await db
       .select()
       .from(schema.eventLog)
@@ -145,7 +159,9 @@ describe.skipIf(!databaseUrl)('self-unpair (integration)', () => {
           eq(schema.eventLog.familyId, household.familyId),
           eq(schema.eventLog.type, 'device.revoked')
         )
-      );
+      )
+      .orderBy(desc(schema.eventLog.id))
+      .limit(1);
     expect(published.payload.entity.id).toBe(deviceId);
     expect(published.payload.actor.deviceId).toBe(deviceId);
     expect(published.payload.actor.source).toBe('hub');

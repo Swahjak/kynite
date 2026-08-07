@@ -12,9 +12,12 @@
 /coverage
 /e2e/test-results/
 /e2e/playwright-report/
+# Per-surface storage states, minted by the `setup` project on every run.
+/e2e/.auth/
 
 # next.js
 /.next/
+/.next-e2e-google/
 /out/
 
 # production

@@ -5,6 +5,24 @@ import createNextIntlPlugin from 'next-intl/plugin';
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 const nextConfig: NextConfig = {
+  /**
+   * M17: the e2e run boots a *second* dev server — same app, but with Google
+   * credentials pointed at the fake Google (see `playwright.config.ts`). Next
+   * refuses two dev servers in one project directory because they would share
+   * `.next/dev`, so the second one is given its own build directory through
+   * this variable. Unset everywhere else, which is every other invocation.
+   */
+  distDir: process.env.NEXT_DIST_DIR || '.next',
+  /**
+   * The dev overlay is off under e2e (M17).
+   *
+   * It renders a fixed portal in the bottom-left corner, which on the `app`
+   * project's 390×844 viewport sits exactly on top of the mobile bottom nav
+   * and swallows the clicks. That is a property of the *tooling*, not of the
+   * product, and `settlePage` already hides it for screenshots — this hides it
+   * for pointer events too, where CSS injected after load is too late.
+   */
+  devIndicators: process.env.E2E === 'true' ? false : undefined,
   reactStrictMode: true,
   typedRoutes: true,
   // Playwright drives the dev server over 127.0.0.1.

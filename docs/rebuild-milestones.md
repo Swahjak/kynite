@@ -279,7 +279,7 @@ This is the single source of progress truth for the Kynite greenfield rebuild. E
 
 ## M17 — E2E suite
 
-- [ ] Status
+- [x] Status
 - **Scope:** Consolidate Playwright into a per-surface project suite (`hub` tablet + device session, `app` mobile + account session, `share` no session) covering every critical journey end to end against a seeded test database. Include visual regression, axe accessibility and the completion-tap perf guard as first-class suites rather than incidental tests.
 - **Acceptance criteria:**
   - `pnpm e2e:full` (setup → run → teardown) exits 0 from a clean machine.
@@ -291,7 +291,7 @@ This is the single source of progress truth for the Kynite greenfield rebuild. E
   - Every test seeds its own family via the factory; the suite passes when run with `--repeat-each=2` and in randomized order (no shared-state coupling).
   - Google is the only mocked boundary; no internal module is mocked.
   - Gate green: `pnpm typecheck && pnpm lint && pnpm test:run`.
-- **Review verdict:** _pending_
+- **Review verdict:** _approved after fixes_ — Opus review 2026-08-07: all eight criteria independently verified (e2e:full exit 0 clean machine; 5 projects with distinct viewports/storage states; all 8 journey specs; 40 visual baselines incl. todo/done/faded + celebration end-frame; 12 axe surfaces zero AA; per-test seeding; Google-only mocking — no vi.mock/internal stubs in e2e/); four mutations confirmed real guards (axe catches 1.46:1, globals.css cross-check catches dropped font token, newAnonymousContext load-bearing, perf wiring intact); zero coverage lost in reorganization (30→35 spec files, 145→150 declarations, no decrements); GOOGLE_API_BASE_URL production refusal verified hard against real build (boot throws), dev routes 404 in production. Genuinely strong engineering flagged by reviewer: extendTailwindMerge root fix (killed bug class across 10 call sites), praise-id search against product's own hash, advisory-lock exclusive fixture, storage-state-inheritance discovery (27 sites), two product bugs found (bootstrapAccount failed-enqueue → linkFailed; e2e:full returned teardown's exit code, could never fail). Blocker fixed: perf companion asserted single sample under CDP interceptor, flaked 2/2 at 101-121ms — now COMPANION_BUDGET_MS 500 (proof-of-optimism; primary median-of-three keeps 100ms), 3/3 green retries=0. Also fixed: dev sync route family-scoped (comment now true), production env gates tested (mutation-verified), TOKEN_ENCRYPTION_KEY env-overridable, busy-only chip axe-audited — hazard confirmed live then fixed (fill/border recede, text full strength), routine-builder visual moved to app project. Post-fix: 1058/1058 with DB, perf 195/195 ×3. Carry-forwards: serwist/turbopack dev-server race (retries CI?2:1 — retest under M18 built server); countRecentGlobalPairingFailuresTx unscoped across families; family-scope test in-order dependency; vitest/e2e port 5435 collision if concurrent.
 
 ## M18 — Parity verification + deploy
 
@@ -309,4 +309,6 @@ This is the single source of progress truth for the Kynite greenfield rebuild. E
   - Nightly `pg_dump` to offsite storage is confirmed running; a restore is smoke-tested once.
   - Gate green on the deployed commit: `pnpm typecheck && pnpm lint && pnpm test:run`.
 - **User decision (2026-08-07):** nothing currently in production use — deploy directly, skip the ngrok-based manual Google link check; verify Google OAuth link + webhook against the real production URL (`BETTER_AUTH_URL`) after deploy instead. Migration backward-compat criterion relaxed accordingly (no old process worth protecting; still verify the release script runs clean).
+- **User decision (2026-08-07, second):** explicit authorization to completely break the current production environment — nothing needs preserving, no data migration required. Fresh production database acceptable; expand/contract criterion dropped; legacy app may be taken down outright.
+- **User decision (2026-08-07, third):** deploy target is **Railway**, not the VPS this section assumed (legacy prod was discovered to be Vercel; architecture needs a persistent process, so Railway chosen for CLI-repeatable deploys + managed Postgres + horizontal scalability). VPS-specific criteria (Caddy, systemd, pg_dump-to-offsite) are replaced by their Railway equivalents: Dockerfile + railway.json as repeatable config, Railway managed Postgres with platform backups, railway up as the release mechanism, health check + SSE verification against the Railway URL. DNS skipped — Railway-issued domain with TLS serves as BETTER_AUTH_URL; custom domain optional later. User's manual steps limited to: railway login, and adding the production redirect URI in Google Cloud console.
 - **Review verdict:** _pending_

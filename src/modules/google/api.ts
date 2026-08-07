@@ -1,4 +1,4 @@
-import { GOOGLE_CALENDAR_API } from './config';
+import { googleCalendarApiUrl } from './config';
 import { GoogleApiError } from './domain/errors';
 import type {
   GoogleCalendarApi,
@@ -62,7 +62,7 @@ export function createGoogleCalendarApi({
   channelTtlSeconds = DEFAULT_CHANNEL_TTL_SECONDS,
 }: ClientOptions): GoogleCalendarApi {
   async function request<T>(path: string, options: RequestOptions = {}): Promise<T | null> {
-    const url = new URL(`${GOOGLE_CALENDAR_API}${path}`);
+    const url = new URL(`${googleCalendarApiUrl()}${path}`);
     for (const [key, value] of Object.entries(options.query ?? {})) {
       if (value !== undefined && value !== null && value !== '') {
         url.searchParams.set(key, String(value));

@@ -47,4 +47,20 @@ describe('server env', () => {
     // Importing the module must never throw, otherwise `next build` breaks.
     await expect(import('@/server/env')).resolves.toBeDefined();
   });
+
+  it('throws when GOOGLE_API_BASE_URL is set in production', () => {
+    expect(() =>
+      parseEnv({
+        ...VALID,
+        NODE_ENV: 'production',
+        GOOGLE_API_BASE_URL: 'http://127.0.0.1:3102',
+      })
+    ).toThrow(/GOOGLE_API_BASE_URL/);
+  });
+
+  it('accepts GOOGLE_API_BASE_URL unset in production', () => {
+    const env = parseEnv({ ...VALID, NODE_ENV: 'production' });
+    expect(env.NODE_ENV).toBe('production');
+    expect(env.GOOGLE_API_BASE_URL).toBeUndefined();
+  });
 });

@@ -1,10 +1,10 @@
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import { env } from '@/server/env';
 import {
-  GOOGLE_OAUTH_AUTHORIZE_URL,
-  GOOGLE_OAUTH_TOKEN_URL,
+  googleOauthAuthorizeUrl,
+  googleOauthTokenUrl,
   GOOGLE_SCOPES,
-  GOOGLE_USERINFO_URL,
+  googleUserinfoUrl,
   googleConfig,
 } from './config';
 import { GoogleAuthError } from './domain/errors';
@@ -133,7 +133,7 @@ export function verifyOAuthState(
 
 export function authorizationUrl(state: string): string {
   const { clientId, redirectUri } = googleConfig();
-  const url = new URL(GOOGLE_OAUTH_AUTHORIZE_URL);
+  const url = new URL(googleOauthAuthorizeUrl());
 
   url.searchParams.set('client_id', clientId);
   url.searchParams.set('redirect_uri', redirectUri);
@@ -163,7 +163,7 @@ async function tokenRequest(
   fetchImpl: typeof fetch,
   now: number
 ): Promise<TokenResponse> {
-  const response = await fetchImpl(GOOGLE_OAUTH_TOKEN_URL, {
+  const response = await fetchImpl(googleOauthTokenUrl(), {
     method: 'POST',
     headers: { 'content-type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams(body).toString(),
@@ -229,7 +229,7 @@ export async function fetchIdentity(
   accessToken: string,
   fetchImpl: typeof fetch = fetch
 ): Promise<GoogleIdentity> {
-  const response = await fetchImpl(GOOGLE_USERINFO_URL, {
+  const response = await fetchImpl(googleUserinfoUrl(), {
     headers: { authorization: `Bearer ${accessToken}` },
   });
 

@@ -113,8 +113,15 @@ export function EventChip({
         hub ? 'gap-1 px-3 py-2' : '',
         interactive && 'cursor-pointer transition-shadow hover:shadow-md',
         // Free/busy blocks are deliberately quieter than the events you can
-        // actually read — they are context, not information.
-        event.busyOnly && 'border-dashed opacity-70',
+        // actually read — they are context, not information. The recede is on
+        // the *fill and border*, not the whole chip: `opacity-70` on the
+        // container took the "Bezet" label's text down with it, the same
+        // contrast hazard the past-event treatment in `person-columns.tsx`
+        // was fixed for in M17 — draining the category tint to a neutral
+        // surface reads as "just context" just as well and leaves the label
+        // legible. The dashed border stays; it is the shape cue, not the
+        // contrast problem.
+        event.busyOnly && 'border-dashed border-line bg-surface/60',
         className
       )}
     >
@@ -160,7 +167,12 @@ export function EventChip({
       {showTime && !event.allDay && (
         <span
           className={cn(
-            'tabular-time truncate opacity-80',
+            // No `opacity-*` on coloured text: an 80% blend of
+            // `--cat-blue-fg` over its own tint lands at 4.13:1, which is a
+            // WCAG AA failure the M17 axe sweep caught the moment `cn()`
+            // stopped silently dropping `palette.text` (see `lib/utils.ts`).
+            // The chip is already visually secondary through size and tint.
+            'tabular-time truncate',
             palette.text,
             hub ? 'text-body' : 'text-caption'
           )}
@@ -172,9 +184,7 @@ export function EventChip({
       )}
 
       {event.location && variant !== 'block' && (
-        <span className={cn('truncate text-caption opacity-70', palette.text)}>
-          {event.location}
-        </span>
+        <span className={cn('truncate text-caption', palette.text)}>{event.location}</span>
       )}
     </div>
   );

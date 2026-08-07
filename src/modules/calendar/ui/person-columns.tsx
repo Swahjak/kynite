@@ -166,7 +166,16 @@ export function PersonColumns({
                       className={cn(
                         // A finished event stays visible but recedes; nothing
                         // in this product marks a past thing as a failure.
-                        now && event.endsAt.getTime() < now.getTime() && 'opacity-50'
+                        //
+                        // The recede is on the *fill*, not the whole chip. It
+                        // used to be `opacity-50`, which took the text down
+                        // with it: M17's axe sweep measured the title at
+                        // 2.27:1 on the wall display, and the arithmetic says
+                        // opacity would have to stay above 0.85 to clear AA —
+                        // by which point it is not a recede at all. Draining
+                        // the category tint to a neutral surface reads as
+                        // "done" just as well and leaves every word legible.
+                        now && event.endsAt.getTime() < now.getTime() && 'border-line bg-surface/60'
                       )}
                     />
                   ))

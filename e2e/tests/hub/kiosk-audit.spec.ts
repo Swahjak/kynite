@@ -1,6 +1,6 @@
-import { expect, test } from '../../fixtures/family';
-import { pairHub } from '../../fixtures/hub';
-import { seedMembers, withDb } from '../../utils/seed';
+import { expect, test } from '@e2e/fixtures/family';
+import { pairHub } from '@e2e/fixtures/hub';
+import { seedMembers, withDb } from '@e2e/utils/seed';
 
 /**
  * The M12 criterion "the hub layout renders fullscreen with no browser chrome
@@ -23,7 +23,7 @@ import { seedMembers, withDb } from '../../utils/seed';
  *     read class names would pass whether or not it was applied.
  *  3. **48px targets.** Every interactive element's bounding box is walked.
  *
- * `e2e/tests/design/target-size.spec.ts` audits the same 48px rule on the
+ * `e2e/tests/hub/target-size.spec.ts` audits the same 48px rule on the
  * component gallery. This one audits the real surfaces, where a layout — not a
  * primitive — is what shrinks something.
  */

@@ -25,6 +25,15 @@ function uniqueEmail(): string {
 export async function signUpFamily(page: Page, familyName: string): Promise<FamilyContext> {
   const email = uniqueEmail();
 
+  // M17: every project now starts its contexts from a storage state — a
+  // signed-in parent on `app`, a paired tablet on `hub`. Both of those would
+  // change what `/nl/sign-up` does (the signed-in guard redirects to /family;
+  // a device cookie outranks the account session on every route), so a spec
+  // that wants its *own* family has to stop being whoever the project made it
+  // first. Clearing here rather than in each spec is what makes the baseline
+  // session a starting point instead of shared state.
+  await page.context().clearCookies();
+
   await page.goto('/nl/sign-up');
   await page.getByLabel('Jouw naam').fill('Sanne');
   await page.getByLabel('Naam van je gezin').fill(familyName);
@@ -54,7 +63,13 @@ export const test = base.extend<{ family: FamilyContext }>({
   // confusing timeout on some unrelated locator rather than as "no session".
   family: [
     async ({ page }, use) => {
-      const context = await signUpFamily(page, `Familie ${Date.now()}`);
+      // Unique per test *attempt*, not per millisecond: `--repeat-each=2` runs
+      // two copies of the same test concurrently, and a shared family name is
+      // exactly the kind of accidental coupling that mode exists to surface.
+      const context = await signUpFamily(
+        page,
+        `Familie ${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+      );
       await use(context);
     },
     { auto: true },

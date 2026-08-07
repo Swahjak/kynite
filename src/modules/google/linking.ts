@@ -81,7 +81,17 @@ export async function bootstrapAccount(accountId: string): Promise<{ calendars: 
       // No channel means we fall back to the 15-minute poll — degraded, not
       // broken, and the renewal job retries every 30 minutes.
     });
-    await enqueueCalendarSync(row.id);
+    await enqueueCalendarSync(row.id).catch((error: unknown) => {
+      // Same reasoning as the `watch` above, and found the same way (M17's
+      // sync smoke): the account is linked and its calendars are stored by the
+      // time we get here, so a queue that is unavailable — a web-only process
+      // with `JOBS_ENABLED=false`, a boss that has not declared its queues yet
+      // — is a *delayed first sync*, not a failed link. Letting it throw made
+      // the callback redirect to `?error=linkFailed` over a household whose
+      // Google account was, in fact, connected. The 15-minute poll picks the
+      // calendar up regardless.
+      console.error('[google] initial sync could not be queued', error);
+    });
   }
 
   return { calendars: calendars.length };

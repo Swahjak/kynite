@@ -1,3 +1,4 @@
+import { createHash, randomBytes } from 'node:crypto';
 import { Client } from 'pg';
 
 /**
@@ -658,4 +659,47 @@ export async function readTimers(client: Client, familyId: string) {
     [familyId]
   );
   return rows;
+}
+
+/**
+ * A share link, straight in the database (M17).
+ *
+ * The minting *flow* is under test once, through the settings UI, in
+ * `tests/share/share-link.spec.ts`. Every other spec that just needs a link to
+ * open — the share surface's axe sweep, a visual baseline — gets it from here
+ * instead, so an unrelated break in the sharing settings page cannot fail them
+ * and so a share spec does not have to establish an account session first.
+ *
+ * The hash is computed exactly as `@/lib/share-token` computes it, including
+ * the `share:` domain separator; a row hashed any other way would simply never
+ * resolve.
+ */
+export async function seedShareLink(
+  client: Client,
+  familyId: string,
+  options: {
+    role?: 'viewer' | 'contributor';
+    label?: string;
+    scope?: Record<string, unknown>;
+    expiresAt?: string | null;
+  } = {}
+): Promise<{ token: string; id: string }> {
+  const token = randomBytes(32).toString('base64url');
+  const tokenHash = createHash('sha256').update(`share:${token}`).digest('hex');
+
+  const { rows } = await client.query<{ id: string }>(
+    `insert into share_link (family_id, token_hash, role, scope, label, expires_at)
+     values ($1, $2, $3, $4, $5, $6)
+     returning id`,
+    [
+      familyId,
+      tokenHash,
+      options.role ?? 'viewer',
+      JSON.stringify(options.scope ?? {}),
+      options.label ?? 'Oma',
+      options.expiresAt ?? null,
+    ]
+  );
+
+  return { token, id: rows[0].id };
 }

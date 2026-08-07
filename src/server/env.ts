@@ -42,6 +42,23 @@ export const envSchema = z.object({
   TOKEN_ENCRYPTION_KEY: base64Key32.optional(),
 
   /**
+   * Origin every Google endpoint hangs off (M17).
+   *
+   * Google is the *only* boundary the e2e suite is allowed to fake, and faking
+   * it honestly means the app still speaks real HTTP — real OAuth redirect,
+   * real token POST, real `calendarList`/`events` GETs — to a server that
+   * happens to be ours. That needs exactly one seam, and this is it: unset
+   * (the default, and the only possibility in production) every URL in
+   * `modules/google/config.ts` resolves against Google's own origins.
+   *
+   * Refused in production below. A variable that can repoint the token
+   * endpoint is a credential-exfiltration primitive if anything can set it on
+   * a live host, so the schema — not a convention — is what keeps it to
+   * development and test.
+   */
+  GOOGLE_API_BASE_URL: z.url().optional(),
+
+  /**
    * VAPID keypair for Web Push (§6 "Web push (parents only)", M11).
    *
    * Optional at boot for the same reason the Google credentials are: an
@@ -75,6 +92,22 @@ export const envSchema = z.object({
     .transform((value) => value === 'true'),
 });
 
+/**
+ * The one cross-field rule: `GOOGLE_API_BASE_URL` may not be set in
+ * production. See its field doc — repointing Google's token endpoint is how
+ * you would steal a household's refresh tokens, so the boot refuses rather
+ * than trusting that nobody sets it.
+ */
+export const envSchemaWithRules = envSchema.superRefine((value, ctx) => {
+  if (value.NODE_ENV === 'production' && value.GOOGLE_API_BASE_URL) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['GOOGLE_API_BASE_URL'],
+      message: 'GOOGLE_API_BASE_URL is a development/test seam and must be unset in production',
+    });
+  }
+});
+
 export type Env = z.infer<typeof envSchema>;
 
 export class EnvValidationError extends Error {
@@ -86,7 +119,7 @@ export class EnvValidationError extends Error {
 
 /** Pure parser — throws `EnvValidationError` when the source is incomplete. */
 export function parseEnv(source: Record<string, string | undefined> = process.env): Env {
-  const result = envSchema.safeParse(source);
+  const result = envSchemaWithRules.safeParse(source);
 
   if (!result.success) {
     throw new EnvValidationError(

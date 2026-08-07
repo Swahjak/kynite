@@ -23,10 +23,45 @@ export const GOOGLE_SCOPES = [
   'https://www.googleapis.com/auth/calendar',
 ] as const;
 
-export const GOOGLE_OAUTH_AUTHORIZE_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
-export const GOOGLE_OAUTH_TOKEN_URL = 'https://oauth2.googleapis.com/token';
-export const GOOGLE_USERINFO_URL = 'https://openidconnect.googleapis.com/v1/userinfo';
-export const GOOGLE_CALENDAR_API = 'https://www.googleapis.com/calendar/v3';
+/**
+ * Google's endpoints — or, when `GOOGLE_API_BASE_URL` is set, the same paths
+ * against a single local origin (M17).
+ *
+ * These are read *lazily*, as functions rather than module consts, for one
+ * reason: a `const` is frozen at import time, which in Next.js is whenever the
+ * route graph first touches this module, and the e2e fake has to be able to
+ * decide the origin from the process environment the server booted with. The
+ * paths never change — only the origin does — so a fake that serves
+ * `/o/oauth2/v2/auth`, `/token`, `/v1/userinfo` and `/calendar/v3/...` is
+ * answering the *real* requests the app makes, not a simplified stand-in.
+ *
+ * Unset (production, always — `server/env.ts` refuses the variable there) each
+ * one resolves to Google's own host, exactly as before.
+ */
+function googleOrigin(): string | undefined {
+  return env.GOOGLE_API_BASE_URL?.replace(/\/+$/, '');
+}
+
+function googleUrl(base: string, path: string): string {
+  const override = googleOrigin();
+  return override ? `${override}${path}` : `${base}${path}`;
+}
+
+export function googleOauthAuthorizeUrl(): string {
+  return googleUrl('https://accounts.google.com', '/o/oauth2/v2/auth');
+}
+
+export function googleOauthTokenUrl(): string {
+  return googleUrl('https://oauth2.googleapis.com', '/token');
+}
+
+export function googleUserinfoUrl(): string {
+  return googleUrl('https://openidconnect.googleapis.com', '/v1/userinfo');
+}
+
+export function googleCalendarApiUrl(): string {
+  return googleUrl('https://www.googleapis.com', '/calendar/v3');
+}
 
 /** The OAuth callback and the push-channel address both hang off §10's public origin. */
 export const OAUTH_CALLBACK_PATH = '/api/google/oauth/callback';

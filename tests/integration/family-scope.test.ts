@@ -25,6 +25,19 @@ describe.skipIf(!databaseUrl)('family scoping (integration)', () => {
 
   let household: Household;
   let bystander: Household;
+  /**
+   * The doomed household's own child rows, captured at seed time.
+   *
+   * The orphan assertions below used to be unscoped (`device_session where
+   * device_id not in (select id from device)`), which reads the *entire*
+   * shared integration database — so a row left behind by any of the thirty
+   * other integration files running concurrently against the same
+   * `DATABASE_URL` failed this file. The cascade this test is about is this
+   * family's, so the query is now this family's too. (M17 carry-forward from
+   * M16.)
+   */
+  let doomedDeviceId: string;
+  let doomedRoutineStepId: string;
 
   beforeAll(async () => {
     household = await seedHousehold(db, 'Doomed');
@@ -36,6 +49,7 @@ describe.skipIf(!databaseUrl)('family scoping (integration)', () => {
       .insert(schema.device)
       .values({ familyId, name: 'Keukenhub', kind: 'hub' })
       .returning();
+    doomedDeviceId = device.id;
     await db.insert(schema.deviceSession).values({
       deviceId: device.id,
       tokenHash: `hash-${randomUUID()}`,
@@ -102,6 +116,7 @@ describe.skipIf(!databaseUrl)('family scoping (integration)', () => {
       .insert(schema.routineStep)
       .values({ routineId: routine.id, title: 'Aankleden' })
       .returning();
+    doomedRoutineStepId = step.id;
     await db.insert(schema.completion).values({
       familyId,
       memberId: household.childId,
@@ -190,6 +205,12 @@ describe.skipIf(!databaseUrl)('family scoping (integration)', () => {
   });
 
   afterAll(async () => {
+    // Both households, not just the bystander. If the cascade test fails or is
+    // skipped (`-t`, `.only`, a shuffled run), the doomed family used to leak
+    // into the shared database forever — and a leaked household is exactly
+    // what breaks the next file that counts rows it does not own. Deleting an
+    // already-deleted family is a no-op.
+    await db.delete(schema.family).where(sql`id = ${household.familyId}`);
     await db.delete(schema.family).where(sql`id = ${bystander.familyId}`);
     await pool.end();
   });
@@ -222,12 +243,10 @@ describe.skipIf(!databaseUrl)('family scoping (integration)', () => {
 
     // Children of family-scoped parents go too, without carrying family_id.
     const orphanSessions = await db.execute(
-      sql`select count(*)::int as count from "device_session"
-          where device_id not in (select id from "device")`
+      sql`select count(*)::int as count from "device_session" where device_id = ${doomedDeviceId}`
     );
     const orphanSteps = await db.execute(
-      sql`select count(*)::int as count from "routine_step"
-          where routine_id not in (select id from "routine")`
+      sql`select count(*)::int as count from "routine_step" where id = ${doomedRoutineStepId}`
     );
     expect((orphanSessions.rows[0] as { count: number }).count).toBe(0);
     expect((orphanSteps.rows[0] as { count: number }).count).toBe(0);

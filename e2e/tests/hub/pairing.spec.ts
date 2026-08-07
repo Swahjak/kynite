@@ -1,11 +1,12 @@
-import { expect, test } from '../../fixtures/family';
+import { newAnonymousContext } from '@e2e/utils/context';
+import { expect, test } from '@e2e/fixtures/family';
 import {
   DEVICE_SESSION_COOKIE,
   ageDeviceSession,
   deviceSessionExpiry,
   pairHub,
   revokeDevice,
-} from '../../fixtures/hub';
+} from '@e2e/fixtures/hub';
 
 /**
  * Kiosk pairing, revocation and survival, end to end (M12).
@@ -38,7 +39,7 @@ test.describe('device pairing', () => {
     // A second context, because the two are different physical devices and,
     // since M12, a browser that holds a device cookie is a kiosk regardless of
     // what account session it also carries.
-    const kiosk = await page.context().browser()!.newContext({ locale: 'nl-NL' });
+    const kiosk = await newAnonymousContext(page.context().browser()!, { locale: 'nl-NL' });
     const hub = await kiosk.newPage();
 
     await hub.goto('/nl/hub');
@@ -81,14 +82,14 @@ test.describe('device pairing', () => {
 
     const browser = page.context().browser()!;
 
-    const first = await browser.newContext({ locale: 'nl-NL' });
+    const first = await newAnonymousContext(browser, { locale: 'nl-NL' });
     const firstPage = await first.newPage();
     await firstPage.goto('/nl/hub/pair');
     for (const digit of code) await firstPage.getByTestId(`pair-key-${digit}`).click();
     await firstPage.getByTestId('pair-submit').click();
     await firstPage.waitForURL(/\/nl\/hub$/);
 
-    const second = await browser.newContext({ locale: 'nl-NL' });
+    const second = await newAnonymousContext(browser, { locale: 'nl-NL' });
     const secondPage = await second.newPage();
     await secondPage.goto('/nl/hub/pair');
     for (const digit of code) await secondPage.getByTestId(`pair-key-${digit}`).click();
@@ -110,7 +111,7 @@ test.describe('a paired hub', () => {
     // A real kiosk context: no account session anywhere in it. That matters
     // for the claim being made — "no login screen" is only interesting when
     // there is no signed-in parent quietly holding the page up.
-    const kiosk = await browser.newContext({ locale: 'nl-NL' });
+    const kiosk = await newAnonymousContext(browser, { locale: 'nl-NL' });
     const page = await kiosk.newPage();
     await page.goto('/nl/hub/pair');
     const device = await pairHub(page, family.familyId, 'Keuken');
@@ -149,7 +150,7 @@ test.describe('a paired hub', () => {
     // browser that also held a parent's cookie would fall back to it after
     // revocation and be sent to `/today` — correct, but a different story from
     // the one this test is telling.
-    const kiosk = await browser.newContext({ locale: 'nl-NL' });
+    const kiosk = await newAnonymousContext(browser, { locale: 'nl-NL' });
     const page = await kiosk.newPage();
     await page.goto('/nl/hub/pair');
     const device = await pairHub(page, family.familyId, 'Keuken');
@@ -197,7 +198,7 @@ test.describe('a paired hub', () => {
   }) => {
     // The kitchen is a second context: revocation is driven from the parent's
     // own session in `page`, and the wall display must react on its own.
-    const kiosk = await browser.newContext({ locale: 'nl-NL' });
+    const kiosk = await newAnonymousContext(browser, { locale: 'nl-NL' });
     const hub = await kiosk.newPage();
 
     await hub.goto('/nl/hub/pair');
@@ -263,7 +264,7 @@ test.describe('a paired hub', () => {
     browser,
     family,
   }) => {
-    const kiosk = await browser.newContext({ locale: 'nl-NL' });
+    const kiosk = await newAnonymousContext(browser, { locale: 'nl-NL' });
     const hub = await kiosk.newPage();
 
     await hub.goto('/nl/hub/pair');

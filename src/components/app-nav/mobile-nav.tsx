@@ -102,7 +102,12 @@ export function MobileNav({ labels }: MobileNavProps) {
             href={href}
             className={cn(
               'flex min-h-12 flex-1 flex-col items-center justify-center gap-0.5 py-2 text-xs font-medium',
-              active ? 'text-primary' : 'text-ink-secondary'
+              // `text-brand-ink`, not `text-primary`: the brand green (#13ec92)
+              // is a *fill* colour and reaches 1.46:1 as text on a light
+              // surface. `button.tsx` already made this call for link buttons;
+              // M17's axe sweep found the mobile nav still doing it the wrong
+              // way, because until M17 nothing ran axe at 390px.
+              active ? 'text-brand-ink' : 'text-ink-secondary'
             )}
             aria-current={active ? 'page' : undefined}
           >
@@ -117,7 +122,7 @@ export function MobileNav({ labels }: MobileNavProps) {
           onClick={() => setOpen(true)}
           className={cn(
             'flex min-h-12 flex-1 flex-col items-center justify-center gap-0.5 py-2 text-xs font-medium',
-            isOverflowActive ? 'text-primary' : 'text-ink-secondary'
+            isOverflowActive ? 'text-brand-ink' : 'text-ink-secondary'
           )}
           aria-haspopup="dialog"
           data-testid="mobile-nav-more"
