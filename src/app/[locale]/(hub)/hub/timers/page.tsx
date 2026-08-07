@@ -25,9 +25,8 @@ export default async function HubTimersPage({
   searchParams: Promise<{ now?: string }>;
 }) {
   const { locale } = await params;
-  await requireHubDevice(locale);
-
   const { now } = await searchParams;
+  await requireHubDevice(locale, '/hub/timers', { now });
 
   const board = await loadTimerBoard({ now });
   const t = await getTranslations('timers');

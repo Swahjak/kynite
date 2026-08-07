@@ -86,7 +86,11 @@ export default async function AppLayout({
               <Link href="/family" className="px-2 py-1 font-display text-sm font-medium">
                 {t('family')}
               </Link>
-              <Link href="/settings/google" className="px-2 py-1 font-display text-sm font-medium">
+              {/* M16: the settings hub. Every household setting lives behind
+                this one link now; the three deep links below it stay because
+                each is a flow of its own and both nav shapes have pointed at
+                them since M11–M13. */}
+              <Link href="/settings" className="px-2 py-1 font-display text-sm font-medium">
                 {t('settings')}
               </Link>
               {/* M11: push opt-in has to be reachable by deliberate navigation —

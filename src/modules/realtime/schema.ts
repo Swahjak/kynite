@@ -21,6 +21,15 @@ export const REALTIME_EVENT_TYPES = [
   // touch it (§7 "revocation drops the hub to a pair screen on the next
   // request or SSE tick"). `entity.id` is the revoked device id.
   'device.revoked',
+  // M16. Also not a data change: a parent changed something about how the
+  // household's shared surfaces are configured — the hub's default board, a
+  // calendar's colour or visibility, the family's locale or timezone — and
+  // every wall display has to pick it up on its own. FR28's criterion is
+  // "takes effect on the hub **without re-pairing**", and a tablet nobody
+  // touches for weeks would otherwise keep rendering the old settings until
+  // something else happened to refresh it. `entity.id` is the family id: the
+  // subject of this event is the household, not a row.
+  'settings.updated',
   'sync.status',
 ] as const;
 

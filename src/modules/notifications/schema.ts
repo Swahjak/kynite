@@ -1,4 +1,5 @@
 import {
+  boolean,
   date,
   index,
   integer,
@@ -106,5 +107,47 @@ export const reminderDispatch = pgTable(
   ]
 );
 
+/**
+ * What one member wants to be notified about (M16).
+ *
+ * Per *member*, not per subscription: a parent with a phone and a laptop has
+ * one opinion about being told a child asked to spend stars, and switching it
+ * off on one device only would be a setting that appears not to work. The
+ * endpoints stay in `push_subscription`; this is the policy above them.
+ *
+ * **An absent row means everything on.** That is what makes this migration
+ * safe for the families that already exist — nobody's reminders stop because
+ * a table was added — and it is why the dispatch path asks "is there a row
+ * that says no" rather than "is there a row that says yes". A member who has
+ * never opened the settings page has no row and is notified exactly as before.
+ *
+ * The two switches are the two notifications this product actually sends
+ * (docs/architecture.md §6): the routine reminder that goes to a routine's
+ * owner, and the redemption request that fans out to every adult.
+ */
+export const notificationPreference = pgTable(
+  'notification_preference',
+  {
+    id: primaryId(),
+    familyId: uuid('family_id')
+      .notNull()
+      .references(() => family.id, { onDelete: 'cascade' }),
+    memberId: uuid('member_id')
+      .notNull()
+      .references(() => member.id, { onDelete: 'cascade' }),
+    /** §6: "a routine starts in a minute", to the routine's owner. */
+    routineReminders: boolean('routine_reminders').notNull().default(true),
+    /** §6 step 4: "may I spend my stars", to every adult. */
+    redemptionRequests: boolean('redemption_requests').notNull().default(true),
+    ...timestamps,
+  },
+  (table) => [
+    // One opinion per member — the upsert's conflict target.
+    uniqueIndex('notification_preference_member_unique').on(table.memberId),
+    index('notification_preference_family_id_idx').on(table.familyId),
+  ]
+);
+
 export type PushSubscription = typeof pushSubscription.$inferSelect;
 export type ReminderDispatch = typeof reminderDispatch.$inferSelect;
+export type NotificationPreference = typeof notificationPreference.$inferSelect;

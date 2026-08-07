@@ -6,12 +6,14 @@ import { headers } from 'next/headers';
 import { getLocale } from 'next-intl/server';
 import { and, eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
+import { locales } from '@/i18n/routing';
 import { redirect } from '@/i18n/navigation';
 import { getAuth } from '@/server/auth';
 import { getDb } from '@/server/db';
 import { user } from '@/server/db/auth-schema';
 import { env } from '@/server/env';
 import { hashInviteToken, inviteUrlFor } from '@/lib/invite-token';
+import { publish } from '@/modules/realtime';
 import {
   actionFailure as failure,
   createInviteFailure,
@@ -23,6 +25,7 @@ import { inviteStateOf } from './domain/invite';
 import { claimInvite, mintInvite, resolveInvite, revokeInvite } from './invites';
 import { assertCan, getPrincipal } from './principal';
 import {
+  HUB_VIEWS,
   MEMBER_COLORS,
   MEMBER_ROLES,
   REWARD_HORIZONS,
@@ -309,6 +312,217 @@ export async function deleteMemberAction(
 
   revalidatePath(`/${await getLocale()}/family`);
   return idleState;
+}
+
+/* ---------------------------------------------------------------------------
+ * Household settings (milestone M16)
+ * ------------------------------------------------------------------------ */
+
+/**
+ * A timezone is valid iff the platform's own ICU database knows it.
+ *
+ * Not an enum: the IANA list is ~600 entries, it changes with the tzdata
+ * release the runtime ships, and pinning a copy of it in this file would mean
+ * a family in a newly-split zone cannot select their own clock until we
+ * redeploy. `Intl` is the same database every `format.dateTime()` in the app
+ * resolves against, so "valid" here means exactly "renders correctly there".
+ */
+function isKnownTimeZone(value: string): boolean {
+  try {
+    new Intl.DateTimeFormat('en', { timeZone: value });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+const familySettingsSchema = z.object({
+  name: trimmed.min(1).max(80),
+  locale: z.enum(locales),
+  timezone: trimmed.min(1).max(64).refine(isKnownTimeZone),
+  /** ISO-8601 weekday numbers; the UI offers Monday and Sunday. */
+  weekStartsOn: z.coerce.number().int().min(1).max(7),
+});
+
+/**
+ * The household's own identity: name, language, clock, week start (M16).
+ *
+ * Owner-only through `family:manage` — see that capability's note in
+ * `authorize.ts` for why an adult second parent may run the household without
+ * being able to redefine it.
+ *
+ * Two of these four fields are read by *every* surface on the next request and
+ * neither needs a re-login, which is the acceptance criterion:
+ *
+ *  - **timezone** is resolved per request in `(app)/layout.tsx` and
+ *    `(hub)/layout.tsx` from the family row (M15), so a changed zone reaches
+ *    every `useFormatter()` below them on the next render.
+ *  - **locale** is the *household's* language: it drives the hub and push copy
+ *    (`notifications/copy.ts` already reads it per family). It deliberately
+ *    does **not** move the parent's own URL: `/nl/...` and `/en/...` are the
+ *    per-person surface, two parents may read the app in different languages,
+ *    and yanking the URL out from under the one who is typing would be a
+ *    setting with a side effect nobody asked for. The wall display has no
+ *    person to have a preference, so it follows the household — see
+ *    `requireHubDevice`, which sends a hub on the wrong locale prefix to the
+ *    family's.
+ *
+ * The realtime event is what closes "without re-login" for the wall: a kiosk
+ * that nobody touches has no reason to re-render otherwise.
+ */
+export async function updateFamilyAction(
+  _previous: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const principal = await assertCan('family:manage').catch(() => null);
+  // `family:manage` is `deny` for every non-member column, so this narrowing
+  // can only ever be the compiler catching up with the matrix.
+  if (!principal || principal.kind !== 'member') return failure('forbidden');
+
+  const parsed = familySettingsSchema.safeParse({
+    name: read(formData, 'name'),
+    locale: read(formData, 'locale'),
+    timezone: read(formData, 'timezone'),
+    weekStartsOn: read(formData, 'weekStartsOn'),
+  });
+  if (!parsed.success) return failure('invalidInput');
+
+  const input = parsed.data;
+
+  await getDb().transaction(async (tx) => {
+    await tx
+      .update(family)
+      .set({
+        name: input.name,
+        locale: input.locale,
+        timezone: input.timezone,
+        weekStartsOn: input.weekStartsOn,
+        updatedAt: new Date(),
+      })
+      .where(eq(family.id, principal.familyId));
+
+    await publish(
+      {
+        familyId: principal.familyId,
+        type: 'settings.updated',
+        entity: { id: principal.familyId },
+        actor: { memberId: principal.memberId, source: 'mobile' },
+        patch: { locale: input.locale, timezone: input.timezone },
+      },
+      tx
+    );
+  });
+
+  await revalidateSettings();
+  return idleState;
+}
+
+const hubDisplaySchema = z.object({ hubDefaultView: z.enum(HUB_VIEWS) });
+
+/**
+ * The hub's default board (PRD FR28, M16).
+ *
+ * `display:manage`, not `family:manage`: FR28 says *parents* configure the hub,
+ * plural, and how the wall looks is the half of settings that changes nothing
+ * about who the household is.
+ *
+ * Family-level rather than per-device on purpose. The criterion is "takes
+ * effect on the hub **without re-pairing**", and the cheapest way to guarantee
+ * that is for the tablet to store no preference at all: it renders whatever
+ * the family row says, every time.
+ */
+export async function setHubDisplayAction(
+  _previous: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const principal = await assertCan('display:manage').catch(() => null);
+  if (!principal || principal.kind !== 'member') return failure('forbidden');
+
+  const parsed = hubDisplaySchema.safeParse({ hubDefaultView: read(formData, 'hubDefaultView') });
+  if (!parsed.success) return failure('invalidInput');
+
+  await getDb().transaction(async (tx) => {
+    await tx
+      .update(family)
+      .set({ hubDefaultView: parsed.data.hubDefaultView, updatedAt: new Date() })
+      .where(eq(family.id, principal.familyId));
+
+    await publish(
+      {
+        familyId: principal.familyId,
+        type: 'settings.updated',
+        entity: { id: principal.familyId },
+        actor: { memberId: principal.memberId, source: 'mobile' },
+        patch: { hubDefaultView: parsed.data.hubDefaultView },
+      },
+      tx
+    );
+  });
+
+  await revalidateSettings();
+  return idleState;
+}
+
+/**
+ * Delete the household, everything in it, and the caller's way back in (M16).
+ *
+ * Owner-only, and confirmed by typing the household's name — not a checkbox.
+ * Every row in this database hangs off `family.id` with `onDelete: 'cascade'`,
+ * so this single statement takes the members, the events, the routines, the
+ * star ledger, the devices and the share links with it. There is no undo and
+ * no soft-delete tombstone to restore from, which is exactly why the
+ * confirmation is a thing a person has to read something to produce.
+ *
+ * The auth `user` rows survive deliberately: a login with no household lands
+ * on sign-up and can start a new one, whereas deleting the account would strand
+ * anyone who shared that email with another family (the divorced-parent
+ * persona in §3 is a real column in this schema, not a hypothetical).
+ */
+export async function deleteFamilyAction(
+  _previous: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const principal = await assertCan('family:manage').catch(() => null);
+  if (!principal) return failure('forbidden');
+
+  const confirmation = read(formData, 'confirmName').trim();
+  if (!confirmation) return failure('invalidInput');
+
+  const db = getDb();
+  const [existing] = await db
+    .select({ name: family.name })
+    .from(family)
+    .where(eq(family.id, principal.familyId))
+    .limit(1);
+
+  if (!existing) return failure('familyNotFound');
+  // Compared case-insensitively: the point of the gate is deliberateness, not
+  // typing accuracy, and a household called "De Jansens" should not be
+  // undeletable because somebody's phone capitalised it.
+  if (confirmation.toLocaleLowerCase() !== existing.name.trim().toLocaleLowerCase()) {
+    return failure('confirmationMismatch');
+  }
+
+  // No realtime event: the family channel is about to have no listeners left
+  // that are still authorized, and every hub session for it dies with the
+  // cascade — a paired tablet's next request finds no device row and drops to
+  // the pair screen on its own (`requireHubDevice`).
+  await db.delete(family).where(eq(family.id, principal.familyId));
+
+  await getAuth()
+    .api.signOut({ headers: await headers() })
+    .catch(() => {});
+
+  redirect({ href: '/sign-in', locale: await getLocale() });
+  // `redirect()` throws — unreachable, but the signature must stay total.
+  return idleState;
+}
+
+/** Every parent-app surface that renders a household setting. */
+async function revalidateSettings(): Promise<void> {
+  const locale = await getLocale();
+  revalidatePath(`/${locale}/settings`);
+  revalidatePath(`/${locale}/family`);
 }
 
 /* ---------------------------------------------------------------------------

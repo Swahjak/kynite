@@ -1,6 +1,14 @@
 import { pairHub } from '../../fixtures/hub';
 import { expect, test } from '../../fixtures/family';
-import { ownerMemberOf, seedCalendar, seedEvents, seedMembers, withDb } from '../../utils/seed';
+import {
+  ownerMemberOf,
+  seedCalendar,
+  seedEvents,
+  seedMembers,
+  setFamilyLocale,
+  setHubDefaultView,
+  withDb,
+} from '../../utils/seed';
 import { settlePage } from '../../utils/settle';
 
 /**
@@ -195,6 +203,10 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
         await pairHub(page, family.familyId);
 
         await seedBoardDay(family.familyId);
+        // M16: the wall display renders in the *household's* language, so an
+        // English board is a household that speaks English — not merely a URL
+        // that says `/en`. Without this the hub redirects back to `/nl`.
+        await withDb((client) => setFamilyLocale(client, family.familyId, locale));
 
         await page.goto(`/${locale}/hub?date=${FUTURE_ANCHOR}`);
         await expect(page.getByTestId('hub-board')).toBeVisible();
@@ -283,6 +295,33 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
       await settlePage(page);
 
       await expect(page).toHaveScreenshot(`hub-dark-${name}.png`, { fullPage: true });
+    });
+
+    test('hub agenda board', async ({ page, family }) => {
+      // B-1: `family.hubDefaultView = 'agenda'` swaps the board from
+      // `PersonColumns` to `AgendaView` (`hub-board.tsx`), which needs its own
+      // baseline — the settings e2e spec seeds no events, so that spec's pass
+      // was an empty-state pass, not proof the agenda board renders content at
+      // hub scale. This baseline is seeded with `seedBoardDay` deliberately,
+      // so `AgendaView`'s date gutter and `EventChip`'s hub sizing actually
+      // paint something.
+      await pairHub(page, family.familyId);
+
+      await seedBoardDay(family.familyId);
+      await withDb((client) => setHubDefaultView(client, family.familyId, 'agenda'));
+
+      await page.goto(`/nl/hub?date=${FUTURE_ANCHOR}`);
+      await expect(page.getByTestId('hub-board')).toBeVisible();
+      await expect(page.getByTestId('kiosk-shell')).toHaveAttribute('data-hub-theme', 'light');
+
+      await expect(page.getByTestId('hub-clock')).toHaveText(/^\d{1,2}:\d{2}(\s?[AP]M)?$/i);
+      await page.getByTestId('hub-clock').evaluate((element) => {
+        element.textContent = '00:00';
+      });
+
+      await settlePage(page);
+
+      await expect(page).toHaveScreenshot(`hub-agenda-${name}.png`, { fullPage: true });
     });
   });
 }

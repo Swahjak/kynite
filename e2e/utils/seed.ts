@@ -184,6 +184,42 @@ export async function seedCalendar(
   return rows[0].id;
 }
 
+/**
+ * Sets the household's language (M16).
+ *
+ * The wall display follows `family.locale` rather than the URL — a kiosk has
+ * no person behind it to hold a preference of its own, so `requireHubDevice`
+ * sends a hub on the wrong prefix to the family's. A spec that wants an
+ * English board therefore has to say so about the *household*, not only about
+ * the address it types.
+ */
+export async function setFamilyLocale(
+  client: Client,
+  familyId: string,
+  locale: 'nl' | 'en'
+): Promise<void> {
+  await client.query(`update family set locale = $2, updated_at = now() where id = $1`, [
+    familyId,
+    locale,
+  ]);
+}
+
+/**
+ * Sets the household's default hub board (PRD FR28, M16) — the same field
+ * `setCalendarDisplayAction`'s sibling action writes, needed here so a visual
+ * spec can pin the agenda board without going through the settings UI.
+ */
+export async function setHubDefaultView(
+  client: Client,
+  familyId: string,
+  view: 'day' | 'agenda'
+): Promise<void> {
+  await client.query(`update family set hub_default_view = $2, updated_at = now() where id = $1`, [
+    familyId,
+    view,
+  ]);
+}
+
 /** The owner member sign-up created, so seeded events can be assigned to them. */
 export async function ownerMemberOf(client: Client, familyId: string): Promise<SeededMember> {
   const { rows } = await client.query<{ id: string; display_name: string; color: string }>(

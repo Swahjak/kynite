@@ -30,16 +30,20 @@ export default async function HubPage({
   searchParams: Promise<{ date?: string; now?: string }>;
 }) {
   const { locale } = await params;
+  const { date, now } = await searchParams;
   // The device principal is resolved before anything is read. An unpaired or
   // revoked tablet lands on the pair screen instead of on an empty board.
-  await requireHubDevice(locale);
-
-  const { date, now } = await searchParams;
+  // NB-3: `?date=`/`?now=` are forwarded so a locale-follow redirect (M16)
+  // doesn't drop them.
+  await requireHubDevice(locale, '/hub', { date, now });
 
   // The board is an ambient "today" surface; `?date=` renders another day,
   // which is what a tomorrow-preview needs and what makes the board
   // snapshot-testable without freezing a clock.
-  const data = await loadCalendarPage({ view: 'day', date, surface: 'hub' });
+  // No `view`: the hub's board is the *family's* (FR28, M16), resolved inside
+  // the loader from `family.hubDefaultView`. Passing 'day' here would have
+  // pinned the wall to one shape and made the setting unobservable.
+  const data = await loadCalendarPage({ date, surface: 'hub' });
   // Renders nothing when nothing is running, so the board is unchanged the
   // rest of the day.
   const timers = await loadTimerBoard({ now });
@@ -77,6 +81,8 @@ export default async function HubPage({
           anchor: data.anchor,
           now: data.now,
           timeZone: data.timeZone,
+          view: data.view,
+          weekStartsOn: data.weekStartsOn,
           members: data.members,
           events: data.events,
         }}

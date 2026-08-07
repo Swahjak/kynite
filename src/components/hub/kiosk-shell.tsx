@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { OfflineIndicator } from '@/components/offline';
 import { DeviceSessionWatcher } from './device-session-watcher';
 import { HubSettings } from './hub-settings';
+import { SettingsWatcher } from './settings-watcher';
 import type { ResolvedHubTheme } from './hub-theme';
 import { useHubTheme } from './use-hub-theme';
 
@@ -102,6 +103,10 @@ export function KioskShell({
       className="flex h-dvh w-full flex-col overflow-hidden bg-background text-foreground [@media(pointer:coarse)]:cursor-none"
     >
       {device ? <DeviceSessionWatcher deviceId={device.id} /> : null}
+      {/* M16: a household setting changed on somebody's phone and this wall has
+        to follow without being touched. Not on the pair screen — it has no
+        family to have settings yet. */}
+      {device ? <SettingsWatcher /> : null}
 
       <header className="flex shrink-0 items-center justify-between gap-4 px-6 pt-4 pb-2">
         <div className="flex items-baseline gap-4">

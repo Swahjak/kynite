@@ -19,19 +19,27 @@ export async function MemberList({
   members,
   invites,
   serverNow,
+  canManage = true,
 }: {
   members: Member[];
   /** Latest invite per member id — `{}` for anyone without `member:manage`. */
   invites: Record<string, MemberInviteView>;
   /** Captured in `loadFamilyPage`, not read here: the clock is impure. */
   serverNow: number;
+  /**
+   * `member:manage` — gates the edit/invite/delete affordances (NB-7).
+   * Defaults `true` so `(app)/family` (owner-and-adult-reachable, but where
+   * the write actions themselves already refuse an adult) keeps its current
+   * shape; the settings hub is the caller that passes the real answer.
+   */
+  canManage?: boolean;
 }) {
   const t = await getTranslations('family');
 
   return (
     <ul className="flex flex-col gap-3">
       {members.map((member) => (
-        <li key={member.id}>
+        <li key={member.id} data-testid="member-row" data-member-id={member.id}>
           <Card>
             <CardContent className="flex flex-wrap items-center gap-4">
               <MemberAvatar
@@ -56,7 +64,7 @@ export async function MemberList({
                   The same predicate is enforced in `mintInvite`; this just
                   keeps the button from appearing where it would only fail.
                 */}
-                {member.role === 'adult' && member.userId === null ? (
+                {canManage && member.role === 'adult' && member.userId === null ? (
                   <MemberInvite
                     memberId={member.id}
                     displayName={member.displayName}
@@ -64,10 +72,13 @@ export async function MemberList({
                     serverNow={serverNow}
                   />
                 ) : null}
-                <MemberDialog member={member} />
-                {member.role === 'owner' ? null : (
+                {/* NB-7: omitted rather than disabled for a caller without
+                    `member:manage` — a button whose action would only refuse
+                    is worse than no button. */}
+                {canManage ? <MemberDialog member={member} /> : null}
+                {canManage && member.role !== 'owner' ? (
                   <DeleteMemberButton memberId={member.id} displayName={member.displayName} />
-                )}
+                ) : null}
               </span>
             </CardContent>
           </Card>

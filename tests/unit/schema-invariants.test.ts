@@ -84,6 +84,9 @@ describe('schema-wide invariants', () => {
       [
         'account',
         'calendar',
+        // M16: FR28's per-calendar colour. A table rather than a column on
+        // `calendar` — see its own note for the module-cycle reason.
+        'calendar_display',
         'completion',
         'device',
         'device_pairing_attempt',
@@ -95,6 +98,8 @@ describe('schema-wide invariants', () => {
         'google_account',
         'member',
         'member_invite',
+        // M16: which notifications one member wants. Absent row = everything on.
+        'notification_preference',
         'push_subscription',
         'redemption',
         'reminder_dispatch',

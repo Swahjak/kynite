@@ -78,15 +78,30 @@ export function nearestCategory(color: string | null | undefined): EventCategory
 export type CategorySource = {
   /** `event.category` — the per-event override. */
   category: EventCategory | null;
+  /**
+   * `calendar_display.category` — the *parent's* colour for the whole calendar
+   * (PRD FR28, M16). Null when nobody has recoloured it, which is why the
+   * Google hex below is still consulted.
+   */
+  calendarCategory?: EventCategory | null;
   /** `calendar.color` — Google's hex for the owning calendar, if any. */
   calendarColor?: string | null;
 };
 
 /**
- * The palette entry an event renders in: its own override, else its calendar's
- * color mapped onto the palette, else blue. Total by construction — every event
- * gets a color, so no view has to handle a colorless one.
+ * The palette entry an event renders in, most specific first: the event's own
+ * override, then the parent's colour for its calendar, then Google's colour for
+ * that calendar mapped onto the palette, then blue.
+ *
+ * The middle rung is what FR28's "per-calendar colour coding" actually is, and
+ * its position in the chain is the decision: above Google (a parent who picks a
+ * colour means it, and the next sync must not silently take it back) and below
+ * the per-event override (recolouring one appointment is a statement about
+ * *that* appointment). Total by construction — every event gets a colour, so no
+ * view has to handle a colourless one.
  */
 export function resolveCategory(source: CategorySource): EventCategory {
-  return source.category ?? nearestCategory(source.calendarColor) ?? 'blue';
+  return (
+    source.category ?? source.calendarCategory ?? nearestCategory(source.calendarColor) ?? 'blue'
+  );
 }

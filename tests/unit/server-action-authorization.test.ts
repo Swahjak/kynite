@@ -236,10 +236,16 @@ describe('every Server Action authorizes first', () => {
     // green even if the auditor silently stopped seeing an entire file, which
     // is exactly the failure mode this suite exists to catch. Counted by hand
     // across the four `'use server'` modules at time of writing:
-    // src/modules/google/actions.ts (3) + src/modules/family/actions.ts (10:
+    // src/modules/google/actions.ts (3) + src/modules/family/actions.ts (13:
     // the six above plus M14's createInvite + revokeInvite + acceptInvite +
-    // chooseProfile, the three-interaction second-parent flow) +
-    // src/modules/calendar/actions.ts (4) + src/modules/routines/actions.ts (6:
+    // chooseProfile, the three-interaction second-parent flow, plus M16's
+    // updateFamily + setHubDisplay + deleteFamily — the household's own
+    // identity and its end) +
+    // src/modules/calendar/actions.ts (5: the four event mutations plus M16's
+    // setCalendarDisplay, FR28's per-calendar colour and visibility) +
+    // src/modules/notifications/actions.ts (1, added in M16:
+    // updateNotificationPreferences — `member:self`, so a parent answers only
+    // for themselves) + src/modules/routines/actions.ts (6:
     // create/update/delete routine + setRoutineReward + completeStep +
     // undoCompletion, added in M10 so `completion.undone` has a publisher) +
     // src/modules/rewards/actions.ts (8: create/update/delete reward +
@@ -249,7 +255,7 @@ describe('every Server Action authorizes first', () => {
     // createPairingCode + pairDevice + revokeDevice, plus cancelPairingCode
     // added in the brute-force/lockout review pass) +
     // src/modules/sharing/actions.ts (2, added in M13: createShareLink +
-    // revokeShareLink) = 39. Self-unpair
+    // revokeShareLink) = 44. Self-unpair
     // (`POST /api/devices/session/unpair`) is deliberately *not* here: it is
     // a route handler, not a `'use server'` module, so this auditor never
     // sees it — see that file's doc comment for why it needs no `assertCan`.
@@ -261,7 +267,7 @@ describe('every Server Action authorizes first', () => {
     // rather than at each entry point.
     // Adding or removing a Server Action must bump this number deliberately —
     // that is the point.
-    expect(findings.length).toBe(39);
+    expect(findings.length).toBe(44);
   });
 
   it('reports no unauthorized action anywhere in src/', () => {

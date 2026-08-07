@@ -30,9 +30,8 @@ export default async function HubStorePage({
   searchParams: Promise<{ member?: string; date?: string }>;
 }) {
   const { locale } = await params;
-  await requireHubDevice(locale);
-
   const { member, date } = await searchParams;
+  await requireHubDevice(locale, '/hub/store', { member, date });
 
   const store = await loadStore({ memberId: member, date });
   const t = await getTranslations('rewards');

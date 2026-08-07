@@ -147,6 +147,19 @@ describe.skipIf(!databaseUrl)('family scoping (integration)', () => {
       invitedByMemberId: household.parentId,
       expiresAt: new Date(Date.now() + 604_800_000),
     });
+    // M16: FR28's per-calendar colour, and the per-member notification
+    // switches. Both hang off `family_id` like everything else here.
+    await db.insert(schema.calendarDisplay).values({
+      familyId,
+      calendarId: calendar.id,
+      category: 'purple',
+    });
+    await db.insert(schema.notificationPreference).values({
+      familyId,
+      memberId: household.parentId,
+      routineReminders: false,
+      redemptionRequests: true,
+    });
     await db.insert(schema.pushSubscription).values({
       familyId,
       memberId: household.parentId,

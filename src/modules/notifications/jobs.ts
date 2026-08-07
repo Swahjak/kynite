@@ -17,10 +17,11 @@ import {
   applyDeliveryOutcome,
   claimReminderDispatch,
   getFamilyLocale,
+  getNotificationPreferences,
   getPushSubscription,
   getReminderRoutine,
   listActiveSubscriptions,
-  listAdultMemberIds,
+  listRedemptionRecipients,
   listScannableFamilies,
 } from './queries';
 import { sendToSubscription, type PushTransport } from './send';
@@ -100,7 +101,11 @@ export async function notifyRedemptionRequested(input: {
 }): Promise<number> {
   if (!isPushConfigured()) return 0;
 
-  const adults = await listAdultMemberIds(input.familyId);
+  // Not *every* adult since M16 — every adult who has not switched this
+  // notification off. The filter is in the query rather than here so the
+  // absent-row default ("on") is evaluated by the database with everything
+  // else (`listRedemptionRecipients`).
+  const adults = await listRedemptionRecipients(input.familyId);
   if (adults.length === 0) return 0;
 
   const payload = await redemptionRequestPayload({
@@ -171,6 +176,20 @@ export async function runReminderDispatch(
   if (!routine) return 0;
 
   const memberId = routine.ownerMemberId;
+
+  /**
+   * The recipient's own preference, checked **before** the idempotency key is
+   * claimed (M16).
+   *
+   * Order matters, and it is the opposite of the claim-before-send rule right
+   * below. Claiming first and then discarding would burn the key for this
+   * occurrence, so a parent who switches reminders back on ten seconds later
+   * would silently get nothing for the rest of the day — the ledger would say
+   * "already sent". Not claiming means the scan's second pass re-evaluates the
+   * preference, which is what a *preference* should do.
+   */
+  const preferences = await getNotificationPreferences(job.familyId, memberId);
+  if (!preferences.routineReminders) return 0;
 
   const claimed = await claimReminderDispatch({
     familyId: job.familyId,

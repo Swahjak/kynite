@@ -27,4 +27,5 @@ export {
 } from './device-session-watcher';
 
 export { HubSettings } from './hub-settings';
+export { SettingsWatcher } from './settings-watcher';
 export { KioskShell } from './kiosk-shell';

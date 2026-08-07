@@ -120,7 +120,7 @@ export function MemberDialog({ member }: { member?: Member }) {
           <Field>
             <FieldLabel>{t('form.rewardHorizon')}</FieldLabel>
             <Select name="rewardHorizon" defaultValue={member?.rewardHorizon ?? 'instant'}>
-              <SelectTrigger size="hub" className="w-full">
+              <SelectTrigger size="hub" className="w-full" data-testid="member-reward-horizon">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -148,7 +148,7 @@ export function MemberDialog({ member }: { member?: Member }) {
                 </Button>
               }
             />
-            <Button type="submit" size="hub" disabled={pending}>
+            <Button type="submit" size="hub" disabled={pending} data-testid="save-member">
               {t('actions.save')}
             </Button>
           </DialogFooter>

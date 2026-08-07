@@ -1,5 +1,5 @@
 import 'server-only';
-import { and, eq, inArray, isNull, lt, sql } from 'drizzle-orm';
+import { and, eq, inArray, isNull, lt, or, sql } from 'drizzle-orm';
 import { getDb } from '@/server/db';
 // Table objects come from the schema assembly point, not from a slice barrel
 // (the same note `modules/timers/queries.ts` carries): `queries.ts` is not a
@@ -7,7 +7,12 @@ import { getDb } from '@/server/db';
 import { family, member, routine } from '@/server/db/schema';
 import { nextSubscriptionState, type DeliveryOutcome } from './domain/delivery';
 import type { ScannableRoutine } from './domain/reminder-window';
-import { pushSubscription, reminderDispatch, type PushSubscription } from './schema';
+import {
+  notificationPreference,
+  pushSubscription,
+  reminderDispatch,
+  type PushSubscription,
+} from './schema';
 
 /**
  * Reads and writes for web push and reminder dispatch (docs/architecture.md
@@ -197,20 +202,6 @@ export async function listActiveSubscriptions(
 }
 
 /**
- * Every adult in the family (§6: "Redemption requests fan out to all adults").
- * `caregiver` is not an adult for this purpose — a babysitter does not approve
- * a reward.
- */
-export async function listAdultMemberIds(familyId: string): Promise<string[]> {
-  const rows = await getDb()
-    .select({ id: member.id })
-    .from(member)
-    .where(and(eq(member.familyId, familyId), inArray(member.role, ['owner', 'adult'])));
-
-  return rows.map((row) => row.id);
-}
-
-/**
  * Claim the idempotency key (§8). `true` means this call is the one that gets
  * to notify; `false` means someone already did — a second scan pass, a retry,
  * or the process that died halfway through the last one.
@@ -344,4 +335,95 @@ export async function countActiveSubscriptions(
     );
 
   return row?.count ?? 0;
+}
+
+/* ---------------------------------------------------------------------------
+ * Per-member notification preferences (milestone M16)
+ * ------------------------------------------------------------------------ */
+
+/** What one member wants, with the absent-row default already applied. */
+export type NotificationPreferences = {
+  routineReminders: boolean;
+  redemptionRequests: boolean;
+};
+
+/**
+ * The default every member has until they say otherwise: everything on.
+ *
+ * Held here, once, rather than only in the column defaults, because the
+ * *absence* of a row is the common case and every reader has to agree with the
+ * database about what that absence means (see the table's own note).
+ */
+export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
+  routineReminders: true,
+  redemptionRequests: true,
+};
+
+export async function getNotificationPreferences(
+  familyId: string,
+  memberId: string
+): Promise<NotificationPreferences> {
+  const [row] = await getDb()
+    .select({
+      routineReminders: notificationPreference.routineReminders,
+      redemptionRequests: notificationPreference.redemptionRequests,
+    })
+    .from(notificationPreference)
+    .where(
+      and(
+        eq(notificationPreference.familyId, familyId),
+        eq(notificationPreference.memberId, memberId)
+      )
+    )
+    .limit(1);
+
+  return row ?? DEFAULT_NOTIFICATION_PREFERENCES;
+}
+
+/** Writes one member's row, creating it the first time they touch the page. */
+export async function upsertNotificationPreferences(input: {
+  familyId: string;
+  memberId: string;
+  preferences: NotificationPreferences;
+}): Promise<void> {
+  await getDb()
+    .insert(notificationPreference)
+    .values({
+      familyId: input.familyId,
+      memberId: input.memberId,
+      routineReminders: input.preferences.routineReminders,
+      redemptionRequests: input.preferences.redemptionRequests,
+    })
+    .onConflictDoUpdate({
+      target: notificationPreference.memberId,
+      set: {
+        routineReminders: input.preferences.routineReminders,
+        redemptionRequests: input.preferences.redemptionRequests,
+        updatedAt: new Date(),
+      },
+    });
+}
+
+/**
+ * Every adult who has not switched redemption requests off (§6 step 4).
+ *
+ * A `leftJoin` with an `or(isNull(...), ...)` predicate rather than an
+ * `inArray` over `listAdultMemberIds` minus an opt-out list: the absent row
+ * *is* the default, so it has to be part of the predicate the database
+ * evaluates, not a set difference computed after two round trips.
+ */
+export async function listRedemptionRecipients(familyId: string): Promise<string[]> {
+  const rows = await getDb()
+    .select({ id: member.id })
+    .from(member)
+    .leftJoin(notificationPreference, eq(notificationPreference.memberId, member.id))
+    .where(
+      and(
+        eq(member.familyId, familyId),
+        inArray(member.role, ['owner', 'adult']),
+        or(isNull(notificationPreference.id), eq(notificationPreference.redemptionRequests, true))
+      )
+    );
+
+  return rows.map((row) => row.id);
 }

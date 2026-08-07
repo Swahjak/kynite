@@ -10,8 +10,10 @@
  */
 
 export {
+  notificationPreference,
   pushSubscription,
   reminderDispatch,
+  type NotificationPreference,
   type PushSubscription,
   type ReminderDispatch,
 } from './schema';
@@ -62,14 +64,18 @@ export {
   claimReminderDispatch,
   countActiveSubscriptions,
   deletePushSubscriptionByEndpoint,
+  DEFAULT_NOTIFICATION_PREFERENCES,
   getFamilyLocale,
+  getNotificationPreferences,
   getPushSubscription,
   getReminderRoutine,
   listActiveSubscriptions,
-  listAdultMemberIds,
+  listRedemptionRecipients,
   listScannableFamilies,
   trimReminderDispatch,
+  upsertNotificationPreferences,
   upsertPushSubscription,
+  type NotificationPreferences,
   type ScannableFamily,
   type SubscriptionUpsert,
 } from './queries';
@@ -104,3 +110,9 @@ export {
   decodeVapidKey,
   type PushOptInProps,
 } from './ui/push-opt-in';
+
+export { NotificationPreferencesForm } from './ui/notification-preferences-form';
+
+export { actionFailure, idleState, type ActionState } from './action-state';
+
+export { updateNotificationPreferencesAction } from './actions';

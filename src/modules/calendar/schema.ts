@@ -117,7 +117,46 @@ export const event = pgTable(
   ]
 );
 
+/**
+ * Per-calendar display preferences (PRD FR28, M16).
+ *
+ * A *separate* table rather than a column on `calendar`, for one structural
+ * reason: `calendar` is owned by the google slice, whose `schema.ts` this file
+ * already imports for the foreign key. Putting an `event_category` column
+ * there would mean google importing this file back for the enum — a module
+ * cycle between two `pgTable` modules, which drizzle evaluates at import time
+ * and would leave one side holding `undefined`. The category dimension belongs
+ * to the calendar slice anyway (`domain/category.ts` is what resolves it), so
+ * the row lives with the code that reads it.
+ *
+ * Null `category` means "keep deriving from Google's own colour" — the same
+ * inherit-by-default rule `event.category` follows, one level up. A calendar a
+ * parent has never recoloured therefore has no row at all, and a sync that
+ * changes Google's colour still moves it.
+ */
+export const calendarDisplay = pgTable(
+  'calendar_display',
+  {
+    id: primaryId(),
+    familyId: uuid('family_id')
+      .notNull()
+      .references(() => family.id, { onDelete: 'cascade' }),
+    calendarId: uuid('calendar_id')
+      .notNull()
+      .references(() => calendar.id, { onDelete: 'cascade' }),
+    /** The parent's colour choice; null = inherit Google's. */
+    category: eventCategory('category'),
+    ...timestamps,
+  },
+  (table) => [
+    // One preference row per calendar: the upsert's conflict target.
+    uniqueIndex('calendar_display_calendar_unique').on(table.calendarId),
+    index('calendar_display_family_id_idx').on(table.familyId),
+  ]
+);
+
 export type Event = typeof event.$inferSelect;
+export type CalendarDisplay = typeof calendarDisplay.$inferSelect;
 export type EventType = (typeof eventType.enumValues)[number];
 export type EventCategory = (typeof eventCategory.enumValues)[number];
 

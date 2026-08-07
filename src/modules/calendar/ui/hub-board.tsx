@@ -6,7 +6,9 @@ import { useMirroredHubState } from '@/components/offline';
 // `server-only` queries, and a value import here would put the database client
 // in the browser bundle.
 import type { Member } from '@/modules/family';
+import { daysOf, type CalendarView } from '../domain/window';
 import type { CalendarEvent } from '../queries';
+import { AgendaView } from './agenda-view';
 import { PersonColumns } from './person-columns';
 
 /**
@@ -37,6 +39,14 @@ export type HubBoardSnapshot = {
   anchor: Date;
   now: Date;
   timeZone: string;
+  /**
+   * Which board this is (PRD FR28, M16) — part of the mirrored payload rather
+   * than a prop for the same reason `anchor` and `timeZone` are: a boot from
+   * IndexedDB must not draw yesterday's events in today's layout. The view and
+   * the events it was fetched for travel together or not at all.
+   */
+  view: CalendarView;
+  weekStartsOn: number;
   members: Member[];
   events: CalendarEvent[];
 };
@@ -88,14 +98,36 @@ export function HubBoard({
 
       {children}
 
-      <PersonColumns
-        members={board.members}
-        events={board.events}
-        timeZone={board.timeZone}
-        day={board.anchor}
-        now={board.now}
-        hub
-      />
+      {/* FR28's "default view", as the only two shapes a wall display can
+          carry: the per-person day columns, or "what is coming up". The
+          switch is server-decided (`family.hubDefaultView`) and arrives in
+          the payload, so a change in the Controller reaches the wall on the
+          next render — no re-pairing, and nothing stored on the device. */}
+      {board.view === 'agenda' ? (
+        <AgendaView
+          days={daysOf('agenda', {
+            anchor: board.anchor,
+            timeZone: board.timeZone,
+            weekStartsOn: board.weekStartsOn,
+          })}
+          events={board.events}
+          timeZone={board.timeZone}
+          today={board.now}
+          hub
+          // No `onSelect`: `event:write` is `deny` for a device principal (§7),
+          // so the hub offers no editing rather than offering some that would
+          // be refused.
+        />
+      ) : (
+        <PersonColumns
+          members={board.members}
+          events={board.events}
+          timeZone={board.timeZone}
+          day={board.anchor}
+          now={board.now}
+          hub
+        />
+      )}
     </>
   );
 }

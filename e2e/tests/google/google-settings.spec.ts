@@ -67,7 +67,12 @@ test.describe('google settings', () => {
   test('explains that linking is switched off when credentials are unset', async ({ page }) => {
     await signUp(page);
 
+    // M16 put a settings *hub* in front of the per-surface pages: the nav's
+    // "Instellingen" is that hub now, and Google is one section on it.
     await page.getByRole('link', { name: 'Instellingen' }).click();
+    await expect(page).toHaveURL(/\/nl\/settings$/);
+
+    await page.getByRole('link', { name: 'Google-accounts beheren' }).click();
     await expect(page).toHaveURL(/\/nl\/settings\/google$/);
 
     await expect(page.getByRole('heading', { name: 'Google Agenda' })).toBeVisible();

@@ -28,9 +28,8 @@ export default async function HubRoutinesPage({
   searchParams: Promise<{ date?: string; time?: string }>;
 }) {
   const { locale, memberId } = await params;
-  await requireHubDevice(locale);
-
   const { date, time } = await searchParams;
+  await requireHubDevice(locale, `/hub/routines/${memberId}`, { date, time });
 
   const board = await loadMemberRoutines({ memberId, date, time });
   const t = await getTranslations('routines');

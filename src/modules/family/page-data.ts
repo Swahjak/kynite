@@ -25,6 +25,8 @@ export type FamilyPageData = {
   /** Latest invite per member id. Empty for anyone without `member:manage`. */
   invites: Record<string, MemberInviteView>;
   serverNow: number;
+  /** Owner-only (`member:manage`) — gates the roster's CRUD affordances. */
+  canManage: boolean;
 };
 
 export async function loadFamilyPage(): Promise<FamilyPageData | null> {
@@ -54,5 +56,44 @@ export async function loadFamilyPage(): Promise<FamilyPageData | null> {
     };
   }
 
-  return { family, members, invites, serverNow: Date.now() };
+  return { family, members, invites, serverNow: Date.now(), canManage };
+}
+
+/**
+ * The household section of `(app)/settings` (M16).
+ *
+ * Separate from `loadFamilyPage` rather than folded into it: the roster page
+ * needs members and invites and nothing about timezones, and the settings hub
+ * needs the household row and two capability answers on every section it
+ * draws. Reading both everywhere would mean every surface paying for the
+ * other's queries.
+ *
+ * The capability flags are resolved here, once, and handed down as props. A
+ * section whose action would refuse the caller is not rendered disabled — it
+ * is not rendered, which is the same rule `loadFamilyPage` follows for
+ * invites: offering a control that can only fail is worse than not offering it.
+ */
+export type FamilySettingsData = {
+  family: Family | null;
+  /** Owner-only: name, locale, timezone, week start, deletion (`family:manage`). */
+  canManageFamily: boolean;
+  /** Both parents: hub board, calendar colours and visibility (`display:manage`). */
+  canManageDisplay: boolean;
+  /** Owner-only: adding, editing and removing members (`member:manage`, NB-7). */
+  canManageMembers: boolean;
+  /** The caller's own member id — the subject of the per-person sections. */
+  memberId: string;
+};
+
+export async function loadFamilySettings(): Promise<FamilySettingsData | null> {
+  const principal = await getPrincipal();
+  if (!principal || principal.kind !== 'member') return null;
+
+  return {
+    family: await getFamily(principal.familyId),
+    canManageFamily: can(principal, 'family:manage', { familyId: principal.familyId }),
+    canManageDisplay: can(principal, 'display:manage', { familyId: principal.familyId }),
+    canManageMembers: can(principal, 'member:manage', { familyId: principal.familyId }),
+    memberId: principal.memberId,
+  };
 }

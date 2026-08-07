@@ -264,7 +264,7 @@ This is the single source of progress truth for the Kynite greenfield rebuild. E
 
 ## M16 — Settings
 
-- [ ] Status
+- [x] Status
 - **Scope:** Build `(app)/settings`: family settings (name, locale, timezone, week start), member management with per-child reward horizon and birth date, per-routine graduation toggles surfaced in one place, notification preferences per adult, hub display preferences (default view, per-calendar color coding and visibility), Google account management, device list and share-link management.
 - **Acceptance criteria:**
   - Route `(app)/settings` exists with sections: family, members, routines/graduation, notifications, calendars, devices, share links.
@@ -275,7 +275,7 @@ This is the single source of progress truth for the Kynite greenfield rebuild. E
   - Owner-only sections (member roles, family deletion) are denied to `adult` principals — authorization tests.
   - Changing `family.locale` or `timezone` re-renders all surfaces correctly without a re-login.
   - Gate green: `pnpm typecheck && pnpm lint && pnpm test:run`.
-- **Review verdict:** _pending_
+- **Review verdict:** _approved after fixes_ — Opus review 2026-08-07: all seven criteria met, gates independently green (1036 with DB, e2e 6/5/19/8/12/36 per-directory), authorization/dispatch-ordering/absent-row-default guards all mutation-verified (pref-before-claim genuinely distinguished by toggle-back-on test); cascade audit proved all 19 family-scoped tables ON DELETE CASCADE (no orphan path); family deletion typed-name confirmed with refusal test; settings.updated payload minimal; offline mirror degrades gracefully pre-M16. Blockers fixed: (1) hub agenda board (FR28's new wall surface) rendered parent-app scale — AgendaView never received hub flag, confirmed by same-viewport screenshot; hub prop threaded + gutter scaled + hub-agenda visual baselines WITH seeded events (empty-state had masked it); en route found+fixed pre-existing tailwind-merge bug silently dropping design-system text-size tokens next to colour classes in agenda gutter; (2) per-calendar colour rung was deletable with entire suite green — 3 resolveCategory precedence unit assertions + board-level e2e asserting data-category on chip, mutation-verified. Also fixed: hub-gate locale redirect preserves query string + guards unconstrained family.locale (kiosk redirect-loop risk), setCalendarDisplayAction denial/cross-family tests, dead listAdultMemberIds deleted, members section omits (not disables) CRUD without member:manage, checked() value-aware, §7 amended (family:manage, display:manage) + §4 amended (settings.updated, device.revoked — M12 debt cleared). Post-fix: 1042 with DB, settings+visual+hub 63/63. Carry-forwards: slice-level (not action-level) realtime exhaustiveness auditor shape; old Select.Value raw labels; device-unpair + family-scope integration flakes under shared-DB parallelism (fix M17); tailwind-merge text-token bug still present in EventChip palette.text (M17 sweep).
 
 ## M17 — E2E suite
 

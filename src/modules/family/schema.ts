@@ -36,6 +36,17 @@ export const memberColor = pgEnum('member_color', [
   'teal',
 ]);
 
+/**
+ * Which board a wall display opens on (PRD FR28, M16).
+ *
+ * Only the two shapes the hub can actually draw at 6-foot scale: the
+ * per-person day columns, or the "what is coming up" agenda list. `week` and
+ * `month` are in `CALENDAR_VIEWS` for the parent app and deliberately not
+ * here — a month grid on a kitchen wall is unreadable from across the room,
+ * so offering it would be offering a setting that makes the hub worse.
+ */
+export const hubView = pgEnum('hub_view', ['day', 'agenda']);
+
 export const family = pgTable('family', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: text('name').notNull(),
@@ -43,6 +54,14 @@ export const family = pgTable('family', {
   timezone: text('timezone').notNull().default('Europe/Amsterdam'),
   /** ISO-8601: 1 = Monday. */
   weekStartsOn: smallint('week_starts_on').notNull().default(1),
+  /**
+   * The hub's default board (FR28). Family-level, not device-level, and that
+   * is the point of the criterion "takes effect on the hub without
+   * re-pairing": a parent changes it in the Controller and every wall display
+   * in the house follows on the next render, because none of them stores a
+   * preference of its own.
+   */
+  hubDefaultView: hubView('hub_default_view').notNull().default('day'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
@@ -156,7 +175,9 @@ export type MemberInvite = typeof memberInvite.$inferSelect;
 export type MemberRole = (typeof memberRole.enumValues)[number];
 export type MemberColor = (typeof memberColor.enumValues)[number];
 export type RewardHorizon = (typeof rewardHorizon.enumValues)[number];
+export type HubView = (typeof hubView.enumValues)[number];
 
 export const MEMBER_ROLES = memberRole.enumValues;
 export const MEMBER_COLORS = memberColor.enumValues;
 export const REWARD_HORIZONS = rewardHorizon.enumValues;
+export const HUB_VIEWS = hubView.enumValues;

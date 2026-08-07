@@ -271,4 +271,26 @@ describe('category resolution', () => {
     expect(nearestCategory('#14b8a6')).toBe('teal');
     expect(nearestCategory('#eab308')).toBe('yellow');
   });
+
+  // BLOCKING B-2: the per-calendar colour rung (`calendarCategory`, PRD FR28,
+  // M16) sits between the per-event override and Google's raw hex — untested
+  // before this, which is how a whole rung of `resolveCategory` could be
+  // deleted with every existing test still green.
+  it('prefers the per-event override over the calendar override', () => {
+    expect(
+      resolveCategory({ category: 'pink', calendarCategory: 'green', calendarColor: '#3b82f6' })
+    ).toBe('pink');
+  });
+
+  it('prefers the calendar override over the Google hex', () => {
+    expect(
+      resolveCategory({ category: null, calendarCategory: 'green', calendarColor: '#3b82f6' })
+    ).toBe('green');
+  });
+
+  it('falls back to the Google hex when neither override is set', () => {
+    expect(
+      resolveCategory({ category: null, calendarCategory: null, calendarColor: '#3f51b5' })
+    ).toBe('blue');
+  });
 });

@@ -1,7 +1,11 @@
 import 'server-only';
 import { getPrincipal } from '@/modules/family';
 import { missingPushConfig, pushPublicKey } from './config';
-import { countActiveSubscriptions } from './queries';
+import {
+  countActiveSubscriptions,
+  getNotificationPreferences,
+  type NotificationPreferences,
+} from './queries';
 
 /**
  * What the notification settings surface needs (M11; the full settings tree is
@@ -18,6 +22,12 @@ export type NotificationsPageData = {
   publicKey: string | null;
   missingConfig: string[];
   subscriptionCount: number;
+  /**
+   * The caller's own switches (M16). Per member, not per family: two parents
+   * on one household disagree about this all the time, and `member:self` is
+   * what lets each of them answer for themselves.
+   */
+  preferences: NotificationPreferences;
 };
 
 /** Null when there is no member principal — the caller renders a notice. */
@@ -25,9 +35,15 @@ export async function loadNotificationsPage(): Promise<NotificationsPageData | n
   const principal = await getPrincipal();
   if (!principal || principal.kind !== 'member') return null;
 
+  const [subscriptionCount, preferences] = await Promise.all([
+    countActiveSubscriptions(principal.familyId, principal.memberId),
+    getNotificationPreferences(principal.familyId, principal.memberId),
+  ]);
+
   return {
     publicKey: pushPublicKey(),
     missingConfig: missingPushConfig(),
-    subscriptionCount: await countActiveSubscriptions(principal.familyId, principal.memberId),
+    subscriptionCount,
+    preferences,
   };
 }

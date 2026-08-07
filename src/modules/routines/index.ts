@@ -123,6 +123,7 @@ export {
 } from './page-data';
 
 export { GraduateRoutineButton } from './ui/graduate-routine-button';
+export { RoutineGraduationList, type GraduationRoutine } from './ui/routine-graduation-list';
 export { RoutineBoard } from './ui/routine-board';
 export { RoutineCard } from './ui/routine-card';
 export { RoutineDialog } from './ui/routine-dialog';

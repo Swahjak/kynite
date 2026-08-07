@@ -414,6 +414,8 @@ type RealtimeEvent = {
     | "stars.awarded"
     | "redemption.requested" | "redemption.decided"
     | "routine.updated" | "timer.started" | "timer.stopped"
+    | "device.revoked"      // M12 — devices slice; entity.id is the revoked device id
+    | "settings.updated"    // M16 — family & calendar slices; entity.id is the family id
     | "sync.status";
   at: string;                      // ISO
   actor: { memberId?: string; deviceId?: string; source: "hub"|"mobile"|"sync"|"job" };
@@ -662,7 +664,9 @@ revocable/expiring with `lastUsedAt`/`useCount` visible to parents. Served with
 | View private calendars | ✓ | own | — | — | — | busy-only |
 | Create/edit events | ✓ | ✓ | — | — | — | — |
 | Link/unlink Google account | ✓ | own | — | — | — | — |
+| Manage the household (`family:manage`) | ✓ | — | — | — | — | — |
 | Manage members & roles | ✓ | — | — | — | — | — |
+| Manage hub/calendar display (`display:manage`) | ✓ | ✓ | — | — | — | — |
 | Create/edit routines | ✓ | ✓ | — | — | — | — |
 | Complete a routine step | ✓ | ✓ | ✓ | ✓ | — | ✓ |
 | Award manual/bonus stars | ✓ | ✓ | — | — | — | — |
@@ -677,6 +681,15 @@ revocable/expiring with `lastUsedAt`/`useCount` visible to parents. Served with
 
 "Remove stars" has no ✓ in any column — that column exists to make the invariant
 visible, and is enforced by the `CHECK (amount > 0)` constraint, not by policy.
+
+`family:manage` (M16) is owner-only: the household's name, language, timezone,
+week start and deletion are the same kind of fact as who is in it, not an
+operational setting a second parent adjusts day to day.
+
+`display:manage` (M16) is owner **and** adult: the hub's default board and each
+calendar's colour/visibility change only what the shared surfaces *look like*,
+never who may read or write what, so FR28's "Parents can configure Hub display
+preferences" is granted to both.
 
 `member:self` (M14, PRD FR26) is graded `own` for every account-backed role
 rather than `✓`/`—`, because it is the one capability in this table that is

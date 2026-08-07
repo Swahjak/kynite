@@ -61,6 +61,11 @@ const OWNERS: Record<RealtimeEventType, string> = {
   'timer.started': 'timers',
   'timer.stopped': 'timers',
   'device.revoked': 'devices',
+  // M16. The household's own settings are the family slice's writes; the
+  // calendar slice publishes it too when a calendar's colour or visibility
+  // changes, which is additive (the same relationship `routines` has to
+  // `stars.awarded`), not a second owner.
+  'settings.updated': 'family',
   'sync.status': 'google',
 };
 
@@ -179,6 +184,10 @@ describe('every realtime event type is published by its owning slice', () => {
     expect([...slices].sort()).toEqual([
       'calendar',
       'devices',
+      // M16: the family slice publishes `settings.updated` — the household's
+      // own settings are its writes, and the wall display has no other way to
+      // learn about them.
+      'family',
       'google',
       'rewards',
       'routines',

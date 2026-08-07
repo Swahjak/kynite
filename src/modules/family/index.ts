@@ -21,6 +21,7 @@ export {
 export { assertCan, getPrincipal, requireDevicePrincipal } from './principal';
 
 export {
+  HUB_VIEWS,
   MEMBER_COLORS,
   MEMBER_ROLES,
   REWARD_HORIZONS,
@@ -31,6 +32,7 @@ export {
   memberRole,
   rewardHorizon,
   type Family,
+  type HubView,
   type Member,
   type MemberColor,
   type MemberInvite,
@@ -48,7 +50,12 @@ export {
 
 export { getFamily, getMember, getMemberByUserId, listMembers } from './queries';
 
-export { loadFamilyPage, type FamilyPageData } from './page-data';
+export {
+  loadFamilyPage,
+  loadFamilySettings,
+  type FamilyPageData,
+  type FamilySettingsData,
+} from './page-data';
 
 export {
   findLiveInvite,
@@ -70,14 +77,20 @@ export {
   chooseProfileAction,
   createInviteAction,
   createMemberAction,
+  deleteFamilyAction,
   deleteMemberAction,
   revokeInviteAction,
+  setHubDisplayAction,
   signInAction,
   signOutAction,
   signUpAction,
+  updateFamilyAction,
   updateMemberAction,
 } from './actions';
 
+export { DeleteFamilyForm } from './ui/delete-family-form';
+export { FamilySettingsForm } from './ui/family-settings-form';
+export { HubDisplayForm } from './ui/hub-display-form';
 export { MemberAvatar } from './ui/member-avatar';
 export { MemberDialog } from './ui/member-dialog';
 export { MemberInvite as MemberInviteControl, type MemberInviteView } from './ui/member-invite';

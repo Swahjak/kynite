@@ -10,7 +10,7 @@ import { getDb } from '@/server/db';
 // so importing it here would pull a React client graph into a `server-only`
 // query module — and make this file unimportable from a plain Node test. The
 // barrel is for *behaviour*; `server/db/schema.ts` is for tables (§2).
-import { calendar } from '@/server/db/schema';
+import { CALENDAR_VISIBILITIES, calendar } from '@/server/db/schema';
 import { assertCan, getFamily, getMember, type Principal } from '@/modules/family';
 import { publish } from '@/modules/realtime';
 import { actionFailure as failure, idleState, type ActionState } from './action-state';
@@ -22,7 +22,7 @@ import {
 } from './domain/presets';
 import { addExdate, exdateLine } from './domain/ical';
 import { fromWall, parseDateKey } from './domain/zone';
-import { EVENT_CATEGORIES, EVENT_TYPES, event } from './schema';
+import { EVENT_CATEGORIES, EVENT_TYPES, calendarDisplay, event } from './schema';
 import { pushToGoogle } from './sync-bridge';
 
 /**
@@ -530,5 +530,102 @@ export async function rescheduleEventAction(
   await publishEvent(principal, 'event.upserted', [parsed.data.eventId]);
   await pushToGoogle(parsed.data.eventId);
   await revalidateCalendar();
+  return idleState;
+}
+
+/* ---------------------------------------------------------------------------
+ * Per-calendar display preferences (PRD FR28, milestone M16)
+ * ------------------------------------------------------------------------ */
+
+const calendarDisplaySchema = z.object({
+  calendarId: z.uuid(),
+  /** `''` = inherit Google's own colour again (the `calendar_display` row's null). */
+  category: z.enum(EVENT_CATEGORIES).or(z.literal('')),
+  visibility: z.enum(CALENDAR_VISIBILITIES),
+});
+
+/**
+ * How one calendar renders everywhere: its colour, and whether it is a family
+ * calendar or a private one (PRD FR28, M16).
+ *
+ * `display:manage`, so both parents may do it — see that capability's note in
+ * `modules/family/authorize.ts`. Nothing here can widen what anyone may read:
+ * `calendar:view_private` still decides who sees a private calendar's detail,
+ * and marking a calendar private only ever shows *less* (the hub drops it to
+ * free/busy on the very next render, via `listEvents`' `privateDetail` flag).
+ *
+ * The two fields live in two tables and that is not an accident — see
+ * `calendarDisplay`'s note in `./schema.ts` for why the colour cannot be a
+ * column on `calendar`. One transaction covers both, so a half-applied
+ * preference is not a state the UI has to render.
+ *
+ * The colour is stored as *our* palette entry rather than a hex: the eight
+ * design-system tokens are what the app has contrast ratios for, and a picker
+ * that offered anything else would be offering a colour the hub cannot draw
+ * legibly from six feet.
+ */
+export async function setCalendarDisplayAction(
+  _previous: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const principal = await assertCan('display:manage').catch(() => null);
+  if (!principal) return failure('forbidden');
+
+  const parsed = calendarDisplaySchema.safeParse({
+    calendarId: read(formData, 'calendarId'),
+    category: read(formData, 'category'),
+    visibility: read(formData, 'visibility'),
+  });
+  if (!parsed.success) return failure('invalidInput');
+
+  const { calendarId, category, visibility } = parsed.data;
+  const db = getDb();
+
+  // Scoped by the *principal's* family, never by the form: a forged calendar id
+  // from another household matches nothing and the action reports it as gone.
+  const [existing] = await db
+    .select({ id: calendar.id })
+    .from(calendar)
+    .where(and(eq(calendar.id, calendarId), eq(calendar.familyId, principal.familyId)))
+    .limit(1);
+
+  if (!existing) return failure('calendarNotFound');
+
+  const now = new Date();
+
+  await db.transaction(async (tx) => {
+    await tx
+      .update(calendar)
+      .set({ visibility, updatedAt: now })
+      .where(and(eq(calendar.id, calendarId), eq(calendar.familyId, principal.familyId)));
+
+    await tx
+      .insert(calendarDisplay)
+      .values({
+        familyId: principal.familyId,
+        calendarId,
+        category: category === '' ? null : category,
+      })
+      .onConflictDoUpdate({
+        target: calendarDisplay.calendarId,
+        set: { category: category === '' ? null : category, updatedAt: now },
+      });
+
+    // The hub has no other way to learn about this: nobody is standing at the
+    // wall to navigate, and the board is `force-dynamic` rather than polled.
+    await publish(
+      {
+        familyId: principal.familyId,
+        type: 'settings.updated',
+        entity: { id: principal.familyId },
+        actor: { ...actorOf(principal), source: 'mobile' },
+        patch: { calendarId, category: category || null, visibility },
+      },
+      tx
+    );
+  });
+
+  await revalidateCalendar();
+  revalidatePath(`/${await getLocale()}/settings`);
   return idleState;
 }

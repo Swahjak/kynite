@@ -14,6 +14,8 @@ export const CAPABILITIES = [
   'calendar:view',
   'calendar:view_private',
   'event:write',
+  'family:manage',
+  'display:manage',
   'google:link',
   'member:manage',
   'member:self',
@@ -92,6 +94,60 @@ const MATRIX: Record<Capability, Record<Column, Grade>> = {
     device: 'busy-only',
   },
   'event:write': {
+    owner: 'allow',
+    adult: 'allow',
+    child: 'deny',
+    contributor: 'deny',
+    viewer: 'deny',
+    device: 'deny',
+  },
+  /**
+   * The household itself — its name, locale, timezone, week start, and its
+   * deletion (M16).
+   *
+   * Not a row in §7's printed matrix; the second deliberate addition after
+   * M14's `member:self`, and it needs carrying into the doc. §7 grades
+   * "Manage members & roles" owner-only because who is in the household and
+   * what they may do is structural, and the *identity* of the household — the
+   * name on it, the language it speaks, the clock every surface renders in,
+   * and whether it continues to exist at all — is the same kind of fact. An
+   * adult second parent gets everything operational (events, routines, stars,
+   * devices, share links) and nothing that redefines the household under the
+   * other parent, which is exactly the line `member:manage` already draws.
+   *
+   * Family deletion in particular has no separate cell: it is the extreme end
+   * of the same authority, and inventing `family:delete` would suggest the two
+   * could sensibly be granted apart. They cannot — anyone who may rename the
+   * household and move it to another timezone is the person who may end it.
+   */
+  'family:manage': {
+    owner: 'allow',
+    adult: 'deny',
+    child: 'deny',
+    contributor: 'deny',
+    viewer: 'deny',
+    device: 'deny',
+  },
+  /**
+   * How the *shared surfaces* look: the hub's default board, and the colour
+   * and family/private visibility of each calendar (PRD FR28, M16).
+   *
+   * Graded `allow` for the adult column while `family:manage` is `deny`, and
+   * the split is FR28's own wording: "**Parents** can configure Hub display
+   * preferences via the Controller" — both of them, not only whoever signed
+   * up first. It is also the safe half: a second parent recolouring a calendar
+   * or switching the wall display to the agenda changes what the household
+   * *sees*, and nothing about what it is or who is in it. Nothing here can
+   * reveal data either — `calendar:view_private` still decides who reads a
+   * private calendar's detail; marking a calendar private only ever shows
+   * *less*.
+   *
+   * The kiosk is `deny` like every other write: §7 is explicit that a device
+   * session may write "completions, timers and redemption requests — never
+   * settings", and a wall tablet reconfiguring the wall is precisely the
+   * settings write that rule names.
+   */
+  'display:manage': {
     owner: 'allow',
     adult: 'allow',
     child: 'deny',

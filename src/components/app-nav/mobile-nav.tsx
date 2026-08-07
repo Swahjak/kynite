@@ -7,6 +7,7 @@ import {
   HomeIcon,
   ListChecksIcon,
   MenuIcon,
+  SettingsIcon,
   Share2Icon,
   StarIcon,
   TabletSmartphoneIcon,
@@ -71,6 +72,8 @@ export function MobileNav({ labels }: MobileNavProps) {
   const overflowLinks: OverflowLink[] = [
     { href: '/timers', label: labels.timers, icon: TimerIcon },
     { href: '/family', label: labels.family, icon: UsersIcon },
+    // M16: the settings hub, above the three deep links it also contains.
+    { href: '/settings', label: labels.settings, icon: SettingsIcon },
     { href: '/settings/notifications', label: labels.notifications, icon: BellIcon },
     { href: '/settings/devices', label: labels.devices, icon: TabletSmartphoneIcon },
     { href: '/settings/sharing', label: labels.sharing, icon: Share2Icon },

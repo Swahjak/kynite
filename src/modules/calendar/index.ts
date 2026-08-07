@@ -103,15 +103,23 @@ export {
   createEventAction,
   deleteEventAction,
   rescheduleEventAction,
+  setCalendarDisplayAction,
   updateEventAction,
   type RescheduleInput,
 } from './actions';
 
 export { pushToGoogle } from './sync-bridge';
 
-export { loadCalendarPage, type CalendarPageData, type LoadOptions } from './page-data';
+export {
+  loadCalendarDisplay,
+  loadCalendarPage,
+  type CalendarDisplayData,
+  type CalendarPageData,
+  type LoadOptions,
+} from './page-data';
 
 export { AgendaView } from './ui/agenda-view';
+export { CalendarDisplayList, type CalendarDisplayView } from './ui/calendar-display-list';
 export { CalendarShell } from './ui/calendar-shell';
 export { EventChip } from './ui/event-chip';
 export { EventDialog, type WritableCalendar } from './ui/event-dialog';

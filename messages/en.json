@@ -777,5 +777,127 @@
       "invalidInput": "Please check the details you entered.",
       "shareLinkNotFound": "This link no longer exists."
     }
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Everything about this household in one place.",
+    "family": {
+      "title": "Household",
+      "description": "This household's name, language and clock.",
+      "name": "Family name",
+      "locale": "Household language",
+      "localeHint": "The wall display and every message on your phone use this language. Your own app stays in whichever language you pick in the address bar.",
+      "timezone": "Time zone",
+      "timezoneHint": "Every date and time in the app is shown in this zone.",
+      "weekStartsOn": "Week starts on",
+      "save": "Save",
+      "locales": {
+        "nl": "Dutch",
+        "en": "English"
+      },
+      "weekdays": {
+        "1": "Monday",
+        "7": "Sunday"
+      },
+      "errors": {
+        "forbidden": "Only this household's owner can change this.",
+        "invalidInput": "Check the details you entered."
+      }
+    },
+    "hub": {
+      "defaultView": "Default view on the wall display",
+      "defaultViewHint": "Every wall display in the house follows this straight away. No need to pair again.",
+      "save": "Save",
+      "views": {
+        "day": "A column per person",
+        "agenda": "A list of what's coming up"
+      },
+      "errors": {
+        "forbidden": "You are not allowed to change this.",
+        "invalidInput": "Check the details you entered."
+      }
+    },
+    "members": {
+      "title": "Members",
+      "description": "Who is in the house, and how each child's rewards work."
+    },
+    "graduation": {
+      "title": "Routines and stars",
+      "description": "A routine that runs on its own no longer needs to pay stars. That applies to that one routine only.",
+      "empty": "There are no routines yet.",
+      "states": {
+        "graduated": "Runs on its own",
+        "earning": "Pays stars"
+      }
+    },
+    "notifications": {
+      "title": "Notifications",
+      "description": "What you want to hear on your own phone. Each parent chooses separately.",
+      "manage": "Set up notifications on this device",
+      "routineReminders": "Routine reminders",
+      "routineRemindersHint": "A message just before one of your routines starts.",
+      "redemptionRequests": "Star requests",
+      "redemptionRequestsHint": "A message when a child asks to spend stars.",
+      "save": "Save",
+      "errors": {
+        "forbidden": "You can only set your own notifications.",
+        "invalidInput": "Check the details you entered."
+      }
+    },
+    "calendars": {
+      "title": "Calendars and wall display",
+      "description": "Which colour each calendar gets, and what the wall display shows.",
+      "empty": "No calendar has been linked yet.",
+      "readOnly": "Only parents can change how things look.",
+      "color": "Colour",
+      "inherit": "Follow Google's colour",
+      "visibility": "Visibility",
+      "visibilities": {
+        "family": "For the whole family",
+        "private": "Private — busy only"
+      },
+      "colors": {
+        "blue": "Blue",
+        "purple": "Purple",
+        "orange": "Orange",
+        "green": "Green",
+        "red": "Red",
+        "yellow": "Yellow",
+        "pink": "Pink",
+        "teal": "Teal"
+      },
+      "save": "Save",
+      "manageGoogle": "Manage Google accounts",
+      "errors": {
+        "forbidden": "You are not allowed to change this.",
+        "invalidInput": "Check the details you entered.",
+        "calendarNotFound": "This calendar no longer exists."
+      }
+    },
+    "devices": {
+      "title": "Devices",
+      "description": "The wall displays paired with this household.",
+      "manage": "Manage devices"
+    },
+    "sharing": {
+      "title": "Share links",
+      "description": "Links that let a caregiver follow along.",
+      "manage": "Manage share links"
+    },
+    "danger": {
+      "title": "Delete household",
+      "description": "This removes everything in this household: members, calendars, routines and stars. It cannot be undone.",
+      "trigger": "Delete household",
+      "confirmLabel": "Type to confirm: {name}",
+      "confirmHint": "You will be signed out afterwards.",
+      "confirm": "Delete permanently",
+      "cancel": "Cancel",
+      "errors": {
+        "forbidden": "Only this household's owner can do this.",
+        "invalidInput": "Enter the household's name.",
+        "familyNotFound": "This household no longer exists.",
+        "confirmationMismatch": "The name you entered does not match."
+      }
+    }
   }
 }

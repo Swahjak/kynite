@@ -24,9 +24,8 @@ export default async function HubStarsPage({
   searchParams: Promise<{ date?: string }>;
 }) {
   const { locale, memberId } = await params;
-  await requireHubDevice(locale);
-
   const { date } = await searchParams;
+  await requireHubDevice(locale, `/hub/stars/${memberId}`, { date });
 
   const chart = await loadStarChart({ memberId, date });
   const t = await getTranslations('rewards');

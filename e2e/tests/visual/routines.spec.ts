@@ -5,6 +5,7 @@ import {
   seedCompletions,
   seedMembers,
   seedRoutines,
+  setFamilyLocale,
   withDb,
 } from '../../utils/seed';
 import { settlePage } from '../../utils/settle';
@@ -144,6 +145,9 @@ for (const [name, viewport] of Object.entries(VIEWPORTS) as [
         // en baseline exists to pin, same as the hub ambient board above.
         const scope = { tablet: { nl: 'a', en: 'e' }, mobile: { nl: 'b', en: 'f' } }[name][locale];
         const { mila } = await seedBoard(family.familyId, scope);
+        // M16: the wall display renders in the household's language (see the
+        // ambient-board spec), so the household has to speak it.
+        await withDb((client) => setFamilyLocale(client, family.familyId, locale));
 
         await page.goto(`/${locale}/hub/routines/${mila.id}?date=${ANCHOR}&time=${ANCHOR_TIME}`);
         await expect(page.getByTestId('routine-board')).toBeVisible();

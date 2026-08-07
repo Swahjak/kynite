@@ -23,10 +23,19 @@ export type AgendaViewProps = {
   events: CalendarEvent[];
   timeZone: string;
   today?: Date | null;
+  /** Hub surfaces render at 6-foot legibility — see `EventChip`'s `hub` prop. */
+  hub?: boolean;
   onSelect?: (event: CalendarEvent) => void;
 };
 
-export function AgendaView({ days, events, timeZone, today, onSelect }: AgendaViewProps) {
+export function AgendaView({
+  days,
+  events,
+  timeZone,
+  today,
+  hub = false,
+  onSelect,
+}: AgendaViewProps) {
   const t = useTranslations('calendar');
   const format = useFormatter();
   const todayKey = today ? toDateKey(toWall(today, timeZone)) : null;
@@ -72,27 +81,44 @@ export function AgendaView({ days, events, timeZone, today, onSelect }: AgendaVi
         const isToday = group.key === todayKey;
 
         return (
-          <section key={group.key} data-day={group.key} className="flex gap-4 px-4 py-3">
-            <div className="w-16 shrink-0 text-center">
-              <div className="label-overline text-ink-muted">
+          <section
+            key={group.key}
+            data-day={group.key}
+            className={cn('flex gap-4 px-4 py-3', hub && 'gap-6 px-6 py-4')}
+          >
+            <div className={cn('w-16 shrink-0 text-center', hub && 'w-24')}>
+              {/* Plain string interpolation, not `cn()`, for the three lines
+                  below: `text-h2`/`text-caption`/`text-body`/`text-display-md`
+                  are this design system's custom font-size scale, which
+                  `tailwind-merge` (inside `cn()`) does not recognize — it
+                  buckets an unrecognized `text-*` token into the same
+                  conflict group as a real `text-*` *color* utility and drops
+                  whichever one of the two came first, no matter which one is
+                  actually the size. Routing these through `cn()` silently
+                  strips the size (or the color); a plain string has no
+                  conflict resolver to fool. */}
+              <div className={`label-overline text-ink-muted ${hub ? 'text-body' : ''}`}>
                 {format.dateTime(date, { weekday: 'short' })}
               </div>
               <div
-                className={cn(
-                  'tabular-time text-h2 font-bold',
-                  isToday ? 'text-brand-ink' : 'text-ink'
-                )}
+                className={`tabular-time font-bold ${hub ? 'text-display-md' : 'text-h2'} ${isToday ? 'text-brand-ink' : 'text-ink'}`}
               >
                 {format.dateTime(date, { day: 'numeric' })}
               </div>
-              <div className="text-caption text-ink-muted">
+              <div className={`text-ink-muted ${hub ? 'text-body' : 'text-caption'}`}>
                 {format.dateTime(date, { month: 'short' })}
               </div>
             </div>
 
-            <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+            <div className={cn('flex min-w-0 flex-1 flex-col gap-1.5', hub && 'gap-2')}>
               {group.events.map((event) => (
-                <EventChip key={event.key} event={event} variant="row" onSelect={onSelect} />
+                <EventChip
+                  key={event.key}
+                  event={event}
+                  variant="row"
+                  hub={hub}
+                  onSelect={onSelect}
+                />
               ))}
             </div>
           </section>

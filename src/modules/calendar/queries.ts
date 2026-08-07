@@ -10,7 +10,7 @@ import { calendar } from '@/server/db/schema';
 import { resolveCategory } from './domain/category';
 import { dayKeysOf, expandSeries, isSeries, type Occurrence } from './domain/expand';
 import { toDateKey, toWall } from './domain/zone';
-import { event, type EventCategory, type EventType } from './schema';
+import { calendarDisplay, event, type EventCategory, type EventType } from './schema';
 
 /**
  * Reads for the calendar slice.
@@ -92,11 +92,16 @@ export async function listEvents(options: ListEventsOptions): Promise<CalendarEv
       event,
       calendarSummary: calendar.summary,
       calendarColor: calendar.color,
+      // FR28's per-calendar colour. A `leftJoin` because the row is the
+      // exception: a calendar nobody has recoloured has none, and that must
+      // read as "inherit Google's colour", not as "no events".
+      calendarCategory: calendarDisplay.category,
       calendarVisibility: calendar.visibility,
       calendarWritable: calendar.writable,
     })
     .from(event)
     .leftJoin(calendar, eq(event.calendarId, calendar.id))
+    .leftJoin(calendarDisplay, eq(calendarDisplay.calendarId, calendar.id))
     .where(
       and(
         eq(event.familyId, familyId),
@@ -137,6 +142,7 @@ type EventRow = {
   event: typeof event.$inferSelect;
   calendarSummary: string | null;
   calendarColor: string | null;
+  calendarCategory: EventCategory | null;
   calendarVisibility: 'family' | 'private' | null;
   calendarWritable: boolean | null;
 };
@@ -162,6 +168,7 @@ function toCalendarEvent(row: EventRow, occurrence: Occurrence, redacted: boolea
     eventType: source.eventType,
     category: resolveCategory({
       category: source.category,
+      calendarCategory: row.calendarCategory,
       calendarColor: row.calendarColor,
     }),
     calendarId: source.calendarId,

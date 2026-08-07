@@ -54,6 +54,10 @@ const PARENT_ONLY = [
   'src/modules/routines/ui/graduate-routine-button.tsx',
   'src/modules/routines/ui/routine-dialog.tsx',
   'src/modules/routines/ui/routine-list.tsx',
+  // M16: the settings hub's graduation list. Parent-only by construction — it
+  // is mounted from `(app)/settings`, which a device principal cannot reach at
+  // all (`(app)/layout.tsx` sends a paired browser to the board).
+  'src/modules/routines/ui/routine-graduation-list.tsx',
   'src/modules/rewards/ui/approval-queue.tsx',
   'src/modules/rewards/ui/award-stars-dialog.tsx',
   'src/modules/rewards/ui/delete-reward-button.tsx',

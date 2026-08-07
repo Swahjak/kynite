@@ -777,5 +777,127 @@
       "invalidInput": "Controleer de ingevulde gegevens.",
       "shareLinkNotFound": "Deze link bestaat niet meer."
     }
+  },
+  "settings": {
+    "title": "Instellingen",
+    "subtitle": "Alles over dit gezin op één plek.",
+    "family": {
+      "title": "Gezin",
+      "description": "De naam, de taal en de klok van dit huishouden.",
+      "name": "Naam van het gezin",
+      "locale": "Taal van het huis",
+      "localeHint": "Deze taal gebruikt het wandscherm, en elk bericht op je telefoon. Jouw eigen app blijft in de taal die je in de adresbalk kiest.",
+      "timezone": "Tijdzone",
+      "timezoneHint": "Elke datum en tijd in de app wordt in deze zone getoond.",
+      "weekStartsOn": "Week begint op",
+      "save": "Opslaan",
+      "locales": {
+        "nl": "Nederlands",
+        "en": "Engels"
+      },
+      "weekdays": {
+        "1": "Maandag",
+        "7": "Zondag"
+      },
+      "errors": {
+        "forbidden": "Alleen de beheerder van dit gezin kan dit aanpassen.",
+        "invalidInput": "Controleer de ingevulde gegevens."
+      }
+    },
+    "hub": {
+      "defaultView": "Standaardweergave op het wandscherm",
+      "defaultViewHint": "Elk wandscherm in huis volgt deze keuze meteen. Opnieuw koppelen hoeft niet.",
+      "save": "Opslaan",
+      "views": {
+        "day": "Kolommen per persoon",
+        "agenda": "Lijst van wat eraan komt"
+      },
+      "errors": {
+        "forbidden": "Je hebt geen rechten om dit aan te passen.",
+        "invalidInput": "Controleer de ingevulde gegevens."
+      }
+    },
+    "members": {
+      "title": "Gezinsleden",
+      "description": "Wie er in huis is, met per kind de vorm van de beloning."
+    },
+    "graduation": {
+      "title": "Routines en sterren",
+      "description": "Een routine die vanzelf gaat, hoeft geen sterren meer op te leveren. Dat geldt alleen voor die ene routine.",
+      "empty": "Er zijn nog geen routines.",
+      "states": {
+        "graduated": "Gaat vanzelf",
+        "earning": "Levert sterren op"
+      }
+    },
+    "notifications": {
+      "title": "Meldingen",
+      "description": "Wat jij op je eigen telefoon wilt horen. Elke ouder kiest dit apart.",
+      "manage": "Meldingen op dit apparaat instellen",
+      "routineReminders": "Herinneringen voor routines",
+      "routineRemindersHint": "Een bericht vlak voordat een routine van jou begint.",
+      "redemptionRequests": "Sterrenverzoeken",
+      "redemptionRequestsHint": "Een bericht als een kind sterren wil uitgeven.",
+      "save": "Opslaan",
+      "errors": {
+        "forbidden": "Je kunt alleen je eigen meldingen instellen.",
+        "invalidInput": "Controleer de ingevulde gegevens."
+      }
+    },
+    "calendars": {
+      "title": "Agenda's en wandscherm",
+      "description": "Welke kleur elke agenda krijgt en wat er op het wandscherm te lezen is.",
+      "empty": "Er is nog geen agenda gekoppeld.",
+      "readOnly": "Alleen ouders kunnen de weergave aanpassen.",
+      "color": "Kleur",
+      "inherit": "Kleur van Google volgen",
+      "visibility": "Zichtbaarheid",
+      "visibilities": {
+        "family": "Voor het hele gezin",
+        "private": "Privé — alleen bezet"
+      },
+      "colors": {
+        "blue": "Blauw",
+        "purple": "Paars",
+        "orange": "Oranje",
+        "green": "Groen",
+        "red": "Rood",
+        "yellow": "Geel",
+        "pink": "Roze",
+        "teal": "Turquoise"
+      },
+      "save": "Opslaan",
+      "manageGoogle": "Google-accounts beheren",
+      "errors": {
+        "forbidden": "Je hebt geen rechten om dit aan te passen.",
+        "invalidInput": "Controleer de ingevulde gegevens.",
+        "calendarNotFound": "Deze agenda bestaat niet meer."
+      }
+    },
+    "devices": {
+      "title": "Apparaten",
+      "description": "De wandschermen die aan dit gezin gekoppeld zijn.",
+      "manage": "Apparaten beheren"
+    },
+    "sharing": {
+      "title": "Deellinks",
+      "description": "Links waarmee een oppas mee kan kijken.",
+      "manage": "Deellinks beheren"
+    },
+    "danger": {
+      "title": "Gezin verwijderen",
+      "description": "Hiermee verdwijnt alles van dit gezin: leden, agenda's, routines en sterren. Dit kan niet ongedaan worden gemaakt.",
+      "trigger": "Gezin verwijderen",
+      "confirmLabel": "Typ ter bevestiging: {name}",
+      "confirmHint": "Daarna word je uitgelogd.",
+      "confirm": "Definitief verwijderen",
+      "cancel": "Annuleren",
+      "errors": {
+        "forbidden": "Alleen de beheerder van dit gezin kan dit doen.",
+        "invalidInput": "Vul de naam van het gezin in.",
+        "familyNotFound": "Dit gezin bestaat niet meer.",
+        "confirmationMismatch": "De ingevulde naam komt niet overeen."
+      }
+    }
   }
 }

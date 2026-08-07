@@ -44,6 +44,15 @@ const EXPECTED: Record<Capability, [Grade, Grade, Grade, Grade, Grade, Grade]> =
   'calendar:view': ['allow', 'allow', 'allow', 'scoped', 'scoped', 'allow'],
   'calendar:view_private': ['allow', 'own', 'deny', 'deny', 'deny', 'busy-only'],
   'event:write': ['allow', 'allow', 'deny', 'deny', 'deny', 'deny'],
+  // M16 additions, not in §7's printed table (carry both into the doc).
+  // `family:manage` is the household's own identity — name, locale, timezone,
+  // week start, deletion — and sits in the owner-only column alongside
+  // "Manage members & roles" for the same reason. `display:manage` is how the
+  // shared surfaces *look* (FR28) and is graded for the adult column too,
+  // because FR28 says "parents", plural, and recolouring a calendar redefines
+  // nothing about the household.
+  'family:manage': ['allow', 'deny', 'deny', 'deny', 'deny', 'deny'],
+  'display:manage': ['allow', 'allow', 'deny', 'deny', 'deny', 'deny'],
   'google:link': ['allow', 'own', 'deny', 'deny', 'deny', 'deny'],
   'member:manage': ['allow', 'deny', 'deny', 'deny', 'deny', 'deny'],
   // M14 addition, not in §7's printed table: editing *your own* avatar/colour.
