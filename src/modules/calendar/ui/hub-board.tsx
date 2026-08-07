@@ -1,7 +1,7 @@
 'use client';
 
 import { useFormatter, useTranslations } from 'next-intl';
-import { OfflineIndicator, useMirroredHubState } from '@/components/offline';
+import { useMirroredHubState } from '@/components/offline';
 // Type-only, like `person-columns.tsx` — `@/modules/family` re-exports
 // `server-only` queries, and a value import here would put the database client
 // in the browser bundle.
@@ -78,10 +78,11 @@ export function HubBoard({
           >
             {format.dateTime(board.now, { hour: '2-digit', minute: '2-digit' })}
           </span>
-          {/* FR21: a non-disruptive indicator, derived from the SSE connection
-              and never from `navigator.onLine` (§6). Renders nothing while the
-              stream is healthy, so the board is unchanged the rest of the day. */}
-          <OfflineIndicator />
+          {/* FR21's offline indicator used to sit here. M12 moved it into the
+              kiosk shell's chrome, which every hub surface shares: two of them
+              on one board (the shell's and this one's) is not a stronger
+              signal, it is a duplicated one. Same component, same derivation
+              from the SSE connection rather than `navigator.onLine` (§6). */}
         </div>
       </header>
 

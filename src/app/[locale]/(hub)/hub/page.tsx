@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import { HubBoard, loadCalendarPage } from '@/modules/calendar';
+import { requireHubDevice } from '@/modules/devices';
 import { AmbientTimers, loadTimerBoard } from '@/modules/timers';
 
 /** Session-dependent: never prerendered, so `next build` needs no database. */
@@ -15,14 +16,24 @@ export const dynamic = 'force-dynamic';
  * dialog at all: `event:write` is `deny` for a device principal (§7), so the
  * board offers no writes rather than offering some that would be refused.
  *
- * M01 put this at `(hub)/hub` rather than `(hub)/` as §2 describes; M12 owns
- * resolving that along with device pairing, so the addressing stands for now.
+ * The board renders behind a **device** principal, not a parent's (M12): the
+ * `(hub)` layout note records why the tree stays at `/hub/*`, and
+ * `requireHubDevice` is why nothing here can be reached with an account
+ * session. `loadCalendarPage` therefore sees `kind: 'device'` and grades
+ * `calendar:view_private` as `busy-only` on its own, with no surface flag.
  */
 export default async function HubPage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ locale: string }>;
   searchParams: Promise<{ date?: string; now?: string }>;
 }) {
+  const { locale } = await params;
+  // The device principal is resolved before anything is read. An unpaired or
+  // revoked tablet lands on the pair screen instead of on an empty board.
+  await requireHubDevice(locale);
+
   const { date, now } = await searchParams;
 
   // The board is an ambient "today" surface; `?date=` renders another day,
@@ -35,10 +46,12 @@ export default async function HubPage({
   const t = await getTranslations('calendar');
 
   if (!data) {
-    // No paired device session exists until M12; until then an unauthenticated
-    // hub says so rather than rendering an empty board that looks broken.
+    // Unreachable in practice — `requireHubDevice` has already redirected a
+    // hub with no principal. Kept as the honest fallback for the case the
+    // loader itself declines (a family row deleted mid-request), because a
+    // blank board is the one thing a wall display must never show.
     return (
-      <main className="flex min-h-dvh flex-col items-center justify-center gap-2 p-8 text-center">
+      <main className="flex min-h-full flex-col items-center justify-center gap-2 p-8 text-center">
         <h1 className="font-display text-h1 font-bold">{t('hub.unpairedTitle')}</h1>
         <p className="text-body-lg text-ink-secondary">{t('hub.unpairedBody')}</p>
       </main>
@@ -46,7 +59,7 @@ export default async function HubPage({
   }
 
   return (
-    <main className="flex min-h-dvh flex-col gap-4 bg-background p-6" data-testid="hub-board">
+    <main className="flex min-h-full flex-col gap-4 bg-background p-6" data-testid="hub-board">
       {/* §6: family state is mirrored to IndexedDB on every load and every SSE
           event, and a boot renders from IDB then reconciles. Both halves live
           in `HubBoard`, because the reconcile has to swap the heading, the day

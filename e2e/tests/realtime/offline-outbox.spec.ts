@@ -1,3 +1,4 @@
+import { pairHub } from '../../fixtures/hub';
 import type { Page } from '@playwright/test';
 import { expect, test } from '../../fixtures/family';
 import {
@@ -89,6 +90,10 @@ test.describe('offline completion outbox', () => {
     context,
     family,
   }) => {
+    // M12: hub surfaces run behind a device principal, never an account
+    // session — this browser is the wall tablet for the rest of the test.
+    await pairHub(page, family.familyId);
+
     const { child, routine } = await seedBoard(family.familyId);
     const stepId = routine.stepIds[0];
 
@@ -146,6 +151,10 @@ test.describe('offline completion outbox', () => {
     context,
     family,
   }) => {
+    // M12: hub surfaces run behind a device principal, never an account
+    // session — this browser is the wall tablet for the rest of the test.
+    await pairHub(page, family.familyId);
+
     const { child, routine } = await seedBoard(family.familyId);
     const stepId = routine.stepIds[0];
 

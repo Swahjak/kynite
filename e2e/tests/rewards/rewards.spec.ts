@@ -1,3 +1,4 @@
+import { pairHub } from '../../fixtures/hub';
 import { expect, test } from '../../fixtures/family';
 import {
   ownerMemberOf,
@@ -50,6 +51,10 @@ async function seedShelf(
 
 test.describe('the child asks for a reward', () => {
   test('one tap sends the request — no confirmation, no spinner', async ({ page, family }) => {
+    // M12: hub surfaces run behind a device principal, never an account
+    // session — this browser is the wall tablet for the rest of the test.
+    await pairHub(page, family.familyId);
+
     const { mila, story } = await seedShelf(family.familyId);
 
     await page.goto(`/nl/hub/store?member=${mila.id}`);
@@ -78,6 +83,10 @@ test.describe('the child asks for a reward', () => {
   });
 
   test('a double tap creates one request, not two', async ({ page, family }) => {
+    // M12: hub surfaces run behind a device principal, never an account
+    // session — this browser is the wall tablet for the rest of the test.
+    await pairHub(page, family.familyId);
+
     const { mila, story } = await seedShelf(family.familyId);
 
     await page.goto(`/nl/hub/store?member=${mila.id}`);
@@ -101,6 +110,10 @@ test.describe('the child asks for a reward', () => {
     page,
     family,
   }) => {
+    // M12: hub surfaces run behind a device principal, never an account
+    // session — this browser is the wall tablet for the rest of the test.
+    await pairHub(page, family.familyId);
+
     const { mila, zoo } = await seedShelf(family.familyId);
 
     await page.goto(`/nl/hub/store?member=${mila.id}`);
@@ -166,6 +179,11 @@ test.describe('the parent answers', () => {
 
     // The child's own screen: the tile is an ordinary tile again. No badge, no
     // explanation, no cooldown — and the balance still reads 10.
+    //
+    // The browser becomes the wall tablet here, after the parent's half of the
+    // test: a device cookie outranks the account session (M12), so pairing
+    // earlier would have redirected `/nl/rewards` to the board.
+    await pairHub(page, family.familyId);
     await page.goto(`/nl/hub/store?member=${mila.id}`);
 
     const tile = page.locator(`[data-reward-id="${film.id}"]`);
@@ -181,6 +199,10 @@ test.describe('the parent answers', () => {
 
 test.describe('the star chart', () => {
   test('shows earned as monotonic and available as derived', async ({ page, family }) => {
+    // M12: hub surfaces run behind a device principal, never an account
+    // session — this browser is the wall tablet for the rest of the test.
+    await pairHub(page, family.familyId);
+
     const { mila, film } = await seedShelf(family.familyId);
 
     await withDb(async (client) => {
@@ -198,6 +220,10 @@ test.describe('the star chart', () => {
   });
 
   test('renders a graduation badge for a faded routine', async ({ page, family }) => {
+    // M12: hub surfaces run behind a device principal, never an account
+    // session — this browser is the wall tablet for the rest of the test.
+    await pairHub(page, family.familyId);
+
     const { mila } = await seedShelf(family.familyId);
 
     await withDb(async (client) => {

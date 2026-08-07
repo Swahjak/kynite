@@ -1,3 +1,4 @@
+import { pairHub } from '../../fixtures/hub';
 import { expect, test } from '../../fixtures/family';
 import {
   ownerMemberOf,
@@ -158,6 +159,10 @@ test.describe('routine builder', () => {
 
 test.describe('the hub routine screen', () => {
   test('one tap completes a step — no dialog, no spinner', async ({ page, family }) => {
+    // M12: hub surfaces run behind a device principal, never an account
+    // session — this browser is the wall tablet for the rest of the test.
+    await pairHub(page, family.familyId);
+
     const { mila, morning } = await seedChildWithRoutines(family.familyId);
 
     await page.goto(`/nl/hub/routines/${mila.id}`);
@@ -191,6 +196,10 @@ test.describe('the hub routine screen', () => {
   });
 
   test('the praise is the headline and the star follows it', async ({ page, family }) => {
+    // M12: hub surfaces run behind a device principal, never an account
+    // session — this browser is the wall tablet for the rest of the test.
+    await pairHub(page, family.familyId);
+
     const { mila } = await seedChildWithRoutines(family.familyId);
 
     await page.goto(`/nl/hub/routines/${mila.id}`);
@@ -217,6 +226,10 @@ test.describe('the hub routine screen', () => {
   });
 
   test('a finished routine collapses to a calm success state', async ({ page, family }) => {
+    // M12: hub surfaces run behind a device principal, never an account
+    // session — this browser is the wall tablet for the rest of the test.
+    await pairHub(page, family.familyId);
+
     const { mila, homework } = await seedChildWithRoutines(family.familyId);
 
     await withDb((client) =>
@@ -241,6 +254,10 @@ test.describe('the hub routine screen', () => {
   });
 
   test('a missed occurrence is dimmed and carries no mark at all', async ({ page, family }) => {
+    // M12: hub surfaces run behind a device principal, never an account
+    // session — this browser is the wall tablet for the rest of the test.
+    await pairHub(page, family.familyId);
+
     const { mila } = await seedChildWithRoutines(family.familyId);
 
     await page.goto(`/nl/hub/routines/${mila.id}`);
@@ -283,6 +300,10 @@ test.describe('the hub routine screen', () => {
   });
 
   test('shows one child only — no combined surface exists', async ({ page, family }) => {
+    // M12: hub surfaces run behind a device principal, never an account
+    // session — this browser is the wall tablet for the rest of the test.
+    await pairHub(page, family.familyId);
+
     const { mila } = await seedChildWithRoutines(family.familyId);
 
     const daan = await withDb(async (client) => {
@@ -310,7 +331,14 @@ test.describe('the hub routine screen', () => {
     await expect(page.getByTestId('routine-board')).not.toContainText('Mila');
   });
 
-  test('a member from another family renders nothing rather than leaking', async ({ page }) => {
+  test('a member from another family renders nothing rather than leaking', async ({
+    page,
+    family,
+  }) => {
+    // M12: hub surfaces run behind a device principal, never an account
+    // session — this browser is the wall tablet for the rest of the test.
+    await pairHub(page, family.familyId);
+
     await page.goto('/nl/hub/routines/00000000-0000-4000-8000-000000000000');
     await expect(page.getByTestId('hub-routines')).toHaveCount(0);
   });

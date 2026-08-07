@@ -1,3 +1,4 @@
+import { pairHub } from '../../fixtures/hub';
 import { expect, test } from '../../fixtures/family';
 import {
   ownerMemberOf,
@@ -152,6 +153,10 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
     test.use({ viewport });
 
     test('store, instant horizon (ages 4-7)', async ({ page, family }) => {
+      // M12: hub surfaces run behind a device principal, never an account
+      // session — this browser is the wall tablet for the rest of the test.
+      await pairHub(page, family.familyId);
+
       const { mila } = await seedShelf(family.familyId, SCOPE[name].storeInstant, 'instant');
 
       await page.goto(`/nl/hub/store?member=${mila.id}&date=${ANCHOR}`);
@@ -164,6 +169,10 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
     });
 
     test('store, savings horizon (ages 8-12)', async ({ page, family }) => {
+      // M12: hub surfaces run behind a device principal, never an account
+      // session — this browser is the wall tablet for the rest of the test.
+      await pairHub(page, family.familyId);
+
       const { mila } = await seedShelf(family.familyId, SCOPE[name].storeSavings, 'savings');
 
       await page.goto(`/nl/hub/store?member=${mila.id}&date=${ANCHOR}`);
@@ -177,6 +186,10 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
     });
 
     test('star chart, instant horizon (ages 4-7)', async ({ page, family }) => {
+      // M12: hub surfaces run behind a device principal, never an account
+      // session — this browser is the wall tablet for the rest of the test.
+      await pairHub(page, family.familyId);
+
       const { mila } = await seedShelf(family.familyId, SCOPE[name].chartInstant, 'instant');
 
       await page.goto(`/nl/hub/stars/${mila.id}?date=${ANCHOR}`);
@@ -190,6 +203,10 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
     });
 
     test('star chart, savings horizon (ages 8-12)', async ({ page, family }) => {
+      // M12: hub surfaces run behind a device principal, never an account
+      // session — this browser is the wall tablet for the rest of the test.
+      await pairHub(page, family.familyId);
+
       const { mila } = await seedShelf(family.familyId, SCOPE[name].chartSavings, 'savings');
 
       await page.goto(`/nl/hub/stars/${mila.id}?date=${ANCHOR}`);

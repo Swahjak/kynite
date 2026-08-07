@@ -49,6 +49,21 @@ export type FamilyStreamOptions = {
   signal: AbortSignal;
   /** Overridable so tests do not have to wait 25 real seconds. */
   heartbeatIntervalMs?: number;
+  /**
+   * The device id this stream belongs to, if the principal that opened it is
+   * a paired kiosk — `undefined` for a member's stream, which has no device
+   * to watch for.
+   *
+   * Non-blocking review finding 3: a revoked device's own stream used to keep
+   * its `LISTEN` fan-out slot and connection for up to an hour (the
+   * heartbeat's only teardown trigger was the browser disconnecting), even
+   * though `device.revoked` for its own id already travelled across the very
+   * channel it was subscribed to. `DeviceSessionWatcher` reacts to that event
+   * client-side and refreshes; this is the server-side mirror — the stream
+   * that carried the news closes itself and frees the slot the moment it has
+   * delivered it, rather than waiting for the client to act on it and cancel.
+   */
+  selfDeviceId?: string;
 };
 
 function parsePayload(raw: string): NotifyPayload | null {
@@ -83,7 +98,7 @@ export async function planReplay(
 export async function openFamilyStream(
   options: FamilyStreamOptions
 ): Promise<ReadableStream<Uint8Array>> {
-  const { familyId, cursor, signal } = options;
+  const { familyId, cursor, signal, selfDeviceId } = options;
   const heartbeatMs = options.heartbeatIntervalMs ?? HEARTBEAT_INTERVAL_MS;
   const encoder = new TextEncoder();
 
@@ -102,6 +117,13 @@ export async function openFamilyStream(
     if (id <= deliveredUpTo) return;
     deliveredUpTo = id;
     write?.(eventFrame(event));
+
+    // The event just written is this very stream's own revocation: deliver
+    // it (above), then close rather than linger for up to an hour holding a
+    // `LISTEN` fan-out slot for a credential that no longer exists.
+    if (selfDeviceId && event.type === 'device.revoked' && event.entity.id === selfDeviceId) {
+      void teardown().then(() => endStream?.());
+    }
   };
 
   const deliver = (event: RealtimeEvent): void => {

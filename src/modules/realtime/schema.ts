@@ -16,6 +16,11 @@ export const REALTIME_EVENT_TYPES = [
   'routine.updated',
   'timer.started',
   'timer.stopped',
+  // M12. Not a data change: it tells a wall tablet that its own credential is
+  // gone, so it can drop to the pair screen without waiting for somebody to
+  // touch it (§7 "revocation drops the hub to a pair screen on the next
+  // request or SSE tick"). `entity.id` is the revoked device id.
+  'device.revoked',
   'sync.status',
 ] as const;
 

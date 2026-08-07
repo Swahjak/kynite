@@ -1,3 +1,4 @@
+import { pairHub } from '../fixtures/hub';
 import { expect, test } from '../fixtures/family';
 import { ownerMemberOf, readTimers, seedTimers, withDb } from '../utils/seed';
 
@@ -43,27 +44,66 @@ function expectedRemaining(row: { started_at: Date; duration_seconds: number }):
 }
 
 /**
- * The ±1s acceptance check, in the units the board actually shows.
+ * Slack added either side of the bracket, in whole seconds (review finding 5).
+ *
+ * `±1` covers the `Math.ceil` rounding alone, on the assumption that "sample
+ * the clock" and "read the rendered digits" are effectively simultaneous. They
+ * are not: `page.getByTestId(...).innerText()` is a round trip to the browser,
+ * and under a loaded CI runner or four parallel `next dev` workers the server
+ * can take real, variable time to render the response between the `before`
+ * sample and the moment the digits actually reach the page — time during
+ * which the *true* remaining seconds keep ticking down independently of when
+ * this test happens to observe them. A margin sized only for rounding treats
+ * that render latency as zero and fails on exactly the runs where the
+ * machine was slow, which says nothing about whether the countdown is
+ * correct. Two seconds of slack is generous next to typical render latency
+ * without being wide enough to hide a countdown that is actually wrong by a
+ * meaningful amount.
+ */
+const RENDER_LATENCY_SLACK_S = 2;
+
+/**
+ * Read the digits, bracketed by the clock either side of the read.
  *
  * The digits are `Math.ceil` of the remaining time (the last second is shown
- * for the whole of it), and this expectation is computed one round-trip after
- * the digits were read — so the comparison is against the *displayed* second,
- * one either way, rather than against a real number.
+ * for the whole of it), so the honest expectation is not "equals now, ±slack"
+ * but "lies inside the interval that elapsed while we were reading, ±slack for
+ * rounding and render latency". Comparing against a single instant sampled
+ * *after* the read was the M09 shape and it flaked: the page renders from
+ * `serverNow` at hydration, the expectation is computed one round-trip later,
+ * and under parallel workers that gap is comfortably more than a second — a
+ * test that failed by exactly one, in a way that said nothing about timers.
  */
-function expectWithinOneSecond(shown: number, expected: number): void {
-  expect(shown).toBeGreaterThanOrEqual(Math.ceil(expected) - 1);
-  expect(shown).toBeLessThanOrEqual(Math.ceil(expected) + 1);
+async function readCountdown(
+  page: import('@playwright/test').Page,
+  row: { started_at: Date; duration_seconds: number }
+): Promise<number> {
+  const before = expectedRemaining(row);
+  const shown = toSeconds(await page.getByTestId('timer-digits').innerText());
+  const after = expectedRemaining(row);
+
+  expect(shown, 'the countdown is behind the clock').toBeLessThanOrEqual(
+    Math.ceil(before) + RENDER_LATENCY_SLACK_S
+  );
+  expect(shown, 'the countdown is ahead of the clock').toBeGreaterThanOrEqual(
+    Math.ceil(after) - RENDER_LATENCY_SLACK_S
+  );
+
+  return shown;
 }
 
 test.describe('hub timers', () => {
   test('resumes at the correct remaining time across a reload', async ({ page, family }) => {
+    // M12: hub surfaces run behind a device principal, never an account
+    // session — this browser is the wall tablet for the rest of the test.
+    await pairHub(page, family.familyId);
+
     const row = await seedRunningTimer(family.familyId, 'Schoenen aan');
 
     await page.goto('/nl/hub/timers');
     await expect(page.getByTestId('timer-tile')).toBeVisible();
 
-    const first = toSeconds(await page.getByTestId('timer-digits').innerText());
-    expectWithinOneSecond(first, expectedRemaining(row));
+    const first = await readCountdown(page, row);
     // It resumed mid-countdown rather than starting over.
     expect(first).toBeLessThan(DURATION);
 
@@ -73,8 +113,7 @@ test.describe('hub timers', () => {
     await page.reload();
     await expect(page.getByTestId('timer-tile')).toBeVisible();
 
-    const second = toSeconds(await page.getByTestId('timer-digits').innerText());
-    expectWithinOneSecond(second, expectedRemaining(row));
+    const second = await readCountdown(page, row);
     expect(second).toBeLessThan(first);
   });
 
@@ -82,6 +121,10 @@ test.describe('hub timers', () => {
     page,
     family,
   }) => {
+    // M12: hub surfaces run behind a device principal, never an account
+    // session — this browser is the wall tablet for the rest of the test.
+    await pairHub(page, family.familyId);
+
     const row = await seedRunningTimer(family.familyId, 'Tanden poetsen');
 
     // A wall tablet that lost its clock. `setFixedTime` leaves timers running
@@ -107,6 +150,10 @@ test.describe('hub timers', () => {
     page,
     family,
   }) => {
+    // M12: hub surfaces run behind a device principal, never an account
+    // session — this browser is the wall tablet for the rest of the test.
+    await pairHub(page, family.familyId);
+
     await seedRunningTimer(family.familyId, 'Jassen aan');
 
     await page.goto('/nl/hub');
@@ -116,6 +163,10 @@ test.describe('hub timers', () => {
   });
 
   test('states the time is up without marking anything', async ({ page, family }) => {
+    // M12: hub surfaces run behind a device principal, never an account
+    // session — this browser is the wall tablet for the rest of the test.
+    await pairHub(page, family.familyId);
+
     await withDb(async (client) => {
       await ownerMemberOf(client, family.familyId);
       await seedTimers(client, family.familyId, [
@@ -134,6 +185,10 @@ test.describe('hub timers', () => {
   });
 
   test('announces a transition in board voice, never as a command', async ({ page, family }) => {
+    // M12: hub surfaces run behind a device principal, never an account
+    // session — this browser is the wall tablet for the rest of the test.
+    await pairHub(page, family.familyId);
+
     await withDb(async (client) => {
       await ownerMemberOf(client, family.familyId);
       await seedTimers(client, family.familyId, [
@@ -169,7 +224,17 @@ test.describe('controller → hub', () => {
       await ownerMemberOf(client, family.familyId);
     });
 
-    const hub = await context.newPage();
+    // Two *contexts*, not two pages in one: this test drives the Controller as
+    // a parent and the board as a kiosk simultaneously, and since M12 a device
+    // cookie outranks the account session for every request the browser makes
+    // (`modules/family/principal.ts`). Cookies are per context, so the wall
+    // tablet needs its own — which is also what the real arrangement looks
+    // like: a phone in a hand and a tablet on a wall.
+    const kiosk = await context.browser()!.newContext({ locale: 'nl-NL' });
+    const hub = await kiosk.newPage();
+    await hub.goto('/nl/hub/pair');
+    await pairHub(hub, family.familyId);
+
     await hub.goto('/nl/hub/timers');
     await expect(hub.getByTestId('timer-board-empty')).toBeVisible();
 
@@ -205,6 +270,6 @@ test.describe('controller → hub', () => {
     expect(rows).toHaveLength(2);
     expect(rows.every((row) => row.stopped_at !== null)).toBe(true);
 
-    await hub.close();
+    await kiosk.close();
   });
 });

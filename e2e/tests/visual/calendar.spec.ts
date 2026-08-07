@@ -1,3 +1,4 @@
+import { pairHub } from '../../fixtures/hub';
 import { expect, test } from '../../fixtures/family';
 import { ownerMemberOf, seedCalendar, seedEvents, seedMembers, withDb } from '../../utils/seed';
 import { settlePage } from '../../utils/settle';
@@ -188,6 +189,10 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
     });
 
     test('hub ambient board', async ({ page, family }) => {
+      // M12: hub surfaces run behind a device principal, never an account
+      // session — this browser is the wall tablet for the rest of the test.
+      await pairHub(page, family.familyId);
+
       await seedBoardDay(family.familyId);
 
       await page.goto(`/nl/hub?date=${FUTURE_ANCHOR}`);
@@ -209,6 +214,32 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
       await settlePage(page);
 
       await expect(page).toHaveScreenshot(`hub-${name}.png`, { fullPage: true });
+    });
+
+    test('hub ambient board, dark', async ({ page, family }) => {
+      // M12 made the kiosk dark-capable, so the board has two looks and both
+      // are worth a baseline: a wall display spends its evenings in the dark
+      // one, and a token that only resolves in light mode would be invisible
+      // in review and glaring in a kitchen at 21:00.
+      //
+      // `?theme=dark` pins it (KioskShell) rather than emulating the media
+      // query, so the snapshot exercises the same override path the settings
+      // corner uses and does not depend on the runner's colour scheme.
+      await pairHub(page, family.familyId);
+
+      await seedBoardDay(family.familyId);
+
+      await page.goto(`/nl/hub?date=${FUTURE_ANCHOR}&theme=dark`);
+      await expect(page.getByTestId('hub-board')).toBeVisible();
+      await expect(page.getByTestId('kiosk-shell')).toHaveAttribute('data-hub-theme', 'dark');
+
+      await page.getByTestId('hub-clock').evaluate((element) => {
+        element.textContent = '00:00';
+      });
+
+      await settlePage(page);
+
+      await expect(page).toHaveScreenshot(`hub-dark-${name}.png`, { fullPage: true });
     });
   });
 }

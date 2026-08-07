@@ -1,5 +1,6 @@
 import 'server-only';
 import type { PgBoss } from 'pg-boss';
+import { trimDeviceSessions } from '@/modules/devices';
 import { retentionCutoff, trimEventLog } from '@/modules/realtime';
 import { trimFinishedTimers } from '@/modules/timers';
 import { trimReminderDispatch } from '@/modules/notifications';
@@ -15,8 +16,9 @@ import { trimReminderDispatch } from '@/modules/notifications';
  * that reconnects after a long gap can never take the `resync` branch, because
  * nothing ever falls out of the log.
  *
- * Device sessions are named in §8 but have no table until M12; the trim gains
- * a line there rather than pretending to prune something that does not exist.
+ * M12 closed the last line of that §8 list: device sessions are pruned here
+ * too, along with the pairing codes and rate-limit counters that only exist to
+ * serve them.
  */
 
 export const MAINTENANCE_QUEUE = 'maintenance:trim';
@@ -39,10 +41,27 @@ export const REMINDER_LEDGER_RETENTION_DAYS = 14;
  */
 export const TIMER_RETENTION_DAYS = 30;
 
+/**
+ * How long a *revoked* device session is kept before it is deleted. Expired
+ * sessions go immediately — they authenticate nothing — but a revoked one is
+ * evidence for a while: "the tablet in the hall stopped working last Tuesday"
+ * is only answerable if the row that stopped working is still there.
+ */
+export const REVOKED_DEVICE_SESSION_RETENTION_DAYS = 30;
+
 export type TrimResult = {
   eventLog: number;
   reminderDispatch: number;
   timers: number;
+  deviceSessions: number;
+  pairingCodes: number;
+  /**
+   * Review finding 9: `trimDeviceSessions` has always returned this count,
+   * but it was silently dropped on the way into `TrimResult` — the nightly
+   * job trimmed the rate-limit counters and then discarded the only number
+   * that says whether it worked.
+   */
+  pairingAttempts: number;
 };
 
 function daysAgo(now: Date, days: number): Date {
@@ -54,10 +73,18 @@ function daysAgo(now: Date, days: number): Date {
  * Postgres with a frozen clock instead of needing a running boss.
  */
 export async function runMaintenanceTrim(now: Date = new Date()): Promise<TrimResult> {
+  const devices = await trimDeviceSessions(
+    daysAgo(now, REVOKED_DEVICE_SESSION_RETENTION_DAYS),
+    now
+  );
+
   return {
     eventLog: await trimEventLog(retentionCutoff(now)),
     reminderDispatch: await trimReminderDispatch(daysAgo(now, REMINDER_LEDGER_RETENTION_DAYS)),
     timers: await trimFinishedTimers(daysAgo(now, TIMER_RETENTION_DAYS), now),
+    deviceSessions: devices.sessions,
+    pairingCodes: devices.pairingCodes,
+    pairingAttempts: devices.pairingAttempts,
   };
 }
 

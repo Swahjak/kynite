@@ -9,7 +9,7 @@ import { getDb } from '@/server/db';
 // (same note as `modules/rewards/actions.ts`): a barrel re-exports client
 // components, which must not enter a server mutation module.
 import { routine, routineStep, timer } from '@/server/db/schema';
-import { assertCan, getMember, type Principal } from '@/modules/family';
+import { assertCan, can, getMember, type Principal } from '@/modules/family';
 import { publish } from '@/modules/realtime';
 import {
   startFailure,
@@ -124,6 +124,26 @@ export async function startTimerAction(input: StartTimerInput): Promise<StartTim
       .limit(1);
 
     if (!step) return startFailure('stepNotFound');
+
+    // M09 review carry-forward, closed here. The `assertCan` above authorized
+    // against `input.memberId` — a value from the form — and the lines below
+    // then *overwrote* the subject with the step's real owner. For every
+    // principal that existed in M09 that was harmless: `timer:control` grades
+    // `allow` for owners, adults and children, so the subject never changed
+    // the answer. M12 lands the first principals it is not harmless for
+    // (`scoped` grades for share contributors, and devices), and the shape of
+    // the bug — authorize on one subject, act on another — is the shape that
+    // must never be in the codebase when those arrive. So the resolved owner
+    // is re-authorized before it is used, and the earlier check becomes what
+    // it always should have been: a cheap early rejection, not the decision.
+    if (
+      !can(principal, 'timer:control', {
+        familyId: principal.familyId,
+        memberId: step.ownerMemberId,
+      })
+    ) {
+      return startFailure('forbidden');
+    }
 
     label = step.title;
     // The step's prescription wins; an explicit duration is the fallback for a

@@ -36,8 +36,12 @@ vi.mock('@/i18n/navigation', () => ({
 process.env.BETTER_AUTH_SECRET ??= 'x'.repeat(32);
 process.env.BETTER_AUTH_URL ??= 'http://localhost:3000';
 
-const { runMaintenanceTrim, REMINDER_LEDGER_RETENTION_DAYS, TIMER_RETENTION_DAYS } =
-  await import('@/server/jobs/maintenance');
+const {
+  runMaintenanceTrim,
+  REMINDER_LEDGER_RETENTION_DAYS,
+  REVOKED_DEVICE_SESSION_RETENTION_DAYS,
+  TIMER_RETENTION_DAYS,
+} = await import('@/server/jobs/maintenance');
 const { RETENTION_DAYS } = await import('@/modules/realtime');
 
 vi.setConfig({ testTimeout: 30_000 });
@@ -47,7 +51,18 @@ const daysAgo = (days: number) => new Date(NOW.getTime() - days * 86_400_000);
 
 describe.skipIf(!databaseUrl)('maintenance trim (integration)', () => {
   const { pool, db } = createTestDb();
-  const { eventLog, family, pushSubscription, reminderDispatch, routine, timer } = schema;
+  const {
+    device,
+    deviceSession,
+    devicePairingAttempt,
+    devicePairingCode,
+    eventLog,
+    family,
+    pushSubscription,
+    reminderDispatch,
+    routine,
+    timer,
+  } = schema;
 
   let household: Household;
   let routineId: string;
@@ -225,6 +240,107 @@ describe.skipIf(!databaseUrl)('maintenance trim (integration)', () => {
       .where(eq(reminderDispatch.familyId, household.familyId));
     expect(remaining).toHaveLength(1);
     expect(remaining[0].occurrenceDate).toBe('2026-03-09');
+  });
+
+  describe('device sessions (M11 carry-forward: §8 named them, the table landed in M12)', () => {
+    let deviceId: string;
+
+    beforeEach(async () => {
+      await db.delete(deviceSession);
+      await db.delete(devicePairingCode);
+      await db.delete(devicePairingAttempt);
+      await db.delete(device).where(eq(device.familyId, household.familyId));
+
+      const [row] = await db
+        .insert(device)
+        .values({ familyId: household.familyId, name: 'Keuken', kind: 'hub' })
+        .returning({ id: device.id });
+      deviceId = row.id;
+    });
+
+    const seedSession = async (input: { expiresAt: Date; revokedAt?: Date }) => {
+      const [row] = await db
+        .insert(deviceSession)
+        .values({
+          deviceId,
+          tokenHash: `hash-${Math.random()}`,
+          expiresAt: input.expiresAt,
+          revokedAt: input.revokedAt ?? null,
+        })
+        .returning({ id: deviceSession.id });
+      return row.id;
+    };
+
+    it('deletes expired sessions and keeps live ones', async () => {
+      const live = await seedSession({ expiresAt: daysAgo(-300) });
+      await seedSession({ expiresAt: daysAgo(1) });
+
+      expect((await runMaintenanceTrim(NOW)).deviceSessions).toBe(1);
+
+      const remaining = await db.select({ id: deviceSession.id }).from(deviceSession);
+      expect(remaining.map((row) => row.id)).toEqual([live]);
+    });
+
+    it('keeps a freshly revoked session as evidence, and drops an old one', async () => {
+      // "The tablet in the hall stopped working last Tuesday" has to stay
+      // answerable; last spring does not.
+      const recent = await seedSession({
+        expiresAt: daysAgo(-300),
+        revokedAt: daysAgo(1),
+      });
+      await seedSession({
+        expiresAt: daysAgo(-300),
+        revokedAt: daysAgo(REVOKED_DEVICE_SESSION_RETENTION_DAYS + 1),
+      });
+
+      expect((await runMaintenanceTrim(NOW)).deviceSessions).toBe(1);
+
+      const remaining = await db.select({ id: deviceSession.id }).from(deviceSession);
+      expect(remaining.map((row) => row.id)).toEqual([recent]);
+    });
+
+    it('prunes pairing codes past their TTL, consumed or not', async () => {
+      await db.insert(devicePairingCode).values([
+        {
+          familyId: household.familyId,
+          codeHash: `expired-${Math.random()}`,
+          deviceName: 'Oud',
+          kind: 'hub',
+          expiresAt: daysAgo(1),
+        },
+        {
+          familyId: household.familyId,
+          codeHash: `live-${Math.random()}`,
+          deviceName: 'Nieuw',
+          kind: 'hub',
+          expiresAt: daysAgo(-1),
+        },
+      ]);
+
+      expect((await runMaintenanceTrim(NOW)).pairingCodes).toBe(1);
+
+      const remaining = await db
+        .select({ name: devicePairingCode.deviceName })
+        .from(devicePairingCode);
+      expect(remaining.map((row) => row.name)).toEqual(['Nieuw']);
+    });
+
+    it('prunes rate-limit counters outside the sliding window', async () => {
+      await db.insert(devicePairingAttempt).values([
+        { clientHash: 'a'.repeat(64), createdAt: daysAgo(1) },
+        { clientHash: 'b'.repeat(64), createdAt: NOW },
+      ]);
+
+      // Review finding 9: `pairingAttempts` was computed by `trimDeviceSessions`
+      // but dropped on the way into `TrimResult` — assert the number the job
+      // actually reports, not just the row that survives.
+      expect((await runMaintenanceTrim(NOW)).pairingAttempts).toBe(1);
+
+      const remaining = await db
+        .select({ hash: devicePairingAttempt.clientHash })
+        .from(devicePairingAttempt);
+      expect(remaining.map((row) => row.hash)).toEqual(['b'.repeat(64)]);
+    });
   });
 
   it('is idempotent — a second pass the same night deletes nothing', async () => {

@@ -29,7 +29,14 @@ vi.mock('@/server/db', () => ({ getDb: () => stubs.db }));
 vi.mock('@/server/auth', () => ({
   getAuth: () => ({ api: { getSession: async () => stubs.session } }),
 }));
-vi.mock('next/headers', () => ({ headers: async () => new Headers() }));
+// `cookies()` is mocked alongside `headers()` since M12: `getPrincipal()` falls
+// back to the kiosk cookie when there is no account session, so every suite
+// that resolves a principal now touches the jar. An empty one means "no paired
+// device", which is what these suites assume.
+vi.mock('next/headers', () => ({
+  headers: async () => new Headers(),
+  cookies: async () => ({ get: () => undefined, set: () => {}, delete: () => {} }),
+}));
 // The family barrel reaches next-intl's client navigation, which cannot
 // resolve outside a bundler. Same stub every integration suite in this repo
 // carries (see `tests/integration/timer.test.ts`).

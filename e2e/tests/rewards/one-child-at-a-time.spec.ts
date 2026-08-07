@@ -1,3 +1,4 @@
+import { pairHub } from '../../fixtures/hub';
 import { type Page } from '@playwright/test';
 import { expect, test } from '../../fixtures/family';
 import {
@@ -87,6 +88,11 @@ const SURFACES = [
 test.describe('no screen renders two children together', () => {
   for (const surface of SURFACES) {
     test(`${surface.name} shows one child's totals only`, async ({ page, family }) => {
+      // M12: both surfaces are hub surfaces, and the hub runs behind a device
+      // principal. The path is built from `surface.path()`, so this is the one
+      // hub test in the suite whose URL is not visible as a literal.
+      await pairHub(page, family.familyId);
+
       // The sibling exists and has a balance; the surface is addressed to Mila.
       const { mila } = await seedTwoChildren(family.familyId);
 
@@ -119,6 +125,10 @@ test.describe('no screen renders two children together', () => {
     page,
     family,
   }) => {
+    // M12: hub surfaces run behind a device principal, never an account
+    // session — this browser is the wall tablet for the rest of the test.
+    await pairHub(page, family.familyId);
+
     const { mila, daan } = await seedTwoChildren(family.familyId);
 
     await page.goto(`/nl/hub/store?member=${mila.id}`);
@@ -135,6 +145,10 @@ test.describe('no screen renders two children together', () => {
   });
 
   test('the star chart has no index that lists everyone', async ({ page, family }) => {
+    // M12: hub surfaces run behind a device principal, never an account
+    // session — this browser is the wall tablet for the rest of the test.
+    await pairHub(page, family.familyId);
+
     await seedTwoChildren(family.familyId);
 
     // There is no `/hub/stars` route: the member id is the whole screen, not a

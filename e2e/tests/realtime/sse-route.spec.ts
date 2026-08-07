@@ -1,3 +1,4 @@
+import { pairHub } from '../../fixtures/hub';
 import { expect, test } from '../../fixtures/family';
 
 /**
@@ -46,6 +47,10 @@ test.describe('GET /api/sse', () => {
   });
 
   test('the hub opens exactly one stream for the whole surface', async ({ page, family }) => {
+    // M12: hub surfaces run behind a device principal, never an account
+    // session — this browser is the wall tablet for the rest of the test.
+    await pairHub(page, family.familyId);
+
     expect(family.familyId).toBeTruthy();
 
     const opened: string[] = [];

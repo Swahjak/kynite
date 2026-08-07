@@ -205,7 +205,7 @@ This is the single source of progress truth for the Kynite greenfield rebuild. E
 
 ## M12 — Hub kiosk mode + device pairing
 
-- [ ] Status
+- [x] Status
 - **Scope:** Build the device pairing flow and kiosk session model: a parent generates a 6-digit code (10-min TTL) in settings, `(hub)/pair` exchanges it for a `device` + `device_session`, and the opaque token lives in an httpOnly cookie with a 1-year sliding expiry. Finish the wall-display layout — fullscreen, dark-capable, 6-foot type, no browser chrome — and constrain device-session capability to completions, timers and redemption requests only. Carry-forward note (M06 review): the hub currently renders light-theme only at `(hub)/hub`, with no kiosk layout of its own — it reuses the app shell. M12 owns making it fullscreen, dark-capable, 6-foot type, and (per this scope) the pairing/addressing that puts a real device session behind it.
 - **Acceptance criteria:**
   - Routes exist: `(app)/settings/devices`, `(hub)/pair`.
@@ -216,7 +216,7 @@ This is the single source of progress truth for the Kynite greenfield rebuild. E
   - The hub layout renders fullscreen with no browser chrome in standalone mode; body text meets the 6-foot legibility scale; all targets ≥48×48px — automated audit.
   - A paired hub survives a browser reload and a simulated multi-day gap with no login screen.
   - Gate green: `pnpm typecheck && pnpm lint && pnpm test:run`.
-- **Review verdict:** _pending_
+- **Review verdict:** _approved after fixes_ — Opus review 2026-08-07: all seven criteria met; §7 device column exact and mutation-verified cell-for-cell (denials assert refusal AND absent row); credential hygiene sound (32-byte token SHA-256 at rest, domain-separated hashes, claiming-UPDATE single-use, sliding renewal coalesced 1/hr); kiosk audit non-vacuous both dimensions (computed-style font walk + 48px bounding-box walk, mutations caught); device-first principal resolution correct (parent sign-in can't leave owner-level wall terminal); M09 step-timer scope bypass genuinely closed; gates independently green (853/853 with DB, build clean, hub e2e 17/17). Blockers fixed: (1) pairing brute-force limit sharded on attacker-controlled X-Forwarded-For/UA + TOCTOU counter — now global 100-failure backstop per window, atomic insert-then-count under pg_advisory_xact_lock, per-family cap 3 live codes (also closes cross-tenant code-space exhaustion); (2) self-paired browser permanently locked out of (app) — new two-tap "This is not a wall display" unpair in kiosk settings via POST /api/devices/session/unpair (revokes + clears cookie; device session is the credential being surrendered, no assertCan by design). Also fixed: revoked device's SSE stream now closed on device.revoked (cap slot released), claiming race Promise.all test, pending codes rendered with cancel, two-tap revoke confirm, trim pairingAttempts surfaced, countdown bracket slack, __Host- comment. Post-fix gates: 861/861 with DB, 139/139 + 35/35 Playwright, auditor 33. Carry-forwards: FR28 hub-display-prefs-from-Controller unowned — assign M15 settings; FR22 push-on-participant-action still unowned — close before M18 parity; no component tests for kiosk client components; wakeLock/cursor unasserted; playwright wants warm .next.
 
 ## M13 — Caregiver share links
 

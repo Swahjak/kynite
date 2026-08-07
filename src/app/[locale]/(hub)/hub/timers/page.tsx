@@ -1,4 +1,5 @@
 import { getFormatter, getTranslations } from 'next-intl/server';
+import { requireHubDevice } from '@/modules/devices';
 import { TimerBoard, loadTimerBoard } from '@/modules/timers';
 
 /** Session-dependent: never prerendered, so `next build` needs no database. */
@@ -13,16 +14,19 @@ export const dynamic = 'force-dynamic';
  * so this page can be reloaded at any point in a countdown and resume on the
  * same second.
  *
- * Addressed `/hub/timers` rather than §2's `(hub)/timers` for the same reason
- * the routine screen is: M01 put the ambient board at `(hub)/hub`, so every
- * hub URL carries the `/hub` prefix, and `(app)/timers` is the Controller's.
- * M12 owns resolving the hub's addressing with device pairing.
+ * Addressing is settled in `(hub)/layout.tsx`: the hub tree keeps its `/hub`
+ * prefix, and this page is reached only behind a device principal (M12).
  */
 export default async function HubTimersPage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ locale: string }>;
   searchParams: Promise<{ now?: string }>;
 }) {
+  const { locale } = await params;
+  await requireHubDevice(locale);
+
   const { now } = await searchParams;
 
   const board = await loadTimerBoard({ now });
@@ -31,7 +35,7 @@ export default async function HubTimersPage({
 
   if (!board) {
     return (
-      <main className="flex min-h-dvh flex-col items-center justify-center gap-2 p-8 text-center">
+      <main className="flex min-h-full flex-col items-center justify-center gap-2 p-8 text-center">
         <h1 className="font-display text-h1 font-bold">{t('hub.unavailableTitle')}</h1>
         <p className="text-body-lg text-ink-secondary">{t('hub.unavailableBody')}</p>
       </main>
@@ -39,7 +43,7 @@ export default async function HubTimersPage({
   }
 
   return (
-    <main className="flex min-h-dvh flex-col gap-6 bg-background p-6" data-testid="hub-timers">
+    <main className="flex min-h-full flex-col gap-6 bg-background p-6" data-testid="hub-timers">
       <header className="flex flex-wrap items-baseline justify-between gap-4">
         <h1 className="font-display text-display-md font-extrabold">{t('hub.title')}</h1>
         <span className="tabular-time text-display-md font-extrabold text-brand-ink">

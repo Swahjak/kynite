@@ -516,6 +516,54 @@
 }
 
 /* ---------------------------------------------------------------------------
+ * Kiosk (6-foot) type scale — M12
+ *
+ * The hub is read from across a kitchen, not from 40cm. Rather than sprinkling
+ * `text-body-lg sm:text-h3 hub:…` through every component that can appear on
+ * both surfaces, the *scale itself* is redefined inside the kiosk shell: the
+ * Tailwind 4 `text-*` utilities compile to `font-size: var(--text-…)`, so
+ * overriding those custom properties on one subtree re-sizes everything below
+ * it with no component churn and no branch on surface.
+ *
+ * The step is a constant ~1.45× on the reading sizes, tapering to 1× at the
+ * Display end (which was already sized for a wall). The floor is the important
+ * number: nothing on the hub is typeset below 1rem/16px, which is what
+ * `e2e/tests/hub/kiosk-audit.spec.ts` asserts by walking every rendered text
+ * node. Body copy lands at 22px.
+ *
+ * Line heights and letter-spacing come along for free: Tailwind emits them as
+ * their own `--text-*--line-height` / `--letter-spacing` vars, both unitless or
+ * em-relative, so they track the new size without being restated.
+ *
+ * The `@theme` block above is left untouched, which matters for more than
+ * tidiness: `tests/unit/timers/legibility.test.ts` reads `--text-display-md`
+ * out of this file to pin the countdown floor, and it must keep reading the
+ * *design system's* value rather than the kiosk's local one.
+ * ------------------------------------------------------------------------- */
+
+[data-surface='hub'] {
+  --text-overline: 1rem;
+  --text-caption: 1.125rem;
+  --text-body-sm: 1.25rem;
+  --text-body: 1.375rem;
+  --text-body-lg: 1.625rem;
+  --text-h3: 1.75rem;
+  --text-h2: 2.25rem;
+  --text-h1: 3rem;
+  --text-display-md: 3.5rem;
+
+  /* Tailwind's own default scale, for the handful of pre-M12 hub components
+     that reached for `text-sm`/`text-base` instead of a brand token. Left
+     honest rather than silently exempted: they are still hub text, and the
+     audit does not care which token produced them. */
+  --text-xs: 1.125rem;
+  --text-sm: 1.25rem;
+  --text-base: 1.375rem;
+  --text-lg: 1.625rem;
+  --text-xl: 1.75rem;
+}
+
+/* ---------------------------------------------------------------------------
  * Base
  * ------------------------------------------------------------------------- */
 

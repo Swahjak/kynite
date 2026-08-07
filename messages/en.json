@@ -10,7 +10,8 @@
     "routines": "Routines",
     "rewards": "Rewards",
     "timers": "Timers",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "devices": "Screens"
   },
   "auth": {
     "signOut": "Sign out",
@@ -559,6 +560,76 @@
       "unsupported": "This browser does not support push notifications.",
       "unconfigured": "Notifications are not configured on this install.",
       "error": "The notification settings could not be updated."
+    }
+  },
+  "devices": {
+    "pageTitle": "Screens",
+    "pageSubtitle": "Pair a wall tablet with your family and manage which screens have access.",
+    "pair": {
+      "title": "Add a screen",
+      "description": "Name the screen, then type the code you get here into the screen itself.",
+      "nameLabel": "Screen name",
+      "namePlaceholder": "Kitchen",
+      "generate": "Create code",
+      "codeFor": "Code for {name}",
+      "expiresAt": "Valid until {time}. {digits} digits, single use."
+    },
+    "list": {
+      "title": "Paired screens",
+      "empty": "No screens paired yet.",
+      "lastSeen": "Last active {when}",
+      "neverSeen": "Not used yet",
+      "revoked": "Access revoked {when}",
+      "revoke": "Revoke access",
+      "revokeConfirm": "Revoke this screen's access?",
+      "revokeConfirmYes": "Yes, revoke",
+      "revokeConfirmCancel": "Cancel"
+    },
+    "pending": {
+      "title": "Waiting to be paired",
+      "expires": "Code expires {when}",
+      "cancel": "Cancel code"
+    },
+    "hubPair": {
+      "title": "Pair this screen",
+      "instructions": "A six-digit code is waiting on a parent's phone. Type it in here.",
+      "entered": "Code entered",
+      "backspace": "Clear last digit",
+      "confirm": "Confirm code",
+      "paired": "Paired as {name}.",
+      "errors": {
+        "invalidCode": "That code does not work. Create a new one on the phone.",
+        "rateLimited": "Please try again in a few minutes."
+      }
+    },
+    "hubSettings": {
+      "open": "Screen settings",
+      "title": "Screen settings",
+      "deviceName": "Screen: {name}",
+      "theme": {
+        "title": "Appearance",
+        "auto": "Automatic",
+        "light": "Light",
+        "dark": "Dark",
+        "active": {
+          "light": "Currently light",
+          "dark": "Currently dark"
+        }
+      },
+      "unpair": {
+        "trigger": "This is not a wall display",
+        "confirmBody": "This screen will stop showing your family's schedule and go back to a pairing screen. You'll need a new code to set it up again.",
+        "confirm": "Yes, unpair this screen",
+        "cancel": "Cancel",
+        "error": "Could not unpair this screen. Please try again."
+      }
+    },
+    "errors": {
+      "forbidden": "You are not allowed to do this.",
+      "invalidInput": "Check the details you entered.",
+      "deviceNotFound": "This screen no longer exists.",
+      "pairingCodeNotFound": "This code no longer exists.",
+      "tooManyPending": "Too many screens are waiting to be paired. Cancel one first, or wait for a code to expire."
     }
   }
 }

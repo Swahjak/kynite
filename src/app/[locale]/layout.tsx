@@ -50,7 +50,15 @@ export default async function LocaleLayout({
   setRequestLocale(locale);
 
   return (
-    <html lang={locale} className={fontVariables}>
+    // `suppressHydrationWarning` covers exactly one thing: the kiosk's
+    // pre-paint script sets `data-surface`/`data-hub-theme` and the `.dark`
+    // class on this element before React hydrates ((hub)/layout.tsx). React
+    // would otherwise warn about attributes the server never rendered — which
+    // is the whole point of the script, since deferring them to an effect would
+    // flash a phone-sized light board across the room on every hub boot. The
+    // flag is not inherited by children; only this element's own attributes are
+    // exempt.
+    <html lang={locale} className={fontVariables} suppressHydrationWarning>
       <body className="min-h-dvh antialiased">
         <NextIntlClientProvider>
           {/* Registers the worker and nothing else — no permission prompt is

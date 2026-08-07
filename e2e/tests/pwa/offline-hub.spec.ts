@@ -1,3 +1,4 @@
+import { pairHub } from '../../fixtures/hub';
 import { expect, test } from '../../fixtures/family';
 
 /**
@@ -150,7 +151,15 @@ async function waitForMirror(page: Page): Promise<MirrorRow | null> {
 }
 
 test.describe('hub offline', () => {
-  test('renders the last-known board with the network disabled', async ({ page, context }) => {
+  test('renders the last-known board with the network disabled', async ({
+    page,
+    context,
+    family,
+  }) => {
+    // M12: hub surfaces run behind a device principal, never an account
+    // session — this browser is the wall tablet for the rest of the test.
+    await pairHub(page, family.familyId);
+
     await page.goto('/nl/hub');
     await expect(page.getByTestId('hub-board')).toBeVisible();
     await waitForController(page);
@@ -173,7 +182,11 @@ test.describe('hub offline', () => {
     await context.setOffline(false);
   });
 
-  test('mirrors the board to IndexedDB on every load', async ({ page }) => {
+  test('mirrors the board to IndexedDB on every load', async ({ page, family }) => {
+    // M12: hub surfaces run behind a device principal, never an account
+    // session — this browser is the wall tablet for the rest of the test.
+    await pairHub(page, family.familyId);
+
     await page.goto('/nl/hub');
     await expect(page.getByTestId('hub-board')).toBeVisible();
 
@@ -191,7 +204,12 @@ test.describe('hub offline', () => {
   test('boots from the mirror when it is newer than the cached document', async ({
     page,
     context,
+    family,
   }) => {
+    // M12: hub surfaces run behind a device principal, never an account
+    // session — this browser is the wall tablet for the rest of the test.
+    await pairHub(page, family.familyId);
+
     /**
      * §6's "boot renders from IDB then reconciles", proved rather than
      * narrated. The situation staged is the real one: a tablet that stayed on
@@ -230,7 +248,11 @@ test.describe('hub offline', () => {
     await context.unroute(HUB_DOCUMENT);
   });
 
-  test('refuses a snapshot belonging to another family', async ({ page, context }) => {
+  test('refuses a snapshot belonging to another family', async ({ page, context, family }) => {
+    // M12: hub surfaces run behind a device principal, never an account
+    // session — this browser is the wall tablet for the rest of the test.
+    await pairHub(page, family.familyId);
+
     /**
      * The other half of the same mechanism, and the one that makes it safe to
      * have at all: a shared tablet re-paired to another household must never be
@@ -272,7 +294,11 @@ test.describe('hub offline', () => {
     await context.unroute(HUB_DOCUMENT);
   });
 
-  test('says nothing while the stream is healthy', async ({ page }) => {
+  test('says nothing while the stream is healthy', async ({ page, family }) => {
+    // M12: hub surfaces run behind a device principal, never an account
+    // session — this browser is the wall tablet for the rest of the test.
+    await pairHub(page, family.familyId);
+
     await page.goto('/nl/hub');
     await expect(page.getByTestId('hub-board')).toBeVisible();
 
@@ -284,7 +310,12 @@ test.describe('hub offline', () => {
   test('shows the offline notice from the stream, while the browser still claims to be online', async ({
     page,
     context,
+    family,
   }) => {
+    // M12: hub surfaces run behind a device principal, never an account
+    // session — this browser is the wall tablet for the rest of the test.
+    await pairHub(page, family.familyId);
+
     /**
      * The captive-portal case, staged exactly: the *stream* is dead and
      * `navigator.onLine` is `true`. §6 chose the stream over `onLine` because
@@ -326,7 +357,12 @@ test.describe('hub offline', () => {
   test('the board is still readable offline — no error page, no empty shell', async ({
     page,
     context,
+    family,
   }) => {
+    // M12: hub surfaces run behind a device principal, never an account
+    // session — this browser is the wall tablet for the rest of the test.
+    await pairHub(page, family.familyId);
+
     await page.goto('/nl/hub');
     await expect(page.getByTestId('hub-board')).toBeVisible();
     await waitForController(page);

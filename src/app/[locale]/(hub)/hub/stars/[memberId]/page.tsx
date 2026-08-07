@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server';
+import { requireHubDevice } from '@/modules/devices';
 import { StarChart, loadStarChart } from '@/modules/rewards';
 
 /** Session-dependent: never prerendered, so `next build` needs no database. */
@@ -19,10 +20,12 @@ export default async function HubStarsPage({
   params,
   searchParams,
 }: {
-  params: Promise<{ memberId: string }>;
+  params: Promise<{ locale: string; memberId: string }>;
   searchParams: Promise<{ date?: string }>;
 }) {
-  const { memberId } = await params;
+  const { locale, memberId } = await params;
+  await requireHubDevice(locale);
+
   const { date } = await searchParams;
 
   const chart = await loadStarChart({ memberId, date });
@@ -30,7 +33,7 @@ export default async function HubStarsPage({
 
   if (!chart) {
     return (
-      <main className="flex min-h-dvh flex-col items-center justify-center gap-2 p-8 text-center">
+      <main className="flex min-h-full flex-col items-center justify-center gap-2 p-8 text-center">
         <h1 className="font-display text-h1 font-bold">{t('chart.unavailableTitle')}</h1>
         <p className="text-body-lg text-ink-secondary">{t('chart.unavailableBody')}</p>
       </main>
@@ -39,7 +42,7 @@ export default async function HubStarsPage({
 
   return (
     <main
-      className="flex min-h-dvh flex-col gap-6 bg-background p-6"
+      className="flex min-h-full flex-col gap-6 bg-background p-6"
       data-testid="hub-stars"
       data-member-id={chart.member.id}
     >

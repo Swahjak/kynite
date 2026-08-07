@@ -22,6 +22,19 @@ import { pushSubscription, reminderDispatch, type PushSubscription } from './sch
 export type SubscriptionUpsert = {
   familyId: string;
   memberId: string;
+  /**
+   * Always `null` in practice, and that is the settled answer rather than an
+   * omission (M11 carry-forward, closed in M12).
+   *
+   * §6 is explicit that web push is "parents only", and the §7 capability
+   * matrix gives a device principal no notification row at all — a wall tablet
+   * is a screen the whole house can read, so a push notification on it is a
+   * message delivered to whoever walks past. The column stays because
+   * `docs/architecture.md` §3 declares it and because the day a *parent's*
+   * phone is also a paired `kind:'mobile'` device, "which of my devices is
+   * this endpoint" becomes answerable without a migration. Until a milestone
+   * sanctions push on a paired device, nothing sets it.
+   */
   deviceId?: string | null;
   endpoint: string;
   p256dh: string;

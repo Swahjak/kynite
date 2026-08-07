@@ -41,6 +41,16 @@ describe.skipIf(!databaseUrl)('family scoping (integration)', () => {
       tokenHash: `hash-${randomUUID()}`,
       expiresAt: new Date(Date.now() + 86_400_000),
     });
+    // M12. A pending pairing code names the family that minted it, so deleting
+    // the family must take it with them — a code that outlived its household
+    // would pair a tablet to nothing.
+    await db.insert(schema.devicePairingCode).values({
+      familyId,
+      codeHash: `pairing-${randomUUID()}`,
+      deviceName: 'Halhub',
+      kind: 'hub',
+      expiresAt: new Date(Date.now() + 600_000),
+    });
 
     const [account] = await db
       .insert(schema.googleAccount)

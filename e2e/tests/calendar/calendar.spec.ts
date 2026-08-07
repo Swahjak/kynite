@@ -1,3 +1,4 @@
+import { pairHub } from '../../fixtures/hub';
 import { expect, test } from '../../fixtures/family';
 import {
   childrenOf,
@@ -368,6 +369,13 @@ test.describe('private calendars on the hub', () => {
     await page.goto('/nl/today');
     await expect(page.getByText('Sollicitatiegesprek')).toBeVisible();
 
+    // Now the same browser becomes the wall tablet. Pairing happens *here*,
+    // between the two navigations, and not at the top of the test: a device
+    // cookie outranks the account session (M12,
+    // `modules/family/principal.ts`), so pairing first would have sent the
+    // `/nl/today` visit above to the board instead.
+    await pairHub(page, family.familyId);
+
     // The wall display: the block is there, the title is not.
     await page.goto('/nl/hub');
     await expect(page.getByTestId('hub-board')).toBeVisible();
@@ -378,7 +386,11 @@ test.describe('private calendars on the hub', () => {
     await expect(busy).toContainText('Bezet');
   });
 
-  test('offers no write affordance on the hub', async ({ page }) => {
+  test('offers no write affordance on the hub', async ({ page, family }) => {
+    // M12: hub surfaces run behind a device principal, never an account
+    // session — this browser is the wall tablet for the rest of the test.
+    await pairHub(page, family.familyId);
+
     await page.goto('/nl/hub');
 
     await expect(page.getByTestId('hub-board')).toBeVisible();

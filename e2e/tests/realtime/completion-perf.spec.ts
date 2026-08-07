@@ -1,3 +1,4 @@
+import { pairHub } from '../../fixtures/hub';
 import { expect, test } from '../../fixtures/family';
 import {
   ownerMemberOf,
@@ -91,6 +92,10 @@ async function tapAndMeasure(
 
 test.describe('completion performance guard', () => {
   test('tap → visual done stays under 100ms', async ({ page, family }) => {
+    // M12: hub surfaces run behind a device principal, never an account
+    // session — this browser is the wall tablet for the rest of the test.
+    await pairHub(page, family.familyId);
+
     const { child, routine } = await seedBoard(family.familyId);
 
     await page.goto(`/nl/hub/routines/${child.id}`);
@@ -127,6 +132,10 @@ test.describe('completion performance guard', () => {
   });
 
   test('the flip happens before the server answers, not after', async ({ page, family }) => {
+    // M12: hub surfaces run behind a device principal, never an account
+    // session — this browser is the wall tablet for the rest of the test.
+    await pairHub(page, family.familyId);
+
     const { child, routine } = await seedBoard(family.familyId);
 
     await page.goto(`/nl/hub/routines/${child.id}`);

@@ -1,4 +1,5 @@
 import { getFormatter, getTranslations } from 'next-intl/server';
+import { requireHubDevice } from '@/modules/devices';
 import { RoutineBoard, loadMemberRoutines } from '@/modules/routines';
 
 /** Session-dependent: never prerendered, so `next build` needs no database. */
@@ -16,20 +17,19 @@ export const dynamic = 'force-dynamic';
  * `?date=`/`?time=` pin the rendered clock so the visual snapshot is
  * deterministic; they affect display only (see `page-data.ts`).
  *
- * Addressed `/hub/routines/[memberId]` rather than §2's `(hub)/routines/…`:
- * M01 put the ambient board at `(hub)/hub` instead of `(hub)/`, so every hub
- * URL carries the `/hub` prefix. Moving it would also collide with the parent
- * builder at `(app)/routines`. M12 owns resolving the hub's addressing along
- * with device pairing; until then the whole tree stays consistent.
+ * Addressing is settled in `(hub)/layout.tsx`: the hub tree keeps its `/hub`
+ * prefix, and this page is reached only behind a device principal (M12).
  */
 export default async function HubRoutinesPage({
   params,
   searchParams,
 }: {
-  params: Promise<{ memberId: string }>;
+  params: Promise<{ locale: string; memberId: string }>;
   searchParams: Promise<{ date?: string; time?: string }>;
 }) {
-  const { memberId } = await params;
+  const { locale, memberId } = await params;
+  await requireHubDevice(locale);
+
   const { date, time } = await searchParams;
 
   const board = await loadMemberRoutines({ memberId, date, time });
@@ -38,7 +38,7 @@ export default async function HubRoutinesPage({
 
   if (!board) {
     return (
-      <main className="flex min-h-dvh flex-col items-center justify-center gap-2 p-8 text-center">
+      <main className="flex min-h-full flex-col items-center justify-center gap-2 p-8 text-center">
         <h1 className="font-display text-h1 font-bold">{t('hub.unavailableTitle')}</h1>
         <p className="text-body-lg text-ink-secondary">{t('hub.unavailableBody')}</p>
       </main>
@@ -47,7 +47,7 @@ export default async function HubRoutinesPage({
 
   return (
     <main
-      className="flex min-h-dvh flex-col gap-6 bg-background p-6"
+      className="flex min-h-full flex-col gap-6 bg-background p-6"
       data-testid="hub-routines"
       data-member-id={board.member.id}
     >

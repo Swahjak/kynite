@@ -60,6 +60,7 @@ const OWNERS: Record<RealtimeEventType, string> = {
   'routine.updated': 'routines',
   'timer.started': 'timers',
   'timer.stopped': 'timers',
+  'device.revoked': 'devices',
   'sync.status': 'google',
 };
 
@@ -175,6 +176,13 @@ describe('every realtime event type is published by its owning slice', () => {
     // Every publication belongs to a slice this test knows about; a new
     // publisher appearing somewhere else is a boundary decision, not a detail.
     const slices = new Set(publications.flatMap((publication) => sliceOf(publication.file) ?? []));
-    expect([...slices].sort()).toEqual(['calendar', 'google', 'rewards', 'routines', 'timers']);
+    expect([...slices].sort()).toEqual([
+      'calendar',
+      'devices',
+      'google',
+      'rewards',
+      'routines',
+      'timers',
+    ]);
   });
 });

@@ -70,6 +70,12 @@ const NOT_FAMILY_SCOPED: Record<string, string> = {
   // Children of a family-scoped parent: scoped transitively, deleted by cascade.
   routine_step: 'scoped through routine',
   device_session: 'scoped through device',
+  // M12's rate-limit counter. Deliberately *not* family-scoped: it counts
+  // failed pairing attempts by client fingerprint, and at the moment a wrong
+  // code is entered there is by definition no family to attribute it to.
+  // Attributing a failure to the family whose code was *nearly* guessed would
+  // make the table an oracle for which codes are close.
+  device_pairing_attempt: 'pre-authentication counter; no family is known yet',
 };
 
 describe('schema-wide invariants', () => {
@@ -80,6 +86,8 @@ describe('schema-wide invariants', () => {
         'calendar',
         'completion',
         'device',
+        'device_pairing_attempt',
+        'device_pairing_code',
         'device_session',
         'event',
         'event_log',

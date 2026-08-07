@@ -23,6 +23,12 @@ const PUBLIC_ACTIONS = [
   'src/modules/family/actions.ts::signUpAction',
   'src/modules/family/actions.ts::signInAction',
   'src/modules/family/actions.ts::signOutAction',
+  // M12. The kiosk pairing exchange is the same class of thing as sign-in: it
+  // *establishes* a credential, so there is no principal for `assertCan` to
+  // check. The six-digit code is the authorization, and everything that makes
+  // it one (10-minute TTL, single use, one family) is enforced by the claiming
+  // UPDATE in `modules/devices/queries.ts`.
+  'src/modules/devices/actions.ts::pairDeviceAction',
 ];
 
 const AUTHORIZATION_CALLS = new Set(['can', 'assertCan', 'decide']);
@@ -230,9 +236,15 @@ describe('every Server Action authorizes first', () => {
     // src/modules/rewards/actions.ts (8: create/update/delete reward +
     // awardStars + requestRedemption + decideRedemption + fulfillRedemption +
     // seedRewardPresets) + src/modules/timers/actions.ts (2: startTimer +
-    // stopTimer) = 29. Adding or removing a Server Action must bump this
-    // number deliberately — that is the point.
-    expect(findings.length).toBe(29);
+    // stopTimer) + src/modules/devices/actions.ts (4, added in M12:
+    // createPairingCode + pairDevice + revokeDevice, plus cancelPairingCode
+    // added in the brute-force/lockout review pass) = 33. Self-unpair
+    // (`POST /api/devices/session/unpair`) is deliberately *not* here: it is
+    // a route handler, not a `'use server'` module, so this auditor never
+    // sees it — see that file's doc comment for why it needs no `assertCan`.
+    // Adding or removing a Server Action must bump this number deliberately —
+    // that is the point.
+    expect(findings.length).toBe(33);
   });
 
   it('reports no unauthorized action anywhere in src/', () => {

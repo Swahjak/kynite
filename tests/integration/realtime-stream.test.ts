@@ -245,6 +245,60 @@ RUN('SSE streams and the listen pool', () => {
     expect(listenPoolStats().streams).toBe(0);
   }, 30_000);
 
+  it('closes a device stream on its own revocation, and releases its slot (review finding 3)', async () => {
+    // Before this: a revoked device's own SSE stream kept its `LISTEN`
+    // fan-out slot and connection for up to an hour — the client-side
+    // `DeviceSessionWatcher` reacts to `device.revoked` and refreshes, but
+    // nothing on the server told *this stream* to stop holding its slot.
+    const revoking = await seedHousehold(db, 'RevokedStream');
+    const deviceId = 'device-under-test';
+
+    const controller = new AbortController();
+    const stream = await openFamilyStream({
+      familyId: revoking.familyId,
+      cursor: null,
+      signal: controller.signal,
+      heartbeatIntervalMs: 10_000,
+      selfDeviceId: deviceId,
+    });
+
+    const reader = stream.getReader();
+    const stream$ = pump(reader);
+    await waitForFrame(() => stream$.text(), '"type":"hello"');
+
+    expect(listenPoolStats().streams).toBe(1);
+    stream$.clear();
+
+    // A different device's revocation must not close this stream.
+    await publish({
+      familyId: revoking.familyId,
+      type: 'device.revoked',
+      entity: { id: 'someone-elses-device' },
+      actor: { source: 'mobile' },
+    });
+    await wait(200);
+    expect(listenPoolStats().streams).toBe(1);
+
+    // This stream's own device, revoked — the frame still has to arrive
+    // (the client needs to see it to redirect), and then the stream closes
+    // and the slot is freed on its own, with no `controller.abort()`.
+    const event = await publish({
+      familyId: revoking.familyId,
+      type: 'device.revoked',
+      entity: { id: deviceId },
+      actor: { source: 'mobile' },
+    });
+
+    const text = await waitForFrame(() => stream$.text(), `id: ${event.id}\n`);
+    expect(text).toContain('"device.revoked"');
+
+    // The stream ends on its own — `reader.read()` resolves `done: true`
+    // without this test ever calling `abort()`.
+    await stream$.stop();
+    await wait(100);
+    expect(listenPoolStats().streams).toBe(0);
+  }, 30_000);
+
   it('replays the gap before going live on reconnect', async () => {
     const reconnecting = await seedHousehold(db, 'Reconnect');
 

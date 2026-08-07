@@ -536,8 +536,12 @@ export async function completeStepAction(input: CompleteStepInput): Promise<Comp
             familyId: principal.familyId,
             type: 'completion.created',
             entity: { id: revived.id },
-            actor: { memberId, clientId, source },
-            patch: { routineId, routineStepId, occurrenceDate, stars: 0 },
+            // The actor is whoever *tapped* — a paired kiosk names its device
+            // (M12), not the child whose routine it is. `memberId` is the
+            // subject and rides in the patch, where every consumer already
+            // reads it from.
+            actor: { ...actorOf(principal), clientId, source },
+            patch: { memberId, routineId, routineStepId, occurrenceDate, stars: 0 },
           },
           tx
         );
@@ -565,8 +569,8 @@ export async function completeStepAction(input: CompleteStepInput): Promise<Comp
         // `clientId` rides along so the device that tapped can drop its own
         // echo (§4) — it has already celebrated; re-applying the event would
         // at best be a no-op and at worst interrupt an animation.
-        actor: { memberId, clientId, source },
-        patch: { routineId, routineStepId, occurrenceDate, stars },
+        actor: { ...actorOf(principal), clientId, source },
+        patch: { memberId, routineId, routineStepId, occurrenceDate, stars },
       },
       tx
     );

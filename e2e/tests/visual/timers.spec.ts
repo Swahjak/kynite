@@ -1,3 +1,4 @@
+import { pairHub } from '../../fixtures/hub';
 import { expect, test } from '../../fixtures/family';
 import { ownerMemberOf, seedMembers, seedTimers, withDb } from '../../utils/seed';
 import { settlePage } from '../../utils/settle';
@@ -27,6 +28,10 @@ test.describe('timer visuals — tablet', () => {
   test.use({ viewport: VIEWPORT });
 
   test('hub timer board', async ({ page, family }) => {
+    // M12: hub surfaces run behind a device principal, never an account
+    // session — this browser is the wall tablet for the rest of the test.
+    await pairHub(page, family.familyId);
+
     await withDb(async (client) => {
       await ownerMemberOf(client, family.familyId);
       // Fixed ids are globally unique rows, so a re-run (or a retry) would

@@ -10,7 +10,8 @@
     "routines": "Routines",
     "rewards": "Beloningen",
     "timers": "Timers",
-    "notifications": "Meldingen"
+    "notifications": "Meldingen",
+    "devices": "Schermen"
   },
   "auth": {
     "signOut": "Uitloggen",
@@ -559,6 +560,76 @@
       "unsupported": "Deze browser ondersteunt geen pushmeldingen.",
       "unconfigured": "Meldingen zijn op deze installatie niet ingesteld.",
       "error": "Het lukte niet om de meldingen bij te werken."
+    }
+  },
+  "devices": {
+    "pageTitle": "Schermen",
+    "pageSubtitle": "Koppel een wandtablet aan je gezin en beheer welke schermen toegang hebben.",
+    "pair": {
+      "title": "Scherm toevoegen",
+      "description": "Geef het scherm een naam en typ de code die je hier krijgt over op het scherm zelf.",
+      "nameLabel": "Naam van het scherm",
+      "namePlaceholder": "Keuken",
+      "generate": "Code aanmaken",
+      "codeFor": "Code voor {name}",
+      "expiresAt": "Geldig tot {time}. {digits} cijfers, één keer te gebruiken."
+    },
+    "list": {
+      "title": "Gekoppelde schermen",
+      "empty": "Nog geen schermen gekoppeld.",
+      "lastSeen": "Laatst actief {when}",
+      "neverSeen": "Nog niet gebruikt",
+      "revoked": "Toegang ingetrokken {when}",
+      "revoke": "Toegang intrekken",
+      "revokeConfirm": "Toegang van dit scherm intrekken?",
+      "revokeConfirmYes": "Ja, intrekken",
+      "revokeConfirmCancel": "Annuleren"
+    },
+    "pending": {
+      "title": "Wachten op koppeling",
+      "expires": "Code verloopt {when}",
+      "cancel": "Code annuleren"
+    },
+    "hubPair": {
+      "title": "Dit scherm koppelen",
+      "instructions": "Op de telefoon van een ouder staat een code van zes cijfers. Typ die hier in.",
+      "entered": "Ingevoerde code",
+      "backspace": "Laatste cijfer wissen",
+      "confirm": "Code bevestigen",
+      "paired": "Gekoppeld als {name}.",
+      "errors": {
+        "invalidCode": "Die code werkt niet. Maak een nieuwe aan op de telefoon.",
+        "rateLimited": "Probeer het over een paar minuten opnieuw."
+      }
+    },
+    "hubSettings": {
+      "open": "Scherminstellingen",
+      "title": "Scherminstellingen",
+      "deviceName": "Scherm: {name}",
+      "theme": {
+        "title": "Weergave",
+        "auto": "Automatisch",
+        "light": "Licht",
+        "dark": "Donker",
+        "active": {
+          "light": "Nu licht",
+          "dark": "Nu donker"
+        }
+      },
+      "unpair": {
+        "trigger": "Dit is geen gezinsscherm",
+        "confirmBody": "Dit scherm laat straks het schema van je gezin niet meer zien en gaat terug naar het koppelscherm. Je hebt een nieuwe code nodig om het opnieuw in te stellen.",
+        "confirm": "Ja, dit scherm ontkoppelen",
+        "cancel": "Annuleren",
+        "error": "Ontkoppelen is niet gelukt. Probeer het opnieuw."
+      }
+    },
+    "errors": {
+      "forbidden": "Je mag dit niet doen.",
+      "invalidInput": "Controleer de ingevulde gegevens.",
+      "deviceNotFound": "Dit scherm bestaat niet meer.",
+      "pairingCodeNotFound": "Deze code bestaat niet meer.",
+      "tooManyPending": "Er wachten al te veel schermen op koppeling. Annuleer er eerst een, of wacht tot een code verloopt."
     }
   }
 }

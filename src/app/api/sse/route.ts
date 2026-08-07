@@ -46,6 +46,11 @@ export async function GET(request: NextRequest): Promise<Response> {
       familyId: principal.familyId,
       cursor,
       signal: request.signal,
+      // Non-blocking finding 3: only a device principal's own stream should
+      // ever close itself on a `device.revoked` frame — a member's stream has
+      // no device id to match and must keep running past any device's
+      // revocation.
+      selfDeviceId: principal.kind === 'device' ? principal.deviceId : undefined,
     });
 
     return new Response(stream, { headers: SSE_HEADERS });

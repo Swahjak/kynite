@@ -1,0 +1,1 @@
+CREATE INDEX "device_pairing_attempt_created_at_idx" ON "device_pairing_attempt" USING btree ("created_at");

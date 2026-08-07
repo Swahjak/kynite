@@ -5,7 +5,6 @@ import { useTranslations } from 'next-intl';
 import { stopTimerAction } from '../actions';
 import { formatCountdown, minutesRemaining, phaseOf, remainingSeconds } from '../domain/countdown';
 import type { TimerBoardData, TimerView } from '../page-data';
-import { ChimeSettings } from './chime-settings';
 import { TimerTile } from './timer-tile';
 import { useChime } from './use-chime';
 import { useServerNow } from './use-server-now';
@@ -24,6 +23,14 @@ import { useTimerChannel } from './use-timer-channel';
  * overrun, and only if a user gesture has already unlocked audio. A hub that
  * boots with three expired timers on it therefore makes no sound at all — the
  * "already over when I arrived" case is not an event.
+ *
+ * The chime *controls* are not here. M09 put them at the bottom of this board
+ * and the M09 review called it furniture: a volume slider that is touched twice
+ * a year had permanent residence on a wall display, at child height. M12 moved
+ * them behind the kiosk shell's settings corner (`components/hub`), where the
+ * setting is still one tap away but is not part of what the room looks at. The
+ * `useChime()` store is shared through localStorage, so the control and the
+ * sound stay in agreement without either knowing about the other.
  */
 export function TimerBoard({ board }: { board: TimerBoardData }) {
   const t = useTranslations('timers');
@@ -83,8 +90,6 @@ export function TimerBoard({ board }: { board: TimerBoardData }) {
           ))}
         </div>
       )}
-
-      <ChimeSettings chime={chime} />
     </div>
   );
 }

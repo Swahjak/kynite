@@ -18,7 +18,7 @@ export {
   type ShareScope,
 } from './authorize';
 
-export { assertCan, getPrincipal } from './principal';
+export { assertCan, getPrincipal, requireDevicePrincipal } from './principal';
 
 export {
   MEMBER_COLORS,

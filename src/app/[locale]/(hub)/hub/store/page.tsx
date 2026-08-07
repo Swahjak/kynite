@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server';
+import { requireHubDevice } from '@/modules/devices';
 import { RewardStore, loadStore } from '@/modules/rewards';
 
 /** Session-dependent: never prerendered, so `next build` needs no database. */
@@ -18,18 +19,19 @@ export const dynamic = 'force-dynamic';
  * snapshot is deterministic; the latter affects display only (see
  * `page-data.ts` — the Server Action re-derives nothing from it).
  *
- * Addressed `/hub/store` rather than §2's `(hub)/store`, for the same reason
- * the routine board is at `/hub/routines/[memberId]`: M01 put the ambient board
- * at `(hub)/hub` instead of `(hub)/`, so every hub URL carries the `/hub`
- * prefix, and `(app)/rewards` already owns the parent side. M12 owns resolving
- * the hub's addressing along with device pairing; until then the tree stays
- * internally consistent.
+ * Addressing is settled in `(hub)/layout.tsx`: the hub tree keeps its `/hub`
+ * prefix, and this page is reached only behind a device principal (M12).
  */
 export default async function HubStorePage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ locale: string }>;
   searchParams: Promise<{ member?: string; date?: string }>;
 }) {
+  const { locale } = await params;
+  await requireHubDevice(locale);
+
   const { member, date } = await searchParams;
 
   const store = await loadStore({ memberId: member, date });
@@ -37,7 +39,7 @@ export default async function HubStorePage({
 
   if (!store) {
     return (
-      <main className="flex min-h-dvh flex-col items-center justify-center gap-2 p-8 text-center">
+      <main className="flex min-h-full flex-col items-center justify-center gap-2 p-8 text-center">
         <h1 className="font-display text-h1 font-bold">{t('store.unavailableTitle')}</h1>
         <p className="text-body-lg text-ink-secondary">{t('store.unavailableBody')}</p>
       </main>
@@ -46,7 +48,7 @@ export default async function HubStorePage({
 
   return (
     <main
-      className="flex min-h-dvh flex-col gap-6 bg-background p-6"
+      className="flex min-h-full flex-col gap-6 bg-background p-6"
       data-testid="hub-store"
       data-member-id={store.member.id}
     >

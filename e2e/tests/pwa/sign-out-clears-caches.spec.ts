@@ -1,3 +1,4 @@
+import { pairHub, unpairHub } from '../../fixtures/hub';
 import { expect, test } from '../../fixtures/family';
 
 /**
@@ -42,7 +43,17 @@ async function databaseNames(page: import('@playwright/test').Page): Promise<str
 const urlsIn = (contents: CacheContents) => contents.flatMap((entry) => entry.urls);
 
 test.describe('sign-out', () => {
-  test('clears every page cache and IndexedDB store this session filled', async ({ page }) => {
+  test('clears every page cache and IndexedDB store this session filled', async ({
+    page,
+    family,
+  }) => {
+    // M12: hub surfaces run behind a device principal. This browser is the
+    // wall tablet for the first half of the test and the parent's phone for
+    // the second — which no real device does, but the claim under test is
+    // about one *cache storage* holding both surfaces' documents, and cache
+    // storage is per browsing context.
+    await pairHub(page, family.familyId);
+
     // The hub fills both the shell cache and the IndexedDB mirror...
     await page.goto('/nl/hub');
     await expect(page.getByTestId('hub-board')).toBeVisible();
@@ -56,7 +67,9 @@ test.describe('sign-out', () => {
     await expect(page.getByTestId('hub-board')).toBeVisible();
 
     // ...and the parent app fills the page cache with a document that is
-    // *this household's* today.
+    // *this household's* today. The device cookie goes first: it outranks the
+    // account session, and `(app)` is member-only.
+    await unpairHub(page);
     await page.goto('/nl/today');
     await expect(page.getByRole('button', { name: 'Uitloggen' })).toBeVisible();
     await page.goto('/nl/today');

@@ -11,6 +11,12 @@ export const dynamic = 'force-dynamic';
  * Parent app shell — an account session is required (docs/architecture.md §2).
  * `src/proxy.ts` already turns cookie-less requests away; this layout is the
  * authoritative check, because a cookie is not a session.
+ *
+ * The principal must be a **member** since M12. A paired kiosk resolves to a
+ * principal too, and it must not satisfy this tree: a wall tablet that reached
+ * `/settings` would render the whole parent shell and then have the §7 matrix
+ * refuse every control on it, which is worse than a redirect. A paired browser
+ * is sent to the board instead — that is the surface it has.
  */
 export default async function AppLayout({
   children,
@@ -22,7 +28,11 @@ export default async function AppLayout({
   const { locale } = await params;
   const principal = await getPrincipal();
 
-  if (!principal) redirect({ href: '/sign-in', locale });
+  // A paired browser is a kiosk regardless of what other cookies it carries
+  // (see `modules/family/principal.ts` on resolution order), so it goes to the
+  // board rather than to a sign-in form it cannot escape.
+  if (principal?.kind === 'device') redirect({ href: '/hub', locale });
+  if (principal?.kind !== 'member') redirect({ href: '/sign-in', locale });
   // `redirect()` throws, but next-intl's wrapper is not typed `never`.
   if (!principal) return null;
 
@@ -62,6 +72,11 @@ export default async function AppLayout({
               className="px-2 py-1 font-display text-sm font-medium"
             >
               {t('notifications')}
+            </Link>
+            {/* M12: pairing a wall display has to be reachable without a
+                deep link — a kiosk that cannot be paired is not a kiosk. */}
+            <Link href="/settings/devices" className="px-2 py-1 font-display text-sm font-medium">
+              {t('devices')}
             </Link>
           </nav>
           <SignOutButton />

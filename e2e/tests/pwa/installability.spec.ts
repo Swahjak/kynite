@@ -1,4 +1,5 @@
-import { expect, test } from '@playwright/test';
+import { pairHub } from '../../fixtures/hub';
+import { expect, test } from '../../fixtures/family';
 
 /**
  * Installability, in a real browser (M11: "both hub and parent app are
@@ -43,7 +44,11 @@ test.describe('installability', () => {
     expect(manifest.display).toBe('standalone');
   });
 
-  test('serves a separate hub manifest that launches at the board', async ({ page }) => {
+  test('serves a separate hub manifest that launches at the board', async ({ page, family }) => {
+    // M12: hub surfaces run behind a device principal, never an account
+    // session — this browser is the wall tablet for the rest of the test.
+    await pairHub(page, family.familyId);
+
     const response = await page.request.get('/hub.webmanifest');
     expect(response.status()).toBe(200);
 
@@ -53,7 +58,11 @@ test.describe('installability', () => {
     expect(manifest.display).toBe('fullscreen');
   });
 
-  test('the hub tree links its own manifest, not the parent app’s', async ({ page }) => {
+  test('the hub tree links its own manifest, not the parent app’s', async ({ page, family }) => {
+    // M12: hub surfaces run behind a device principal, never an account
+    // session — this browser is the wall tablet for the rest of the test.
+    await pairHub(page, family.familyId);
+
     await page.goto('/nl/hub');
 
     const href = await page.locator('link[rel="manifest"]').first().getAttribute('href');
