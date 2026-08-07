@@ -1,15 +1,13 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
-import { getLocale } from 'next-intl/server';
-import { and, eq, isNotNull, isNull, notInArray } from 'drizzle-orm';
+import { and, eq, isNull, notInArray } from 'drizzle-orm';
 import { z } from 'zod';
 import { getDb } from '@/server/db';
 // Table objects come from the schema assembly point, not from a slice barrel
 // (see the same note in `modules/calendar/actions.ts`): a barrel re-exports
 // client components, which must not enter a server mutation module.
-import { completion, routine, routineStep, starLedger } from '@/server/db/schema';
-import { assertCan, getFamily, getMember, type Principal } from '@/modules/family';
+import { completion, routine, routineStep } from '@/server/db/schema';
+import { assertCan, getMember } from '@/modules/family';
 import { publish } from '@/modules/realtime';
 import {
   actionFailure as failure,
@@ -18,9 +16,8 @@ import {
   type ActionState,
   type CompletionState,
 } from './action-state';
-import { isCompletableOn } from './domain/occurrence';
+import { actorOf, recordCompletion, revalidateRoutines, type CompleteStepInput } from './complete';
 import { MAX_GRACE_DAYS, WEEKDAYS, ruleForWeekdays, type Weekday } from './domain/schedule';
-import { starsFor } from './domain/stars';
 import { isRoutineIcon } from './ui/tokens';
 
 /**
@@ -109,18 +106,6 @@ function routineInput(formData: FormData) {
   });
 }
 
-async function revalidateRoutines(memberIds: readonly string[]): Promise<void> {
-  const locale = await getLocale();
-  // No SSE yet (M10 owns realtime), so every surface that renders routines is
-  // revalidated explicitly. `publish()` below is already wired, so when the
-  // stream lands these paths become a fallback rather than the mechanism.
-  revalidatePath(`/${locale}/routines`);
-  revalidatePath(`/${locale}/hub`);
-  for (const memberId of new Set(memberIds)) {
-    revalidatePath(`/${locale}/hub/routines/${memberId}`);
-  }
-}
-
 type ResolvedInput = z.infer<typeof routineSchema> & { rrule: string };
 
 async function resolveInput(
@@ -141,16 +126,6 @@ async function resolveInput(
   }
 
   return { ok: true, input: { ...parsed.data, rrule } };
-}
-
-/**
- * The realtime `actor` for a principal. A `member` principal names itself; a
- * paired kiosk names its device (M12). Neither is invented from a form.
- */
-function actorOf(principal: Principal): { memberId?: string; deviceId?: string } {
-  if (principal.kind === 'member') return { memberId: principal.memberId };
-  if (principal.kind === 'device') return { deviceId: principal.deviceId };
-  return {};
 }
 
 function scheduleOf(input: ResolvedInput) {
@@ -415,38 +390,16 @@ export async function setRoutineRewardAction(
   return idleState;
 }
 
-const completeSchema = z.object({
-  routineId: z.uuid(),
-  routineStepId: z.uuid(),
-  memberId: z.uuid(),
-  occurrenceDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  /**
-   * The idempotency key, minted by the client *before* the request leaves the
-   * device (§4). It is derived from `(member, step, occurrence date)` rather
-   * than random, so a retry after a dropped connection reuses the same key by
-   * construction instead of by remembering to.
-   */
-  clientId: trimmed.min(8).max(200),
-  source: z.enum(['hub', 'mobile']),
-});
-
-export type CompleteStepInput = z.infer<typeof completeSchema>;
-
 /**
- * A single tap on the hub (FR8) — the whole of the <100ms optimistic path's
- * server half.
+ * A single tap on the hub (FR8).
  *
- * The completion row and its star land in **one transaction**, together with
- * the realtime publish, so there is no observable moment where a step is done
- * but unpaid. Idempotency is the database's job, not a read-then-write check:
- * `ON CONFLICT DO NOTHING` covers both `unique(clientId)` (an offline outbox
- * replay) and `unique(memberId, routineStepId, occurrenceDate)` (a double
- * tap). When nothing was inserted, nothing is awarded — which is exactly why
- * a replay cannot mint a second star.
- *
- * There is no failure UI on this path by design: a tap that arrives late, or
- * twice, or for a routine that has graduated, all render the same. The one
- * thing that never happens is a mark against the child.
+ * The write itself moved to `./complete.ts` in M13, unchanged: a caregiver
+ * share link ticks the same step through `POST /api/share/completions`, and the
+ * `(share)` tree may not import a Server Action, so the two entry points share
+ * one implementation rather than two that drift. What stays here is the part
+ * that is specific to *this* entry point — resolving the request principal from
+ * a session cookie via `assertCan`, which is meaningless for a link that has
+ * no session at all.
  */
 export async function completeStepAction(input: CompleteStepInput): Promise<CompletionState> {
   const principal = await assertCan('completion:write', { memberId: input.memberId }).catch(
@@ -454,147 +407,7 @@ export async function completeStepAction(input: CompleteStepInput): Promise<Comp
   );
   if (!principal) return completionFailure('forbidden');
 
-  const parsed = completeSchema.safeParse(input);
-  if (!parsed.success) return completionFailure('invalidInput');
-
-  const { routineId, routineStepId, memberId, occurrenceDate, clientId, source } = parsed.data;
-
-  const db = getDb();
-
-  const [target] = await db
-    .select({
-      routine: routine,
-      step: routineStep,
-    })
-    .from(routineStep)
-    .innerJoin(routine, eq(routine.id, routineStep.routineId))
-    .where(
-      and(
-        eq(routineStep.id, routineStepId),
-        eq(routineStep.routineId, routineId),
-        eq(routine.familyId, principal.familyId)
-      )
-    )
-    .limit(1);
-
-  if (!target) return completionFailure('routineNotFound');
-
-  // The completing member must be in this family; a forged id addresses nothing.
-  if (!(await getMember(principal.familyId, memberId))) {
-    return completionFailure('memberNotFound');
-  }
-
-  const family = await getFamily(principal.familyId);
-  const timeZone = family?.timezone ?? 'Europe/Amsterdam';
-
-  const completable = isCompletableOn(
-    { schedule: target.routine.schedule, anchor: target.routine.createdAt, timeZone },
-    occurrenceDate,
-    new Date()
-  );
-  if (!completable) return completionFailure('notScheduled');
-
-  const stars = starsFor(target.routine);
-
-  const result = await db.transaction(async (tx): Promise<CompletionState> => {
-    const [inserted] = await tx
-      .insert(completion)
-      .values({
-        familyId: principal.familyId,
-        memberId,
-        routineId,
-        routineStepId,
-        occurrenceDate,
-        source,
-        clientId,
-      })
-      // No conflict *target*: this has to absorb both unique indexes at once —
-      // the clientId replay and the (member, step, day) double tap.
-      .onConflictDoNothing()
-      .returning({ id: completion.id });
-
-    if (!inserted) {
-      // Either a replay (same `clientId`) or a re-tap after an undo. Clearing
-      // the stamp is what makes the second case work; on a replay it updates
-      // nothing, because the row was never undone. Either way **no star is
-      // awarded** — `inserted` is empty, and that is the only thing that pays.
-      const [revived] = await tx
-        .update(completion)
-        .set({ undoneAt: null })
-        .where(
-          and(
-            eq(completion.familyId, principal.familyId),
-            eq(completion.clientId, clientId),
-            isNotNull(completion.undoneAt)
-          )
-        )
-        .returning({ id: completion.id });
-
-      if (revived) {
-        await publish(
-          {
-            familyId: principal.familyId,
-            type: 'completion.created',
-            entity: { id: revived.id },
-            // The actor is whoever *tapped* — a paired kiosk names its device
-            // (M12), not the child whose routine it is. `memberId` is the
-            // subject and rides in the patch, where every consumer already
-            // reads it from.
-            actor: { ...actorOf(principal), clientId, source },
-            patch: { memberId, routineId, routineStepId, occurrenceDate, stars: 0 },
-          },
-          tx
-        );
-      }
-
-      return { status: 'done', stars: 0, replayed: true } as const;
-    }
-
-    if (stars > 0) {
-      await tx.insert(starLedger).values({
-        familyId: principal.familyId,
-        memberId,
-        amount: stars,
-        reason: 'routine',
-        completionId: inserted.id,
-        routineId,
-      });
-    }
-
-    await publish(
-      {
-        familyId: principal.familyId,
-        type: 'completion.created',
-        entity: { id: inserted.id },
-        // `clientId` rides along so the device that tapped can drop its own
-        // echo (§4) — it has already celebrated; re-applying the event would
-        // at best be a no-op and at worst interrupt an animation.
-        actor: { ...actorOf(principal), clientId, source },
-        patch: { memberId, routineId, routineStepId, occurrenceDate, stars },
-      },
-      tx
-    );
-
-    if (stars > 0) {
-      await publish(
-        {
-          familyId: principal.familyId,
-          type: 'stars.awarded',
-          entity: { id: inserted.id },
-          actor: { memberId, clientId, source },
-          patch: { amount: stars, reason: 'routine', routineId },
-        },
-        tx
-      );
-    }
-
-    return { status: 'done', stars, replayed: false } as const;
-  });
-
-  // Outside the transaction: revalidation is a cache concern, not a write, and
-  // the hub's own view has already flipped optimistically by the time this runs.
-  await revalidateRoutines([memberId]);
-  return result;
+  return recordCompletion(principal, input);
 }
 
 const undoSchema = z.object({ clientId: trimmed.min(8).max(200) });

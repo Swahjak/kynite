@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from 'next';
 import { notFound } from 'next/navigation';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
-import { ServiceWorkerRegistrar } from '@/components/offline';
 import { fontVariables } from '@/lib/fonts';
 import { routing } from '@/i18n/routing';
 import '../globals.css';
@@ -60,12 +59,13 @@ export default async function LocaleLayout({
     // exempt.
     <html lang={locale} className={fontVariables} suppressHydrationWarning>
       <body className="min-h-dvh antialiased">
-        <NextIntlClientProvider>
-          {/* Registers the worker and nothing else — no permission prompt is
-              reachable from a page load (§6 step 1, M11 cold-entry test). */}
-          <ServiceWorkerRegistrar />
-          {children}
-        </NextIntlClientProvider>
+        {/* No `ServiceWorkerRegistrar` here (B-1 fix): this layout also wraps
+            `(share)`, and a caregiver's browser must never install the
+            worker at all — not even one that then routes their page
+            `network-only`. `(app)/layout.tsx` and `(hub)/layout.tsx` each
+            mount their own registrar instead, since those are the only two
+            surfaces the PWA guarantees apply to. */}
+        <NextIntlClientProvider>{children}</NextIntlClientProvider>
       </body>
     </html>
   );

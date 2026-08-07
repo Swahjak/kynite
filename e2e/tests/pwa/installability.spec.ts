@@ -96,7 +96,12 @@ test.describe('installability', () => {
   });
 
   test('registers a service worker and takes control of the page', async ({ page }) => {
-    await page.goto('/nl');
+    // `/nl/hub` rather than `/nl`: B-1 moved `ServiceWorkerRegistrar` out of
+    // the root `[locale]` layout (shared with the caregiver `(share)` tree,
+    // which must never install one) and into `(app)` and `(hub)` only. An
+    // unpaired browser here redirects to `/nl/hub/pair`, still inside
+    // `(hub)/layout.tsx`.
+    await page.goto('/nl/hub');
 
     const scope = await page.evaluate(async () => {
       const registration = await navigator.serviceWorker.ready;

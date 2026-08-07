@@ -86,6 +86,22 @@ export async function pairHub(
     throw new Error(`pairHub: the device cookie did not attach to ${origin}`);
   }
 
+  // B-1 moved `ServiceWorkerRegistrar` out of the root `[locale]` layout and
+  // into `(app)` and `(hub)` only, so `family`'s sign-up flow (which ends on
+  // `/nl/family`, inside `(app)`) is now the *only* navigation before this
+  // point that could have registered a worker — one fewer than before, when
+  // the root layout registered on `/nl/sign-up` as well. A spec that pairs and
+  // then immediately asserts `serviceWorker.controller` on its very first
+  // `/nl/hub` navigation needs that worker to already be *active*, not merely
+  // registered, by the time that navigation starts — a controller is decided
+  // once, at the start of a navigation, and never retroactively. Waiting here,
+  // on whatever page `pairHub` was called from, is what makes that
+  // deterministic instead of a race against however long `/nl/family` took to
+  // register and activate.
+  if (await page.evaluate(() => 'serviceWorker' in navigator)) {
+    await page.evaluate(() => navigator.serviceWorker.ready);
+  }
+
   return { deviceId, deviceName, token };
 }
 

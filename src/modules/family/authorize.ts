@@ -260,8 +260,13 @@ export function decide(principal: Principal, capability: Capability, resource?: 
   // against — an absent memberId is not "unrestricted", it is untestable.
   const memberOk =
     memberIds === undefined || (!!resource.memberId && memberIds.includes(resource.memberId));
+  // Same reading, mirrored: a calendar-restricted link denied a resource with
+  // no `calendarId` to test — untestable is not unrestricted, matching
+  // `sharing/domain/scope.ts`'s `coversCalendar()`, which fails closed on
+  // exactly this case (a native event has no calendar to test against).
   const calendarOk =
-    calendarIds === undefined || !resource.calendarId || calendarIds.includes(resource.calendarId);
+    calendarIds === undefined ||
+    (!!resource.calendarId && calendarIds.includes(resource.calendarId));
 
   return memberOk && calendarOk ? 'allow' : 'deny';
 }

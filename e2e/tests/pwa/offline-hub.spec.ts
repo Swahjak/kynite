@@ -56,12 +56,27 @@ type MirrorRow = { familyId: string; savedAt: number; data: Record<string, unkno
  *
  * `familyId: null` leaves the row's family alone; a string forges it, which is
  * the rejection case.
+ *
+ * Returns the `generatedAt` written, though most callers use
+ * `rewriteMirrorUntilStable` below instead of calling this directly.
+ *
+ * The write itself waits on the transaction's `oncomplete`, not on the `put`
+ * request's `onsuccess` — `oncomplete` is the actual commit, `onsuccess` only
+ * the individual request's result — which is good practice but was **not**
+ * NB-7's actual bug. See `waitForMirrorFrom` and `rewriteMirrorUntilStable`
+ * below for the real race: `useMirroredHubState`
+ * (`components/offline/hub-state-mirror.tsx`) writes its own natural snapshot
+ * on every hub mount (and again, unconditionally, on certain realtime
+ * events), and this helper's read-modify-write can race either — if a
+ * natural write's commit lands *after* this one, it silently overwrites the
+ * injected row with the mount's own (small, real) `generatedAt`, and a test
+ * that only wrote once would read back the un-rewritten board.
  */
 async function rewriteMirror(
   page: Page,
   patch: { displayName: string; familyId: string | null; newer: boolean }
-): Promise<void> {
-  await page.evaluate(async (input) => {
+): Promise<number> {
+  return page.evaluate(async (input) => {
     const open = () =>
       new Promise<IDBDatabase>((resolve, reject) => {
         const request = indexedDB.open('kynite-offline');
@@ -89,14 +104,14 @@ async function rewriteMirror(
     );
 
     await new Promise<void>((resolve, reject) => {
-      const request = database
-        .transaction('family-state', 'readwrite')
-        .objectStore('family-state')
-        .put(row);
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject(new Error('write failed'));
+      const transaction = database.transaction('family-state', 'readwrite');
+      transaction.objectStore('family-state').put(row);
+      // The commit, not the individual request — see the doc comment above.
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(new Error('write failed'));
     });
     database.close();
+    return row.data.generatedAt;
   }, patch);
 }
 
@@ -148,6 +163,54 @@ async function waitForMirror(page: Page): Promise<MirrorRow | null> {
     }
     return null;
   });
+}
+
+/**
+ * Waits for the mirror to hold a snapshot saved at or after `since` — i.e.
+ * for *this* navigation's own `useMirroredHubState` mount effect to have
+ * finished writing, not merely for some earlier snapshot to exist (NB-7).
+ *
+ * `rewriteMirror` does a read-modify-write of the same row; called before
+ * that natural write lands, it can read the row first, and if the natural
+ * write's own commit then lands *after* the test's, it silently overwrites
+ * the injected row with the mount's own real (small) `generatedAt` — the
+ * test then reads back the un-rewritten board and fails, ~1 in 3 by how
+ * often the two happened to race. Waiting here for the natural write to be
+ * durable first removes the race instead of tightening its timing.
+ */
+async function waitForMirrorFrom(page: Page, since: number): Promise<void> {
+  await expect
+    .poll(async () => (await waitForMirror(page))?.savedAt ?? 0, { timeout: 10_000 })
+    .toBeGreaterThanOrEqual(since);
+}
+
+/**
+ * `rewriteMirror`, but confirmed — and re-applied if it lost the race.
+ *
+ * `waitForMirrorFrom` above closes the *common* window (the natural mount
+ * write still in flight when the injection starts), but does not close every
+ * window: `useMirroredHubState`'s realtime listener re-saves unconditionally
+ * on `event.upserted` / `event.deleted`, with no freshness check, so a write
+ * from *any* later cause can still land after the injected one. Rather than
+ * chase every possible source, this reads the row straight back after
+ * writing it and, if it does not carry what was just written, writes it
+ * again — a compare-and-retry that converges regardless of what raced it,
+ * and leaves only the reload's own network-abort as the remaining window
+ * (which the original, unpatched test already relied on being short).
+ */
+async function rewriteMirrorUntilStable(
+  page: Page,
+  patch: { displayName: string; familyId: string | null; newer: boolean }
+): Promise<void> {
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    await rewriteMirror(page, patch);
+    const row = await waitForMirror(page);
+    const members = row?.data.members as { displayName: string }[] | undefined;
+    if (members?.[0]?.displayName === patch.displayName) return;
+  }
+  throw new Error(
+    `rewriteMirrorUntilStable: the mirror never settled on "${patch.displayName}" — something keeps re-saving it`
+  );
 }
 
 test.describe('hub offline', () => {
@@ -233,11 +296,26 @@ test.describe('hub offline', () => {
     await page.goto('/nl/hub');
     await expect(page.getByTestId('hub-board')).toBeVisible();
     await waitForController(page);
+    const secondNavAt = Date.now();
     await page.goto('/nl/hub');
     await expect(page.getByTestId('hub-board')).toBeVisible();
-    expect(await waitForMirror(page)).not.toBeNull();
+    // NB-7: the flake this closes. `useMirroredHubState`'s mount effect saves
+    // its own (real, server-sent) snapshot on every hub load, asynchronously
+    // — and `rewriteMirror` below is a read-modify-write of the *same* row.
+    // Calling it before that natural write has landed let the two race: if
+    // the natural write's commit landed *after* the injected one, it silently
+    // overwrote the test's row with the mount's own real (small) `generatedAt`,
+    // and the assertions below saw the un-rewritten board. Waiting here for a
+    // snapshot saved at or after this navigation's start — not merely for
+    // *a* snapshot to exist, which an earlier navigation already satisfied —
+    // is what proves the natural write is done before the injected one begins.
+    await waitForMirrorFrom(page, secondNavAt);
 
-    await rewriteMirror(page, { displayName: 'Mirror Sanne', familyId: null, newer: true });
+    await rewriteMirrorUntilStable(page, {
+      displayName: 'Mirror Sanne',
+      familyId: null,
+      newer: true,
+    });
 
     await context.route(HUB_DOCUMENT, (route) => route.abort());
     await page.reload();
@@ -265,12 +343,17 @@ test.describe('hub offline', () => {
     await page.goto('/nl/hub');
     await expect(page.getByTestId('hub-board')).toBeVisible();
     await waitForController(page);
+    const secondNavAt = Date.now();
     await page.goto('/nl/hub');
     await expect(page.getByTestId('hub-board')).toBeVisible();
+    // Same deterministic wait as the sibling test above (NB-7): let the
+    // natural mirror write from *this* navigation land before racing it with
+    // the injected rewrite.
+    await waitForMirrorFrom(page, secondNavAt);
     const own = await waitForMirror(page);
     expect(own).not.toBeNull();
 
-    await rewriteMirror(page, {
+    await rewriteMirrorUntilStable(page, {
       displayName: 'Buurfamilie',
       familyId: '00000000-0000-4000-8000-000000000000',
       newer: true,

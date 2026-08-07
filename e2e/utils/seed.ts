@@ -88,6 +88,12 @@ export type SeedEvent = {
   calendarId?: string | null;
   pendingSync?: boolean;
   tz?: string;
+  /**
+   * M13. The share view's busy-only assertion needs a detail field *other* than
+   * the title to prove is withheld — a redacted event that still leaked
+   * "Kantoor Amsterdam" would pass a title-only check.
+   */
+  location?: string | null;
 };
 
 export async function seedEvents(
@@ -102,9 +108,9 @@ export async function seedEvents(
       `insert into event (
          family_id, calendar_id, title, starts_at, ends_at, all_day, tz,
          owner_member_id, attendee_member_ids, event_type, category, rrule,
-         exdates, pending_sync_at
+         exdates, pending_sync_at, location
        )
-       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
        returning id`,
       [
         familyId,
@@ -121,6 +127,7 @@ export async function seedEvents(
         event.rrule ?? null,
         event.exdates ?? [],
         event.pendingSync ? new Date().toISOString() : null,
+        event.location ?? null,
       ]
     );
     ids.push(rows[0].id);

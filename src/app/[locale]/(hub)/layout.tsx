@@ -5,7 +5,7 @@ import {
   HUB_THEME_STORAGE_KEY,
   KioskShell,
 } from '@/components/hub';
-import { HubReloadController } from '@/components/offline';
+import { HubReloadController, ServiceWorkerRegistrar } from '@/components/offline';
 import { RealtimeProvider } from '@/components/realtime';
 import { getPrincipal } from '@/modules/family';
 import { getDevice } from '@/modules/devices';
@@ -90,6 +90,9 @@ export default async function HubLayout({
           sync; this only has to be right for the first frame, so it reads the
           same localStorage key and the same media query and nothing else. */}
       <script dangerouslySetInnerHTML={{ __html: PRE_PAINT_THEME }} />
+      {/* B-1: registered per-surface now, not from the root `[locale]`
+          layout — see `(app)/layout.tsx` for why. */}
+      <ServiceWorkerRegistrar />
       <HubReloadController />
       {/* The chime control is rendered here, not inside the shell: the shell is
           a client component and `@/modules/timers` carries `server-only`

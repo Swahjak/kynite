@@ -11,25 +11,20 @@ import {
 } from 'drizzle-orm/pg-core';
 import { primaryId, timestamps } from '@/server/db/columns';
 import { family } from '@/modules/family/schema';
+import { SHARE_SURFACES, type ShareLinkScope, type ShareSurface } from './domain/scope';
 
 /** docs/architecture.md §3 "Sharing, push, devices" (PRD FR24/FR25). */
 
 export const shareRole = pgEnum('share_role', ['viewer', 'contributor']);
 
-/** Which read surfaces a link opens. Absent = every surface its role allows. */
-export const SHARE_SURFACES = ['calendar', 'routines', 'rewards', 'timers'] as const;
-export type ShareSurface = (typeof SHARE_SURFACES)[number];
-
 /**
- * The stored scope. Mirrors `ShareScope` in `modules/family/authorize.ts`:
- * an absent dimension is unrestricted, and `decide()` fails closed when a
- * restricted dimension has nothing to test against.
+ * The scope vocabulary moved to `./domain/scope` in M13 — same values, same
+ * stored shape, now reachable from pure code. The `(share)` route tree must not
+ * transitively import a `'use server'` module (§2), which makes drizzle's
+ * `schema.ts` the wrong place for anything that tree needs to *reason* with;
+ * re-exported here so the stored column's type still reads off the table.
  */
-export type ShareLinkScope = {
-  memberIds?: string[];
-  calendarIds?: string[];
-  surfaces?: ShareSurface[];
-};
+export { SHARE_SURFACES, type ShareLinkScope, type ShareSurface };
 
 /**
  * A no-account access grant (the babysitter link). Only the hash is stored —

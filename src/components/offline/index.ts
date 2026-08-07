@@ -18,6 +18,7 @@ export {
   isHubUrl,
   isImmutableAsset,
   isNeverCached,
+  isShareUrl,
   strategyFor,
   type CacheStrategy,
 } from './sw-strategy';

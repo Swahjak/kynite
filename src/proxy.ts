@@ -27,6 +27,37 @@ function isLocale(segment: string | undefined): segment is (typeof routing.local
 /** The kiosk tree's own first segment (M12). */
 const HUB_SECTION = 'hub';
 
+/** The caregiver share tree's first segment — `(share)/s/[token]` (M13). */
+const SHARE_SECTION = 's';
+
+/**
+ * Headers every `(share)` response carries (M13 criterion).
+ *
+ * `X-Robots-Tag` rather than only a `<meta name="robots">`: the share layout
+ * sets the meta tag too, but a crawler that follows a link from a WhatsApp
+ * preview may never parse the body, and an indexed share URL is an indexed
+ * bearer token. Belt and braces is the correct posture when the failure mode is
+ * "the family schedule is on Google".
+ *
+ * `Referrer-Policy: no-referrer` is the more important of the two. The token is
+ * *in the path*, so any outbound request from this page — a stylesheet on a
+ * CDN, a link a caregiver taps, an image — would otherwise put the full URL in
+ * a `Referer` header on somebody else's server. The share view has no external
+ * requests today; the header is what keeps that a design decision rather than a
+ * standing hazard.
+ */
+const SHARE_HEADERS: Record<string, string> = {
+  'X-Robots-Tag': 'noindex, nofollow',
+  'Referrer-Policy': 'no-referrer',
+  // A share page rendered from a shared cache would be one family's schedule
+  // served to whoever asks next. `force-dynamic` already says so to Next; this
+  // says it to every proxy in between.
+  'Cache-Control': 'no-store',
+};
+
+/** Reads only. Everything else from this tree is a mutation attempt. */
+const SAFE_METHODS = new Set(['GET', 'HEAD']);
+
 /**
  * Optimistic guard: a missing session cookie is turned away here so the tree
  * behind it is never even rendered. Cookie *presence* is not proof of a
@@ -44,6 +75,33 @@ export default function proxy(request: NextRequest): NextResponse {
   const locale = isLocale(segments[0]) ? segments[0] : routing.defaultLocale;
   const rest = isLocale(segments[0]) ? segments.slice(1) : segments;
   const section = rest[0];
+
+  /**
+   * The `(share)` tree (M13, docs/architecture.md §2: "must be impossible to
+   * reach a mutation from this tree").
+   *
+   * This runs **first**, and it is a hard refusal rather than a redirect. A
+   * Server Action invocation is a `POST` to the URL of the page that rendered
+   * it, so refusing every non-GET request to `/s/*` closes the mutation path at
+   * the transport, underneath whatever the route tree happens to import. The
+   * lint rule and `tests/unit/share-tree-no-server-actions.test.ts` stop an
+   * action from being imported at all; this stops one from being *invoked* even
+   * if both were somehow wrong. Three independent mechanisms, because the thing
+   * being protected is a household's data behind a URL anybody may hold.
+   *
+   * A contributor's tick is not affected: it goes to
+   * `POST /api/share/completions`, which this proxy never sees — the matcher
+   * skips `api/` — and which re-derives the principal from the token itself.
+   */
+  if (section === SHARE_SECTION) {
+    if (!SAFE_METHODS.has(request.method)) {
+      return new NextResponse(null, { status: 405, headers: { Allow: 'GET, HEAD' } });
+    }
+
+    const response = intl(request);
+    for (const [key, value] of Object.entries(SHARE_HEADERS)) response.headers.set(key, value);
+    return response;
+  }
 
   if (section && PROTECTED_SECTIONS.has(section) && !getSessionCookie(request)) {
     const url = request.nextUrl.clone();

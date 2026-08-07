@@ -165,6 +165,44 @@ describe('resource resolution', () => {
     expect(can(contributor, 'completion:write', { familyId: FAMILY, memberId: null })).toBe(false);
   });
 
+  it('fails closed when a scoped principal is restricted to calendars but the resource carries no calendarId — NB-2', () => {
+    // The mirror of the memberIds case above, and of
+    // `sharing/domain/scope.ts`'s `coversCalendar()`: a calendar-restricted
+    // link denied a resource with no `calendarId` to test is untestable, not
+    // unrestricted. A native (non-Google) event carries no calendarId at all,
+    // so an open reading here would have let a calendar-scoped link see and
+    // act on every native event in the family regardless of its restriction.
+    const calendarScoped: Principal = {
+      kind: 'share',
+      familyId: FAMILY,
+      role: 'contributor',
+      scope: { calendarIds: ['cal-1'] },
+    };
+
+    expect(can(calendarScoped, 'calendar:view', { familyId: FAMILY, memberId: ME })).toBe(false);
+    expect(
+      can(calendarScoped, 'calendar:view', {
+        familyId: FAMILY,
+        memberId: ME,
+        calendarId: null,
+      })
+    ).toBe(false);
+    expect(
+      can(calendarScoped, 'calendar:view', {
+        familyId: FAMILY,
+        memberId: ME,
+        calendarId: 'cal-2',
+      })
+    ).toBe(false);
+    expect(
+      can(calendarScoped, 'calendar:view', {
+        familyId: FAMILY,
+        memberId: ME,
+        calendarId: 'cal-1',
+      })
+    ).toBe(true);
+  });
+
   it('reports "busy-only" for a hub device, and does not count it as a grant', () => {
     expect(decide(device, 'calendar:view_private', { familyId: FAMILY })).toBe('busy-only');
     expect(can(device, 'calendar:view_private', { familyId: FAMILY })).toBe(false);

@@ -72,6 +72,22 @@ export function isHubUrl(url: URL | string): boolean {
 }
 
 /**
+ * A caregiver share URL: `/{locale}/s/*` (docs/architecture.md §2, §7).
+ *
+ * Mirrors `isHubUrl()`'s shape for the same reason it exists: the same worker
+ * serves every surface, and only the URL tells it which one it is looking at.
+ * This one matters more than most — a share document caches the family's
+ * schedule *and* the raw bearer token (it is the URL) in Cache Storage, which
+ * a revocation in the database does nothing to evict. `strategyFor()` routes
+ * it to `'network-only'` before it ever reaches the page branch below, so it
+ * is never written to `kynite-app-pages-v1` in the first place.
+ */
+export function isShareUrl(url: URL | string): boolean {
+  const path = pathOf(url);
+  return LOCALES.some((locale) => path === `/${locale}/s` || path.startsWith(`/${locale}/s/`));
+}
+
+/**
  * Immutable build output and static art. §6: fonts, icons and celebration
  * assets are `CacheFirst` — "celebrations must never wait on a network".
  *
@@ -104,7 +120,13 @@ export function isNeverCached(url: URL | string): boolean {
     path.startsWith('/api/sse') ||
     path.startsWith('/api/auth') ||
     path.startsWith('/api/push') ||
-    path.startsWith('/api/webhooks')
+    path.startsWith('/api/webhooks') ||
+    // The contributor write a share link posts to (§7). Caching it would be
+    // harmless in itself — it is a POST, never matched by a GET-keyed cache —
+    // but it belongs on this list on the same principle as the rest: nothing
+    // reachable from an anonymous bearer token is ever a candidate for
+    // Cache Storage.
+    path.startsWith('/api/share')
   );
 }
 
@@ -129,6 +151,13 @@ export function strategyFor(input: {
   mode?: string;
 }): CacheStrategy {
   if (isNeverCached(input.url)) return 'network-only';
+  // Before the page branch: a share document must never fall into
+  // `kynite-app-pages-v1` (B-1) — it carries both the family's schedule and
+  // the raw token (the URL itself), and a `Cache-Control: no-store` response
+  // header does not bind the Cache Storage API the way it binds an HTTP
+  // cache. A revoked link would otherwise keep answering from a caregiver's
+  // own device indefinitely.
+  if (isShareUrl(input.url)) return 'network-only';
   if (isImmutableAsset(input.url)) return 'assets';
   if (isDataRequest(input.url)) return 'data';
 

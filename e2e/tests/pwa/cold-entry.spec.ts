@@ -66,7 +66,14 @@ test.describe('cold entry', () => {
     // The two acts are independent and this is the test that keeps them so:
     // a worker is installed (offline caching, push *delivery*) with no
     // permission dialog anywhere near it.
-    await page.goto('/nl');
+    //
+    // `/nl/hub` rather than `/nl`: B-1 moved `ServiceWorkerRegistrar` out of
+    // the root `[locale]` layout (which also wraps the caregiver `(share)`
+    // tree — that tree must never install a worker) and into `(app)` and
+    // `(hub)` only. An unpaired browser hitting `/nl/hub` still redirects to
+    // `/nl/hub/pair`, which is inside `(hub)/layout.tsx` and registers just
+    // the same, with no session and no device cookie required.
+    await page.goto('/nl/hub');
     await page.evaluate(() => navigator.serviceWorker.ready);
 
     const requests = await page.evaluate(

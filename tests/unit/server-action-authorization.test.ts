@@ -238,13 +238,21 @@ describe('every Server Action authorizes first', () => {
     // seedRewardPresets) + src/modules/timers/actions.ts (2: startTimer +
     // stopTimer) + src/modules/devices/actions.ts (4, added in M12:
     // createPairingCode + pairDevice + revokeDevice, plus cancelPairingCode
-    // added in the brute-force/lockout review pass) = 33. Self-unpair
+    // added in the brute-force/lockout review pass) +
+    // src/modules/sharing/actions.ts (2, added in M13: createShareLink +
+    // revokeShareLink) = 35. Self-unpair
     // (`POST /api/devices/session/unpair`) is deliberately *not* here: it is
     // a route handler, not a `'use server'` module, so this auditor never
     // sees it — see that file's doc comment for why it needs no `assertCan`.
+    // The same is true of M13's `POST /api/share/completions`, the contributor
+    // tick: the `(share)` tree may not import a Server Action and `src/proxy.ts`
+    // refuses a POST to it, so that write *cannot* be one. Its authorization
+    // lives inside `recordCompletion`, which both it and `completeStepAction`
+    // call — see that function's doc comment for why the check was put there
+    // rather than at each entry point.
     // Adding or removing a Server Action must bump this number deliberately —
     // that is the point.
-    expect(findings.length).toBe(33);
+    expect(findings.length).toBe(35);
   });
 
   it('reports no unauthorized action anywhere in src/', () => {

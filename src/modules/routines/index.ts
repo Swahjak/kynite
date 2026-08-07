@@ -99,6 +99,8 @@ export {
   type CompletionState,
 } from './action-state';
 
+export { recordCompletion, completeStepSchema, type CompleteStepInput } from './complete';
+
 export {
   completeStepAction,
   createRoutineAction,
@@ -106,7 +108,6 @@ export {
   setRoutineRewardAction,
   undoCompletionAction,
   updateRoutineAction,
-  type CompleteStepInput,
   type UndoCompletionInput,
 } from './actions';
 

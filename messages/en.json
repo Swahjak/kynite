@@ -11,7 +11,8 @@
     "rewards": "Rewards",
     "timers": "Timers",
     "notifications": "Notifications",
-    "devices": "Screens"
+    "devices": "Screens",
+    "sharing": "Sharing"
   },
   "auth": {
     "signOut": "Sign out",
@@ -630,6 +631,85 @@
       "deviceNotFound": "This screen no longer exists.",
       "pairingCodeNotFound": "This code no longer exists.",
       "tooManyPending": "Too many screens are waiting to be paired. Cancel one first, or wait for a code to expire."
+    }
+  },
+  "sharing": {
+    "pageTitle": "Sharing",
+    "pageSubtitle": "Make a link so a sitter or grandparent can see the schedule — no account needed.",
+    "roles": {
+      "viewer": "View only",
+      "contributor": "Can tick off"
+    },
+    "roleHints": {
+      "viewer": "Sees the schedule. Changes nothing.",
+      "contributor": "Sees the schedule and can tick routine steps off."
+    },
+    "surfaces": {
+      "calendar": "Calendar",
+      "routines": "Routines"
+    },
+    "create": {
+      "title": "New link",
+      "description": "The link works straight away and is shown only once.",
+      "labelLabel": "Who is this link for?",
+      "labelPlaceholder": "Grandma",
+      "roleLabel": "What may this link do?",
+      "membersLabel": "Who is it about?",
+      "membersHint": "Nothing ticked means everyone in the family.",
+      "calendarsLabel": "Which calendars?",
+      "calendarsHint": "Nothing ticked means all calendars. Private calendars only ever show busy.",
+      "surfacesLabel": "What is visible?",
+      "surfacesHint": "Nothing ticked means everything this role may see.",
+      "expiryLabel": "How long should the link work?",
+      "expiryDays": "{days, plural, one {# day} other {# days}}",
+      "expiryNever": "Until you revoke it",
+      "submit": "Make link"
+    },
+    "created": {
+      "title": "Done. Here is the link.",
+      "onceWarning": "This is the only time you will see this link. Save it or scan the code — it cannot be looked up again.",
+      "copy": "Copy",
+      "copied": "Copied",
+      "expiresAt": "Works until {date}",
+      "noExpiry": "Until you revoke it",
+      "qrLabel": "QR code for this link"
+    },
+    "list": {
+      "title": "Shared links",
+      "empty": "No links shared yet.",
+      "untitled": "Untitled link",
+      "scopedTo": "About {names}",
+      "scopeAll": "About the whole family",
+      "usage": "{count, plural, one {opened # time} other {opened # times}}, last {when}",
+      "neverUsed": "Not opened yet",
+      "expiresAt": "Works until {date}",
+      "noExpiry": "Until you revoke it",
+      "expiredAt": "Expired {when}",
+      "revokedAt": "Revoked {when}",
+      "revoke": "Revoke",
+      "revokeConfirm": "Revoke this link?",
+      "revokeConfirmYes": "Yes, revoke",
+      "revokeConfirmCancel": "Cancel"
+    },
+    "view": {
+      "title": "{family}'s schedule",
+      "titleFallback": "The schedule",
+      "roleViewer": "You are looking in. Nothing changes because of you.",
+      "roleContributor": "You can tick steps off once they are done.",
+      "scheduleTitle": "This week",
+      "routinesTitle": "Today",
+      "dayEmpty": "Nothing planned.",
+      "allDay": "All day",
+      "busy": "Busy",
+      "stepDone": "Done",
+      "stepTodo": "To do",
+      "goneTitle": "This link no longer works",
+      "goneBody": "Ask the family for a new one. Nothing is wrong."
+    },
+    "errors": {
+      "forbidden": "You are not allowed to do this.",
+      "invalidInput": "Please check the details you entered.",
+      "shareLinkNotFound": "This link no longer exists."
     }
   }
 }

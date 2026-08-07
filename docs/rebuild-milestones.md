@@ -220,7 +220,7 @@ This is the single source of progress truth for the Kynite greenfield rebuild. E
 
 ## M13 — Caregiver share links
 
-- [ ] Status
+- [x] Status
 - **Scope:** Build `modules/sharing`: 32-byte base64url tokens stored SHA-256 hashed with the raw value shown once (plus QR), resolving to a request-scoped principal with no cookie and no session row. Serve the `(share)/s/[token]` read-only view scoped to a subset of members and calendars, with `viewer` and `contributor` roles, expiry/revocation, and usage telemetry visible to parents.
 - **Acceptance criteria:**
   - Route `(share)/s/[token]` exists and renders the consolidated schedule with no account and no session cookie set.
@@ -231,7 +231,7 @@ This is the single source of progress truth for the Kynite greenfield rebuild. E
   - Responses carry `noindex` and `Referrer-Policy: no-referrer` — asserted by a header test.
   - Expired and revoked links return a friendly gone state, not a stack trace; `lastUsedAt` and `useCount` update and are visible in `(app)/settings`.
   - Gate green: `pnpm typecheck && pnpm lint && pnpm test:run`.
-- **Review verdict:** _pending_
+- **Review verdict:** _approved after fixes_ — Opus review 2026-08-07: all eight criteria met and mutation-verified (transitive AST share-tree scan real incl. 3-hop path reporting, both eslint rules incl. barrel-regex quirk, proxy 405, out-of-scope denial asserting refusal + absent row + absent ledger entry, raw-token hygiene with domain-separated hash tested against device hash, negative-marking roots live on share view); busy-only proven in the query not CSS; cookie-freedom asserted (empty cookies + no set-cookie); §7 scoped grade genuinely exercised; gone-states identical by design (no anonymous probe oracle); contributor route-handler exception argued correctly (no CORS, no cookie = no CSRF, uniques bound amplification). Blocker fixed: SW registered from root locale layout cached share pages NetworkFirst — family schedule + raw token persisted in Cache Storage past revocation (Cache API ignores no-store); now isShareUrl → network-only, /api/share never-cached, registrar moved out of root into (app)+(hub) layouts so share visitors never install a worker, unit + e2e proof (no controller, no /s/ cache entry). Also fixed: decide() calendarIds arm fails closed (was open, contradicting coversCalendar and two comments), actorOf/revalidateRoutines deduped, token-hygiene scan extended to event_log, viewer/revoked route-POST e2e denials, offline-hub flake root-caused (test's injected mirror write raced natural mirror-save — condition-based waits, 42/42 over 6 repeats), QR aria-label localized, dead shareTokenHashEquals removed. Post-fix gates: 933/933 with DB, build clean, sharing 11/11 + pwa 41/41. Carry-forwards: completion-perf ~100ms budget flake under machine load (101.9ms observed — pin before M17); mobile header 10 links overflow (M15); share-view visual baseline unpinnable without ?date= on bearer URL (M15 decision); useCount may over-count within coalesce window (documented property); rewards/timers share surfaces in vocabulary without renderer.
 
 ## M14 — Second-parent onboarding
 

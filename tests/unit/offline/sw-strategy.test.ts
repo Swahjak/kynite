@@ -6,6 +6,7 @@ import {
   isHubUrl,
   isImmutableAsset,
   isNeverCached,
+  isShareUrl,
   strategyFor,
 } from '@/components/offline/sw-strategy';
 
@@ -68,6 +69,34 @@ describe('service worker strategy', () => {
     });
   });
 
+  describe('share matching', () => {
+    it('recognises a share URL in every locale and at every depth', () => {
+      expect(isShareUrl('/nl/s/2XZ1qsSPBLc0y2i8s8OXY0N2gZ2mLcQOgVaVsGxOaWo')).toBe(true);
+      expect(isShareUrl('/en/s/2XZ1qsSPBLc0y2i8s8OXY0N2gZ2mLcQOgVaVsGxOaWo')).toBe(true);
+      expect(isShareUrl('/nl/s')).toBe(true);
+      expect(isShareUrl(new URL('https://kynite.test/nl/s/token'))).toBe(true);
+    });
+
+    it('does not treat a route that merely starts with the same letters as a share URL', () => {
+      expect(isShareUrl('/nl/settings')).toBe(false);
+      expect(isShareUrl('/nl/sign-in')).toBe(false);
+      expect(isShareUrl('/s/token')).toBe(false);
+    });
+
+    it('routes a share page to network-only, never the app-pages bucket — B-1', () => {
+      // The finding this closes: a share document must never land in
+      // `kynite-app-pages-v1`, because that cache has no `maxAge` and a
+      // `Cache-Control: no-store` response header does not bind Cache
+      // Storage. Asserted against `page()`, not `isShareUrl()` directly, so
+      // it also proves the branch order in `strategyFor()` — a share URL that
+      // fell through to the page branch below would otherwise silently
+      // resolve to `'app-pages'` and this test is what would catch it.
+      expect(page('/nl/s/2XZ1qsSPBLc0y2i8s8OXY0N2gZ2mLcQOgVaVsGxOaWo')).toBe('network-only');
+      expect(page('/en/s/2XZ1qsSPBLc0y2i8s8OXY0N2gZ2mLcQOgVaVsGxOaWo')).toBe('network-only');
+      expect(page('/nl/s/2XZ1qsSPBLc0y2i8s8OXY0N2gZ2mLcQOgVaVsGxOaWo')).not.toBe('app-pages');
+    });
+  });
+
   describe('assets', () => {
     it('serves hashed build output and art from the cache first', () => {
       expect(isImmutableAsset('/_next/static/chunks/main-abc123.js')).toBe(true);
@@ -97,6 +126,15 @@ describe('service worker strategy', () => {
       expect(isNeverCached('/api/auth/session')).toBe(true);
       expect(isNeverCached('/api/push/subscribe')).toBe(true);
       expect(isNeverCached('/api/webhooks/google-calendar')).toBe(true);
+    });
+
+    it('leaves the share completion endpoint alone — B-1', () => {
+      expect(isNeverCached('/api/share/completions')).toBe(true);
+      expect(strategyFor({ url: '/api/share/completions', destination: '' })).toBe('network-only');
+      // Not merely uncached by accident: it must not be reachable through the
+      // `isDataRequest` bucket, which would give it `NetworkFirst` and a cache
+      // entry keyed only by URL.
+      expect(isDataRequest('/api/share/completions')).toBe(false);
     });
 
     it('still caches the ordinary reads the hub polls', () => {

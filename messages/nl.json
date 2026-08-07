@@ -11,7 +11,8 @@
     "rewards": "Beloningen",
     "timers": "Timers",
     "notifications": "Meldingen",
-    "devices": "Schermen"
+    "devices": "Schermen",
+    "sharing": "Delen"
   },
   "auth": {
     "signOut": "Uitloggen",
@@ -630,6 +631,85 @@
       "deviceNotFound": "Dit scherm bestaat niet meer.",
       "pairingCodeNotFound": "Deze code bestaat niet meer.",
       "tooManyPending": "Er wachten al te veel schermen op koppeling. Annuleer er eerst een, of wacht tot een code verloopt."
+    }
+  },
+  "sharing": {
+    "pageTitle": "Delen",
+    "pageSubtitle": "Maak een link waarmee oppas of opa en oma het schema kunnen bekijken — zonder account.",
+    "roles": {
+      "viewer": "Alleen bekijken",
+      "contributor": "Mag afvinken"
+    },
+    "roleHints": {
+      "viewer": "Ziet het schema. Verandert niets.",
+      "contributor": "Ziet het schema en mag routinestappen afvinken."
+    },
+    "surfaces": {
+      "calendar": "Agenda",
+      "routines": "Routines"
+    },
+    "create": {
+      "title": "Nieuwe link",
+      "description": "De link is meteen bruikbaar en wordt maar één keer getoond.",
+      "labelLabel": "Voor wie is deze link?",
+      "labelPlaceholder": "Oma",
+      "roleLabel": "Wat mag deze link?",
+      "membersLabel": "Over wie gaat het?",
+      "membersHint": "Niets aangevinkt betekent: iedereen in het gezin.",
+      "calendarsLabel": "Welke agenda's?",
+      "calendarsHint": "Niets aangevinkt betekent: alle agenda's. Privé-agenda's laten alleen bezet zien.",
+      "surfacesLabel": "Wat is er te zien?",
+      "surfacesHint": "Niets aangevinkt betekent: alles wat deze rol mag zien.",
+      "expiryLabel": "Hoe lang blijft de link werken?",
+      "expiryDays": "{days, plural, one {# dag} other {# dagen}}",
+      "expiryNever": "Blijft werken tot je hem intrekt",
+      "submit": "Link maken"
+    },
+    "created": {
+      "title": "Klaar. Hier is de link.",
+      "onceWarning": "Je ziet deze link nu één keer. Bewaar hem of scan de code — daarna kun je hem niet meer opvragen.",
+      "copy": "Kopiëren",
+      "copied": "Gekopieerd",
+      "expiresAt": "Werkt tot {date}",
+      "noExpiry": "Blijft werken tot je hem intrekt",
+      "qrLabel": "QR-code voor deze link"
+    },
+    "list": {
+      "title": "Gedeelde links",
+      "empty": "Nog geen links gedeeld.",
+      "untitled": "Naamloze link",
+      "scopedTo": "Over {names}",
+      "scopeAll": "Over het hele gezin",
+      "usage": "{count, plural, one {# keer geopend} other {# keer geopend}}, laatst {when}",
+      "neverUsed": "Nog niet geopend",
+      "expiresAt": "Werkt tot {date}",
+      "noExpiry": "Blijft werken tot je hem intrekt",
+      "expiredAt": "Verlopen {when}",
+      "revokedAt": "Ingetrokken {when}",
+      "revoke": "Intrekken",
+      "revokeConfirm": "Deze link intrekken?",
+      "revokeConfirmYes": "Ja, intrekken",
+      "revokeConfirmCancel": "Annuleren"
+    },
+    "view": {
+      "title": "Het schema van {family}",
+      "titleFallback": "Het schema",
+      "roleViewer": "Je kijkt mee. Er verandert niets door jou.",
+      "roleContributor": "Je kunt stappen afvinken zodra ze klaar zijn.",
+      "scheduleTitle": "Deze week",
+      "routinesTitle": "Vandaag",
+      "dayEmpty": "Niets gepland.",
+      "allDay": "Hele dag",
+      "busy": "Bezet",
+      "stepDone": "Klaar",
+      "stepTodo": "Nog te doen",
+      "goneTitle": "Deze link werkt niet meer",
+      "goneBody": "Vraag het gezin om een nieuwe link. Er is verder niets aan de hand."
+    },
+    "errors": {
+      "forbidden": "Je mag dit niet doen.",
+      "invalidInput": "Controleer de ingevulde gegevens.",
+      "shareLinkNotFound": "Deze link bestaat niet meer."
     }
   }
 }

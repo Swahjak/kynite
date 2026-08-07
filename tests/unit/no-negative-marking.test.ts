@@ -37,6 +37,12 @@ const CHILD_FACING_ROOTS = [
   'src/components/celebration',
   'src/components/hub',
   'src/app/[locale]/(hub)',
+  // M13. The caregiver share view renders routine steps and their done state to
+  // an adult who is standing next to the child — which is the *worst* place for
+  // a red cross or a "3 missed" line to appear, because it hands a visitor a
+  // verdict on somebody else's kid. Same rules, same scanner.
+  'src/modules/sharing/view',
+  'src/app/[locale]/(share)',
 ];
 
 /**

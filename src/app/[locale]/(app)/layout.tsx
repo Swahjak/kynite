@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server';
+import { ServiceWorkerRegistrar } from '@/components/offline';
 import { RealtimeProvider } from '@/components/realtime';
 import { Link, redirect } from '@/i18n/navigation';
 import { SignOutButton, getPrincipal } from '@/modules/family';
@@ -41,6 +42,10 @@ export default async function AppLayout({
   return (
     // One stream for the parent app, the mirror of the hub tree's layout (§4).
     <RealtimeProvider>
+      {/* B-1: the worker is registered here rather than in the root
+          `[locale]` layout, because that layout also wraps `(share)` — a
+          caregiver's browser must never install it at all. */}
+      <ServiceWorkerRegistrar />
       <div className="flex min-h-dvh flex-col">
         <header className="flex items-center justify-between gap-4 border-b border-border px-4 py-2">
           <nav className="flex items-center gap-2">
@@ -77,6 +82,12 @@ export default async function AppLayout({
                 deep link — a kiosk that cannot be paired is not a kiosk. */}
             <Link href="/settings/devices" className="px-2 py-1 font-display text-sm font-medium">
               {t('devices')}
+            </Link>
+            {/* M13: a caregiver link is minted here and — more importantly —
+                revoked here. The one credential in this product with nobody's
+                face attached to it needs a door a parent can find. */}
+            <Link href="/settings/sharing" className="px-2 py-1 font-display text-sm font-medium">
+              {t('sharing')}
             </Link>
           </nav>
           <SignOutButton />
