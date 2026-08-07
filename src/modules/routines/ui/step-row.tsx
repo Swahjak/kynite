@@ -38,6 +38,18 @@ export type StepRowProps = {
   starLabel: string;
   /** Accessible name of the tap target, e.g. "Mark Brush teeth as done". */
   actionLabel: string;
+  /**
+   * The step this routine is *on* — the first one not yet done (M19).
+   *
+   * Purely presentational, and additive: the stitch board gives the live step a
+   * taller row, a left accent bar and a forward arrow so a glance from across
+   * the room lands on "this one next" without reading a word
+   * (`chores_routines_light_mode_landscape_hub/code.html`, "Active Step").
+   * Every other row keeps the 56px height it always had. Nothing about this
+   * marks the rows around it — the ones behind are done, the ones ahead are
+   * ordinary, and neither carries a status.
+   */
+  active?: boolean;
   onComplete?: (origin: { x: number; y: number }) => void;
 };
 
@@ -57,8 +69,11 @@ export function StepRow({
   stars,
   starLabel,
   actionLabel,
+  active = false,
   onComplete,
 }: StepRowProps) {
+  const live = active && !done;
+
   return (
     <li data-testid="routine-step" data-step-id={stepId} data-state={done ? 'done' : 'todo'}>
       <button
@@ -79,19 +94,31 @@ export function StepRow({
         }}
         className={cn(
           // 56px — the Stitch hub step-row height, well past the 48px kiosk
-          // minimum, because this is the one control that matters here.
-          'flex h-14 w-full items-center gap-4 rounded-lg px-4 text-left transition-all duration-200 ease-brand',
+          // minimum, because this is the one control that matters here. The
+          // live step steps up to 72px, which is the mockup's only size change.
+          'group/step relative flex w-full items-center gap-4 overflow-hidden rounded-xl px-4 text-left transition-all duration-200 ease-brand',
           'focus-visible:ring-3 focus-visible:ring-ring/50',
-          done
-            ? 'bg-surface-hover'
-            : 'bg-surface ring-1 ring-foreground/10 hover:bg-accent active:scale-[0.99]'
+          live ? 'h-18' : 'h-14',
+          // The "done" dim is decorative, but `opacity` applies to the text
+          // inside the row as well — and a done step carries the star award in
+          // `--gold-ink`, the darkest-tinted label on the row (6.49:1 on white).
+          // At 80% it composited to 3.86:1 on the hub board and took the
+          // routines surface under AA (M19). 90% keeps the recede the mockup
+          // asks for and leaves every label on the row above 4.5:1.
+          done && 'bg-surface-container-low opacity-90 hover:opacity-100',
+          live && 'border-l-4 border-primary bg-primary/8 shadow-sm hover:bg-primary/12',
+          !done && !live && 'bg-surface-container-lowest shadow-sm hover:bg-surface-hover',
+          !done && 'active:scale-[0.99]'
         )}
       >
         <span
           aria-hidden
           className={cn(
-            'flex size-8 shrink-0 items-center justify-center rounded-full',
-            done ? 'bg-primary text-primary-foreground' : 'ring-2 ring-line'
+            'flex shrink-0 items-center justify-center rounded-full transition-colors duration-200',
+            live ? 'size-10' : 'size-8',
+            done && 'bg-primary text-primary-foreground',
+            live && 'border-2 border-primary bg-surface-container-lowest',
+            !done && !live && 'border-2 border-line'
           )}
         >
           {done ? <Icon name="check" size="sm" filled /> : null}
@@ -99,7 +126,8 @@ export function StepRow({
 
         <span
           className={cn(
-            'min-w-0 flex-1 truncate text-body-lg',
+            'min-w-0 flex-1 truncate',
+            live ? 'font-display text-h3 font-semibold' : 'text-body-lg',
             done && 'text-ink-secondary line-through decoration-ink-muted/50'
           )}
         >
@@ -120,12 +148,26 @@ export function StepRow({
               <StarPop amount={stars} label={starLabel} />
             </span>
           </span>
-        ) : timerSeconds ? (
-          <span className="ml-auto flex shrink-0 items-center gap-1 text-caption text-ink-secondary">
-            <Icon name="timer" size="sm" />
-            <span className="tabular-time">{formatTimer(timerSeconds)}</span>
+        ) : (
+          <span className="ml-auto flex shrink-0 items-center gap-3">
+            {timerSeconds ? (
+              <span className="flex items-center gap-1 rounded-4xl bg-surface-container px-3 py-1 text-caption text-ink-secondary">
+                <Icon name="timer" size="sm" />
+                <span className="tabular-time">{formatTimer(timerSeconds)}</span>
+              </span>
+            ) : null}
+            {/* The mockup's forward arrow on the live row. Direction, not a
+                verdict: it points at what happens next and says nothing about
+                the rows behind it. */}
+            {live ? (
+              <Icon
+                name="arrow_forward"
+                size="lg"
+                className="text-ink-secondary transition-transform duration-200 ease-brand group-hover/step:translate-x-1"
+              />
+            ) : null}
           </span>
-        ) : null}
+        )}
       </button>
     </li>
   );

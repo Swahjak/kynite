@@ -5,7 +5,10 @@ import { useFormatter, useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { Fab } from '@/components/ui/fab';
 import { Icon } from '@/components/ui/icon';
+import type { IconName } from '@/components/ui/icon-codepoints';
+import { HEADER_SLOT_ID, SlotPortal } from '@/components/ui/slot-portal';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { Member } from '@/modules/family';
 import { CALENDAR_VIEWS, daysOf, shiftAnchor, type CalendarView } from '../domain/window';
@@ -13,8 +16,17 @@ import { toWall } from '../domain/zone';
 import type { CalendarEvent } from '../queries';
 import { AgendaView } from './agenda-view';
 import { EventDialog, type WritableCalendar } from './event-dialog';
+import { MemberDayGrid } from './member-day-grid';
 import { MonthView } from './month-view';
 import { TimeGrid } from './time-grid';
+
+/** One glyph per view, so the pill fits a 390px header without a scrollbar. */
+const VIEW_ICONS: Record<CalendarView, IconName> = {
+  day: 'event',
+  week: 'grid_view',
+  month: 'calendar_month',
+  agenda: 'event_available',
+};
 
 /**
  * The parent app's calendar surface.
@@ -133,10 +145,55 @@ export function CalendarShell({
   return (
     <div
       data-slot="calendar-shell"
-      className="flex min-h-0 min-w-0 flex-1 flex-col gap-3 overflow-x-hidden p-3"
+      className="flex min-h-0 min-w-0 flex-1 flex-col gap-3 overflow-x-hidden p-3 sm:p-6"
     >
+      {/* M19: the segmented view pill lives in the *shell's* glass header, as
+          every mockup draws it — the page portals into the slot the header
+          renders (`components/ui/slot-portal.tsx`) rather than the layout
+          learning what a calendar view is. It is the same `Tabs`, the same
+          state and the same test ids; only its position moved.
+
+          `min-w-0` + `overflow-x-auto`: at 390px the header already carries a
+          clock and an avatar, so the pill takes the leftover width and any
+          spill scrolls inside the pill instead of widening the page. Below
+          `sm` the triggers are glyphs with an accessible name; the words come
+          back as soon as there is room for them. */}
+      <SlotPortal id={HEADER_SLOT_ID}>
+        <Tabs
+          value={view}
+          onValueChange={(value) => changeView(value as CalendarView)}
+          className="min-w-0 max-w-full"
+        >
+          <TabsList
+            data-testid="view-switcher"
+            // The height override carries the same `group-data-horizontal`
+            // variant the primitive's default does, or the default's higher
+            // specificity keeps the 32px track under 40px triggers.
+            className="max-w-full overflow-x-auto rounded-4xl bg-surface-container p-1 group-data-horizontal/tabs:h-12"
+          >
+            {CALENDAR_VIEWS.map((candidate) => (
+              <TabsTrigger
+                key={candidate}
+                value={candidate}
+                data-testid={`view-${candidate}`}
+                className="label-overline h-10 shrink-0 rounded-4xl px-3 data-active:bg-surface-container-lowest data-active:text-primary data-active:shadow-sm sm:px-5"
+              >
+                <Icon name={VIEW_ICONS[candidate]} size="sm" className="sm:hidden" />
+                <span className="sr-only sm:not-sr-only">{t(`views.${candidate}`)}</span>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+      </SlotPortal>
+
+      {/* The mockups' FAB replaces the inline "add event" button — same
+          action, same test id, positioned by the shell's `FabSlot`. */}
+      {canWrite && (
+        <Fab icon="add" label={t('actions.add')} onClick={openCreate} data-testid="event-create" />
+      )}
+
       <header className="flex min-w-0 flex-wrap items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-2">
+        <div className="flex min-w-0 items-center gap-1">
           <Button
             variant="ghost"
             size="icon-hub"
@@ -146,7 +203,7 @@ export function CalendarShell({
             <Icon name="chevron_left" />
           </Button>
           <h1
-            className="min-w-0 truncate font-display text-h2 font-bold"
+            className="min-w-0 truncate font-display text-h1 font-bold tracking-tight"
             data-testid="calendar-heading"
           >
             {heading}
@@ -160,37 +217,12 @@ export function CalendarShell({
             <Icon name="chevron_right" />
           </Button>
         </div>
-
-        {/* NB-7 (M15): at 390px, four hub-sized tabs plus the "Event" button
-            add up to well past the viewport — a flex child's default
-            `min-width: auto` locks it to that full content width regardless
-            of `flex-wrap` on the parent, which was pushing the *page* wider
-            than the viewport instead of just this row. `min-w-0` lets the
-            group shrink again; `overflow-x-auto` on it (not on the page) is
-            where the leftover width goes — a horizontal scroll confined to
-            this control cluster, never the page. */}
-        <div className="flex min-w-0 max-w-full items-center gap-2 overflow-x-auto">
-          <Tabs value={view} onValueChange={(value) => changeView(value as CalendarView)}>
-            <TabsList size="hub" data-testid="view-switcher">
-              {CALENDAR_VIEWS.map((candidate) => (
-                <TabsTrigger key={candidate} value={candidate} data-testid={`view-${candidate}`}>
-                  {t(`views.${candidate}`)}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
-
-          {canWrite && (
-            <Button size="hub" onClick={openCreate} data-testid="event-create" className="shrink-0">
-              <Icon name="add" size="sm" inline="start" />
-              {t('actions.add')}
-            </Button>
-          )}
-        </div>
       </header>
 
       <div
-        className={cn('flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl bg-surface')}
+        className={cn(
+          'flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-sm'
+        )}
         data-testid={`calendar-view-${view}`}
       >
         {view === 'month' ? (
@@ -209,6 +241,19 @@ export function CalendarShell({
             events={events}
             timeZone={timeZone}
             today={now}
+            onSelect={onSelect}
+          />
+        ) : view === 'day' && members.length > 0 ? (
+          // M19: the day reads per member, not as a one-column week (see
+          // `member-day-grid.tsx`). A family with no members left — only
+          // reachable mid-deletion — falls back to the day-shaped time grid
+          // rather than rendering a board with no columns.
+          <MemberDayGrid
+            members={members}
+            events={events}
+            timeZone={timeZone}
+            day={days[0]}
+            now={now}
             onSelect={onSelect}
           />
         ) : (

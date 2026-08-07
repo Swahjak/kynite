@@ -102,10 +102,19 @@ test.describe('locale persistence', () => {
   test('a nl session never crosses into /en and vice versa on the sign-in guard', async ({
     page,
   }) => {
-    await page.goto('/en/today');
-    await expect(page).toHaveURL(/\/en\/sign-in$/);
+    // M18 added `?callbackUrl=` to the guard's redirect, so the path is no
+    // longer the whole URL. The crossing this test is about is asserted on
+    // *both* halves now: the sign-in page must be in-locale, and so must the
+    // route it will send the parent back to — a `callbackUrl` that had lost
+    // its prefix would bounce an English parent into the Dutch app after they
+    // signed in, which is the same bug one navigation later.
+    for (const locale of ['en', 'nl'] as const) {
+      await page.goto(`/${locale}/today`);
+      await expect(page).toHaveURL(new RegExp(`/${locale}/sign-in\\?`));
 
-    await page.goto('/nl/today');
-    await expect(page).toHaveURL(/\/nl\/sign-in$/);
+      const url = new URL(page.url());
+      expect(url.pathname).toBe(`/${locale}/sign-in`);
+      expect(url.searchParams.get('callbackUrl')).toBe(`/${locale}/today`);
+    }
   });
 });

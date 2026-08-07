@@ -67,10 +67,10 @@ export function CreateShareLinkPanel({
   };
 
   return (
-    <section className="flex flex-col gap-4 rounded-xl border border-border p-4">
+    <section className="flex flex-col gap-4 rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
       <div className="flex flex-col gap-1">
-        <h2 className="font-display text-h3 font-semibold">{t('create.title')}</h2>
-        <p className="text-body-sm text-muted-foreground">{t('create.description')}</p>
+        <h2 className="font-display text-h3 font-semibold text-ink">{t('create.title')}</h2>
+        <p className="text-body-sm text-ink-secondary">{t('create.description')}</p>
       </div>
 
       <form className="flex flex-col gap-4" onSubmit={submit}>
@@ -91,7 +91,7 @@ export function CreateShareLinkPanel({
             {(['viewer', 'contributor'] as const).map((value) => (
               <label
                 key={value}
-                className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-body-sm"
+                className="flex min-h-12 items-center gap-2 rounded-4xl border border-border bg-surface-container-lowest px-4 py-2 text-body-sm transition-colors duration-200 ease-brand has-checked:border-primary has-checked:bg-brand-container/20"
               >
                 <input
                   type="radio"
@@ -103,7 +103,7 @@ export function CreateShareLinkPanel({
                 />
                 <span className="flex flex-col">
                   <span className="font-medium">{t(`roles.${value}`)}</span>
-                  <span className="text-muted-foreground">{t(`roleHints.${value}`)}</span>
+                  <span className="text-ink-secondary">{t(`roleHints.${value}`)}</span>
                 </span>
               </label>
             ))}
@@ -112,12 +112,12 @@ export function CreateShareLinkPanel({
 
         <fieldset className="flex flex-col gap-2">
           <legend className="text-body-sm font-medium">{t('create.membersLabel')}</legend>
-          <p className="text-body-sm text-muted-foreground">{t('create.membersHint')}</p>
+          <p className="text-body-sm text-ink-secondary">{t('create.membersHint')}</p>
           <div className="flex flex-wrap gap-2">
             {members.map((member) => (
               <label
                 key={member.id}
-                className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-body-sm"
+                className="flex min-h-12 items-center gap-2 rounded-4xl border border-border bg-surface-container-lowest px-4 py-2 text-body-sm transition-colors duration-200 ease-brand has-checked:border-primary has-checked:bg-brand-container/20"
               >
                 <input
                   type="checkbox"
@@ -134,12 +134,12 @@ export function CreateShareLinkPanel({
         {calendars.length > 0 ? (
           <fieldset className="flex flex-col gap-2">
             <legend className="text-body-sm font-medium">{t('create.calendarsLabel')}</legend>
-            <p className="text-body-sm text-muted-foreground">{t('create.calendarsHint')}</p>
+            <p className="text-body-sm text-ink-secondary">{t('create.calendarsHint')}</p>
             <div className="flex flex-wrap gap-2">
               {calendars.map((entry) => (
                 <label
                   key={entry.id}
-                  className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-body-sm"
+                  className="flex min-h-12 items-center gap-2 rounded-4xl border border-border bg-surface-container-lowest px-4 py-2 text-body-sm transition-colors duration-200 ease-brand has-checked:border-primary has-checked:bg-brand-container/20"
                 >
                   <input
                     type="checkbox"
@@ -155,12 +155,12 @@ export function CreateShareLinkPanel({
 
         <fieldset className="flex flex-col gap-2">
           <legend className="text-body-sm font-medium">{t('create.surfacesLabel')}</legend>
-          <p className="text-body-sm text-muted-foreground">{t('create.surfacesHint')}</p>
+          <p className="text-body-sm text-ink-secondary">{t('create.surfacesHint')}</p>
           <div className="flex flex-wrap gap-2">
             {SHARE_SURFACE_CHOICES.map((surface) => (
               <label
                 key={surface}
-                className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-body-sm"
+                className="flex min-h-12 items-center gap-2 rounded-4xl border border-border bg-surface-container-lowest px-4 py-2 text-body-sm transition-colors duration-200 ease-brand has-checked:border-primary has-checked:bg-brand-container/20"
               >
                 <input
                   type="checkbox"
@@ -177,7 +177,7 @@ export function CreateShareLinkPanel({
         <label className="flex max-w-64 flex-col gap-1">
           <span className="text-body-sm font-medium">{t('create.expiryLabel')}</span>
           <select
-            className="h-10 rounded-lg border border-border bg-background px-3 text-body-sm"
+            className="h-12 rounded-lg border border-border bg-background px-3 text-body-sm"
             value={expiresInDays === null ? 'never' : String(expiresInDays)}
             onChange={(event) =>
               setExpiresInDays(event.target.value === 'never' ? null : Number(event.target.value))
@@ -199,12 +199,17 @@ export function CreateShareLinkPanel({
       </form>
 
       {state.status === 'created' ? (
-        <output className="flex flex-col gap-3 rounded-lg bg-muted p-4" data-testid="share-created">
-          <span className="text-body-sm font-medium">{t('created.title')}</span>
-          <span className="text-body-sm text-muted-foreground">{t('created.onceWarning')}</span>
+        <output
+          className="flex flex-col gap-3 rounded-xl bg-surface-container p-4"
+          data-testid="share-created"
+        >
+          <span className="font-display text-body font-semibold text-ink">
+            {t('created.title')}
+          </span>
+          <span className="text-body-sm text-ink-secondary">{t('created.onceWarning')}</span>
 
           <code
-            className="break-all rounded-md bg-background p-3 text-body-sm"
+            className="break-all rounded-lg border border-border bg-background p-3 text-body-sm"
             data-testid="share-url"
           >
             {state.url}
@@ -221,7 +226,7 @@ export function CreateShareLinkPanel({
               {copied ? t('created.copied') : t('created.copy')}
             </Button>
             {state.expiresAt ? (
-              <span className="text-body-sm text-muted-foreground">
+              <span className="text-body-sm text-ink-secondary">
                 {t('created.expiresAt', {
                   date: format.dateTime(new Date(state.expiresAt), {
                     day: 'numeric',
@@ -230,7 +235,7 @@ export function CreateShareLinkPanel({
                 })}
               </span>
             ) : (
-              <span className="text-body-sm text-muted-foreground">{t('created.noExpiry')}</span>
+              <span className="text-body-sm text-ink-secondary">{t('created.noExpiry')}</span>
             )}
           </div>
 

@@ -95,6 +95,9 @@ describe('schema-wide invariants', () => {
         'event',
         'event_log',
         'family',
+        // M19 (F4): the tombstone that keeps "never had a household" and "had
+        // one taken away" distinguishable after a member row is hard-deleted.
+        'former_member',
         'google_account',
         'member',
         'member_invite',

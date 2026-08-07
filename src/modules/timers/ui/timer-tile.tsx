@@ -1,5 +1,6 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import { cn } from '@/lib/utils';
 import {
@@ -46,6 +47,12 @@ export type TimerTileCopy = {
   remainingLabel: string;
   /** Accessible name of the stop control. Omitted when there is no control. */
   stopLabel?: string;
+  /**
+   * Stated when `extendTimerAction` answers `atMaximum` (M18, surfaced in M19):
+   * the timer is already as long as a timer gets. A fact about the clock, not
+   * a refusal — see `atMaximum` below.
+   */
+  atMaximum?: string;
 };
 
 /**
@@ -72,6 +79,13 @@ export type TimerTileProps = {
    */
   extendOptions?: readonly TimerExtendOption[];
   onExtend?: (minutes: number) => void;
+  /**
+   * The timer is at `MAX_DURATION_SECONDS` (M18's `atMaximum`, wired to the UI
+   * in M19). The extend controls come off and the tile states why, once, in
+   * the same ink as everything else: nothing is disabled-looking, nothing is
+   * marked, and the child is not left tapping a button that answers nothing.
+   */
+  atMaximum?: boolean;
 };
 
 export function TimerTile({
@@ -82,6 +96,7 @@ export function TimerTile({
   onStop,
   extendOptions,
   onExtend,
+  atMaximum = false,
 }: TimerTileProps) {
   const phase = phaseOf(timer, nowMs);
   const left = remainingSeconds(timer, nowMs);
@@ -95,11 +110,22 @@ export function TimerTile({
       data-phase={phase}
       data-warning={warning ? 'due' : 'none'}
       className={cn(
-        'flex flex-col gap-3 rounded-xl bg-surface p-6 ring-1 ring-foreground/10',
-        compact && 'gap-2 p-4'
+        // Card radius `2xl` (24px) and elevation instead of an outline, per the
+        // design system's card rules (docs/rebuild-design-gaps.md §7).
+        'flex flex-col gap-4 rounded-2xl bg-surface-container-lowest p-6 shadow-sm transition-shadow duration-200 ease-brand hover:shadow-md',
+        compact && 'gap-3 rounded-xl p-4'
       )}
     >
-      <header className="flex items-baseline gap-3">
+      <header className="flex items-center gap-3">
+        <span
+          aria-hidden
+          className={cn(
+            'flex shrink-0 items-center justify-center rounded-full bg-brand-container text-brand-container-ink',
+            compact ? 'size-9' : 'size-11'
+          )}
+        >
+          <Icon name="timer" size={compact ? 'sm' : 'md'} filled />
+        </span>
         <h3
           data-testid="timer-label"
           className={cn(
@@ -110,7 +136,10 @@ export function TimerTile({
           {timer.label}
         </h3>
         {timer.memberName ? (
-          <span data-testid="timer-member" className="shrink-0 text-body text-ink-secondary">
+          <span
+            data-testid="timer-member"
+            className="shrink-0 rounded-4xl bg-surface-container px-3 py-1 text-body-sm text-ink-secondary"
+          >
             {timer.memberName}
           </span>
         ) : null}
@@ -128,11 +157,19 @@ export function TimerTile({
       </p>
 
       {/* A single progress line — the six-foot read is the digits; this is the
-          peripheral one for a child who cannot yet read them. */}
-      <span aria-hidden className="h-2 w-full overflow-hidden rounded-full bg-muted">
+          peripheral one for a child who cannot yet read them. Pill-radius and
+          thicker since M19, so it reads as the same material as the star bar on
+          the reward hero rather than as a hairline. */}
+      <span
+        aria-hidden
+        className={cn(
+          'w-full overflow-hidden rounded-4xl bg-surface-container-high',
+          compact ? 'h-2' : 'h-3'
+        )}
+      >
         <span
           data-testid="timer-progress"
-          className="block h-full rounded-full bg-primary transition-[width] duration-500 ease-brand"
+          className="block h-full rounded-4xl bg-primary transition-[width] duration-500 ease-brand"
           style={{ width: `${Math.round(ratio * 100)}%` }}
         />
       </span>
@@ -154,45 +191,61 @@ export function TimerTile({
         </p>
       ) : null}
 
-      {(onStop && copy.stopLabel) || (onExtend && extendOptions?.length) ? (
+      {/* The `atMaximum` line keeps its own distinguishable slot: a chip, not a
+          disabled button and not an alert. It is stated where the extend
+          buttons would have been, so the absence of the controls is explained
+          in the same place it is noticed. */}
+      {atMaximum && copy.atMaximum ? (
+        <p
+          data-testid="timer-at-maximum"
+          aria-live="polite"
+          className="flex w-max items-center gap-2 rounded-4xl bg-surface-container px-4 py-2 text-body text-ink-secondary"
+        >
+          <Icon name="hourglass_top" size="sm" />
+          {copy.atMaximum}
+        </p>
+      ) : null}
+
+      {/* M19: the controls are the shared `<Button size="hub">` rather than
+          hand-rolled boxes (docs/rebuild-design-gaps.md §7). `size="hub"` *is*
+          the 48px kiosk target; `TIMER_TAP_TARGET_CLASS` stays applied on top
+          so the minimum is still stated where the legibility test reads it,
+          independent of how the button scale is retuned later. */}
+      {(onStop && copy.stopLabel) || (onExtend && extendOptions?.length && !atMaximum) ? (
         <div className="mt-1 flex flex-wrap items-center gap-2">
           {onStop && copy.stopLabel ? (
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="hub"
               data-testid="timer-stop"
               aria-label={copy.stopLabel}
               onClick={onStop}
-              className={cn(
-                TIMER_TAP_TARGET_CLASS,
-                'rounded-lg bg-surface-hover px-5 text-body-lg font-medium ring-1 ring-foreground/10',
-                'transition-colors duration-200 ease-brand hover:bg-accent focus-visible:ring-3 focus-visible:ring-ring/50'
-              )}
+              className={cn(TIMER_TAP_TARGET_CLASS, 'rounded-4xl')}
             >
               {copy.stopLabel}
-            </button>
+            </Button>
           ) : null}
 
           {/* "A bit longer" sits *next to* stop, in the same weight and the
               same colours. It is not an escape hatch and not a reward: the
               board offers more time the way it offers less, and neither
               choice is marked (FR11). */}
-          {onExtend
+          {onExtend && !atMaximum
             ? extendOptions?.map((option) => (
-                <button
+                <Button
                   key={option.minutes}
                   type="button"
+                  variant="outline"
+                  size="hub"
                   data-testid="timer-extend"
                   data-minutes={option.minutes}
                   aria-label={option.ariaLabel}
                   onClick={() => onExtend(option.minutes)}
-                  className={cn(
-                    TIMER_TAP_TARGET_CLASS,
-                    'tabular-time rounded-lg bg-surface-hover px-4 text-body font-medium ring-1 ring-foreground/10',
-                    'transition-colors duration-200 ease-brand hover:bg-accent focus-visible:ring-3 focus-visible:ring-ring/50'
-                  )}
+                  className={cn(TIMER_TAP_TARGET_CLASS, 'tabular-time rounded-4xl px-5')}
                 >
                   {option.label}
-                </button>
+                </Button>
               ))
             : null}
         </div>

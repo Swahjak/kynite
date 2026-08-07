@@ -66,11 +66,11 @@ export function MonthView({
 
   return (
     <div data-slot="month-view" className="flex min-h-0 flex-col">
-      <div className="grid grid-cols-7 border-b border-line">
+      <div className="grid grid-cols-7 border-b border-line bg-surface-container-low/60">
         {weekdays.map((day) => (
           <div
             key={day.toISOString()}
-            className="label-overline px-2 py-2 text-center text-ink-muted"
+            className="label-overline px-2 py-3 text-center text-ink-secondary"
           >
             {format.dateTime(day, { weekday: 'short' })}
           </div>
@@ -91,8 +91,8 @@ export function MonthView({
               data-day={key}
               data-outside={outside || undefined}
               className={cn(
-                'flex min-h-24 min-w-0 flex-col gap-1 border-t border-l border-line-subtle p-1',
-                outside && 'bg-muted/40'
+                'flex min-h-24 min-w-0 flex-col gap-1 border-t border-l border-line-subtle p-1.5 transition-colors',
+                outside ? 'bg-surface-container-low/50' : 'hover:bg-surface-container-low/40'
               )}
             >
               <div className="flex items-center justify-between">
@@ -116,7 +116,7 @@ export function MonthView({
                         date: format.dateTime(day, { day: 'numeric', month: 'long' }),
                       })}
                       onClick={() => onOpenDay(key)}
-                      className="rounded px-1 text-caption text-ink-muted underline-offset-2 hover:text-ink hover:underline focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
+                      className="rounded-4xl bg-surface-container px-2 py-0.5 text-caption font-semibold text-ink-secondary transition-colors hover:bg-surface-container-high hover:text-ink focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
                     >
                       {t('month.more', { count: dayEvents.length - MAX_ROWS_PER_CELL })}
                     </button>
@@ -135,7 +135,7 @@ export function MonthView({
                     variant="row"
                     showTime={false}
                     onSelect={onSelect}
-                    className="border-l-2 px-1 py-0"
+                    className="rounded-lg border-l-2 px-1 py-0 shadow-none"
                   />
                 ))}
               </div>

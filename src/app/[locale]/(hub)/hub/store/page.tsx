@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server';
+import { ChildTabs } from '@/components/hub';
 import { requireHubDevice } from '@/modules/devices';
 import { RewardStore, loadStore } from '@/modules/rewards';
 
@@ -57,6 +58,11 @@ export default async function HubStorePage({
         </h1>
         <p className="text-body-lg text-ink-secondary">{t('store.subtitle')}</p>
       </header>
+
+      {/* M19. Two different switches, deliberately: the store's own chips
+          change *whose* shelf this is, these change *which screen* of that
+          child's you are on. */}
+      <ChildTabs memberId={store.member.id} displayName={store.member.displayName} />
 
       <RewardStore store={store} />
     </main>

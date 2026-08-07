@@ -1,5 +1,10 @@
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
+import {
+  SettingsBackLink,
+  SettingsPage,
+  SettingsPageHeader,
+} from '@/components/settings/settings-shell';
 import { PushOptIn, loadNotificationsPage } from '@/modules/notifications';
 
 /** Session- and env-dependent: never prerendered (`next build` needs no secrets). */
@@ -17,16 +22,21 @@ export default async function NotificationSettingsPage() {
   const data = await loadNotificationsPage();
   if (!data) notFound();
 
-  const t = await getTranslations('notifications.settings');
+  const [t, tSettings] = await Promise.all([
+    getTranslations('notifications.settings'),
+    getTranslations('settings'),
+  ]);
 
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-4 sm:p-8">
-      <div className="flex flex-col gap-1">
-        <h1 className="font-display text-2xl font-bold">{t('pageTitle')}</h1>
-        <p className="text-sm text-muted-foreground">{t('pageSubtitle')}</p>
-      </div>
+    <SettingsPage>
+      <SettingsBackLink label={tSettings('back')} />
+      <SettingsPageHeader
+        icon="notifications"
+        title={t('pageTitle')}
+        description={t('pageSubtitle')}
+      />
 
       <PushOptIn publicKey={data.publicKey} subscriptionCount={data.subscriptionCount} />
-    </main>
+    </SettingsPage>
   );
 }

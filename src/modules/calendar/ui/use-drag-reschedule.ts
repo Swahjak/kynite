@@ -41,6 +41,17 @@ export type UseDragRescheduleOptions = {
 const MS_PER_MINUTE = 60_000;
 /** Movement under this many pixels is a click, not a drag. */
 const DRAG_THRESHOLD_PX = 4;
+/**
+ * How long after a real drag a `click` is still treated as that drag's tail.
+ *
+ * The browser synthesises a `click` on `pointerup` even when the pointer
+ * travelled hundreds of pixels, and that click would open the editor seeded
+ * with the block's *pre-drag* times — pressing save would then revert the
+ * reschedule the drag just wrote. A timestamp rather than a sticky boolean, so
+ * a gesture that ends without a click (a cancelled drag, a pointer released
+ * outside the chip) cannot swallow the next genuine tap.
+ */
+const CLICK_SUPPRESSION_MS = 300;
 
 export function useDragReschedule(options: UseDragRescheduleOptions) {
   const router = useRouter();
@@ -57,6 +68,9 @@ export function useDragReschedule(options: UseDragRescheduleOptions) {
     minuteDelta: number;
     dayDelta: number;
   } | null>(null);
+
+  /** When the last gesture that actually moved ended — see `shouldIgnoreClick`. */
+  const draggedAt = useRef(0);
 
   const finish = useCallback(
     async (state: { event: CalendarEvent; minuteDelta: number; dayDelta: number }) => {
@@ -149,6 +163,8 @@ export function useDragReschedule(options: UseDragRescheduleOptions) {
       setDrag(null);
       if (!current || !current.moved) return;
 
+      draggedAt.current = Date.now();
+
       void finish({
         event: current.event,
         minuteDelta: current.minuteDelta,
@@ -184,5 +200,19 @@ export function useDragReschedule(options: UseDragRescheduleOptions) {
     [drag, options.columnWidth]
   );
 
-  return { drag, pending, onPointerDown, offsetFor };
+  /**
+   * True for the synthetic `click` that follows a real drag, once.
+   *
+   * Handed to `EventChip` as `suppressClick`: the chip asks before it opens the
+   * editor, and the answer is consumed so a second, genuine click on the same
+   * block still works.
+   */
+  const shouldIgnoreClick = useCallback(() => {
+    if (draggedAt.current === 0) return false;
+    if (Date.now() - draggedAt.current > CLICK_SUPPRESSION_MS) return false;
+    draggedAt.current = 0;
+    return true;
+  }, []);
+
+  return { drag, pending, onPointerDown, offsetFor, shouldIgnoreClick };
 }

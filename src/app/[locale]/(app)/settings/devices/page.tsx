@@ -1,5 +1,11 @@
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
+import {
+  SettingsBackLink,
+  SettingsPage,
+  SettingsPageHeader,
+  SettingsSection,
+} from '@/components/settings/settings-shell';
 import { DeviceList, PairDevicePanel, PendingCodeList, loadDevicesPage } from '@/modules/devices';
 
 /** Session-dependent: never prerendered, so `next build` needs no database. */
@@ -20,14 +26,19 @@ export default async function DeviceSettingsPage() {
   const data = await loadDevicesPage();
   if (!data) notFound();
 
-  const t = await getTranslations('devices');
+  const [t, tSettings] = await Promise.all([
+    getTranslations('devices'),
+    getTranslations('settings'),
+  ]);
 
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-4 sm:p-8">
-      <div className="flex flex-col gap-1">
-        <h1 className="font-display text-2xl font-bold">{t('pageTitle')}</h1>
-        <p className="text-sm text-muted-foreground">{t('pageSubtitle')}</p>
-      </div>
+    <SettingsPage>
+      <SettingsBackLink label={tSettings('back')} />
+      <SettingsPageHeader
+        icon="tablet_mac"
+        title={t('pageTitle')}
+        description={t('pageSubtitle')}
+      />
 
       {data.canManage ? <PairDevicePanel /> : null}
 
@@ -37,10 +48,9 @@ export default async function DeviceSettingsPage() {
         canManage={data.canManage}
       />
 
-      <section className="flex flex-col gap-3">
-        <h2 className="font-display text-h3 font-semibold">{t('list.title')}</h2>
+      <SettingsSection title={t('list.title')}>
         <DeviceList devices={data.devices} serverNow={data.serverNow} canManage={data.canManage} />
-      </section>
-    </main>
+      </SettingsSection>
+    </SettingsPage>
   );
 }

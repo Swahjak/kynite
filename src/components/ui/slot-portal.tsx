@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useCallback, useSyncExternalStore, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
 /**
@@ -25,20 +25,33 @@ import { createPortal } from 'react-dom';
 export const HEADER_SLOT_ID = 'app-header-slot';
 export const FAB_SLOT_ID = 'app-fab-slot';
 
-function useSlotContainer(id: string) {
-  // Resolved once, in a lazy `useState` initializer rather than in an effect.
-  //
-  // On the server there is no `document`, so this renders nothing — correct,
-  // because a portal has no server output anyway. On the client the initializer
-  // runs during the hydration render, by which point the whole document
-  // (including the layout's slot `<div>`) is parsed, so the node is there. The
-  // effect version needed a `setState` in an effect to say the same thing, and
-  // paid a second render for it.
-  const [container] = useState<HTMLElement | null>(() =>
-    typeof document === 'undefined' ? null : document.getElementById(id)
-  );
+/** The slot `<div>` never moves or changes identity, so there is nothing to subscribe to. */
+const subscribeToNothing = () => () => {};
 
-  return container;
+function useSlotContainer(id: string) {
+  // `useSyncExternalStore` with a *server* snapshot of `null` — deliberately,
+  // and not the lazy `useState` initializer this used to be.
+  //
+  // The initializer looks cheaper (one render instead of two) and is wrong: it
+  // runs during the **hydration** render, where `document` already exists, so
+  // the client's first render produced a portal while the server's had produced
+  // nothing. That is a hydration mismatch, and React's recovery from one is to
+  // throw the mismatched subtree away and re-create its DOM — while the portal
+  // survives that recovery still pointing at the *old*, now-detached slot node.
+  // The header pill and the FAB then rendered into a node that was no longer in
+  // the document: present in React, invisible on screen, unfindable by any
+  // query. It is what took `view-*` and `event-create` off the calendar
+  // entirely in M19.
+  //
+  // This hook is the primitive for exactly that shape — "a value the server
+  // cannot know, read from outside React". React uses `getServerSnapshot`
+  // through hydration, so the first client render agrees with the server's
+  // nothing, and re-renders with the real container once hydration has
+  // committed. `getElementById` returns the same node every call, so the
+  // snapshot is referentially stable and the re-render happens once.
+  const getSnapshot = useCallback(() => document.getElementById(id), [id]);
+
+  return useSyncExternalStore(subscribeToNothing, getSnapshot, () => null);
 }
 
 export function SlotPortal({ id, children }: { id: string; children: ReactNode }) {

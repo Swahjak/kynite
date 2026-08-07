@@ -65,7 +65,7 @@ export function CalendarDisplayList({ calendars }: { calendars: CalendarDisplayV
   const t = useTranslations('settings.calendars');
 
   if (calendars.length === 0) {
-    return <p className="text-sm text-muted-foreground">{t('empty')}</p>;
+    return <p className="text-body-sm text-ink-secondary">{t('empty')}</p>;
   }
 
   return (
@@ -90,7 +90,7 @@ function CalendarDisplayRow({ calendar }: { calendar: CalendarDisplayView }) {
   return (
     <form
       action={formAction}
-      className="flex flex-col gap-3 rounded-xl border border-border p-4"
+      className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-sm"
       data-testid="calendar-display-row"
       data-calendar-id={calendar.id}
     >
@@ -98,8 +98,8 @@ function CalendarDisplayRow({ calendar }: { calendar: CalendarDisplayView }) {
       <input type="hidden" name="category" value={category} />
 
       <div className="flex flex-col gap-0.5">
-        <span className="font-display text-sm font-semibold">{calendar.summary}</span>
-        <span className="text-xs text-muted-foreground">{calendar.accountEmail}</span>
+        <span className="font-display text-body font-semibold text-ink">{calendar.summary}</span>
+        <span className="text-caption break-all text-ink-muted">{calendar.accountEmail}</span>
       </div>
 
       <div className="flex flex-col gap-1.5">
@@ -174,7 +174,7 @@ function CalendarDisplayRow({ calendar }: { calendar: CalendarDisplayView }) {
           {t('save')}
         </Button>
         {state.status === 'error' ? (
-          <span role="alert" className="text-sm text-destructive">
+          <span role="alert" className="text-body-sm text-destructive">
             {t(`errors.${state.error}`)}
           </span>
         ) : null}

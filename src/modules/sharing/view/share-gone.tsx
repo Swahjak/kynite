@@ -20,12 +20,12 @@ export async function ShareGone() {
   const t = await getTranslations('sharing.view');
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col items-center justify-center gap-4 p-6 text-center">
-      <span className="flex size-14 items-center justify-center rounded-full bg-muted text-muted-foreground">
-        <Icon name="schedule" size="lg" />
+    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col items-center justify-center gap-5 p-6 text-center">
+      <span className="bg-surface-container text-ink-muted flex size-16 items-center justify-center rounded-full">
+        <Icon name="schedule" size="xl" />
       </span>
-      <h1 className="font-display text-2xl font-bold">{t('goneTitle')}</h1>
-      <p className="text-balance text-muted-foreground">{t('goneBody')}</p>
+      <h1 className="font-display text-h1 text-balance">{t('goneTitle')}</h1>
+      <p className="text-ink-secondary text-body-lg text-balance">{t('goneBody')}</p>
     </main>
   );
 }

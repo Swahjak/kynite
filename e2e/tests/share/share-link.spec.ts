@@ -19,7 +19,8 @@ import {
  * and no session cookie set" rather than "no account that we noticed".
  */
 
-const TODAY = () => new Date().toISOString().slice(0, 10);
+const TODAY = () =>
+  new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Amsterdam' }).format(new Date());
 
 /** Mint a link through the real settings UI and read the URL back off the page. */
 async function mintLink(

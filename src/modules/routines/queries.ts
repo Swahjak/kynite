@@ -118,3 +118,51 @@ export async function listCompletedSteps(input: {
       : []
   );
 }
+
+export type MemberCompletedStep = CompletedStep & { memberId: string };
+
+/**
+ * The same question as `listCompletedSteps`, asked for the **whole family** at
+ * once (M19: the "Kids' Progress" panel on `/today`).
+ *
+ * The per-member version would mean one round trip per child to draw one panel;
+ * this is a single scan of the same `(familyId, memberId, occurrenceDate)`
+ * index, bounded by the handful of occurrence dates the caller is rendering.
+ * Members are *not* filtered here — a family has a handful, and grouping in
+ * JavaScript keeps the caller free to decide which of them the panel shows.
+ */
+export async function listCompletionsOn(input: {
+  familyId: string;
+  occurrenceDates: readonly string[];
+}): Promise<MemberCompletedStep[]> {
+  if (input.occurrenceDates.length === 0) return [];
+
+  const rows = await getDb()
+    .select({
+      memberId: completion.memberId,
+      routineStepId: completion.routineStepId,
+      occurrenceDate: completion.occurrenceDate,
+    })
+    .from(completion)
+    .where(
+      and(
+        eq(completion.familyId, input.familyId),
+        // An undone completion keeps its row but is not "done" — the same rule
+        // `listCompletedSteps` applies, and for the same reason.
+        isNull(completion.undoneAt),
+        inArray(completion.occurrenceDate, [...input.occurrenceDates])
+      )
+    );
+
+  return rows.flatMap((row) =>
+    row.routineStepId
+      ? [
+          {
+            memberId: row.memberId,
+            routineStepId: row.routineStepId,
+            occurrenceDate: row.occurrenceDate,
+          },
+        ]
+      : []
+  );
+}

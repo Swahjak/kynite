@@ -2,13 +2,14 @@ import { getTranslations } from 'next-intl/server';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
+import { cn } from '@/lib/utils';
 import type { Member } from '@/modules/family';
 import type { RewardPreset } from '../domain/economy';
 import type { Reward } from '../schema';
 import { DeleteRewardButton } from './delete-reward-button';
 import { RewardDialog } from './reward-dialog';
 import { SeedPresetsButton } from './seed-presets-button';
-import { rewardIconOf } from './tokens';
+import { CATEGORY_TILE, rewardIconOf } from './tokens';
 
 /**
  * The parent's reward catalogue.
@@ -62,16 +63,31 @@ export async function RewardList({
   }
 
   return (
-    <ul className="flex flex-col gap-3">
+    // The catalogue is a card grid, the same shape the child's shelf is
+    // (docs/rebuild-design-gaps.md §6): a parent editing the shelf should be
+    // looking at something recognisably the same object.
+    <ul className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       {rewards.map((reward) => (
-        <li key={reward.id}>
-          <Card data-testid="reward-row" data-reward-id={reward.id}>
+        <li key={reward.id} className="flex">
+          <Card
+            data-testid="reward-row"
+            data-reward-id={reward.id}
+            className={cn(
+              'w-full transition-shadow duration-200 ease-brand hover:shadow-md',
+              // Dimming, not a badge-only signal: an inactive reward is off the
+              // shelf, and the tile says so the same quiet way the store does.
+              reward.active ? undefined : 'opacity-70 hover:opacity-100'
+            )}
+          >
             <CardContent className="flex flex-wrap items-start gap-4">
               <span
                 aria-hidden
-                className="flex size-12 shrink-0 items-center justify-center rounded-full bg-muted text-ink-secondary"
+                className={cn(
+                  'flex size-12 shrink-0 items-center justify-center rounded-full',
+                  CATEGORY_TILE[reward.category]
+                )}
               >
-                <Icon name={rewardIconOf(reward.icon)} size="lg" />
+                <Icon name={rewardIconOf(reward.icon)} size="lg" filled />
               </span>
 
               <div className="flex min-w-0 flex-1 flex-col gap-2">

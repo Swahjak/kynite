@@ -1,7 +1,7 @@
 import 'server-only';
 import { asc, eq } from 'drizzle-orm';
 import { getDb } from '@/server/db';
-import { family, member, type Family, type Member } from './schema';
+import { family, formerMember, member, type Family, type Member } from './schema';
 
 /**
  * Reads for the family slice. Server-side only — the `server-only` import makes
@@ -33,4 +33,33 @@ export async function getMember(familyId: string, memberId: string): Promise<Mem
 export async function getMemberByUserId(userId: string): Promise<Member | null> {
   const [row] = await getDb().select().from(member).where(eq(member.userId, userId)).limit(1);
   return row ?? null;
+}
+
+/**
+ * Has this login ever held a member row? (M19, F4.)
+ *
+ * The question `(auth)/onboarding` has to answer before it offers to create a
+ * household: a session with no principal is a *social first run* only if the
+ * user has never been a member of anything. A removed second parent presents
+ * the identical state — valid session, no member row — and must not be sent
+ * down the owner-creation path, so both the live rows and the tombstones
+ * `deleteMemberAction` leaves behind are consulted.
+ */
+export async function hasEverBeenMember(userId: string): Promise<boolean> {
+  const db = getDb();
+
+  const [live] = await db
+    .select({ id: member.id })
+    .from(member)
+    .where(eq(member.userId, userId))
+    .limit(1);
+  if (live) return true;
+
+  const [removed] = await db
+    .select({ id: formerMember.id })
+    .from(formerMember)
+    .where(eq(formerMember.userId, userId))
+    .limit(1);
+
+  return Boolean(removed);
 }

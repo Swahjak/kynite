@@ -169,7 +169,46 @@ export const memberInvite = pgTable(
   ]
 );
 
+/**
+ * A tombstone: this login once held a member row in this household (M19, F4).
+ *
+ * `member` is hard-deleted — `deleteMemberAction` removes the row outright,
+ * because a soft-deleted member would have to be filtered out of every board,
+ * every roster and every star query in the app, and one missed predicate there
+ * is a removed person reappearing on a kitchen wall. The cost of that choice is
+ * that the database afterwards cannot tell **"this login never had a
+ * household"** from **"this login had one taken away"**, and those two states
+ * need opposite treatment: the first is a social first run, and belongs on
+ * `(auth)/onboarding`; the second is a person who was removed, and must not be
+ * handed a form that quietly makes them the owner of a brand new household.
+ *
+ * So the fact is recorded separately and append-only. It stores no name, no
+ * role and no profile — only that the pairing existed and when it ended. It is
+ * family-scoped and cascades with the household on purpose: once the family is
+ * gone there is nothing left to have been removed from, and a login with no
+ * household anywhere is a first run again.
+ */
+export const formerMember = pgTable(
+  'former_member',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    familyId: uuid('family_id')
+      .notNull()
+      .references(() => family.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    removedAt: timestamp('removed_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    // The read is always "has *this login* ever been a member?", on the
+    // onboarding path, on every request that reaches it.
+    index('former_member_user_id_idx').on(table.userId),
+  ]
+);
+
 export type Family = typeof family.$inferSelect;
+export type FormerMember = typeof formerMember.$inferSelect;
 export type Member = typeof member.$inferSelect;
 export type MemberInvite = typeof memberInvite.$inferSelect;
 export type MemberRole = (typeof memberRole.enumValues)[number];

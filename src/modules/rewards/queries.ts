@@ -135,6 +135,36 @@ export async function listStarTotals(familyId: string): Promise<Map<string, Star
   );
 }
 
+/**
+ * Stars earned per member since an instant — "today", in practice (M19's
+ * "Kids' Progress" panel on `/today`).
+ *
+ * Earned, never balance: this reads `star_ledger`, which is append-only and
+ * carries no spending (research §Decisions 1), so "3 stars today" cannot go
+ * down over the course of an afternoon because a reward was redeemed. The
+ * *balance* is a different question with a different source
+ * (`listStarTotals`), and the panel shows both.
+ *
+ * One indexed scan on `(familyId, memberId, createdAt)` for the whole family,
+ * rather than `starsPerDay` once per child.
+ */
+export async function listStarsEarnedSince(input: {
+  familyId: string;
+  since: Date;
+}): Promise<Map<string, number>> {
+  const rows = await getDb()
+    .select({ memberId: starLedger.memberId, amount: starLedger.amount })
+    .from(starLedger)
+    .where(and(eq(starLedger.familyId, input.familyId), gte(starLedger.createdAt, input.since)));
+
+  const totals = new Map<string, number>();
+  for (const row of rows) {
+    totals.set(row.memberId, (totals.get(row.memberId) ?? 0) + row.amount);
+  }
+
+  return totals;
+}
+
 export type StarEntry = {
   id: string;
   amount: number;

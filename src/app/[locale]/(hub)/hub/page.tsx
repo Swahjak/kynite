@@ -1,6 +1,9 @@
 import { getTranslations } from 'next-intl/server';
+import { ChildLauncher, type HubChild } from '@/components/hub';
 import { HubBoard, loadCalendarPage } from '@/modules/calendar';
 import { requireHubDevice } from '@/modules/devices';
+import { MEMBER_COLOR_CLASSES, initialsOf } from '@/modules/family';
+import { loadFamilyRoutineTotals } from '@/modules/routines';
 import { AmbientTimers, loadTimerBoard } from '@/modules/timers';
 
 /** Session-dependent: never prerendered, so `next build` needs no database. */
@@ -49,6 +52,37 @@ export default async function HubPage({
   const timers = await loadTimerBoard({ now });
   const t = await getTranslations('calendar');
 
+  // M19: the board is the way *in*, not only a thing to read. One entry per
+  // child, carrying today's step count so the tap is informed rather than
+  // exploratory. Loaded here, on the server, because `ChildLauncher` is a
+  // client component and `@/modules/routines` is `server-only`; the same seam
+  // `AmbientTimers` uses. Adults are absent by design — the hub's interactive
+  // half is the child-facing one (§7: a device may complete steps and request
+  // redemptions, and nothing an adult does on the wall is a thing the wall
+  // should offer).
+  //
+  // One family-wide read, not one board per child: this page re-renders on
+  // every SSE event a wall display receives, and `loadMemberRoutines` per child
+  // was an N+1 that built four full board sections per member to read two
+  // integers off the end (M19 review, F11).
+  const totals = data ? await loadFamilyRoutineTotals({ date }) : null;
+
+  const children: HubChild[] = (data?.members ?? [])
+    .filter((member) => member.role === 'child')
+    .map((member) => {
+      const progress = totals?.get(member.id) ?? { done: 0, total: 0 };
+
+      return {
+        id: member.id,
+        displayName: member.displayName,
+        avatarUrl: member.avatarUrl,
+        initials: initialsOf(member.displayName),
+        colorClass: MEMBER_COLOR_CLASSES[member.color].surface,
+        doneCount: progress.done,
+        total: progress.total,
+      };
+    });
+
   if (!data) {
     // Unreachable in practice — `requireHubDevice` has already redirected a
     // hub with no principal. Kept as the honest fallback for the case the
@@ -63,7 +97,10 @@ export default async function HubPage({
   }
 
   return (
-    <main className="flex min-h-full flex-col gap-4 bg-background p-6" data-testid="hub-board">
+    <main
+      className="flex min-h-full flex-col gap-4 bg-background px-6 py-4"
+      data-testid="hub-board"
+    >
       {/* §6: family state is mirrored to IndexedDB on every load and every SSE
           event, and a boot renders from IDB then reconciles. Both halves live
           in `HubBoard`, because the reconcile has to swap the heading, the day
@@ -91,6 +128,12 @@ export default async function HubPage({
             it. Passed as a child rather than mirrored — a countdown comes from
             the server's clock, and a cached one would be a wrong number. */}
         {timers ? <AmbientTimers board={timers} /> : null}
+
+        {/* M19: the per-child entry points. Not mirrored either — a step count
+            is a live number, and a board rendered from IndexedDB after a
+            reboot should show yesterday's schedule rather than yesterday's
+            progress. */}
+        <ChildLauncher entries={children} />
       </HubBoard>
     </main>
   );

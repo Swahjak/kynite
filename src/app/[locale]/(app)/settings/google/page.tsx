@@ -1,5 +1,10 @@
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
+import {
+  SettingsBackLink,
+  SettingsPage,
+  SettingsPageHeader,
+} from '@/components/settings/settings-shell';
 import { canOwn, getPrincipal } from '@/modules/family';
 import { GoogleAccountsPanel, listLinkedAccounts, missingGoogleConfig } from '@/modules/google';
 
@@ -26,21 +31,20 @@ export default async function GoogleSettingsPage({
   // the same `canOwn` helper `GoogleReauthBanner` uses, so the two agree.
   if (!canOwn(principal, 'google:link')) notFound();
 
-  const [params, accounts, t] = await Promise.all([
+  const [params, accounts, t, tSettings] = await Promise.all([
     searchParams,
     listLinkedAccounts(principal.familyId),
     getTranslations('google'),
+    getTranslations('settings'),
   ]);
 
   const single = (value: string | string[] | undefined): string | undefined =>
     Array.isArray(value) ? value[0] : value;
 
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-4 sm:p-8">
-      <div className="flex flex-col gap-1">
-        <h1 className="font-display text-2xl font-bold">{t('title')}</h1>
-        <p className="text-sm text-muted-foreground">{t('subtitle')}</p>
-      </div>
+    <SettingsPage>
+      <SettingsBackLink label={tSettings('back')} />
+      <SettingsPageHeader icon="calendar_month" title={t('title')} description={t('subtitle')} />
 
       <GoogleAccountsPanel
         accounts={accounts}
@@ -48,6 +52,6 @@ export default async function GoogleSettingsPage({
         error={single(params.error)}
         linkedEmail={single(params.linked)}
       />
-    </main>
+    </SettingsPage>
   );
 }

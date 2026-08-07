@@ -30,7 +30,9 @@ const SURFACES = [
 test.describe('hub accessibility', () => {
   for (const surface of SURFACES) {
     test(`the hub ${surface.name} has no WCAG AA violations`, async ({ page, family }) => {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Amsterdam' }).format(
+        new Date()
+      );
       const { children } = await seedHousehold(family.familyId, today);
 
       // M12: hub surfaces run behind a device principal, never an account.

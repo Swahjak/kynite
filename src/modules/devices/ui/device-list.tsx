@@ -49,7 +49,7 @@ export function DeviceList({
 
   if (devices.length === 0) {
     return (
-      <p className="text-body-sm text-muted-foreground" data-testid="devices-empty">
+      <p className="text-body-sm text-ink-secondary" data-testid="devices-empty">
         {t('list.empty')}
       </p>
     );
@@ -88,7 +88,7 @@ export function DeviceList({
           data-testid="device-row"
           data-device-id={entry.id}
           data-revoked={entry.revokedAt !== null}
-          className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border p-3 data-[revoked=true]:opacity-60"
+          className="flex min-h-12 flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-4 shadow-sm transition-colors duration-200 ease-brand data-[revoked=true]:bg-surface-container data-[revoked=true]:opacity-60 data-[revoked=true]:shadow-none"
         >
           <div className="flex min-w-0 flex-col gap-0.5">
             {renamingId === entry.id ? (
@@ -124,11 +124,14 @@ export function DeviceList({
                 </Button>
               </div>
             ) : (
-              <span className="font-display text-body font-semibold" data-testid="device-name">
+              <span
+                className="font-display text-body font-semibold text-ink"
+                data-testid="device-name"
+              >
                 {entry.name}
               </span>
             )}
-            <span className="text-body-sm text-muted-foreground">
+            <span className="text-body-sm text-ink-secondary">
               {entry.revokedAt !== null
                 ? t('list.revoked', {
                     when: format.relativeTime(new Date(entry.revokedAt), serverNow),
@@ -143,7 +146,7 @@ export function DeviceList({
                 It is the second half of "which of these two tablets is which" —
                 "last seen" answers it for a live screen, "paired on" answers it
                 for one that has been quiet for a week. */}
-            <span className="text-caption text-muted-foreground" data-testid="device-paired-at">
+            <span className="text-caption text-ink-muted" data-testid="device-paired-at">
               {t('list.pairedAt', {
                 date: format.dateTime(new Date(entry.pairedAt), { dateStyle: 'medium' }),
               })}
@@ -153,9 +156,7 @@ export function DeviceList({
           {canManage && entry.revokedAt === null ? (
             confirmingId === entry.id ? (
               <div className="flex items-center gap-2" data-testid="revoke-device-confirm">
-                <span className="text-body-sm text-muted-foreground">
-                  {t('list.revokeConfirm')}
-                </span>
+                <span className="text-body-sm text-ink-secondary">{t('list.revokeConfirm')}</span>
                 <Button
                   type="button"
                   variant="destructive"

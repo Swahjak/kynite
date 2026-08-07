@@ -32,6 +32,18 @@ export type EventChipProps = {
   onSelect?: (event: CalendarEvent) => void;
   /** Drag start, for the time-grid blocks that can be rescheduled. */
   onPointerDown?: (pointerEvent: React.PointerEvent<HTMLElement>, event: CalendarEvent) => void;
+  /**
+   * Asked once per click, before `onSelect`. A pointer gesture that actually
+   * moved still ends in a synthetic `click`, and opening the editor from it
+   * would seed the dialog with the *pre-drag* times — saving would then quietly
+   * undo the reschedule the user just performed. The drag hook owns the
+   * "did this move?" fact, so it answers this rather than the chip guessing.
+   */
+  suppressClick?: () => boolean;
+  /** The block starts before the rendered grid window — draw the clip cue. */
+  continuesBefore?: boolean;
+  /** The block ends after the rendered grid window. */
+  continuesAfter?: boolean;
   className?: string;
   style?: React.CSSProperties;
 };
@@ -43,6 +55,9 @@ export function EventChip({
   showTime = true,
   onSelect,
   onPointerDown,
+  suppressClick,
+  continuesBefore = false,
+  continuesAfter = false,
   className,
   style,
 }: EventChipProps) {
@@ -88,9 +103,18 @@ export function EventChip({
       data-recurring={event.recurring || undefined}
       data-event-id={event.seriesId}
       data-occurrence-start={event.startsAt.toISOString()}
+      data-continues-before={continuesBefore || undefined}
+      data-continues-after={continuesAfter || undefined}
       role={interactive ? 'button' : undefined}
       tabIndex={interactive ? 0 : undefined}
-      onClick={interactive ? () => onSelect(event) : undefined}
+      onClick={
+        interactive
+          ? () => {
+              if (suppressClick?.()) return;
+              onSelect(event);
+            }
+          : undefined
+      }
       onPointerDown={
         onPointerDown ? (pointerEvent) => onPointerDown(pointerEvent, event) : undefined
       }
@@ -106,12 +130,17 @@ export function EventChip({
       }
       style={style}
       className={cn(
-        'group/chip relative flex min-w-0 flex-col justify-start gap-0.5 overflow-hidden rounded-lg border-l-4 px-2 py-1 text-left',
+        // M19: `rounded-xl` + `shadow-sm` / `hover:shadow-md`, the mockups'
+        // event card. The 4px left border and the category tint were already
+        // the right treatment (docs/rebuild-design-gaps.md §4) and are
+        // untouched — only the radius and the elevation moved.
+        'group/chip relative flex min-w-0 flex-col justify-start gap-0.5 overflow-hidden rounded-xl border-l-4 px-2 py-1 text-left shadow-sm',
         palette.surface,
         palette.border,
         variant === 'block' && 'absolute inset-x-1 select-none',
         hub ? 'gap-1 px-3 py-2' : '',
-        interactive && 'cursor-pointer transition-shadow hover:shadow-md',
+        interactive &&
+          'cursor-pointer transition-all duration-200 ease-brand hover:-translate-y-px hover:shadow-md',
         // Free/busy blocks are deliberately quieter than the events you can
         // actually read — they are context, not information. The recede is on
         // the *fill and border*, not the whole chip: `opacity-70` on the
@@ -125,6 +154,27 @@ export function EventChip({
         className
       )}
     >
+      {/* Clip cues: the grid renders `GRID_START_HOUR`–`GRID_END_HOUR`, so a
+          block reaching outside that window is drawn against the edge. Without
+          a mark it would read as starting at 06:00 / ending at 23:00, which is
+          a different fact from the one in the database. */}
+      {continuesBefore && (
+        <Icon
+          name="arrow_upward"
+          size="xs"
+          label={t('continuesBefore')}
+          className={cn('absolute top-0.5 right-0.5 opacity-70', palette.text)}
+        />
+      )}
+      {continuesAfter && (
+        <Icon
+          name="arrow_downward"
+          size="xs"
+          label={t('continuesAfter')}
+          className={cn('absolute right-0.5 bottom-0.5 opacity-70', palette.text)}
+        />
+      )}
+
       <div className="flex min-w-0 items-center gap-1">
         {!event.busyOnly && (
           <Icon
@@ -184,7 +234,10 @@ export function EventChip({
       )}
 
       {event.location && variant !== 'block' && (
-        <span className={cn('truncate text-caption', palette.text)}>{event.location}</span>
+        <span className={cn('flex min-w-0 items-center gap-1 text-caption', palette.text)}>
+          <Icon name="location_on" size="xs" className="shrink-0" />
+          <span className="truncate">{event.location}</span>
+        </span>
       )}
     </div>
   );

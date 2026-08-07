@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { revokeShareLinkAction } from '../actions';
 import type { SharingPageData } from '../page-data';
@@ -42,7 +43,7 @@ export function ShareLinkList({
 
   if (links.length === 0) {
     return (
-      <p className="text-body-sm text-muted-foreground" data-testid="share-links-empty">
+      <p className="text-body-sm text-ink-secondary" data-testid="share-links-empty">
         {t('list.empty')}
       </p>
     );
@@ -75,22 +76,24 @@ export function ShareLinkList({
             data-state={link.state}
             className={
               link.state === 'active'
-                ? 'flex flex-col gap-2 rounded-xl border border-border p-4'
-                : 'flex flex-col gap-2 rounded-xl border border-border p-4 opacity-60'
+                ? 'flex flex-col gap-2 rounded-xl border border-border bg-card p-4 shadow-sm'
+                : 'flex flex-col gap-2 rounded-xl border border-border bg-surface-container p-4 opacity-60'
             }
           >
             <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <span className="font-display font-semibold">{link.label ?? t('list.untitled')}</span>
-              <span className="text-body-sm text-muted-foreground">{t(`roles.${link.role}`)}</span>
+              <span className="font-display text-body font-semibold text-ink">
+                {link.label ?? t('list.untitled')}
+              </span>
+              <Badge variant="outline">{t(`roles.${link.role}`)}</Badge>
             </div>
 
-            <p className="text-body-sm text-muted-foreground">
+            <p className="text-body-sm text-ink-secondary">
               {link.memberNames.length > 0
                 ? t('list.scopedTo', { names: link.memberNames.join(', ') })
                 : t('list.scopeAll')}
             </p>
 
-            <p className="text-body-sm text-muted-foreground" data-testid="share-link-usage">
+            <p className="text-body-sm text-ink-secondary" data-testid="share-link-usage">
               {link.lastUsedAt
                 ? t('list.usage', {
                     count: link.useCount,
@@ -99,7 +102,7 @@ export function ShareLinkList({
                 : t('list.neverUsed')}
             </p>
 
-            <p className="text-body-sm text-muted-foreground" data-testid="share-link-state">
+            <p className="text-caption text-ink-muted" data-testid="share-link-state">
               {link.state === 'revoked' && link.revokedAt
                 ? t('list.revokedAt', {
                     when: format.relativeTime(new Date(link.revokedAt), new Date(serverNow)),

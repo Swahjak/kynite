@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server';
+import { Icon } from '@/components/ui/icon';
 import { TimerControls, loadTimersPage } from '@/modules/timers';
 
 /** Session-dependent: never prerendered, so `next build` needs no database. */
@@ -19,10 +20,21 @@ export default async function TimersPage() {
   if (!page) return null;
 
   return (
-    <main className="flex flex-1 flex-col gap-6 p-6" data-testid="timers-page">
-      <header className="flex flex-col gap-1">
-        <h1 className="font-display text-h1 font-bold">{t('title')}</h1>
-        <p className="text-body text-ink-secondary">{t('subtitle')}</p>
+    <main
+      className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 p-4 sm:p-6"
+      data-testid="timers-page"
+    >
+      <header className="flex items-center gap-4">
+        <span
+          aria-hidden
+          className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-brand-container text-brand-container-ink shadow-sm"
+        >
+          <Icon name="timer" size="xl" filled />
+        </span>
+        <div className="min-w-0">
+          <h1 className="font-display text-h1 font-bold">{t('title')}</h1>
+          <p className="text-body text-ink-secondary">{t('subtitle')}</p>
+        </div>
       </header>
 
       <TimerControls page={page} />

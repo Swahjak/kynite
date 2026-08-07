@@ -11,12 +11,14 @@ import { GRID_END_HOUR, GRID_START_HOUR, HOUR_HEIGHT } from './tokens';
 import { useDragReschedule } from './use-drag-reschedule';
 
 /**
- * The shared day/week time grid.
+ * The week time grid — one column per day.
  *
- * Day view is this component with one column; week view is the same component
- * with seven. Keeping them one component is what keeps drag-and-drop, overlap
- * layout, the now-line and the all-day row from drifting apart between two
- * views that are the same thing at different widths.
+ * Until M19 this was the day view too, at 1/7th the width. Day view now reads
+ * per *member* (`member-day-grid.tsx`, the stitch composition), and this
+ * component stays the week grid it always was; the hub still renders it for
+ * both. The overlap `layout()` is shared with the member grid rather than
+ * reimplemented there — it is the one piece of this file that is about time
+ * rather than about days.
  */
 
 export type TimeGridProps = {
@@ -36,7 +38,13 @@ type Positioned = {
   /** Horizontal share of the column, for events that overlap in time. */
   columnIndex: number;
   columnCount: number;
+  /** The block began before this day, or before the first rendered hour. */
+  continuesBefore: boolean;
+  /** The block runs past this day, or past the last rendered hour. */
+  continuesAfter: boolean;
 };
+
+const MINUTES_PER_DAY = 1440;
 
 const GRID_HOURS = GRID_END_HOUR - GRID_START_HOUR;
 
@@ -47,7 +55,7 @@ const GRID_HOURS = GRID_END_HOUR - GRID_START_HOUR;
  * are live at this moment" is the only question worth answering, and it gives
  * the same answer with none of the machinery.
  */
-function layout(events: CalendarEvent[], timeZone: string): Positioned[] {
+function layout(events: CalendarEvent[], timeZone: string, dayKey: string): Positioned[] {
   const sorted = [...events].sort(
     (a, b) => a.startsAt.getTime() - b.startsAt.getTime() || b.endsAt.getTime() - a.endsAt.getTime()
   );
@@ -60,7 +68,7 @@ function layout(events: CalendarEvent[], timeZone: string): Positioned[] {
     for (const [index, event] of cluster.entries()) {
       positioned.push({
         event,
-        ...verticalSpan(event, timeZone),
+        ...verticalSpan(event, timeZone, dayKey),
         columnIndex: index,
         columnCount: cluster.length,
       });
@@ -79,17 +87,47 @@ function layout(events: CalendarEvent[], timeZone: string): Positioned[] {
   return positioned;
 }
 
-/** Where a block sits vertically, in px, clamped to the rendered hour range. */
-function verticalSpan(event: CalendarEvent, timeZone: string): { top: number; height: number } {
-  const startMinutes = minutesIntoDay(event.startsAt, timeZone);
-  const rawEnd = minutesIntoDay(event.endsAt, timeZone);
-  // An event ending past midnight reads as ending at the bottom of the day.
-  const endMinutes = rawEnd <= startMinutes ? GRID_END_HOUR * 60 : rawEnd;
+/**
+ * Where a block sits vertically on **this** day, in px.
+ *
+ * The span is day-relative, not clock-relative: `minutesIntoDay` alone answers
+ * "what time is it", which is the wrong question for a block that crosses
+ * midnight. A 22:00 → 02:00 event has to draw as 22:00 → end-of-day on the day
+ * it starts and as start-of-day → 02:00 on the day it ends; taking the raw
+ * minutes on the second day would put it at 22:00 there too, i.e. on the wrong
+ * day entirely (and the old `rawEnd <= start ? bottom` guard turned the second
+ * day's copy into a four-hour block starting at 22:00).
+ *
+ * The result is then clamped into the rendered hour window. An event before
+ * `GRID_START_HOUR` used to produce a negative `top` and float above the grid;
+ * it now parks on the first hour line and the chip carries a clip cue instead
+ * (`continuesBefore` / `continuesAfter`).
+ */
+function verticalSpan(
+  event: CalendarEvent,
+  timeZone: string,
+  dayKey: string
+): { top: number; height: number; continuesBefore: boolean; continuesAfter: boolean } {
+  const startKey = toDateKey(toWall(event.startsAt, timeZone));
+  const endKey = toDateKey(toWall(event.endsAt, timeZone));
 
-  const top = ((startMinutes - GRID_START_HOUR * 60) / 60) * HOUR_HEIGHT;
-  const height = Math.max(((endMinutes - startMinutes) / 60) * HOUR_HEIGHT, 22);
+  const dayStart = startKey === dayKey ? minutesIntoDay(event.startsAt, timeZone) : 0;
+  // An end that lands on a later wall day — including exactly midnight, which
+  // reads as 00:00 of the next day — fills this day to the bottom.
+  const dayEnd = endKey === dayKey ? minutesIntoDay(event.endsAt, timeZone) : MINUTES_PER_DAY;
 
-  return { top, height };
+  const windowTop = GRID_START_HOUR * 60;
+  const windowBottom = GRID_END_HOUR * 60;
+
+  const start = Math.min(Math.max(dayStart, windowTop), windowBottom);
+  const end = Math.min(Math.max(dayEnd, start), windowBottom);
+
+  return {
+    top: ((start - windowTop) / 60) * HOUR_HEIGHT,
+    height: Math.max(((end - start) / 60) * HOUR_HEIGHT, 22),
+    continuesBefore: dayStart < windowTop,
+    continuesAfter: dayEnd > windowBottom,
+  };
 }
 
 export function TimeGrid({ days, events, timeZone, now, onSelect, hub = false }: TimeGridProps) {
@@ -148,24 +186,18 @@ export function TimeGrid({ days, events, timeZone, now, onSelect, hub = false }:
 
   return (
     <div data-slot="time-grid" className="flex min-h-0 flex-col">
-      {/* Day headers */}
-      <div className="flex border-b border-line pl-14">
+      {/* Day headers — the mockups' sticky, glass column strip. */}
+      <div className="flex border-b border-line bg-surface-container-low/60 pl-14">
         {days.map((day, index) => (
-          <div
-            key={dayKeys[index]}
-            className={cn(
-              'flex-1 px-1 py-2 text-center',
-              nowKey === dayKeys[index] && 'bg-accent/40'
-            )}
-          >
+          <div key={dayKeys[index]} className="flex flex-1 flex-col items-center gap-0.5 px-1 py-2">
             <div className="label-overline text-ink-muted">
               {format.dateTime(day, { weekday: 'short' })}
             </div>
             <div
               className={cn(
-                'tabular-time font-display font-bold',
-                hub ? 'text-h2' : 'text-body-lg',
-                nowKey === dayKeys[index] ? 'text-brand-ink' : 'text-ink'
+                'flex items-center justify-center rounded-4xl tabular-time font-display font-bold',
+                hub ? 'size-11 text-h2' : 'size-7 text-body-lg',
+                nowKey === dayKeys[index] ? 'bg-primary text-primary-foreground' : 'text-ink'
               )}
             >
               {format.dateTime(day, { day: 'numeric' })}
@@ -176,7 +208,10 @@ export function TimeGrid({ days, events, timeZone, now, onSelect, hub = false }:
 
       {/* All-day row: dates, not times, so they cannot live on the hour grid. */}
       {dayKeys.some((key) => (allDay.get(key)?.length ?? 0) > 0) && (
-        <div className="flex border-b border-line pl-14" data-slot="all-day-row">
+        <div
+          className="flex border-b border-line bg-surface-container-low/40 pl-14"
+          data-slot="all-day-row"
+        >
           {dayKeys.map((key) => (
             <div key={key} className="flex flex-1 flex-col gap-1 p-1">
               {(allDay.get(key) ?? []).map((event) => (
@@ -231,7 +266,7 @@ export function TimeGrid({ days, events, timeZone, now, onSelect, hub = false }:
               )}
               style={{ height: GRID_HOURS * HOUR_HEIGHT }}
             >
-              {layout(timed.get(key) ?? [], timeZone).map((positioned) => {
+              {layout(timed.get(key) ?? [], timeZone, key).map((positioned) => {
                 const offset = drag.offsetFor(positioned.event);
                 const isDragging = drag.drag?.key === positioned.event.key;
                 const width = 100 / positioned.columnCount;
@@ -244,6 +279,9 @@ export function TimeGrid({ days, events, timeZone, now, onSelect, hub = false }:
                     hub={hub}
                     onSelect={onSelect}
                     onPointerDown={drag.onPointerDown}
+                    suppressClick={drag.shouldIgnoreClick}
+                    continuesBefore={positioned.continuesBefore}
+                    continuesAfter={positioned.continuesAfter}
                     className={cn(
                       'touch-none',
                       isDragging && 'z-30 opacity-90 shadow-lg',
@@ -264,7 +302,7 @@ export function TimeGrid({ days, events, timeZone, now, onSelect, hub = false }:
               {nowKey === key && (
                 <div
                   data-testid="now-line"
-                  className="pointer-events-none absolute inset-x-0 z-20 border-t-2 border-now"
+                  className="pointer-events-none absolute inset-x-0 z-20 border-t border-now"
                   style={{ top: nowTop }}
                 >
                   <span className="absolute -top-1 -left-1 size-2 rounded-full bg-now" />
@@ -278,4 +316,4 @@ export function TimeGrid({ days, events, timeZone, now, onSelect, hub = false }:
   );
 }
 
-export { layout as layoutForTests };
+export { layout, layout as layoutForTests };

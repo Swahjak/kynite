@@ -26,12 +26,14 @@ export {
   MEMBER_ROLES,
   REWARD_HORIZONS,
   family,
+  formerMember,
   member,
   memberColor,
   memberInvite,
   memberRole,
   rewardHorizon,
   type Family,
+  type FormerMember,
   type HubView,
   type Member,
   type MemberColor,
@@ -57,7 +59,7 @@ export {
   type GreetingSlot,
 } from './domain/greeting';
 
-export { getFamily, getMember, getMemberByUserId, listMembers } from './queries';
+export { getFamily, getMember, getMemberByUserId, hasEverBeenMember, listMembers } from './queries';
 
 export {
   loadFamilyPage,
@@ -84,6 +86,7 @@ export {
 export {
   acceptInviteAction,
   chooseProfileAction,
+  createFamilyForSocialUserAction,
   createInviteAction,
   createMemberAction,
   deleteFamilyAction,
@@ -91,12 +94,14 @@ export {
   revokeInviteAction,
   setHubDisplayAction,
   signInAction,
+  signInWithGoogleAction,
   signOutAction,
   signUpAction,
   updateFamilyAction,
   updateMemberAction,
 } from './actions';
 
+export { CreateFamilyForm } from './ui/create-family-form';
 export { DeleteFamilyForm } from './ui/delete-family-form';
 export { FamilySettingsForm } from './ui/family-settings-form';
 export { HubDisplayForm } from './ui/hub-display-form';

@@ -9,40 +9,58 @@ import { Input } from '@/components/ui/input';
 import { Link } from '@/i18n/navigation';
 import { idleState } from '../action-state';
 import { signUpAction } from '../actions';
+import { AuthDivider, GoogleSignInButton } from './google-sign-in-button';
 
-/** First run: one form creates the account, the family and the owner member. */
-export function SignUpForm() {
+/**
+ * First run: one form creates the account, the family and the owner member.
+ *
+ * The Google path above the rule reaches the same destination by a different
+ * route — it cannot ask for a family name (there is nothing to ask on Google's
+ * consent screen), so `(auth)/onboarding` asks for it on the way back. Two
+ * shapes, one outcome: an account with exactly one household it owns.
+ *
+ * Restyled to the stitch card idiom in M19 phase 2 (docs/rebuild-design-gaps.md
+ * §8); the primitives and the field set are unchanged.
+ */
+export function SignUpForm({ socialEnabled = false }: { socialEnabled?: boolean }) {
   const t = useTranslations('auth');
   const [state, formAction, pending] = useActionState(signUpAction, idleState);
 
   return (
-    <Card className="w-full max-w-md">
+    <Card className="w-full max-w-md gap-6 rounded-2xl p-2 shadow-lg">
       <CardHeader>
         <CardTitle>
-          <h1 className="text-xl">{t('signUp.title')}</h1>
+          <h1 className="font-display text-h1">{t('signUp.title')}</h1>
         </CardTitle>
-        <CardDescription>{t('signUp.description')}</CardDescription>
+        <CardDescription className="text-body">{t('signUp.description')}</CardDescription>
       </CardHeader>
-      <CardContent>
-        <form action={formAction} className="flex flex-col gap-4">
+      <CardContent className="flex flex-col gap-5">
+        {socialEnabled ? (
+          <>
+            <GoogleSignInButton />
+            <AuthDivider label={t('or')} />
+          </>
+        ) : null}
+
+        <form action={formAction} className="flex flex-col gap-5">
           <Field>
-            <FieldLabel>{t('fields.name')}</FieldLabel>
+            <FieldLabel className="font-display font-semibold">{t('fields.name')}</FieldLabel>
             <Input name="name" size="hub" required maxLength={80} autoComplete="name" />
           </Field>
 
           <Field>
-            <FieldLabel>{t('fields.familyName')}</FieldLabel>
+            <FieldLabel className="font-display font-semibold">{t('fields.familyName')}</FieldLabel>
             <Input name="familyName" size="hub" required maxLength={80} autoComplete="off" />
             <FieldDescription>{t('fields.familyNameHint')}</FieldDescription>
           </Field>
 
           <Field>
-            <FieldLabel>{t('fields.email')}</FieldLabel>
+            <FieldLabel className="font-display font-semibold">{t('fields.email')}</FieldLabel>
             <Input name="email" type="email" size="hub" required autoComplete="email" />
           </Field>
 
           <Field>
-            <FieldLabel>{t('fields.password')}</FieldLabel>
+            <FieldLabel className="font-display font-semibold">{t('fields.password')}</FieldLabel>
             <Input
               name="password"
               type="password"
@@ -55,18 +73,21 @@ export function SignUpForm() {
           </Field>
 
           {state.status === 'error' ? (
-            <p role="alert" className="text-sm text-destructive">
+            <p role="alert" className="text-body-sm text-destructive">
               {t(`errors.${state.error}`)}
             </p>
           ) : null}
 
-          <Button type="submit" size="hub" disabled={pending}>
+          <Button type="submit" size="hub" disabled={pending} className="w-full">
             {t('signUp.submit')}
           </Button>
 
-          <p className="text-center text-sm text-muted-foreground">
+          <p className="text-body-sm text-ink-secondary text-center">
             {t('signUp.haveAccount')}{' '}
-            <Link href="/sign-in" className="text-brand-ink underline-offset-4 hover:underline">
+            <Link
+              href="/sign-in"
+              className="text-brand-ink font-semibold underline-offset-4 hover:underline"
+            >
               {t('signIn.title')}
             </Link>
           </p>

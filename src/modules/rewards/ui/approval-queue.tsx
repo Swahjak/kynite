@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
+import type { IconName } from '@/components/ui/icon-codepoints';
+import { cn } from '@/lib/utils';
 import { idleState } from '../action-state';
 import { decideRedemptionAction, fulfillRedemptionAction } from '../actions';
 import type { RedemptionWithReward } from '../queries';
@@ -104,13 +106,30 @@ function Row({
 
   return (
     <li>
-      <Card data-testid="redemption-row" data-redemption-id={entry.id} data-status={entry.status}>
+      <Card
+        data-testid="redemption-row"
+        data-redemption-id={entry.id}
+        data-status={entry.status}
+        className="transition-shadow duration-200 ease-brand hover:shadow-md"
+      >
         <CardContent className="flex flex-wrap items-center gap-4">
           <span
             aria-hidden
-            className="flex size-12 shrink-0 items-center justify-center rounded-full bg-muted text-ink-secondary"
+            className={cn(
+              'flex size-12 shrink-0 items-center justify-center rounded-full',
+              // Only what is still waiting on a parent carries the brand tint;
+              // settled rows go quiet. A queue that shouts at every row is a
+              // queue nobody reads.
+              entry.status === 'requested'
+                ? 'bg-brand-container text-brand-container-ink'
+                : 'bg-surface-container text-ink-secondary'
+            )}
           >
-            <Icon name={rewardIconOf(entry.rewardIcon)} size="lg" />
+            <Icon
+              name={rewardIconOf(entry.rewardIcon)}
+              size="lg"
+              filled={entry.status === 'requested'}
+            />
           </span>
 
           <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -126,6 +145,25 @@ function Row({
         </CardContent>
       </Card>
     </li>
+  );
+}
+
+/**
+ * A section heading with the stitch icon medallion beside it. Three sections,
+ * three glyphs, so a parent scanning the page finds "what needs me" without
+ * reading — `hourglass_top` waits, `redeem` is owed, `check_circle` is done.
+ */
+function QueueHeading({ icon, children }: { icon: IconName; children: React.ReactNode }) {
+  return (
+    <h2 className="flex items-center gap-3 font-display text-h2 font-bold">
+      <span
+        aria-hidden
+        className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-surface-container text-ink-secondary"
+      >
+        <Icon name={icon} size="md" />
+      </span>
+      {children}
+    </h2>
   );
 }
 
@@ -154,7 +192,7 @@ export function ApprovalQueue({
   return (
     <div className="flex flex-col gap-8">
       <section className="flex flex-col gap-4">
-        <h2 className="font-display text-h2 font-bold">{t('queue.pendingTitle')}</h2>
+        <QueueHeading icon="hourglass_top">{t('queue.pendingTitle')}</QueueHeading>
         {pending.length === 0 ? (
           <p data-testid="queue-empty" className="text-body-lg text-ink-secondary">
             {t('queue.pendingEmpty')}
@@ -172,7 +210,7 @@ export function ApprovalQueue({
 
       {outstanding.length > 0 ? (
         <section className="flex flex-col gap-4">
-          <h2 className="font-display text-h2 font-bold">{t('queue.outstandingTitle')}</h2>
+          <QueueHeading icon="redeem">{t('queue.outstandingTitle')}</QueueHeading>
           <p className="text-body-sm text-ink-secondary">{t('queue.outstandingHint')}</p>
           <ul data-testid="outstanding-queue" className="flex flex-col gap-3">
             {outstanding.map((entry) => (
@@ -186,7 +224,7 @@ export function ApprovalQueue({
 
       {history.length > 0 ? (
         <section className="flex flex-col gap-4">
-          <h2 className="font-display text-h2 font-bold">{t('queue.historyTitle')}</h2>
+          <QueueHeading icon="check_circle">{t('queue.historyTitle')}</QueueHeading>
           <ul data-testid="redemption-history" className="flex flex-col gap-3">
             {history.map((entry) => (
               <Row key={entry.id} entry={entry} memberName={nameOf(entry.memberId)} />

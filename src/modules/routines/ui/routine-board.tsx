@@ -219,12 +219,28 @@ export function RoutineBoard({ board }: { board: RoutineBoardData }) {
   const anythingToShow = board.sections.some((section) => section.routines.length > 0);
 
   return (
-    <div data-testid="routine-board" className="flex flex-col gap-8">
+    // `gap-6`, and the band below carries `mb-3` rather than `mb-4`: four time
+    // sections mean four of each, and at 1280×800 that difference is the
+    // difference between the evening routine being on the wall and being below
+    // a fold a kiosk cannot scroll (M19 review, F8).
+    <div data-testid="routine-board" className="flex flex-col gap-6">
       {board.sections.map((section) => (
         <section key={section.section} data-testid={`routine-section-${section.section}`}>
-          <div className="mb-4 flex items-center gap-4">
+          {/* The stitch band header: sticky, glass, and the progress rule runs
+              the full remaining width of the row rather than sitting as a stub
+              on the right (`chores_routines_…/code.html`,
+              `h-1 flex-1 mx-4`). Sticky so a long morning keeps its heading
+              while it scrolls under the glass shell header.
+
+              `pointer-events-none`: sticky *and* `z-10` means the band is
+              parked on top of the rows that scroll beneath it, and on the hub
+              those rows are 56px tap targets a child aims at. Every tap landing
+              in the band's strip was being eaten by a heading. Nothing in here
+              is interactive — a heading, a count and a bar — so the band gives
+              its clicks back to whatever is underneath it. */}
+          <div className="glass pointer-events-none sticky top-0 z-10 mb-3 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-2xl px-3 py-2">
             <h2 className="flex items-center gap-2 font-display text-h2 font-bold text-foreground">
-              <Icon name={SECTION_ICONS[section.section]} size="lg" filled />
+              <Icon name={SECTION_ICONS[section.section]} size="lg" filled className="text-gold" />
               {t(`sections.${section.section}`)}
             </h2>
 
@@ -238,10 +254,10 @@ export function RoutineBoard({ board }: { board: RoutineBoardData }) {
 
             <span
               aria-hidden
-              className="ml-auto h-1 w-24 overflow-hidden rounded-full bg-muted sm:w-48"
+              className="h-1 min-w-24 flex-1 overflow-hidden rounded-4xl bg-surface-container"
             >
               <span
-                className="block h-full rounded-full bg-primary transition-[width] duration-500 ease-brand"
+                className="block h-full rounded-4xl bg-gold transition-[width] duration-500 ease-brand"
                 style={{ width: `${Math.round(section.ratio * 100)}%` }}
               />
             </span>

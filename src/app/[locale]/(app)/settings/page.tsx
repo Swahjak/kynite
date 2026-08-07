@@ -1,6 +1,11 @@
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import { Link } from '@/i18n/navigation';
+import {
+  SettingsNavRow,
+  SettingsPage,
+  SettingsPageHeader,
+  SettingsSection,
+} from '@/components/settings/settings-shell';
 import { CalendarDisplayList, loadCalendarDisplay } from '@/modules/calendar';
 import {
   DeleteFamilyForm,
@@ -18,7 +23,7 @@ import { RoutineGraduationList, hasGraduated, loadRoutinesPage } from '@/modules
 export const dynamic = 'force-dynamic';
 
 /**
- * The settings hub (milestone M16).
+ * The settings hub (milestone M16, restyled in M19 phase 2).
  *
  * One page with every section on it, rather than a menu of eight routes. A
  * household's settings are read far more often than they are written — "what
@@ -27,7 +32,8 @@ export const dynamic = 'force-dynamic';
  * more than a tidy index. The four surfaces that already had their own route
  * before M16 (Google, notifications, devices, share links) keep it: each is a
  * flow rather than a field, and deep links to them exist in the wild. They
- * appear here as sections with a way in.
+ * appear here as icon-led rows with a chevron, which is the mockups' idiom for
+ * "this continues elsewhere" and the only affordance on the page that navigates.
  *
  * The members section renders the *same* `MemberList`/`MemberDialog` the
  * roster page does, bound to the same actions. It is not a second
@@ -40,7 +46,7 @@ export const dynamic = 'force-dynamic';
  * rule `loadFamilyPage` follows for invites. A control whose action would
  * refuse you is worse than no control.
  */
-export default async function SettingsPage() {
+export default async function SettingsHubPage() {
   const settings = await loadFamilySettings();
   // The layout guard redirects unauthenticated requests; this is belt-and-braces.
   if (!settings) notFound();
@@ -55,42 +61,39 @@ export default async function SettingsPage() {
   const t = await getTranslations('settings');
 
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-col gap-10 p-4 sm:p-8">
-      <div className="flex flex-col gap-1">
-        <h1 className="font-display text-2xl font-bold">{t('title')}</h1>
-        <p className="text-sm text-muted-foreground">{t('subtitle')}</p>
-      </div>
+    <SettingsPage>
+      <SettingsPageHeader icon="settings" title={t('title')} description={t('subtitle')} />
 
       {settings.canManageFamily && settings.family ? (
-        <Section id="family" title={t('family.title')} description={t('family.description')}>
+        <SettingsSection
+          id="family"
+          title={t('family.title')}
+          description={t('family.description')}
+        >
           <FamilySettingsForm family={settings.family} />
-        </Section>
+        </SettingsSection>
       ) : null}
 
-      <Section id="members" title={t('members.title')} description={t('members.description')}>
-        <div className="flex flex-col gap-4">
-          {roster ? (
-            <>
-              {/* NB-7: the "new member" affordance is owner-only
-                  (`member:manage`) — omitted for an adult, per this page's own
-                  omit-not-disable rule, rather than shown and left to refuse. */}
-              {settings.canManageMembers ? (
-                <div className="flex justify-end">
-                  <MemberDialog />
-                </div>
-              ) : null}
-              <MemberList
-                members={roster.members}
-                invites={roster.invites}
-                serverNow={roster.serverNow}
-                canManage={settings.canManageMembers}
-              />
-            </>
-          ) : null}
-        </div>
-      </Section>
+      <SettingsSection
+        id="members"
+        title={t('members.title')}
+        description={t('members.description')}
+        // NB-7: the "new member" affordance is owner-only (`member:manage`) —
+        // omitted for an adult, per this page's own omit-not-disable rule,
+        // rather than shown and left to refuse.
+        action={roster && settings.canManageMembers ? <MemberDialog /> : undefined}
+      >
+        {roster ? (
+          <MemberList
+            members={roster.members}
+            invites={roster.invites}
+            serverNow={roster.serverNow}
+            canManage={settings.canManageMembers}
+          />
+        ) : null}
+      </SettingsSection>
 
-      <Section
+      <SettingsSection
         id="graduation"
         title={t('graduation.title')}
         description={t('graduation.description')}
@@ -112,81 +115,73 @@ export default async function SettingsPage() {
               : []
           }
         />
-      </Section>
+      </SettingsSection>
 
-      <Section
+      <SettingsSection
         id="notifications"
         title={t('notifications.title')}
         description={t('notifications.description')}
       >
-        <div className="flex flex-col gap-4">
-          {notifications ? (
-            <NotificationPreferencesForm preferences={notifications.preferences} />
-          ) : null}
-          <SectionLink href="/settings/notifications" label={t('notifications.manage')} />
-        </div>
-      </Section>
+        {notifications ? (
+          <NotificationPreferencesForm preferences={notifications.preferences} />
+        ) : null}
+        <SettingsNavRow
+          href="/settings/notifications"
+          icon="notifications"
+          label={t('notifications.manage')}
+          bordered
+        />
+      </SettingsSection>
 
-      <Section id="calendars" title={t('calendars.title')} description={t('calendars.description')}>
-        <div className="flex flex-col gap-6">
-          {settings.canManageDisplay && settings.family ? (
-            <HubDisplayForm defaultView={settings.family.hubDefaultView} />
-          ) : null}
-          {calendars?.canManage ? (
-            <CalendarDisplayList calendars={calendars.calendars} />
-          ) : (
-            <p className="text-sm text-muted-foreground">{t('calendars.readOnly')}</p>
-          )}
-          <SectionLink href="/settings/google" label={t('calendars.manageGoogle')} />
-        </div>
-      </Section>
+      <SettingsSection
+        id="calendars"
+        title={t('calendars.title')}
+        description={t('calendars.description')}
+      >
+        {settings.canManageDisplay && settings.family ? (
+          <HubDisplayForm defaultView={settings.family.hubDefaultView} />
+        ) : null}
+        {calendars?.canManage ? (
+          <CalendarDisplayList calendars={calendars.calendars} />
+        ) : (
+          <p className="text-body-sm text-ink-secondary">{t('calendars.readOnly')}</p>
+        )}
+        <SettingsNavRow
+          href="/settings/google"
+          icon="calendar_month"
+          label={t('calendars.manageGoogle')}
+          bordered
+        />
+      </SettingsSection>
 
-      <Section id="devices" title={t('devices.title')} description={t('devices.description')}>
-        <SectionLink href="/settings/devices" label={t('devices.manage')} />
-      </Section>
+      <SettingsSection id="devices" title={t('devices.title')}>
+        <SettingsNavRow
+          href="/settings/devices"
+          icon="tablet_mac"
+          label={t('devices.manage')}
+          description={t('devices.description')}
+        />
+      </SettingsSection>
 
-      <Section id="sharing" title={t('sharing.title')} description={t('sharing.description')}>
-        <SectionLink href="/settings/sharing" label={t('sharing.manage')} />
-      </Section>
+      <SettingsSection id="sharing" title={t('sharing.title')}>
+        <SettingsNavRow
+          href="/settings/sharing"
+          icon="share"
+          label={t('sharing.manage')}
+          description={t('sharing.description')}
+        />
+      </SettingsSection>
 
       {settings.canManageFamily && settings.family ? (
-        <Section id="danger" title={t('danger.title')} description={t('danger.description')}>
+        <SettingsSection
+          id="danger"
+          title={t('danger.title')}
+          description={t('danger.description')}
+          tone="danger"
+        >
           <DeleteFamilyForm familyName={settings.family.name} />
-        </Section>
+        </SettingsSection>
       ) : null}
-    </main>
-  );
-}
-
-function Section({
-  id,
-  title,
-  description,
-  children,
-}: {
-  id: string;
-  title: string;
-  description: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section id={id} data-testid={`settings-section-${id}`} className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1">
-        <h2 className="font-display text-lg font-semibold">{title}</h2>
-        <p className="text-sm text-muted-foreground">{description}</p>
-      </div>
-      {children}
-    </section>
-  );
-}
-
-function SectionLink({ href, label }: { href: string; label: string }) {
-  return (
-    <Link
-      href={href}
-      className="font-display text-sm font-medium text-brand-ink underline-offset-4 hover:underline"
-    >
-      {label}
-    </Link>
+    </SettingsPage>
   );
 }

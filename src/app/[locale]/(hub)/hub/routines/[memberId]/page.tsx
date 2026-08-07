@@ -1,4 +1,5 @@
 import { getFormatter, getTranslations } from 'next-intl/server';
+import { ChildTabs } from '@/components/hub';
 import { requireHubDevice } from '@/modules/devices';
 import { RoutineBoard, loadMemberRoutines } from '@/modules/routines';
 
@@ -45,8 +46,11 @@ export default async function HubRoutinesPage({
   }
 
   return (
+    // Tighter than the 24px rhythm the rest of the app uses (M19 review, F8):
+    // at 1280×800 the shell's chrome plus this page's own header and tabs left
+    // the routine list scrolling inside a screen nobody can scroll.
     <main
-      className="flex min-h-full flex-col gap-6 bg-background p-6"
+      className="flex min-h-full flex-col gap-4 bg-background px-6 py-4"
       data-testid="hub-routines"
       data-member-id={board.member.id}
     >
@@ -59,13 +63,19 @@ export default async function HubRoutinesPage({
             {format.dateTime(board.now, { dateStyle: 'full' })}
           </p>
         </div>
+        {/* M19: the Stitch board clock token (72px), not the 56px display-md
+            this carried before — the clock is the one thing on a hub screen
+            read from the far side of a room. */}
         <span
           data-testid="hub-routines-clock"
-          className="tabular-time text-display-md font-extrabold text-brand-ink"
+          className="tabular-time text-display-hub font-extrabold text-brand-ink"
         >
           {format.dateTime(board.now, { hour: '2-digit', minute: '2-digit' })}
         </span>
       </header>
+
+      {/* M19: their stars and their shelf are one tap from their steps. */}
+      <ChildTabs memberId={board.member.id} displayName={board.member.displayName} />
 
       <RoutineBoard board={board} />
     </main>

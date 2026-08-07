@@ -55,7 +55,9 @@ const SEEDED_RANDOM = `
 
 test.describe('celebration visuals — hub tablet', () => {
   test('the end frame after a completion tap', async ({ page, family }) => {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Amsterdam' }).format(
+      new Date()
+    );
     // The first step is the one that gets tapped, so it is the one whose praise
     // has to be pinned.
     const { memberId, routineStepId } = idsForPraise('byYourself', today);

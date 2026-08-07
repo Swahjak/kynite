@@ -9,7 +9,7 @@ import {
   setHubDefaultView,
   withDb,
 } from '@e2e/utils/seed';
-import { settlePage } from '@e2e/utils/settle';
+import { pinLiveText, settlePage } from '@e2e/utils/settle';
 
 /**
  * Visual regression for every calendar surface, at both viewports M06 names:
@@ -227,34 +227,17 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
         // comparison deterministic *and* actually compares the clock instead of
         // blanking it.
         //
-        // F14b, root-caused: `toBeVisible()` above only proves the *server's*
-        // markup painted — it says nothing about client hydration having
-        // finished. `HubBoard` is a client component (`hub-board.tsx`) whose
-        // clock is `useMirroredHubState(...).now`, formatted client-side by
-        // `useFormatter()`; the very first client render reproduces the
-        // server's text exactly (same `snapshot.now`), but hydration itself is
-        // still in flight when this line used to run. Overwriting `textContent`
-        // to `'00:00'` *before* React finishes attaching event handlers put a
-        // value in the DOM that did not come from React's own render — so when
-        // hydration completed a moment later, React compared its expected text
-        // ("10:05", say) against what was actually in the DOM ("00:00"), called
-        // that a hydration mismatch, logged "Hydration failed because the
-        // server rendered text didn't match the client" to the WebServer
-        // console and **discarded the whole subtree to re-render it from
-        // scratch** — which is what put the live clock time back on screen for
-        // the screenshot, 2 (or 4) runs in 4.
+        // M19 replaces F14b's "wait for a real-looking time, then overwrite
+        // once" with `pinLiveText`, which holds the pin against whatever
+        // rewrites the node. F14b's wait could not do that: the clock reads
+        // like a real time in the *server's* markup, so it matches long before
+        // React hydrates, and hydration then puts the live time back. See
+        // `utils/settle.ts` for the measurement.
         //
-        // The fix is to make the pin happen strictly *after* hydration rather
-        // than race it: wait for the clock to show real time text (proof
-        // React has committed its first client render) before overwriting it.
-        //
-        // M15: `en`'s `useFormatter()` renders 12-hour "10:49 AM" rather than
-        // nl's 24-hour "10:49" — a real, locale-appropriate difference in the
-        // app, not a bug — so the wait pattern accepts either shape.
-        await expect(page.getByTestId('hub-clock')).toHaveText(/^\d{1,2}:\d{2}(\s?[AP]M)?$/i);
-        await page.getByTestId('hub-clock').evaluate((element) => {
-          element.textContent = '00:00';
-        });
+        // (M15's locale note survives the change: `en`'s `useFormatter()`
+        // renders 12-hour "10:49 AM" where nl renders "10:49". The pin does not
+        // care what shape it replaces.)
+        await pinLiveText(page, 'hub-clock');
 
         await settlePage(page);
 
@@ -283,14 +266,8 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
       await expect(page.getByTestId('hub-board')).toBeVisible();
       await expect(page.getByTestId('kiosk-shell')).toHaveAttribute('data-hub-theme', 'dark');
 
-      // F14b: same hydration race as the light variant above — wait for the
-      // clock's real first client render before overwriting it, or React can
-      // discard the overwrite as part of recovering from the "mismatch" the
-      // overwrite itself caused.
-      await expect(page.getByTestId('hub-clock')).toHaveText(/^\d{2}:\d{2}$/);
-      await page.getByTestId('hub-clock').evaluate((element) => {
-        element.textContent = '00:00';
-      });
+      // Same live clock, same durable pin as the light variant above.
+      await pinLiveText(page, 'hub-clock');
 
       await settlePage(page);
 
@@ -314,10 +291,7 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
       await expect(page.getByTestId('hub-board')).toBeVisible();
       await expect(page.getByTestId('kiosk-shell')).toHaveAttribute('data-hub-theme', 'light');
 
-      await expect(page.getByTestId('hub-clock')).toHaveText(/^\d{1,2}:\d{2}(\s?[AP]M)?$/i);
-      await page.getByTestId('hub-clock').evaluate((element) => {
-        element.textContent = '00:00';
-      });
+      await pinLiveText(page, 'hub-clock');
 
       await settlePage(page);
 

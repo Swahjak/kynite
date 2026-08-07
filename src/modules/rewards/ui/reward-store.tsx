@@ -71,13 +71,17 @@ export function RewardStore({ store }: { store: StoreData }) {
   const savings = store.horizon === 'savings';
 
   return (
-    <div data-testid="reward-store" data-horizon={store.horizon} className="flex flex-col gap-8">
+    <div
+      data-testid="reward-store"
+      data-horizon={store.horizon}
+      className="mx-auto flex w-full max-w-6xl flex-col gap-8 md:gap-12"
+    >
       <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
         {store.chips.length > 1 ? (
           <nav
             data-testid="store-chips"
             aria-label={t('store.chooseMember')}
-            className="flex w-max flex-row items-center gap-2 rounded-4xl bg-muted p-2"
+            className="flex w-max flex-row items-center gap-2 rounded-4xl bg-surface-container-low p-2 shadow-sm"
           >
             {store.chips.map((chip) => {
               const active = chip.id === store.member.id;
@@ -90,10 +94,10 @@ export function RewardStore({ store }: { store: StoreData }) {
                   data-active={active ? 'true' : 'false'}
                   aria-current={active ? 'page' : undefined}
                   className={cn(
-                    'flex h-14 min-w-12 items-center gap-3 rounded-4xl px-6 font-display text-body-lg font-medium transition-colors',
+                    'flex h-14 min-w-12 items-center gap-3 rounded-4xl px-6 font-display text-body-lg font-medium transition-all duration-200 ease-brand active:scale-[0.98]',
                     active
-                      ? 'bg-card text-foreground shadow-sm'
-                      : 'text-ink-secondary hover:bg-surface-hover'
+                      ? 'bg-brand-container text-brand-container-ink shadow-md'
+                      : 'text-ink-secondary hover:bg-surface-container-high hover:text-foreground'
                   )}
                 >
                   {/* The face, rendered from strings the server resolved: this
@@ -129,13 +133,13 @@ export function RewardStore({ store }: { store: StoreData }) {
         <div
           data-testid="star-balance"
           data-member-id={store.member.id}
-          className="flex w-max items-center gap-4 rounded-4xl bg-gold/20 px-8 py-4 text-gold-ink"
+          className="flex h-18 w-max items-center gap-4 self-start rounded-4xl bg-gold/20 px-8 py-4 text-gold-ink shadow-sm"
         >
-          <Icon name="star" size="2xl" filled />
-          <span className="flex flex-col gap-1">
+          <Icon name="star" size="2xl" filled className="scale-125" />
+          <span className="flex flex-col">
             <span
               data-testid="available-stars"
-              className="font-display text-display-md font-extrabold tabular-time"
+              className="font-display text-display-md leading-none font-extrabold tabular-time"
             >
               {store.totals.available}
             </span>
@@ -160,7 +164,15 @@ export function RewardStore({ store }: { store: StoreData }) {
       ) : null}
 
       <section className="flex flex-col gap-6">
-        <h2 className="font-display text-h2 font-bold text-foreground">{t('store.shelf')}</h2>
+        <h2 className="flex items-center gap-3 font-display text-h2 font-bold text-foreground">
+          <span
+            aria-hidden
+            className="flex size-10 items-center justify-center rounded-2xl bg-brand-container text-brand-container-ink"
+          >
+            <Icon name="redeem" size="md" filled />
+          </span>
+          {t('store.shelf')}
+        </h2>
 
         {store.tiles.length === 0 ? (
           <p data-testid="store-empty" className="text-body-lg text-ink-secondary">

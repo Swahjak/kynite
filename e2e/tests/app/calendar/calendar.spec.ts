@@ -371,7 +371,12 @@ test.describe('private calendars on the hub', () => {
 
     // The parent's own device: the owner may read their private calendar.
     await page.goto('/nl/today');
-    await expect(page.getByText('Sollicitatiegesprek')).toBeVisible();
+    // `.first()` because M19's `/today` shows the next event twice — once as
+    // the "up next" hero heading and once as its chip on the timeline. The
+    // claim under test is that the title is legible *at all* on the parent's
+    // own device; the hub half below still asserts the exact opposite with
+    // `toHaveCount(0)`, which is the assertion that has to stay strict.
+    await expect(page.getByText('Sollicitatiegesprek').first()).toBeVisible();
 
     // Now the same browser becomes the wall tablet. Pairing happens *here*,
     // between the two navigations, and not at the top of the test: a device

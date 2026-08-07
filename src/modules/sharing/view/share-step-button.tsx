@@ -84,8 +84,11 @@ export function ShareStepButton({
       aria-pressed={isDone}
       data-testid="share-step"
       className={cn(
-        'flex w-full items-center gap-3 rounded-lg border border-border px-3 py-3 text-left text-base transition-colors',
-        isDone ? 'bg-muted text-muted-foreground' : 'bg-card hover:bg-accent'
+        // M19 phase 2: the 48px hub target and the design system's radius,
+        // shared with the read-only twin in `share-board.tsx` so the two shapes
+        // differ only in whether they can be pressed.
+        'flex min-h-hub-target w-full items-center gap-3 rounded-xl border border-border px-4 py-3 text-left text-body transition-all duration-200 ease-brand active:scale-[0.99]',
+        isDone ? 'bg-surface-container text-ink-muted' : 'bg-card shadow-sm hover:bg-surface-hover'
       )}
     >
       <span

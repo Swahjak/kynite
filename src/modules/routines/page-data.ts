@@ -24,7 +24,12 @@ import {
 } from './domain/praise';
 import { completionRatio } from './domain/steps';
 import { hasGraduated, starsFor } from './domain/stars';
-import { listCompletedSteps, listRoutines, type RoutineWithSteps } from './queries';
+import {
+  listCompletedSteps,
+  listCompletionsOn,
+  listRoutines,
+  type RoutineWithSteps,
+} from './queries';
 import { routineIconOf, type RoutineIcon } from './ui/tokens';
 
 /**
@@ -134,9 +139,83 @@ export type BoardOptions = {
  * *rendering only* — `completeStepAction` reads the real clock server-side, so
  * a pinned board cannot be used to write a completion for another day.
  */
-function resolveNow(options: BoardOptions, timeZone: string): Date {
+function resolveNow(options: { date?: string; time?: string }, timeZone: string): Date {
   const pinned = options.date ? instantAt(options.date, options.time, timeZone) : null;
   return pinned ?? new Date();
+}
+
+/** "3 of 7 done", for one member, on the day the board is rendering. */
+export type RoutineTotals = { done: number; total: number };
+
+/**
+ * Today's step totals for **every** member of the family, in one query set.
+ *
+ * The hub board draws one launcher tile per child, each with a step count. It
+ * used to get them by calling `loadMemberRoutines` once per child — which is
+ * `getPrincipal` + `getMember` + `getFamily` + `listRoutines` + a completion
+ * lookup *per child*, assembling four board sections and a praise key per step
+ * to read two integers off the end. On a wall display that re-renders on every
+ * SSE event, with four children, that is an N+1 firing all evening.
+ *
+ * This is the same question asked once, following `listCompletionsOn`'s
+ * family-scan pattern (`queries.ts`, and `modules/today/page-data.ts` which
+ * does the same for the "Kids' Progress" panel): all active routines for the
+ * family, all completions on the occurrence dates they open, grouped in
+ * JavaScript. Members are not filtered — a family has a handful, and the caller
+ * decides which of them it draws.
+ *
+ * Null only when there is no principal. A member with nothing scheduled today
+ * is present with `{ done: 0, total: 0 }`, because "nothing today" is a thing
+ * the launcher says rather than a member it omits.
+ */
+export async function loadFamilyRoutineTotals(
+  options: { date?: string; time?: string } = {}
+): Promise<Map<string, RoutineTotals> | null> {
+  const principal = await getPrincipal();
+  if (!principal) return null;
+
+  const [family, members, routines] = await Promise.all([
+    getFamily(principal.familyId),
+    listMembers(principal.familyId),
+    listRoutines(principal.familyId, { activeOnly: true }),
+  ]);
+
+  const timeZone = family?.timezone ?? 'Europe/Amsterdam';
+  const now = resolveNow(options, timeZone);
+
+  // Same rule as the single-member board: a routine with no open occurrence is
+  // not due today and does not count towards anyone's total.
+  const open = routines.flatMap((row) => {
+    const timing = timingAt({ schedule: row.schedule, anchor: row.createdAt, timeZone }, now);
+    return timing.occurrence ? [{ row, occurrence: timing.occurrence }] : [];
+  });
+
+  const completions = await listCompletionsOn({
+    familyId: principal.familyId,
+    occurrenceDates: [...new Set(open.map(({ occurrence }) => occurrence.occurrenceDate))],
+  });
+
+  const done = new Set(
+    completions.map((entry) => `${entry.memberId}:${entry.routineStepId}:${entry.occurrenceDate}`)
+  );
+
+  const totals = new Map<string, RoutineTotals>(
+    members.map((member) => [member.id, { done: 0, total: 0 }])
+  );
+
+  for (const { row, occurrence } of open) {
+    const bucket = totals.get(row.ownerMemberId);
+    if (!bucket) continue;
+
+    for (const step of row.steps) {
+      bucket.total += 1;
+      if (done.has(`${row.ownerMemberId}:${step.id}:${occurrence.occurrenceDate}`)) {
+        bucket.done += 1;
+      }
+    }
+  }
+
+  return totals;
 }
 
 /** Null when there is no principal, or the member is not in this family. */

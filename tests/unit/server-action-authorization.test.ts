@@ -36,6 +36,19 @@ const PUBLIC_ACTIONS = [
   // that still has no login — is the WHERE clause of the claiming UPDATE in
   // `modules/family/invites.ts`, so there is no check here to race against.
   'src/modules/family/actions.ts::acceptInviteAction',
+  // M19 phase 2. Google social sign-in, both halves. `signInWithGoogleAction`
+  // is `signInAction` by another route — it hands the browser to Google's
+  // consent screen and establishes the principal on the way back, so there is
+  // none to check on the way out; the PKCE verifier and the signed `state`
+  // better-auth mints are what make the round trip safe, and the one
+  // attacker-controlled value it touches (`callbackUrl`) is refused unless
+  // `sanitizeCallbackUrl` says it is a same-origin path.
+  'src/modules/family/actions.ts::signInWithGoogleAction',
+  // The other half: a Google account arrives with a session and *no* household,
+  // which is the one state that resolves to no principal at all. This action
+  // creates it, so `assertCan` has nothing to check — its authorization is the
+  // better-auth session cookie it reads first, and it refuses without one.
+  'src/modules/family/actions.ts::createFamilyForSocialUserAction',
 ];
 
 const AUTHORIZATION_CALLS = new Set(['can', 'assertCan', 'decide']);
@@ -272,7 +285,9 @@ describe('every Server Action authorizes first', () => {
     // rather than at each entry point.
     // Adding or removing a Server Action must bump this number deliberately —
     // that is the point.
-    expect(findings.length).toBe(47);
+    // 47 → 49 in M19 phase 2: `signInWithGoogleAction` and
+    // `createFamilyForSocialUserAction`, the two halves of Google sign-in.
+    expect(findings.length).toBe(49);
   });
 
   it('reports no unauthorized action anywhere in src/', () => {

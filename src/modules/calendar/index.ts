@@ -125,6 +125,7 @@ export { EventChip } from './ui/event-chip';
 export { EventDialog, type WritableCalendar } from './ui/event-dialog';
 export { HubBoard, type HubBoardSnapshot } from './ui/hub-board';
 export { MonthView } from './ui/month-view';
+export { NewEventFab, type NewEventFabProps } from './ui/new-event-fab';
 export { PersonColumns } from './ui/person-columns';
 export { TimeGrid } from './ui/time-grid';
 export { CATEGORY_CLASSES, EVENT_TYPE_ICONS, HOUR_HEIGHT, SNAP_MINUTES } from './ui/tokens';

@@ -166,7 +166,9 @@ describe.skipIf(!databaseUrl)('device session capability (integration)', () => {
         .values({ routineId: created.id, title: 'Tanden poetsen', sortOrder: 0 })
         .returning();
 
-      const today = new Date().toISOString().slice(0, 10);
+      const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Amsterdam' }).format(
+        new Date()
+      );
       const result = await completeStepAction({
         routineId: created.id,
         routineStepId: step.id,

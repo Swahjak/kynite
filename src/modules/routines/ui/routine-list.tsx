@@ -43,19 +43,26 @@ export async function RoutineList({
   }
 
   return (
-    <ul className="flex flex-col gap-3">
+    // A card grid, not a stack of full-width rows (docs/rebuild-design-gaps.md
+    // §5): the roster answers "what routines exist" at a glance, and the
+    // mockups render every catalogue as a grid of tiles.
+    <ul className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       {routines.map((routine) => {
         const days = weekdaysOfRule(routine.schedule.rrule, timeZone);
 
         return (
-          <li key={routine.id}>
-            <Card data-testid="routine-row" data-routine-id={routine.id}>
+          <li key={routine.id} className="flex">
+            <Card
+              data-testid="routine-row"
+              data-routine-id={routine.id}
+              className="w-full transition-shadow duration-200 ease-brand hover:shadow-md"
+            >
               <CardContent className="flex flex-wrap items-start gap-4">
                 <span
                   aria-hidden
-                  className="flex size-12 shrink-0 items-center justify-center rounded-full bg-muted text-ink-secondary"
+                  className="flex size-12 shrink-0 items-center justify-center rounded-full bg-brand-container text-brand-container-ink"
                 >
-                  <Icon name={routineIconOf(routine.icon)} size="lg" />
+                  <Icon name={routineIconOf(routine.icon)} size="lg" filled />
                 </span>
 
                 <div className="flex min-w-0 flex-1 flex-col gap-2">
@@ -87,15 +94,30 @@ export async function RoutineList({
                     )}
                   </span>
 
-                  <ol
-                    data-testid="routine-steps"
-                    className="flex flex-col gap-1 text-body-sm text-ink-secondary"
-                  >
+                  {/* The step list is the routine, so it reads as an ordered
+                      list of rows rather than a paragraph of run-together
+                      text: a numbered medallion, the title, and the timer
+                      prescription as a chip on the right. */}
+                  <ol data-testid="routine-steps" className="flex flex-col gap-1">
                     {routine.steps.map((step, index) => (
-                      <li key={step.id} data-testid="routine-step-name">
-                        <span className="tabular-time">{index + 1}.</span> {step.title}
+                      <li
+                        key={step.id}
+                        data-testid="routine-step-name"
+                        className="flex items-center gap-3 rounded-lg bg-surface-container-low px-3 py-2 text-body-sm"
+                      >
+                        <span
+                          aria-hidden
+                          className="flex size-6 shrink-0 items-center justify-center rounded-full bg-surface-container-lowest text-caption font-bold text-ink-secondary tabular-time"
+                        >
+                          {index + 1}
+                        </span>
+                        {/* Wrapping, not clipping: a step title is an
+                            instruction, and half of one ("Tanden poetsen en
+                            dan…") is not a shorter instruction. Two lines
+                            keeps the row list scannable. */}
+                        <span className="line-clamp-2 min-w-0 flex-1">{step.title}</span>
                         {step.timerSeconds ? (
-                          <span className="ml-2 text-caption">
+                          <span className="shrink-0 rounded-4xl bg-surface-container px-2 py-0.5 text-caption text-ink-secondary">
                             {t('stepTimer', { seconds: step.timerSeconds })}
                           </span>
                         ) : null}

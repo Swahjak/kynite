@@ -128,7 +128,7 @@ export function FamilySettingsForm({ family }: { family: Family }) {
           {t('save')}
         </Button>
         {state.status === 'error' ? (
-          <span role="alert" className="text-sm text-destructive">
+          <span role="alert" className="text-body-sm text-destructive">
             {t(`errors.${state.error}`)}
           </span>
         ) : null}

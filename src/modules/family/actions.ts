@@ -3,6 +3,9 @@
 import { randomBytes } from 'node:crypto';
 import { revalidatePath } from 'next/cache';
 import { headers } from 'next/headers';
+// The locale-aware `redirect` below cannot express an off-site destination, and
+// Google's consent screen is one. Aliased so the two are never confused.
+import { redirect as externalRedirect } from 'next/navigation';
 import { getLocale } from 'next-intl/server';
 import { and, eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
@@ -10,7 +13,7 @@ import { locales } from '@/i18n/routing';
 import { redirect } from '@/i18n/navigation';
 import { getAuth } from '@/server/auth';
 import { getDb } from '@/server/db';
-import { user } from '@/server/db/auth-schema';
+import { session as sessionTable, user } from '@/server/db/auth-schema';
 import { env } from '@/server/env';
 import { sanitizeCallbackUrl, withoutLocalePrefix } from '@/lib/callback-url';
 import { hashInviteToken, inviteUrlFor } from '@/lib/invite-token';
@@ -31,6 +34,7 @@ import {
   MEMBER_ROLES,
   REWARD_HORIZONS,
   family,
+  formerMember,
   member,
   memberInvite,
   type MemberRole,
@@ -213,6 +217,270 @@ export async function signInAction(
   return idleState;
 }
 
+/**
+ * Where a *returning* Google account lands, and where a *brand new* one does.
+ *
+ * Both are locale-prefixed absolute paths, because better-auth hands them
+ * straight to a `Location` header on its own callback route — `@/i18n/navigation`
+ * never sees them and so never adds the prefix itself.
+ */
+/**
+ * Next 16's typed routes accept an off-site destination only as a literal
+ * carrying a protocol; better-auth hands back a plain `string`. The assertion
+ * is the whole of the widening, and it is safe by construction: the value is a
+ * URL better-auth built from `accounts.google.com`, never anything a caller
+ * supplied.
+ */
+function asExternalUrl(url: string): `${string}:${string}` {
+  return url as `${string}:${string}`;
+}
+
+function socialCallbackUrls(locale: string, callbackUrl: string | null) {
+  return {
+    callbackURL: callbackUrl ?? `/${locale}/family`,
+    // A Google user is new the instant the callback creates their `user` row,
+    // and at that instant they have no household — `session.create.before` in
+    // `server/auth.ts` found no member to scope the session with. Sending them
+    // to `/family` would bounce them straight back to the sign-in form they
+    // just came from, so first-run goes to onboarding instead.
+    newUserCallbackURL: `/${locale}/onboarding`,
+    errorCallbackURL: `/${locale}/sign-in`,
+  };
+}
+
+/**
+ * "Continue with Google" — hand the browser to Google's consent screen.
+ *
+ * A Server Action rather than a client-side `authClient.signIn.social()` call
+ * for the same reason every other credential step in this slice is one: the
+ * client bundle then holds no auth SDK, no base URL and no provider list, and
+ * the `callbackUrl` never has to survive a client round trip.
+ *
+ * `disableRedirect: true` asks better-auth for the authorization URL instead of
+ * a `Location` header it cannot set from inside a Server Action; the redirect
+ * is issued here. The `state`/PKCE cookies better-auth sets while building that
+ * URL reach the browser through the `nextCookies()` plugin, exactly as the
+ * session cookie does after `signInEmail`.
+ *
+ * M18 `callbackUrl` survives the round trip because better-auth signs it into
+ * the OAuth `state` and replays it on its own callback — the value is sanitized
+ * here first, since a Server Action is a POST endpoint anybody can call with
+ * any body.
+ *
+ * @public-action Social sign-in has no principal to authorize; it establishes
+ * one. Everything that makes the round trip safe belongs to the OAuth flow
+ * itself (PKCE verifier + signed `state`, both minted by better-auth), and the
+ * only attacker-controlled value this action touches — `callbackUrl` — is
+ * refused unless it is a same-origin path.
+ */
+export async function signInWithGoogleAction(
+  _previous: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const locale = await getLocale();
+  const callbackUrl = sanitizeCallbackUrl(read(formData, 'callbackUrl'));
+
+  let url: string | undefined;
+  try {
+    const result = await getAuth().api.signInSocial({
+      body: {
+        provider: 'google',
+        ...socialCallbackUrls(locale, callbackUrl),
+        disableRedirect: true,
+      },
+      headers: await headers(),
+    });
+    url = result.url;
+  } catch (error) {
+    console.error('[auth] google sign-in could not start', error);
+    return failure('oauthUnavailable');
+  }
+
+  if (!url) return failure('oauthUnavailable');
+
+  // Google's own origin, so `@/i18n/navigation`'s locale-aware wrapper is the
+  // wrong tool — this is a bare external redirect.
+  externalRedirect(asExternalUrl(url));
+  // `redirect()` throws — unreachable, but the signature must stay total.
+  return idleState;
+}
+
+const createFamilySchema = z.object({ familyName: trimmed.min(1).max(80) });
+
+/**
+ * The other half of social sign-up: name the household.
+ *
+ * `signUpAction` gets to do account → household → session in that order, so the
+ * first cookie is already scoped. Google's callback does account *and* session
+ * in one pass with no seam between them, so the household necessarily arrives
+ * late — and a session row whose `activeFamilyId` is null stays null, because
+ * `session.create.before` only ever runs at creation.
+ *
+ * So the session is **re-issued**, and the way it is re-issued is the same
+ * sequence `acceptInviteAction` uses for the same reason: discard the
+ * credential, attach the member, obtain a fresh credential. The last step here
+ * is a second trip through Google rather than a `signInEmail`, because a social
+ * account has no password this process could present. That trip is silent in
+ * practice — the grant already exists and `loginHint` names the account, so
+ * Google redirects straight back without a prompt.
+ *
+ * Rejected alternatives, both of which would have avoided the round trip and
+ * neither of which is honest: writing `activeFamilyId` onto the session row
+ * directly leaves the *signed cookie cache* (300s, `server/auth.ts`) serving the
+ * unscoped copy, so the household would exist and the app would still refuse
+ * them for five minutes; and `auth.api.updateSession` cannot set these fields
+ * at all, since both are declared `input: false`.
+ *
+ * @public-action This is the social flow's sign-up step: it creates the very
+ * principal `assertCan` would otherwise check. The authorization is the
+ * better-auth session cookie, read below — without one there is no user id to
+ * hang a household on and the action refuses. It is idempotent against its own
+ * replay: a caller who already has a member row is redirected instead of being
+ * given a second household.
+ */
+export async function createFamilyForSocialUserAction(
+  _previous: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const parsed = createFamilySchema.safeParse({ familyName: read(formData, 'familyName') });
+  if (!parsed.success) return failure('invalidInput');
+
+  const auth = getAuth();
+  const requestHeaders = await headers();
+  const locale = await getLocale();
+
+  const session = await auth.api.getSession({ headers: requestHeaders });
+  if (!session) return failure('sessionExpired');
+
+  const db = getDb();
+
+  let alreadyOnboarded: boolean;
+  try {
+    // Family + owner member in one transaction: a household is never half-made.
+    // Same shape as `signUpAction`, minus the compensating delete — the user
+    // row here predates this action and is not ours to roll back.
+    alreadyOnboarded = await db.transaction(async (tx) => {
+      /**
+       * F1. The replay guard has to be race-proof, and `acceptInviteAction`'s
+       * doctrine is that the guard must be *the write's own predicate, not a
+       * check that could be raced*. A `select` followed by an `insert` is
+       * exactly that raceable check: two submits of this form (double click,
+       * duplicate tab, a retried POST) both read "no member" and both create a
+       * household, and no constraint can catch the second — `member`'s unique
+       * index is `(familyId, userId)`, and the second family has a different
+       * `familyId` by construction.
+       *
+       * A global unique index on `member.userId` *would* be a predicate, and
+       * it is deliberately not used: one login legitimately holds a member row
+       * in more than one household (docs/architecture.md §3's separated-parent
+       * persona; `deleteFamilyAction`'s note says the same, and the existing
+       * index is per-family precisely so). Uniqueness is therefore not a true
+       * invariant of this table, and asserting it in the schema would break a
+       * supported case to fix a concurrency bug.
+       *
+       * So the serialization is explicit instead: a transaction-scoped
+       * advisory lock keyed on this user. It is held until commit or rollback,
+       * needs no row to exist, and blocks the second caller until the first has
+       * either written its member row or thrown — at which point the re-check
+       * below sees the truth rather than a stale snapshot. The loser of the
+       * race is treated as a replay: redirected, not given a second household.
+       */
+      await tx.execute(
+        sql`select pg_advisory_xact_lock(hashtext('family:onboarding'), hashtext(${session.user.id}))`
+      );
+
+      // Re-read *under the lock*. `getPrincipal()` cannot answer this — it
+      // reads the session cookie, which is exactly the thing that is out of
+      // date here — so the member table is asked directly.
+      const [existing] = await tx
+        .select({ id: member.id })
+        .from(member)
+        .where(eq(member.userId, session.user.id))
+        .limit(1);
+
+      if (existing) return true;
+
+      const [created] = await tx
+        .insert(family)
+        .values({ name: parsed.data.familyName })
+        .returning();
+
+      await tx.insert(member).values({
+        familyId: created.id,
+        userId: session.user.id,
+        displayName: session.user.name || parsed.data.familyName,
+        role: 'owner',
+        color: 'blue',
+        rewardHorizon: 'savings',
+        sortOrder: 0,
+      });
+
+      return false;
+    });
+  } catch (error) {
+    console.error('[auth] could not create the household for a social sign-up', error);
+    return failure('signUpFailed');
+  }
+
+  // A replay (or the loser of a double submit): the household already exists,
+  // and this is a success, not an error. Outside the `try` because `redirect()`
+  // signals by throwing, which the catch above would otherwise swallow.
+  if (alreadyOnboarded) {
+    redirect({ href: '/family', locale });
+    return idleState;
+  }
+
+  /**
+   * The session that exists now was stamped before the member did; it can never
+   * become scoped, so it is discarded rather than carried.
+   *
+   * F3: a failure here used to be swallowed. It cannot be. The whole point of
+   * this step is that the *old* cookie stops being presented — if it survives,
+   * the browser keeps a session that resolves to no principal forever and the
+   * user rides /onboarding → /family → /sign-in → /onboarding in a circle. The
+   * household stands (it is committed), so the honest report is "you are done,
+   * sign in again", which is what `onboardingSignOutFailed` says.
+   */
+  try {
+    await auth.api.signOut({ headers: requestHeaders });
+  } catch (error) {
+    console.error('[auth] could not discard the unscoped session after onboarding', error);
+    return failure('onboardingSignOutFailed');
+  }
+
+  let url: string | undefined;
+  try {
+    const result = await auth.api.signInSocial({
+      body: {
+        provider: 'google',
+        ...socialCallbackUrls(locale, null),
+        // F5: `newUserCallbackURL` deliberately stays at `/onboarding` (the
+        // shared default). `loginHint` is a hint, not a constraint — Google may
+        // still show the account chooser, and the account that comes back may be
+        // a genuinely new one. That account has no household, so sending it to
+        // `/family` would strand it on a page it cannot pass; `/onboarding` is
+        // where a user with no member row belongs, whichever trip created them.
+        loginHint: session.user.email,
+        disableRedirect: true,
+      },
+      headers: requestHeaders,
+    });
+    url = result.url;
+  } catch (error) {
+    console.error('[auth] could not re-issue a scoped session after onboarding', error);
+    url = undefined;
+  }
+
+  // The household stands either way; only the re-authentication failed. Signing
+  // in again from the form reaches it, because the member row is now there for
+  // `session.create.before` to find.
+  if (!url) return failure('oauthUnavailable');
+
+  externalRedirect(asExternalUrl(url));
+  // `redirect()` throws — unreachable, but the signature must stay total.
+  return idleState;
+}
+
 /** @public-action Signing out discards the principal; nothing to permit. */
 export async function signOutAction(): Promise<void> {
   await getAuth().api.signOut({ headers: await headers() });
@@ -308,7 +576,7 @@ export async function deleteMemberAction(
 
   const db = getDb();
   const [existing] = await db
-    .select({ role: member.role })
+    .select({ role: member.role, userId: member.userId })
     .from(member)
     .where(and(eq(member.id, memberId), eq(member.familyId, principal.familyId)))
     .limit(1);
@@ -316,9 +584,41 @@ export async function deleteMemberAction(
   if (!existing) return failure('memberNotFound');
   if (existing.role === 'owner') return failure('cannotRemoveOwner');
 
-  await db
-    .delete(member)
-    .where(and(eq(member.id, memberId), eq(member.familyId, principal.familyId)));
+  /**
+   * F4: removing a member with a login is removing *access*, and three things
+   * have to happen together or the removal is cosmetic.
+   *
+   *  1. The member row goes (the removal itself).
+   *  2. A tombstone is written. `member` is hard-deleted, so without one the
+   *     database can no longer distinguish "this login never had a household"
+   *     from "this login had one taken away" — and `(auth)/onboarding` needs
+   *     exactly that distinction, or a removed parent signing back in is
+   *     silently handed a form to create a household of their own.
+   *  3. Their sessions are revoked. Otherwise the removed parent keeps a valid
+   *     cookie; it resolves to no principal on the next request (no member row
+   *     to scope it), but a session that outlives the membership is a session
+   *     the app has to keep reasoning about, and it is what put them in the
+   *     redirect loop this finding is about.
+   *
+   * The sessions are deleted directly rather than through better-auth:
+   * `/revoke-sessions` revokes the *caller's own* sessions, and revoking
+   * another user's needs the admin plugin this app does not install. Same
+   * caveat as everywhere else in `server/auth.ts`: the signed cookie cache
+   * (300s) can serve a stale copy on another device for up to that long.
+   */
+  await db.transaction(async (tx) => {
+    await tx
+      .delete(member)
+      .where(and(eq(member.id, memberId), eq(member.familyId, principal.familyId)));
+
+    if (existing.userId) {
+      await tx.insert(formerMember).values({
+        userId: existing.userId,
+        familyId: principal.familyId,
+      });
+      await tx.delete(sessionTable).where(eq(sessionTable.userId, existing.userId));
+    }
+  });
 
   revalidatePath(`/${await getLocale()}/family`);
   return idleState;

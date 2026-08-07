@@ -41,12 +41,22 @@ export async function StarChart({ chart }: { chart: StarChartData }) {
       data-testid="star-chart"
       data-member-id={chart.member.id}
       data-horizon={chart.horizon}
-      className="flex flex-col gap-8"
+      className="mx-auto flex w-full max-w-6xl flex-col gap-8 md:gap-12"
     >
-      <section className="flex flex-wrap items-center gap-8 rounded-3xl bg-card p-8 shadow-sm ring-1 ring-foreground/10">
+      {/* The stitch chart panel: a 32px-radius white card carried by elevation
+          alone, with a soft gold wash behind the medallion
+          (`mila_s_star_chart_light_mode/code.html`, "Reward Progress Card").
+          No streak pill — streaks are a deliberate product cut (research
+          §"Streaks and loss-framing"), so the mockup's amber `5-DAY STREAK`
+          chip has no counterpart here and never will. */}
+      <section className="relative isolate flex flex-wrap items-center gap-8 overflow-hidden rounded-3xl bg-surface-container-lowest p-8 shadow-md">
         <span
           aria-hidden
-          className="flex size-24 shrink-0 items-center justify-center rounded-full bg-gold/20 text-gold-ink"
+          className="pointer-events-none absolute -top-10 -right-10 -z-10 size-40 rounded-full bg-gold/15 blur-3xl"
+        />
+        <span
+          aria-hidden
+          className="flex size-24 shrink-0 items-center justify-center rounded-full bg-gold/20 text-gold-ink shadow-sm"
         >
           <Icon name="star" size="2xl" filled className="scale-150" />
         </span>
@@ -73,7 +83,10 @@ export async function StarChart({ chart }: { chart: StarChartData }) {
       </section>
 
       {savings ? (
-        <section data-testid="week-chart" className="flex flex-col gap-4">
+        <section
+          data-testid="week-chart"
+          className="flex flex-col gap-6 rounded-3xl bg-surface-container-lowest p-6 shadow-sm md:p-8"
+        >
           <div className="flex flex-wrap items-baseline gap-4">
             <h2 className="font-display text-h2 font-bold text-foreground">
               {t('chart.thisWeek')}
@@ -83,34 +96,66 @@ export async function StarChart({ chart }: { chart: StarChartData }) {
             </span>
           </div>
 
-          <ol className="flex items-end gap-3">
-            {chart.week.map((bar) => (
-              <li
-                key={bar.day}
-                data-testid="week-bar"
-                data-day={bar.day}
-                data-total={bar.total}
-                className="flex min-w-0 flex-1 flex-col items-center gap-2"
-              >
-                <span className="text-caption text-ink-secondary tabular-time">{bar.total}</span>
-                <span
-                  aria-hidden
-                  className="flex h-32 w-full items-end overflow-hidden rounded-lg bg-muted"
+          {/* The mockup's weekly grid reads down seven day columns, with today
+              as a filled medallion at the head of its column
+              (`mila_s_star_chart_light_mode/code.html`, "Column Headers"). The
+              week always ends today, so the last column is the filled one.
+              Earlier days are quieter, never marked. */}
+          <ol className="flex items-end gap-2 sm:gap-3">
+            {chart.week.map((bar, index) => {
+              const today = index === chart.week.length - 1;
+              const date = new Date(`${bar.day}T12:00:00Z`);
+
+              return (
+                <li
+                  key={bar.day}
+                  data-testid="week-bar"
+                  data-day={bar.day}
+                  data-total={bar.total}
+                  data-today={today ? 'true' : 'false'}
+                  className={cn(
+                    'flex min-w-0 flex-1 flex-col items-center gap-2 rounded-2xl py-2 transition-colors',
+                    today && 'bg-primary/5'
+                  )}
                 >
-                  {/* A zero day is an empty bar and nothing else — no label, no
-                      colour, no annotation. Absence is the whole treatment. */}
                   <span
                     className={cn(
-                      'block w-full rounded-lg bg-gold transition-[height] duration-500 ease-brand'
+                      'text-caption tabular-time',
+                      bar.total > 0 ? 'font-bold text-gold-ink' : 'text-ink-secondary'
                     )}
-                    style={{ height: `${Math.round((bar.total / peak) * 100)}%` }}
-                  />
-                </span>
-                <span className="text-caption text-ink-secondary">
-                  {format.dateTime(new Date(`${bar.day}T12:00:00Z`), { weekday: 'short' })}
-                </span>
-              </li>
-            ))}
+                  >
+                    {bar.total}
+                  </span>
+                  <span
+                    aria-hidden
+                    className="flex h-32 w-full items-end overflow-hidden rounded-4xl bg-surface-container-high"
+                  >
+                    {/* A zero day is an empty bar and nothing else — no label, no
+                      colour, no annotation. Absence is the whole treatment. */}
+                    <span
+                      className={cn(
+                        'block w-full rounded-4xl bg-gold transition-[height] duration-500 ease-brand'
+                      )}
+                      style={{ height: `${Math.round((bar.total / peak) * 100)}%` }}
+                    />
+                  </span>
+                  <span
+                    aria-hidden
+                    className={cn(
+                      'flex size-9 items-center justify-center rounded-full font-display text-caption font-bold tabular-time',
+                      today
+                        ? 'bg-primary text-primary-foreground shadow-md'
+                        : 'text-ink-secondary opacity-70'
+                    )}
+                  >
+                    {format.dateTime(date, { day: 'numeric' })}
+                  </span>
+                  <span className="label-overline text-ink-secondary">
+                    {format.dateTime(date, { weekday: 'short' })}
+                  </span>
+                </li>
+              );
+            })}
           </ol>
         </section>
       ) : null}
@@ -128,9 +173,14 @@ export async function StarChart({ chart }: { chart: StarChartData }) {
               <li
                 key={entry.id}
                 data-testid="history-entry"
-                className="flex items-center gap-4 rounded-xl bg-card px-4 py-3 shadow-sm ring-1 ring-foreground/5"
+                className="flex items-center gap-4 rounded-2xl bg-surface-container-lowest px-4 py-3 shadow-sm transition-colors duration-200 ease-brand hover:bg-surface-container-low"
               >
-                <Icon name="star" size="md" filled className="text-gold-ink" />
+                <span
+                  aria-hidden
+                  className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gold/20 text-gold-ink"
+                >
+                  <Icon name="star" size="md" filled />
+                </span>
                 <span className="min-w-0 flex-1 truncate text-body-lg">
                   {entry.note ?? t(`reasons.${entry.reason}`)}
                 </span>

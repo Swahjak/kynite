@@ -41,6 +41,9 @@ export type RoutineCardProps = {
 
 export function RoutineCard({ routine, expanded, copy, onComplete }: RoutineCardProps) {
   const dimmed = !expanded && (routine.state === 'upcoming' || routine.state === 'grace');
+  // The step the routine is *on*. Presentational only — the board's completion
+  // flow is unchanged; this just tells `StepRow` which row to draw large.
+  const activeStepId = routine.steps.find((step) => !step.done)?.id ?? null;
 
   return (
     <article
@@ -50,19 +53,36 @@ export function RoutineCard({ routine, expanded, copy, onComplete }: RoutineCard
       data-complete={routine.complete ? 'true' : 'false'}
       data-expanded={expanded ? 'true' : 'false'}
       className={cn(
-        'rounded-xl bg-card ring-1 ring-foreground/10 transition-opacity duration-200',
-        expanded ? 'p-6 shadow-md' : 'p-4 shadow-sm',
+        'relative isolate overflow-hidden rounded-xl bg-surface-container-lowest transition-all duration-200 ease-brand',
+        expanded ? 'p-6 shadow-md hover:shadow-lg' : 'p-4 shadow-sm hover:shadow-md',
         // The dimmed treatment. One opacity, no colour, no border, no icon —
         // "missed" and "not yet" look the same because neither is a failure.
-        dimmed && 'opacity-60'
+        dimmed && 'opacity-60 hover:opacity-100'
       )}
     >
+      {/* The faint glow the mockup paints behind the live card
+          (`chores_routines_…/code.html`: a blurred `primary-container/20`
+          quarter-circle in the top-right). Ambience, not a status marker —
+          only the expanded card has it, and it carries no information the
+          `IN PROGRESS` pill does not already carry in words. */}
+      {expanded ? (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -top-16 -right-16 -z-10 size-40 rounded-full bg-primary/15 blur-3xl"
+        />
+      ) : null}
+
       <header className="flex items-center gap-4">
         <span
           aria-hidden
-          className="flex size-12 shrink-0 items-center justify-center rounded-full bg-muted text-ink-secondary"
+          className={cn(
+            'flex size-12 shrink-0 items-center justify-center rounded-full transition-colors duration-200',
+            expanded
+              ? 'bg-brand-container text-brand-container-ink'
+              : 'bg-surface-container text-ink-secondary'
+          )}
         >
-          <Icon name={routine.icon} size="lg" />
+          <Icon name={routine.icon} size="lg" filled={expanded} />
         </span>
 
         <div className="min-w-0 flex-1">
@@ -85,14 +105,17 @@ export function RoutineCard({ routine, expanded, copy, onComplete }: RoutineCard
         {routine.complete ? (
           <span
             aria-hidden
-            className="flex size-12 shrink-0 items-center justify-center rounded-full bg-accent text-brand-ink"
+            className="flex size-12 shrink-0 items-center justify-center rounded-full bg-brand-container text-brand-container-ink"
           >
-            <Icon name="task_alt" size="lg" filled />
+            {/* `celebration`, per the mockup's finished-routine medallion. Still
+                one quiet glyph on a collapsed card — the celebration itself
+                happened at the tap. */}
+            <Icon name="celebration" size="lg" filled />
           </span>
         ) : copy.countdown ? (
           <span
             data-testid="routine-countdown"
-            className="flex shrink-0 items-center gap-1 rounded-4xl bg-muted px-3 py-1 text-caption text-ink-secondary"
+            className="flex shrink-0 items-center gap-1 rounded-4xl bg-surface-container px-3 py-1 text-caption text-ink-secondary"
           >
             <Icon name="schedule" size="xs" />
             {copy.countdown}
@@ -100,7 +123,7 @@ export function RoutineCard({ routine, expanded, copy, onComplete }: RoutineCard
         ) : expanded ? (
           <span
             data-testid="routine-progress"
-            className="label-overline shrink-0 rounded-4xl bg-accent px-4 py-1.5 text-accent-foreground"
+            className="label-overline shrink-0 rounded-4xl bg-brand-container px-4 py-1.5 text-brand-container-ink"
           >
             {copy.inProgress}
           </span>
@@ -120,6 +143,7 @@ export function RoutineCard({ routine, expanded, copy, onComplete }: RoutineCard
               stars={routine.starsPerCompletion}
               starLabel={copy.starLabel(routine.starsPerCompletion)}
               actionLabel={copy.actionLabel(step.title)}
+              active={step.id === activeStepId}
               onComplete={onComplete ? (origin) => onComplete(step.id, origin) : undefined}
             />
           ))}

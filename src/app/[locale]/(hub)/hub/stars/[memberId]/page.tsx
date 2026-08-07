@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server';
+import { ChildTabs } from '@/components/hub';
 import { requireHubDevice } from '@/modules/devices';
 import { StarChart, loadStarChart } from '@/modules/rewards';
 
@@ -51,6 +52,10 @@ export default async function HubStarsPage({
         </h1>
         <p className="text-body-lg text-ink-secondary">{t('chart.subtitle')}</p>
       </header>
+
+      {/* M19: browsing the chart is a child's own errand on the wall, so the
+          way back to their steps and their shelf is on the screen. */}
+      <ChildTabs memberId={chart.member.id} displayName={chart.member.displayName} />
 
       <StarChart chart={chart} />
     </main>

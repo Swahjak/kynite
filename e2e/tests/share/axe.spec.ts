@@ -20,7 +20,9 @@ import { seedCalendar, seedEvents, seedShareLink, withDb } from '@e2e/utils/seed
 test.describe('share view accessibility', () => {
   for (const role of ['viewer', 'contributor'] as const) {
     test(`a ${role} link has no WCAG AA violations`, async ({ browser, family }) => {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Amsterdam' }).format(
+        new Date()
+      );
       const { owner, children } = await seedHousehold(family.familyId, today);
 
       // `calendar:view_private` is `deny` for both share roles (§7), so an

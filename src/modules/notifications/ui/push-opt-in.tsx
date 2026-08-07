@@ -145,18 +145,18 @@ export function PushOptIn({ publicKey, subscriptionCount }: PushOptInProps) {
   }, [t]);
 
   return (
-    <Card className="flex flex-col gap-4 p-4" data-testid="push-opt-in">
+    <Card className="flex flex-col gap-4 p-4 sm:p-5" data-testid="push-opt-in">
       <div className="flex flex-col gap-1">
-        <h2 className="font-display text-lg font-semibold">{t('title')}</h2>
-        <p className="text-sm text-muted-foreground">{t('description')}</p>
+        <h2 className="font-display text-h3 font-semibold text-ink">{t('title')}</h2>
+        <p className="text-body-sm text-ink-secondary">{t('description')}</p>
       </div>
 
       {state === 'unconfigured' ? (
-        <p className="text-sm text-muted-foreground">{t('unconfigured')}</p>
+        <p className="text-body-sm text-ink-secondary">{t('unconfigured')}</p>
       ) : state === 'unsupported' ? (
-        <p className="text-sm text-muted-foreground">{t('unsupported')}</p>
+        <p className="text-body-sm text-ink-secondary">{t('unsupported')}</p>
       ) : state === 'denied' ? (
-        <p className="text-sm text-muted-foreground">{t('denied')}</p>
+        <p className="text-body-sm text-ink-secondary">{t('denied')}</p>
       ) : (
         <div className="flex items-center gap-3">
           {state === 'on' ? (
@@ -168,14 +168,14 @@ export function PushOptIn({ publicKey, subscriptionCount }: PushOptInProps) {
               {t('enable')}
             </Button>
           )}
-          <span className="text-sm text-muted-foreground">
+          <span className="text-body-sm text-ink-secondary">
             {t('deviceCount', { count: subscriptionCount })}
           </span>
         </div>
       )}
 
       {error ? (
-        <p role="alert" className="text-sm text-destructive">
+        <p role="alert" className="text-body-sm text-destructive">
           {error}
         </p>
       ) : null}

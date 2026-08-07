@@ -109,7 +109,7 @@ Kynite is a Next.js 16 (App Router) application using React 19 and TypeScript, s
 
 - **Framework:** Next.js 16, React 19, TypeScript (strict mode). TypeScript pinned to 5.9.x, not 7.x: the TS 7 Go binary exposes no JS compiler API, which typescript-eslint requires (decided M01, 2026-08-06).
 - **Data layer:** Drizzle ORM over PostgreSQL.
-- **Auth:** better-auth (email/password), with a separate no-account link-based flow for caregiver views.
+- **Auth:** better-auth (email/password), with a separate no-account link-based flow for caregiver views.[^auth-google]
 - **i18n:** next-intl, Dutch (`nl`) as default locale, English (`en`) supported.
 - **UI:** Tailwind CSS 4 with shadcn/ui (new-york style) built on Base UI primitives.
 - **Realtime:** Server-Sent Events (SSE) backed by PostgreSQL `LISTEN`/`NOTIFY` — no separate message broker.
@@ -118,6 +118,20 @@ Kynite is a Next.js 16 (App Router) application using React 19 and TypeScript, s
 - **Server logic:** Next.js server actions and route handlers — no separate backend service.
 - **Celebration effects:** canvas-confetti for completion animations.
 - **Deployment:** self-hosted VPS (no managed serverless platform dependency).
+
+[^auth-google]:
+    **Owner override, 2026-08-07 (M19 phase 2).** Google social sign-in was added
+    *alongside* email/password, which stays. Neither replaces the other and neither
+    is required: an install with no `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` keeps
+    working with the form alone. Sign-in requests basic profile scopes only
+    (`openid email profile`) and never the calendar scope — linking a calendar
+    remains its own deliberate step (FR27), on its own OAuth client flow and its
+    own callback. A Google account arrives with no household, so first run
+    continues at `(auth)/onboarding`, which asks for the family name the consent
+    screen cannot. Rationale: the sign-up form asked a parent for four fields
+    before they had seen anything, and Google is the identity every household in
+    the target segment already has — the same one they will be asked to link for
+    the calendar minutes later.
 
 ## Project Scoping & Phased Development
 

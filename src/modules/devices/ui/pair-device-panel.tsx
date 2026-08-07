@@ -33,10 +33,10 @@ export function PairDevicePanel() {
   };
 
   return (
-    <section className="flex flex-col gap-4 rounded-xl border border-border p-4">
+    <section className="flex flex-col gap-4 rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
       <div className="flex flex-col gap-1">
-        <h2 className="font-display text-h3 font-semibold">{t('pair.title')}</h2>
-        <p className="text-body-sm text-muted-foreground">{t('pair.description')}</p>
+        <h2 className="font-display text-h3 font-semibold text-ink">{t('pair.title')}</h2>
+        <p className="text-body-sm text-ink-secondary">{t('pair.description')}</p>
       </div>
 
       <form className="flex flex-wrap items-end gap-3" onSubmit={submit}>
@@ -60,19 +60,19 @@ export function PairDevicePanel() {
 
       {state.status === 'created' ? (
         <output
-          className="flex flex-col gap-2 rounded-lg bg-muted p-4"
+          className="flex flex-col gap-2 rounded-xl bg-surface-container p-4"
           data-testid="pairing-code-panel"
         >
-          <span className="text-body-sm text-muted-foreground">
+          <span className="label-overline text-ink-muted">
             {t('pair.codeFor', { name: state.deviceName })}
           </span>
           <span
-            className="font-display text-display-md tracking-[0.2em] tabular-time"
+            className="font-display text-display-md text-ink tracking-[0.2em] tabular-time"
             data-testid="pairing-code"
           >
             {state.code}
           </span>
-          <span className="text-body-sm text-muted-foreground">
+          <span className="text-body-sm text-ink-secondary">
             {t('pair.expiresAt', {
               time: format.dateTime(new Date(state.expiresAt), {
                 hour: '2-digit',

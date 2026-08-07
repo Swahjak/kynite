@@ -84,9 +84,19 @@ export function AgendaView({
           <section
             key={group.key}
             data-day={group.key}
-            className={cn('flex gap-4 px-4 py-3', hub && 'gap-6 px-6 py-4')}
+            className={cn(
+              'flex gap-4 px-4 py-4 transition-colors',
+              isToday && 'bg-surface-container-low/50',
+              hub && 'gap-6 px-6 py-5'
+            )}
           >
-            <div className={cn('w-16 shrink-0 text-center', hub && 'w-24')}>
+            <div
+              className={cn(
+                'flex w-16 shrink-0 flex-col items-center rounded-xl py-1 text-center',
+                isToday && 'bg-primary/10',
+                hub && 'w-24'
+              )}
+            >
               {/* Plain string interpolation, not `cn()`, for the three lines
                   below: `text-h2`/`text-caption`/`text-body`/`text-display-md`
                   are this design system's custom font-size scale, which

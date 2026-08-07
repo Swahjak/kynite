@@ -84,7 +84,10 @@ export function HubBoard({
           {/* A real wall clock — the one deliberately live thing on the board. */}
           <span
             data-testid="hub-clock"
-            className="tabular-time text-display-md font-extrabold text-brand-ink"
+            // M19: `display-hub` (72px), the Stitch board-clock token — the one
+            // thing on this screen read from the far side of a room. It was
+            // `display-md` (56px), which `docs/rebuild-design-gaps.md` §3 flags.
+            className="tabular-time text-display-hub font-extrabold text-brand-ink"
           >
             {format.dateTime(board.now, { hour: '2-digit', minute: '2-digit' })}
           </span>

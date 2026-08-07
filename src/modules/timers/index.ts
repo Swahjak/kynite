@@ -88,7 +88,7 @@ export {
 export { AmbientTimers } from './ui/ambient-timers';
 export { ChimeSettings } from './ui/chime-settings';
 export { ChimeSettingsPanel } from './ui/chime-settings-panel';
-export { TimerBoard } from './ui/timer-board';
+export { TimerBoard, type TimerQuickStart } from './ui/timer-board';
 export { TimerControls } from './ui/timer-controls';
 export { TimerTile, type TimerTileCopy, type TimerTileProps } from './ui/timer-tile';
 export {

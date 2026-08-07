@@ -5,7 +5,9 @@ import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { OfflineIndicator } from '@/components/offline';
 import { DeviceSessionWatcher } from './device-session-watcher';
+import { HubRail } from './hub-rail';
 import { HubSettings } from './hub-settings';
+import { IdleReturn } from './idle-return';
 import { SettingsWatcher } from './settings-watcher';
 import type { ResolvedHubTheme } from './hub-theme';
 import { useHubTheme } from './use-hub-theme';
@@ -18,9 +20,15 @@ import { useHubTheme } from './use-hub-theme';
  * only. This is the replacement, and it is deliberately almost nothing:
  *
  *  - **fullscreen, no chrome.** `h-dvh overflow-hidden` and a single fixed
- *    header strip. There is no nav, no sign-out, no back button — a wall
- *    tablet in `display: fullscreen` (public/hub.webmanifest) has no browser
- *    UI to fall back on, so anything not drawn here does not exist.
+ *    header strip. There is no sign-out and no back button — a wall tablet in
+ *    `display: fullscreen` (public/hub.webmanifest) has no browser UI to fall
+ *    back on, so anything not drawn here does not exist. M19 adds the one
+ *    exception that sentence always implied: three destinations in a left rail
+ *    (`HubRail`), because "not reachable by URL" was making the store, the
+ *    timers and every child's routines unreachable *at all*.
+ *  - **it comes home by itself.** `IdleReturn` — a hub left on one child's
+ *    screen returns to the board rather than showing the household one
+ *    person's steps all evening.
  *  - **6-foot type.** Applied by `useHubTheme` as `data-surface="hub"` on the
  *    document element, which re-points the whole Tailwind type scale
  *    (globals.css). Nothing below has to know.
@@ -118,32 +126,49 @@ export function KioskShell({
         to follow without being touched. Not on the pair screen — it has no
         family to have settings yet. */}
       {device ? <SettingsWatcher /> : null}
+      {/* M19. Not on the pair screen: there is no board to return to yet. */}
+      {device ? <IdleReturn /> : null}
 
-      <header className="flex shrink-0 items-center justify-between gap-4 px-6 pt-4 pb-2">
-        <div className="flex items-center gap-4">
-          {brand}
-          {device ? (
-            <span className="text-body-lg text-ink-secondary" data-testid="hub-device-name">
-              {t('deviceName', { name: device.name })}
-            </span>
-          ) : null}
+      <div className="flex min-h-0 flex-1">
+        {/* The rail is the paired hub's only navigation. A tablet that has not
+          been paired has exactly one screen and nowhere to go. */}
+        {device ? <HubRail /> : null}
+
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+          {/* M19 review (F8): the rail, this strip and the child tabs together
+              added ~104px of chrome to an 800px-tall wall, which pushed the
+              routines and timers screens into an internal scroll — the one
+              thing a kiosk must not do, because there is no scrollbar and no
+              hint that anything is below the fold. The strip's own padding is
+              the cheapest of that back: it holds a 48px control and a name, and
+              16px above it was decoration. */}
+          <header className="flex shrink-0 items-center justify-between gap-4 px-6 py-2">
+            <div className="flex items-center gap-4">
+              {brand}
+              {device ? (
+                <span className="text-body-lg text-ink-secondary" data-testid="hub-device-name">
+                  {t('deviceName', { name: device.name })}
+                </span>
+              ) : null}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <OfflineIndicator />
+              {device ? (
+                <HubSettings
+                  deviceName={device.name}
+                  mode={mode}
+                  theme={theme}
+                  onModeChange={setMode}
+                  chimeSettings={chimeSettings}
+                />
+              ) : null}
+            </div>
+          </header>
+
+          <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
         </div>
-
-        <div className="flex items-center gap-2">
-          <OfflineIndicator />
-          {device ? (
-            <HubSettings
-              deviceName={device.name}
-              mode={mode}
-              theme={theme}
-              onModeChange={setMode}
-              chimeSettings={chimeSettings}
-            />
-          ) : null}
-        </div>
-      </header>
-
-      <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
+      </div>
     </div>
   );
 }

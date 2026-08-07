@@ -26,6 +26,10 @@ export {
   DeviceSessionWatcher,
 } from './device-session-watcher';
 
+export { ChildLauncher, type HubChild } from './child-launcher';
+export { ChildTabs } from './child-tabs';
+export { HubRail } from './hub-rail';
+export { HUB_IDLE_TIMEOUT_MS, IdleReturn } from './idle-return';
 export { HubSettings } from './hub-settings';
 export { SettingsWatcher } from './settings-watcher';
 export { KioskShell } from './kiosk-shell';

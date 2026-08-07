@@ -40,10 +40,10 @@ export function NotificationPreferencesForm({
   return (
     <form
       action={formAction}
-      className="flex flex-col gap-4"
+      className="-mx-2 flex flex-col gap-1"
       data-testid="notification-preferences-form"
     >
-      <label className="flex items-start gap-3">
+      <label className="flex min-h-12 cursor-pointer items-start gap-3 rounded-xl px-2 py-2 transition-colors duration-200 ease-brand hover:bg-surface-container">
         <input
           type="checkbox"
           name="routineReminders"
@@ -52,12 +52,14 @@ export function NotificationPreferencesForm({
           data-testid="pref-routine-reminders"
         />
         <span className="flex flex-col gap-0.5">
-          <span className="font-display text-sm font-medium">{t('routineReminders')}</span>
-          <span className="text-xs text-muted-foreground">{t('routineRemindersHint')}</span>
+          <span className="font-display text-body-sm font-semibold text-ink">
+            {t('routineReminders')}
+          </span>
+          <span className="text-caption text-ink-muted">{t('routineRemindersHint')}</span>
         </span>
       </label>
 
-      <label className="flex items-start gap-3">
+      <label className="flex min-h-12 cursor-pointer items-start gap-3 rounded-xl px-2 py-2 transition-colors duration-200 ease-brand hover:bg-surface-container">
         <input
           type="checkbox"
           name="redemptionRequests"
@@ -66,12 +68,14 @@ export function NotificationPreferencesForm({
           data-testid="pref-redemption-requests"
         />
         <span className="flex flex-col gap-0.5">
-          <span className="font-display text-sm font-medium">{t('redemptionRequests')}</span>
-          <span className="text-xs text-muted-foreground">{t('redemptionRequestsHint')}</span>
+          <span className="font-display text-body-sm font-semibold text-ink">
+            {t('redemptionRequests')}
+          </span>
+          <span className="text-caption text-ink-muted">{t('redemptionRequestsHint')}</span>
         </span>
       </label>
 
-      <label className="flex items-start gap-3">
+      <label className="flex min-h-12 cursor-pointer items-start gap-3 rounded-xl px-2 py-2 transition-colors duration-200 ease-brand hover:bg-surface-container">
         <input
           type="checkbox"
           name="completionUpdates"
@@ -80,17 +84,19 @@ export function NotificationPreferencesForm({
           data-testid="pref-completion-updates"
         />
         <span className="flex flex-col gap-0.5">
-          <span className="font-display text-sm font-medium">{t('completionUpdates')}</span>
-          <span className="text-xs text-muted-foreground">{t('completionUpdatesHint')}</span>
+          <span className="font-display text-body-sm font-semibold text-ink">
+            {t('completionUpdates')}
+          </span>
+          <span className="text-caption text-ink-muted">{t('completionUpdatesHint')}</span>
         </span>
       </label>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 px-2 pt-3">
         <Button type="submit" size="hub" disabled={pending} data-testid="save-notification-prefs">
           {t('save')}
         </Button>
         {state.status === 'error' ? (
-          <span role="alert" className="text-sm text-destructive">
+          <span role="alert" className="text-body-sm text-destructive">
             {t(`errors.${state.error}`)}
           </span>
         ) : null}

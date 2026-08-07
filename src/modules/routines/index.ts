@@ -86,9 +86,11 @@ export { hasGraduated, starsFor, type Awardable } from './domain/stars';
 export {
   getRoutine,
   listCompletedSteps,
+  listCompletionsOn,
   listRoutines,
   listSteps,
   type CompletedStep,
+  type MemberCompletedStep,
   type RoutineWithSteps,
 } from './queries';
 
@@ -112,6 +114,7 @@ export {
 } from './actions';
 
 export {
+  loadFamilyRoutineTotals,
   loadMemberRoutines,
   loadRoutinesPage,
   type BoardOptions,
@@ -120,6 +123,7 @@ export {
   type BoardStep,
   type RoutineBoard as RoutineBoardData,
   type RoutinesPageData,
+  type RoutineTotals,
 } from './page-data';
 
 export { GraduateRoutineButton } from './ui/graduate-routine-button';

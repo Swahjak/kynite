@@ -56,6 +56,7 @@ export {
   listRedemptions,
   listRewards,
   listStarHistory,
+  listStarsEarnedSince,
   listStarTotals,
   starsPerDay,
   type RedemptionWithReward,

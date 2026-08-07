@@ -52,7 +52,65 @@
       "invalidInput": "Please check the details you entered.",
       "invalidCredentials": "That email address or password is not right.",
       "emailTaken": "An account with this email address already exists.",
-      "signUpFailed": "Could not create the account. Please try again."
+      "signUpFailed": "Could not create the account. Please try again.",
+      "oauthUnavailable": "Signing in with Google is not working right now. Please try again.",
+      "oauthFailed": "Signing in with Google did not finish. Please try again.",
+      "oauthNotLinked": "An account with this email address already exists. Sign in with your password.",
+      "sessionExpired": "Your session has expired. Please sign in again.",
+      "onboardingSignOutFailed": "Your family has been created. Please sign in again to continue.",
+      "membershipRemoved": "This account no longer belongs to a family. Sign in, or ask for a new invite."
+    },
+    "or": "or",
+    "google": {
+      "continue": "Continue with Google"
+    },
+    "onboarding": {
+      "title": "One more thing",
+      "description": "Welcome, {name}. Give your family a name and Kynite is ready to go.",
+      "submit": "Create family",
+      "hint": "You can change the name later in settings."
+    }
+  },
+  "marketing": {
+    "nav": {
+      "label": "Main menu",
+      "signIn": "Sign in",
+      "signUp": "Get started free"
+    },
+    "hero": {
+      "eyebrow": "For the whole family",
+      "title": "One view for the whole family.",
+      "body": "Kynite brings calendars, routines and rewards together in one place — on your phone, and on the tablet on the kitchen wall.",
+      "primaryCta": "Get started free",
+      "secondaryCta": "I already have an account",
+      "reassurance": "Free to try. Your family is set up in a minute."
+    },
+    "features": {
+      "title": "Everything home has to hold",
+      "body": "No more scattered lists and messages. Everyone sees the same thing, and the wall tablet shows it from across the room.",
+      "items": {
+        "calendar": {
+          "title": "Family calendar",
+          "body": "Link your Google calendars and see at a glance who needs to be where."
+        },
+        "routines": {
+          "title": "Routines",
+          "body": "Morning and bedtime rituals as steps children can tick off themselves."
+        },
+        "rewards": {
+          "title": "Stars and rewards",
+          "body": "Celebrate what goes well, with a savings goal the whole family works towards."
+        },
+        "hub": {
+          "title": "Wall display",
+          "body": "A paired tablet on the wall shows today, legible from the other side of the kitchen."
+        }
+      }
+    },
+    "cta": {
+      "title": "Start today with a calmer house",
+      "body": "Create your family, invite the other parent, and put the tablet on the wall.",
+      "button": "Create family"
     }
   },
   "family": {
@@ -243,6 +301,9 @@
     "empty": "Nothing scheduled in this period.",
     "freeDay": "Free day",
     "everyone": "Everyone",
+    "allDay": "All day",
+    "continuesBefore": "Started earlier",
+    "continuesAfter": "Continues later",
     "recurring": "Repeats",
     "pendingSync": "Not synced to Google yet",
     "eventCount": "{count, plural, =0 {No events} one {# event} other {# events}}",
@@ -267,6 +328,12 @@
     },
     "dialog": {
       "addTitle": "Add event",
+      "sections": {
+        "what": "What",
+        "when": "When",
+        "who": "Who",
+        "where": "Where"
+      },
       "editTitle": "Edit event",
       "description": "Events in a linked Google calendar are pushed there straight away."
     },
@@ -342,6 +409,46 @@
     "month": {
       "more": "{count} more",
       "openDay": "See everything on {date}"
+    }
+  },
+  "today": {
+    "title": "Today",
+    "allDay": "All day",
+    "now": {
+      "eyebrowLive": "Now",
+      "eyebrowNext": "Next",
+      "remainingTitle": "In progress",
+      "remainingLabel": "{minutes} minutes remaining",
+      "minutesShort": "{minutes}m",
+      "endsAt": "Done at {time}",
+      "startsTitle": "Coming up",
+      "startsLabel": "Starts at {time}",
+      "inMinutes": "In {minutes} minutes",
+      "openDay": "Open this day in the calendar",
+      "clearTitle": "Nothing else planned",
+      "clearBody": "The rest of the day is yours.",
+      "eyebrowPast": "Earlier",
+      "pastTitle": "Already happened",
+      "pastBody": "From {start} to {end}",
+      "pastClearTitle": "Nothing was planned",
+      "pastClearBody": "This day stayed empty."
+    },
+    "upNext": {
+      "title": "Up next",
+      "free": "Free time!",
+      "pastTitle": "Earlier that day"
+    },
+    "kids": {
+      "title": "Kids' progress",
+      "empty": "No children in this family yet.",
+      "noRoutines": "No routines today",
+      "steps": "{done} of {total} done",
+      "starsToday": "{count, plural, =0 {No stars yet today} one {# star today} other {# stars today}}",
+      "progressLabel": "Today",
+      "balance": "{count, plural, one {# star} other {# stars}} to spend"
+    },
+    "board": {
+      "title": "The day, per person"
     }
   },
   "routines": {
@@ -642,7 +749,8 @@
       "stepNotFound": "That routine step no longer exists.",
       "timerNotFound": "That timer is no longer running.",
       "alreadyRunning": "That timer is already running."
-    }
+    },
+    "atMaximum": "This timer is as long as it goes."
   },
   "offline": {
     "lastKnown": "Last known schedule"
@@ -832,6 +940,7 @@
   "settings": {
     "title": "Settings",
     "subtitle": "Everything about this household in one place.",
+    "back": "Back to settings",
     "family": {
       "title": "Household",
       "description": "This household's name, language and clock.",
@@ -967,6 +1076,35 @@
       "title": "This page does not exist",
       "body": "The link is no longer valid, or the page has moved.",
       "home": "Go to overview"
+    }
+  },
+  "hub": {
+    "nav": {
+      "label": "Hub navigation",
+      "board": "Board",
+      "store": "Store",
+      "timers": "Timers"
+    },
+    "children": {
+      "title": "Everyone's day",
+      "progress": "{done} of {total} done",
+      "allDone": "All done",
+      "nothingToday": "Nothing planned today",
+      "openRoutines": "Open {name}'s routines",
+      "openStars": "Open {name}'s star chart"
+    },
+    "child": {
+      "label": "{name}'s screens",
+      "routines": "Routines",
+      "stars": "Stars",
+      "store": "Store"
+    },
+    "timers": {
+      "startTitle": "New timer",
+      "start": "{minutes} min",
+      "startNamed": "Timer of {minutes} minutes",
+      "atMaximum": "This timer is as long as it goes.",
+      "quickStartLabel": "{minutes} min timer"
     }
   }
 }

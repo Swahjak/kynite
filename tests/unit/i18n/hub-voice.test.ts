@@ -55,6 +55,11 @@ const HUB_SUBTREES: readonly { namespace: string; path: string }[] = [
   { namespace: 'routines', path: 'routines.routineDone' },
   { namespace: 'rewards', path: 'rewards.store' },
   { namespace: 'rewards', path: 'rewards.chart' },
+  // M19: the kiosk's own chrome — the rail, the per-child launcher on the
+  // board and the child's screen switcher. It is the first copy a child reads
+  // on the wall, so it is scanned with everything else rather than being
+  // exempt for being "navigation".
+  { namespace: 'hub', path: 'hub' },
 ];
 
 function collect(locale: 'nl' | 'en'): [string, string][] {

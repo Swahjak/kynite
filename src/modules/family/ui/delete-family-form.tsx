@@ -73,7 +73,7 @@ export function DeleteFamilyForm({ familyName }: { familyName: string }) {
           {t('cancel')}
         </Button>
         {state.status === 'error' ? (
-          <span role="alert" className="text-sm text-destructive">
+          <span role="alert" className="text-body-sm text-destructive">
             {t(`errors.${state.error}`)}
           </span>
         ) : null}

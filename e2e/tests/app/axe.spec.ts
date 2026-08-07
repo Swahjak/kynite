@@ -23,7 +23,9 @@ const SURFACES = [
 test.describe('parent app accessibility', () => {
   for (const surface of SURFACES) {
     test(`${surface.name} has no WCAG AA violations`, async ({ page, family }) => {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Amsterdam' }).format(
+        new Date()
+      );
       await seedHousehold(family.familyId, today);
 
       await page.goto(surface.path());

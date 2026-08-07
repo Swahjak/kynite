@@ -60,23 +60,26 @@ export function GoogleAccountsPanel({
   const configured = missingConfig.length === 0;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       {error ? (
-        <p role="alert" className="rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">
+        <p
+          role="alert"
+          className="rounded-xl bg-destructive/10 px-4 py-3 text-body-sm text-destructive"
+        >
           {t(`errors.${error}` as 'errors.linkFailed')}
         </p>
       ) : null}
 
       {linkedEmail ? (
-        <p role="status" className="rounded-lg bg-primary/10 px-4 py-3 text-sm">
+        <p role="status" className="rounded-xl bg-brand-container/20 px-4 py-3 text-body-sm">
           {t('linkedNotice', { email: linkedEmail })}
         </p>
       ) : null}
 
-      <Card className="flex flex-col gap-3 p-4">
+      <Card className="flex flex-col gap-3 p-4 sm:p-5">
         <div className="flex flex-col gap-1">
-          <h2 className="font-display text-lg font-semibold">{t('link.title')}</h2>
-          <p className="text-sm text-muted-foreground">{t('link.description')}</p>
+          <h2 className="font-display text-h3 font-semibold text-ink">{t('link.title')}</h2>
+          <p className="text-body-sm text-ink-secondary">{t('link.description')}</p>
         </div>
 
         {configured ? (
@@ -97,14 +100,14 @@ export function GoogleAccountsPanel({
             {t('link.action')}
           </Button>
         ) : (
-          <p className="rounded-lg bg-muted px-4 py-3 text-sm text-muted-foreground">
+          <p className="rounded-xl bg-surface-container px-4 py-3 text-body-sm text-ink-secondary">
             {t('notConfigured', { missing: missingConfig.join(', ') })}
           </p>
         )}
       </Card>
 
       {accounts.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t('empty')}</p>
+        <p className="px-1 text-body-sm text-ink-secondary">{t('empty')}</p>
       ) : (
         accounts.map((account) => <AccountCard key={account.id} account={account} />)
       )}
@@ -125,10 +128,12 @@ function AccountCard({ account }: { account: LinkedAccount }) {
   const { locked, lock } = useSubmitGuard(pending);
 
   return (
-    <Card className="flex flex-col gap-4 p-4" data-testid="google-account-card">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex flex-col gap-1">
-          <span className="font-medium">{account.email}</span>
+    <Card className="flex flex-col gap-4 p-4 sm:p-5" data-testid="google-account-card">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex min-w-0 flex-col gap-1.5">
+          <span className="font-display text-body font-semibold break-all text-ink">
+            {account.email}
+          </span>
           <div className="flex flex-wrap items-center gap-2">
             {account.status === 'reauth_required' ? (
               <Badge variant="destructive">{t('status.reauthRequired')}</Badge>
@@ -142,12 +147,12 @@ function AccountCard({ account }: { account: LinkedAccount }) {
               {account.hasCalendarAccess ? t('calendarAccess') : t('noCalendarAccess')}
             </Badge>
           </div>
-          <span className="text-xs text-muted-foreground" data-testid="linked-since">
+          <span className="text-caption text-ink-muted" data-testid="linked-since">
             {t('linkedSince', {
               date: format.dateTime(account.linkedAt, { dateStyle: 'medium' }),
             })}
           </span>
-          <span className="text-xs text-muted-foreground" data-testid="account-last-sync">
+          <span className="text-caption text-ink-muted" data-testid="account-last-sync">
             {account.lastSyncedAt
               ? t('sync.lastSynced', { when: format.relativeTime(account.lastSyncedAt) })
               : t('sync.never')}
@@ -198,17 +203,20 @@ function AccountCard({ account }: { account: LinkedAccount }) {
       </AlertDialog>
 
       {state.status === 'error' ? (
-        <p role="alert" className="text-sm text-destructive">
+        <p role="alert" className="text-body-sm text-destructive">
           {t(`errors.${state.error}` as 'errors.forbidden')}
         </p>
       ) : null}
 
-      <ul className="flex flex-col gap-2">
+      {/* The calendars this account brings with it, as a grouped list inside
+          the account's own card — full-bleed, so the divider between two
+          calendars reaches the card edge the way the mockups' lists do. */}
+      <ul className="-mx-4 flex flex-col sm:-mx-5">
         {account.calendars.map((calendar) => (
           <CalendarRow key={calendar.id} calendar={calendar} />
         ))}
         {account.calendars.length === 0 ? (
-          <li className="text-sm text-muted-foreground">{t('noCalendars')}</li>
+          <li className="px-4 py-3 text-body-sm text-ink-secondary sm:px-5">{t('noCalendars')}</li>
         ) : null}
       </ul>
     </Card>
@@ -221,26 +229,26 @@ function CalendarRow({ calendar }: { calendar: LinkedCalendar }) {
 
   return (
     <li
-      className="flex flex-wrap items-center justify-between gap-3"
+      className="flex min-h-12 flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3 sm:px-5"
       data-testid="google-calendar-row"
       data-calendar-id={calendar.id}
     >
-      <span className="flex min-w-0 flex-col gap-0.5 text-sm">
-        <span className="flex items-center gap-2">
+      <span className="flex min-w-0 flex-col gap-0.5">
+        <span className="flex items-center gap-2 font-display text-body-sm font-semibold text-ink">
           <span
             aria-hidden
-            className="size-3 shrink-0 rounded-full border border-border"
+            className="size-3 shrink-0 rounded-4xl border border-border"
             style={calendar.color ? { backgroundColor: calendar.color } : undefined}
           />
           {calendar.summary}
           {calendar.writable ? null : (
-            <span className="text-xs text-muted-foreground">{t('readOnly')}</span>
+            <span className="label-overline text-ink-muted">{t('readOnly')}</span>
           )}
         </span>
         {/* M18: `calendar.syncedAt` has been written since M05 and rendered
             nowhere, which made a silently-stalled calendar indistinguishable
             from a quiet one. */}
-        <span className="text-xs text-muted-foreground" data-testid="calendar-last-sync">
+        <span className="text-caption text-ink-muted" data-testid="calendar-last-sync">
           {calendar.syncedAt
             ? t('sync.lastSynced', { when: format.relativeTime(calendar.syncedAt) })
             : t('sync.never')}

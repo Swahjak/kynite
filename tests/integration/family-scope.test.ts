@@ -38,12 +38,27 @@ describe.skipIf(!databaseUrl)('family scoping (integration)', () => {
    */
   let doomedDeviceId: string;
   let doomedRoutineStepId: string;
+  /** The login behind the doomed household's `former_member` tombstone. */
+  const doomedUserId = randomUUID();
 
   beforeAll(async () => {
     household = await seedHousehold(db, 'Doomed');
     bystander = await seedHousehold(db, 'Bystander');
 
     const familyId = household.familyId;
+
+    // M19 (F4). The tombstone a removed member leaves behind is family-scoped
+    // like everything else: once the household is gone there is nothing left to
+    // have been removed from, so it must not outlive the cascade either.
+    await db.insert(schema.user).values({
+      id: doomedUserId,
+      name: 'Verwijderd',
+      email: `removed-${doomedUserId.slice(0, 8)}@kynite.test`,
+      emailVerified: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    await db.insert(schema.formerMember).values({ familyId, userId: doomedUserId });
 
     const [device] = await db
       .insert(schema.device)
@@ -212,6 +227,9 @@ describe.skipIf(!databaseUrl)('family scoping (integration)', () => {
     // already-deleted family is a no-op.
     await db.delete(schema.family).where(sql`id = ${household.familyId}`);
     await db.delete(schema.family).where(sql`id = ${bystander.familyId}`);
+    // The tombstone's login is not family-scoped and so survives the cascade
+    // by design; it is this file's to clean up.
+    await db.delete(schema.user).where(sql`id = ${doomedUserId}`);
     await pool.end();
   });
 

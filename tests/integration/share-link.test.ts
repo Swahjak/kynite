@@ -134,7 +134,12 @@ describe.skipIf(!databaseUrl)('caregiver share links (integration)', () => {
     return result;
   };
 
-  const todayKey = () => new Date().toISOString().slice(0, 10);
+  // In the seeded household's timezone (Europe/Amsterdam, the schema default),
+  // not UTC: `isCompletableOn` resolves "today" in the family zone, so a UTC
+  // date key is one day behind between local midnight and 02:00 and every
+  // completion in this file would fail 'notScheduled' in that window.
+  const todayKey = () =>
+    new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Amsterdam' }).format(new Date());
 
   describe('token hygiene', () => {
     it('stores the hash and nothing else — no column anywhere holds the raw token', async () => {

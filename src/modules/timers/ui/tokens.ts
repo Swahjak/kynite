@@ -24,7 +24,15 @@ import { OVERRUN_PULSE_MS } from '../domain/chime';
  * conflicting `text-` colour utility. The default colour is `foreground`
  * anyway (globals.css `body`), so the class is nothing but a trap.
  */
-export const COUNTDOWN_DIGIT_CLASS = 'tabular-time font-extrabold text-display-xl leading-none';
+/*
+ * M19: `text-display-hub` (72px) on a phone, stepping to `text-display-xl`
+ * (80px) from `sm` up. The hub token is the mockups' own "one huge number on a
+ * screen" size (`kynite_design_system_spec.txt`), and at 390px an 80px `1:04:30`
+ * overflows the tile — 72px is the largest that does not. Both are far above
+ * the Display M floor `tests/unit/timers/legibility.test.ts` holds.
+ */
+export const COUNTDOWN_DIGIT_CLASS =
+  'tabular-time font-extrabold text-display-hub sm:text-display-xl leading-none';
 
 /** The ambient board's smaller countdown — still Display scale (2.25rem). */
 export const COUNTDOWN_DIGIT_CLASS_COMPACT =

@@ -52,7 +52,65 @@
       "invalidInput": "Controleer de ingevulde gegevens.",
       "invalidCredentials": "Dit e-mailadres of wachtwoord klopt niet.",
       "emailTaken": "Er bestaat al een account met dit e-mailadres.",
-      "signUpFailed": "Aanmaken is niet gelukt. Probeer het opnieuw."
+      "signUpFailed": "Aanmaken is niet gelukt. Probeer het opnieuw.",
+      "oauthUnavailable": "Inloggen met Google lukt nu even niet. Probeer het opnieuw.",
+      "oauthFailed": "Inloggen met Google is niet afgerond. Probeer het opnieuw.",
+      "oauthNotLinked": "Er bestaat al een account met dit e-mailadres. Log in met je wachtwoord.",
+      "sessionExpired": "Je sessie is verlopen. Log opnieuw in.",
+      "onboardingSignOutFailed": "Je gezin is aangemaakt. Log opnieuw in om verder te gaan.",
+      "membershipRemoved": "Dit account hoort niet meer bij een gezin. Log in of vraag om een nieuwe uitnodiging."
+    },
+    "or": "of",
+    "google": {
+      "continue": "Doorgaan met Google"
+    },
+    "onboarding": {
+      "title": "Nog één ding",
+      "description": "Welkom, {name}. Geef je gezin een naam, dan is Kynite klaar voor gebruik.",
+      "submit": "Gezin aanmaken",
+      "hint": "Je kunt de naam later altijd aanpassen in de instellingen."
+    }
+  },
+  "marketing": {
+    "nav": {
+      "label": "Hoofdmenu",
+      "signIn": "Inloggen",
+      "signUp": "Gratis beginnen"
+    },
+    "hero": {
+      "eyebrow": "Voor het hele gezin",
+      "title": "Eén overzicht voor het hele gezin.",
+      "body": "Kynite brengt agenda’s, routines en beloningen samen op één plek — op je telefoon, en op de tablet aan de keukenmuur.",
+      "primaryCta": "Gratis beginnen",
+      "secondaryCta": "Ik heb al een account",
+      "reassurance": "Gratis te proberen. Je gezin is in een minuut ingericht."
+    },
+    "features": {
+      "title": "Alles wat thuis samenkomt",
+      "body": "Geen losse lijstjes en appjes meer. Iedereen ziet hetzelfde, en de wandtablet laat het van een afstand zien.",
+      "items": {
+        "calendar": {
+          "title": "Gezinsagenda",
+          "body": "Koppel je Google-agenda’s en zie in één blik wie waar moet zijn."
+        },
+        "routines": {
+          "title": "Routines",
+          "body": "Ochtend- en avondrituelen als stappen die kinderen zelf kunnen afvinken."
+        },
+        "rewards": {
+          "title": "Sterren en beloningen",
+          "body": "Vier wat er goed gaat, met een spaardoel waar het hele gezin naartoe werkt."
+        },
+        "hub": {
+          "title": "Wanddisplay",
+          "body": "Een gekoppelde tablet aan de muur toont vandaag, leesbaar vanaf de andere kant van de keuken."
+        }
+      }
+    },
+    "cta": {
+      "title": "Begin vandaag met een rustiger huis",
+      "body": "Maak je gezin aan, nodig de andere ouder uit en hang de tablet aan de muur.",
+      "button": "Gezin aanmaken"
     }
   },
   "family": {
@@ -243,6 +301,9 @@
     "empty": "Geen afspraken in deze periode.",
     "freeDay": "Vrije dag",
     "everyone": "Iedereen",
+    "allDay": "Hele dag",
+    "continuesBefore": "Begon eerder",
+    "continuesAfter": "Loopt door",
     "recurring": "Herhaalt zich",
     "pendingSync": "Nog niet gesynchroniseerd met Google",
     "eventCount": "{count, plural, =0 {Geen afspraken} one {# afspraak} other {# afspraken}}",
@@ -268,7 +329,13 @@
     "dialog": {
       "addTitle": "Afspraak toevoegen",
       "editTitle": "Afspraak bewerken",
-      "description": "Afspraken in een gekoppelde Google-agenda worden meteen doorgestuurd."
+      "description": "Afspraken in een gekoppelde Google-agenda worden meteen doorgestuurd.",
+      "sections": {
+        "what": "Wat",
+        "when": "Wanneer",
+        "who": "Wie",
+        "where": "Waar"
+      }
     },
     "form": {
       "title": "Titel",
@@ -342,6 +409,46 @@
     "month": {
       "more": "Nog {count}",
       "openDay": "Alles van {date} bekijken"
+    }
+  },
+  "today": {
+    "title": "Vandaag",
+    "allDay": "Hele dag",
+    "now": {
+      "eyebrowLive": "Nu",
+      "eyebrowNext": "Straks",
+      "remainingTitle": "Nu bezig",
+      "remainingLabel": "Nog {minutes} minuten",
+      "minutesShort": "{minutes}m",
+      "endsAt": "Klaar om {time}",
+      "startsTitle": "Hierna",
+      "startsLabel": "Begint om {time}",
+      "inMinutes": "Over {minutes} minuten",
+      "openDay": "Deze dag in de agenda openen",
+      "clearTitle": "Niets meer gepland",
+      "clearBody": "De rest van de dag is van jullie.",
+      "eyebrowPast": "Eerder",
+      "pastTitle": "Al geweest",
+      "pastBody": "Van {start} tot {end}",
+      "pastClearTitle": "Er stond niets gepland",
+      "pastClearBody": "Deze dag bleef leeg."
+    },
+    "upNext": {
+      "title": "Hierna",
+      "free": "Vrije tijd!",
+      "pastTitle": "Eerder die dag"
+    },
+    "kids": {
+      "title": "Hoe gaat het met de kinderen",
+      "empty": "Nog geen kinderen in dit gezin.",
+      "noRoutines": "Vandaag geen routines",
+      "steps": "{done} van {total} klaar",
+      "starsToday": "{count, plural, =0 {Nog geen sterren vandaag} one {# ster vandaag} other {# sterren vandaag}}",
+      "progressLabel": "Vandaag",
+      "balance": "{count, plural, one {# ster} other {# sterren}} te besteden"
+    },
+    "board": {
+      "title": "De dag per persoon"
     }
   },
   "routines": {
@@ -642,7 +749,8 @@
       "stepNotFound": "Deze routinestap bestaat niet meer.",
       "timerNotFound": "Deze timer loopt niet meer.",
       "alreadyRunning": "Deze timer loopt al."
-    }
+    },
+    "atMaximum": "Deze timer is al zo lang als hij kan zijn."
   },
   "offline": {
     "lastKnown": "Laatst bekende planning"
@@ -832,6 +940,7 @@
   "settings": {
     "title": "Instellingen",
     "subtitle": "Alles over dit gezin op één plek.",
+    "back": "Terug naar instellingen",
     "family": {
       "title": "Gezin",
       "description": "De naam, de taal en de klok van dit huishouden.",
@@ -967,6 +1076,35 @@
       "title": "Deze pagina bestaat niet",
       "body": "De link klopt niet meer, of de pagina is verplaatst.",
       "home": "Naar het overzicht"
+    }
+  },
+  "hub": {
+    "nav": {
+      "label": "Hubnavigatie",
+      "board": "Bord",
+      "store": "Winkel",
+      "timers": "Timers"
+    },
+    "children": {
+      "title": "De dag van iedereen",
+      "progress": "{done} van {total} klaar",
+      "allDone": "Alles klaar",
+      "nothingToday": "Niets gepland vandaag",
+      "openRoutines": "Open de routines van {name}",
+      "openStars": "Open de sterrenkaart van {name}"
+    },
+    "child": {
+      "label": "Schermen van {name}",
+      "routines": "Routines",
+      "stars": "Sterren",
+      "store": "Winkel"
+    },
+    "timers": {
+      "startTitle": "Nieuwe timer",
+      "start": "{minutes} min",
+      "startNamed": "Timer van {minutes} minuten",
+      "atMaximum": "Deze timer is al zo lang als hij kan zijn.",
+      "quickStartLabel": "Timer van {minutes} min"
     }
   }
 }
