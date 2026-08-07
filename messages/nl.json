@@ -104,7 +104,66 @@
       "invalidInput": "Controleer de ingevulde gegevens.",
       "memberNotFound": "Dit gezinslid bestaat niet meer.",
       "singleOwner": "Een gezin heeft precies één beheerder.",
-      "cannotRemoveOwner": "De beheerder kan niet verwijderd worden."
+      "cannotRemoveOwner": "De beheerder kan niet verwijderd worden.",
+      "inviteExists": "Er staat al een uitnodiging open voor dit gezinslid.",
+      "memberNotInvitable": "Alleen een volwassene zonder login kan worden uitgenodigd.",
+      "inviteNotFound": "Deze uitnodiging bestaat niet meer.",
+      "inviteFailed": "Uitnodigen is niet gelukt. Probeer het opnieuw."
+    },
+    "invite": {
+      "accept": {
+        "title": "Welkom bij {family}",
+        "description": "Je plek in dit gezin staat al klaar, {name}. Eén tik en je hoort erbij.",
+        "submit": "Doe mee"
+      },
+      "profile": {
+        "title": "Kies je gezicht, {name}",
+        "description": "Kies er één. Je kleur hoort erbij en is overal in het gezin van jou."
+      },
+      "google": {
+        "title": "Koppel je agenda",
+        "description": "Jouw afspraken komen erbij te staan, {name} — de rest van het gezin ziet ze meteen.",
+        "submit": "Koppel Google",
+        "notConfigured": "Google is nog niet ingesteld op deze installatie. Vraag de beheerder om het aan te zetten."
+      },
+      "gone": {
+        "claimed": {
+          "title": "Deze uitnodiging is al gebruikt",
+          "description": "Je hoort er al bij. Meld je aan om verder te gaan."
+        },
+        "revoked": {
+          "title": "Deze uitnodiging is ingetrokken",
+          "description": "De beheerder van het gezin heeft deze link stopgezet. Vraag om een nieuwe."
+        },
+        "expired": {
+          "title": "Deze uitnodiging is verlopen",
+          "description": "Een uitnodiging blijft zeven dagen geldig. Vraag om een nieuwe link."
+        },
+        "signIn": "Naar aanmelden"
+      },
+      "manage": {
+        "open": "Uitnodigen",
+        "title": "{name} uitnodigen",
+        "description": "Jij vult het e-mailadres in — {name} hoeft daarna niets meer in te typen. Stuur de link zelf door.",
+        "emailLabel": "E-mailadres",
+        "emailHint": "Hiermee wordt het account aangemaakt zodra de uitnodiging wordt aangenomen.",
+        "submit": "Maak uitnodigingslink",
+        "linkLabel": "Uitnodigingslink",
+        "expires": "Geldig tot {date}. Je ziet deze link maar één keer.",
+        "pendingUntil": "Uitnodiging open tot {date}",
+        "revoke": "Intrekken",
+        "revokeConfirm": "Zeker weten?"
+      },
+      "errors": {
+        "forbidden": "Je hebt geen rechten om dit te doen.",
+        "invalidInput": "Er ging iets mis met deze uitnodiging.",
+        "inviteInvalid": "Deze uitnodigingslink klopt niet.",
+        "invite_claimed": "Deze uitnodiging is al gebruikt.",
+        "invite_revoked": "Deze uitnodiging is ingetrokken.",
+        "invite_expired": "Deze uitnodiging is verlopen.",
+        "inviteEmailTaken": "Er bestaat al een account met dit e-mailadres. Vraag om een uitnodiging op een ander adres.",
+        "inviteFailed": "Aanmelden is niet gelukt. Probeer de link opnieuw te openen."
+      }
     }
   },
   "google": {

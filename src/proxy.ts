@@ -31,6 +31,20 @@ const HUB_SECTION = 'hub';
 const SHARE_SECTION = 's';
 
 /**
+ * The second-parent invite tree's first segment — `(auth)/invite/[token]`
+ * (M14, PRD FR26).
+ *
+ * Carries the same `SHARE_HEADERS` as `(share)` and for the identical reason:
+ * the raw token lives in the URL itself, so an indexed link or a leaked
+ * `Referer` is a leaked credential either way — here, one that grants a login
+ * rather than a read. Unlike `(share)` it is **not** funnelled through the
+ * `SAFE_METHODS` 405 guard below: this tree's Server Actions (`acceptInviteAction`,
+ * `chooseProfileAction`) submit as `POST` to the page that rendered them, so
+ * blocking non-GET here would break the flow it exists to protect.
+ */
+const INVITE_SECTION = 'invite';
+
+/**
  * Headers every `(share)` response carries (M13 criterion).
  *
  * `X-Robots-Tag` rather than only a `<meta name="robots">`: the share layout
@@ -98,6 +112,17 @@ export default function proxy(request: NextRequest): NextResponse {
       return new NextResponse(null, { status: 405, headers: { Allow: 'GET, HEAD' } });
     }
 
+    const response = intl(request);
+    for (const [key, value] of Object.entries(SHARE_HEADERS)) response.headers.set(key, value);
+    return response;
+  }
+
+  /**
+   * F3: the invite tree gets the same `noindex` / `no-referrer` / `no-store`
+   * headers as `(share)`, headers only — no method restriction (see
+   * `INVITE_SECTION`).
+   */
+  if (section === INVITE_SECTION) {
     const response = intl(request);
     for (const [key, value] of Object.entries(SHARE_HEADERS)) response.headers.set(key, value);
     return response;

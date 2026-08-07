@@ -7,6 +7,7 @@ import {
   authorizationUrl,
   createOAuthState,
   isGoogleConfigured,
+  isOAuthReturnTo,
 } from '@/modules/google';
 
 /**
@@ -49,7 +50,16 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   // says which variables are missing rather than bouncing to a broken consent.
   if (!isGoogleConfigured()) return redirectTo(settings('notConfigured'));
 
-  const { state, nonce } = createOAuthState(principal.familyId, principal.memberId);
+  /**
+   * Where the callback should land (M14). Validated against a closed set here
+   * and then carried *inside the signed state*, never as a query parameter on
+   * the callback — so it cannot be swapped after consent, and an unrecognised
+   * value silently falls back to settings rather than becoming a redirect.
+   */
+  const requested = request.nextUrl.searchParams.get('returnTo');
+  const returnTo = isOAuthReturnTo(requested) ? requested : undefined;
+
+  const { state, nonce } = createOAuthState(principal.familyId, principal.memberId, { returnTo });
 
   const store = await cookies();
   store.set(OAUTH_NONCE_COOKIE, nonce, {

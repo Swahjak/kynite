@@ -49,6 +49,39 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+      // F14a: the completion-perf guard lives in its own project (below) so it
+      // never shares a worker pool with this one.
+      testIgnore: '**/realtime/completion-perf.spec.ts',
+    },
+    /**
+     * F14a: `completion-perf.spec.ts` measures the <100ms optimistic-completion
+     * NFR in real milliseconds inside the page (`performance.now()`), against a
+     * fixed 100ms budget that is meant to fail the build on a genuine
+     * regression. That budget is a property of the *code path*, not of the
+     * machine — but it was measured on a machine, and this repo's default run
+     * is `fullyParallel: true` with no worker cap, so up to 4 Chromium
+     * instances contend for the same CPU. Under that contention the spec
+     * measured 159ms 4/4 runs: a real machine-load artefact, not a code
+     * regression, and not something the budget should be loosened to
+     * accommodate (loosening it would just move the same false floor
+     * elsewhere).
+     *
+     * `test.describe.configure({ mode: 'serial' })` was considered and
+     * rejected: it only orders tests *within* the same worker/file, it does
+     * not stop the other project's workers from running concurrently on the
+     * same box. A separate project with `workers: 1` and `dependencies:
+     * ['chromium']` is what actually isolates it — Playwright runs a project's
+     * dependencies to completion before starting the project itself, so this
+     * one starts only once every `chromium` worker has exited and has the
+     * machine to itself.
+     */
+    {
+      name: 'chromium-perf',
+      use: { ...devices['Desktop Chrome'] },
+      testMatch: '**/realtime/completion-perf.spec.ts',
+      fullyParallel: false,
+      workers: 1,
+      dependencies: ['chromium'],
     },
   ],
   webServer: {

@@ -99,9 +99,12 @@ export {
   createOAuthState,
   exchangeCode,
   fetchIdentity,
+  isOAuthReturnTo,
   refreshAccessToken,
   verifyOAuthState,
+  OAUTH_RETURN_TARGETS,
   type GoogleIdentity,
+  type OAuthReturnTo,
   type OAuthState,
   type TokenResponse,
 } from './oauth';

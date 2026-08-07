@@ -79,8 +79,80 @@ export const member = pgTable(
   ]
 );
 
+/**
+ * A single-use, expiring, revocable link that attaches a login to one already
+ * existing `member` row (PRD FR26, milestone M14).
+ *
+ * The table stores a *pointer to a member*, never a role and never a name. That
+ * is the whole anti-escalation design: acceptance can only ever confer whatever
+ * the target row already says, and the target row was created by the owner
+ * through `member:manage`. There is no field here a client could tamper with to
+ * arrive as an owner.
+ *
+ * `memberId` is unique among live invites rather than outright, so an owner who
+ * lets one lapse can mint another for the same person, and the spent one stays
+ * in the list as history.
+ */
+export const memberInvite = pgTable(
+  'member_invite',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    familyId: uuid('family_id')
+      .notNull()
+      .references(() => family.id, { onDelete: 'cascade' }),
+    /** The unclaimed row this invite hands over. Cascades: no member, no invite. */
+    memberId: uuid('member_id')
+      .notNull()
+      .references(() => member.id, { onDelete: 'cascade' }),
+    /** SHA-256 of the raw token, `invite:`-domain-separated (`@/lib/invite-token`). */
+    tokenHash: text('token_hash').notNull(),
+    /**
+     * The address the account is created under. The *owner* types this when
+     * minting; the invitee never types anything (FR26), so the login has to
+     * carry an identifier that was known before they arrived.
+     */
+    email: text('email').notNull(),
+    /** Who minted it — kept for the audit trail the owner reads in the roster. */
+    invitedByMemberId: uuid('invited_by_member_id').references(() => member.id, {
+      onDelete: 'set null',
+    }),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    /** Set by the claiming UPDATE. Non-null = spent; this is the single-use latch. */
+    claimedAt: timestamp('claimed_at', { withTimezone: true }),
+    /** The login the claim created or attached, for the already-claimed screen. */
+    claimedByUserId: text('claimed_by_user_id').references(() => user.id, {
+      onDelete: 'set null',
+    }),
+    revokedAt: timestamp('revoked_at', { withTimezone: true }),
+    /**
+     * Set once the invitee submits `chooseProfileAction` — interaction two of
+     * three (F10). Deriving step 2 from `member.avatarUrl IS NULL` looked
+     * equivalent and was not: an owner who pre-sets an avatar on the member
+     * row before minting (or edits it while the invite is outstanding) makes
+     * `avatarUrl` non-null before the invitee ever visits the profile step,
+     * which silently skips it — the invitee never gets their own tap at
+     * "this is me." This column is the explicit marker instead: it means
+     * "the invitee did this step in *this* flow," which `avatarUrl` alone
+     * cannot say no matter who else has touched the member row.
+     */
+    profileCompletedAt: timestamp('profile_completed_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('member_invite_token_hash_unique').on(table.tokenHash),
+    index('member_invite_family_id_idx').on(table.familyId),
+    // At most one *live* invite per member: two links in circulation for the
+    // same person is two chances for the wrong one to be forwarded.
+    uniqueIndex('member_invite_live_member_unique')
+      .on(table.memberId)
+      .where(sql`${table.claimedAt} is null and ${table.revokedAt} is null`),
+  ]
+);
+
 export type Family = typeof family.$inferSelect;
 export type Member = typeof member.$inferSelect;
+export type MemberInvite = typeof memberInvite.$inferSelect;
 export type MemberRole = (typeof memberRole.enumValues)[number];
 export type MemberColor = (typeof memberColor.enumValues)[number];
 export type RewardHorizon = (typeof rewardHorizon.enumValues)[number];

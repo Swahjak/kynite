@@ -49,7 +49,25 @@ export type OAuthState = {
   nonce: string;
   /** Epoch ms; a consent screen left open for a day is not a valid callback. */
   expiresAt: number;
+  /** Where the callback sends the browser afterwards. Absent = `settings`. */
+  returnTo?: OAuthReturnTo;
 };
+
+/**
+ * The two places a completed consent can land (M14).
+ *
+ * A closed set, not a path — the state is signed but it is still a value the
+ * browser carries, and "redirect to whatever string comes back" is how open
+ * redirects are built. The callback maps these names to routes it already
+ * knows; nothing the client sends ever becomes a `Location` header.
+ */
+export const OAUTH_RETURN_TARGETS = ['settings', 'onboarding'] as const;
+
+export type OAuthReturnTo = (typeof OAUTH_RETURN_TARGETS)[number];
+
+export function isOAuthReturnTo(value: string | null): value is OAuthReturnTo {
+  return value !== null && (OAUTH_RETURN_TARGETS as readonly string[]).includes(value);
+}
 
 const STATE_TTL_MS = 15 * 60 * 1000;
 
@@ -66,10 +84,19 @@ function sign(payload: string): string {
 export function createOAuthState(
   familyId: string,
   memberId: string,
-  now: number = Date.now()
+  options: { now?: number; returnTo?: OAuthReturnTo } = {}
 ): { state: string; nonce: string } {
+  const now = options.now ?? Date.now();
   const nonce = randomBytes(16).toString('base64url');
-  const payload: OAuthState = { familyId, memberId, nonce, expiresAt: now + STATE_TTL_MS };
+  const payload: OAuthState = {
+    familyId,
+    memberId,
+    nonce,
+    expiresAt: now + STATE_TTL_MS,
+    // Omitted rather than defaulted, so an existing signed state minted before
+    // M14 still verifies and still lands where it always did.
+    ...(options.returnTo ? { returnTo: options.returnTo } : {}),
+  };
   const encoded = Buffer.from(JSON.stringify(payload), 'utf8').toString('base64url');
 
   return { state: `${encoded}.${sign(encoded)}`, nonce };

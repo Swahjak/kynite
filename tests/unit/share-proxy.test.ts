@@ -93,3 +93,38 @@ describe('(share) refuses every mutation', () => {
     expect(matcher.test(`/nl/s/${TOKEN}`)).toBe(true);
   });
 });
+
+/**
+ * F3: the `(auth)/invite/[token]` tree (M14, PRD FR26) carries the same
+ * `noindex` / `no-referrer` / `no-store` headers as `(share)` — the raw token
+ * lives in the path here too. Headers only: unlike `(share)` this tree is
+ * *not* funnelled through the 405 mutation guard, because `acceptInviteAction`
+ * and `chooseProfileAction` submit as `POST` to this same URL by design.
+ */
+describe('(invite) responses carry noindex and no-referrer', () => {
+  it.each([
+    `/nl/invite/${TOKEN}`,
+    `/en/invite/${TOKEN}`,
+    // Unprefixed: next-intl redirects to the default locale, and the redirect
+    // itself carries the token in its `Location` — so it needs the headers too.
+    `/invite/${TOKEN}`,
+  ])('%s', (path) => {
+    const response = proxy(request(path));
+
+    expect(response.headers.get('X-Robots-Tag')).toBe('noindex, nofollow');
+    expect(response.headers.get('Referrer-Policy')).toBe('no-referrer');
+    expect(response.headers.get('Cache-Control')).toBe('no-store');
+  });
+
+  it('does not 405 a POST — the flow submits Server Actions to this tree', () => {
+    const response = proxy(request(`/nl/invite/${TOKEN}`, 'POST'));
+
+    expect(response.status).not.toBe(405);
+    expect(response.headers.get('Referrer-Policy')).toBe('no-referrer');
+  });
+
+  it('is inside the matcher', () => {
+    const matcher = new RegExp(`^${config.matcher}$`);
+    expect(matcher.test(`/nl/invite/${TOKEN}`)).toBe(true);
+  });
+});

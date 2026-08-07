@@ -94,6 +94,7 @@ describe('schema-wide invariants', () => {
         'family',
         'google_account',
         'member',
+        'member_invite',
         'push_subscription',
         'redemption',
         'reminder_dispatch',

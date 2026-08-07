@@ -197,6 +197,11 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
 
       await page.goto(`/nl/hub?date=${FUTURE_ANCHOR}`);
       await expect(page.getByTestId('hub-board')).toBeVisible();
+      // F14b: waiting on the theme settling too, matching the "dark" variant
+      // below (`useHubTheme` only applies `.dark`/`data-hub-theme` to `<html>`
+      // in a post-hydration effect — see `use-hub-theme.ts` — which can lose
+      // the race with `settlePage()`'s screenshot under a loaded CPU).
+      await expect(page.getByTestId('kiosk-shell')).toHaveAttribute('data-hub-theme', 'light');
 
       // The wall clock is the one deliberately live element on the board, so
       // its *text* is pinned rather than the element being masked.
@@ -207,6 +212,33 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
       // 11:11 than at 00:52 — a snapshot that failed by ~10 pixels depending on
       // what time the suite ran. Pinning the text makes the comparison
       // deterministic *and* actually compares the clock instead of blanking it.
+      //
+      // F14b, root-caused: `toBeVisible()` above only proves the *server's*
+      // markup painted — it says nothing about client hydration having
+      // finished. `HubBoard` is a client component (`hub-board.tsx`) whose
+      // clock is `useMirroredHubState(...).now`, formatted client-side by
+      // `useFormatter()`; the very first client render reproduces the
+      // server's text exactly (same `snapshot.now`), but hydration itself is
+      // still in flight when this line used to run. Overwriting
+      // `textContent` to `'00:00'` *before* React finishes attaching event
+      // handlers put a value in the DOM that did not come from React's own
+      // render — so when hydration completed a moment later, React compared
+      // its expected text ("10:05", say) against what was actually in the
+      // DOM ("00:00"), called that a hydration mismatch, logged "Hydration
+      // failed because the server rendered text didn't match the client" to
+      // the WebServer console (exactly the log line this carry-forward named)
+      // and **discarded the whole subtree to re-render it from scratch** —
+      // which is what put the live clock time back on screen for the
+      // screenshot, 2 (or 4) runs in 4. Confirmed live: a clean run of this
+      // suite reproduced the failure with that exact console error and a
+      // "+10:05 / -00:00" diff on this very `<span>`.
+      //
+      // The fix is to make the pin happen strictly *after* hydration rather
+      // than race it: wait for the clock to show real `HH:MM` text (proof
+      // React has committed its first client render) before overwriting it.
+      // Once hydration is known-finished, nothing schedules another render
+      // that could stomp the overwrite.
+      await expect(page.getByTestId('hub-clock')).toHaveText(/^\d{2}:\d{2}$/);
       await page.getByTestId('hub-clock').evaluate((element) => {
         element.textContent = '00:00';
       });
@@ -233,6 +265,11 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
       await expect(page.getByTestId('hub-board')).toBeVisible();
       await expect(page.getByTestId('kiosk-shell')).toHaveAttribute('data-hub-theme', 'dark');
 
+      // F14b: same hydration race as the light variant above — wait for the
+      // clock's real first client render before overwriting it, or React can
+      // discard the overwrite as part of recovering from the "mismatch" the
+      // overwrite itself caused.
+      await expect(page.getByTestId('hub-clock')).toHaveText(/^\d{2}:\d{2}$/);
       await page.getByTestId('hub-clock').evaluate((element) => {
         element.textContent = '00:00';
       });

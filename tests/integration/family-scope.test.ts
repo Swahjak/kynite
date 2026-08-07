@@ -136,6 +136,17 @@ describe.skipIf(!databaseUrl)('family scoping (integration)', () => {
       scope: { memberIds: [household.childId], surfaces: ['calendar'] },
       label: 'Oppas',
     });
+    // M14. An invite is a live credential for *this* household; if it outlived
+    // the family it would be a token pointing at a member row that no longer
+    // exists — the cascade is what makes "delete the family" mean it.
+    await db.insert(schema.memberInvite).values({
+      familyId,
+      memberId: household.parentId,
+      tokenHash: `invite-${randomUUID()}`,
+      email: `papa-${randomUUID().slice(0, 8)}@kynite.test`,
+      invitedByMemberId: household.parentId,
+      expiresAt: new Date(Date.now() + 604_800_000),
+    });
     await db.insert(schema.pushSubscription).values({
       familyId,
       memberId: household.parentId,

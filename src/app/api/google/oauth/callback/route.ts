@@ -77,7 +77,16 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // calendars; the initial per-calendar sync is queued, not awaited.
     await bootstrapAccount(account.id);
 
-    return redirectTo(settings(`?linked=${encodeURIComponent(account.email || '1')}`));
+    const linked = encodeURIComponent(account.email || '1');
+
+    // M14: the second parent's third and final interaction ends here. FR26 says
+    // their own calendar is merged into the family view "immediately", so that
+    // is where they land — not on a settings page they never asked for.
+    return redirectTo(
+      state.returnTo === 'onboarding'
+        ? `/${locale}/calendar?linked=${linked}`
+        : settings(`?linked=${linked}`)
+    );
   } catch (error) {
     console.error('[google] link failed', error);
     return fail('linkFailed');

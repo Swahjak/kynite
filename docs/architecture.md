@@ -673,9 +673,21 @@ revocable/expiring with `lastUsedAt`/`useCount` visible to parents. Served with
 | Pair/revoke devices | ✓ | ✓ | — | — | — | — |
 | Create/revoke share links | ✓ | ✓ | — | — | — | — |
 | Start/stop timers | ✓ | ✓ | ✓ | ✓ | — | ✓ |
+| Edit own avatar/colour (`member:self`) | own | own | own | — | — | — |
 
 "Remove stars" has no ✓ in any column — that column exists to make the invariant
 visible, and is enforced by the `CHECK (amount > 0)` constraint, not by policy.
+
+`member:self` (M14, PRD FR26) is graded `own` for every account-backed role
+rather than `✓`/`—`, because it is the one capability in this table that is
+never a blanket grant: it resolves against `ownerMemberId` in
+`modules/family/authorize.ts`'s `decide()` and can only ever act on the
+caller's own row. It exists because M14's invite profile step — the second
+parent picking their own avatar and colour — has to work under the `adult`
+column, where "Manage members & roles" is correctly `—`; without a narrow
+capability for "your own presentation" that step would have to either
+escalate the invitee to `member:manage` or skip the chokepoint, and both are
+worse than the extra row.
 
 Enforcement lives in one place: `modules/family/authorize.ts` exports
 `can(principal, action, resource)`, called at the top of every Server Action.

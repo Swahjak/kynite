@@ -1,0 +1,1 @@
+ALTER TABLE "member_invite" ADD COLUMN "profile_completed_at" timestamp with time zone;

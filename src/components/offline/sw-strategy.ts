@@ -88,6 +88,27 @@ export function isShareUrl(url: URL | string): boolean {
 }
 
 /**
+ * A second-parent invite URL: `/{locale}/invite/*` (PRD FR26, milestone M14).
+ *
+ * Mirrors `isShareUrl()`'s shape for the same reason it exists: the same
+ * worker serves every surface, and only the URL tells it which one it is
+ * looking at. This one is worse than the share case — the raw token in the
+ * path is not a read-only credential, it is *the* thing standing between a
+ * stranger and a login attached to a real member row (`@/lib/invite-token`).
+ * `strategyFor()` routes it to `'network-only'` before it ever reaches the
+ * page branch below, for the identical reason `isShareUrl()` does: a
+ * `Cache-Control: no-store` response header does not bind the Cache Storage
+ * API, so a revoked or claimed invite would otherwise keep answering from
+ * Cache Storage indefinitely.
+ */
+export function isInviteUrl(url: URL | string): boolean {
+  const path = pathOf(url);
+  return LOCALES.some(
+    (locale) => path === `/${locale}/invite` || path.startsWith(`/${locale}/invite/`)
+  );
+}
+
+/**
  * Immutable build output and static art. §6: fonts, icons and celebration
  * assets are `CacheFirst` — "celebrations must never wait on a network".
  *
@@ -158,6 +179,10 @@ export function strategyFor(input: {
   // cache. A revoked link would otherwise keep answering from a caregiver's
   // own device indefinitely.
   if (isShareUrl(input.url)) return 'network-only';
+  // Same rationale, same place in the branch order: an invite URL carries an
+  // account-granting token in the path (see `isInviteUrl()`), so it must never
+  // fall into `kynite-app-pages-v1` either.
+  if (isInviteUrl(input.url)) return 'network-only';
   if (isImmutableAsset(input.url)) return 'assets';
   if (isDataRequest(input.url)) return 'data';
 

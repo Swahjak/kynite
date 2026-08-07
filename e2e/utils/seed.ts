@@ -194,6 +194,51 @@ export async function ownerMemberOf(client: Client, familyId: string): Promise<S
   return { id: rows[0].id, displayName: rows[0].display_name, color: rows[0].color };
 }
 
+export type SeededMemberRow = { id: string; displayName: string; userId: string | null };
+
+/**
+ * Look a member up by name (M14).
+ *
+ * The invite spec cannot know the second parent's member id up front: the owner
+ * creates them through the roster UI, which is the point — the flow under test
+ * is "claim a row somebody else made". Reading it back by display name is how
+ * the spec gets a handle on the row it then asserts about.
+ */
+export async function memberByDisplayName(
+  client: Client,
+  familyId: string,
+  displayName: string
+): Promise<SeededMemberRow | null> {
+  const { rows } = await client.query<{ id: string; display_name: string; user_id: string | null }>(
+    `select id, display_name, user_id from member where family_id = $1 and display_name = $2 limit 1`,
+    [familyId, displayName]
+  );
+
+  const row = rows[0];
+  return row ? { id: row.id, displayName: row.display_name, userId: row.user_id } : null;
+}
+
+/** How far out the invite for `memberId` expires — used to age one out. */
+export async function expireInvite(client: Client, memberId: string): Promise<void> {
+  await client.query(
+    `update member_invite set expires_at = now() - interval '1 minute'
+     where member_id = $1 and claimed_at is null and revoked_at is null`,
+    [memberId]
+  );
+}
+
+/**
+ * Set a member's avatar/colour directly, standing in for an owner who filled
+ * these in before (or while) an invite for that member is outstanding (F10).
+ *
+ * The invite flow's step 2 must be shown regardless — see the
+ * `profileCompletedAt` column in `modules/family/schema.ts` and the e2e
+ * assertion in `family/invite.spec.ts` this exists for.
+ */
+export async function presetAvatar(client: Client, memberId: string, avatarUrl: string) {
+  await client.query(`update member set avatar_url = $2 where id = $1`, [memberId, avatarUrl]);
+}
+
 /** `pending_sync_at` as the push path would set it — for asserting the pip. */
 export async function markPendingSync(client: Client, eventId: string): Promise<void> {
   await client.query(`update event set pending_sync_at = now() where id = $1`, [eventId]);

@@ -64,6 +64,20 @@
       "when": 1786072794473,
       "tag": "0008_round_starbolt",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1786083012653,
+      "tag": "0009_little_mordo",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1786087640386,
+      "tag": "0010_wise_starhawk",
+      "breakpoints": true
     }
   ]
 }

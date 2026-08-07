@@ -16,6 +16,7 @@ export const CAPABILITIES = [
   'event:write',
   'google:link',
   'member:manage',
+  'member:self',
   'routine:write',
   'completion:write',
   'stars:award',
@@ -110,6 +111,31 @@ const MATRIX: Record<Capability, Record<Column, Grade>> = {
     owner: 'allow',
     adult: 'deny',
     child: 'deny',
+    contributor: 'deny',
+    viewer: 'deny',
+    device: 'deny',
+  },
+  /**
+   * Edit *your own* presentation — avatar and colour, nothing else.
+   *
+   * Not a row in §7's printed matrix, and that is a deliberate, narrow addition
+   * rather than an oversight (M14; carry it into the doc). FR26 requires the
+   * second parent's second interaction to be picking their own avatar and
+   * colour, and at that moment they hold the `adult` column, where
+   * `member:manage` is `deny` — correctly so, since managing members and roles
+   * is owner-only. Without this cell the zero-data-entry flow would have to
+   * either escalate the invitee or skip the chokepoint, and both are worse than
+   * naming the capability.
+   *
+   * Graded `own` for every account-backed role, so `decide()` resolves it
+   * against `ownerMemberId` and it can never reach another person's row. The
+   * kiosk is `deny`: a wall tablet is physically unauthenticated (§7), and it
+   * has no "own" member to be in the first place.
+   */
+  'member:self': {
+    owner: 'own',
+    adult: 'own',
+    child: 'own',
     contributor: 'deny',
     viewer: 'deny',
     device: 'deny',

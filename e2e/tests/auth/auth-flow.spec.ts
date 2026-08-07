@@ -105,6 +105,33 @@ test.describe('sign-in', () => {
   });
 });
 
+test.describe('signed-in redirect', () => {
+  // F8: `sign-in/page.tsx` and `sign-up/page.tsx` each bounce a caller who
+  // already has a scoped session — that rule lives on the two forms
+  // themselves rather than on `(auth)/layout.tsx` (see that file's comment:
+  // `invite/[token]` continues past its own accept step with a freshly issued
+  // session, so a layout-level guard would eject the second parent from the
+  // middle of the flow it just signed them into). This is the coverage for
+  // the two forms where the rule *does* apply — previously asserted nowhere.
+  test('a signed-in user visiting /sign-in is sent to /family, not the form', async ({ page }) => {
+    await signUp(page, `Familie Redirect ${Date.now()}`);
+    await expect(page).toHaveURL(/\/nl\/family$/);
+
+    await page.goto('/nl/sign-in');
+
+    await expect(page).toHaveURL(/\/nl\/family$/);
+  });
+
+  test('a signed-in user visiting /sign-up is sent to /family, not the form', async ({ page }) => {
+    await signUp(page, `Familie Redirect2 ${Date.now()}`);
+    await expect(page).toHaveURL(/\/nl\/family$/);
+
+    await page.goto('/nl/sign-up');
+
+    await expect(page).toHaveURL(/\/nl\/family$/);
+  });
+});
+
 test.describe('app guard', () => {
   test('sends an unauthenticated visitor to sign-in', async ({ page }) => {
     await page.goto('/nl/family');

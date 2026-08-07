@@ -104,7 +104,66 @@
       "invalidInput": "Please check the details you entered.",
       "memberNotFound": "That family member no longer exists.",
       "singleOwner": "A family has exactly one owner.",
-      "cannotRemoveOwner": "The owner cannot be removed."
+      "cannotRemoveOwner": "The owner cannot be removed.",
+      "inviteExists": "There is already an open invite for this family member.",
+      "memberNotInvitable": "Only an adult without a login can be invited.",
+      "inviteNotFound": "This invite no longer exists.",
+      "inviteFailed": "Sending the invite failed. Please try again."
+    },
+    "invite": {
+      "accept": {
+        "title": "Welcome to {family}",
+        "description": "Your place in this family is already set, {name}. One tap and you are in.",
+        "submit": "Join"
+      },
+      "profile": {
+        "title": "Pick your face, {name}",
+        "description": "Choose one. Your colour comes with it and is yours everywhere in the family."
+      },
+      "google": {
+        "title": "Connect your calendar",
+        "description": "Your own appointments join the board, {name} — everyone sees them straight away.",
+        "submit": "Connect Google",
+        "notConfigured": "Google is not configured on this installation yet. Ask the family owner to switch it on."
+      },
+      "gone": {
+        "claimed": {
+          "title": "This invite has already been used",
+          "description": "You are already part of the family. Sign in to carry on."
+        },
+        "revoked": {
+          "title": "This invite was withdrawn",
+          "description": "The family owner stopped this link. Ask them for a new one."
+        },
+        "expired": {
+          "title": "This invite has expired",
+          "description": "An invite stays valid for seven days. Ask for a fresh link."
+        },
+        "signIn": "Go to sign in"
+      },
+      "manage": {
+        "open": "Invite",
+        "title": "Invite {name}",
+        "description": "You fill in the email address — {name} types nothing at all. Send them the link yourself.",
+        "emailLabel": "Email address",
+        "emailHint": "The account is created under this address when the invite is accepted.",
+        "submit": "Create invite link",
+        "linkLabel": "Invite link",
+        "expires": "Valid until {date}. You will only see this link once.",
+        "pendingUntil": "Invite open until {date}",
+        "revoke": "Withdraw",
+        "revokeConfirm": "Are you sure?"
+      },
+      "errors": {
+        "forbidden": "You are not allowed to do this.",
+        "invalidInput": "Something went wrong with this invite.",
+        "inviteInvalid": "This invite link is not valid.",
+        "invite_claimed": "This invite has already been used.",
+        "invite_revoked": "This invite was withdrawn.",
+        "invite_expired": "This invite has expired.",
+        "inviteEmailTaken": "An account with this email address already exists. Ask for an invite to a different address.",
+        "inviteFailed": "Signing you in did not work. Try opening the link again."
+      }
     }
   },
   "google": {

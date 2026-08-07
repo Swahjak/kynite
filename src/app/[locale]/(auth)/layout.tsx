@@ -1,25 +1,19 @@
-import { redirect } from '@/i18n/navigation';
-import { getPrincipal } from '@/modules/family';
-
 /** Session-dependent: never prerendered, so `next build` needs no secrets. */
 export const dynamic = 'force-dynamic';
 
 /**
- * Sign-in / sign-up shell. Anyone who already has a scoped session is bounced
- * into the app: an authenticated user has no business on these screens.
+ * Shell for the account screens — sign-in, sign-up, and M14's invite flow.
+ *
+ * Deliberately *not* a guard. The "you already have a session, go to the app"
+ * redirect lives on the sign-in and sign-up pages themselves, because it is
+ * true of those two screens and false of the third: `invite/[token]` continues
+ * past its own accept step with a freshly issued session, and a layout that
+ * bounced every principal would eject the second parent from the middle of the
+ * flow it just signed them into. Putting the rule where it applies is also the
+ * honest shape — it was never a property of "being unauthenticated screens", it
+ * was a property of those two forms.
  */
-export default async function AuthLayout({
-  children,
-  params,
-}: {
-  children: React.ReactNode;
-  params: Promise<{ locale: string }>;
-}) {
-  const { locale } = await params;
-  const principal = await getPrincipal();
-
-  if (principal) redirect({ href: '/family', locale });
-
+export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <main className="flex min-h-dvh flex-col items-center justify-center gap-6 p-6">
       {children}

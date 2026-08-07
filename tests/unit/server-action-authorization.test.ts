@@ -29,6 +29,13 @@ const PUBLIC_ACTIONS = [
   // it one (10-minute TTL, single use, one family) is enforced by the claiming
   // UPDATE in `modules/devices/queries.ts`.
   'src/modules/devices/actions.ts::pairDeviceAction',
+  // M14. Same class again, and the strictest case of it: accepting a
+  // second-parent invite *creates* the principal it would otherwise be checked
+  // against. The 32-byte token is the authorization, and every property that
+  // makes it one — single use, unexpired, unrevoked, pointing at a member row
+  // that still has no login — is the WHERE clause of the claiming UPDATE in
+  // `modules/family/invites.ts`, so there is no check here to race against.
+  'src/modules/family/actions.ts::acceptInviteAction',
 ];
 
 const AUTHORIZATION_CALLS = new Set(['can', 'assertCan', 'decide']);
@@ -229,7 +236,9 @@ describe('every Server Action authorizes first', () => {
     // green even if the auditor silently stopped seeing an entire file, which
     // is exactly the failure mode this suite exists to catch. Counted by hand
     // across the four `'use server'` modules at time of writing:
-    // src/modules/google/actions.ts (3) + src/modules/family/actions.ts (6) +
+    // src/modules/google/actions.ts (3) + src/modules/family/actions.ts (10:
+    // the six above plus M14's createInvite + revokeInvite + acceptInvite +
+    // chooseProfile, the three-interaction second-parent flow) +
     // src/modules/calendar/actions.ts (4) + src/modules/routines/actions.ts (6:
     // create/update/delete routine + setRoutineReward + completeStep +
     // undoCompletion, added in M10 so `completion.undone` has a publisher) +
@@ -240,7 +249,7 @@ describe('every Server Action authorizes first', () => {
     // createPairingCode + pairDevice + revokeDevice, plus cancelPairingCode
     // added in the brute-force/lockout review pass) +
     // src/modules/sharing/actions.ts (2, added in M13: createShareLink +
-    // revokeShareLink) = 35. Self-unpair
+    // revokeShareLink) = 39. Self-unpair
     // (`POST /api/devices/session/unpair`) is deliberately *not* here: it is
     // a route handler, not a `'use server'` module, so this auditor never
     // sees it — see that file's doc comment for why it needs no `assertCan`.
@@ -252,7 +261,7 @@ describe('every Server Action authorizes first', () => {
     // rather than at each entry point.
     // Adding or removing a Server Action must bump this number deliberately —
     // that is the point.
-    expect(findings.length).toBe(35);
+    expect(findings.length).toBe(39);
   });
 
   it('reports no unauthorized action anywhere in src/', () => {

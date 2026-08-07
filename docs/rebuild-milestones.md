@@ -235,7 +235,7 @@ This is the single source of progress truth for the Kynite greenfield rebuild. E
 
 ## M14 — Second-parent onboarding
 
-- [ ] Status
+- [x] Status
 - **Scope:** Deliver the zero-data-entry second-parent flow (FR26): the owner sends an invite, the invitee opens `(auth)/invite/[token]`, claims an existing unclaimed `member` row by picking an avatar and color, links their own Google account, and immediately sees their calendar merged into the family view. No manual entry is required anywhere in the path.
 - **Acceptance criteria:**
   - Route `(auth)/invite/[token]` exists; invites are single-use, expiring and revocable.
@@ -245,7 +245,7 @@ This is the single source of progress truth for the Kynite greenfield rebuild. E
   - The second parent has `adult` role capabilities per the permission matrix (own calendars, own Google links) without owner-only rights.
   - The invite link cannot be replayed after acceptance; a second use returns a friendly already-claimed state.
   - Gate green: `pnpm typecheck && pnpm lint && pnpm test:run`.
-- **Review verdict:** _pending_
+- **Review verdict:** _approved after fixes_ — Opus review 2026-08-07: all seven criteria met and mutation-verified (claim predicate unraceable — single-use/expiry/revocation one SQL predicate; anti-escalation structural via FOR UPDATE role check; claim-not-create proven by roster capture; no-typing assertion is a real typeable-element count over all three screens; concurrent claim race exactly-one-wins); zero-typing design sound (owner types email once, server-generated 32-byte password nobody sees, sign-up→claim→sign-in with compensating delete, session fixation closed by explicit pre-signOut); returnTo closed-enum in signed OAuth state, backward compatible. Blockers fixed: (1) SW cached invite URLs (raw account-granting token) into app-pages — isInviteUrl → network-only + tests (M13 B-1 class, third recurrence-proofed); (2) invite flake — instrumentation exposed a real bug: better-auth with autoSignIn:false returns synthetic success for duplicate email, making inviteEmailTaken dead code and duplicates crash on FK violation; fixed by verifying persisted user id, plus logging at all three failure sites and idempotent sign-in retry. Also fixed: invite tree noindex/no-referrer/no-store headers (no 405 — actions POST by design), listInvites projection excludes tokenHash, mintInvite catch narrowed by constraint name, nativeButton warnings (3 components), signed-in redirect e2e coverage (was mutation-proven untested), profile step survives owner-preset avatar (profileCompletedAt, migration 0010), inviteEmailTaken integration test, completion-perf isolated into workers:1 chromium-perf project, hub ambient hydration flake root-caused (test overwrote clock pre-hydration-commit; now waits for committed HH:MM). Architecture §7 amended: member:self row (own/own/own/deny/deny/deny). Post-fix gates: 978/978 with DB, 162/162 Playwright ×2 zero flakes. Carry-forwards: no password-recovery path until mailer exists (spent invite + unknown password + failed sign-in = stranded; owner-side detach-login wanted); inviteEmailTaken regex fragile on better-auth upgrade (now tested); google-merge seed fidelity drift risk documented; device-principal invite ending unspecified.
 
 ## M15 — i18n nl/en
 
@@ -308,4 +308,5 @@ This is the single source of progress truth for the Kynite greenfield rebuild. E
   - A real hub tablet pairs against production and completes a routine step with visible confetti.
   - Nightly `pg_dump` to offsite storage is confirmed running; a restore is smoke-tested once.
   - Gate green on the deployed commit: `pnpm typecheck && pnpm lint && pnpm test:run`.
+- **User decision (2026-08-07):** nothing currently in production use — deploy directly, skip the ngrok-based manual Google link check; verify Google OAuth link + webhook against the real production URL (`BETTER_AUTH_URL`) after deploy instead. Migration backward-compat criterion relaxed accordingly (no old process worth protecting; still verify the release script runs clean).
 - **Review verdict:** _pending_

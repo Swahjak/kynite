@@ -59,8 +59,16 @@ export function GoogleAccountsPanel({
           // response is a cross-origin redirect to Google's consent screen, so
           // client-side navigation would be wrong (and `no-html-link-for-pages`
           // is checking for *page* routes, which this is not).
-          // eslint-disable-next-line @next/next/no-html-link-for-pages
-          <Button render={<a href="/api/google/oauth/start" />} size="hub" className="self-start">
+          <Button
+            // eslint-disable-next-line @next/next/no-html-link-for-pages
+            render={<a href="/api/google/oauth/start" />}
+            // Renders as an `<a>`, not a native `<button>` — without this,
+            // Base UI's `Button` warns about the native-button
+            // keyboard/disabled assumptions it makes by default (F7).
+            nativeButton={false}
+            size="hub"
+            className="self-start"
+          >
             {t('link.action')}
           </Button>
         ) : (

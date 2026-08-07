@@ -5,6 +5,7 @@ import {
   isDataRequest,
   isHubUrl,
   isImmutableAsset,
+  isInviteUrl,
   isNeverCached,
   isShareUrl,
   strategyFor,
@@ -94,6 +95,34 @@ describe('service worker strategy', () => {
       expect(page('/nl/s/2XZ1qsSPBLc0y2i8s8OXY0N2gZ2mLcQOgVaVsGxOaWo')).toBe('network-only');
       expect(page('/en/s/2XZ1qsSPBLc0y2i8s8OXY0N2gZ2mLcQOgVaVsGxOaWo')).toBe('network-only');
       expect(page('/nl/s/2XZ1qsSPBLc0y2i8s8OXY0N2gZ2mLcQOgVaVsGxOaWo')).not.toBe('app-pages');
+    });
+  });
+
+  describe('invite matching', () => {
+    it('recognises an invite URL in every locale and at every depth', () => {
+      expect(isInviteUrl('/nl/invite/2XZ1qsSPBLc0y2i8s8OXY0N2gZ2mLcQOgVaVsGxOaWo')).toBe(true);
+      expect(isInviteUrl('/en/invite/2XZ1qsSPBLc0y2i8s8OXY0N2gZ2mLcQOgVaVsGxOaWo')).toBe(true);
+      expect(isInviteUrl('/nl/invite')).toBe(true);
+      expect(isInviteUrl(new URL('https://kynite.test/nl/invite/token'))).toBe(true);
+    });
+
+    it('does not treat a route that merely starts with the same letters as an invite URL', () => {
+      expect(isInviteUrl('/nl/invited')).toBe(false);
+      expect(isInviteUrl('/nl/sign-in')).toBe(false);
+      expect(isInviteUrl('/invite/token')).toBe(false);
+    });
+
+    it('routes an invite page to network-only, never the app-pages bucket — F1', () => {
+      // Same finding as the share case: an invite document must never land in
+      // `kynite-app-pages-v1`, because a `Cache-Control: no-store` response
+      // header does not bind Cache Storage. Asserted against `page()`, not
+      // `isInviteUrl()` directly, so it also proves the branch order in
+      // `strategyFor()` — an invite URL that fell through to the page branch
+      // below would otherwise silently resolve to `'app-pages'` and this test
+      // is what would catch it.
+      expect(page('/nl/invite/2XZ1qsSPBLc0y2i8s8OXY0N2gZ2mLcQOgVaVsGxOaWo')).toBe('network-only');
+      expect(page('/en/invite/2XZ1qsSPBLc0y2i8s8OXY0N2gZ2mLcQOgVaVsGxOaWo')).toBe('network-only');
+      expect(page('/nl/invite/2XZ1qsSPBLc0y2i8s8OXY0N2gZ2mLcQOgVaVsGxOaWo')).not.toBe('app-pages');
     });
   });
 

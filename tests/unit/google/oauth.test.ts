@@ -83,8 +83,16 @@ describe('signed OAuth state', () => {
 
   it('expires', () => {
     const now = Date.now();
-    const { state, nonce } = createOAuthState(FAMILY, MEMBER, now);
+    const { state, nonce } = createOAuthState(FAMILY, MEMBER, { now });
     expect(verifyOAuthState(state, nonce, now + 16 * 60 * 1000)).toBeNull();
+  });
+
+  it('round-trips the return target, and omits it when unset (M14)', () => {
+    const plain = createOAuthState(FAMILY, MEMBER);
+    expect(verifyOAuthState(plain.state, plain.nonce)?.returnTo).toBeUndefined();
+
+    const onboarding = createOAuthState(FAMILY, MEMBER, { returnTo: 'onboarding' });
+    expect(verifyOAuthState(onboarding.state, onboarding.nonce)?.returnTo).toBe('onboarding');
   });
 
   it('rejects garbage', () => {

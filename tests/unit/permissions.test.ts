@@ -46,6 +46,10 @@ const EXPECTED: Record<Capability, [Grade, Grade, Grade, Grade, Grade, Grade]> =
   'event:write': ['allow', 'allow', 'deny', 'deny', 'deny', 'deny'],
   'google:link': ['allow', 'own', 'deny', 'deny', 'deny', 'deny'],
   'member:manage': ['allow', 'deny', 'deny', 'deny', 'deny', 'deny'],
+  // M14 addition, not in §7's printed table: editing *your own* avatar/colour.
+  // FR26's second interaction happens while the invitee holds the `adult`
+  // column, where `member:manage` is (correctly) `deny`.
+  'member:self': ['own', 'own', 'own', 'deny', 'deny', 'deny'],
   'routine:write': ['allow', 'allow', 'deny', 'deny', 'deny', 'deny'],
   'completion:write': ['allow', 'allow', 'allow', 'scoped', 'deny', 'allow'],
   'stars:award': ['allow', 'allow', 'deny', 'deny', 'deny', 'deny'],
