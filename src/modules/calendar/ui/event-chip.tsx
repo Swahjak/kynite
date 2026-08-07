@@ -7,6 +7,16 @@ import type { CalendarEvent } from '../queries';
 import { CATEGORY_CLASSES, EVENT_TYPE_ICONS } from './tokens';
 
 /**
+ * Mirrors `UNTITLED` in `modules/google/domain/mapping.ts` — not imported
+ * from there, deliberately: that slice is the Google sync integration, and
+ * this calendar-UI component has no business depending on it for anything
+ * but a string constant. Both sides are covered by
+ * `tests/unit/i18n/hardcoded-strings.test.ts`-adjacent unit coverage on the
+ * mapping module, so a drift between the two literals fails loudly.
+ */
+const UNTITLED_SENTINEL = '(no title)';
+
+/**
  * One event, as it appears in every view. The chip is the single place that
  * decides how an event *reads*, so a busy-only block, a pending-sync pip and a
  * recurring instance look the same in the day grid as in the agenda list.
@@ -42,7 +52,19 @@ export function EventChip({
 
   // A redacted event has no title to show — it is a shape in the day, which is
   // exactly what free/busy means (§7 `calendar:view_private` → `busy-only`).
-  const title = event.busyOnly ? t('busy') : event.title;
+  //
+  // A synced Google event with no summary persists the `UNTITLED` sentinel
+  // (`modules/google/domain/mapping.ts`) into `event.title` — deliberately:
+  // the row needs *a* string, and re-deriving "was this untitled?" from an
+  // empty string at read time would be one more place to get it wrong. The
+  // sentinel is translated here, at the UI boundary, the same way `busy-only`
+  // is — not stored pre-translated, which would hardcode English into the
+  // database for every locale a family ever opens the event in.
+  const title = event.busyOnly
+    ? t('busy')
+    : event.title === UNTITLED_SENTINEL
+      ? t('untitled')
+      : event.title;
 
   if (variant === 'dot') {
     return (

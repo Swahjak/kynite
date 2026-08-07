@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { NextIntlClientProvider } from 'next-intl';
 import {
   DARK_FROM_HOUR,
   DARK_UNTIL_HOUR,
@@ -7,7 +8,7 @@ import {
 } from '@/components/hub';
 import { HubReloadController, ServiceWorkerRegistrar } from '@/components/offline';
 import { RealtimeProvider } from '@/components/realtime';
-import { getPrincipal } from '@/modules/family';
+import { getFamily, getPrincipal } from '@/modules/family';
 import { getDevice } from '@/modules/devices';
 import { ChimeSettingsPanel } from '@/modules/timers';
 
@@ -76,11 +77,19 @@ export default async function HubLayout({
   const paired =
     principal?.kind === 'device' ? await getDevice(principal.familyId, principal.deviceId) : null;
 
+  // BLOCKING 2: same rule as `(app)/layout.tsx` — the wall clock and every
+  // event chip on the board must read in the family's zone, not the server's.
+  // The pair screen has no device yet and falls back to `request.ts`'s
+  // default rather than a lookup with no family to key it by.
+  const family = principal?.kind === 'device' ? await getFamily(principal.familyId) : null;
+  const timeZone = family?.timezone ?? 'Europe/Amsterdam';
+
   return (
     // One stream for the whole wall display (§4): the board, the timers and the
     // star chart share a connection instead of opening one each.
-    <RealtimeProvider>
-      {/* The 6-foot scale and the theme are applied before first paint, not in
+    <NextIntlClientProvider timeZone={timeZone}>
+      <RealtimeProvider>
+        {/* The 6-foot scale and the theme are applied before first paint, not in
           an effect. Both hang off the *document* element (globals.css keys the
           kiosk type scale on `[data-surface='hub']`, and the design system's
           dark variant on `.dark`), and a wall display that painted the parent
@@ -89,21 +98,22 @@ export default async function HubLayout({
           worker reload. `useHubTheme` takes over from here and keeps both in
           sync; this only has to be right for the first frame, so it reads the
           same localStorage key and the same media query and nothing else. */}
-      <script dangerouslySetInnerHTML={{ __html: PRE_PAINT_THEME }} />
-      {/* B-1: registered per-surface now, not from the root `[locale]`
+        <script dangerouslySetInnerHTML={{ __html: PRE_PAINT_THEME }} />
+        {/* B-1: registered per-surface now, not from the root `[locale]`
           layout — see `(app)/layout.tsx` for why. */}
-      <ServiceWorkerRegistrar />
-      <HubReloadController />
-      {/* The chime control is rendered here, not inside the shell: the shell is
+        <ServiceWorkerRegistrar />
+        <HubReloadController />
+        {/* The chime control is rendered here, not inside the shell: the shell is
           a client component and `@/modules/timers` carries `server-only`
           queries (see `chime-settings-panel.tsx`). A server component may
           import the barrel, so the slice's own boundary stays intact. */}
-      <KioskShell
-        device={paired ? { id: paired.id, name: paired.name } : null}
-        chimeSettings={<ChimeSettingsPanel />}
-      >
-        {children}
-      </KioskShell>
-    </RealtimeProvider>
+        <KioskShell
+          device={paired ? { id: paired.id, name: paired.name } : null}
+          chimeSettings={<ChimeSettingsPanel />}
+        >
+          {children}
+        </KioskShell>
+      </RealtimeProvider>
+    </NextIntlClientProvider>
   );
 }

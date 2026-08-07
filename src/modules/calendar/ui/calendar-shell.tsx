@@ -116,9 +116,12 @@ export function CalendarShell({
           )}`;
 
   return (
-    <div data-slot="calendar-shell" className="flex min-h-0 flex-1 flex-col gap-3 p-3">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
+    <div
+      data-slot="calendar-shell"
+      className="flex min-h-0 min-w-0 flex-1 flex-col gap-3 overflow-x-hidden p-3"
+    >
+      <header className="flex min-w-0 flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2">
           <Button
             variant="ghost"
             size="icon-hub"
@@ -127,7 +130,10 @@ export function CalendarShell({
           >
             <Icon name="chevron_left" />
           </Button>
-          <h1 className="min-w-0 font-display text-h2 font-bold" data-testid="calendar-heading">
+          <h1
+            className="min-w-0 truncate font-display text-h2 font-bold"
+            data-testid="calendar-heading"
+          >
             {heading}
           </h1>
           <Button
@@ -140,7 +146,15 @@ export function CalendarShell({
           </Button>
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* NB-7 (M15): at 390px, four hub-sized tabs plus the "Event" button
+            add up to well past the viewport — a flex child's default
+            `min-width: auto` locks it to that full content width regardless
+            of `flex-wrap` on the parent, which was pushing the *page* wider
+            than the viewport instead of just this row. `min-w-0` lets the
+            group shrink again; `overflow-x-auto` on it (not on the page) is
+            where the leftover width goes — a horizontal scroll confined to
+            this control cluster, never the page. */}
+        <div className="flex min-w-0 max-w-full items-center gap-2 overflow-x-auto">
           <Tabs value={view} onValueChange={(value) => changeView(value as CalendarView)}>
             <TabsList size="hub" data-testid="view-switcher">
               {CALENDAR_VIEWS.map((candidate) => (
@@ -152,7 +166,7 @@ export function CalendarShell({
           </Tabs>
 
           {canWrite && (
-            <Button size="hub" onClick={openCreate} data-testid="event-create">
+            <Button size="hub" onClick={openCreate} data-testid="event-create" className="shrink-0">
               <Icon name="add" size="sm" inline="start" />
               {t('actions.add')}
             </Button>

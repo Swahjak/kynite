@@ -1,6 +1,9 @@
 {
   "common": {
-    "appName": "Kynite"
+    "appName": "Kynite",
+    "tagline": "Eén overzicht voor het hele gezin.",
+    "close": "Sluiten",
+    "closeToast": "Melding sluiten"
   },
   "nav": {
     "today": "Vandaag",
@@ -12,7 +15,9 @@
     "timers": "Timers",
     "notifications": "Meldingen",
     "devices": "Schermen",
-    "sharing": "Delen"
+    "sharing": "Delen",
+    "more": "Meer",
+    "mainNavigation": "Hoofdnavigatie"
   },
   "auth": {
     "signOut": "Uitloggen",
@@ -207,6 +212,7 @@
     "title": "Agenda",
     "todayTitle": "Vandaag",
     "busy": "Bezet",
+    "untitled": "(zonder titel)",
     "empty": "Geen afspraken in deze periode.",
     "freeDay": "Vrije dag",
     "everyone": "Iedereen",
@@ -760,6 +766,7 @@
       "dayEmpty": "Niets gepland.",
       "allDay": "Hele dag",
       "busy": "Bezet",
+      "untitled": "(zonder titel)",
       "stepDone": "Klaar",
       "stepTodo": "Nog te doen",
       "goneTitle": "Deze link werkt niet meer",

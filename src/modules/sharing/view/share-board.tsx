@@ -2,6 +2,12 @@ import { getFormatter, getTranslations } from 'next-intl/server';
 import { ShareStepButton } from './share-step-button';
 import type { ShareDay, ShareMember, ShareRoutine, ShareView } from './load';
 
+/** Mirrors `UNTITLED` in `modules/google/domain/mapping.ts` — see the same
+ *  constant in `modules/calendar/ui/event-chip.tsx` for why this is a literal
+ *  copy rather than an import across slice boundaries (doubly true here,
+ *  where the `(share)` tree may not import anything Google-sync-adjacent). */
+const UNTITLED_SENTINEL = '(no title)';
+
 /**
  * The caregiver's whole surface: a week of schedule, and today's routines.
  *
@@ -50,7 +56,7 @@ export async function ShareBoard({ token, view }: { token: string; view: ShareVi
         <section className="flex flex-col gap-4">
           <h2 className="font-display text-h3 font-semibold">{t('scheduleTitle')}</h2>
           {view.days.map((day) => (
-            <DayRow key={day.dateKey} day={day} members={view.members} />
+            <DayRow key={day.dateKey} day={day} members={view.members} timeZone={view.timeZone} />
           ))}
         </section>
       ) : null}
@@ -116,7 +122,17 @@ async function RoutineCard({
   );
 }
 
-async function DayRow({ day, members }: { day: ShareDay; members: ShareMember[] }) {
+async function DayRow({
+  day,
+  members,
+  timeZone,
+}: {
+  day: ShareDay;
+  members: ShareMember[];
+  /** The shared family's zone (`ShareView.timeZone`) — a caregiver's own
+   *  browser locale/zone must never leak into what "today" means here. */
+  timeZone: string;
+}) {
   const t = await getTranslations('sharing.view');
   const format = await getFormatter();
 
@@ -125,7 +141,7 @@ async function DayRow({ day, members }: { day: ShareDay; members: ShareMember[] 
   return (
     <div className="flex flex-col gap-2" data-testid="share-day" data-date={day.dateKey}>
       <h3 className="font-display text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-        {format.dateTime(date, { weekday: 'long', day: 'numeric', month: 'long' })}
+        {format.dateTime(date, { weekday: 'long', day: 'numeric', month: 'long', timeZone })}
       </h3>
 
       {day.events.length === 0 ? (
@@ -145,6 +161,7 @@ async function DayRow({ day, members }: { day: ShareDay; members: ShareMember[] 
                   : format.dateTime(new Date(item.startsAt), {
                       hour: '2-digit',
                       minute: '2-digit',
+                      timeZone,
                     })}
               </span>
               <span className="flex flex-col">
@@ -153,7 +170,11 @@ async function DayRow({ day, members }: { day: ShareDay; members: ShareMember[] 
                     than stored — the query withholds detail, the UI names the
                     withholding. */}
                 <span className={item.busyOnly ? 'italic text-muted-foreground' : undefined}>
-                  {item.busyOnly ? t('busy') : item.title}
+                  {item.busyOnly
+                    ? t('busy')
+                    : item.title === UNTITLED_SENTINEL
+                      ? t('untitled')
+                      : item.title}
                 </span>
                 {!item.busyOnly && item.location ? (
                   <span className="text-sm text-muted-foreground">{item.location}</span>

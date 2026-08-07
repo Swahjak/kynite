@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { NextIntlClientProvider } from 'next-intl';
 import { fontVariables } from '@/lib/fonts';
+import enMessages from '../../../messages/en.json';
 import '../globals.css';
 
 /**
@@ -23,7 +25,18 @@ export default function DevLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <html lang="en" className={fontVariables} suppressHydrationWarning>
-      <body className="min-h-dvh antialiased">{children}</body>
+      <body className="min-h-dvh antialiased">
+        {/* This tree is deliberately outside `[locale]` (no locale
+            negotiation, no `messages/{nl}.json`) — but the shared UI
+            primitives it showcases (`dialog.tsx`, `sheet.tsx`, `toast.tsx`)
+            now call `useTranslations('common')` for their close labels
+            (NON-BLOCKING 4a), which throws without *some* provider in scope.
+            English-only, matching this tree's own stated design, rather than
+            pulling in the full locale routing this layout exists to avoid. */}
+        <NextIntlClientProvider locale="en" messages={{ common: enMessages.common }}>
+          {children}
+        </NextIntlClientProvider>
+      </body>
     </html>
   );
 }

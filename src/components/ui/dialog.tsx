@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { Dialog as DialogPrimitive } from '@base-ui/react/dialog';
+import { useTranslations } from 'next-intl';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -48,6 +49,11 @@ function DialogContent({
   size?: 'default' | 'hub';
 }) {
   const closeButtonSize = size === 'hub' ? 'icon-hub' : 'icon-sm';
+  // A shared primitive, not a feature — every caller across every locale
+  // renders the same "Close" glyph, so the label is read here rather than
+  // threaded through every call site as a prop each of them would have to
+  // remember to localize.
+  const t = useTranslations('common');
 
   return (
     <DialogPortal>
@@ -70,7 +76,7 @@ function DialogContent({
             }
           >
             <XIcon />
-            <span className="sr-only">Close</span>
+            <span className="sr-only">{t('close')}</span>
           </DialogPrimitive.Close>
         )}
       </DialogPrimitive.Popup>
@@ -92,6 +98,8 @@ function DialogFooter({
 }: React.ComponentProps<'div'> & {
   showCloseButton?: boolean;
 }) {
+  const t = useTranslations('common');
+
   return (
     <div
       data-slot="dialog-footer"
@@ -103,7 +111,9 @@ function DialogFooter({
     >
       {children}
       {showCloseButton && (
-        <DialogPrimitive.Close render={<Button variant="outline" />}>Close</DialogPrimitive.Close>
+        <DialogPrimitive.Close render={<Button variant="outline" />}>
+          {t('close')}
+        </DialogPrimitive.Close>
       )}
     </div>
   );

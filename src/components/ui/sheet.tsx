@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { Dialog as SheetPrimitive } from '@base-ui/react/dialog';
+import { useTranslations } from 'next-intl';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -50,6 +51,9 @@ function SheetContent({
   size?: 'default' | 'hub';
 }) {
   const closeButtonSize = size === 'hub' ? 'icon-hub' : 'icon-sm';
+  // Same rationale as `DialogContent`: one shared primitive, so the label is
+  // read here rather than threaded through every call site.
+  const t = useTranslations('common');
 
   return (
     <SheetPortal>
@@ -73,7 +77,7 @@ function SheetContent({
             }
           >
             <XIcon />
-            <span className="sr-only">Close</span>
+            <span className="sr-only">{t('close')}</span>
           </SheetPrimitive.Close>
         )}
       </SheetPrimitive.Popup>

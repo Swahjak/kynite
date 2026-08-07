@@ -8,7 +8,12 @@ import '../globals.css';
 
 export const metadata: Metadata = {
   title: 'Kynite',
-  description: 'Family planning that actually gets done.',
+  // Static, not per-locale: this is a module-level `Metadata` object, not
+  // `generateMetadata()`, so there is no request to read a locale from (the
+  // same constraint `src/app/manifest.ts` documents). `nl` is
+  // `routing.defaultLocale` — the string below matches `manifest.ts`'s and
+  // `hub.webmanifest`'s Dutch description instead of contradicting them.
+  description: 'Gezinsplanning die daadwerkelijk gebeurt.',
   // The parent-app manifest (`src/app/manifest.ts`). The hub tree overrides
   // this with its own (§6: two installable surfaces, one service worker).
   manifest: '/manifest.webmanifest',

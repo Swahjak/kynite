@@ -249,7 +249,7 @@ This is the single source of progress truth for the Kynite greenfield rebuild. E
 
 ## M15 — i18n nl/en
 
-- [ ] Status
+- [x] Status
 - **Scope:** Complete next-intl coverage across every surface — marketing, auth, parent app, hub, share view, push notification bodies and email — with `nl` as default locale and `en` supported. All hub-facing copy is reviewed against FR30's neutral-board voice rule in both languages.
 - **Acceptance criteria:**
   - `messages/nl.json` and `messages/en.json` exist with identical key trees; a test fails on any missing or orphaned key in either file.
@@ -260,7 +260,7 @@ This is the single source of progress truth for the Kynite greenfield rebuild. E
   - Hub copy in both locales is neutral-board voice (no "mama says", no imperative attributed to a parent) — asserted by a copy-review checklist test over the hub message namespace.
   - Playwright visual snapshots for the hub board and routine screen in both locales.
   - Gate green: `pnpm typecheck && pnpm lint && pnpm test:run`.
-- **Review verdict:** _pending_
+- **Review verdict:** _approved after fixes_ — Opus review 2026-08-07: parity/hub-voice/locale-persistence tests real and mutation-verified; FR30 second-person allowance correctly grounded (research endorses direct praise; ban is on parent-attributed commands); family.locale push routing and weekStartsOn threading confirmed sound. Three blockers fixed: (1) TS2532 in visual spec broke typecheck/build (implementer claimed clean without rerunning) — narrowed typing, both gates verified; (2) family.timezone never reached rendered output (no timeZone on provider, 0/27 format.dateTime sites) — nested NextIntlClientProvider timeZone from family row in (app)+(hub) layouts, explicit timeZone in share view, Europe/Amsterdam SSR default, America/New_York proof test; (3) DST untested at window level — 4 new cases (23h/25h Amsterdam weeks, weekStartsOn=7 on transition day, New_York zone parameterization). Reviewer refuted "1 hardcoded string": six live ones fixed (dialog/sheet/toast English "Close" via common.close, UNTITLED sentinel translated at UI boundary, metadata/manifest descriptions localized nl); scan holes closed (ternaries/JSX expression containers, .ts files, src/components + share view in scope, test files excluded); mobile-nav a11y (nav.more + mainNavigation keys, segment-aware active state, 48px floor); calendar mobile overflow root-caused (flex min-width:auto) — 4 baselines now true 390px. Post-fix gates: 1006/1006 with DB, typecheck/build clean, visual+i18n+smoke 42, auth/calendar/design/family/google 40, hub+realtime 24/24 (orchestrator-run). Rewards/routines/sharing e2e chunk deferred to M17 full pass per lean-protocol change. Carry-forwards: DB suite load-flaky (2/5 full runs, different tests, green isolated); font-AA visual flake class at tolerance boundary; process note — full-suite e2e now runs once at M17 and M18, not per fix round.
 
 ## M16 — Settings
 

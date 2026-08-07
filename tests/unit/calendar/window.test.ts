@@ -9,7 +9,7 @@ import {
   shiftAnchor,
   viewWindow,
 } from '@/modules/calendar/domain/window';
-import { fromWall, toWall } from '@/modules/calendar/domain/zone';
+import { fromWall, MS_PER_DAY, MS_PER_HOUR, toWall } from '@/modules/calendar/domain/zone';
 
 const AMSTERDAM = 'Europe/Amsterdam';
 
@@ -64,6 +64,143 @@ describe('viewWindow', () => {
       const wall = toWall(viewWindow(view, options).from, AMSTERDAM);
       expect([wall.hour, wall.minute, wall.second]).toEqual([0, 0, 0]);
     }
+  });
+});
+
+describe('viewWindow — DST boundaries (BLOCKING 3)', () => {
+  const NEW_YORK = 'America/New_York';
+
+  it('a week spanning the Amsterdam spring-forward (2026-03-29, 23h day) stays 7 wall days', () => {
+    // Sunday 29 March 2026 is the night Amsterdam clocks jump 02:00 → 03:00.
+    // Anchoring mid-week keeps the assertion about the *week*, not about
+    // which day the anchor happens to land on.
+    const anchor = new Date('2026-03-25T10:00:00.000Z'); // Wednesday, well inside the week
+    const springOptions = { anchor, timeZone: AMSTERDAM, weekStartsOn: 1 };
+
+    const { from, to } = viewWindow('week', springOptions);
+    const days = daysOf('week', springOptions);
+
+    expect(localDay(from)).toBe('2026-03-23'); // Monday
+    expect(localDay(new Date(to.getTime() - 1))).toBe('2026-03-29'); // Sunday
+
+    // Every window still starts at local midnight, DST or not.
+    for (const day of days) {
+      const wall = toWall(day, AMSTERDAM);
+      expect([wall.hour, wall.minute, wall.second]).toEqual([0, 0, 0]);
+    }
+
+    // Day count is unaffected by the lost hour: 7 wall days, correct wall
+    // dates, even though the *elapsed* span is only 167 hours.
+    expect(days).toHaveLength(7);
+    expect(days.map((day) => localDay(day))).toEqual([
+      '2026-03-23',
+      '2026-03-24',
+      '2026-03-25',
+      '2026-03-26',
+      '2026-03-27',
+      '2026-03-28',
+      '2026-03-29',
+    ]);
+
+    // The instant span is 7×24h minus the lost hour — proof the window is
+    // built from wall-clock arithmetic, not from a naive 7×86 400 000 ms add.
+    const sevenDays = 7 * MS_PER_DAY;
+    expect(to.getTime() - from.getTime()).toBe(sevenDays - MS_PER_HOUR);
+  });
+
+  it('a week spanning the Amsterdam autumn-back (2026-10-25, 25h day) stays 7 wall days', () => {
+    // Sunday 25 October 2026: clocks fall back 03:00 → 02:00, a 25-hour day.
+    const anchor = new Date('2026-10-21T10:00:00.000Z'); // Wednesday
+    const autumnOptions = { anchor, timeZone: AMSTERDAM, weekStartsOn: 1 };
+
+    const { from, to } = viewWindow('week', autumnOptions);
+    const days = daysOf('week', autumnOptions);
+
+    expect(localDay(from)).toBe('2026-10-19'); // Monday
+    expect(localDay(new Date(to.getTime() - 1))).toBe('2026-10-25'); // Sunday
+    expect(days).toHaveLength(7);
+    expect(days.map((day) => localDay(day))).toEqual([
+      '2026-10-19',
+      '2026-10-20',
+      '2026-10-21',
+      '2026-10-22',
+      '2026-10-23',
+      '2026-10-24',
+      '2026-10-25',
+    ]);
+
+    for (const day of days) {
+      const wall = toWall(day, AMSTERDAM);
+      expect([wall.hour, wall.minute, wall.second]).toEqual([0, 0, 0]);
+    }
+
+    // The extra hour shows up as 7×24h *plus* one, the mirror of the spring
+    // case above.
+    const sevenDays = 7 * MS_PER_DAY;
+    expect(to.getTime() - from.getTime()).toBe(sevenDays + MS_PER_HOUR);
+  });
+
+  it('weekStartsOn = 7 (Sunday-first) still finds the right week through the spring-forward transition', () => {
+    // Anchor is the transition day itself, under a Sunday-first family. A
+    // Sunday-first week containing 2026-03-29 runs 2026-03-29 → 2026-04-04 —
+    // the transition day becomes the *first* day of the week rather than the
+    // last, which exercises `weekStart()`'s own DST arithmetic from the other
+    // side.
+    const anchor = new Date('2026-03-29T10:00:00.000Z');
+    const options7 = { anchor, timeZone: AMSTERDAM, weekStartsOn: 7 };
+
+    const { from, to } = viewWindow('week', options7);
+    const days = daysOf('week', options7);
+
+    expect(localDay(from)).toBe('2026-03-29');
+    expect(localDay(new Date(to.getTime() - 1))).toBe('2026-04-04');
+    expect(days).toHaveLength(7);
+    expect(days.map((day) => localDay(day))).toEqual([
+      '2026-03-29',
+      '2026-03-30',
+      '2026-03-31',
+      '2026-04-01',
+      '2026-04-02',
+      '2026-04-03',
+      '2026-04-04',
+    ]);
+
+    const sevenDays = 7 * MS_PER_DAY;
+    expect(to.getTime() - from.getTime()).toBe(sevenDays - MS_PER_HOUR);
+  });
+
+  it('a non-Amsterdam zone (America/New_York, 2026-03-08 spring-forward) parameterizes correctly', () => {
+    const localDayNY = (instant: Date): string =>
+      new Intl.DateTimeFormat('sv-SE', { timeZone: NEW_YORK }).format(instant);
+
+    // Sunday 8 March 2026: US clocks jump 02:00 → 03:00 — a different date
+    // than Amsterdam's, proof the DST table is read per-zone, not hardcoded.
+    const anchor = new Date('2026-03-04T10:00:00.000Z'); // Wednesday
+    const nyOptions = { anchor, timeZone: NEW_YORK, weekStartsOn: 1 };
+
+    const { from, to } = viewWindow('week', nyOptions);
+    const days = daysOf('week', nyOptions);
+
+    expect(localDayNY(from)).toBe('2026-03-02'); // Monday
+    expect(localDayNY(new Date(to.getTime() - 1))).toBe('2026-03-08'); // Sunday
+    expect(days).toHaveLength(7);
+    expect(days.map((day) => localDayNY(day))).toEqual([
+      '2026-03-02',
+      '2026-03-03',
+      '2026-03-04',
+      '2026-03-05',
+      '2026-03-06',
+      '2026-03-07',
+      '2026-03-08',
+    ]);
+
+    for (const day of days) {
+      const wall = toWall(day, NEW_YORK);
+      expect([wall.hour, wall.minute, wall.second]).toEqual([0, 0, 0]);
+    }
+
+    const sevenDays = 7 * MS_PER_DAY;
+    expect(to.getTime() - from.getTime()).toBe(sevenDays - MS_PER_HOUR);
   });
 });
 

@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { Toast as ToastPrimitive } from '@base-ui/react/toast';
+import { useTranslations } from 'next-intl';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -120,10 +121,12 @@ function ToastClose({
   render,
   ...props
 }: ToastPrimitive.Close.Props & { size?: 'default' | 'hub' }) {
+  const t = useTranslations('common');
+
   return (
     <ToastPrimitive.Close
       data-slot="toast-close"
-      aria-label="Close toast"
+      aria-label={t('closeToast')}
       render={render ?? <Button variant="ghost" size={size === 'hub' ? 'icon-hub' : 'icon-sm'} />}
       className={cn(
         "relative shrink-0 text-muted-foreground after:absolute after:-inset-2 after:content-[''] hover:text-foreground",

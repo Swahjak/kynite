@@ -123,23 +123,38 @@ async function seedBoard(familyId: string, scope: string) {
   });
 }
 
-for (const [name, viewport] of Object.entries(VIEWPORTS)) {
+type ViewportName = keyof typeof VIEWPORTS;
+
+for (const [name, viewport] of Object.entries(VIEWPORTS) as [
+  ViewportName,
+  (typeof VIEWPORTS)[ViewportName],
+][]) {
   test.describe(`routine visuals — ${name}`, () => {
     test.use({ viewport });
 
-    test('hub routine board', async ({ page, family }) => {
-      // M12: hub surfaces run behind a device principal, never an account
-      // session — this browser is the wall tablet for the rest of the test.
-      await pairHub(page, family.familyId);
+    for (const locale of ['nl', 'en'] as const) {
+      test(`hub routine board (${locale})`, async ({ page, family }) => {
+        // M12: hub surfaces run behind a device principal, never an account
+        // session — this browser is the wall tablet for the rest of the test.
+        await pairHub(page, family.familyId);
 
-      const { mila } = await seedBoard(family.familyId, name === 'tablet' ? 'a' : 'b');
+        // Fixed content is Dutch (seeded routine/step titles) regardless of
+        // locale — real families see their own titles either way, so the
+        // board chrome (headings, praise, countdown labels) is what M15's
+        // en baseline exists to pin, same as the hub ambient board above.
+        const scope = { tablet: { nl: 'a', en: 'e' }, mobile: { nl: 'b', en: 'f' } }[name][locale];
+        const { mila } = await seedBoard(family.familyId, scope);
 
-      await page.goto(`/nl/hub/routines/${mila.id}?date=${ANCHOR}&time=${ANCHOR_TIME}`);
-      await expect(page.getByTestId('routine-board')).toBeVisible();
-      await settlePage(page);
+        await page.goto(`/${locale}/hub/routines/${mila.id}?date=${ANCHOR}&time=${ANCHOR_TIME}`);
+        await expect(page.getByTestId('routine-board')).toBeVisible();
+        await settlePage(page);
 
-      await expect(page).toHaveScreenshot(`hub-routines-${name}.png`, { fullPage: true });
-    });
+        const suffix = locale === 'nl' ? '' : `-${locale}`;
+        await expect(page).toHaveScreenshot(`hub-routines-${name}${suffix}.png`, {
+          fullPage: true,
+        });
+      });
+    }
 
     test('routine builder', async ({ page, family }) => {
       await seedBoard(family.familyId, name === 'tablet' ? 'c' : 'd');

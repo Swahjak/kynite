@@ -2,7 +2,7 @@
   "id": "/nl/hub",
   "name": "Kynite Hub",
   "short_name": "Kynite Hub",
-  "description": "The family board for the wall display.",
+  "description": "Het gezinsbord voor het wandscherm.",
   "start_url": "/nl/hub",
   "scope": "/nl/hub",
   "display": "fullscreen",

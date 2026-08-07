@@ -1,6 +1,9 @@
 {
   "common": {
-    "appName": "Kynite"
+    "appName": "Kynite",
+    "tagline": "One view for the whole family.",
+    "close": "Close",
+    "closeToast": "Close toast"
   },
   "nav": {
     "today": "Today",
@@ -12,7 +15,9 @@
     "timers": "Timers",
     "notifications": "Notifications",
     "devices": "Screens",
-    "sharing": "Sharing"
+    "sharing": "Sharing",
+    "more": "More",
+    "mainNavigation": "Main navigation"
   },
   "auth": {
     "signOut": "Sign out",
@@ -207,6 +212,7 @@
     "title": "Calendar",
     "todayTitle": "Today",
     "busy": "Busy",
+    "untitled": "(no title)",
     "empty": "Nothing scheduled in this period.",
     "freeDay": "Free day",
     "everyone": "Everyone",
@@ -760,6 +766,7 @@
       "dayEmpty": "Nothing planned.",
       "allDay": "All day",
       "busy": "Busy",
+      "untitled": "(no title)",
       "stepDone": "Done",
       "stepTodo": "To do",
       "goneTitle": "This link no longer works",

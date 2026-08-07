@@ -22,7 +22,11 @@ export default function manifest(): MetadataRoute.Manifest {
     id: home,
     name: 'Kynite',
     short_name: 'Kynite',
-    description: 'Family planning that actually gets done.',
+    // Static, not per-locale (the manifest route has no request to read a
+    // locale from — see the class doc above). `nl` is `routing.defaultLocale`,
+    // the same reasoning `lang` below already follows, and the one this
+    // string now matches instead of contradicting it in English.
+    description: 'Gezinsplanning die daadwerkelijk gebeurt.',
     start_url: home,
     scope: '/',
     display: 'standalone',

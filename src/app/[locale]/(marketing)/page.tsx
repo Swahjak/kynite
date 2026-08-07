@@ -32,7 +32,7 @@ export default async function MarketingHomePage({
   return (
     <main className="flex min-h-dvh flex-col items-center justify-center gap-2 p-8">
       <h1 className="text-3xl font-semibold">{t('appName')}</h1>
-      <p className="text-sm opacity-70">Greenfield scaffold — M01.</p>
+      <p className="text-sm opacity-70">{t('tagline')}</p>
     </main>
   );
 }
