@@ -3,15 +3,57 @@ import {
   DEFAULT_TIME_OF_DAY,
   MAX_GRACE_DAYS,
   graceDaysOf,
+  isOneOff,
   isSimpleWeeklyRule,
+  isValidDateKey,
   isValidTimeOfDay,
+  oneOffDateOf,
   parseTimeOfDay,
   ruleForWeekdays,
   timeOfDayOf,
+  todayKeyIn,
   weekdaysOfRule,
 } from '@/modules/routines/domain/schedule';
 
 const ZONE = 'Europe/Amsterdam';
+
+describe('one-off schedules (M20)', () => {
+  it('names the single day it is due on', () => {
+    const schedule = { kind: 'once' as const, date: '2026-08-08', timeOfDay: '10:00' };
+    expect(isOneOff(schedule)).toBe(true);
+    expect(oneOffDateOf(schedule)).toBe('2026-08-08');
+  });
+
+  it('is not a one-off without the `once` kind, however dated', () => {
+    expect(oneOffDateOf({ rrule: 'FREQ=DAILY', date: '2026-08-08' })).toBeNull();
+    expect(isOneOff({ rrule: 'FREQ=DAILY' })).toBe(false);
+  });
+
+  it('rejects a date that is the right shape but not a day', () => {
+    // A regex would take this; the whole point of parsing it is that
+    // `fromWall` would otherwise roll it silently into March.
+    expect(isValidDateKey('2026-02-30')).toBe(false);
+    expect(isValidDateKey('2026-8-8')).toBe(false);
+    expect(isValidDateKey('zaterdag')).toBe(false);
+    expect(isValidDateKey(undefined)).toBe(false);
+    expect(isValidDateKey('2026-02-28')).toBe(true);
+  });
+
+  it('degrades a `once` schedule with no usable date to "not a one-off" — never a guess', () => {
+    expect(oneOffDateOf({ kind: 'once' })).toBeNull();
+    expect(oneOffDateOf({ kind: 'once', date: '2026-13-01' })).toBeNull();
+  });
+
+  it('reads "today" in the family zone, not in UTC', () => {
+    // 23:30 UTC on 7 August is already 8 August in Amsterdam, and still
+    // 7 August in New York. `toISOString().slice(0, 10)` would say the 7th to
+    // both of them.
+    const instant = new Date('2026-08-07T23:30:00Z');
+    expect(todayKeyIn('Europe/Amsterdam', instant)).toBe('2026-08-08');
+    expect(todayKeyIn('America/New_York', instant)).toBe('2026-08-07');
+    expect(todayKeyIn('Pacific/Kiritimati', instant)).toBe('2026-08-08');
+  });
+});
 
 describe('weekday picker ⇄ RRULE', () => {
   it('builds a weekly rule in RFC-5545 weekday order, not click order', () => {

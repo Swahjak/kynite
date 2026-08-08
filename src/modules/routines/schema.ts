@@ -26,14 +26,21 @@ export const completionSource = pgEnum('completion_source', ['hub', 'mobile', 'a
 
 export const starReason = pgEnum('star_reason', ['routine', 'bonus', 'manual', 'surprise']);
 
-/** The `schedule` jsonb: an RRULE plus the day's shape around it. */
+/** The `schedule` jsonb: an RRULE (or a single date) plus the day's shape around it. */
 export type RoutineSchedule = {
-  /** RFC-5545 RRULE, e.g. `FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR`. */
-  rrule: string;
+  /**
+   * RFC-5545 RRULE, e.g. `FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR`. Absent for a
+   * one-off, which recurs never — see `domain/schedule.ts`.
+   */
+  rrule?: string;
   /** Local wall-clock `HH:mm` the routine is due at. */
   timeOfDay?: string;
   /** Days after the due date a completion still counts (never a penalty). */
   graceDays?: number;
+  /** `'once'` = M20's one-off chore. Absent reads as `'recurring'`. */
+  kind?: 'recurring' | 'once';
+  /** The single family-timezone date key a one-off is due on (`YYYY-MM-DD`). */
+  date?: string;
 };
 
 /**
@@ -68,6 +75,21 @@ export const routine = pgTable(
     index('routine_family_id_idx').on(table.familyId),
     index('routine_family_owner_idx').on(table.familyId, table.ownerMemberId),
     check('routine_stars_per_completion_non_negative', sql`${table.starsPerCompletion} >= 0`),
+    // M20. A one-off is defined by the day it is due on, so a row that claims
+    // `kind: 'once'` without a well-formed date key is not a routine with a
+    // missing field — it is a routine nothing can ever surface. The domain
+    // already degrades it to "never due" (`oneOffDateOf`); this is the same
+    // rule one layer down, where a bad migration or a hand-written UPDATE
+    // cannot get past it. `date` on a recurring schedule is simply ignored.
+    //
+    // `coalesce` is load-bearing: a missing key yields SQL NULL, `NULL ~ …` is
+    // NULL, and a CHECK that evaluates to NULL *passes*. Without it the
+    // constraint would accept precisely the row it exists to reject.
+    check(
+      'routine_once_has_date',
+      sql`${table.schedule} ->> 'kind' is distinct from 'once'
+          or coalesce(${table.schedule} ->> 'date', '') ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'`
+    ),
   ]
 );
 

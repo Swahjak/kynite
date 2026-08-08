@@ -80,7 +80,9 @@ export default async function InvitePage({
   // "this is me." `profileCompletedAt` is written exactly once, by
   // `chooseProfileAction`, and only in response to that tap.
   if (!invite.profileCompletedAt) {
-    return <InviteProfileStep token={token} displayName={member.displayName} />;
+    return (
+      <InviteProfileStep token={token} displayName={member.displayName} color={member.color} />
+    );
   }
 
   const accounts = await listLinkedAccounts(invite.familyId);

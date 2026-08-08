@@ -220,4 +220,79 @@ describe.skipIf(!databaseUrl)('family action authorization (integration)', () =>
     const survivors = await db.select().from(member).where(eq(member.id, ours.parentId));
     expect(survivors).toHaveLength(1);
   });
+
+  /**
+   * Custom avatars (M20), through the running action and into the column.
+   *
+   * `tests/unit/avatar-svg.test.ts` proves what the validator answers.
+   * These prove the answer is *load-bearing*: that the accepted data URI
+   * survives the round trip byte-for-byte (`avatar_url` is `text`, so there is
+   * no length to truncate against and no migration to make), and that a
+   * rejected one leaves the row exactly as it was rather than being stored,
+   * stripped or blanked.
+   */
+  describe('custom avatar uploads', () => {
+    const svg =
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#D0C6AC"/></svg>';
+    const dataUri = `data:image/svg+xml;base64,${Buffer.from(svg, 'utf8').toString('base64')}`;
+
+    async function avatarOf(memberId: string): Promise<string | null> {
+      const [row] = await db.select().from(member).where(eq(member.id, memberId));
+      return row.avatarUrl;
+    }
+
+    it('stores a validated data URI unchanged, and swaps back to a preset', async () => {
+      signInAs(ours.familyId, ours.parentId);
+
+      const uploaded = await updateMemberAction(
+        { status: 'idle' },
+        form({ ...childInput, displayName: 'Bram', memberId: ours.childId, avatarUrl: dataUri })
+      );
+
+      expect(uploaded).toEqual({ status: 'idle' });
+      expect(await avatarOf(ours.childId)).toBe(dataUri);
+
+      // Going back to a built-in avatar is the same field taking a different
+      // value — there is no upload to clear first.
+      const preset = await updateMemberAction(
+        { status: 'idle' },
+        form({
+          ...childInput,
+          displayName: 'Bram',
+          memberId: ours.childId,
+          avatarUrl: '/avatars/fox.svg',
+        })
+      );
+
+      expect(preset).toEqual({ status: 'idle' });
+      expect(await avatarOf(ours.childId)).toBe('/avatars/fox.svg');
+    });
+
+    it.each([
+      [
+        'a script element',
+        `data:image/svg+xml;base64,${Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"><script>fetch("//evil.example")</script></svg>', 'utf8').toString('base64')}`,
+      ],
+      [
+        'an event handler',
+        `data:image/svg+xml;base64,${Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"></svg>', 'utf8').toString('base64')}`,
+      ],
+      [
+        'an oversized payload',
+        `data:image/svg+xml;base64,${Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg"><desc>${'a'.repeat(21 * 1024)}</desc></svg>`, 'utf8').toString('base64')}`,
+      ],
+      ['a bare http URL', 'https://evil.example/avatar.svg'],
+    ])('refuses %s and writes nothing', async (_label, avatarUrl) => {
+      signInAs(ours.familyId, ours.parentId);
+      const before = await avatarOf(ours.childId);
+
+      const result = await updateMemberAction(
+        { status: 'idle' },
+        form({ ...childInput, displayName: 'Bram', memberId: ours.childId, avatarUrl })
+      );
+
+      expect(result).toEqual({ status: 'error', error: 'invalidInput' });
+      expect(await avatarOf(ours.childId)).toBe(before);
+    });
+  });
 });

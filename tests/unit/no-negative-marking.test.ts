@@ -2,6 +2,8 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { openOccurrence, timingAt } from '@/modules/routines/domain/occurrence';
+import type { Schedule } from '@/modules/routines/domain/schedule';
 
 /**
  * Repo-wide enforcement of research §Decisions 1 and 3 and PRD FR11/FR13:
@@ -358,6 +360,63 @@ describe('no negative marking on any child-facing surface', () => {
 
     expect(isReachable(edges, ['hub/board.tsx'], 'builder/delete-button.tsx')).toBe(true);
     expect(isReachable(edges, ['hub/board.tsx'], 'builder/unrelated.tsx')).toBe(false);
+  });
+});
+
+/**
+ * FR11, at the level the scanner above cannot reach: the *state machine*.
+ *
+ * A regex can prove no component renders a red cross. It cannot prove that the
+ * domain never hands one a reason to. M20 adds the case where a penalty state
+ * would be most tempting to invent — a one-off chore whose day has come and
+ * gone — so the pin is extended to it explicitly: a lapsed one-off produces
+ * `state: 'none'` and no occurrence, which is the same nothing an ordinary
+ * routine's off-day produces. There is no "overdue", no "missed", no fourth
+ * state, and the union below is asserted closed so adding one is a test
+ * failure rather than a design drift.
+ */
+describe('the routine state machine has no penalty state (FR11)', () => {
+  const ZONE = 'Europe/Amsterdam';
+  const anchor = new Date('2026-01-05T00:00:00Z');
+  const input = (schedule: Schedule) => ({ schedule, anchor, timeZone: ZONE });
+
+  /** Every state the board can be in — the closed set, restated here on purpose. */
+  const ALLOWED = ['upcoming', 'due', 'grace', 'none'];
+
+  const GARAGE: Schedule = { kind: 'once', date: '2026-03-14', timeOfDay: '10:00', graceDays: 2 };
+
+  it('never leaves a one-off in anything but upcoming / due / grace / none', () => {
+    // Every day from a week before the chore to a week after it, hour by hour.
+    const seen = new Set<string>();
+    for (let hour = -7 * 24; hour <= 7 * 24; hour += 1) {
+      const now = new Date(Date.UTC(2026, 2, 14, 10 + hour));
+      const timing = timingAt(input(GARAGE), now);
+      expect(ALLOWED).toContain(timing.state);
+      seen.add(timing.state);
+    }
+
+    // And the walk actually exercised the interesting ones, so this is not a
+    // test that passes by never reaching the chore at all.
+    expect([...seen].sort()).toEqual(['due', 'grace', 'none', 'upcoming']);
+  });
+
+  it('turns a lapsed one-off into absence, not a mark', () => {
+    const lapsed = timingAt(input(GARAGE), new Date('2026-03-20T10:00:00Z'));
+
+    expect(lapsed).toEqual({ state: 'none', occurrence: null, minutesUntil: null });
+    // Nothing to complete either: there is no backlog to clear and no row that
+    // says the chore was not done.
+    expect(openOccurrence(input(GARAGE), new Date('2026-03-20T10:00:00Z'))).toBeNull();
+  });
+
+  it('calls a late-but-open one-off "grace" — the same neutral word a routine gets', () => {
+    const timing = timingAt(input(GARAGE), new Date('2026-03-16T10:00:00Z'));
+
+    expect(timing.state).toBe('grace');
+    expect(timing.occurrence?.daysLate).toBe(2);
+    // `daysLate` is bookkeeping for which occurrence a tap satisfies. It is not
+    // a count of anything a child is told about — no surface reads it.
+    expect(timing.minutesUntil).toBeNull();
   });
 });
 

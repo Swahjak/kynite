@@ -32,15 +32,21 @@ export {
 export {
   DEFAULT_TIME_OF_DAY,
   MAX_GRACE_DAYS,
+  SCHEDULE_KINDS,
   WEEKDAYS,
   graceDaysOf,
+  isOneOff,
   isSimpleWeeklyRule,
+  isValidDateKey,
   isValidTimeOfDay,
+  oneOffDateOf,
   parseTimeOfDay,
   ruleForWeekdays,
   timeOfDayOf,
+  todayKeyIn,
   weekdaysOfRule,
   type Schedule,
+  type ScheduleKind,
   type Weekday,
 } from './domain/schedule';
 

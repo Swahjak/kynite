@@ -47,10 +47,16 @@ const SECOND_PARENT = 'Papa';
  * inputs are exempt because they carry values the *server* chose. This is the
  * executable form of the acceptance criterion, so it errs towards catching too
  * much rather than too little.
+ *
+ * `type=file` is exempt as of M20's custom-avatar upload, and the exemption is
+ * narrow on purpose: the criterion is that the invitee *types* nothing, and a
+ * file picker takes no keystrokes — it is a chooser, like the avatar tiles next
+ * to it. What still holds, and is what this assertion is really protecting, is
+ * that no `.fill()` appears anywhere in the invitee's path below.
  */
 async function expectNoTypeableField(page: Page, step: string): Promise<void> {
   const typeable = page.locator(
-    'input:not([type=hidden]):not([type=submit]):not([type=button]), textarea, select, [contenteditable="true"]'
+    'input:not([type=hidden]):not([type=submit]):not([type=button]):not([type=file]), textarea, select, [contenteditable="true"]'
   );
 
   await expect(typeable, `step "${step}" must ask the invitee to type nothing`).toHaveCount(0);

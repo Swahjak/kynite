@@ -31,8 +31,12 @@ import { moveStep } from '../domain/steps';
 import {
   DEFAULT_TIME_OF_DAY,
   MAX_GRACE_DAYS,
+  SCHEDULE_KINDS,
   WEEKDAYS,
+  oneOffDateOf,
+  todayKeyIn,
   weekdaysOfRule,
+  type ScheduleKind,
   type Weekday,
 } from '../domain/schedule';
 import type { RoutineWithSteps } from '../queries';
@@ -142,9 +146,40 @@ function RoutineForm({
   const wasPending = useRef(false);
 
   const [steps, setSteps] = useState<Draft[]>(() => draftsFrom(routine));
-  const [days, setDays] = useState<Weekday[]>(() =>
-    routine ? weekdaysOfRule(routine.schedule.rrule, timeZone) : DEFAULT_DAYS
+  const [days, setDays] = useState<Weekday[]>(() => {
+    const existing = routine ? weekdaysOfRule(routine.schedule.rrule, timeZone) : [];
+    return existing.length > 0 ? existing : DEFAULT_DAYS;
+  });
+
+  /**
+   * M20's one-off. The toggle is a *mode*, not an extra field: a routine is
+   * either a rhythm ("every school morning") or a single dated job ("clean the
+   * garage on Saturday"), and showing a weekday picker and a date picker at the
+   * same time would invite a parent to answer both and mean neither.
+   */
+  const [kind, setKind] = useState<ScheduleKind>(() =>
+    routine && oneOffDateOf(routine.schedule) ? 'once' : 'recurring'
   );
+  // Today in the *family's* zone, so a parent in a different one still gets
+  // their own household's "today" as the floor and the default.
+  const today = todayKeyIn(timeZone);
+  const storedOnceDate = (routine ? oneOffDateOf(routine.schedule) : null) ?? null;
+  const [onceDate, setOnceDate] = useState<string>(() => storedOnceDate ?? today);
+  /**
+   * The floor the picker enforces.
+   *
+   * Creating: today — a one-off in the past is never due, so the picker simply
+   * does not offer one.
+   *
+   * Editing a one-off whose date has already passed: today would make the field
+   * invalid on open, and `required` + `min` means the *whole dialog* refuses to
+   * submit. A parent renaming yesterday's "Garage opruimen", or fixing its
+   * steps, would be told nothing except that Save does not work. So the floor
+   * drops to whatever is already stored: the date the parent never touched stays
+   * savable, and anything they change it to is still today-or-later. Day keys
+   * are `YYYY-MM-DD`, so the lexical minimum is the chronological one.
+   */
+  const onceDateFloor = storedOnceDate && storedOnceDate < today ? storedOnceDate : today;
 
   useEffect(() => {
     if (wasPending.current && !pending && state.status === 'idle') onSaved();
@@ -221,38 +256,109 @@ function RoutineForm({
         </Select>
       </Field>
 
-      <Field>
-        <FieldLabel>{t('form.days')}</FieldLabel>
-        <div className="flex flex-wrap gap-2" role="group" aria-label={t('form.days')}>
-          {WEEKDAYS.map((day) => {
-            const selected = days.includes(day);
+      {/* Not a `Field`: a group of radios names itself (see the note on the
+          reward checkbox below). The two pills carry the same indigo selected
+          treatment as the weekday picker underneath them, so the whole
+          schedule block reads as one control. */}
+      <div className="flex w-full flex-col gap-1.5">
+        <FieldGroupLabel>{t('form.scheduleKind')}</FieldGroupLabel>
+        <div
+          className="flex gap-2"
+          role="radiogroup"
+          aria-label={t('form.scheduleKind')}
+          data-testid="schedule-kind"
+        >
+          {SCHEDULE_KINDS.map((option) => {
+            const selected = kind === option;
             return (
               <label
-                key={day}
-                data-testid={`weekday-${day}`}
+                key={option}
+                data-testid={`schedule-kind-${option}`}
                 data-selected={selected ? 'true' : 'false'}
                 className={cn(
-                  'flex h-12 min-w-12 cursor-pointer items-center justify-center rounded-xl px-3 font-display text-sm font-medium transition-colors',
+                  'flex h-12 flex-1 cursor-pointer items-center justify-center rounded-xl px-3 font-display text-sm font-medium transition-colors',
                   selected
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-muted text-ink-secondary hover:bg-surface-hover'
                 )}
               >
                 <input
-                  type="checkbox"
-                  name="weekdays"
-                  value={day}
+                  type="radio"
+                  name="scheduleKind"
+                  value={option}
                   checked={selected}
-                  onChange={() => toggleDay(day)}
+                  onChange={() => setKind(option)}
                   className="sr-only"
                 />
-                {t(`weekdays.${day}`)}
+                {t(`form.scheduleKinds.${option}`)}
               </label>
             );
           })}
         </div>
-        <FieldDescription>{t('form.daysHint')}</FieldDescription>
-      </Field>
+      </div>
+
+      {kind === 'once' ? (
+        <Field>
+          <FieldLabel>{t('form.onceDate')}</FieldLabel>
+          <Input
+            type="date"
+            name="onceDate"
+            size="hub"
+            required
+            // A one-off in the past is never due (its window has already
+            // closed), so the floor is today rather than a validation message
+            // about a mistake the picker can simply not offer — except when
+            // the stored date is already behind it (see `onceDateFloor`).
+            min={onceDateFloor}
+            value={onceDate}
+            onChange={(event) => setOnceDate(event.target.value)}
+          />
+          <FieldDescription>{t('form.onceDateHint')}</FieldDescription>
+        </Field>
+      ) : (
+        <Field>
+          <FieldLabel>{t('form.days')}</FieldLabel>
+          <div className="flex flex-wrap gap-2" role="group" aria-label={t('form.days')}>
+            {WEEKDAYS.map((day) => {
+              const selected = days.includes(day);
+              return (
+                <label
+                  key={day}
+                  data-testid={`weekday-${day}`}
+                  data-selected={selected ? 'true' : 'false'}
+                  className={cn(
+                    'flex h-12 min-w-12 cursor-pointer items-center justify-center rounded-xl px-3 font-display text-sm font-medium transition-colors',
+                    selected
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted text-ink-secondary hover:bg-surface-hover'
+                  )}
+                >
+                  <input
+                    type="checkbox"
+                    name="weekdays"
+                    value={day}
+                    checked={selected}
+                    onChange={() => toggleDay(day)}
+                    className="sr-only"
+                  />
+                  {t(`weekdays.${day}`)}
+                </label>
+              );
+            })}
+          </div>
+          <FieldDescription>{t('form.daysHint')}</FieldDescription>
+        </Field>
+      )}
+
+      {/* Client-side half of the same rule the Server Action enforces: neither
+          mode can be saved half-answered. The date input carries `required`
+          itself; an empty weekday selection has no single control to hang
+          `required` on, so it is stated here. */}
+      {kind === 'recurring' && days.length === 0 ? (
+        <p role="alert" className="text-sm text-ink-secondary">
+          {t('form.daysRequired')}
+        </p>
+      ) : null}
 
       <div className="grid grid-cols-2 gap-4">
         <Field>
@@ -431,7 +537,11 @@ function RoutineForm({
             </Button>
           }
         />
-        <Button type="submit" size="hub" disabled={pending}>
+        <Button
+          type="submit"
+          size="hub"
+          disabled={pending || (kind === 'recurring' && days.length === 0)}
+        >
           {t('actions.save')}
         </Button>
       </DialogFooter>

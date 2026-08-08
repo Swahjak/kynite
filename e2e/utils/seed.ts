@@ -305,8 +305,17 @@ export type SeedRoutine = {
   id?: string;
   title: string;
   ownerMemberId: string;
-  /** `{ rrule, timeOfDay, graceDays }` — the `routine.schedule` jsonb. */
-  schedule: { rrule: string; timeOfDay?: string; graceDays?: number };
+  /**
+   * The `routine.schedule` jsonb. Either a recurring `{ rrule, … }` or M20's
+   * one-off `{ kind: 'once', date, … }` — a dated chore rather than a rhythm.
+   */
+  schedule: {
+    rrule?: string;
+    timeOfDay?: string;
+    graceDays?: number;
+    kind?: 'recurring' | 'once';
+    date?: string;
+  };
   icon?: string;
   starsPerCompletion?: number;
   rewardEnabled?: boolean;

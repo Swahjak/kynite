@@ -40,6 +40,7 @@ import {
   type MemberRole,
 } from './schema';
 import { MEMBER_AVATARS, avatarUrlFor } from './ui/tokens';
+import { MAX_CUSTOM_AVATAR_URI_LENGTH, checkCustomAvatar } from './domain/avatar';
 
 /**
  * Mutations for the family slice. Every action authorizes through
@@ -53,8 +54,31 @@ import { MEMBER_AVATARS, avatarUrlFor } from './ui/tokens';
 
 const trimmed = z.string().trim();
 
-/** The only avatarUrl values a member may carry — the built-in avatar set. */
+/** The built-in avatar set — the only *paths* a member may carry. */
 const AVATAR_URLS = MEMBER_AVATARS.map(avatarUrlFor) as [string, ...string[]];
+const PRESET_AVATAR_URLS: ReadonlySet<string> = new Set(AVATAR_URLS);
+
+/**
+ * `member.avatarUrl`: a built-in preset, or a custom upload inlined as a
+ * `data:` URI (M20).
+ *
+ * Free text was — and still is — an unvalidated `img-src` injection risk, so
+ * "custom" does not mean "unchecked": `checkCustomAvatar()` allowlists the
+ * media type, caps the decoded size at 20 KB, matches raster magic bytes
+ * against the declared type, and parses SVG against an element/attribute
+ * allowlist that rejects scripts, `foreignObject`, event handlers and every
+ * form of external reference. This is the check that decides — the picker runs
+ * the same function in the browser purely so the parent hears "no" sooner.
+ */
+const avatarUrlSchema = z
+  .string()
+  // Bound the string before anything decodes it: a data URI cannot be longer
+  // than base64 of the byte cap, and a preset path is far shorter still.
+  .max(MAX_CUSTOM_AVATAR_URI_LENGTH)
+  .refine(
+    (value) => value === '' || PRESET_AVATAR_URLS.has(value) || checkCustomAvatar(value).ok,
+    'avatar'
+  );
 
 const signUpSchema = z.object({
   name: trimmed.min(1).max(80),
@@ -73,9 +97,7 @@ const memberSchema = z.object({
   role: z.enum(MEMBER_ROLES),
   color: z.enum(MEMBER_COLORS),
   rewardHorizon: z.enum(REWARD_HORIZONS),
-  // Free text was an unvalidated img-src injection risk; only the built-in
-  // avatar set (public/avatars) may be stored.
-  avatarUrl: z.enum(AVATAR_URLS).optional().or(z.literal('')),
+  avatarUrl: avatarUrlSchema,
   birthDate: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/)
@@ -1094,8 +1116,10 @@ export async function acceptInviteAction(
   return idleState;
 }
 
+// Same avatar rules as the roster dialog, minus the empty option: this step
+// exists to *set* a face, so "none" is not one of the answers.
 const inviteProfileSchema = z.object({
-  avatarUrl: z.enum(AVATAR_URLS),
+  avatarUrl: avatarUrlSchema.refine((value) => value !== ''),
   color: z.enum(MEMBER_COLORS),
 });
 
@@ -1107,9 +1131,15 @@ const inviteTokenSchema = z.string().regex(/^[A-Za-z0-9_-]{43}$/);
  *
  * Authorized by `member:self`, which grades `own` — so this can only ever write
  * the caller's own row, and a second parent holding the `adult` column can do
- * it without holding owner-only `member:manage`. Both fields are closed sets
- * (the eight built-in avatars, the eight design-system colours); there is no
- * free-text field on this screen and no free-text field in this schema.
+ * it without holding owner-only `member:manage`.
+ *
+ * `color` is a closed set (the eight design-system colours). `avatarUrl` is
+ * not, since M20: it is either one of the eight built-in `/avatars/*.svg`
+ * paths or a custom upload the invitee brought, and an upload arrives as a
+ * data URI. It is still not free text — `avatarUrlSchema` decodes the URI and
+ * puts the markup through `checkCustomAvatar` (`domain/avatar.ts`), so what
+ * this schema admits is "a built-in path, or an image this app has parsed and
+ * vouched for". There remains no field on this screen an invitee types into.
  */
 export async function chooseProfileAction(
   _previous: ActionState,

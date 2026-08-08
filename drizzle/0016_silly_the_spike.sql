@@ -1,0 +1,2 @@
+ALTER TABLE "routine" ADD CONSTRAINT "routine_once_has_date" CHECK ("routine"."schedule" ->> 'kind' is distinct from 'once'
+          or coalesce("routine"."schedule" ->> 'date', '') ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$');

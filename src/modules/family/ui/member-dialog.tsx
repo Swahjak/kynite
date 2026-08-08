@@ -27,7 +27,6 @@ import { createMemberAction, updateMemberAction } from '../actions';
 import { REWARD_HORIZONS, type Member } from '../schema';
 import { AvatarPicker } from './avatar-picker';
 import { ColorPicker } from './color-picker';
-import { avatarNameFrom } from './tokens';
 
 /** Roles a parent may hand out. `owner` is not one of them — it is the account holder. */
 const ASSIGNABLE_ROLES = ['adult', 'child', 'caregiver'] as const;
@@ -104,7 +103,7 @@ export function MemberDialog({ member }: { member?: Member }) {
           </Field>
 
           <ColorPicker defaultValue={member?.color ?? 'blue'} />
-          <AvatarPicker defaultValue={avatarNameFrom(member?.avatarUrl ?? null)} />
+          <AvatarPicker defaultValue={member?.avatarUrl ?? null} />
 
           <Field>
             <FieldLabel>{t('form.birthDate')}</FieldLabel>

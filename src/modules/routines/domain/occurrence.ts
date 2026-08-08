@@ -25,7 +25,7 @@ import {
   type Wall,
 } from '@/modules/calendar/domain/zone';
 import { occurrencesOf, parseRule } from '@/modules/calendar/domain/rrule';
-import { graceDaysOf, timeOfDayOf, type Schedule } from './schedule';
+import { graceDaysOf, oneOffDateOf, timeOfDayOf, type Schedule } from './schedule';
 
 /** The board's three bands (the Stitch "chores routines" hub screen). */
 export const TIME_SECTIONS = ['morning', 'afternoon', 'evening'] as const;
@@ -95,7 +95,28 @@ function seriesStart(input: OccurrenceInput): Date {
  * simply does not appear, which is the neutral failure this product wants.
  */
 export function occurrenceStartsBetween(input: OccurrenceInput, from: Date, to: Date): Date[] {
-  const rule = parseRule(input.schedule.rrule, input.timeZone);
+  /**
+   * A one-off (M20) is a series of exactly one instant, named outright rather
+   * than derived from a rule, so it short-circuits the whole RRULE path. It is
+   * also deliberately **not** anchored to `createdAt`: its date is the parent's
+   * explicit answer to "when", and a chore created this morning for this
+   * afternoon must not be filtered out by a DTSTART it never had.
+   *
+   * Everything downstream — `occursOn`, `openOccurrence`, `isCompletableOn`,
+   * `timingAt` — is written in terms of this function, so grace, the
+   * completable window and the board state all fall out unchanged. In
+   * particular there is still no state for "the day has passed": the single
+   * occurrence leaves the window and the routine is simply absent.
+   */
+  const onceDate = oneOffDateOf(input.schedule);
+  if (onceDate) {
+    const wall = parseDateKey(onceDate);
+    if (!wall) return [];
+    const start = dueInstantOn(input, wall);
+    return start >= from && start < to ? [start] : [];
+  }
+
+  const rule = parseRule(input.schedule.rrule ?? '', input.timeZone);
   if (!rule) return [];
 
   return occurrencesOf(rule, {

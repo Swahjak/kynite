@@ -193,6 +193,138 @@ describe('how a routine reads on the board', () => {
   });
 });
 
+describe('one-off chores (M20)', () => {
+  /** "Clean the garage on Saturday 14 March, 10 stars." */
+  const GARAGE: Schedule = { kind: 'once', date: '2026-03-14', timeOfDay: '10:00' };
+
+  it('is due on its day and on no other', () => {
+    expect(occursOn(input(GARAGE), '2026-03-14')).toBe(true);
+    expect(occursOn(input(GARAGE), '2026-03-13')).toBe(false);
+    expect(occursOn(input(GARAGE), '2026-03-15')).toBe(false);
+    // Not "every Saturday" — the following one is a different day entirely.
+    expect(occursOn(input(GARAGE), '2026-03-21')).toBe(false);
+  });
+
+  it('places the occurrence at its time in the family zone', () => {
+    expect(occurrenceStartOn(input(GARAGE), '2026-03-14')?.toISOString()).toBe(
+      '2026-03-14T09:00:00.000Z'
+    );
+  });
+
+  it('is not filtered out by an anchor later than its own date', () => {
+    // A one-off is not a series with a DTSTART: the date *is* the answer, so a
+    // chore created this morning for this afternoon still appears.
+    const created = new Date('2026-03-14T08:00:00Z');
+    expect(occursOn(input(GARAGE, created), '2026-03-14')).toBe(true);
+  });
+
+  it('is absent before its day — a chore for Saturday is not on Thursday’s board', () => {
+    const now = new Date('2026-03-12T09:00:00Z');
+    expect(timingAt(input(GARAGE), now)).toEqual({
+      state: 'none',
+      occurrence: null,
+      minutesUntil: null,
+    });
+  });
+
+  it('is upcoming, then due, across its own time of day', () => {
+    expect(timingAt(input(GARAGE), new Date('2026-03-14T08:30:00Z'))).toMatchObject({
+      state: 'upcoming',
+      minutesUntil: 30,
+    });
+    expect(timingAt(input(GARAGE), new Date('2026-03-14T09:00:00Z'))).toMatchObject({
+      state: 'due',
+      minutesUntil: null,
+    });
+  });
+
+  it('stays open through its grace window, as grace and never as a mark', () => {
+    const graceful = { ...GARAGE, graceDays: 2 };
+
+    const timing = timingAt(input(graceful), new Date('2026-03-16T09:00:00Z'));
+    expect(timing.state).toBe('grace');
+    expect(timing.occurrence).toMatchObject({ occurrenceDate: '2026-03-14', daysLate: 2 });
+  });
+
+  it('leaves the board once grace has lapsed — absence, not "overdue"', () => {
+    const graceful = { ...GARAGE, graceDays: 2 };
+
+    expect(timingAt(input(graceful), new Date('2026-03-17T09:00:00Z'))).toEqual({
+      state: 'none',
+      occurrence: null,
+      minutesUntil: null,
+    });
+    // And with no grace at all, the day after is already over.
+    expect(openOccurrence(input(GARAGE), new Date('2026-03-15T09:00:00Z'))).toBeNull();
+  });
+
+  it('accepts a completion on its day, one day early, and inside grace only', () => {
+    const graceful = { ...GARAGE, graceDays: 1 };
+    const saturday = new Date('2026-03-14T11:00:00Z');
+
+    expect(isCompletableOn(input(graceful), '2026-03-14', saturday)).toBe(true);
+    // A hub that is an hour into tomorrow is not an attack (the same tolerance
+    // recurring routines get).
+    expect(isCompletableOn(input(graceful), '2026-03-14', new Date('2026-03-13T11:00:00Z'))).toBe(
+      true
+    );
+    expect(isCompletableOn(input(graceful), '2026-03-14', new Date('2026-03-15T11:00:00Z'))).toBe(
+      true
+    );
+    expect(isCompletableOn(input(graceful), '2026-03-14', new Date('2026-03-16T11:00:00Z'))).toBe(
+      false
+    );
+    // A forged date the chore was never set for.
+    expect(isCompletableOn(input(graceful), '2026-03-15', saturday)).toBe(false);
+  });
+
+  it('slots into a board section by its time of day, like any routine', () => {
+    expect(sectionOf({ kind: 'once', date: '2026-03-14', timeOfDay: '09:00' })).toBe('morning');
+    expect(sectionOf({ kind: 'once', date: '2026-03-14', timeOfDay: '14:00' })).toBe('afternoon');
+    expect(sectionOf({ kind: 'once', date: '2026-03-14', timeOfDay: '19:30' })).toBe('evening');
+  });
+
+  it('keys its day in the family zone, never in UTC', () => {
+    // 23:30 UTC on the 13th is already the 14th in Amsterdam: the chore is
+    // due. `toISOString().slice(0, 10)` would still read "2026-03-13" and the
+    // board would be empty on the very evening the chore is for.
+    const justPastLocalMidnight = new Date('2026-03-13T23:30:00Z');
+    expect(dateKeyOf(justPastLocalMidnight, ZONE)).toBe('2026-03-14');
+    expect(
+      openOccurrence(
+        input({ kind: 'once', date: '2026-03-14', timeOfDay: '00:15' }),
+        justPastLocalMidnight
+      )
+    ).toMatchObject({ occurrenceDate: '2026-03-14', daysLate: 0 });
+
+    // The same instant in a zone still on the 13th: not due yet, and absent
+    // rather than wrong.
+    const westInput = {
+      schedule: { kind: 'once' as const, date: '2026-03-14', timeOfDay: '00:15' },
+      anchor: ANCHOR,
+      timeZone: 'America/New_York',
+    };
+    expect(openOccurrence(westInput, justPastLocalMidnight)).toBeNull();
+  });
+
+  it('survives a DST spring-forward with its wall clock intact', () => {
+    // Europe/Amsterdam springs forward on 2026-03-29.
+    expect(
+      occurrenceStartOn(
+        input({ kind: 'once', date: '2026-03-30', timeOfDay: '07:30' }),
+        '2026-03-30'
+      )?.toISOString()
+    ).toBe('2026-03-30T05:30:00.000Z');
+  });
+
+  it('is never due when its date is unusable — absence, not a fallback day', () => {
+    const broken: Schedule = { kind: 'once', date: '2026-02-30', timeOfDay: '10:00' };
+    expect(occursOn(input(broken), '2026-02-30')).toBe(false);
+    expect(occursOn(input(broken), '2026-03-02')).toBe(false);
+    expect(openOccurrence(input(broken), new Date('2026-03-02T09:00:00Z'))).toBeNull();
+  });
+});
+
 describe('board sections', () => {
   it('splits the day at noon and 17:00', () => {
     expect(sectionOf({ rrule: 'FREQ=DAILY', timeOfDay: '07:30' })).toBe('morning');

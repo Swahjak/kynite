@@ -1,14 +1,17 @@
 'use client';
 
 import Image from 'next/image';
-import { useActionState } from 'react';
+import { useActionState, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Icon } from '@/components/ui/icon';
 import { cn } from '@/lib/utils';
 import { MEMBER_COLORS, type MemberColor } from '../schema';
 import { idleState } from '../action-state';
 import { acceptInviteAction, chooseProfileAction } from '../actions';
+import { CUSTOM_AVATAR_ACCEPT } from '../domain/avatar';
+import { readAvatarFile, type AvatarUploadError } from './avatar-upload';
 import { MEMBER_AVATARS, MEMBER_COLOR_CLASSES, avatarUrlFor } from './tokens';
 
 /**
@@ -90,11 +93,72 @@ export function InviteAcceptStep({
  *
  * The colour is refinable later in the roster; getting *into* the household is
  * what has to be frictionless, not getting it perfect.
+ *
+ * M20 adds a tenth option: bring your own picture. It keeps the one-tap shape —
+ * choosing a file *is* the interaction, so the form submits itself the moment a
+ * valid one is read, and the colour that rides along is the one the owner
+ * already gave this member rather than a tenth thing to decide. FR26's
+ * criterion is that the invitee types nothing, and a file picker asks for no
+ * keystrokes; `e2e/tests/app/family/invite.spec.ts` asserts that literally.
  */
-export function InviteProfileStep({ token, displayName }: { token: string; displayName: string }) {
+export function InviteProfileStep({
+  token,
+  displayName,
+  color,
+}: {
+  token: string;
+  displayName: string;
+  /** The member's existing colour — what a custom upload is paired with. */
+  color: MemberColor;
+}) {
   const t = useTranslations('family.invite');
   const tForm = useTranslations('family.form');
   const [state, formAction, pending] = useActionState(chooseProfileAction, idleState);
+
+  const fileInput = useRef<HTMLInputElement>(null);
+  const uploadForm = useRef<HTMLFormElement>(null);
+  /**
+   * The chosen picture, boxed rather than held as a bare string.
+   *
+   * The box is what makes *picking the same file twice* work. The server can
+   * reject an upload this client was happy with (the markup check runs on both
+   * sides), and the obvious next move for the invitee is to pick that same file
+   * again to see whether it takes. With a bare data URI in state, that second
+   * pick sets state to a string equal to the one already there, React bails out
+   * of the re-render, the effect below never fires, and the screen sits silent —
+   * the one outcome that reads as "this button is broken". A fresh object per
+   * pick is never `Object.is`-equal to the last one, so every pick submits.
+   */
+  const [custom, setCustom] = useState<{ dataUri: string } | null>(null);
+  const [uploadError, setUploadError] = useState<AvatarUploadError | null>(null);
+
+  // Submitting from the effect rather than from the change handler is what
+  // guarantees the hidden field already carries the data URI React was told
+  // about — `requestSubmit()` reads the DOM, and the DOM is only current after
+  // the render this state change caused.
+  useEffect(() => {
+    if (custom) uploadForm.current?.requestSubmit();
+  }, [custom]);
+
+  async function onFilePicked(file: File | undefined) {
+    if (!file) return;
+    setUploadError(null);
+
+    const result = await readAvatarFile(file);
+
+    // Cleared on both paths, and before the state update: a file input holding
+    // the file it just handed over emits no `change` when that same file is
+    // chosen again, so leaving the value in place would swallow the retry one
+    // level below the state bail-out described above.
+    if (fileInput.current) fileInput.current.value = '';
+
+    if (!result.ok) {
+      setUploadError(result.error);
+      return;
+    }
+
+    setCustom({ dataUri: result.dataUri });
+  }
 
   return (
     <Card className="w-full max-w-md" data-testid="invite-profile">
@@ -108,6 +172,12 @@ export function InviteProfileStep({ token, displayName }: { token: string; displ
         {state.status === 'error' ? (
           <p role="alert" className="text-sm text-destructive">
             {t(`errors.${state.error}`)}
+          </p>
+        ) : null}
+
+        {uploadError ? (
+          <p role="alert" className="text-sm text-destructive" data-testid="invite-profile-error">
+            {tForm(`avatarErrors.${uploadError}`)}
           </p>
         ) : null}
 
@@ -142,6 +212,41 @@ export function InviteProfileStep({ token, displayName }: { token: string; displ
             );
           })}
         </div>
+
+        {/* The tenth option, in its own row: a picture of their own. Same shape
+            as the tiles above — one form, its own hidden fields — except that
+            the file dialog does the choosing and the form submits itself. */}
+        <form ref={uploadForm} action={formAction}>
+          <input type="hidden" name="token" value={token} />
+          <input type="hidden" name="avatarUrl" value={custom?.dataUri ?? ''} />
+          <input type="hidden" name="color" value={color} />
+
+          <Button
+            type="button"
+            variant="outline"
+            size="hub"
+            className="w-full"
+            disabled={pending}
+            data-testid="invite-profile-upload"
+            onClick={() => fileInput.current?.click()}
+          >
+            <Icon name="add" size="md" inline="start" />
+            {tForm('avatarUpload')}
+          </Button>
+
+          <input
+            ref={fileInput}
+            type="file"
+            accept={CUSTOM_AVATAR_ACCEPT}
+            className="sr-only"
+            tabIndex={-1}
+            aria-hidden
+            data-testid="invite-profile-upload-input"
+            onChange={(event) => void onFilePicked(event.target.files?.[0])}
+          />
+        </form>
+
+        <p className="text-xs text-muted-foreground">{tForm('avatarUploadHint')}</p>
       </CardContent>
     </Card>
   );

@@ -22,6 +22,7 @@ import {
   type PraiseKey,
   type RoutineDoneKey,
 } from './domain/praise';
+import { isOneOff } from './domain/schedule';
 import { completionRatio } from './domain/steps';
 import { hasGraduated, starsFor } from './domain/stars';
 import {
@@ -95,6 +96,8 @@ export type BoardRoutine = {
   total: number;
   complete: boolean;
   ratio: number;
+  /** M20: a one-off chore rather than a recurring routine. */
+  oneOff: boolean;
   /** Stars this routine pays per step — 0 once it has graduated. */
   starsPerCompletion: number;
   graduated: boolean;
@@ -290,21 +293,52 @@ export async function loadMemberRoutines(options: BoardOptions): Promise<Routine
       total: steps.length,
       complete: steps.length > 0 && doneCount === steps.length,
       ratio: completionRatio(steps.length, doneCount),
+      oneOff: isOneOff(row.schedule),
       starsPerCompletion: starsFor(row),
       graduated: hasGraduated(row),
       doneKey: routineDoneKeyFor(`${row.id}:${occurrence.occurrenceDate}`),
     };
   });
 
-  const sections: BoardSection[] = TIME_SECTIONS.map((section) => {
-    const inSection = board.filter((entry) => entry.section === section);
+  /**
+   * A finished one-off is **done with**, not merely ticked (M20).
+   *
+   * A recurring routine that is complete stays on the board all day as a calm
+   * collapsed success line, because it will be back tomorrow and its place in
+   * the day is part of what the board teaches. A one-off has no tomorrow: once
+   * the garage is clean, leaving "Garage opruimen ✓" pinned to the evening
+   * band is clutter that only a parent can clear. So it leaves — and it leaves
+   * the same way an out-of-window occurrence does, by absence. The celebration
+   * has already fired on the device that tapped (`routine-board.tsx` keeps it
+   * through the refresh), so nothing a child is watching is cut short.
+   */
+  const visible = board.filter((entry) => !(entry.oneOff && entry.complete));
 
-    const total = inSection.reduce((sum, entry) => sum + entry.total, 0);
-    const doneCount = inSection.reduce((sum, entry) => sum + entry.doneCount, 0);
+  /**
+   * The card leaves; the credit does not.
+   *
+   * Counting the finished one-off out of the band's *denominator* as well as
+   * its numerator would make the counter shrink under the household: a band
+   * that read "0 van 3" this morning reads "0 van 2" after the garage is done,
+   * on every fresh load and on every other device. That is a board quietly
+   * rewriting what it asked for, and it is the same dishonesty as a progress
+   * bar that jumps back — the work happened, so it stays counted.
+   *
+   * So the band counts `board` while it renders `visible`: the finished one-off
+   * lands in both `doneCount` and `total`, giving "3 van 3 klaar" above a band
+   * that no longer shows the card. This is deliberately the same arithmetic
+   * `loadFamilyRoutineTotals` does for the parent dashboard, so the two never
+   * disagree about the same day.
+   */
+  const sections: BoardSection[] = TIME_SECTIONS.map((section) => {
+    const counted = board.filter((entry) => entry.section === section);
+
+    const total = counted.reduce((sum, entry) => sum + entry.total, 0);
+    const doneCount = counted.reduce((sum, entry) => sum + entry.doneCount, 0);
 
     return {
       section,
-      routines: inSection,
+      routines: visible.filter((entry) => entry.section === section),
       doneCount,
       total,
       ratio: completionRatio(total, doneCount),
@@ -315,8 +349,10 @@ export async function loadMemberRoutines(options: BoardOptions): Promise<Routine
   // A routine still ahead of its time, or one already done, does not steal the
   // expansion from the thing the child is meant to be doing right now.
   const active =
-    board.find((entry) => !entry.complete && (entry.state === 'due' || entry.state === 'grace')) ??
-    board.find((entry) => !entry.complete) ??
+    visible.find(
+      (entry) => !entry.complete && (entry.state === 'due' || entry.state === 'grace')
+    ) ??
+    visible.find((entry) => !entry.complete) ??
     null;
 
   return {

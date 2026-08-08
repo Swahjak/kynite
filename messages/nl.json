@@ -137,6 +137,12 @@
       "roleHint": "Volwassenen kunnen alles beheren; kinderen vinken alleen taken af.",
       "color": "Kleur",
       "avatar": "Avatar",
+      "avatarUpload": "Eigen avatar uploaden",
+      "avatarUploadHint": "Of upload een eigen plaatje — SVG, PNG, JPG of WebP, maximaal 20 KB.",
+      "avatarErrors": {
+        "tooLarge": "Dit plaatje is te groot. Kies er een van minder dan 20 KB.",
+        "invalidFile": "Dit bestand werkt niet als avatar. Probeer een SVG, PNG, JPG of WebP."
+      },
       "birthDate": "Geboortedatum",
       "rewardHorizon": "Beloningen",
       "rewardHorizonHint": "Jonge kinderen hebben een directe beloning nodig; vanaf ongeveer 8 jaar kunnen ze sparen.",
@@ -483,8 +489,16 @@
       "owner": "Van wie",
       "ownerHint": "Bepaalt op wiens hub-scherm de routine staat en waar herinneringen heen gaan.",
       "icon": "Pictogram",
+      "scheduleKind": "Wanneer",
+      "scheduleKinds": {
+        "recurring": "Elke week",
+        "once": "Eén keer"
+      },
       "days": "Dagen",
       "daysHint": "De routine verschijnt op de dagen die je hier kiest.",
+      "daysRequired": "Kies minstens één dag.",
+      "onceDate": "Datum",
+      "onceDateHint": "De routine staat alleen op deze dag op het bord.",
       "timeOfDay": "Tijd",
       "graceDays": "Extra dagen",
       "graceDaysHint": "Dagen erna waarop een stap nog steeds meetelt.",
@@ -521,6 +535,7 @@
     },
     "schedule": {
       "daily": "Elke dag",
+      "once": "Eén keer op {date}",
       "noTime": "Geen vaste tijd",
       "grace": "{days, plural, one {# extra dag} other {# extra dagen}}"
     },

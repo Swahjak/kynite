@@ -14,12 +14,34 @@
  */
 
 import { WEEKDAYS, parseRule, type Weekday } from '@/modules/calendar/domain/rrule';
+import { parseDateKey } from '@/modules/calendar/domain/zone';
+
+/**
+ * How a routine is scheduled.
+ *
+ * `'recurring'` is the RRULE the weekday picker authors. `'once'` is M20's
+ * one-off chore — "clean the garage on Saturday, 10 stars" — which is due on a
+ * single named day and then, once done or once its grace has run out, simply
+ * stops appearing. An absent `kind` reads as `'recurring'`: every routine
+ * written before M20 is one, and a default is cheaper than a backfill.
+ */
+export const SCHEDULE_KINDS = ['recurring', 'once'] as const;
+export type ScheduleKind = (typeof SCHEDULE_KINDS)[number];
 
 /** Structurally the `RoutineSchedule` of `../schema`, without importing it. */
 export type Schedule = {
-  rrule: string;
+  /**
+   * The RRULE a recurring routine repeats on. Absent for a one-off, which
+   * recurs never — and absence is the safe shape: any reader that forgets the
+   * one-off branch gets "no rule, therefore never due", which is this
+   * product's neutral failure rather than a wrong occurrence.
+   */
+  rrule?: string;
   timeOfDay?: string;
   graceDays?: number;
+  kind?: ScheduleKind;
+  /** The single family-timezone date key (`YYYY-MM-DD`) a one-off is due on. */
+  date?: string;
 };
 
 /** `HH:mm`, 24h. The wall clock the routine is due at in the family's zone. */
@@ -37,6 +59,38 @@ export const MAX_GRACE_DAYS = 7;
 
 export function isValidTimeOfDay(value: string): boolean {
   return TIME_OF_DAY.test(value);
+}
+
+/**
+ * A real calendar day, not merely ten characters in the right shape.
+ * `parseDateKey` rejects `2026-02-30`, which a regex would happily accept and
+ * `fromWall` would silently roll forward into March.
+ */
+export function isValidDateKey(value: string | undefined): boolean {
+  return typeof value === 'string' && parseDateKey(value) !== null;
+}
+
+/**
+ * The date a one-off is due on, or null when this schedule is not one.
+ *
+ * A schedule that *claims* `kind: 'once'` but carries no usable date is not a
+ * one-off here: it has no rrule either, so it resolves to "never due" and is
+ * absent from every board. That is the intended failure — a routine nobody can
+ * see is recoverable by editing it; a routine due on a date nobody can name is
+ * not.
+ */
+export function oneOffDateOf(schedule: Schedule): string | null {
+  if (schedule.kind !== 'once') return null;
+  return isValidDateKey(schedule.date) ? schedule.date! : null;
+}
+
+export function isOneOff(schedule: Schedule): boolean {
+  return oneOffDateOf(schedule) !== null;
+}
+
+/** `'2026-08-08'` in `timeZone` — never `toISOString().slice(0, 10)`, which is UTC. */
+export function todayKeyIn(timeZone: string, now: Date = new Date()): string {
+  return new Intl.DateTimeFormat('en-CA', { timeZone }).format(now);
 }
 
 /** `'07:30'` → `{ hour: 7, minute: 30 }`. Null for anything else. */
@@ -80,8 +134,8 @@ export function ruleForWeekdays(days: readonly Weekday[]): string | null {
  * its `BYDAY`, and anything else reports the days it actually contains as far
  * as the parser understands them — never a guess.
  */
-export function weekdaysOfRule(rrule: string, timeZone: string): Weekday[] {
-  const rule = parseRule(rrule, timeZone);
+export function weekdaysOfRule(rrule: string | undefined, timeZone: string): Weekday[] {
+  const rule = parseRule(rrule ?? '', timeZone);
   if (!rule) return [];
 
   if (rule.byDay.length > 0) {
@@ -93,8 +147,8 @@ export function weekdaysOfRule(rrule: string, timeZone: string): Weekday[] {
 }
 
 /** True for a rule this builder can round-trip without losing information. */
-export function isSimpleWeeklyRule(rrule: string, timeZone: string): boolean {
-  const rule = parseRule(rrule, timeZone);
+export function isSimpleWeeklyRule(rrule: string | undefined, timeZone: string): boolean {
+  const rule = parseRule(rrule ?? '', timeZone);
   if (!rule) return false;
 
   return (

@@ -1,10 +1,10 @@
-import { getTranslations } from 'next-intl/server';
+import { getFormatter, getTranslations } from 'next-intl/server';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
 import type { Member } from '@/modules/family';
 import { hasGraduated } from '../domain/stars';
-import { weekdaysOfRule } from '../domain/schedule';
+import { oneOffDateOf, weekdaysOfRule } from '../domain/schedule';
 import type { RoutineWithSteps } from '../queries';
 import { DeleteRoutineButton } from './delete-routine-button';
 import { GraduateRoutineButton } from './graduate-routine-button';
@@ -31,6 +31,14 @@ export async function RoutineList({
   canWrite: boolean;
 }) {
   const t = await getTranslations('routines');
+  const format = await getFormatter();
+  /**
+   * A date key rendered in the reader's locale. Noon UTC, not midnight: the
+   * key already *is* the family's calendar day, and reading it back at midnight
+   * would let any zone west of UTC render the day before.
+   */
+  const dayOf = (dateKey: string) =>
+    format.dateTime(new Date(`${dateKey}T12:00:00Z`), { day: 'numeric', month: 'long' });
   const nameOf = (memberId: string) =>
     members.find((member) => member.id === memberId)?.displayName ?? '';
 
@@ -49,6 +57,7 @@ export async function RoutineList({
     <ul className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       {routines.map((routine) => {
         const days = weekdaysOfRule(routine.schedule.rrule, timeZone);
+        const onceDate = oneOffDateOf(routine.schedule);
 
         return (
           <li key={routine.id} className="flex">
@@ -70,10 +79,12 @@ export async function RoutineList({
 
                   <span className="flex flex-wrap items-center gap-2">
                     <Badge variant="secondary">{nameOf(routine.ownerMemberId)}</Badge>
-                    <Badge variant="outline">
-                      {days.length === 7
-                        ? t('schedule.daily')
-                        : days.map((day) => t(`weekdays.${day}`)).join(' ')}
+                    <Badge variant="outline" data-testid="routine-schedule-badge">
+                      {onceDate
+                        ? t('schedule.once', { date: dayOf(onceDate) })
+                        : days.length === 7
+                          ? t('schedule.daily')
+                          : days.map((day) => t(`weekdays.${day}`)).join(' ')}
                     </Badge>
                     <Badge variant="outline">
                       {routine.schedule.timeOfDay ?? t('schedule.noTime')}

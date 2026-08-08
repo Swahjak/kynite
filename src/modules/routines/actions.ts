@@ -17,7 +17,15 @@ import {
   type CompletionState,
 } from './action-state';
 import { actorOf, recordCompletion, revalidateRoutines, type CompleteStepInput } from './complete';
-import { MAX_GRACE_DAYS, WEEKDAYS, ruleForWeekdays, type Weekday } from './domain/schedule';
+import {
+  MAX_GRACE_DAYS,
+  SCHEDULE_KINDS,
+  WEEKDAYS,
+  isValidDateKey,
+  ruleForWeekdays,
+  type Schedule,
+  type Weekday,
+} from './domain/schedule';
 import { isRoutineIcon } from './ui/tokens';
 
 /**
@@ -39,18 +47,38 @@ const stepSchema = z.object({
   timerSeconds: z.number().int().min(5).max(7200).nullable(),
 });
 
-const routineSchema = z.object({
-  title: trimmed.min(1).max(120),
-  icon: trimmed.refine(isRoutineIcon),
-  ownerMemberId: z.uuid(),
-  weekdays: z.array(z.enum(WEEKDAYS)).min(1),
-  timeOfDay: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/),
-  graceDays: z.number().int().min(0).max(MAX_GRACE_DAYS),
-  starsPerCompletion: z.number().int().min(0).max(20),
-  rewardEnabled: z.boolean(),
-  active: z.boolean(),
-  steps: z.array(stepSchema).min(1).max(20),
-});
+const routineSchema = z
+  .object({
+    title: trimmed.min(1).max(120),
+    icon: trimmed.refine(isRoutineIcon),
+    ownerMemberId: z.uuid(),
+    /** M20: `'recurring'` reads the weekdays, `'once'` reads `onceDate`. */
+    scheduleKind: z.enum(SCHEDULE_KINDS),
+    weekdays: z.array(z.enum(WEEKDAYS)),
+    /** `YYYY-MM-DD` in the family's zone. Empty for a recurring routine. */
+    onceDate: z.string(),
+    timeOfDay: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/),
+    graceDays: z.number().int().min(0).max(MAX_GRACE_DAYS),
+    starsPerCompletion: z.number().int().min(0).max(20),
+    rewardEnabled: z.boolean(),
+    active: z.boolean(),
+    steps: z.array(stepSchema).min(1).max(20),
+  })
+  // The two schedule kinds have different required fields, and *neither* may be
+  // saved half-answered: a routine with no weekdays is never due, and a one-off
+  // with no date is a chore nobody can see. `2026-02-30` fails here too —
+  // `isValidDateKey` parses the day rather than matching its shape.
+  .superRefine((value, ctx) => {
+    if (value.scheduleKind === 'once') {
+      if (!isValidDateKey(value.onceDate)) {
+        ctx.addIssue({ code: 'custom', path: ['onceDate'], message: 'invalidDate' });
+      }
+      return;
+    }
+    if (value.weekdays.length === 0) {
+      ctx.addIssue({ code: 'custom', path: ['weekdays'], message: 'noWeekdays' });
+    }
+  });
 
 function read(formData: FormData, key: string): string {
   const value = formData.get(key);
@@ -96,7 +124,9 @@ function routineInput(formData: FormData) {
     title: read(formData, 'title'),
     icon: read(formData, 'icon'),
     ownerMemberId: read(formData, 'ownerMemberId'),
+    scheduleKind: read(formData, 'scheduleKind') || 'recurring',
     weekdays: readAll(formData, 'weekdays'),
+    onceDate: read(formData, 'onceDate'),
     timeOfDay: read(formData, 'timeOfDay'),
     graceDays: readNumber(formData, 'graceDays', 0),
     starsPerCompletion: readNumber(formData, 'starsPerCompletion', 1),
@@ -106,7 +136,7 @@ function routineInput(formData: FormData) {
   });
 }
 
-type ResolvedInput = z.infer<typeof routineSchema> & { rrule: string };
+type ResolvedInput = z.infer<typeof routineSchema> & { schedule: Schedule };
 
 async function resolveInput(
   familyId: string,
@@ -115,21 +145,38 @@ async function resolveInput(
   const parsed = routineInput(formData);
   if (!parsed.success) return { ok: false, error: 'invalidInput' };
 
-  const rrule = ruleForWeekdays(parsed.data.weekdays as Weekday[]);
-  if (!rrule) return { ok: false, error: 'invalidInput' };
+  const schedule = scheduleOf(parsed.data);
+  if (!schedule) return { ok: false, error: 'invalidInput' };
 
   // `ownerMemberId` is a uuid a form supplied. `getMember` returns null for an
   // id that exists but belongs to another family, which is what turns a forged
   // cross-family id into a rejection instead of a silent cross-tenant write.
+  // FR9: it is also why a routine can never end up unowned — there is no code
+  // path here that writes one without a member that resolved.
   if (!(await getMember(familyId, parsed.data.ownerMemberId))) {
     return { ok: false, error: 'memberNotFound' };
   }
 
-  return { ok: true, input: { ...parsed.data, rrule } };
+  return { ok: true, input: { ...parsed.data, schedule } };
 }
 
-function scheduleOf(input: ResolvedInput) {
-  return { rrule: input.rrule, timeOfDay: input.timeOfDay, graceDays: input.graceDays };
+/**
+ * The validated form → the `schedule` jsonb. Null when the two cannot be
+ * reconciled, which after `superRefine` means only an unrepresentable weekday
+ * set.
+ *
+ * A one-off stores **no rrule**: it does not recur, and writing a placeholder
+ * rule would be a claim the data model would then have to keep true.
+ */
+function scheduleOf(input: z.infer<typeof routineSchema>): Schedule | null {
+  const shared = { timeOfDay: input.timeOfDay, graceDays: input.graceDays };
+
+  if (input.scheduleKind === 'once') {
+    return { kind: 'once', date: input.onceDate, ...shared };
+  }
+
+  const rrule = ruleForWeekdays(input.weekdays as Weekday[]);
+  return rrule ? { kind: 'recurring', rrule, ...shared } : null;
 }
 
 export async function createRoutineAction(
@@ -153,7 +200,7 @@ export async function createRoutineAction(
         ownerMemberId: input.ownerMemberId,
         title: input.title,
         icon: input.icon,
-        schedule: scheduleOf(input),
+        schedule: input.schedule,
         starsPerCompletion: input.starsPerCompletion,
         rewardEnabled: input.rewardEnabled,
         active: input.active,
@@ -215,7 +262,7 @@ export async function updateRoutineAction(
         ownerMemberId: input.ownerMemberId,
         title: input.title,
         icon: input.icon,
-        schedule: scheduleOf(input),
+        schedule: input.schedule,
         starsPerCompletion: input.starsPerCompletion,
         rewardEnabled: input.rewardEnabled,
         // Fade is a *state*, not a toggle echo: turning rewards off stamps the

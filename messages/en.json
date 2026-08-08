@@ -137,6 +137,12 @@
       "roleHint": "Adults can manage everything; children only tick off their tasks.",
       "color": "Color",
       "avatar": "Avatar",
+      "avatarUpload": "Upload your own",
+      "avatarUploadHint": "Or upload your own picture — SVG, PNG, JPG or WebP, up to 20 KB.",
+      "avatarErrors": {
+        "tooLarge": "That picture is too big. Pick one under 20 KB.",
+        "invalidFile": "That file will not work as an avatar. Try an SVG, PNG, JPG or WebP."
+      },
       "birthDate": "Date of birth",
       "rewardHorizon": "Rewards",
       "rewardHorizonHint": "Young children need an instant reward; from about age 8 they can save up.",
@@ -483,8 +489,16 @@
       "owner": "Whose routine",
       "ownerHint": "Decides whose hub screen it appears on and where reminders go.",
       "icon": "Icon",
+      "scheduleKind": "When",
+      "scheduleKinds": {
+        "recurring": "Every week",
+        "once": "One time"
+      },
       "days": "Days",
       "daysHint": "The routine appears on the days you pick here.",
+      "daysRequired": "Pick at least one day.",
+      "onceDate": "Date",
+      "onceDateHint": "The routine is on the board on this day only.",
       "timeOfDay": "Time",
       "graceDays": "Extra days",
       "graceDaysHint": "Days afterwards on which a step still counts.",
@@ -521,6 +535,7 @@
     },
     "schedule": {
       "daily": "Every day",
+      "once": "One time on {date}",
       "noTime": "No fixed time",
       "grace": "{days, plural, one {# extra day} other {# extra days}}"
     },

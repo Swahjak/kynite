@@ -16,7 +16,7 @@ import { useRouter } from '@/i18n/navigation';
 import { Icon } from '@/components/ui/icon';
 import { cn } from '@/lib/utils';
 import { completeStepAction } from '../actions';
-import type { BoardRoutine, RoutineBoard as RoutineBoardData } from '../page-data';
+import type { BoardRoutine, BoardSection, RoutineBoard as RoutineBoardData } from '../page-data';
 import { RoutineCard } from './routine-card';
 import { SECTION_ICONS } from './tokens';
 
@@ -80,6 +80,23 @@ export function RoutineBoard({ board }: { board: RoutineBoardData }) {
    * own render catches up.
    */
   const [celebrated, setCelebrated] = useState<ReadonlySet<string>>(new Set());
+  /**
+   * Routines this device finished that the *server* has since dropped from the
+   * board (M20).
+   *
+   * A finished one-off leaves the board — that is the point of a one-off, and
+   * `loadMemberRoutines` filters it out. But the completion also triggers a
+   * refresh, so without this the card a child has just tapped would be yanked
+   * off the screen underneath their finger, half a second into its
+   * celebration. That is the same broken promise as a rolled-back animation,
+   * arriving by a different route.
+   *
+   * So the card lingers for as long as this view lives: the child watches it
+   * finish, and the next time the board loads it is simply not there. Nothing
+   * is re-fetched and nothing is written — this is a render-level memory of
+   * something that has already happened.
+   */
+  const [lingering, setLingering] = useState<ReadonlyMap<string, BoardRoutine>>(new Map());
   const [, startTransition] = useTransition();
   const router = useRouter();
   const { markOwn } = useRealtime();
@@ -167,6 +184,9 @@ export function RoutineBoard({ board }: { board: RoutineBoardData }) {
     // fail.
     markOwn(step.clientId);
     setCelebrated((previous) => new Set(previous).add(stepId));
+    if (routine.oneOff) {
+      setLingering((previous) => new Map(previous).set(routine.id, routine));
+    }
 
     startTransition(async () => {
       addOptimisticDone(stepId);
@@ -188,6 +208,18 @@ export function RoutineBoard({ board }: { board: RoutineBoardData }) {
           setCelebrated((previous) => {
             const next = new Set(previous);
             next.delete(stepId);
+            return next;
+          });
+          // The same revert has to reach `lingering`, or the one-off whose
+          // deletion caused this rejection is held on screen *forever* — and
+          // held as permanently incomplete, since the completion it was holding
+          // for has just been taken back. A card that cannot be finished and
+          // cannot be dismissed is worse than the card simply going away, which
+          // is what the server has already decided happened.
+          setLingering((previous) => {
+            if (!previous.has(routine.id)) return previous;
+            const next = new Map(previous);
+            next.delete(routine.id);
             return next;
           });
         }
@@ -216,7 +248,31 @@ export function RoutineBoard({ board }: { board: RoutineBoardData }) {
     graduated: routine.graduated ? t('graduated') : null,
   });
 
-  const anythingToShow = board.sections.some((section) => section.routines.length > 0);
+  /**
+   * The server's section, plus anything this device is still holding on screen.
+   *
+   * Only the *list* is merged — the counters are left exactly as the server
+   * sent them. `loadMemberRoutines` counts a finished one-off in both the
+   * numerator and the denominator of its band even though it drops the card
+   * (the work happened, so the band still says "3 van 3"), which means a held
+   * card is already in those numbers. Recomputing the totals over
+   * `routines + held` would count it a second time and the band would read
+   * "4 van 4" for three routines.
+   */
+  const merge = (section: BoardSection) => {
+    const routines = section.routines.map(withOptimistic);
+    const present = new Set(routines.map((entry) => entry.id));
+    const held = [...lingering.values()]
+      .filter((entry) => entry.section === section.section && !present.has(entry.id))
+      .map(withOptimistic);
+
+    if (held.length === 0) return { ...section, routines };
+
+    return { ...section, routines: [...routines, ...held] };
+  };
+
+  const sections = board.sections.map(merge);
+  const anythingToShow = sections.some((section) => section.routines.length > 0);
 
   return (
     // `gap-6`, and the band below carries `mb-3` rather than `mb-4`: four time
@@ -224,7 +280,7 @@ export function RoutineBoard({ board }: { board: RoutineBoardData }) {
     // difference between the evening routine being on the wall and being below
     // a fold a kiosk cannot scroll (M19 review, F8).
     <div data-testid="routine-board" className="flex flex-col gap-6">
-      {board.sections.map((section) => (
+      {sections.map((section) => (
         <section key={section.section} data-testid={`routine-section-${section.section}`}>
           {/* The stitch band header: sticky, glass, and the progress rule runs
               the full remaining width of the row rather than sitting as a stub
@@ -267,8 +323,7 @@ export function RoutineBoard({ board }: { board: RoutineBoardData }) {
             <p className={cn('text-body text-ink-muted')}>{t('sectionEmpty')}</p>
           ) : (
             <div className="flex flex-col gap-4">
-              {section.routines.map((raw) => {
-                const routine = withOptimistic(raw);
+              {section.routines.map((routine) => {
                 const expanded = routine.id === board.activeRoutineId && !routine.complete;
 
                 return (
