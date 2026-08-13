@@ -36,11 +36,7 @@ export function HubDisplayForm({ defaultView }: { defaultView: HubView }) {
         <FieldLabel>{t('defaultView')}</FieldLabel>
         <Select name="hubDefaultView" defaultValue={defaultView}>
           <SelectTrigger size="hub" data-testid="hub-default-view">
-            {/* See `calendar-display-list.tsx`: Base UI shows the raw value
-                unless the label is formatted here. */}
-            <SelectValue>
-              {(value: HubView) => t(`views.${value === 'agenda' ? 'agenda' : 'day'}`)}
-            </SelectValue>
+            <SelectValue />
           </SelectTrigger>
           <SelectContent>
             {HUB_VIEWS.map((view) => (

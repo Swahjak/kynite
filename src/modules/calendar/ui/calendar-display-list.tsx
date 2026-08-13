@@ -160,14 +160,7 @@ function CalendarDisplayRow({ calendar }: { calendar: CalendarDisplayView }) {
         <FieldLabel>{t('visibility')}</FieldLabel>
         <Select name="visibility" defaultValue={calendar.visibility}>
           <SelectTrigger size="hub" data-testid="calendar-visibility">
-            {/* Base UI's `Select.Value` renders the raw *value* unless it is
-                given a formatter, and the raw value here is a database enum
-                (`family`/`private`). The trigger is the one place a parent
-                reads this setting without opening the list, so it has to say
-                what the option says. */}
-            <SelectValue>
-              {(value: string) => t(`visibilities.${value === 'private' ? 'private' : 'family'}`)}
-            </SelectValue>
+            <SelectValue />
           </SelectTrigger>
           <SelectContent>
             {VISIBILITY_OPTIONS.map((option) => (

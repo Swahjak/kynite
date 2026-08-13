@@ -6,7 +6,70 @@ import { Select as SelectPrimitive } from '@base-ui/react/select';
 import { cn } from '@/lib/utils';
 import { ChevronDownIcon, CheckIcon, ChevronUpIcon } from 'lucide-react';
 
-const Select = SelectPrimitive.Root;
+/**
+ * Flattens a rendered node down to its text content, the way
+ * `Element.textContent` would for a DOM subtree. `SelectItem` children are
+ * almost always a bare translated string, but this also copes with an item
+ * that wraps its label in an icon + `<span>`.
+ */
+function nodeToText(node: React.ReactNode): string {
+  if (node == null || typeof node === 'boolean') return '';
+  if (typeof node === 'string' || typeof node === 'number') return String(node);
+  if (Array.isArray(node)) return node.map(nodeToText).join('');
+  if (React.isValidElement(node)) {
+    return nodeToText((node.props as { children?: React.ReactNode }).children);
+  }
+  return '';
+}
+
+/**
+ * Walks the JSX tree a `<Select>` was given — through `SelectContent`,
+ * `SelectGroup`, `.map()` output, fragments, whatever — and collects a
+ * `{ value, label }` per `SelectItem` found. This is what makes
+ * `Select.Value` show the item's *rendered label* instead of Base UI's
+ * `serializeValue(value)` fallback (a raw enum/UUID/empty string), without
+ * every call-site having to hand-write a `<SelectValue>{(v) => ...}</SelectValue>`
+ * formatter that duplicates the item labels it sits next to.
+ */
+function collectSelectItems(
+  node: React.ReactNode,
+  acc: Array<{ value: unknown; label: React.ReactNode }>
+): void {
+  React.Children.forEach(node, (child) => {
+    if (!React.isValidElement(child)) return;
+    if (child.type === SelectItem) {
+      const itemProps = child.props as SelectPrimitive.Item.Props;
+      acc.push({
+        value: itemProps.value,
+        label: itemProps.label ?? nodeToText(itemProps.children),
+      });
+      return;
+    }
+    const childProps = child.props as { children?: React.ReactNode } | undefined;
+    if (childProps?.children !== undefined) {
+      collectSelectItems(childProps.children, acc);
+    }
+  });
+}
+
+function Select<Value = unknown, Multiple extends boolean | undefined = false>({
+  children,
+  items,
+  ...props
+}: SelectPrimitive.Root.Props<Value, Multiple>) {
+  const derivedItems = React.useMemo(() => {
+    if (items) return items;
+    const acc: Array<{ value: unknown; label: React.ReactNode }> = [];
+    collectSelectItems(children, acc);
+    return acc;
+  }, [children, items]);
+
+  return (
+    <SelectPrimitive.Root items={derivedItems} {...props}>
+      {children}
+    </SelectPrimitive.Root>
+  );
+}
 
 function SelectGroup({ className, ...props }: SelectPrimitive.Group.Props) {
   return (

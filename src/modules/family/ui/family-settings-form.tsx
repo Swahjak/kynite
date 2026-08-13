@@ -69,11 +69,7 @@ export function FamilySettingsForm({ family }: { family: Family }) {
         <FieldLabel>{t('locale')}</FieldLabel>
         <Select name="locale" defaultValue={family.locale}>
           <SelectTrigger size="hub" data-testid="family-locale">
-            {/* Base UI shows the raw value unless the label is formatted here,
-                and the raw value is a locale code. */}
-            <SelectValue>
-              {(value: string) => t(`locales.${value === 'en' ? 'en' : 'nl'}`)}
-            </SelectValue>
+            <SelectValue />
           </SelectTrigger>
           <SelectContent>
             {locales.map((locale) => (
@@ -109,9 +105,7 @@ export function FamilySettingsForm({ family }: { family: Family }) {
         <FieldLabel>{t('weekStartsOn')}</FieldLabel>
         <Select name="weekStartsOn" defaultValue={String(family.weekStartsOn)}>
           <SelectTrigger size="hub" data-testid="family-week-start">
-            <SelectValue>
-              {(value: string) => t(`weekdays.${value === '7' ? '7' : '1'}`)}
-            </SelectValue>
+            <SelectValue />
           </SelectTrigger>
           <SelectContent>
             {WEEK_STARTS.map((day) => (
