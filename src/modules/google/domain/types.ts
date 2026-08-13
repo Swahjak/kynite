@@ -156,6 +156,12 @@ export type MappedEvent = {
   exdates: string[];
   /** Google id of the series master, when this row is an override instance. */
   recurringEventId: string | null;
+  /**
+   * The instant on the master this override replaces (`originalStartTime`).
+   * The expander subtracts it, because Google — unlike our own occurrence edit
+   * — does not put an EXDATE on the master (see `event.recurrenceOriginalStart`).
+   */
+  recurrenceOriginalStart: Date | null;
   etag: string | null;
   updatedAtRemote: Date | null;
   /**

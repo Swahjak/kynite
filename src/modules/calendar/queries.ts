@@ -1,5 +1,5 @@
 import 'server-only';
-import { and, asc, eq, gt, isNull, lt, or, sql } from 'drizzle-orm';
+import { and, asc, eq, gt, inArray, isNull, lt, or, sql } from 'drizzle-orm';
 import { getDb } from '@/server/db';
 // Table objects come from the schema assembly point, not from the owning
 // slice's barrel. `@/modules/google` re-exports that slice's client components,
@@ -135,13 +135,22 @@ export async function listEvents(options: ListEventsOptions): Promise<CalendarEv
     )
     .orderBy(asc(event.startsAt));
 
+  // Only a row that recurs can generate a slot an override needs to take back,
+  // so the lookup is asked about those and nothing else.
+  const exceptions = await overrideStartsByParent(
+    rows.filter((row) => isSeries(row.event)).map((row) => row.event.id)
+  );
+
   const events: CalendarEvent[] = [];
 
   for (const row of rows) {
     const isPrivate = row.calendarVisibility === 'private';
     const redacted = isPrivate && !privateDetail;
 
-    for (const occurrence of expandSeries(row.event, window)) {
+    for (const occurrence of expandSeries(row.event, {
+      ...window,
+      excludeStarts: exceptions.get(row.event.id),
+    })) {
       events.push(toCalendarEvent(row, occurrence, redacted));
     }
   }
@@ -149,6 +158,55 @@ export async function listEvents(options: ListEventsOptions): Promise<CalendarEv
   return events.sort(
     (a, b) => a.startsAt.getTime() - b.startsAt.getTime() || a.title.localeCompare(b.title)
   );
+}
+
+/**
+ * The slots imported overrides take out of their parent series.
+ *
+ * Google does not write an EXDATE onto a master when one of its occurrences is
+ * edited — it sends a separate instance resource carrying `originalStartTime`,
+ * which sync stores as `recurrenceOriginalStart`. Without subtracting those the
+ * parent generates the occurrence *and* the child row renders it, which is the
+ * duplicate every recurring Google event showed on the board.
+ *
+ * Two deliberate details:
+ *
+ * - **Soft-deleted children count.** An override Google later cancelled means
+ *   that occurrence is gone, not that the original slot comes back.
+ * - **Rows that predate the column fall back to their own start**, and only
+ *   when they came from Google (`google_event_id IS NOT NULL`). It is exactly
+ *   right for the overwhelmingly common override — one Google rewrote in place,
+ *   same time, because somebody replied to the invitation — and it is the only
+ *   repair available for those rows, since an incremental pass will never hand
+ *   them back. A Kynite-authored override is excluded from the fallback because
+ *   its parent already carries the EXDATE, so guessing here could only subtract
+ *   an instant nobody asked it to.
+ */
+async function overrideStartsByParent(parentIds: string[]): Promise<Map<string, Date[]>> {
+  const byParent = new Map<string, Date[]>();
+  if (parentIds.length === 0) return byParent;
+
+  const rows = await getDb()
+    .select({
+      parentId: event.recurrenceParentId,
+      originalStart: event.recurrenceOriginalStart,
+      startsAt: event.startsAt,
+      googleEventId: event.googleEventId,
+    })
+    .from(event)
+    .where(inArray(event.recurrenceParentId, parentIds));
+
+  for (const row of rows) {
+    if (!row.parentId) continue;
+    const slot = row.originalStart ?? (row.googleEventId ? row.startsAt : null);
+    if (!slot) continue;
+
+    const slots = byParent.get(row.parentId);
+    if (slots) slots.push(slot);
+    else byParent.set(row.parentId, [slot]);
+  }
+
+  return byParent;
 }
 
 /** `rrule IS NOT NULL OR rdates <> '{}'` — "this row recurs", in SQL. */

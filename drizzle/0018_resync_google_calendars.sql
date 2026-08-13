@@ -1,0 +1,25 @@
+-- M20: one forced full sync per Google calendar, to repair two classes of row
+-- that an incremental pass can never revisit.
+--
+-- `sync_token` is Google's "everything since here" cursor: a pass that carries
+-- one is handed *only* the events that changed since it was issued. That is the
+-- whole point of it, and it is also why both repairs below are impossible from
+-- code alone — the rows that need repairing are precisely the ones nothing has
+-- touched since they were imported.
+--
+--  1. **Working-location cards.** `isStatusOnly` (modules/google/domain/mapping.ts)
+--     keeps `workingLocation`/`focusTime`/`outOfOffice` entries off the board and
+--     tombstones any it finds — but only for entries Google actually hands back.
+--     A household that synced before that filter existed still has yesterday's
+--     "Working location: Home" on its wall, and would keep it forever.
+--  2. **Recurring overrides with no recorded original slot.** `0017` adds
+--     `event.recurrence_original_start`; the value comes from Google's
+--     `originalStartTime`, which only arrives with the instance resource.
+--
+-- Clearing the cursor makes the next scheduled poll (§5, every 15 minutes) a
+-- full list for that calendar, which is the same path a 410 GONE already takes —
+-- so this exercises no new code, and one extra paginated list per calendar, once,
+-- is the entire cost. `synced_at` is deliberately left alone: it records when we
+-- last heard from Google, which this statement does not change.
+
+UPDATE "calendar" SET "sync_token" = NULL WHERE "sync_token" IS NOT NULL;

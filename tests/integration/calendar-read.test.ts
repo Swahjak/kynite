@@ -159,6 +159,59 @@ describe.skipIf(!databaseUrl)('calendar read path (integration)', () => {
         pendingSyncAt: new Date(),
       },
     ]);
+
+    // Two imported series whose 9/10 March occurrence was edited in Google.
+    // Neither master carries an EXDATE, because Google does not write one — the
+    // exception is the child row alone, which is why the parent used to
+    // generate the slot a second time.
+    const masters = await db
+      .insert(event)
+      .values([
+        {
+          familyId: household.familyId,
+          calendarId: familyCalendarId,
+          googleEventId: `weekly-${randomUUID()}`,
+          title: 'Teamoverleg',
+          startsAt: new Date('2026-03-02T07:30:00.000Z'),
+          endsAt: new Date('2026-03-02T08:30:00.000Z'),
+          rrule: 'FREQ=WEEKLY;BYDAY=MO',
+        },
+        {
+          familyId: household.familyId,
+          calendarId: familyCalendarId,
+          googleEventId: `swim-${randomUUID()}`,
+          title: 'Zwemles',
+          startsAt: new Date('2026-03-03T15:00:00.000Z'),
+          endsAt: new Date('2026-03-03T16:00:00.000Z'),
+          rrule: 'FREQ=WEEKLY;BYDAY=TU',
+        },
+      ])
+      .returning();
+
+    await db.insert(event).values([
+      {
+        familyId: household.familyId,
+        calendarId: familyCalendarId,
+        googleEventId: `weekly-instance-${randomUUID()}`,
+        title: 'Teamoverleg (met Sanne)',
+        startsAt: new Date('2026-03-09T07:30:00.000Z'),
+        endsAt: new Date('2026-03-09T08:30:00.000Z'),
+        recurrenceParentId: masters[0].id,
+        recurrenceOriginalStart: new Date('2026-03-09T07:30:00.000Z'),
+      },
+      {
+        // The same shape, imported *before* `recurrence_original_start`
+        // existed: nothing records the slot it replaces, so the read falls back
+        // to its own start. This is the already-duplicated row on a live board.
+        familyId: household.familyId,
+        calendarId: familyCalendarId,
+        googleEventId: `swim-instance-${randomUUID()}`,
+        title: 'Zwemles (afspraak)',
+        startsAt: new Date('2026-03-10T15:00:00.000Z'),
+        endsAt: new Date('2026-03-10T16:00:00.000Z'),
+        recurrenceParentId: masters[1].id,
+      },
+    ]);
   });
 
   afterAll(async () => {
@@ -189,6 +242,24 @@ describe.skipIf(!databaseUrl)('calendar read path (integration)', () => {
 
     expect(instances).toHaveLength(1);
     expect(instances[0].startsAt.toISOString()).toBe('2026-03-12T13:00:00.000Z');
+  });
+
+  it('renders an imported override once, not alongside the slot it replaces', async () => {
+    const events = await read(true);
+    const instances = events.filter((item) => item.title.startsWith('Teamoverleg'));
+
+    expect(instances.map((item) => item.title)).toEqual(['Teamoverleg (met Sanne)']);
+    expect(instances[0].startsAt.toISOString()).toBe('2026-03-09T07:30:00.000Z');
+  });
+
+  it('dedupes an override imported before the original slot was recorded', async () => {
+    const events = await read(true);
+    const instances = events.filter((item) => item.title.startsWith('Zwemles'));
+
+    // The fallback: a Google-sourced child with no recorded original slot
+    // suppresses its own start on the parent, which is exactly the occurrence
+    // it replaced for every override Google rewrote in place.
+    expect(instances.map((item) => item.title)).toEqual(['Zwemles (afspraak)']);
   });
 
   it('omits soft-deleted rows', async () => {

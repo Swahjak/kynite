@@ -185,6 +185,31 @@ describe('EXDATE / RDATE', () => {
     ]);
   });
 
+  it('removes the slot an imported Google override replaces, which carries no EXDATE', () => {
+    // Google never writes an EXDATE onto the master: the exception is a
+    // separate instance resource, stored as a child row with the original slot
+    // on it (`event.recurrence_original_start`). Without the subtraction the
+    // parent generates 9 March *and* the child renders it — the duplicate.
+    const imported = series({ rrule: 'FREQ=WEEKLY;BYDAY=MO' });
+    const window = {
+      from: new Date('2026-03-01T00:00:00.000Z'),
+      to: new Date('2026-03-24T00:00:00.000Z'),
+    };
+
+    expect(localStarts(expandSeries(imported, window))).toContain('2026-03-09 08:30');
+
+    const deduped = expandSeries(imported, {
+      ...window,
+      excludeStarts: [new Date('2026-03-09T07:30:00.000Z')],
+    });
+
+    expect(localStarts(deduped)).toEqual([
+      '2026-03-02 08:30',
+      '2026-03-16 08:30',
+      '2026-03-23 08:30',
+    ]);
+  });
+
   it('honours a UTC EXDATE value as UTC, not as the series zone', () => {
     // 07:30Z *is* 08:30 Amsterdam — the same instant the rule generates.
     const occurrences = expandSeries(

@@ -207,9 +207,14 @@ async function applyItems({
      * `continue`, and that is deliberate: a household that synced before this
      * filter existed already has these rows on its board, and a filter that
      * only stopped *new* ones would leave yesterday's "Working location: Home"
-     * on the wall forever. Treating a known status entry as a deletion is what
-     * repairs those boards on the next incremental pass; an unknown one is
-     * simply skipped, because there is nothing to remove.
+     * on the wall forever. Treating a known status entry as a deletion removes
+     * those rows the moment Google hands the entry back; an entry we never
+     * stored is simply skipped, because there is nothing to remove.
+     *
+     * That last clause is why `drizzle/0018` clears every calendar's sync
+     * token: an incremental pass is handed *only* what changed, so a stale
+     * status entry nobody has touched since it was imported would never come
+     * back round to be tombstoned. One forced full pass per calendar does it.
      */
     if (isTombstone(item) || isStatusOnly(item)) {
       const removed = await store.tombstone(calendar, item.id, now());

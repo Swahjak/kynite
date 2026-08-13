@@ -10,10 +10,13 @@
  *
  *   (every RRULE ∪ every RDATE) − every EXDATE
  *
- * Overrides need no step of their own. "Edit this one occurrence" writes a
- * child row carrying `recurrenceParentId` *and* an EXDATE on the parent — the
- * same shape Google uses — so the parent stops generating that instant and the
- * child expands as the single-instance series it now is.
+ * Overrides are the one asymmetry. "Edit this one occurrence" in Kynite writes
+ * a child row carrying `recurrenceParentId` *and* an EXDATE on the parent, so
+ * the parent stops generating that instant and the child expands as the
+ * single-instance series it now is. Google does the first half only: its
+ * override is a separate instance resource and the master's recurrence is left
+ * untouched. So an imported exception arrives as `excludeStarts` instead —
+ * same subtraction, a slot the caller supplies rather than one the row carries.
  */
 
 import { parseRule, parseDateTimeValue, occurrencesOf, type Rule } from './rrule';
@@ -52,6 +55,19 @@ export type ExpandOptions = {
   to: Date;
   /** Ceiling on instances per series — a runaway rule cannot flood a view. */
   maxPerSeries?: number;
+  /**
+   * Extra instants this series must not generate, on top of its own EXDATEs.
+   *
+   * These are the original slots of *imported* override instances (Google's
+   * `originalStartTime`). Google expresses "this occurrence moved" as a
+   * separate instance resource and leaves the master's recurrence untouched,
+   * so an imported series has no EXDATE for the slot its child replaces —
+   * without this, the parent generates the occurrence and the child row
+   * renders it again, which is the duplicate every recurring Google event
+   * showed. A Kynite-authored occurrence edit needs nothing here: it writes
+   * the EXDATE itself (`modules/calendar/actions.ts`).
+   */
+  excludeStarts?: Iterable<Date>;
 };
 
 const DEFAULT_MAX_PER_SERIES = 750;
@@ -165,6 +181,9 @@ export function expandSeries(series: ExpandableSeries, options: ExpandOptions): 
   for (const line of series.exdates) {
     for (const instant of parseDateLine(line, series.tz)) starts.delete(instant.getTime());
   }
+  // Imported overrides, which carry their exception on the child rather than as
+  // an EXDATE on this row (see `excludeStarts`).
+  for (const instant of options.excludeStarts ?? []) starts.delete(instant.getTime());
 
   return [...starts]
     .sort((a, b) => a - b)

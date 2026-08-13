@@ -4,11 +4,12 @@ import {
   EventMappingError,
   UNTITLED,
   fromGoogleEvent,
+  isStatusOnly,
   isTombstone,
   toAllDayDate,
   toGoogleEvent,
 } from '@/modules/google/domain/mapping';
-import { googleEvent, tombstone } from './support/fixtures';
+import { googleEvent, importedSeries, statusEntry, tombstone } from './support/fixtures';
 
 /** Google `events` resource ⇄ `event` row (docs/architecture.md §3). */
 
@@ -46,6 +47,47 @@ describe('fromGoogleEvent', () => {
 
   it('rejects an event with no usable start', () => {
     expect(() => fromGoogleEvent(googleEvent({ start: {} }))).toThrow(EventMappingError);
+  });
+
+  it('records the slot an override replaces, which Google leaves off the master', () => {
+    const { master, override } = importedSeries();
+
+    // The master's rule has no EXDATE for the overridden week — the exception
+    // lives entirely on the instance, so `originalStartTime` is the only thing
+    // that can stop the parent generating that slot twice.
+    expect(fromGoogleEvent(master).rrule).toBe('FREQ=WEEKLY;BYDAY=MO');
+    expect(fromGoogleEvent(master).exdates).toEqual([]);
+    expect(fromGoogleEvent(master).recurrenceOriginalStart).toBeNull();
+
+    const mapped = fromGoogleEvent(override);
+    expect(mapped.recurringEventId).toBe('weekly-master');
+    expect(mapped.recurrenceOriginalStart?.toISOString()).toBe('2026-03-09T07:30:00.000Z');
+  });
+
+  it('leaves the original slot null for an ordinary event and for an unparsable one', () => {
+    expect(fromGoogleEvent(googleEvent()).recurrenceOriginalStart).toBeNull();
+    expect(
+      fromGoogleEvent(googleEvent({ recurringEventId: 'master', originalStartTime: {} }))
+        .recurrenceOriginalStart
+    ).toBeNull();
+  });
+});
+
+describe('isStatusOnly', () => {
+  it('rejects the status entries a work calendar emits constantly', () => {
+    for (const eventType of ['workingLocation', 'focusTime', 'outOfOffice']) {
+      expect(isStatusOnly(statusEntry(eventType)), eventType).toBe(true);
+    }
+  });
+
+  it('keeps the event types that are real appointments', () => {
+    // `birthday` and `fromGmail` are deliberately *not* status entries: a
+    // birthday is the one imported event a child looks for, and a Gmail-parsed
+    // booking is a flight with a real time and a real place.
+    for (const eventType of ['default', 'birthday', 'fromGmail', 'somethingGoogleAddedLater']) {
+      expect(isStatusOnly(statusEntry(eventType)), eventType).toBe(false);
+    }
+    expect(isStatusOnly(googleEvent())).toBe(false);
   });
 });
 

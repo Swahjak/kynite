@@ -76,6 +76,7 @@ const emptyMapped = (googleEventId: string): MappedEvent => ({
   rdates: [],
   exdates: [],
   recurringEventId: null,
+  recurrenceOriginalStart: null,
   etag: null,
   updatedAtRemote: null,
   ownerMemberId: null,

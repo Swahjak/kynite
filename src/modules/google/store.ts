@@ -57,6 +57,10 @@ function upsertValues(
     rdates: input.rdates,
     exdates: input.exdates,
     recurrenceParentId: parentId,
+    // The slot this override replaces on its master. Null on a master (and on
+    // an override Google sent without one), which the expander reads as
+    // "nothing to suppress".
+    recurrenceOriginalStart: input.recurrenceOriginalStart,
     // M18 attribution. On an *insert* these are simply what the pass resolved;
     // the conflict branch below is where the interesting rule lives.
     ownerMemberId: input.ownerMemberId,
@@ -86,6 +90,11 @@ async function upsertEvent(
         // Keep the parent link when this pass did not resolve one (an override
         // whose master arrives in a later page).
         recurrenceParentId: parentId ?? sql`${event.recurrenceParentId}`,
+        // Same rule, same reason: the push-echo path re-maps our own write and
+        // carries no `originalStartTime`, and forgetting the slot an override
+        // replaces would resurrect the duplicate this column exists to kill.
+        recurrenceOriginalStart:
+          input.recurrenceOriginalStart ?? sql`${event.recurrenceOriginalStart}`,
         /**
          * Attribution is **never destructive on update** (M18).
          *
