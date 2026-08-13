@@ -177,13 +177,20 @@ describe.skipIf(!databaseUrl)('calendar read path (integration)', () => {
           rrule: 'FREQ=WEEKLY;BYDAY=MO',
         },
         {
+          // A Kynite-authored "this occurrence only" *move*: the parent carries
+          // the EXDATE for 11 March and the child sits on the 12th, which the
+          // daily rule also generates. The child has a `google_event_id`
+          // (`claimGoogleEventId` stamps one before insert) and no original
+          // start — so any read that guessed the slot from the child's own
+          // start would delete the legitimate occurrence on the 12th.
           familyId: household.familyId,
           calendarId: familyCalendarId,
-          googleEventId: `swim-${randomUUID()}`,
-          title: 'Zwemles',
-          startsAt: new Date('2026-03-03T15:00:00.000Z'),
-          endsAt: new Date('2026-03-03T16:00:00.000Z'),
-          rrule: 'FREQ=WEEKLY;BYDAY=TU',
+          googleEventId: `tutor-${randomUUID()}`,
+          title: 'Bijles',
+          startsAt: new Date('2026-03-09T16:00:00.000Z'),
+          endsAt: new Date('2026-03-09T17:00:00.000Z'),
+          rrule: 'FREQ=DAILY',
+          exdates: ['EXDATE:20260311T160000Z'],
         },
       ])
       .returning();
@@ -200,15 +207,13 @@ describe.skipIf(!databaseUrl)('calendar read path (integration)', () => {
         recurrenceOriginalStart: new Date('2026-03-09T07:30:00.000Z'),
       },
       {
-        // The same shape, imported *before* `recurrence_original_start`
-        // existed: nothing records the slot it replaces, so the read falls back
-        // to its own start. This is the already-duplicated row on a live board.
+        // The moved occurrence: 11 March, dragged onto the 12th.
         familyId: household.familyId,
         calendarId: familyCalendarId,
-        googleEventId: `swim-instance-${randomUUID()}`,
-        title: 'Zwemles (afspraak)',
-        startsAt: new Date('2026-03-10T15:00:00.000Z'),
-        endsAt: new Date('2026-03-10T16:00:00.000Z'),
+        googleEventId: `tutor-instance-${randomUUID()}`,
+        title: 'Bijles (verzet)',
+        startsAt: new Date('2026-03-12T16:00:00.000Z'),
+        endsAt: new Date('2026-03-12T17:00:00.000Z'),
         recurrenceParentId: masters[1].id,
       },
     ]);
@@ -252,14 +257,23 @@ describe.skipIf(!databaseUrl)('calendar read path (integration)', () => {
     expect(instances[0].startsAt.toISOString()).toBe('2026-03-09T07:30:00.000Z');
   });
 
-  it('dedupes an override imported before the original slot was recorded', async () => {
+  it('keeps the occurrence a moved override happens to land on', async () => {
     const events = await read(true);
-    const instances = events.filter((item) => item.title.startsWith('Zwemles'));
+    const starts = (title: string) =>
+      events.filter((item) => item.title === title).map((item) => item.startsAt.toISOString());
 
-    // The fallback: a Google-sourced child with no recorded original slot
-    // suppresses its own start on the parent, which is exactly the occurrence
-    // it replaced for every override Google rewrote in place.
-    expect(instances.map((item) => item.title)).toEqual(['Zwemles (afspraak)']);
+    // 11 March is gone (the parent's EXDATE) and the 12th is *not*: the moved
+    // child shares that instant with a legitimate occurrence of the series, and
+    // a child with no recorded original slot must subtract nothing.
+    expect(starts('Bijles')).toEqual([
+      '2026-03-09T16:00:00.000Z',
+      '2026-03-10T16:00:00.000Z',
+      '2026-03-12T16:00:00.000Z',
+      '2026-03-13T16:00:00.000Z',
+      '2026-03-14T16:00:00.000Z',
+      '2026-03-15T16:00:00.000Z',
+    ]);
+    expect(starts('Bijles (verzet)')).toEqual(['2026-03-12T16:00:00.000Z']);
   });
 
   it('omits soft-deleted rows', async () => {

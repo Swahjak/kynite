@@ -102,9 +102,11 @@ export const event = pgTable(
      * as a child row while its parent kept generating the very slot the child
      * replaces — the "every recurring event shows twice" duplicate.
      *
-     * Null for a native override (the parent's EXDATE already covers it) and
-     * for rows imported before this column existed; `listEvents` falls back to
-     * the child's own start for those.
+     * Null for a native override, where the parent's EXDATE already covers the
+     * slot. A row imported before this column existed is also null until the
+     * sync engine backfills it (`needsExceptionBackfill`), and a null subtracts
+     * nothing — guessing the slot from the child's own start would delete a
+     * legitimate occurrence whenever the override was *moved* onto one.
      */
     recurrenceOriginalStart: timestamp('recurrence_original_start', { withTimezone: true }),
     /** Last-write-wins inputs: our `If-Match` token and Google's `updated`. */

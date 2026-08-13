@@ -56,6 +56,7 @@ export type MemoryStore = SyncStore &
       familyId: string;
       googleEventId: string | null;
       etag?: string | null;
+      recurrenceOriginalStart?: Date | null;
       updatedAtRemote?: Date | null;
       updatedAt?: Date;
       deletedAt?: Date | null;
@@ -106,6 +107,7 @@ export function createMemoryStore(log: CallLog = []): MemoryStore {
         familyId: input.familyId,
         googleEventId: input.googleEventId,
         etag: input.etag ?? null,
+        recurrenceOriginalStart: input.recurrenceOriginalStart ?? null,
         updatedAtRemote: input.updatedAtRemote ?? null,
         updatedAt: input.updatedAt ?? new Date(0),
         version: 0,
@@ -147,6 +149,12 @@ export function createMemoryStore(log: CallLog = []): MemoryStore {
               : existing.mapped.attendeeMemberIds,
         };
         existing.etag = input.etag;
+        // Mirrors `store.ts`: an instance resource always carries both fields,
+        // so the presence of `recurringEventId` is what decides — a detached
+        // exception stops suppressing a slot it no longer belongs to.
+        existing.recurrenceOriginalStart = input.recurringEventId
+          ? (input.recurrenceOriginalStart ?? existing.recurrenceOriginalStart)
+          : null;
         existing.updatedAtRemote = input.updatedAtRemote;
         existing.deletedAt = null;
         existing.version += 1;
@@ -160,6 +168,7 @@ export function createMemoryStore(log: CallLog = []): MemoryStore {
         familyId: calendar.familyId,
         googleEventId: input.googleEventId,
         etag: input.etag,
+        recurrenceOriginalStart: input.recurrenceOriginalStart,
         updatedAtRemote: input.updatedAtRemote,
         updatedAt: new Date(),
         version: 0,

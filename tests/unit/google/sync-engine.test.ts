@@ -158,6 +158,71 @@ describe('imported recurring series', () => {
       '2026-03-09T07:30:00.000Z'
     );
   });
+
+  it('backfills the original slot on a row imported before the column existed', async () => {
+    // The row the forced full pass (`drizzle/0018`) exists to repair: same
+    // etag, so echo suppression would skip it and leave the slot unrecorded
+    // forever — and the parent generating the occurrence its child renders.
+    const store = createMemoryStore();
+    const emit = createRecordingEmitter();
+    const { master, override } = importedSeries();
+    const legacy = store.seed({
+      calendarId: testCalendar.id,
+      familyId: testCalendar.familyId,
+      googleEventId: override.id,
+      etag: override.etag,
+      recurrenceOriginalStart: null,
+    });
+    const api = createFakeApi({ listEvents: [{ items: [master, override], nextSyncToken: 't' }] });
+
+    const result = await syncCalendar({ calendar: testCalendar, api, store, emit });
+
+    expect(result.skipped).toBe(0);
+    expect(legacy.recurrenceOriginalStart?.toISOString()).toBe('2026-03-09T07:30:00.000Z');
+    expect(legacy.recurrenceParentId).toBe(store.byGoogleId(master.id)!.id);
+  });
+
+  it('still skips an override whose slot is already recorded', async () => {
+    // The backfill converges: once the value is there, the same item on the
+    // next pass is an ordinary echo again.
+    const store = createMemoryStore();
+    const emit = createRecordingEmitter();
+    const { override } = importedSeries();
+    store.seed({
+      calendarId: testCalendar.id,
+      familyId: testCalendar.familyId,
+      googleEventId: override.id,
+      etag: override.etag,
+      recurrenceOriginalStart: new Date('2026-03-09T07:30:00.000Z'),
+    });
+    const api = createFakeApi({ listEvents: [{ items: [override], nextSyncToken: 't' }] });
+
+    const result = await syncCalendar({ calendar: testCalendar, api, store, emit });
+
+    expect(result.skipped).toBe(1);
+    expect(result.upserted).toBe(0);
+  });
+
+  it('stops suppressing a slot once Google detaches the exception', async () => {
+    const store = createMemoryStore();
+    const emit = createRecordingEmitter();
+    const { override } = importedSeries();
+    const row = store.seed({
+      calendarId: testCalendar.id,
+      familyId: testCalendar.familyId,
+      googleEventId: override.id,
+      etag: '"etag-old"',
+      recurrenceOriginalStart: new Date('2026-03-09T07:30:00.000Z'),
+    });
+    // A detached instance arrives as a plain event: no `recurringEventId`, no
+    // `originalStartTime`. It belongs to no series, so it takes no slot.
+    const detached = { ...override, recurringEventId: undefined, originalStartTime: undefined };
+    const api = createFakeApi({ listEvents: [{ items: [detached], nextSyncToken: 't' }] });
+
+    await syncCalendar({ calendar: testCalendar, api, store, emit });
+
+    expect(row.recurrenceOriginalStart).toBeNull();
+  });
 });
 
 describe('incremental sync', () => {

@@ -21,5 +21,15 @@
 -- so this exercises no new code, and one extra paginated list per calendar, once,
 -- is the entire cost. `synced_at` is deliberately left alone: it records when we
 -- last heard from Google, which this statement does not change.
+--
+-- **Best-effort, and worth saying out loud.** A sync pass already in flight when
+-- this runs finishes by writing its own `next_sync_token` over the NULL, and
+-- that calendar simply keeps its old cursor: the repair is skipped, not broken —
+-- it stays exactly as stale as it is today, and the next token expiry (410) or
+-- any re-run of this statement picks it up. The migration is not re-runnable by
+-- itself either, since drizzle records it as applied. Neither is worth a lock or
+-- a bespoke repair-version column: the failure mode is "one household waits
+-- longer", and both repairs are also applied to every row Google hands back for
+-- any other reason.
 
 UPDATE "calendar" SET "sync_token" = NULL WHERE "sync_token" IS NOT NULL;

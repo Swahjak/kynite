@@ -1,5 +1,5 @@
 import 'server-only';
-import { and, asc, eq, gt, inArray, isNull, lt, or, sql } from 'drizzle-orm';
+import { and, asc, eq, gt, inArray, isNotNull, isNull, lt, or, sql } from 'drizzle-orm';
 import { getDb } from '@/server/db';
 // Table objects come from the schema assembly point, not from the owning
 // slice's barrel. `@/modules/google` re-exports that slice's client components,
@@ -173,37 +173,36 @@ export async function listEvents(options: ListEventsOptions): Promise<CalendarEv
  *
  * - **Soft-deleted children count.** An override Google later cancelled means
  *   that occurrence is gone, not that the original slot comes back.
- * - **Rows that predate the column fall back to their own start**, and only
- *   when they came from Google (`google_event_id IS NOT NULL`). It is exactly
- *   right for the overwhelmingly common override — one Google rewrote in place,
- *   same time, because somebody replied to the invitation — and it is the only
- *   repair available for those rows, since an incremental pass will never hand
- *   them back. A Kynite-authored override is excluded from the fallback because
- *   its parent already carries the EXDATE, so guessing here could only subtract
- *   an instant nobody asked it to.
+ * - **A null `recurrenceOriginalStart` subtracts nothing.** The obvious guess —
+ *   fall back to the child's own start — is wrong for the one case it would
+ *   have to be right about: an occurrence that was *moved*. A "this occurrence
+ *   only" drag lands the child on a different instant, and subtracting that
+ *   instant deletes whichever occurrence the series legitimately generates
+ *   there (a daily event moved to tomorrow, a weekly one moved a week). Nor is
+ *   `google_event_id IS NULL` a way to spot a native override and dodge it:
+ *   `pushStore.claimGoogleEventId` stamps an id on a Kynite-authored child
+ *   before it is even inserted. Rows imported before the column existed are
+ *   repaired at the source instead — `needsExceptionBackfill` in the sync
+ *   engine writes the real `originalStartTime` through echo suppression on the
+ *   full pass `drizzle/0018` forces.
  */
 async function overrideStartsByParent(parentIds: string[]): Promise<Map<string, Date[]>> {
   const byParent = new Map<string, Date[]>();
   if (parentIds.length === 0) return byParent;
 
   const rows = await getDb()
-    .select({
-      parentId: event.recurrenceParentId,
-      originalStart: event.recurrenceOriginalStart,
-      startsAt: event.startsAt,
-      googleEventId: event.googleEventId,
-    })
+    .select({ parentId: event.recurrenceParentId, originalStart: event.recurrenceOriginalStart })
     .from(event)
-    .where(inArray(event.recurrenceParentId, parentIds));
+    .where(
+      and(inArray(event.recurrenceParentId, parentIds), isNotNull(event.recurrenceOriginalStart))
+    );
 
   for (const row of rows) {
-    if (!row.parentId) continue;
-    const slot = row.originalStart ?? (row.googleEventId ? row.startsAt : null);
-    if (!slot) continue;
+    if (!row.parentId || !row.originalStart) continue;
 
     const slots = byParent.get(row.parentId);
-    if (slots) slots.push(slot);
-    else byParent.set(row.parentId, [slot]);
+    if (slots) slots.push(row.originalStart);
+    else byParent.set(row.parentId, [row.originalStart]);
   }
 
   return byParent;

@@ -210,6 +210,38 @@ describe('EXDATE / RDATE', () => {
     ]);
   });
 
+  it('matches an all-day exclusion on the day, across a DST boundary', () => {
+    // All-day dates are stored as exact UTC midnights, but expansion is
+    // wall-clock in the series zone — so after the clocks go forward the
+    // generated instant is an hour off the midnight the override carries.
+    // Birthdays and holiday feeds are all-day series, so an instant comparison
+    // would fail on exactly the imports a family has most of.
+    const yearly = series({
+      startsAt: new Date('2026-03-02T00:00:00.000Z'),
+      endsAt: new Date('2026-03-03T00:00:00.000Z'),
+      allDay: true,
+      rrule: 'FREQ=WEEKLY;BYDAY=MO',
+    });
+    const window = {
+      from: new Date('2026-03-23T00:00:00.000Z'),
+      to: new Date('2026-04-07T00:00:00.000Z'),
+    };
+
+    // 30 March is in CEST; the rule generates 23:00Z on the 29th for it.
+    const before = expandSeries(yearly, window);
+    expect(before.map((item) => item.startsAt.toISOString())).toContain('2026-03-29T23:00:00.000Z');
+
+    const deduped = expandSeries(yearly, {
+      ...window,
+      excludeStarts: [new Date('2026-03-30T00:00:00.000Z')],
+    });
+
+    expect(deduped).toHaveLength(before.length - 1);
+    expect(deduped.map((item) => item.startsAt.toISOString())).not.toContain(
+      '2026-03-29T23:00:00.000Z'
+    );
+  });
+
   it('honours a UTC EXDATE value as UTC, not as the series zone', () => {
     // 07:30Z *is* 08:30 Amsterdam — the same instant the rule generates.
     const occurrences = expandSeries(

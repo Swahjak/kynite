@@ -183,7 +183,7 @@ export function expandSeries(series: ExpandableSeries, options: ExpandOptions): 
   }
   // Imported overrides, which carry their exception on the child rather than as
   // an EXDATE on this row (see `excludeStarts`).
-  for (const instant of options.excludeStarts ?? []) starts.delete(instant.getTime());
+  subtractExcluded(starts, options.excludeStarts, series);
 
   return [...starts]
     .sort((a, b) => a - b)
@@ -200,6 +200,44 @@ export function expandSeries(series: ExpandableSeries, options: ExpandOptions): 
       };
     })
     .filter((occurrence) => overlaps(occurrence.startsAt, occurrence.endsAt, from, to));
+}
+
+/**
+ * Remove the excluded slots from a generated set — by instant for a timed
+ * series, by *day* for an all-day one.
+ *
+ * The two halves of an all-day series do not meet on the instant. A stored
+ * all-day date is an exact UTC midnight (M05's `parseAllDay`, so the date
+ * carries no zone), and that is what an override's `originalStartTime` maps to
+ * as well — but expansion is wall-clock in the series zone, so a rule anchored
+ * at 00:00Z generates 01:00 Amsterdam in winter and, once the clocks go
+ * forward, an instant an hour off the midnight it means. Comparing instants
+ * would therefore stop matching at the DST boundary, and silently: birthdays
+ * and holiday feeds are all-day series, which is most of what a family
+ * imports. The calendar day is the thing both sides actually agree on — read
+ * in the series zone for the generated instant (where the wall clock is intact)
+ * and in UTC for the stored date (where the date means what it says), exactly
+ * as `dayKeysOf` splits it.
+ */
+function subtractExcluded(
+  starts: Set<number>,
+  excludeStarts: Iterable<Date> | undefined,
+  series: ExpandableSeries
+): void {
+  if (!excludeStarts) return;
+
+  if (!series.allDay) {
+    for (const instant of excludeStarts) starts.delete(instant.getTime());
+    return;
+  }
+
+  const excludedDays = new Set<string>();
+  for (const instant of excludeStarts) excludedDays.add(toDateKey(toWall(instant, 'UTC')));
+  if (excludedDays.size === 0) return;
+
+  for (const start of [...starts]) {
+    if (excludedDays.has(toDateKey(toWall(new Date(start), series.tz)))) starts.delete(start);
+  }
 }
 
 /** Half-open overlap, with zero-length events counted at their own instant. */

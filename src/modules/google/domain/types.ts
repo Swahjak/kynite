@@ -179,6 +179,11 @@ export type StoredEvent = {
   id: string;
   googleEventId: string | null;
   etag: string | null;
+  /**
+   * What we recorded as the slot this override replaces — read back so the
+   * engine can tell "unchanged" from "never recorded" (`needsExceptionBackfill`).
+   */
+  recurrenceOriginalStart: Date | null;
   updatedAtRemote: Date | null;
   updatedAt: Date;
   version: number;
