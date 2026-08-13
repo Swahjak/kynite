@@ -3,8 +3,8 @@
 import { useMemo } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Icon } from '@/components/ui/icon';
+import { CategoryDot, EmptyState, MemberFace } from '@/components/kynite';
+import { Card } from '@/components/ui/card';
 // Type-only, and deliberately so: this is a client component, and
 // `@/modules/family` re-exports `queries.ts`, which is `server-only` and pulls
 // the Postgres client. A value import here would put the database driver (and
@@ -80,10 +80,11 @@ export function PersonColumns({
   return (
     <div data-slot="person-columns" className="flex min-h-0 flex-1 flex-col gap-3">
       {shared.length > 0 && (
-        <section
-          data-slot="shared-events"
-          className={cn('flex flex-col gap-2 rounded-xl bg-surface p-3', hub && 'p-4')}
-        >
+        // `layout.md` § "Content area": the board's blocks are the shell's
+        // nested content cards — white, rounded, `0 1px 2px rgba(0,0,0,0.04)`
+        // and *no* border (`components.md` § Cards: elevation, not outline, is
+        // what separates a card from the ground). `Card` is that shape.
+        <Card data-slot="shared-events" size="sm" className={cn('gap-2 p-3', hub && 'p-4')}>
           <h3 className="label-overline text-ink-muted">{t('everyone')}</h3>
           <div className={cn('flex flex-wrap gap-2')}>
             {shared.map((event) => (
@@ -97,7 +98,7 @@ export function PersonColumns({
               />
             ))}
           </div>
-        </section>
+        </Card>
       )}
 
       <div
@@ -117,19 +118,23 @@ export function PersonColumns({
           const palette = CATEGORY_CLASSES[member.color];
 
           return (
-            <section
+            <Card
               key={member.id}
               data-slot="member-column"
               data-member-id={member.id}
-              className="flex min-h-0 min-w-0 flex-col gap-2 rounded-xl bg-surface p-3"
+              size="sm"
+              className="min-h-0 min-w-0 gap-2 p-3"
             >
-              <header className="flex items-center gap-2 border-b border-line pb-2">
-                <Avatar size={hub ? 'hub' : 'default'}>
-                  {member.avatarUrl ? <AvatarImage src={member.avatarUrl} alt="" /> : null}
-                  <AvatarFallback className={palette.surface}>
-                    {member.displayName.trim().slice(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
+              {/* `Card/Stat`'s header rule: "Header row separated by
+                  `border-bottom:1px solid #e1e3e4`" — the `#e1e3e4` divider
+                  tone (`--line-subtle`), not the darker `#c4c5d9` outline. */}
+              <header className="flex items-center gap-2 border-b border-line-subtle pb-2">
+                <MemberFace
+                  size={hub ? 'hub' : 'default'}
+                  avatarUrl={member.avatarUrl}
+                  name={member.displayName}
+                  surfaceClass={palette.surface}
+                />
                 <div className="min-w-0 flex-1">
                   <div
                     className={cn(
@@ -144,17 +149,17 @@ export function PersonColumns({
                   </div>
                 </div>
                 {/* The member's own color, present on every surface they own. */}
-                <span className={cn('size-3 shrink-0 rounded-full', palette.solid)} />
+                <CategoryDot size="md" className={cn('size-3', palette.solid)} />
               </header>
 
               <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">
                 {memberEvents.length === 0 ? (
-                  <div className="flex flex-1 flex-col items-center justify-center gap-1 py-6 text-center">
-                    <Icon name="wb_sunny" size={hub ? 'xl' : 'md'} className="text-ink-muted" />
-                    <span className={cn('text-ink-muted', hub ? 'text-body' : 'text-caption')}>
-                      {t('freeDay')}
-                    </span>
-                  </div>
+                  <EmptyState
+                    size={hub ? 'page' : 'inline'}
+                    icon="wb_sunny"
+                    title={t('freeDay')}
+                    className="flex-1 justify-center"
+                  />
                 ) : (
                   memberEvents.map((event) => (
                     <EventChip
@@ -181,7 +186,7 @@ export function PersonColumns({
                   ))
                 )}
               </div>
-            </section>
+            </Card>
           );
         })}
       </div>

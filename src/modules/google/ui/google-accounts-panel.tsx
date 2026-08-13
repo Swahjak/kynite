@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useSubmitGuard } from '@/components/ui/use-submit-guard';
 import { idleState, type ActionState } from '../action-state';
 import {
@@ -76,34 +76,35 @@ export function GoogleAccountsPanel({
         </p>
       ) : null}
 
-      <Card className="flex flex-col gap-3 p-4 sm:p-5">
-        <div className="flex flex-col gap-1">
-          <h2 className="font-display text-h3 font-semibold text-ink">{t('link.title')}</h2>
-          <p className="text-body-sm text-ink-secondary">{t('link.description')}</p>
-        </div>
-
-        {configured ? (
-          // A real anchor, not `next/link`: the target is a route handler whose
-          // response is a cross-origin redirect to Google's consent screen, so
-          // client-side navigation would be wrong (and `no-html-link-for-pages`
-          // is checking for *page* routes, which this is not).
-          <Button
-            // eslint-disable-next-line @next/next/no-html-link-for-pages
-            render={<a href="/api/google/oauth/start" />}
-            // Renders as an `<a>`, not a native `<button>` — without this,
-            // Base UI's `Button` warns about the native-button
-            // keyboard/disabled assumptions it makes by default (F7).
-            nativeButton={false}
-            size="hub"
-            className="self-start"
-          >
-            {t('link.action')}
-          </Button>
-        ) : (
-          <p className="rounded-xl bg-surface-container px-4 py-3 text-body-sm text-ink-secondary">
-            {t('notConfigured', { missing: missingConfig.join(', ') })}
-          </p>
-        )}
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('link.title')}</CardTitle>
+          <CardDescription>{t('link.description')}</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3">
+          {configured ? (
+            // A real anchor, not `next/link`: the target is a route handler whose
+            // response is a cross-origin redirect to Google's consent screen, so
+            // client-side navigation would be wrong (and `no-html-link-for-pages`
+            // is checking for *page* routes, which this is not).
+            <Button
+              // eslint-disable-next-line @next/next/no-html-link-for-pages
+              render={<a href="/api/google/oauth/start" />}
+              // Renders as an `<a>`, not a native `<button>` — without this,
+              // Base UI's `Button` warns about the native-button
+              // keyboard/disabled assumptions it makes by default (F7).
+              nativeButton={false}
+              size="hub"
+              className="self-start"
+            >
+              {t('link.action')}
+            </Button>
+          ) : (
+            <p className="rounded-xl bg-surface-container px-4 py-3 text-body-sm text-ink-secondary">
+              {t('notConfigured', { missing: missingConfig.join(', ') })}
+            </p>
+          )}
+        </CardContent>
       </Card>
 
       {accounts.length === 0 ? (
@@ -161,7 +162,7 @@ function AccountCard({ account }: { account: LinkedAccount }) {
 
         <Button
           type="button"
-          variant="ghost"
+          variant="destructive-soft"
           onClick={() => setConfirming(true)}
           disabled={pending}
           data-testid="unlink-account"
@@ -277,7 +278,7 @@ function RemoveCalendarButton({ calendar }: { calendar: LinkedCalendar }) {
       <Button
         type="button"
         size="sm"
-        variant="ghost"
+        variant="destructive-soft"
         onClick={() => setConfirming(true)}
         disabled={pending}
         data-testid="remove-calendar"
@@ -358,7 +359,7 @@ function SyncNowButton() {
 
   return (
     <form action={action}>
-      <Button type="submit" variant="outline" disabled={pending}>
+      <Button type="submit" variant="brand-outline" disabled={pending}>
         {t('syncNow')}
       </Button>
     </form>

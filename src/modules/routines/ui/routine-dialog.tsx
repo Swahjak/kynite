@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useId, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogClose,
@@ -102,7 +103,7 @@ export function RoutineDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button variant={isEdit ? 'outline' : 'default'} size="hub">
+          <Button variant={isEdit ? 'brand-outline' : 'default'} size="hub">
             {isEdit ? t('actions.edit') : t('actions.add')}
           </Button>
         }
@@ -406,13 +407,15 @@ function RoutineForm({
           <FieldGroupLabel id={`${fieldId}-reward-label`}>
             {t('form.rewardEnabled')}
           </FieldGroupLabel>
+          {/* Shared `Checkbox` primitive (`ui/checkbox.tsx`) — Base UI's hidden
+              native input is what makes this a real form field (uncontrolled,
+              `defaultChecked` only), same as the old hand-rolled `peer` pair,
+              minus reimplementing it. */}
           <label className="flex h-12 items-center gap-3 text-body-sm text-ink-secondary">
-            <input
+            <Checkbox
               id={`${fieldId}-reward`}
-              type="checkbox"
               name="rewardEnabled"
               defaultChecked={routine ? routine.rewardEnabled : true}
-              className="size-5 accent-[var(--brand)]"
             />
             {t('form.rewardEnabledHint')}
           </label>
@@ -503,7 +506,7 @@ function RoutineForm({
         </ul>
         <Button
           type="button"
-          variant="outline"
+          variant="brand-outline"
           size="hub"
           onClick={() =>
             setSteps((current) => [

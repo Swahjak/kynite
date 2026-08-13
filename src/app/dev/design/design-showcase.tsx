@@ -157,7 +157,7 @@ export function DesignShowcase({ initialTheme = 'light' }: { initialTheme?: 'lig
           <Section
             id="brand"
             title="Brand colours"
-            description="Primary indigo #0040e0 and amber #FEA619, plus the accessible on-light ink variants."
+            description="Primary indigo #5d5fef and accent orange #ef8d5d, plus the accessible on-light ink variants."
           >
             <Panel>
               <SwatchGrid swatches={BRAND_SWATCHES} />
@@ -204,7 +204,10 @@ export function DesignShowcase({ initialTheme = 'light' }: { initialTheme?: 'lig
                       className={cn(
                         'rounded-lg border-l-4 p-3 transition-all duration-200 ease-brand',
                         c.surface,
-                        c.border
+                        // The 4px rule is the *solid* hue, not the pale chip
+                        // outline — `docs/design/calendar.md` § "Event list
+                        // item".
+                        c.rule
                       )}
                     >
                       <p className={cn('font-display text-body-sm font-bold', c.fg)}>
@@ -228,7 +231,7 @@ export function DesignShowcase({ initialTheme = 'light' }: { initialTheme?: 'lig
           <Section
             id="typography"
             title="Typography"
-            description="Hanken Grotesk for display, Inter for body — both self-hosted via next/font."
+            description="Baloo 2 for display, Poppins for body — both self-hosted via next/font."
           >
             <Panel className="space-y-5">
               {TYPE_SCALE.map((t) => (
@@ -349,7 +352,7 @@ export function DesignShowcase({ initialTheme = 'light' }: { initialTheme?: 'lig
                 </CardFooter>
               </Card>
 
-              <div className="rounded-lg border-l-4 border-cat-blue-border bg-cat-blue-surface p-3">
+              <div className="rounded-lg border-l-4 border-cat-blue-solid bg-cat-blue-surface p-3">
                 <p className="label-overline text-cat-blue-fg">Event card</p>
                 <p className="font-display text-h3 text-cat-blue-fg">Voetbaltraining</p>
                 <p className="tabular-time text-body-sm text-cat-blue-fg">17:30 — 18:45</p>

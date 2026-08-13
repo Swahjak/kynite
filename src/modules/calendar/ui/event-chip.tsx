@@ -2,6 +2,7 @@
 
 import { useFormatter, useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
+import { CategoryDot } from '@/components/kynite';
 import { Icon } from '@/components/ui/icon';
 import type { CalendarEvent } from '../queries';
 import { CATEGORY_CLASSES, EVENT_TYPE_ICONS } from './tokens';
@@ -83,11 +84,19 @@ export function EventChip({
 
   if (variant === 'dot') {
     return (
-      <span
+      // `calendar.md` § "Month view / date picker": "a `4px × 4px` dot at
+      // `border-radius:9999px;background:oklch(58% 0.14 H)`" — a round pip in
+      // the day's category hue, not a bar. It was `h-1.5 w-full`, which drew a
+      // stretched lozenge; the size now comes from the shared `CategoryDot`
+      // (`size-1` = the documented 4px) and the hue from the same solid token
+      // the event card's rule uses.
+      <CategoryDot
         data-slot="event-dot"
         data-category={event.category}
+        aria-hidden={undefined}
         title={title}
-        className={cn('block h-1.5 w-full rounded-full', palette.solid, className)}
+        size="xs"
+        className={cn(palette.solid, className)}
       />
     );
   }
@@ -130,17 +139,24 @@ export function EventChip({
       }
       style={style}
       className={cn(
-        // M19: `rounded-xl` + `shadow-sm` / `hover:shadow-md`, the mockups'
-        // event card. The 4px left border and the category tint were already
-        // the right treatment (docs/rebuild-design-gaps.md §4) and are
-        // untouched — only the radius and the elevation moved.
-        'group/chip relative flex min-w-0 flex-col justify-start gap-0.5 overflow-hidden rounded-xl border-l-4 px-2 py-1 text-left shadow-sm',
+        // The design system's event card: a `oklch(94% 0.025 H)` tint carrying
+        // a 4px left rule in the category's *solid* hue (`calendar.md` §
+        // "Event list item": "Category color bar: `width:4px;…;background:
+        // oklch(58% 0.14 H)`"). The rule used to take `palette.border`, which
+        // is the pale `oklch(85% 0.05 H)` **chip outline** — a tenth of the
+        // contrast the bar is drawn at in the spec.
+        'group/chip relative flex min-w-0 flex-col justify-start gap-0.5 overflow-hidden rounded-lg border-l-4 px-2 py-1 text-left shadow-sm',
         palette.surface,
-        palette.border,
+        palette.rule,
         variant === 'block' && 'absolute inset-x-1 select-none',
         hub ? 'gap-1 px-3 py-2' : '',
         interactive &&
           'cursor-pointer transition-all duration-200 ease-brand hover:-translate-y-px hover:shadow-md',
+        // The press convention (`components.md`: every interactive shape is
+        // pressed, not just hovered). Not on a `block`, whose `transform` is
+        // owned by the drag hook — a `scale` class there would be overwritten
+        // mid-gesture by the inline `translateX`, i.e. visibly flicker.
+        interactive && variant !== 'block' && 'active:scale-95',
         // Free/busy blocks are deliberately quieter than the events you can
         // actually read — they are context, not information. The recede is on
         // the *fill and border*, not the whole chip: `opacity-70` on the

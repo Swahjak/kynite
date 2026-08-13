@@ -234,15 +234,16 @@ export function TimerBoard({
           ) : null}
 
           <div className="flex flex-wrap gap-3">
-            {/* M19: the shared `<Button size="hub">`, which is the 48px kiosk
-                target; `TIMER_TAP_TARGET_CLASS` stays on top so the minimum is
-                still asserted from the tokens module. */}
+            {/* The shared `<Button size="tablet">` — `motion.md`'s "Big tap
+                target" specimen: 64px for a primary, high-frequency action on
+                the wall kiosk, above the 48px `TIMER_TAP_TARGET_CLASS` floor
+                that stays applied on top. */}
             {quickStart.map((option) => (
               <Button
                 key={option.seconds}
                 type="button"
                 variant="outline"
-                size="hub"
+                size="tablet"
                 data-testid="timer-quick-start-button"
                 data-seconds={option.seconds}
                 aria-label={option.ariaLabel}

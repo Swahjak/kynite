@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import { Icon } from '@/components/ui/icon';
 import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
+import { ProgressBar, StarCount } from '@/components/kynite';
 import { MemberAvatar } from '@/modules/family';
 import type { KidProgress } from '../page-data';
 
@@ -71,11 +72,11 @@ export async function KidsProgress({ kids, className }: KidsProgressProps) {
                     : t('kids.steps', { done: kid.doneSteps, total: kid.totalSteps })}
                 </span>
               </div>
-              <span className="ml-auto flex shrink-0 items-center gap-1 rounded-4xl bg-gold/15 px-3 py-1.5 text-gold-ink">
-                <span className="font-display font-bold tabular-nums">{kid.starsToday}</span>
-                <Icon name="star" size="sm" filled />
-                <span className="sr-only">{t('kids.starsToday', { count: kid.starsToday })}</span>
-              </span>
+              <StarCount
+                className="ml-auto"
+                value={kid.starsToday}
+                srLabel={t('kids.starsToday', { count: kid.starsToday })}
+              />
             </div>
 
             <div className="flex flex-col gap-1.5">
@@ -87,15 +88,7 @@ export async function KidsProgress({ kids, className }: KidsProgressProps) {
               </div>
               {/* `aria-hidden`: the same numbers are already spelled out above,
                   and a second announcement of the same ratio is noise. */}
-              <div
-                aria-hidden="true"
-                className="h-2 w-full overflow-hidden rounded-4xl bg-surface-container-high"
-              >
-                <div
-                  className="h-full rounded-4xl bg-gold transition-[width] duration-500 ease-brand"
-                  style={{ width: `${Math.round(kid.ratio * 100)}%` }}
-                />
-              </div>
+              <ProgressBar value={Math.round(kid.ratio * 100)} tone="gold" />
             </div>
           </Link>
         ))

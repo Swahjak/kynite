@@ -2,6 +2,7 @@
 
 import { Card } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
+import { ProgressBar } from '@/components/kynite';
 import type { Goal } from '../domain/economy';
 import { rewardIconOf } from './tokens';
 
@@ -85,20 +86,15 @@ export function SavingsGoalCard({
               </span>
             </div>
 
-            <div
-              role="progressbar"
-              aria-valuenow={goal.progressStars}
-              aria-valuemin={0}
-              aria-valuemax={goal.costStars}
-              aria-label={goal.title}
-              className="h-4 w-full overflow-hidden rounded-full bg-card/25"
-            >
-              <span
-                data-testid="goal-bar"
-                className="block h-full rounded-full bg-gold transition-[width] duration-1000 ease-brand"
-                style={{ width: `${percent}%` }}
-              />
-            </div>
+            <ProgressBar
+              data-testid="goal-bar"
+              value={goal.progressStars}
+              max={goal.costStars}
+              label={goal.title}
+              tone="gold"
+              size="lg"
+              className="bg-card/25"
+            />
           </div>
         </div>
       </Card>

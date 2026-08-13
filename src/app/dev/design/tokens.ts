@@ -6,7 +6,7 @@
 export type Swatch = { name: string; cssVar: string; className: string; note?: string };
 
 export const BRAND_SWATCHES: Swatch[] = [
-  { name: 'brand', cssVar: '--brand', className: 'bg-brand', note: 'Primary indigo #0040e0' },
+  { name: 'brand', cssVar: '--brand', className: 'bg-brand', note: 'Primary indigo #5d5fef' },
   { name: 'brand-hover', cssVar: '--brand-hover', className: 'bg-brand-hover' },
   { name: 'brand-dark', cssVar: '--brand-dark', className: 'bg-brand-dark' },
   {
@@ -16,7 +16,7 @@ export const BRAND_SWATCHES: Swatch[] = [
     note: 'AA on-light brand ink',
   },
   { name: 'brand-foreground', cssVar: '--brand-foreground', className: 'bg-brand-foreground' },
-  { name: 'gold', cssVar: '--gold', className: 'bg-gold', note: 'Amber accent #FEA619' },
+  { name: 'gold', cssVar: '--gold', className: 'bg-gold', note: 'Amber accent #ef8d5d' },
   { name: 'gold-hover', cssVar: '--gold-hover', className: 'bg-gold-hover' },
   {
     name: 'gold-ink',
@@ -55,18 +55,26 @@ export const STATUS_SWATCHES: Swatch[] = [
 export type Category = {
   name: string;
   surface: string;
+  /** The pale chip outline, `--cat-*-border` = `oklch(85% 0.05 H)`. */
   border: string;
+  /**
+   * The 4px left rule on an event card, as a *border* colour: `--cat-*-solid`
+   * = `oklch(58% 0.14 H)` (`docs/design/calendar.md` § "Event list item"). Not
+   * the same tone as `border`, which is the chip outline.
+   */
+  rule: string;
   fg: string;
   solid: string;
   useCase: string;
 };
 
-/** The eight event/category colours from docs/brand-guideline.md. */
+/** The eight event/category colours from docs/design/colors.md. */
 export const CATEGORIES: Category[] = [
   {
     name: 'blue',
     surface: 'bg-cat-blue-surface',
     border: 'border-cat-blue-border',
+    rule: 'border-cat-blue-solid',
     fg: 'text-cat-blue-fg',
     solid: 'bg-cat-blue-solid',
     useCase: 'Sports, activities, outdoor',
@@ -75,6 +83,7 @@ export const CATEGORIES: Category[] = [
     name: 'purple',
     surface: 'bg-cat-purple-surface',
     border: 'border-cat-purple-border',
+    rule: 'border-cat-purple-solid',
     fg: 'text-cat-purple-fg',
     solid: 'bg-cat-purple-solid',
     useCase: 'Personal, gym, self-care',
@@ -83,6 +92,7 @@ export const CATEGORIES: Category[] = [
     name: 'orange',
     surface: 'bg-cat-orange-surface',
     border: 'border-cat-orange-border',
+    rule: 'border-cat-orange-solid',
     fg: 'text-cat-orange-fg',
     solid: 'bg-cat-orange-solid',
     useCase: 'Lessons, learning, school',
@@ -91,6 +101,7 @@ export const CATEGORIES: Category[] = [
     name: 'green',
     surface: 'bg-cat-green-surface',
     border: 'border-cat-green-border',
+    rule: 'border-cat-green-solid',
     fg: 'text-cat-green-fg',
     solid: 'bg-cat-green-solid',
     useCase: 'Family events, meals',
@@ -99,6 +110,7 @@ export const CATEGORIES: Category[] = [
     name: 'red',
     surface: 'bg-cat-red-surface',
     border: 'border-cat-red-border',
+    rule: 'border-cat-red-solid',
     fg: 'text-cat-red-fg',
     solid: 'bg-cat-red-solid',
     useCase: 'Date nights, special occasions',
@@ -107,6 +119,7 @@ export const CATEGORIES: Category[] = [
     name: 'yellow',
     surface: 'bg-cat-yellow-surface',
     border: 'border-cat-yellow-border',
+    rule: 'border-cat-yellow-solid',
     fg: 'text-cat-yellow-fg',
     solid: 'bg-cat-yellow-solid',
     useCase: 'Celebrations, birthdays',
@@ -115,6 +128,7 @@ export const CATEGORIES: Category[] = [
     name: 'pink',
     surface: 'bg-cat-pink-surface',
     border: 'border-cat-pink-border',
+    rule: 'border-cat-pink-solid',
     fg: 'text-cat-pink-fg',
     solid: 'bg-cat-pink-solid',
     useCase: 'Creative, arts, hobbies',
@@ -123,6 +137,7 @@ export const CATEGORIES: Category[] = [
     name: 'teal',
     surface: 'bg-cat-teal-surface',
     border: 'border-cat-teal-border',
+    rule: 'border-cat-teal-solid',
     fg: 'text-cat-teal-fg',
     solid: 'bg-cat-teal-solid',
     useCase: 'Health, wellness, appointments',

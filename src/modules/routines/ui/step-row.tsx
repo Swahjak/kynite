@@ -111,17 +111,35 @@ export function StepRow({
           !done && 'active:scale-[0.99]'
         )}
       >
+        {/* Selection controls (components.md § Selection controls): checkbox
+            off = 24px, radius 6px, 2px solid border; on = 24px, radius 6px,
+            #006056 (teal / `bg-success`) fill, white 16px check. The row keeps
+            its own size step for the live/next step (40px vs 32px) — that is
+            this board's own "what's next" affordance, not part of the
+            checkbox spec — but the shape and the checked colour now match the
+            doc exactly, including the check-pop motion from motion.md
+            § "Checkbox pop" (`.kynite-anim-check`).
+            Not `ui/checkbox.tsx` (the shared primitive `routine-dialog.tsx`'s
+            reward toggle now uses): this glyph is `aria-hidden` decoration
+            inside a `<button>` that is *itself* the whole tap target — the
+            entire row already carries `aria-pressed`. Base UI's `Checkbox`
+            is its own interactive control with a hidden native `<input>`;
+            nesting one inside this button would add a second, invalid,
+            interactive descendant and a duplicate keyboard target for a
+            state this row already reports. */}
         <span
           aria-hidden
           className={cn(
-            'flex shrink-0 items-center justify-center rounded-full transition-colors duration-200',
+            'flex shrink-0 items-center justify-center rounded-sm transition-colors duration-200',
             live ? 'size-10' : 'size-8',
-            done && 'bg-primary text-primary-foreground',
-            live && 'border-2 border-primary bg-surface-container-lowest',
+            done && 'bg-success',
+            live && !done && 'border-2 border-primary bg-surface-container-lowest',
             !done && !live && 'border-2 border-line'
           )}
         >
-          {done ? <Icon name="check" size="sm" filled /> : null}
+          {done ? (
+            <Icon name="check" size="sm" filled className="text-white kynite-anim-check" />
+          ) : null}
         </span>
 
         <span

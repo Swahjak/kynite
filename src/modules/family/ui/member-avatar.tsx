@@ -1,7 +1,6 @@
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { cn } from '@/lib/utils';
+import { MemberFace } from '@/components/kynite';
 import type { MemberColor } from '../schema';
-import { MEMBER_COLOR_CLASSES, initialsOf } from './tokens';
+import { MEMBER_COLOR_CLASSES } from './tokens';
 
 /**
  * A member's face: their avatar if picked, their initials on their own color
@@ -28,17 +27,14 @@ export function MemberAvatar({
   className?: string;
 }) {
   return (
-    <Avatar
+    <MemberFace
+      name={displayName}
+      avatarUrl={avatarUrl}
+      surfaceClass={MEMBER_COLOR_CLASSES[color].surface}
+      ringClass={MEMBER_COLOR_CLASSES[color].ring}
       size={size}
-      className={cn(
-        ringed && ['ring-2 ring-offset-2 ring-offset-card', MEMBER_COLOR_CLASSES[color].ring],
-        className
-      )}
-    >
-      {avatarUrl ? <AvatarImage src={avatarUrl} alt="" /> : null}
-      <AvatarFallback className={cn(MEMBER_COLOR_CLASSES[color].surface)}>
-        {initialsOf(displayName)}
-      </AvatarFallback>
-    </Avatar>
+      ringed={ringed}
+      className={className}
+    />
   );
 }

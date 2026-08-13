@@ -26,10 +26,11 @@ export const CELEBRATION_INTENSITIES = ['gentle', 'standard', 'big'] as const;
 export type CelebrationIntensity = (typeof CELEBRATION_INTENSITIES)[number];
 
 /**
- * Brand indigo, its container tone, the amber accent and two of its light tints
- * (M19: the stitch palette). No red, no white flash.
+ * The confetti palette, quoted from `docs/design/motion.md`: the regular burst
+ * mixes `#ef8d5d`, `#71f8e4`, `#b8c3ff` and `#006056`, and the big-celebration
+ * burst adds `#fecf6e`. No red, no white flash.
  */
-export const CELEBRATION_COLORS = ['#0040e0', '#2e5bff', '#fea619', '#ffddb8', '#b8c3ff'] as const;
+export const CELEBRATION_COLORS = ['#ef8d5d', '#71f8e4', '#b8c3ff', '#006056', '#fecf6e'] as const;
 
 export type CelebrationPreset = {
   particleCount: number;

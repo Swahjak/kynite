@@ -1,6 +1,7 @@
 'use client';
 
 import { useFormatter, useTranslations } from 'next-intl';
+import { PageHeader } from '@/components/kynite';
 import { useMirroredHubState } from '@/components/offline';
 // Type-only, like `person-columns.tsx` — `@/modules/family` re-exports
 // `server-only` queries, and a value import here would put the database client
@@ -73,31 +74,31 @@ export function HubBoard({
 
   return (
     <>
-      <header className="flex items-baseline justify-between gap-4">
-        <div>
-          <h1 className="font-display text-display-md font-extrabold">{t('hub.title')}</h1>
-          <p data-testid="hub-date" className="text-body-lg text-ink-secondary">
-            {format.dateTime(board.anchor, { dateStyle: 'full' })}
-          </p>
-        </div>
-        <div className="flex flex-col items-end gap-1">
-          {/* A real wall clock — the one deliberately live thing on the board. */}
+      {/* `PageHeader surface="hub"` is the shared shape for this row — title,
+          subtitle, right-aligned action — so the board's heading, the routine
+          screens' and the store's cannot drift from each other. The clock goes
+          in the action slot; it is the one deliberately live thing on the
+          board, and `display-hub` (72px) is the type step the design system
+          reserves for exactly that (`typography.md`).
+          FR21's offline indicator used to sit under it. M12 moved it into the
+          kiosk shell's chrome, which every hub surface shares: two of them on
+          one board is not a stronger signal, it is a duplicated one. */}
+      <PageHeader
+        surface="hub"
+        title={t('hub.title')}
+        subtitle={
+          <span data-testid="hub-date">{format.dateTime(board.anchor, { dateStyle: 'full' })}</span>
+        }
+        className="items-baseline"
+        action={
           <span
             data-testid="hub-clock"
-            // M19: `display-hub` (72px), the Stitch board-clock token — the one
-            // thing on this screen read from the far side of a room. It was
-            // `display-md` (56px), which `docs/rebuild-design-gaps.md` §3 flags.
             className="tabular-time text-display-hub font-extrabold text-brand-ink"
           >
             {format.dateTime(board.now, { hour: '2-digit', minute: '2-digit' })}
           </span>
-          {/* FR21's offline indicator used to sit here. M12 moved it into the
-              kiosk shell's chrome, which every hub surface shares: two of them
-              on one board (the shell's and this one's) is not a stronger
-              signal, it is a duplicated one. Same component, same derivation
-              from the SSE connection rather than `navigator.onLine` (§6). */}
-        </div>
-      </header>
+        }
+      />
 
       {children}
 

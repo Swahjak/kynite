@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { CategoryDot, EmptyState, MemberFace } from '@/components/kynite';
 import { Icon } from '@/components/ui/icon';
 // Type-only, deliberately: `@/modules/family` re-exports `server-only` query
 // modules, and a value import would drag the Postgres client into this client
@@ -175,16 +175,20 @@ export function MemberDayGrid({
                   data-slot="all-day-member"
                   data-member-id={member.id}
                   className={cn(
+                    // Same 4px rule as an event card, in the member's own solid
+                    // hue (`calendar.md` § "Event list item") — not the pale
+                    // `--cat-*-border` chip outline it used to take.
                     'flex min-w-32 flex-1 items-center gap-1.5 rounded-xl border-l-4 py-0.5 pl-1.5',
-                    palette.border
+                    palette.rule
                   )}
                 >
-                  <Avatar size="sm" className="shrink-0">
-                    {member.avatarUrl ? <AvatarImage src={member.avatarUrl} alt="" /> : null}
-                    <AvatarFallback className={palette.surface}>
-                      {member.displayName.trim().slice(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
+                  <MemberFace
+                    size="sm"
+                    avatarUrl={member.avatarUrl}
+                    name={member.displayName}
+                    surfaceClass={palette.surface}
+                    className="shrink-0"
+                  />
                   <span className="sr-only">{member.displayName}</span>
                   <div className="flex min-w-0 flex-1 flex-col gap-1">
                     {owned.map((event) => (
@@ -303,16 +307,16 @@ export function MemberDayGrid({
                     className="glass sticky top-0 z-20 flex items-center justify-center gap-2 px-2"
                     style={{ height: HEADER_HEIGHT }}
                   >
-                    <Avatar size="sm">
-                      {member.avatarUrl ? <AvatarImage src={member.avatarUrl} alt="" /> : null}
-                      <AvatarFallback className={palette.surface}>
-                        {member.displayName.trim().slice(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
+                    <MemberFace
+                      size="sm"
+                      avatarUrl={member.avatarUrl}
+                      name={member.displayName}
+                      surfaceClass={palette.surface}
+                    />
                     <span className="label-overline truncate text-ink-secondary">
                       {member.displayName}
                     </span>
-                    <span className={cn('size-2 shrink-0 rounded-full', palette.solid)} />
+                    <CategoryDot size="sm" className={palette.solid} />
                   </div>
 
                   <div className="relative" style={{ height: bodyHeight }}>
@@ -320,12 +324,16 @@ export function MemberDayGrid({
                         commitment, so a member with only those does not get the
                         empty state. */}
                     {memberEvents.length === 0 && memberAllDay.length === 0 ? (
-                      <div
-                        data-slot="member-day-empty"
-                        className="absolute inset-x-1 top-4 flex flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-line-subtle p-4 text-center opacity-70"
-                      >
-                        <Icon name="self_improvement" size="md" className="text-ink-muted" />
-                        <span className="label-overline text-ink-muted">{t('freeDay')}</span>
+                      <div data-slot="member-day-empty" className="absolute inset-x-1 top-4">
+                        {/* The shared zero-state, in its `framed` form — the
+                            dashed outline `EmptyState` already owns, rather
+                            than a fourth hand-rolled copy of it. */}
+                        <EmptyState
+                          framed
+                          icon="self_improvement"
+                          title={t('freeDay')}
+                          className="opacity-70"
+                        />
                       </div>
                     ) : (
                       <TimedChips

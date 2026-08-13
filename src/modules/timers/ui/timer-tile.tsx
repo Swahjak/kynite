@@ -1,8 +1,10 @@
 'use client';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import { cn } from '@/lib/utils';
+import { IconMedallion, ProgressBar } from '@/components/kynite';
 import {
   formatCountdown,
   isWarningDue,
@@ -117,15 +119,16 @@ export function TimerTile({
       )}
     >
       <header className="flex items-center gap-3">
-        <span
+        {/* `IconMedallion` — the shared tinted-tile shape (`components.md`),
+            in place of the hand-rolled circle this used to be. */}
+        <IconMedallion
+          icon="timer"
+          filled
+          tint="brand-container"
+          shape="circle"
+          size={compact ? 'md' : 'lg'}
           aria-hidden
-          className={cn(
-            'flex shrink-0 items-center justify-center rounded-full bg-brand-container text-brand-container-ink',
-            compact ? 'size-9' : 'size-11'
-          )}
-        >
-          <Icon name="timer" size={compact ? 'sm' : 'md'} filled />
-        </span>
+        />
         <h3
           data-testid="timer-label"
           className={cn(
@@ -136,12 +139,14 @@ export function TimerTile({
           {timer.label}
         </h3>
         {timer.memberName ? (
-          <span
-            data-testid="timer-member"
-            className="shrink-0 rounded-4xl bg-surface-container px-3 py-1 text-body-sm text-ink-secondary"
-          >
-            {timer.memberName}
-          </span>
+          // `Chip/Removable` shape (`components.md`) — `bg:#e7e8e9` is the
+          // `muted` badge variant's own token, not the input-fill shade the
+          // hand-rolled span used.
+          <Badge
+            variant="muted"
+            size="md"
+            render={<span data-testid="timer-member">{timer.memberName}</span>}
+          />
         ) : null}
       </header>
 
@@ -160,19 +165,11 @@ export function TimerTile({
           peripheral one for a child who cannot yet read them. Pill-radius and
           thicker since M19, so it reads as the same material as the star bar on
           the reward hero rather than as a hairline. */}
-      <span
-        aria-hidden
-        className={cn(
-          'w-full overflow-hidden rounded-4xl bg-surface-container-high',
-          compact ? 'h-2' : 'h-3'
-        )}
-      >
-        <span
-          data-testid="timer-progress"
-          className="block h-full rounded-4xl bg-primary transition-[width] duration-500 ease-brand"
-          style={{ width: `${Math.round(ratio * 100)}%` }}
-        />
-      </span>
+      <ProgressBar
+        data-testid="timer-progress"
+        value={Math.round(ratio * 100)}
+        size={compact ? 'md' : 'lg'}
+      />
 
       {phase === 'overrun' ? (
         <p data-testid="timer-overrun" className="text-body-lg text-ink-secondary">
@@ -206,18 +203,21 @@ export function TimerTile({
         </p>
       ) : null}
 
-      {/* M19: the controls are the shared `<Button size="hub">` rather than
-          hand-rolled boxes (docs/rebuild-design-gaps.md §7). `size="hub"` *is*
-          the 48px kiosk target; `TIMER_TAP_TARGET_CLASS` stays applied on top
-          so the minimum is still stated where the legibility test reads it,
-          independent of how the button scale is retuned later. */}
+      {/* M19: the controls are the shared `<Button>` rather than hand-rolled
+          boxes (docs/rebuild-design-gaps.md §7). Non-`compact` tiles are the
+          hub board's — the wall kiosk `motion.md`'s "Big tap target" specimen
+          sizes primary/high-frequency actions for ("64px on tablet vs. 48px
+          minimum") — so they step up to `size="tablet"`; `compact` tiles (the
+          Controller, the ambient board) stay at the `hub` 48px floor.
+          `TIMER_TAP_TARGET_CLASS` stays applied on top either way, so the
+          minimum is still stated where the legibility test reads it. */}
       {(onStop && copy.stopLabel) || (onExtend && extendOptions?.length && !atMaximum) ? (
         <div className="mt-1 flex flex-wrap items-center gap-2">
           {onStop && copy.stopLabel ? (
             <Button
               type="button"
               variant="outline"
-              size="hub"
+              size={compact ? 'hub' : 'tablet'}
               data-testid="timer-stop"
               aria-label={copy.stopLabel}
               onClick={onStop}
@@ -237,7 +237,7 @@ export function TimerTile({
                   key={option.minutes}
                   type="button"
                   variant="outline"
-                  size="hub"
+                  size={compact ? 'hub' : 'tablet'}
                   data-testid="timer-extend"
                   data-minutes={option.minutes}
                   aria-label={option.ariaLabel}

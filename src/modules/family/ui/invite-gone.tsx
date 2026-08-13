@@ -32,7 +32,7 @@ export async function InviteGone({
     <Card className="w-full max-w-md" data-testid="invite-gone">
       <CardHeader>
         <CardTitle>
-          <h1 className="text-xl">{t(`${key}.title`)}</h1>
+          <h1 className="font-display text-h1">{t(`${key}.title`)}</h1>
         </CardTitle>
         <CardDescription>{t(`${key}.description`)}</CardDescription>
       </CardHeader>

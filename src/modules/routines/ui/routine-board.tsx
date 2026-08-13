@@ -15,6 +15,7 @@ import {
 import { useRouter } from '@/i18n/navigation';
 import { Icon } from '@/components/ui/icon';
 import { cn } from '@/lib/utils';
+import { ProgressBar } from '@/components/kynite';
 import { completeStepAction } from '../actions';
 import type { BoardRoutine, BoardSection, RoutineBoard as RoutineBoardData } from '../page-data';
 import { RoutineCard } from './routine-card';
@@ -308,15 +309,12 @@ export function RoutineBoard({ board }: { board: RoutineBoardData }) {
               {t('sectionProgress', { done: section.doneCount, total: section.total })}
             </span>
 
-            <span
-              aria-hidden
-              className="h-1 min-w-24 flex-1 overflow-hidden rounded-4xl bg-surface-container"
-            >
-              <span
-                className="block h-full rounded-4xl bg-gold transition-[width] duration-500 ease-brand"
-                style={{ width: `${Math.round(section.ratio * 100)}%` }}
-              />
-            </span>
+            <ProgressBar
+              value={Math.round(section.ratio * 100)}
+              size="xs"
+              tone="gold"
+              className="min-w-24 flex-1"
+            />
           </div>
 
           {section.routines.length === 0 ? (

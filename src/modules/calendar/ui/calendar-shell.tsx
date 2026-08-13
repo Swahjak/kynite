@@ -3,8 +3,8 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
-import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { Fab } from '@/components/ui/fab';
 import { Icon } from '@/components/ui/icon';
 import type { IconName } from '@/components/ui/icon-codepoints';
@@ -219,10 +219,15 @@ export function CalendarShell({
         </div>
       </header>
 
-      <div
-        className={cn(
-          'flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-sm'
-        )}
+      {/* The view frame. `Card variant="outlined"` rather than a hand-built
+          box: a default card carries no border since the design system
+          separates a card from the ground by elevation (`components.md` §
+          Cards), and this frame has to read as a *boundary* around a grid that
+          paints its own white. `p-0`/`gap-0` because the grid is full-bleed
+          inside it — the card's own padding would inset the hour rules. */}
+      <Card
+        variant="outlined"
+        className="min-h-0 flex-1 gap-0 p-0"
         data-testid={`calendar-view-${view}`}
       >
         {view === 'month' ? (
@@ -259,7 +264,7 @@ export function CalendarShell({
         ) : (
           <TimeGrid days={days} events={events} timeZone={timeZone} now={now} onSelect={onSelect} />
         )}
-      </div>
+      </Card>
 
       {canWrite && (
         <EventDialog

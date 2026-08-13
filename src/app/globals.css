@@ -3,34 +3,32 @@
 @import 'shadcn/tailwind.css';
 
 @custom-variant dark (&:is(.dark *));
-
 /* ---------------------------------------------------------------------------
- * Kynite design tokens — `docs/design/stitch/` (M19 phase 1).
+ * Kynite design tokens — `docs/design/` (the single source of truth for design,
+ * see `docs/design/README.md`).
  *
- * DESIGN AUTHORITY / PRIMARY-COLOUR DECISION (M19)
- * ------------------------------------------------
- * The stitch mockups are the design authority (owner decision, M19). Their two
- * `DESIGN.md` sidecars disagree on the primary: `kynite/DESIGN.md` says
- * **#0040e0** (indigo), `vibrant_kynite/DESIGN.md` says #402ae7 (violet).
+ * Every value below is quoted from `docs/design/colors.md`, `typography.md`,
+ * `components.md`, `layout.md` and `motion.md`, which in turn transcribe the
+ * canonical `docs/design/design-system.html` export verbatim. Where a value is
+ * *derived* rather than quoted, the comment says so and says why.
  *
- * Resolved by majority usage across the mockups themselves:
- *   #0040e0 → 24 files (23 × `code.html`, incl. every "vibrant_*" screen, + 1 sidecar)
- *   #402ae7 →  1 file  (`vibrant_kynite/DESIGN.md`, which has no `code.html`)
- * **#0040e0 wins.** The `vibrant_kynite` sidecar is a stale label: the vibrant
- * mockups' own embedded Tailwind config emits `"primary":"#0040e0"`.
+ * Brand summary (README.md): primary `#5d5fef` indigo, secondary `#ef8d5d`
+ * orange, background `#fbf9f4` cream, text `#191c1d`. This replaces the stitch
+ * indigo `#0040e0` / amber scheme, which replaced the green `#13ec92` brand.
  *
- * The palette below is the Material-3 tonal scheme those mockups embed
- * (indigo primary #0040e0 / primary-container #2e5bff, amber accent #fea619 /
- * #855300, 5-step `surface-container-*` ramp on a #f8f9fa background). It is
- * mapped **onto the existing token names** — `--brand*`, `--gold*`, `--ink*`,
- * `--line*`, `--cat-*` — so every shadcn/Base-UI component and all 400+ brand
- * utility call sites restyle without churn.
+ * The palette is mapped **onto the existing token names** — `--brand*`,
+ * `--gold*`, `--ink*`, `--line*`, `--cat-*` plus the shadcn/Base-UI semantic
+ * aliases — so every component and all the brand utility call sites restyle
+ * without churn. No variable was renamed or removed in this pass.
  *
- * Dark mode: the mockups ship no dark palette (every "dark mode" screen embeds
- * the light config verbatim). It is derived from the M3 *fixed* roles in the
- * light scheme — the canonical way to obtain the dark scheme from the same
- * tonal palettes — over the "Deep Charcoal, not pure black" neutral base the
- * `kynite/DESIGN.md` prose specifies (#0f172a / #1e293b).
+ * DARK THEME: the design system defines **no dark palette** (it is a single
+ * light specimen sheet). The dark scheme below is *derived*, anchored on the
+ * two dark surfaces the docs do specify — `#191c1d` (On Surface, used as the
+ * dark background of the big-celebration and lockup-reversed specimens) and
+ * `#2e3132` (Inverse Surface, the toast card) — with `#f0f1f2` as text-on-dark
+ * and `#b8c3ff` as the light-indigo brand tone the docs already use for
+ * icon-on-dark. Accents that the docs give a "bright" variant for
+ * (`#71f8e4` tertiary-fixed, `#fecf6e` yellow) take those values in dark.
  *
  * Layering:
  *   1. `:root` / `.dark`   raw brand tokens + shadcn semantic aliases.
@@ -39,110 +37,128 @@
  *                          `.dark` keeps working at runtime.
  *
  * Contrast: every token pair that carries text is verified at >= 4.5:1 (WCAG
- * AA) against every surface it is used on, in both themes. Where the mockup
- * named a shade that fails, the token is darkened/lightened and the deviation
- * is noted inline.
+ * AA) against every surface it is used on, in both themes. Where the design
+ * system names a shade that fails, the token is darkened/lightened and the
+ * deviation is noted inline.
  * ------------------------------------------------------------------------- */
 
 :root {
-  /* -- Brand — M3 primary (indigo) --------------------------------------- */
-  --brand: #0040e0;
-  --brand-hover: #0035be; /* on-primary-fixed-variant */
-  --brand-dark: #001356; /* on-primary-fixed */
-  --brand-container: #2e5bff; /* primary-container */
-  --brand-container-ink: #efefff; /* on-primary-container */
-  /* Unlike the old brand green, indigo *is* legible as text: 7.47:1 on white,
-     so `--brand-ink` is the brand colour itself rather than a darker stand-in.
-     The token is kept because ~100 call sites name it. */
-  --brand-ink: #0040e0;
-  --brand-foreground: #ffffff; /* on-primary */
+  /* -- Brand — Primary (indigo) ------------------------------------------ */
+  --brand: #5d5fef; /* colors.md "Primary" */
+  --brand-hover: #4547c9; /* colors.md `a:hover { color: #4547c9 }` — 7.01:1 on white */
+  /* Derived: one further step down the same ramp, for deep-brand fills and
+     text-on-tint. The docs name no third indigo. 11.11:1 on white. */
+  --brand-dark: #2e2f8a;
+  --brand-container: #2e5bff; /* colors.md "Primary Container" */
+  --brand-container-ink: #ffffff; /* 5.18:1 on --brand-container */
+  /* The brand indigo *is* legible as text: 4.83:1 on #ffffff, 4.59:1 on the
+     #fbf9f4 cream background. The token is kept separate because ~100 call
+     sites name it and because a brand *fill* is not obliged to be legible. */
+  --brand-ink: #5d5fef;
+  --brand-foreground: #ffffff; /* 4.83:1 on --brand */
 
-  /* -- Accent — M3 secondary (amber). Rewards, streaks, celebration only. -- */
-  --gold: #fea619; /* secondary-container */
-  --gold-hover: #e59200;
-  --gold-foreground: #684000; /* on-secondary-container, 4.60:1 on --gold */
-  --gold-ink: #855300; /* M3 secondary; 6.49:1 on white */
+  /* -- Accent — Secondary (orange). Stars, rewards, streaks, celebration. -- */
+  --gold: #ef8d5d; /* colors.md "Secondary" */
+  /* Derived hover: the same hue one step darker; the docs give no orange
+     hover state. */
+  --gold-hover: #e07a45;
+  --gold-foreground: #191c1d; /* On Surface on the orange fill — 7.05:1 */
+  /* Derived: #ef8d5d is only 2.43:1 on white, so it cannot be text. The ink
+     token is the same hue darkened until it clears AA — 6.00:1 on #ffffff,
+     5.70:1 on the cream background. */
+  --gold-ink: #9a4f14;
 
-  /* -- Surfaces — M3 5-step tonal ramp ----------------------------------- */
-  --background: #f8f9fa;
-  --surface: #ffffff;
+  /* -- Surfaces — colors.md § "Surface palette" -------------------------- */
+  --background: #fbf9f4; /* Surface — app background (cream) */
+  --surface: #ffffff; /* Surface Lowest — cards, inputs, sidebar */
   --surface-elevated: #ffffff;
-  --surface-hover: #edeeef;
+  --surface-hover: #f5f3ee; /* Surface Container */
   --surface-container-lowest: #ffffff;
-  --surface-container-low: #f3f4f5;
-  --surface-container: #edeeef;
-  --surface-container-high: #e7e8e9;
-  --surface-container-highest: #e1e3e4;
+  --surface-container-low: #f5f3ee;
+  --surface-container: #f5f3ee; /* Surface Container — input fill */
+  --surface-container-high: #e7e8e9; /* Surface Container High — removable chip */
+  --surface-container-highest: #e1e3e4; /* the border/track tone */
 
   /* -- Ink --------------------------------------------------------------- */
-  --ink: #191c1d; /* on-surface */
-  --ink-secondary: #434656; /* on-surface-variant */
-  /* M3 `outline` (#747688) is 4.48:1 on white — one notch short of AA, so the
-     muted ink is darkened. `--line` still carries the literal outline tone. */
-  --ink-muted: #63657a;
+  --ink: #191c1d; /* On Surface */
+  --ink-secondary: #434656; /* On Surface Variant — 8.87:1 on cream */
+  /* The docs' muted label colour `#747688` is 4.26:1 on the cream background —
+     short of AA — so the muted ink is darkened to the nearest passing tone.
+     5.13:1 on cream, 5.39:1 on white. `#747688` itself survives as the
+     leading-icon/placeholder tone inside components, where it is decorative. */
+  --ink-muted: #67697d;
 
   /* -- Lines ------------------------------------------------------------- */
-  --line: #c4c5d9; /* outline-variant */
-  --line-subtle: #e1e3e4; /* surface-variant */
-  --line-focus: #0040e0;
+  --line: #c4c5d9; /* Outline Variant — borders, unchecked controls */
+  --line-subtle: #e1e3e4; /* Border — dividers, progress track */
+  --line-focus: #5d5fef; /* colors.md: "Focused input border: #5d5fef" */
 
   /* -- Status ------------------------------------------------------------ */
-  --success: #006056; /* M3 tertiary */
-  --warning: #855300; /* M3 secondary */
-  --error: #ba1a1a;
-  --info: #0040e0;
+  --success: #006056; /* colors.md "Tertiary" — 7.48:1 on white */
+  --warning: #9a4f14; /* = --gold-ink; the docs have no separate warning tone */
+  --error: #ba1a1a; /* colors.md "Error" — 6.46:1 on white */
+  --info: #5d5fef;
   --now: #ba1a1a;
-  --now-foreground: #ffffff;
+  --now-foreground: #ffffff; /* 6.46:1 on --now */
 
-  /* -- Category palette (8 colours x surface / border / text / solid) -----
-     Re-tuned onto the stitch ramp: four categories are anchored on the M3
-     roles the mockups' own "Category Colors" swatch uses (blue = primary,
-     orange = secondary/amber, teal = tertiary, red = error); the other four
-     are generated at the same tones from their hue. Each `surface` is the
-     solid mixed 12% into white, each `border` is the solid itself (the
-     mockups' 4px left rule is a *solid* colour — `event-chip.tsx` keeps the
-     `rounded-lg border-l-4` + tint treatment unchanged), and each `fg` is
-     darkened until it clears AA on its own tint, on `--surface` and on
-     `--background`. */
-  --cat-blue-surface: #e0e8fb;
-  --cat-blue-border: #0040e0;
-  --cat-blue-fg: #0040e0;
-  --cat-blue-solid: #0040e0;
+  /* -- Category palette — colors.md § "Category palette" ------------------
+     8 categories, each a 4-colour set generated from one hue in `oklch()`:
 
-  --cat-purple-surface: #ede8fa;
-  --cat-purple-border: #6d3fd4;
-  --cat-purple-fg: #6d3fd4;
-  --cat-purple-solid: #6d3fd4;
+       solid   oklch(58% 0.14 H)     dot / 4px event rule / avatar fill
+       surface oklch(94% 0.025 H)    chip background
+       border  oklch(85% 0.05 H)     chip border
+       fg      oklch(32% 0.08 H)     chip text
 
-  --cat-orange-surface: #faf0e0;
-  --cat-orange-border: #d98300;
-  --cat-orange-fg: #9e6000;
-  --cat-orange-solid: #d98300;
+     `oklch()` literals rather than the hex approximations, as colors.md
+     instructs ("prefer using the `oklch()` string directly").
 
-  --cat-green-surface: #e6f3ea;
-  --cat-green-border: #2e9b4f;
-  --cat-green-fg: #257c3f;
-  --cat-green-solid: #2e9b4f;
+     The hue assignment maps this codebase's colour-named tokens onto the
+     design system's semantic categories:
+       blue→School 245 · purple→Chores 290 · orange→Travel 65 · green→Sports 155
+       red→Health 20 · yellow→Play 110 · pink→Family 335 · teal→Personal 200
 
-  --cat-red-surface: #f7e4e4;
-  --cat-red-border: #ba1a1a;
-  --cat-red-fg: #ba1a1a;
-  --cat-red-solid: #ba1a1a;
+     NOTE for page work: `--cat-*-border` carries the *chip* border tone
+     (`oklch(85% 0.05 H)`), which is deliberately pale. The 4px left rule on an
+     event chip must use `--cat-*-solid`, not `--cat-*-border`. */
+  --cat-blue-surface: oklch(94% 0.025 245);
+  --cat-blue-border: oklch(85% 0.05 245);
+  --cat-blue-fg: oklch(32% 0.08 245);
+  --cat-blue-solid: oklch(58% 0.14 245);
 
-  --cat-yellow-surface: #eef2e0;
-  --cat-yellow-border: #6f8f00;
-  --cat-yellow-fg: #5b7500;
-  --cat-yellow-solid: #6f8f00;
+  --cat-purple-surface: oklch(94% 0.025 290);
+  --cat-purple-border: oklch(85% 0.05 290);
+  --cat-purple-fg: oklch(32% 0.08 290);
+  --cat-purple-solid: oklch(58% 0.14 290);
 
-  --cat-pink-surface: #f8e3eb;
-  --cat-pink-border: #c2185b;
-  --cat-pink-fg: #c2185b;
-  --cat-pink-solid: #c2185b;
+  --cat-orange-surface: oklch(94% 0.025 65);
+  --cat-orange-border: oklch(85% 0.05 65);
+  --cat-orange-fg: oklch(32% 0.08 65);
+  --cat-orange-solid: oklch(58% 0.14 65);
 
-  --cat-teal-surface: #e0efee;
-  --cat-teal-border: #007b6e;
-  --cat-teal-fg: #00776b;
-  --cat-teal-solid: #007b6e;
+  --cat-green-surface: oklch(94% 0.025 155);
+  --cat-green-border: oklch(85% 0.05 155);
+  --cat-green-fg: oklch(32% 0.08 155);
+  --cat-green-solid: oklch(58% 0.14 155);
+
+  --cat-red-surface: oklch(94% 0.025 20);
+  --cat-red-border: oklch(85% 0.05 20);
+  --cat-red-fg: oklch(32% 0.08 20);
+  --cat-red-solid: oklch(58% 0.14 20);
+
+  --cat-yellow-surface: oklch(94% 0.025 110);
+  --cat-yellow-border: oklch(85% 0.05 110);
+  --cat-yellow-fg: oklch(32% 0.08 110);
+  --cat-yellow-solid: oklch(58% 0.14 110);
+
+  --cat-pink-surface: oklch(94% 0.025 335);
+  --cat-pink-border: oklch(85% 0.05 335);
+  --cat-pink-fg: oklch(32% 0.08 335);
+  --cat-pink-solid: oklch(58% 0.14 335);
+
+  --cat-teal-surface: oklch(94% 0.025 200);
+  --cat-teal-border: oklch(85% 0.05 200);
+  --cat-teal-fg: oklch(32% 0.08 200);
+  --cat-teal-solid: oklch(58% 0.14 200);
 
   /* -- shadcn / Base UI semantic aliases ---------------------------------- */
   --foreground: var(--ink);
@@ -156,9 +172,11 @@
   --secondary-foreground: var(--ink);
   --muted: var(--surface-container);
   --muted-foreground: var(--ink-muted);
-  /* M3 primary-fixed / on-primary-fixed-variant — 7.23:1. */
-  --accent: #dde1ff;
-  --accent-foreground: #0035be;
+  /* The active-nav / selected tint: `rgba(93,95,239,0.08)` (layout.md § "Nav
+     item, active") flattened onto the cream background so it can also sit on
+     white. Foreground is the hover indigo — 5.75:1 on the tint. */
+  --accent: #eeeefd;
+  --accent-foreground: #4547c9;
   --destructive: var(--error);
   --border: var(--line);
   --input: var(--line);
@@ -170,21 +188,21 @@
   --chart-4: var(--cat-teal-solid);
   --chart-5: var(--cat-pink-solid);
 
-  --sidebar: var(--surface);
+  --sidebar: var(--surface); /* layout.md § Sidebar: `background:#ffffff` */
   --sidebar-foreground: var(--ink);
   --sidebar-primary: var(--brand);
   --sidebar-primary-foreground: var(--brand-foreground);
-  --sidebar-accent: var(--surface-hover);
-  --sidebar-accent-foreground: var(--ink);
-  --sidebar-border: var(--line);
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--accent-foreground);
+  --sidebar-border: var(--line-subtle); /* `border-right:1px solid #e1e3e4` */
   --sidebar-ring: var(--line-focus);
 
-  /* Buttons/inputs = 12px. The rest of the scale is *explicit* in
-     `@theme inline` below rather than a multiplier of this — see the note
-     there. */
+  /* Buttons are pills (`border-radius:9999px`, components.md § Buttons); this
+     is the *container* radius — select rows and nav items at 10–12px. The rest
+     of the scale is explicit in `@theme inline` below. */
   --radius: 0.75rem;
 
-  /* -- Motion durations (docs/brand-guideline.md "Duration Scale") -------- */
+  /* -- Motion durations --------------------------------------------------- */
   --duration-fast: 150ms;
   --duration-normal: 200ms;
   --duration-slow: 300ms;
@@ -192,93 +210,90 @@
 }
 
 .dark {
-  /* M3 dark roles derived from the light scheme's *fixed* tones:
-     dark primary = inverse-primary, dark on-primary = on-primary-fixed,
-     dark primary-container = on-primary-fixed-variant, and so on. */
-  --brand: #b8c3ff; /* inverse-primary */
-  --brand-hover: #dde1ff;
-  --brand-dark: #8fa0f5;
-  --brand-container: #0035be;
-  --brand-container-ink: #dde1ff;
+  /* Derived — see the header note. Anchored on the two dark surfaces the design
+     system does specify (`#191c1d` On Surface, `#2e3132` Inverse Surface) and
+     on `#b8c3ff`, the light indigo it already uses for icon-on-dark. */
+  --brand: #b8c3ff; /* 10.03:1 on #191c1d */
+  --brand-hover: #d5dcff;
+  --brand-dark: #8f9df0;
+  --brand-container: #4547c9;
+  --brand-container-ink: #ffffff;
   --brand-ink: #b8c3ff;
-  --brand-foreground: #001356; /* on-primary-fixed */
+  --brand-foreground: #191c1d;
 
-  --gold: #ffb95f; /* secondary-fixed-dim */
-  --gold-hover: #ffddb8;
-  --gold-foreground: #2a1700; /* on-secondary-fixed */
-  --gold-ink: #ffb95f;
+  --gold: #ef8d5d; /* the brand orange is already legible on dark — 7.05:1 */
+  --gold-hover: #f4a67a;
+  --gold-foreground: #191c1d;
+  --gold-ink: #ef8d5d;
 
-  /* "Deep Charcoal base rather than pure black … Surfaces use #1E293B"
-     (docs/design/stitch/.../kynite/DESIGN.md, "Neutral Logic"). */
-  --background: #0f172a;
-  --surface: #1e293b;
-  --surface-elevated: #273347;
-  --surface-hover: #273347;
-  --surface-container-lowest: #0b1220;
-  --surface-container-low: #172033;
-  --surface-container: #1e293b;
-  --surface-container-high: #273347;
-  --surface-container-highest: #313d52;
+  --background: #191c1d; /* On Surface, used as a dark surface by the docs */
+  --surface: #2e3132; /* Inverse Surface — the docs' dark card (toast) */
+  --surface-elevated: #383c3d;
+  --surface-hover: #383c3d;
+  --surface-container-lowest: #131617;
+  --surface-container-low: #232728;
+  --surface-container: #2e3132;
+  --surface-container-high: #383c3d;
+  --surface-container-highest: #43484a;
 
-  --ink: #e6e8ef;
-  --ink-secondary: #c4c5d9;
-  --ink-muted: #a3a6bd;
+  --ink: #f0f1f2; /* colors.md: "#f0f1f2 (text-on-dark)" — 15.16:1 */
+  --ink-secondary: #c8cacb; /* 10.42:1 on --background */
+  --ink-muted: #a2a5a7; /* 6.92:1 on --background, 5.29:1 on --surface */
 
-  --line: #33415a;
-  --line-subtle: #273347;
+  --line: #43484a;
+  --line-subtle: #33393a;
   --line-focus: #b8c3ff;
 
-  --success: #4fdbc8; /* tertiary-fixed-dim */
-  --warning: #ffb95f;
-  --error: #ffb4ab;
+  --success: #71f8e4; /* colors.md "Tertiary Fixed" (bright mint) */
+  --warning: #fecf6e; /* colors.md: "#fecf6e (yellow, confetti + trophy icon)" */
+  --error: #ffb4ab; /* derived: the error tone lightened for dark surfaces */
   --info: #b8c3ff;
   /* The dark "now" marker flips to dark-on-light rather than white-on-red. */
   --now: #ffb4ab;
   --now-foreground: #690005;
 
-  /* Dark category tints are the solid mixed 80% into --surface, kept as literal
-     hexes (not `color-mix`) so they stay deterministic for contrast tooling and
-     for stacking on either --background or --card. Each `fg` is lightened until
-     it clears AA on its own tint, on --surface and on --background. */
-  --cat-blue-surface: #182e5c;
-  --cat-blue-border: #4070e8;
-  --cat-blue-fg: #7094ee;
-  --cat-blue-solid: #0040e0;
+  /* Derived from the same per-category hue as light, re-tuned for a dark
+     ground: the tint drops to L 26%, the border rises to L 45%, the text to
+     L 80%, and the solid brightens slightly so a 4px rule still reads. */
+  --cat-blue-surface: oklch(26% 0.04 245);
+  --cat-blue-border: oklch(45% 0.09 245);
+  --cat-blue-fg: oklch(80% 0.09 245);
+  --cat-blue-solid: oklch(66% 0.14 245);
 
-  --cat-purple-surface: #2e2d5a;
-  --cat-purple-border: #926fdf;
-  --cat-purple-fg: #a68ae5;
-  --cat-purple-solid: #6d3fd4;
+  --cat-purple-surface: oklch(26% 0.04 290);
+  --cat-purple-border: oklch(45% 0.09 290);
+  --cat-purple-fg: oklch(80% 0.09 290);
+  --cat-purple-solid: oklch(66% 0.14 290);
 
-  --cat-orange-surface: #433b2f;
-  --cat-orange-border: #e2a240;
-  --cat-orange-fg: #df9729;
-  --cat-orange-solid: #d98300;
+  --cat-orange-surface: oklch(26% 0.04 65);
+  --cat-orange-border: oklch(45% 0.09 65);
+  --cat-orange-fg: oklch(80% 0.09 65);
+  --cat-orange-solid: oklch(66% 0.14 65);
 
-  --cat-green-surface: #21403f;
-  --cat-green-border: #62b47b;
-  --cat-green-fg: #64b57d;
-  --cat-green-solid: #2e9b4f;
+  --cat-green-surface: oklch(26% 0.04 155);
+  --cat-green-border: oklch(45% 0.09 155);
+  --cat-green-fg: oklch(80% 0.09 155);
+  --cat-green-solid: oklch(66% 0.14 155);
 
-  --cat-red-surface: #3d2634;
-  --cat-red-border: #cb5353;
-  --cat-red-fg: #d77a7a;
-  --cat-red-solid: #ba1a1a;
+  --cat-red-surface: oklch(26% 0.04 20);
+  --cat-red-border: oklch(45% 0.09 20);
+  --cat-red-fg: oklch(80% 0.09 20);
+  --cat-red-solid: oklch(66% 0.14 20);
 
-  --cat-yellow-surface: #2e3d2f;
-  --cat-yellow-border: #93ab40;
-  --cat-yellow-fg: #94ac42;
-  --cat-yellow-solid: #6f8f00;
+  --cat-yellow-surface: oklch(26% 0.04 110);
+  --cat-yellow-border: oklch(45% 0.09 110);
+  --cat-yellow-fg: oklch(80% 0.09 110);
+  --cat-yellow-solid: oklch(66% 0.14 110);
 
-  --cat-pink-surface: #3f2641;
-  --cat-pink-border: #d15284;
-  --cat-pink-fg: #db779e;
-  --cat-pink-solid: #c2185b;
+  --cat-pink-surface: oklch(26% 0.04 335);
+  --cat-pink-border: oklch(45% 0.09 335);
+  --cat-pink-fg: oklch(80% 0.09 335);
+  --cat-pink-solid: oklch(66% 0.14 335);
 
-  --cat-teal-surface: #183945;
-  --cat-teal-border: #409c92;
-  --cat-teal-fg: #5caba2;
-  --cat-teal-solid: #007b6e;
+  --cat-teal-surface: oklch(26% 0.04 200);
+  --cat-teal-border: oklch(45% 0.09 200);
+  --cat-teal-fg: oklch(80% 0.09 200);
+  --cat-teal-solid: oklch(66% 0.14 200);
 
   --foreground: var(--ink);
   --card: var(--surface);
@@ -291,9 +306,8 @@
   --secondary-foreground: var(--ink);
   --muted: var(--surface-container-high);
   --muted-foreground: var(--ink-muted);
-  /* M3 dark primary-container / on-primary-container — 7.23:1. */
-  --accent: #0035be;
-  --accent-foreground: #dde1ff;
+  --accent: #3b3da8;
+  --accent-foreground: #dde1ff; /* 6.73:1 on --accent */
   --destructive: var(--error);
   --border: var(--line);
   --input: var(--line-subtle);
@@ -303,8 +317,8 @@
   --sidebar-foreground: var(--ink);
   --sidebar-primary: var(--brand);
   --sidebar-primary-foreground: var(--brand-foreground);
-  --sidebar-accent: var(--surface-hover);
-  --sidebar-accent-foreground: var(--ink);
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--accent-foreground);
   --sidebar-border: var(--line);
   --sidebar-ring: var(--line-focus);
 }
@@ -314,24 +328,29 @@
  * ------------------------------------------------------------------------- */
 
 @theme {
-  /* Fonts. The `--font-*-src` vars are injected by next/font (src/lib/fonts.ts);
-     the `-ext` families are per-glyph fallbacks for Latin Extended. */
-  --font-sans: var(--font-inter), var(--font-inter-ext), ui-sans-serif, system-ui, sans-serif;
+  /* Fonts. `--font-baloo-2` / `--font-poppins` / `--font-material-symbols` are
+     injected by next/font (src/lib/fonts.ts). typography.md § "Font families":
+     the stack is the family plus `sans-serif`, "never a longer system stack";
+     `next/font` appends its own metric-matched fallback ahead of it. */
+  --font-sans: var(--font-poppins), sans-serif;
   --font-body: var(--font-sans);
-  --font-display:
-    var(--font-hanken-grotesk), var(--font-hanken-grotesk-ext), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-baloo-2), sans-serif;
   --font-heading: var(--font-display);
   --font-icon: var(--font-material-symbols);
 
-  /* Type scale — the stitch `fontSize` map, keeping this codebase's token
-     *names* so no page code churns:
-       display-hub ← display-hub 72px   h2       ← headline-lg-mobile 24px
-       h1          ← headline-lg 32px   h3       ← headline-md 20px
-       body-lg/body/body-sm ← body-lg 18 / body-md 16 / UI label 14
-       overline    ← label-caps 12px/0.05em
+  /* Type scale — typography.md § "Type scale", mapped onto this codebase's
+     token *names* so no call site churns:
+       display-hub ← display-hub  72/80  Baloo 2 800  -0.04em
+       h1          ← headline-lg  32/40  Baloo 2 700  -0.02em
+       h2          ← 24px section heading  Baloo 2 700
+       h3          ← headline-md  20/28  Baloo 2 600
+       body-lg     ← body-lg      18/28  Poppins 400
+       body        ← body-md      16/24  Poppins 400
+       body-sm     ← 14px UI/body        Poppins 400
+       caption     ← 12px small meta     Poppins 400
+       overline    ← label-caps   12/16  Baloo 2 700  0.05em uppercase
      `display-xl`/`display-lg`/`display-md` stay as the wall-hub steps above
-     `h1` (DESIGN.md "Display L 48 / Display M 36" are the *mobile* sizes;
-     `display-md` is pinned at 36px by tests/unit/timers/legibility.test.ts). */
+     `h1`; `display-md` is pinned at 36px by tests/unit/timers/legibility.test.ts. */
   --text-display-hub: 4.5rem;
   --text-display-hub--line-height: 1.111;
   --text-display-hub--font-weight: 800;
@@ -342,8 +361,10 @@
   --text-display-xl--font-weight: 800;
   --text-display-xl--letter-spacing: -0.04em;
 
-  --text-display-lg: 4rem;
-  --text-display-lg--line-height: 1.1;
+  /* 56px / 1.04 / -0.03em — the page-H1 specimen (typography.md § "Additional
+     sizes"), the largest Baloo 2 step the docs actually name below the hub. */
+  --text-display-lg: 3.5rem;
+  --text-display-lg--line-height: 1.04;
   --text-display-lg--font-weight: 800;
   --text-display-lg--letter-spacing: -0.03em;
 
@@ -380,29 +401,51 @@
 
   --text-caption: 0.75rem;
   --text-caption--line-height: 1.333;
-  --text-caption--font-weight: 500;
+  --text-caption--font-weight: 400;
 
   --text-overline: 0.75rem;
   --text-overline--line-height: 1.333;
   --text-overline--font-weight: 700;
   --text-overline--letter-spacing: 0.05em;
 
-  /* Elevation — the stitch "Tonal Layering + Soft Ambient Shadows" scale.
-     Level 1 (cards) is a 4px blur; level 2 (modals/popovers) a 12px blur at
-     0.1 with a 4px Y-offset; the glass header carries `--shadow-glass`. */
-  --shadow-sm: 0 1px 2px rgb(15 23 42 / 0.04), 0 2px 4px rgb(15 23 42 / 0.04);
-  --shadow-md: 0 2px 4px rgb(15 23 42 / 0.04), 0 4px 12px rgb(15 23 42 / 0.1);
-  --shadow-lg: 0 4px 12px rgb(15 23 42 / 0.1), 0 12px 32px rgb(15 23 42 / 0.12);
-  --shadow-2xl: 0 25px 50px rgb(15 23 42 / 0.25);
-  --shadow-glass: 0 1px 8px rgb(15 23 42 / 0.04);
+  /* Elevation — components.md § Cards and layout.md § "Shell frame".
+     `sm` is the card resting elevation the docs give every card
+     (`0 1px 2px rgba(0,0,0,0.04)`); `md` is the shell frame's ambient lift;
+     `lg` is the toast's `0 8px 24px rgba(0,0,0,0.18)`; `glass` is the sticky
+     chrome. `2xl` is derived — the docs name nothing above the toast. */
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.04);
+  --shadow-md: 0 4px 24px rgb(0 0 0 / 0.08);
+  --shadow-lg: 0 8px 24px rgb(0 0 0 / 0.18);
+  --shadow-2xl: 0 12px 40px rgb(0 0 0 / 0.24);
+  --shadow-glass: 0 1px 8px rgb(0 0 0 / 0.04);
 
-  /* Motion. */
+  /* Brand-tinted elevation. components.md § Buttons: the primary button carries
+     `0 2px 8px rgba(93,95,239,0.28)` and the FAB `0 4px 14px rgba(93,95,239,0.35)`.
+     Tokenised so the tint follows the brand rather than being retyped. */
+  --shadow-brand: 0 2px 8px rgb(93 95 239 / 0.28);
+  --shadow-brand-lg: 0 4px 14px rgb(93 95 239 / 0.35);
+
+  /* Motion. motion.md's own animations are `ease-in-out` (pops), `ease-out`
+     (confetti) and `linear` (shimmer); `--ease-bounce` stays for the overshoot
+     transitions that are not part of a named keyframe. */
   --ease-brand: ease;
   --ease-smooth: ease-in-out;
   --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
-  /* Kiosk minimum touch target (docs/design stitch spec: 48x48). */
-  --spacing-hub-target: 3rem;
+  /* Named durations for the celebration animations (motion.md § "Animation
+     classes"), so a component can reuse the timing without restating it. */
+  --duration-pop: 2.4s;
+  --duration-pop-big: 2.6s;
+  --duration-confetti: 1.8s;
+  --duration-confetti-big: 1.6s;
+  --duration-shimmer: 2.2s;
+
+  /* Tap targets. motion.md § "Tap-target sizing rule": minimum 48px for any
+     interactive target, 64px on tablet for primary/high-frequency actions,
+     with the 56px FAB as the intermediate step. */
+  --spacing-hub-target: 3rem; /* 48px — the floor */
+  --spacing-fab: 3.5rem; /* 56px */
+  --spacing-tablet-target: 4rem; /* 64px */
 }
 
 @theme inline {
@@ -510,22 +553,35 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  /* Radius. Explicit values, not multipliers of `--radius`: the multiplier
-     scale drifted to 21.6 / 26.4 / 31.2px where the mockups use 16 / 24px and
-     every chip is a pill (docs/rebuild-design-gaps.md S6). Cards sit at `xl`
-     (16px), hero/feature cards at `2xl` (24px), pills at `4xl`. */
-  --radius-sm: 0.25rem; /* 4px  — checkboxes, tiny tags */
-  --radius-md: 0.5rem; /* 8px  — inputs, small buttons */
-  --radius-lg: 0.75rem; /* 12px — buttons, event chips (= --radius) */
-  --radius-xl: 1rem; /* 16px — cards */
-  --radius-2xl: 1.5rem; /* 24px — hero cards, sheets, the FAB */
+  /* Radius. Explicit values, not multipliers of `--radius`. Every step is a
+     radius the design system actually names:
+       6px  checkbox `border-radius:6px` (components.md § Selection controls)
+       8px  text field `border-radius:8px 8px 0 0` (§ Inputs)
+       10px nav item / 12px select row (layout.md, components.md § Inputs)
+       16px lockup card, nested shell card 18px (brand.md, layout.md)
+       24px every card, the shell frame and sheets (components.md § Cards)
+       9999px every button, chip, badge and avatar. */
+  --radius-sm: 0.375rem; /* 6px  — checkboxes, tiny tags */
+  --radius-md: 0.5rem; /* 8px  — text fields */
+  --radius-lg: 0.75rem; /* 12px — select rows, nav items (= --radius) */
+  --radius-xl: 1rem; /* 16px — nested/inner cards, the lockup card */
+  --radius-2xl: 1.5rem; /* 24px — cards, sheets, dialogs, the shell frame */
   --radius-3xl: 2rem; /* 32px — full-bleed panels */
-  --radius-4xl: 9999px; /* pill — chips, avatars, segmented controls */
+  --radius-4xl: 9999px; /* pill — buttons, chips, badges, avatars, the FAB */
 }
 
 /* ---------------------------------------------------------------------------
  * Utilities
  * ------------------------------------------------------------------------- */
+
+/* typography.md § "Tabular numerals": `.tnum { font-variant-numeric:
+ * tabular-nums; }` — applied to any numeral that needs a stable width in a row
+ * (dates, times, star counts, point totals). The design system's own class
+ * name, kept verbatim so doc snippets paste in. `tabular-time` below is the
+ * richer clock-face variant this app already uses. */
+@utility tnum {
+  font-variant-numeric: tabular-nums;
+}
 
 /* Fixed-width digits for `00:00` clocks, countdowns and star counts. */
 @utility tabular-time {
@@ -614,6 +670,143 @@
  * brightness change small enough to find from across a room without pulling
  * the eye away from anything else. Never a flash, never a colour change.
  * `modules/timers/domain/chime.ts` owns the number; `isNonStrobing()` holds it. */
+/* ---------------------------------------------------------------------------
+ * Celebration motion — `docs/design/motion.md`.
+ *
+ * The keyframes and the `.kynite-*` class names are copied verbatim from the
+ * design system so a doc snippet drops straight in. They live here rather than
+ * in a component because they are shared by the confetti provider, the reward
+ * modules, checkboxes and the streak bar.
+ *
+ * "Confetti fires the instant a step or reward is tapped — under 100ms, before
+ * the server responds. Once fired, it's never walked back." (rewards.md)
+ * ------------------------------------------------------------------------- */
+
+@keyframes kynite-pop {
+  0% {
+    transform: scale(1);
+  }
+  12% {
+    transform: scale(1.35);
+  }
+  28% {
+    transform: scale(0.92);
+  }
+  42% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes kynite-check-pop {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  15% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  30% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes kynite-confetti {
+  0% {
+    transform: translate(0, 0) rotate(0deg) scale(0);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg) scale(1);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--tx), var(--ty)) rotate(var(--tr)) scale(0.5);
+    opacity: 0;
+  }
+}
+
+@keyframes kynite-shimmer {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(320%);
+  }
+}
+
+@keyframes kynite-pop-big {
+  0% {
+    transform: scale(1);
+  }
+  10% {
+    transform: scale(1.6);
+  }
+  24% {
+    transform: scale(0.85);
+  }
+  38% {
+    transform: scale(1.15);
+  }
+  50% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/**
+ * Small/regular pop — star icon idle-celebrate.
+ *
+ * `motion.md`'s table gives every `kynite-anim-*` keyframe an `infinite`
+ * iteration count, but that is the specimen sheet describing the raw
+ * `@keyframes` for a looping demo tile, not a mandate that product UI loop
+ * forever. Every in-app consumer (`StarMedallion`'s `animate` prop,
+ * `Checkbox`'s check glyph, `step-row.tsx`'s done check) mounts this class
+ * once, on a state change, and wants a single pop-in — not a distracting
+ * loop for as long as the element stays on screen. A dev showcase wanting
+ * the doc's literal looping demo should give itself its own wrapper class
+ * (e.g. `animate-infinite`) rather than reusing this one.
+ */
+@utility kynite-anim-pop {
+  animation: kynite-pop var(--duration-pop) ease-in-out 1;
+}
+
+/** Checkbox check-mark pop-in — plays once per check, see `kynite-anim-pop` above. */
+@utility kynite-anim-check {
+  animation: kynite-check-pop var(--duration-pop) ease-in-out 1;
+}
+
+/** Big-celebration icon pop — reward claimed, milestone. Plays once. */
+@utility kynite-anim-pop-big {
+  animation: kynite-pop-big var(--duration-pop-big) ease-in-out 1;
+}
+
+/** Regular-size confetti burst piece. Needs `--tx`/`--ty`/`--tr` per instance. */
+@utility kynite-confetti-piece {
+  animation: kynite-confetti var(--duration-confetti) ease-out infinite;
+}
+
+/** Big-celebration confetti piece — same keyframe, shorter/faster duration. */
+@utility kynite-confetti-piece-big {
+  animation: kynite-confetti var(--duration-confetti-big) ease-out infinite;
+}
+
+/** Streak progress-bar shimmer sweep. */
+@utility kynite-shimmer-sweep {
+  animation: kynite-shimmer var(--duration-shimmer) linear infinite;
+}
+
 @keyframes timer-breath {
   0%,
   100% {
@@ -687,6 +880,8 @@
 
   body {
     @apply bg-background text-foreground;
+    /* typography.md: `body { margin:0; -webkit-font-smoothing:antialiased; }` */
+    -webkit-font-smoothing: antialiased;
     transition:
       background-color var(--duration-normal) ease,
       color var(--duration-normal) ease;

@@ -90,7 +90,12 @@ function CalendarDisplayRow({ calendar }: { calendar: CalendarDisplayView }) {
   return (
     <form
       action={formAction}
-      className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-sm"
+      // `Card variant="outlined"`'s shape, written out because the element has
+      // to stay a `<form>` (the card primitive is a `div` and this row submits
+      // its own action). The settings list is a stack of frames on an
+      // already-light ground — the one case `components.md` § Cards still
+      // wants an outline for — at the 24px card radius.
+      className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm"
       data-testid="calendar-display-row"
       data-calendar-id={calendar.id}
     >
@@ -120,8 +125,13 @@ function CalendarDisplayRow({ calendar }: { calendar: CalendarDisplayView }) {
             <span
               aria-hidden
               className={cn(
+                // The hue it currently inherits, at the *solid* tone — the
+                // pale `--cat-*-border` chip outline is a 1px chip edge, and a
+                // dashed ring drawn in it is close to invisible against the
+                // card. `colors.md`: the dot/solid tone is what carries a
+                // colour cue at this size.
                 'size-6 rounded-full border-2 border-dashed',
-                CATEGORY_CLASSES[calendar.inheritedCategory].border
+                CATEGORY_CLASSES[calendar.inheritedCategory].rule
               )}
             />
           </Button>

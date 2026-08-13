@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
 import { cn } from '@/lib/utils';
+import { StarCount } from '@/components/kynite';
 import type { Member } from '@/modules/family';
 import type { RewardPreset } from '../domain/economy';
 import type { Reward } from '../schema';
@@ -93,7 +94,11 @@ export async function RewardList({
               <div className="flex min-w-0 flex-1 flex-col gap-2">
                 <span className="font-display text-h3 font-bold">{reward.title}</span>
                 <span className="flex flex-wrap items-center gap-2">
-                  <Badge variant="gold">{t('starsCost', { count: reward.costStars })}</Badge>
+                  <StarCount
+                    value={reward.costStars}
+                    srLabel={t('starsCost', { count: reward.costStars })}
+                    size="sm"
+                  />
                   <Badge variant="secondary">{t(`categories.${reward.category}`)}</Badge>
                   {reward.availableToMemberIds.length === 0 ? (
                     <Badge variant="outline">{t('availableToEveryone')}</Badge>

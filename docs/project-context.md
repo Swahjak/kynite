@@ -75,7 +75,7 @@ _This file contains critical rules and patterns that AI agents must follow when 
 
 ### Code Quality & Style Rules
 
-- **Styling:** Use Tailwind CSS v4 utility classes. Avoid standard CSS modules unless specifically required for complex PWA layouts. Use "brand-guidelines" skill to ensure consistency with the Family Planner's design system.
+- **Styling:** Use Tailwind CSS v4 utility classes. Avoid standard CSS modules unless specifically required for complex PWA layouts. Consult `docs/design/README.md` to ensure consistency with the Family Planner's design system.
 - **Database Schema:**
   - Define all schema in `src/server/schema.ts` (or modularized files imported there).
   - Use `snake_case` for all table and column names to match PostgreSQL standards.

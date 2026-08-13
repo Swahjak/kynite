@@ -77,6 +77,8 @@ pnpm db:studio        # Open Drizzle Studio GUI
 
 Uses shadcn/ui component library with CSS variables for theming (see globals.css). Use the `cn()` helper from `@/lib/utils` for conditional class merging.
 
+**Design source of truth**: `docs/design/README.md` — the Kynite design system (Baloo 2 / Poppins, indigo `#5d5fef` / orange `#ef8d5d` / cream `#fbf9f4`). It supersedes all older design references. Consult it before making any color, typography, spacing, or component-styling decision.
+
 ### Calendar Component
 
 The calendar is the core feature, located in `src/components/calendar/`:

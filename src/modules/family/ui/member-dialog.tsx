@@ -134,7 +134,7 @@ export function MemberDialog({ member }: { member?: Member }) {
           </Field>
 
           {state.status === 'error' ? (
-            <p role="alert" className="text-sm text-destructive">
+            <p role="alert" className="text-body-sm text-destructive">
               {t(`errors.${state.error}`)}
             </p>
           ) : null}

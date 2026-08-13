@@ -39,7 +39,7 @@ export function GraduateRoutineButton({
       <input type="hidden" name="rewardEnabled" value={graduated ? 'true' : 'false'} />
       <Button
         type="submit"
-        variant="outline"
+        variant="brand-outline"
         size="hub"
         data-testid={graduated ? 'ungraduate-routine' : 'graduate-routine'}
         aria-label={t(graduated ? 'actions.resumeStarsNamed' : 'actions.graduateNamed', { title })}

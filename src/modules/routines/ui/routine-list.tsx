@@ -1,7 +1,7 @@
 import { getFormatter, getTranslations } from 'next-intl/server';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Icon } from '@/components/ui/icon';
+import { IconMedallion, StarCount } from '@/components/kynite';
 import type { Member } from '@/modules/family';
 import { hasGraduated } from '../domain/stars';
 import { oneOffDateOf, weekdaysOfRule } from '../domain/schedule';
@@ -67,12 +67,13 @@ export async function RoutineList({
               className="w-full transition-shadow duration-200 ease-brand hover:shadow-md"
             >
               <CardContent className="flex flex-wrap items-start gap-4">
-                <span
-                  aria-hidden
-                  className="flex size-12 shrink-0 items-center justify-center rounded-full bg-brand-container text-brand-container-ink"
-                >
-                  <Icon name={routineIconOf(routine.icon)} size="lg" filled />
-                </span>
+                <IconMedallion
+                  icon={routineIconOf(routine.icon)}
+                  filled
+                  tint="brand-container"
+                  shape="circle"
+                  size="lg"
+                />
 
                 <div className="flex min-w-0 flex-1 flex-col gap-2">
                   <span className="font-display text-h3 font-bold">{routine.title}</span>
@@ -99,9 +100,10 @@ export async function RoutineList({
                         {t('graduated')}
                       </Badge>
                     ) : (
-                      <Badge variant="gold">
-                        {t('starsPerStep', { count: routine.starsPerCompletion })}
-                      </Badge>
+                      <StarCount
+                        value={routine.starsPerCompletion}
+                        srLabel={t('starsPerStep', { count: routine.starsPerCompletion })}
+                      />
                     )}
                   </span>
 

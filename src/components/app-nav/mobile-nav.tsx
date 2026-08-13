@@ -64,7 +64,7 @@ export function MobileNav({ labels }: { labels: NavLabels }) {
 }
 
 const tabClass =
-  'flex min-h-14 flex-1 flex-col items-center justify-center gap-1 px-1 py-2 transition-colors duration-200 ease-brand';
+  'flex min-h-14 flex-1 flex-col items-center justify-center gap-1 px-1 py-2 transition-all duration-200 ease-brand active:scale-95';
 /**
  * `text-primary`, which the mockups use, is now legible as text: the stitch
  * indigo is 7.47:1 on the bar's surface where the old brand green was 1.46:1

@@ -41,7 +41,7 @@ export function NavOverflowSheet({
               render={
                 <Link
                   href={href}
-                  className="flex min-h-12 items-center gap-3 rounded-lg px-3 py-2 font-display text-body-sm font-semibold transition-colors duration-200 ease-brand hover:bg-muted"
+                  className="flex min-h-12 items-center gap-3 rounded-lg px-3 py-2 font-display text-body-sm font-semibold transition-all duration-200 ease-brand hover:bg-muted active:scale-95"
                 />
               }
             >

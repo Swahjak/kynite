@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
 import { Icon } from '@/components/ui/icon';
@@ -28,14 +29,18 @@ export function AppRail({ labels }: { labels: NavLabels }) {
       aria-label={labels.mainNavigation}
       data-testid="app-rail"
     >
-      {/* Logo tile. The mark itself is swapped in phase 2; what the shell owes
-        the mockup here is the 48px primary tile at the top of the rail. */}
+      {/* Logo tile — `docs/design/brand.md` § "Icon / App icon": the two-blob
+        star mark, self-contained (own rounded-square background baked into
+        the SVG), so it sits bare rather than inside a second `bg-primary`
+        tile. `AppRail` is a client component (it reads `usePathname`), so this
+        renders the static asset via `next/image` directly rather than
+        `BrandMark` (a server component). */}
       <Link
         href="/today"
-        className="mb-2 flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary font-display text-h2 font-extrabold text-primary-foreground"
+        className="mb-2 flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl"
         aria-label={labels.appName}
       >
-        {labels.appName.charAt(0)}
+        <Image src="/images/logo-icon.svg" alt="" width={48} height={48} unoptimized priority />
       </Link>
 
       <div className="flex flex-1 flex-col items-center gap-1">
@@ -69,7 +74,7 @@ export function AppRail({ labels }: { labels: NavLabels }) {
 
 /** 64px tile: 28px glyph + caps micro-label, 48px minimum touch target. */
 const railTileClass =
-  'flex w-16 shrink-0 flex-col items-center justify-center gap-0.5 rounded-2xl px-1 py-2 transition-colors duration-200 ease-brand';
+  'flex w-16 shrink-0 flex-col items-center justify-center gap-0.5 rounded-2xl px-1 py-2 transition-all duration-200 ease-brand active:scale-95';
 const railActiveClass = 'bg-accent text-accent-foreground';
 const railIdleClass = 'text-ink-secondary hover:bg-surface-container-high hover:text-ink';
 

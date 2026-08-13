@@ -3,26 +3,33 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 
 /**
- * Card variants — `docs/design/stitch/.../kynite/DESIGN.md`, "Elevation & Depth".
+ * Card variants — `docs/design/components.md` § Cards.
  *
- * - `default` — Level 1. A 1px border *and* a soft ambient shadow. Before M19
- *   this was `ring-1` with **no shadow at all** (docs/rebuild-design-gaps.md
- *   S5/§9), which is why the app read as flat next to the mockups: the mockups
- *   lean on elevation, not on outline, to separate a card from the background.
- *   A real `border` rather than a ring, so the card participates in the tonal
- *   layering (`--line` is M3 `outline-variant`) instead of tinting the
- *   foreground colour at 10%.
- * - `hero` — the filled-primary "NOW" / "CURRENT GOAL" card every mockup screen
- *   has exactly one of. Phase 2 adopts it on `/today`, the hub and the reward
- *   store; `savings-goal-card.tsx` already hand-rolls this treatment and is the
- *   reference for it. Radius steps up to `2xl` (24px) and the ambient glow the
- *   mockups paint behind the eyebrow comes with it.
+ * "All cards: `border-radius:24px` … `box-shadow:0 1px 2px rgba(0,0,0,0.04)` as
+ * the default resting elevation." Elevation, not outline, is what separates a
+ * card from the cream background, so `default` carries no border.
+ *
+ * - `default` — `Card/Stat`: `background:#ffffff;border-radius:24px;
+ *   box-shadow:0 1px 2px rgba(0,0,0,0.04)`.
+ * - `muted` — `Card/Attention`: the same card on `#f5f3ee`, for the secondary
+ *   tile in a pair (approval requests, "needs your attention").
+ * - `hero` — the filled-primary "NOW" / "CURRENT GOAL" card every screen has
+ *   exactly one of.
+ * - `inverse` — `Card/Toast`: `background:#2e3132;box-shadow:0 8px 24px
+ *   rgba(0,0,0,0.18)`, the dark card the celebration and toast specimens use.
+ * - `outlined` — a card that has to read as a *boundary* rather than as a
+ *   surface (pickers, list frames on an already-white ground). Not a design
+ *   system variant; kept because dropping the border from `default` would
+ *   otherwise erase those frames.
  */
-type CardVariant = 'default' | 'hero';
+type CardVariant = 'default' | 'muted' | 'hero' | 'inverse' | 'outlined';
 
 const CARD_VARIANTS: Record<CardVariant, string> = {
-  default: 'rounded-xl border border-border bg-card text-card-foreground shadow-sm',
+  default: 'rounded-2xl bg-card text-card-foreground shadow-sm',
+  muted: 'rounded-2xl bg-surface-container text-card-foreground shadow-sm',
   hero: 'relative rounded-2xl bg-primary text-primary-foreground shadow-lg',
+  inverse: 'rounded-2xl bg-ink text-background shadow-lg dark:bg-surface dark:text-ink',
+  outlined: 'rounded-2xl border border-border bg-card text-card-foreground shadow-sm',
 };
 
 function Card({
@@ -40,7 +47,7 @@ function Card({
       data-size={size}
       data-variant={variant}
       className={cn(
-        'group/card flex flex-col gap-(--card-spacing) overflow-hidden py-(--card-spacing) text-sm transition-shadow duration-200 ease-brand [--card-spacing:--spacing(4)] has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:[--card-spacing:--spacing(3)] data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl',
+        'group/card flex flex-col gap-(--card-spacing) overflow-hidden py-(--card-spacing) text-sm transition-shadow duration-200 ease-brand [--card-spacing:--spacing(4)] has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:[--card-spacing:--spacing(3)] data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-2xl *:[img:last-child]:rounded-b-2xl',
         CARD_VARIANTS[variant],
         className
       )}
@@ -54,7 +61,7 @@ function CardHeader({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot="card-header"
       className={cn(
-        'group/card-header @container/card-header grid auto-rows-min items-start gap-1 rounded-t-xl px-(--card-spacing) has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto] [.border-b]:pb-(--card-spacing)',
+        'group/card-header @container/card-header grid auto-rows-min items-start gap-1 rounded-t-2xl px-(--card-spacing) has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto] [.border-b]:pb-(--card-spacing)',
         className
       )}
       {...props}
@@ -67,9 +74,8 @@ function CardTitle({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot="card-title"
       className={cn(
-        // The brand type scale, not a generic `text-base`/weight-500: the
-        // mockups set card titles in Hanken Grotesk at 600–700
-        // (docs/rebuild-design-gaps.md §9).
+        // `typography.md`: card headings are Baloo 2 at 16–18px/700 and
+        // `headline-md` is Baloo 2 20px/600 — never a generic weight-500 body.
         'font-heading text-h3 leading-snug font-semibold group-data-[size=sm]/card:text-body',
         className
       )}
@@ -109,7 +115,7 @@ function CardFooter({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot="card-footer"
       className={cn(
-        'flex items-center rounded-b-xl border-t bg-muted/50 p-(--card-spacing)',
+        'flex items-center rounded-b-2xl border-t bg-muted/50 p-(--card-spacing)',
         className
       )}
       {...props}

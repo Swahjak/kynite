@@ -1,79 +1,61 @@
 import localFont from 'next/font/local';
+import { Baloo_2, Poppins } from 'next/font/google';
 
 /**
- * Self-hosted brand fonts — `docs/design/stitch/` (M19 phase 1).
+ * Brand fonts — `docs/design/typography.md` (the single source of truth for
+ * design, `docs/design/README.md`).
  *
- * **Hanken Grotesk** for structural elements (display, headings, labels,
- * buttons, tabular clocks) and **Inter** for reading copy, as declared by every
- * stitch mockup's embedded `fontFamily` map and by `kynite/DESIGN.md`. These
- * replace Lexend / Noto Sans, which came from the superseded green design
- * system (docs/rebuild-design-gaps.md §1).
+ * **Baloo 2** for display/headings/labels/buttons and **Poppins** for body copy
+ * and UI text, quoting `typography.md` § "Font families":
  *
- * The .woff2 files live in `src/styles/fonts` and are served from our own
- * origin — the app never issues a runtime request to fonts.googleapis.com or
- * fonts.gstatic.com, which an e2e test asserts.
+ * | `Baloo 2` | Display / headings / labels / numerals-with-personality | 400, 600, 700, 800 |
+ * | `Poppins` | Body copy, UI text | 400, 500, 600, 700 |
  *
- * Each family ships the `latin` subset. `latin-ext` is registered as a separate
- * family and chained after the primary one in `--font-sans` / `--font-display`
- * (see globals.css) so the browser only downloads it when a glyph outside
- * Latin-1 is actually rendered.
+ * These replace Hanken Grotesk / Inter, which came from the superseded stitch
+ * mockups, which in turn replaced Lexend / Noto Sans from the green brand.
  *
- * The main display/body fonts set `fallback: []` and `adjustFontFallback: false`
- * so next/font doesn't embed a generic (or metric-adjusted) fallback inside the
- * `--font-hanken-grotesk` / `--font-inter` CSS variables themselves. If it did,
- * the embedded generic would sit *before* the `-ext` family once globals.css
- * chains `var(--font-hanken-grotesk), var(--font-hanken-grotesk-ext), …` —
- * making the ext family (and its latin-ext woff2) unreachable by the CSS
- * font-matching algorithm. The full fallback chain is built explicitly in
- * globals.css instead.
+ * `next/font/google` **self-hosts**: the files are downloaded at build time and
+ * served from our own origin, so the app still never issues a runtime request
+ * to fonts.googleapis.com or fonts.gstatic.com (asserted by
+ * `e2e/tests/app/design/fonts.spec.ts`). It also handles the `latin` /
+ * `latin-ext` split itself — the hand-rolled `-ext` sibling families the
+ * previous `localFont` setup needed are gone.
+ *
+ * Baloo 2 is a variable font (`wght` 400–800), so no `weight` is declared and
+ * the whole axis is available. Poppins ships as statics, so its four documented
+ * weights are listed explicitly.
+ *
+ * `fallback` is `['sans-serif']` to match the doc's own stack declaration —
+ * "always with the `sans-serif` fallback, never a longer system stack".
  */
-
-export const fontDisplay = localFont({
-  src: './../styles/fonts/hanken-grotesk-latin.woff2',
-  variable: '--font-hanken-grotesk',
-  weight: '100 900',
-  style: 'normal',
+export const fontDisplay = Baloo_2({
+  subsets: ['latin', 'latin-ext'],
+  variable: '--font-baloo-2',
   display: 'swap',
   preload: true,
-  fallback: [],
-  adjustFontFallback: false,
+  fallback: ['sans-serif'],
 });
 
-export const fontDisplayExt = localFont({
-  src: './../styles/fonts/hanken-grotesk-latin-ext.woff2',
-  variable: '--font-hanken-grotesk-ext',
-  weight: '100 900',
+export const fontBody = Poppins({
+  subsets: ['latin', 'latin-ext'],
+  weight: ['400', '500', '600', '700'],
   style: 'normal',
-  display: 'swap',
-  preload: false,
-  fallback: ['ui-sans-serif', 'system-ui', 'sans-serif'],
-});
-
-export const fontBody = localFont({
-  src: './../styles/fonts/inter-latin.woff2',
-  variable: '--font-inter',
-  weight: '100 900',
-  style: 'normal',
+  variable: '--font-poppins',
   display: 'swap',
   preload: true,
-  fallback: [],
-  adjustFontFallback: false,
-});
-
-export const fontBodyExt = localFont({
-  src: './../styles/fonts/inter-latin-ext.woff2',
-  variable: '--font-inter-ext',
-  weight: '100 900',
-  style: 'normal',
-  display: 'swap',
-  preload: false,
-  fallback: ['ui-sans-serif', 'system-ui', 'sans-serif'],
+  fallback: ['sans-serif'],
 });
 
 /**
- * Material Symbols Outlined, the variable icon font. `FILL` is driven from CSS
- * (`.material-symbols-outlined` / `.icon-filled` in globals.css) rather than
- * from separate font files, so the filled state is a single variation axis.
+ * Material Symbols Outlined, the variable icon font — unchanged by the brand
+ * swap (`typography.md` § "Material Symbols Outlined setup" keeps it). Stays
+ * self-hosted from our own subset (`scripts/subset-icons.mjs`) rather than
+ * coming from `next/font/google`: the full family is 10MB and we ship only the
+ * codepoints `icon-codepoints.ts` names.
+ *
+ * `FILL` is driven from CSS (`.material-symbols-outlined` / `.icon-filled` in
+ * globals.css) rather than from separate font files, so the filled state is a
+ * single variation axis.
  */
 export const fontIcon = localFont({
   src: './../styles/fonts/material-symbols-outlined.woff2',
@@ -87,10 +69,4 @@ export const fontIcon = localFont({
 });
 
 /** Every font variable, ready to drop on `<html>`. */
-export const fontVariables = [
-  fontDisplay.variable,
-  fontDisplayExt.variable,
-  fontBody.variable,
-  fontBodyExt.variable,
-  fontIcon.variable,
-].join(' ');
+export const fontVariables = [fontDisplay.variable, fontBody.variable, fontIcon.variable].join(' ');

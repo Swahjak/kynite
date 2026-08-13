@@ -53,8 +53,14 @@ export async function UpNextGrid({ events, members, timeZone, limit, mode }: UpN
               data-slot="up-next-card"
               data-category={event.category}
               className={cn(
-                'flex min-h-36 flex-col justify-between gap-4 rounded-2xl border border-line-subtle p-5 shadow-sm',
-                palette.surface
+                // Left rule only — no `border-line-subtle` frame. `palette.rule`
+                // (`border-cat-*-solid`) sets border-*color* on all four sides;
+                // pairing it with a full 1px `border` colored every edge in the
+                // category hue instead of just the intended 4px left bar. Match
+                // `event-chip.tsx`'s pattern: `border-l-4` + `palette.rule` alone.
+                'flex min-h-36 flex-col justify-between gap-4 rounded-2xl border-l-4 p-5 shadow-sm',
+                palette.surface,
+                palette.rule
               )}
             >
               <div className="flex items-start justify-between gap-3">

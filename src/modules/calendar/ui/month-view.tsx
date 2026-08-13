@@ -66,11 +66,15 @@ export function MonthView({
 
   return (
     <div data-slot="month-view" className="flex min-h-0 flex-col">
-      <div className="grid grid-cols-7 border-b border-line bg-surface-container-low/60">
+      {/* `calendar.md` § "Month view / date picker": the weekday header row is
+          bare — "each letter: `text-align:center;font-family:'Baloo 2';
+          font-weight:700;font-size:11px;color:#747688;`" on the card's own
+          white ground, with no band behind it. */}
+      <div className="grid grid-cols-7 border-b border-line-subtle">
         {weekdays.map((day) => (
           <div
             key={day.toISOString()}
-            className="label-overline px-2 py-3 text-center text-ink-secondary"
+            className="label-overline px-2 py-3 text-center text-ink-muted"
           >
             {format.dateTime(day, { weekday: 'short' })}
           </div>
@@ -96,12 +100,18 @@ export function MonthView({
               )}
             >
               <div className="flex items-center justify-between">
+                {/* Date number: `class="tnum" font-size:13px`. The selected /
+                    today date is the documented pill — "`background:#5d5fef;
+                    border-radius:9999px;` with number `font-weight:700;
+                    color:#ffffff;`" — the pill *is* the indicator, so a today
+                    cell carries no dot of its own. */}
                 <span
                   className={cn(
-                    'tabular-time text-caption font-semibold',
+                    'tnum text-body-sm',
                     outside ? 'text-ink-muted' : 'text-ink',
-                    isToday &&
-                      'flex size-6 items-center justify-center rounded-full bg-primary text-primary-foreground'
+                    isToday
+                      ? 'flex size-7 items-center justify-center rounded-4xl bg-primary font-bold text-primary-foreground'
+                      : 'font-medium'
                   )}
                 >
                   {format.dateTime(day, { day: 'numeric' })}
@@ -135,7 +145,7 @@ export function MonthView({
                     variant="row"
                     showTime={false}
                     onSelect={onSelect}
-                    className="rounded-lg border-l-2 px-1 py-0 shadow-none"
+                    className="px-1 py-0 shadow-none"
                   />
                 ))}
               </div>
@@ -143,9 +153,9 @@ export function MonthView({
               {/* Past the row budget, the remaining events survive as pips, so
                   a busy day still reads as busy rather than as a bare count. */}
               {dayEvents.length > MAX_ROWS_PER_CELL && (
-                <div className="mt-auto flex gap-0.5">
+                <div className="mt-auto flex items-center gap-1">
                   {dayEvents.slice(MAX_ROWS_PER_CELL, MAX_ROWS_PER_CELL + 6).map((event) => (
-                    <EventChip key={event.key} event={event} variant="dot" className="w-2" />
+                    <EventChip key={event.key} event={event} variant="dot" />
                   ))}
                 </div>
               )}

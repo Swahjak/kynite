@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Icon } from '@/components/ui/icon';
 import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
+import { ProgressBar } from '@/components/kynite';
 
 /**
  * The board's per-child entry points (M19) — the Stitch "Kids' Progress" panel,
@@ -98,15 +99,7 @@ export function ChildLauncher({ entries }: { entries: readonly HubChild[] }) {
                           ? t('allDone')
                           : t('progress', { done: child.doneCount, total: child.total })}
                       </span>
-                      <span
-                        aria-hidden
-                        className="h-2 w-full overflow-hidden rounded-full bg-muted"
-                      >
-                        <span
-                          className="block h-full rounded-full bg-primary transition-[width] duration-500 ease-brand"
-                          style={{ width: `${Math.round(ratio * 100)}%` }}
-                        />
-                      </span>
+                      <ProgressBar value={Math.round(ratio * 100)} />
                     </>
                   )}
                 </span>

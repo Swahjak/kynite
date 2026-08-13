@@ -8,17 +8,28 @@ function Field({ className, ...props }: FieldPrimitive.Root.Props) {
   return (
     <FieldPrimitive.Root
       data-slot="field"
-      className={cn('flex w-full flex-col gap-1.5', className)}
+      className={cn('group/field flex w-full flex-col gap-1.5', className)}
       {...props}
     />
   );
 }
 
+/**
+ * `docs/design/components.md` § Inputs — the label above a text field:
+ * `font-family:'Baloo 2';font-weight:700;font-size:12px;letter-spacing:0.05em;
+ * text-transform:uppercase;color:#434656;` — and, on focus, `color:#5d5fef`.
+ *
+ * The focus colour rides on Base UI's `data-focused` state on `Field.Root`, so
+ * the label follows the input's 2px underline without a client hook.
+ */
 function FieldLabel({ className, ...props }: FieldPrimitive.Label.Props) {
   return (
     <FieldPrimitive.Label
       data-slot="field-label"
-      className={cn('font-display text-sm font-medium text-foreground', className)}
+      className={cn(
+        'label-overline text-ink-secondary transition-colors duration-200 ease-brand group-data-[focused]/field:text-brand-ink',
+        className
+      )}
       {...props}
     />
   );
@@ -49,7 +60,7 @@ function FieldGroupLabel({ className, ...props }: React.ComponentProps<'span'>) 
   return (
     <span
       data-slot="field-group-label"
-      className={cn('font-display text-sm font-medium text-foreground', className)}
+      className={cn('label-overline text-ink-secondary', className)}
       {...props}
     />
   );

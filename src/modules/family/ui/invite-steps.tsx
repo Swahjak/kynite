@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
+import { MemberFace } from '@/components/kynite';
 import { cn } from '@/lib/utils';
 import { MEMBER_COLORS, type MemberColor } from '../schema';
 import { idleState } from '../action-state';
@@ -49,24 +50,25 @@ export function InviteAcceptStep({
     <Card className="w-full max-w-md" data-testid="invite-accept">
       <CardHeader>
         <CardTitle>
-          <h1 className="text-xl">{t('accept.title', { family: familyName })}</h1>
+          <h1 className="font-display text-h1">{t('accept.title', { family: familyName })}</h1>
         </CardTitle>
         <CardDescription>{t('accept.description', { name: displayName })}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <div className="flex items-center gap-3">
-          <span
-            aria-hidden
-            className={cn('size-10 rounded-full', MEMBER_COLOR_CLASSES[color].dot)}
+          <MemberFace
+            name={displayName}
+            surfaceClass={MEMBER_COLOR_CLASSES[color].surface}
+            size="lg"
           />
-          <span className="font-display text-lg font-medium">{displayName}</span>
+          <span className="font-display text-h3 font-semibold text-ink">{displayName}</span>
         </div>
 
         <form action={formAction}>
           <input type="hidden" name="token" value={token} />
 
           {state.status === 'error' ? (
-            <p role="alert" className="mb-3 text-sm text-destructive">
+            <p role="alert" className="mb-3 text-body-sm text-destructive">
               {t(`errors.${state.error}`)}
             </p>
           ) : null}
@@ -164,19 +166,23 @@ export function InviteProfileStep({
     <Card className="w-full max-w-md" data-testid="invite-profile">
       <CardHeader>
         <CardTitle>
-          <h1 className="text-xl">{t('profile.title', { name: displayName })}</h1>
+          <h1 className="font-display text-h1">{t('profile.title', { name: displayName })}</h1>
         </CardTitle>
         <CardDescription>{t('profile.description')}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {state.status === 'error' ? (
-          <p role="alert" className="text-sm text-destructive">
+          <p role="alert" className="text-body-sm text-destructive">
             {t(`errors.${state.error}`)}
           </p>
         ) : null}
 
         {uploadError ? (
-          <p role="alert" className="text-sm text-destructive" data-testid="invite-profile-error">
+          <p
+            role="alert"
+            className="text-body-sm text-destructive"
+            data-testid="invite-profile-error"
+          >
             {tForm(`avatarErrors.${uploadError}`)}
           </p>
         ) : null}
@@ -285,13 +291,13 @@ export function InviteGoogleStep({
     <Card className="w-full max-w-md" data-testid="invite-google">
       <CardHeader>
         <CardTitle>
-          <h1 className="text-xl">{t('google.title')}</h1>
+          <h1 className="font-display text-h1">{t('google.title')}</h1>
         </CardTitle>
         <CardDescription>{t('google.description', { name: displayName })}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         {configured ? null : (
-          <p role="alert" className="text-sm text-muted-foreground">
+          <p role="alert" className="text-body-sm text-muted-foreground">
             {t('google.notConfigured')}
           </p>
         )}

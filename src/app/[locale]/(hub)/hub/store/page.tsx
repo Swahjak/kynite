@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server';
+import { EmptyState } from '@/components/kynite';
 import { ChildTabs } from '@/components/hub';
 import { requireHubDevice } from '@/modules/devices';
 import { RewardStore, loadStore } from '@/modules/rewards';
@@ -39,9 +40,13 @@ export default async function HubStorePage({
 
   if (!store) {
     return (
-      <main className="flex min-h-full flex-col items-center justify-center gap-2 p-8 text-center">
-        <h1 className="font-display text-h1 font-bold">{t('store.unavailableTitle')}</h1>
-        <p className="text-body-lg text-ink-secondary">{t('store.unavailableBody')}</p>
+      <main className="min-h-full">
+        <EmptyState
+          size="hub"
+          heading
+          title={t('store.unavailableTitle')}
+          description={t('store.unavailableBody')}
+        />
       </main>
     );
   }

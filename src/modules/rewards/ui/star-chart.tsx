@@ -1,6 +1,7 @@
 import { getFormatter, getTranslations } from 'next-intl/server';
 import { Icon } from '@/components/ui/icon';
 import { cn } from '@/lib/utils';
+import { StarMedallion } from '@/components/kynite';
 import type { StarChartData } from '../page-data';
 
 /**
@@ -54,12 +55,7 @@ export async function StarChart({ chart }: { chart: StarChartData }) {
           aria-hidden
           className="pointer-events-none absolute -top-10 -right-10 -z-10 size-40 rounded-full bg-gold/15 blur-3xl"
         />
-        <span
-          aria-hidden
-          className="flex size-24 shrink-0 items-center justify-center rounded-full bg-gold/20 text-gold-ink shadow-sm"
-        >
-          <Icon name="star" size="2xl" filled className="scale-150" />
-        </span>
+        <StarMedallion size="3xl" className="shadow-sm" />
 
         <div className="flex flex-col">
           <span
@@ -175,12 +171,7 @@ export async function StarChart({ chart }: { chart: StarChartData }) {
                 data-testid="history-entry"
                 className="flex items-center gap-4 rounded-2xl bg-surface-container-lowest px-4 py-3 shadow-sm transition-colors duration-200 ease-brand hover:bg-surface-container-low"
               >
-                <span
-                  aria-hidden
-                  className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gold/20 text-gold-ink"
-                >
-                  <Icon name="star" size="md" filled />
-                </span>
+                <StarMedallion size="md" />
                 <span className="min-w-0 flex-1 truncate text-body-lg">
                   {entry.note ?? t(`reasons.${entry.reason}`)}
                 </span>

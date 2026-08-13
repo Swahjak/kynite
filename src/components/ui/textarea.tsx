@@ -14,13 +14,13 @@ import { cn } from '@/lib/utils';
  * `cva` with a height override at every call site would be the worse copy.
  */
 const textareaVariants = cva(
-  'w-full min-w-0 rounded-lg border border-input bg-transparent transition-colors duration-200 ease-brand outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:bg-input/30 dark:disabled:bg-input/80 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40',
+  'w-full min-w-0 rounded-t-md rounded-b-none border-0 border-b-2 border-line bg-surface-container text-ink transition-colors duration-200 ease-brand outline-none placeholder:text-ink-muted focus-visible:border-line-focus focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive',
   {
     variants: {
       size: {
-        default: 'min-h-16 px-2.5 py-1.5 text-base md:text-sm',
+        default: 'min-h-16 px-3 py-2 text-base md:text-sm',
         /** Kiosk/hub target: roomy enough to type on a tablet. */
-        hub: 'min-h-24 rounded-xl px-4 py-3 text-base',
+        hub: 'min-h-24 px-4 py-3 text-base',
       },
     },
     defaultVariants: { size: 'default' },

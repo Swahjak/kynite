@@ -27,6 +27,10 @@ export function ChimeSettings({ chime }: { chime: Chime }) {
 
       <div role="group" aria-label={t('chime.title')} className="flex gap-2">
         {CHIME_INTENSITIES.map((intensity) => (
+          // `Button/Primary` when selected, `Button/Secondary` (outline) when
+          // not — `docs/design/components.md` § Buttons. Native `<button>`,
+          // not the shared `<Button>`, because this is a segmented toggle
+          // (`aria-pressed`), not a set of independent actions.
           <button
             key={intensity}
             type="button"
@@ -38,9 +42,11 @@ export function ChimeSettings({ chime }: { chime: Chime }) {
             }}
             className={cn(
               TIMER_TAP_TARGET_CLASS,
-              'rounded-lg px-4 text-body font-medium ring-1 ring-foreground/10',
+              'rounded-4xl px-4 font-display text-body-sm font-bold',
               'transition-colors duration-200 ease-brand focus-visible:ring-3 focus-visible:ring-ring/50',
-              setting.intensity === intensity ? 'bg-primary text-primary-foreground' : 'bg-surface'
+              setting.intensity === intensity
+                ? 'bg-primary text-primary-foreground shadow-brand'
+                : 'border-2 border-primary bg-transparent text-brand-ink hover:bg-accent'
             )}
           >
             {t(`chime.${intensity}`)}

@@ -186,24 +186,44 @@ export function TimeGrid({ days, events, timeZone, now, onSelect, hub = false }:
 
   return (
     <div data-slot="time-grid" className="flex min-h-0 flex-col">
-      {/* Day headers — the mockups' sticky, glass column strip. */}
-      <div className="flex border-b border-line bg-surface-container-low/60 pl-14">
-        {days.map((day, index) => (
-          <div key={dayKeys[index]} className="flex flex-1 flex-col items-center gap-0.5 px-1 py-2">
-            <div className="label-overline text-ink-muted">
-              {format.dateTime(day, { weekday: 'short' })}
-            </div>
+      {/* Day headers — `calendar.md` § "Week strip". Each cell is
+          "`display:flex;flex-direction:column;align-items:center;gap:6px;
+          padding:10px 0;border-radius:16px;`" with a Baloo-2 700 11px weekday
+          label over a `tnum` date; **today fills the whole cell** with
+          `#5d5fef` (label at 75% white, date bold white) rather than putting a
+          circle around the number, which is what this drew before. */}
+      <div className="flex border-b border-line-subtle px-1 pt-1 pb-1 pl-14">
+        {days.map((day, index) => {
+          const isToday = nowKey === dayKeys[index];
+
+          return (
             <div
+              key={dayKeys[index]}
               className={cn(
-                'flex items-center justify-center rounded-4xl tabular-time font-display font-bold',
-                hub ? 'size-11 text-h2' : 'size-7 text-body-lg',
-                nowKey === dayKeys[index] ? 'bg-primary text-primary-foreground' : 'text-ink'
+                'mx-0.5 flex flex-1 flex-col items-center gap-1.5 rounded-xl px-1 py-2.5',
+                isToday && 'bg-primary'
               )}
             >
-              {format.dateTime(day, { day: 'numeric' })}
+              <div
+                className={cn(
+                  'label-overline',
+                  isToday ? 'text-primary-foreground/75' : 'text-ink-muted'
+                )}
+              >
+                {format.dateTime(day, { weekday: 'short' })}
+              </div>
+              <div
+                className={cn(
+                  'tabular-time font-bold',
+                  hub ? 'text-h2' : 'text-body-lg',
+                  isToday ? 'text-primary-foreground' : 'text-ink'
+                )}
+              >
+                {format.dateTime(day, { day: 'numeric' })}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* All-day row: dates, not times, so they cannot live on the hour grid. */}

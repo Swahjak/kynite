@@ -1,7 +1,9 @@
 'use client';
 
+import { Badge } from '@/components/ui/badge';
 import { Icon } from '@/components/ui/icon';
 import { cn } from '@/lib/utils';
+import { IconMedallion } from '@/components/kynite';
 import type { BoardRoutine } from '../page-data';
 import { StepRow } from './step-row';
 
@@ -73,17 +75,13 @@ export function RoutineCard({ routine, expanded, copy, onComplete }: RoutineCard
       ) : null}
 
       <header className="flex items-center gap-4">
-        <span
-          aria-hidden
-          className={cn(
-            'flex size-12 shrink-0 items-center justify-center rounded-full transition-colors duration-200',
-            expanded
-              ? 'bg-brand-container text-brand-container-ink'
-              : 'bg-surface-container text-ink-secondary'
-          )}
-        >
-          <Icon name={routine.icon} size="lg" filled={expanded} />
-        </span>
+        <IconMedallion
+          icon={routine.icon}
+          filled={expanded}
+          tint={expanded ? 'brand-container' : 'muted'}
+          shape="circle"
+          size="lg"
+        />
 
         <div className="min-w-0 flex-1">
           <h3 className="truncate font-display text-h3 font-bold text-foreground">
@@ -103,30 +101,30 @@ export function RoutineCard({ routine, expanded, copy, onComplete }: RoutineCard
         </div>
 
         {routine.complete ? (
-          <span
-            aria-hidden
-            className="flex size-12 shrink-0 items-center justify-center rounded-full bg-brand-container text-brand-container-ink"
-          >
-            {/* `celebration`, per the mockup's finished-routine medallion. Still
-                one quiet glyph on a collapsed card — the celebration itself
-                happened at the tap. */}
-            <Icon name="celebration" size="lg" filled />
-          </span>
+          /* `celebration`, per the mockup's finished-routine medallion. Still
+             one quiet glyph on a collapsed card — the celebration itself
+             happened at the tap. */
+          <IconMedallion
+            icon="celebration"
+            filled
+            tint="brand-container"
+            shape="circle"
+            size="lg"
+          />
         ) : copy.countdown ? (
-          <span
-            data-testid="routine-countdown"
-            className="flex shrink-0 items-center gap-1 rounded-4xl bg-surface-container px-3 py-1 text-caption text-ink-secondary"
-          >
+          <Badge data-testid="routine-countdown" variant="soft" size="md" className="shrink-0">
             <Icon name="schedule" size="xs" />
             {copy.countdown}
-          </span>
+          </Badge>
         ) : expanded ? (
-          <span
+          <Badge
             data-testid="routine-progress"
-            className="label-overline shrink-0 rounded-4xl bg-brand-container px-4 py-1.5 text-brand-container-ink"
+            variant="status"
+            size="md"
+            className="label-overline shrink-0"
           >
             {copy.inProgress}
-          </span>
+          </Badge>
         ) : null}
       </header>
 

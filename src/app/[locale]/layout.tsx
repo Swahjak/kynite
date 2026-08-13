@@ -19,16 +19,22 @@ export const metadata: Metadata = {
   manifest: '/manifest.webmanifest',
   applicationName: 'Kynite',
   appleWebApp: { capable: true, statusBarStyle: 'default', title: 'Kynite' },
-  // iOS ignores the manifest's icons and reads this instead.
+  // iOS ignores the manifest's icons and reads this instead. The SVG is the
+  // brand mark itself (`docs/design/assets/logo-icon.svg`); the 96px PNG is the
+  // raster fallback for the browsers and bookmark UIs that will not take one.
   icons: {
-    icon: '/favicon.svg',
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/icons/favicon-96.png', sizes: '96x96', type: 'image/png' },
+    ],
     apple: [{ url: '/icons/apple-touch-icon.png', sizes: '180x180' }],
   },
 };
 
 export const viewport: Viewport = {
-  // Matches both manifests, so the installed title bar is brand green.
-  themeColor: '#0040e0',
+  // Matches both manifests, so the installed title bar is the brand indigo
+  // (`docs/design/colors.md` "Primary").
+  themeColor: '#5d5fef',
   // A wall tablet and a phone both want the full display; neither wants a
   // pinch-zoom that a small hand can trigger by accident.
   width: 'device-width',

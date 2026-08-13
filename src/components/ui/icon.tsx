@@ -3,7 +3,7 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { ICON_CODEPOINTS, type IconName } from './icon-codepoints';
 
-/** Icon sizes from docs/brand-guideline.md "Icon Sizes". */
+/** Icon sizes from docs/design/README.md "Icon Sizes". */
 const ICON_SIZES = {
   xs: 14,
   sm: 18,

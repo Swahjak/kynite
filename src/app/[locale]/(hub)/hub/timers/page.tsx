@@ -1,4 +1,5 @@
 import { getFormatter, getTranslations } from 'next-intl/server';
+import { EmptyState } from '@/components/kynite';
 import { requireHubDevice } from '@/modules/devices';
 import {
   DURATION_PRESETS,
@@ -59,9 +60,13 @@ export default async function HubTimersPage({
 
   if (!board) {
     return (
-      <main className="flex min-h-full flex-col items-center justify-center gap-2 p-8 text-center">
-        <h1 className="font-display text-h1 font-bold">{t('hub.unavailableTitle')}</h1>
-        <p className="text-body-lg text-ink-secondary">{t('hub.unavailableBody')}</p>
+      <main className="min-h-full">
+        <EmptyState
+          size="hub"
+          heading
+          title={t('hub.unavailableTitle')}
+          description={t('hub.unavailableBody')}
+        />
       </main>
     );
   }

@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { Badge } from '@/components/ui/badge';
+import { EmptyState, MediaRow } from '@/components/kynite';
 import { GraduateRoutineButton } from './graduate-routine-button';
 
 /**
@@ -35,7 +36,7 @@ export function RoutineGraduationList({ routines }: { routines: GraduationRoutin
   const t = useTranslations('settings.graduation');
 
   if (routines.length === 0) {
-    return <p className="text-sm text-muted-foreground">{t('empty')}</p>;
+    return <EmptyState title={t('empty')} />;
   }
 
   return (
@@ -43,25 +44,27 @@ export function RoutineGraduationList({ routines }: { routines: GraduationRoutin
       {routines.map((routine) => (
         <li
           key={routine.id}
-          className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border p-3"
           data-testid="graduation-row"
           data-routine-id={routine.id}
           data-graduated={routine.graduated ? 'true' : 'false'}
         >
-          <div className="flex flex-col gap-0.5">
-            <span className="font-display text-sm font-semibold">{routine.title}</span>
-            <span className="text-xs text-muted-foreground">{routine.ownerName}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="outline">
-              {t(routine.graduated ? 'states.graduated' : 'states.earning')}
-            </Badge>
-            <GraduateRoutineButton
-              routineId={routine.id}
-              title={routine.title}
-              graduated={routine.graduated}
-            />
-          </div>
+          <MediaRow
+            variant="outlined"
+            title={routine.title}
+            meta={<span className="text-caption text-ink-secondary">{routine.ownerName}</span>}
+            actions={
+              <>
+                <Badge variant="outline">
+                  {t(routine.graduated ? 'states.graduated' : 'states.earning')}
+                </Badge>
+                <GraduateRoutineButton
+                  routineId={routine.id}
+                  title={routine.title}
+                  graduated={routine.graduated}
+                />
+              </>
+            }
+          />
         </li>
       ))}
     </ul>

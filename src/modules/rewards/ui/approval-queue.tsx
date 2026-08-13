@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
-import type { IconName } from '@/components/ui/icon-codepoints';
+import { SectionHeading, StarCount } from '@/components/kynite';
 import { cn } from '@/lib/utils';
 import { idleState } from '../action-state';
 import { decideRedemptionAction, fulfillRedemptionAction } from '../actions';
@@ -136,7 +136,11 @@ function Row({
             <span className="font-display text-h3 font-bold">{entry.rewardTitle}</span>
             <span className="flex flex-wrap items-center gap-2">
               <Badge variant="secondary">{memberName}</Badge>
-              <Badge variant="gold">{t('starsCost', { count: entry.costStars })}</Badge>
+              <StarCount
+                value={entry.costStars}
+                srLabel={t('starsCost', { count: entry.costStars })}
+                size="sm"
+              />
               <Badge variant="outline">{t(`statuses.${entry.status}`)}</Badge>
             </span>
           </div>
@@ -145,25 +149,6 @@ function Row({
         </CardContent>
       </Card>
     </li>
-  );
-}
-
-/**
- * A section heading with the stitch icon medallion beside it. Three sections,
- * three glyphs, so a parent scanning the page finds "what needs me" without
- * reading — `hourglass_top` waits, `redeem` is owed, `check_circle` is done.
- */
-function QueueHeading({ icon, children }: { icon: IconName; children: React.ReactNode }) {
-  return (
-    <h2 className="flex items-center gap-3 font-display text-h2 font-bold">
-      <span
-        aria-hidden
-        className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-surface-container text-ink-secondary"
-      >
-        <Icon name={icon} size="md" />
-      </span>
-      {children}
-    </h2>
   );
 }
 
@@ -192,7 +177,7 @@ export function ApprovalQueue({
   return (
     <div className="flex flex-col gap-8">
       <section className="flex flex-col gap-4">
-        <QueueHeading icon="hourglass_top">{t('queue.pendingTitle')}</QueueHeading>
+        <SectionHeading icon="hourglass_top" iconTint="muted" title={t('queue.pendingTitle')} />
         {pending.length === 0 ? (
           <p data-testid="queue-empty" className="text-body-lg text-ink-secondary">
             {t('queue.pendingEmpty')}
@@ -210,7 +195,7 @@ export function ApprovalQueue({
 
       {outstanding.length > 0 ? (
         <section className="flex flex-col gap-4">
-          <QueueHeading icon="redeem">{t('queue.outstandingTitle')}</QueueHeading>
+          <SectionHeading icon="redeem" iconTint="muted" title={t('queue.outstandingTitle')} />
           <p className="text-body-sm text-ink-secondary">{t('queue.outstandingHint')}</p>
           <ul data-testid="outstanding-queue" className="flex flex-col gap-3">
             {outstanding.map((entry) => (
@@ -224,7 +209,7 @@ export function ApprovalQueue({
 
       {history.length > 0 ? (
         <section className="flex flex-col gap-4">
-          <QueueHeading icon="check_circle">{t('queue.historyTitle')}</QueueHeading>
+          <SectionHeading icon="check_circle" iconTint="muted" title={t('queue.historyTitle')} />
           <ul data-testid="redemption-history" className="flex flex-col gap-3">
             {history.map((entry) => (
               <Row key={entry.id} entry={entry} memberName={nameOf(entry.memberId)} />

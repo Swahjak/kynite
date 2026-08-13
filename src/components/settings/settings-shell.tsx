@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react';
+import { PageHeader, SectionHeading } from '@/components/kynite';
+import { Card, CardContent } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
 import type { IconName } from '@/components/ui/icon-codepoints';
 import { Link } from '@/i18n/navigation';
@@ -82,7 +84,13 @@ export function SettingsBackLink({ href = '/settings', label }: { href?: string;
   );
 }
 
-/** A subpage's title block: icon tile, `h1` on the brand scale, one line of why. */
+/**
+ * A subpage's title block: icon tile, `h1` on the brand scale, one line of why.
+ *
+ * `layout.md` § Header covers the shell's own bar; this is the content header
+ * one level in, which `kynite/page-header.tsx` draws at `headline-lg` for every
+ * route in the system — so it delegates rather than repeating that markup.
+ */
 export function SettingsPageHeader({
   icon,
   title,
@@ -92,19 +100,18 @@ export function SettingsPageHeader({
   title: string;
   description?: string;
 }) {
-  return (
-    <div className="flex items-center gap-4">
-      <SettingsIconTile icon={icon} size="lg" />
-      <div className="flex min-w-0 flex-col gap-1">
-        <h1 className="font-display text-h1 font-bold text-ink">{title}</h1>
-        {description ? <p className="text-body-sm text-ink-secondary">{description}</p> : null}
-      </div>
-    </div>
-  );
+  return <PageHeader icon={icon} iconTint="brand-container" title={title} subtitle={description} />;
 }
 
 /**
- * A group: overline heading outside the card, content inside it.
+ * A group: `SectionHeading` inside a card, content underneath it.
+ *
+ * `components.md` § Cards' `Card/Stat` is the model — "Header row separated by
+ * `border-bottom:1px solid #e1e3e4;padding-bottom:16px;margin-bottom:16px;`" —
+ * so the heading lives inside the card rather than as a hand-rolled label
+ * above it. `danger` sections get `outlined` for the visible red frame; every
+ * other section is `default` (elevation-only), which is enough contrast on
+ * this page's cream background.
  *
  * `id` is optional and drives the anchor *and* the `settings-section-*` test id
  * the e2e suite walks (`e2e/tests/app/settings/settings.spec.ts:95-107`), so a
@@ -127,26 +134,22 @@ export function SettingsSection({
   children: ReactNode;
 }) {
   return (
-    <section
-      id={id}
-      data-testid={id ? `settings-section-${id}` : undefined}
-      className="flex flex-col gap-3"
-    >
-      <div className="flex min-h-8 flex-wrap items-center justify-between gap-3 px-1">
-        <h2 className="label-overline text-ink-muted">{title}</h2>
-        {action}
-      </div>
-      <div
-        className={cn(
-          'overflow-hidden rounded-xl border bg-card shadow-sm',
-          tone === 'danger' ? 'border-destructive/30' : 'border-border'
-        )}
+    <section id={id} data-testid={id ? `settings-section-${id}` : undefined}>
+      <Card
+        variant={tone === 'danger' ? 'outlined' : 'default'}
+        className={cn(tone === 'danger' && 'border-destructive/30')}
       >
-        <div className="flex flex-col gap-4 p-4 sm:p-5">
+        <CardContent className="flex flex-col gap-4">
+          <SectionHeading
+            title={title}
+            action={action}
+            size="card"
+            className="border-b border-border pb-4"
+          />
           {description ? <p className="text-body-sm text-ink-secondary">{description}</p> : null}
           {children}
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </section>
   );
 }
@@ -199,13 +202,13 @@ export function SettingsNavRow({
         data-slot="settings-nav-row"
         aria-describedby={descriptionId}
         className={cn(
-          'group/row -mx-4 flex min-h-12 items-center gap-4 px-4 py-3 transition-colors duration-200 ease-brand hover:bg-surface-container sm:-mx-5 sm:px-5',
+          'group/row -mx-4 flex min-h-12 items-center gap-4 px-4 py-3 transition-colors duration-200 ease-brand hover:bg-surface-container',
           bordered && '-mt-4 border-t border-border pt-4'
         )}
       >
         <SettingsIconTile icon={icon} />
         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <span className="font-display text-body font-semibold text-ink">{label}</span>
+          <span className="font-body text-body font-semibold text-ink">{label}</span>
           {description ? (
             <span aria-hidden className="text-body-sm text-ink-secondary">
               {description}

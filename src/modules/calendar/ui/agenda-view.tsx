@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
-import { Icon } from '@/components/ui/icon';
+import { EmptyState } from '@/components/kynite';
 import { dayKeysOf } from '../domain/expand';
 import { parseDateKey, toDateKey, toWall, fromWall } from '../domain/zone';
 import type { CalendarEvent } from '../queries';
@@ -62,20 +62,22 @@ export function AgendaView({
   }, [days, events, timeZone]);
 
   if (groups.length === 0) {
+    // The shared zero-state block rather than a hand-rolled icon + line
+    // (`docs/design/README.md` § "Component library": "do not hand-roll a shape
+    // that is already here"). `hub` renders the same state at kiosk type size.
     return (
-      <div
-        data-slot="agenda-view"
-        className="flex flex-1 flex-col items-center justify-center gap-2 p-8 text-center"
-      >
-        <Icon name="event_available" size="2xl" className="text-ink-muted" />
-        <p className="text-body text-ink-secondary">{t('empty')}</p>
+      <div data-slot="agenda-view" className="flex flex-1 flex-col justify-center">
+        <EmptyState size={hub ? 'hub' : 'page'} icon="event_available" title={t('empty')} />
       </div>
     );
   }
 
   return (
-    <div data-slot="agenda-view" className="flex min-h-0 flex-1 flex-col divide-y divide-line">
-      {groups.map((group) => {
+    <div
+      data-slot="agenda-view"
+      className="flex min-h-0 flex-1 flex-col divide-y divide-line-subtle"
+    >
+      {groups.map((group, index) => {
         const wall = parseDateKey(group.key);
         const date = wall ? fromWall(wall, timeZone) : new Date(group.key);
         const isToday = group.key === todayKey;
@@ -85,19 +87,29 @@ export function AgendaView({
             key={group.key}
             data-day={group.key}
             className={cn(
+              // No row tint on today: the spec gives the *date pill* the
+              // selected treatment and leaves the row on the card's own white,
+              // so the day reads as marked without a second, weaker signal.
               'flex gap-4 px-4 py-4 transition-colors',
-              isToday && 'bg-surface-container-low/50',
               hub && 'gap-6 px-6 py-5'
             )}
           >
-            <div
-              className={cn(
-                'flex w-16 shrink-0 flex-col items-center rounded-xl py-1 text-center',
-                isToday && 'bg-primary/10',
-                hub && 'w-24'
-              )}
-            >
-              {/* Plain string interpolation, not `cn()`, for the three lines
+            {/* The time/date column of `calendar.md` § "Day agenda": a fixed,
+                centred rail (44px there; wider here because this rail carries a
+                whole date rather than one `HH:mm`), with a vertical connector
+                running from it to the next day — `width:1px;flex:1;
+                background:#c4c5d9;` — on every row but the last. The day the
+                board is showing takes the week strip's selected treatment:
+                "`background:#5d5fef;` with label `color:rgba(255,255,255,0.75)`
+                and date `font-weight:700;color:#ffffff`". */}
+            <div className={cn('flex shrink-0 flex-col items-center', hub ? 'w-24' : 'w-16')}>
+              <div
+                className={cn(
+                  'flex w-full flex-col items-center gap-1.5 rounded-xl py-2 text-center',
+                  isToday && 'bg-primary'
+                )}
+              >
+                {/* Plain string interpolation, not `cn()`, for the three lines
                   below: `text-h2`/`text-caption`/`text-body`/`text-display-md`
                   are this design system's custom font-size scale, which
                   `tailwind-merge` (inside `cn()`) does not recognize — it
@@ -107,17 +119,29 @@ export function AgendaView({
                   actually the size. Routing these through `cn()` silently
                   strips the size (or the color); a plain string has no
                   conflict resolver to fool. */}
-              <div className={`label-overline text-ink-muted ${hub ? 'text-body' : ''}`}>
-                {format.dateTime(date, { weekday: 'short' })}
+                <div
+                  className={`label-overline ${hub ? 'text-body' : ''} ${isToday ? 'text-primary-foreground/75' : 'text-ink-muted'}`}
+                >
+                  {format.dateTime(date, { weekday: 'short' })}
+                </div>
+                <div
+                  className={`tabular-time font-bold ${hub ? 'text-display-md' : 'text-h2'} ${isToday ? 'text-primary-foreground' : 'text-ink'}`}
+                >
+                  {format.dateTime(date, { day: 'numeric' })}
+                </div>
+                <div
+                  className={`${hub ? 'text-body' : 'text-caption'} ${isToday ? 'text-primary-foreground/75' : 'text-ink-muted'}`}
+                >
+                  {format.dateTime(date, { month: 'short' })}
+                </div>
               </div>
-              <div
-                className={`tabular-time font-bold ${hub ? 'text-display-md' : 'text-h2'} ${isToday ? 'text-brand-ink' : 'text-ink'}`}
-              >
-                {format.dateTime(date, { day: 'numeric' })}
-              </div>
-              <div className={`text-ink-muted ${hub ? 'text-body' : 'text-caption'}`}>
-                {format.dateTime(date, { month: 'short' })}
-              </div>
+
+              {/* The connector, omitted on the last row exactly as the spec
+                  omits it — a line running off the bottom of the list would
+                  promise a day that is not there. */}
+              {index < groups.length - 1 ? (
+                <span aria-hidden className="mt-1 w-px flex-1 bg-line" />
+              ) : null}
             </div>
 
             <div className={cn('flex min-w-0 flex-1 flex-col gap-1.5', hub && 'gap-2')}>

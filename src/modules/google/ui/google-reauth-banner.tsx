@@ -1,4 +1,6 @@
 import { getTranslations } from 'next-intl/server';
+import { Button } from '@/components/ui/button';
+import { Icon } from '@/components/ui/icon';
 import { Link } from '@/i18n/navigation';
 import { canOwn, type Principal } from '@/modules/family';
 import { listReauthRequiredAccounts } from '../queries';
@@ -28,12 +30,21 @@ export async function GoogleReauthBanner({ principal }: { principal: Principal }
   return (
     <div
       role="alert"
-      className="border-b border-destructive/30 bg-destructive/10 px-4 py-2 text-sm"
+      data-slot="google-reauth-banner"
+      className="flex flex-wrap items-center gap-3 border-b border-destructive/30 bg-destructive/10 px-4 py-2 text-body-sm text-destructive sm:px-6"
     >
-      <span>{t('reauthBanner', { email: accounts.map((a) => a.email).join(', ') })}</span>{' '}
-      <Link href="/settings/google" className="font-medium underline underline-offset-4">
+      <Icon name="calendar_month" size="sm" className="shrink-0" />
+      <span className="min-w-0 flex-1">
+        {t('reauthBanner', { email: accounts.map((a) => a.email).join(', ') })}
+      </span>
+      <Button
+        render={<Link href="/settings/google" />}
+        nativeButton={false}
+        variant="destructive-soft"
+        size="sm"
+      >
         {t('reauthAction')}
-      </Link>
+      </Button>
     </div>
   );
 }

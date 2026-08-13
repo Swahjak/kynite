@@ -6,6 +6,7 @@ import { fireConfettiBurst } from '@/components/celebration';
 import { Icon } from '@/components/ui/icon';
 import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
+import { MemberFace, SectionHeading } from '@/components/kynite';
 import { requestRedemptionAction } from '../actions';
 import type { StoreData, StoreTile } from '../page-data';
 import { RewardCard } from './reward-card';
@@ -103,24 +104,12 @@ export function RewardStore({ store }: { store: StoreData }) {
                   {/* The face, rendered from strings the server resolved: this
                       is a client module, and reaching into `@/modules/family`
                       for the colour map here would ship `pg` to the browser. */}
-                  {chip.avatarUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={chip.avatarUrl}
-                      alt=""
-                      className="size-8 shrink-0 rounded-full object-cover"
-                    />
-                  ) : (
-                    <span
-                      aria-hidden
-                      className={cn(
-                        'flex size-8 shrink-0 items-center justify-center rounded-full text-caption font-bold',
-                        chip.colorClass
-                      )}
-                    >
-                      {chip.initials}
-                    </span>
-                  )}
+                  <MemberFace
+                    size="default"
+                    avatarUrl={chip.avatarUrl}
+                    initials={chip.initials}
+                    surfaceClass={chip.colorClass}
+                  />
                   {chip.displayName}
                 </Link>
               );
@@ -164,15 +153,12 @@ export function RewardStore({ store }: { store: StoreData }) {
       ) : null}
 
       <section className="flex flex-col gap-6">
-        <h2 className="flex items-center gap-3 font-display text-h2 font-bold text-foreground">
-          <span
-            aria-hidden
-            className="flex size-10 items-center justify-center rounded-2xl bg-brand-container text-brand-container-ink"
-          >
-            <Icon name="redeem" size="md" filled />
-          </span>
-          {t('store.shelf')}
-        </h2>
+        <SectionHeading
+          icon="redeem"
+          iconTint="brand-container"
+          iconFilled
+          title={t('store.shelf')}
+        />
 
         {store.tiles.length === 0 ? (
           <p data-testid="store-empty" className="text-body-lg text-ink-secondary">

@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server';
+import { EmptyState } from '@/components/kynite';
 import { ChildTabs } from '@/components/hub';
 import { requireHubDevice } from '@/modules/devices';
 import { StarChart, loadStarChart } from '@/modules/rewards';
@@ -33,9 +34,13 @@ export default async function HubStarsPage({
 
   if (!chart) {
     return (
-      <main className="flex min-h-full flex-col items-center justify-center gap-2 p-8 text-center">
-        <h1 className="font-display text-h1 font-bold">{t('chart.unavailableTitle')}</h1>
-        <p className="text-body-lg text-ink-secondary">{t('chart.unavailableBody')}</p>
+      <main className="min-h-full">
+        <EmptyState
+          size="hub"
+          heading
+          title={t('chart.unavailableTitle')}
+          description={t('chart.unavailableBody')}
+        />
       </main>
     );
   }

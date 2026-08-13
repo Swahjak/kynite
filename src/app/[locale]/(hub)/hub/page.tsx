@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server';
+import { EmptyState } from '@/components/kynite';
 import { ChildLauncher, type HubChild } from '@/components/hub';
 import { HubBoard, loadCalendarPage } from '@/modules/calendar';
 import { requireHubDevice } from '@/modules/devices';
@@ -89,9 +90,13 @@ export default async function HubPage({
     // loader itself declines (a family row deleted mid-request), because a
     // blank board is the one thing a wall display must never show.
     return (
-      <main className="flex min-h-full flex-col items-center justify-center gap-2 p-8 text-center">
-        <h1 className="font-display text-h1 font-bold">{t('hub.unpairedTitle')}</h1>
-        <p className="text-body-lg text-ink-secondary">{t('hub.unpairedBody')}</p>
+      <main className="min-h-full">
+        <EmptyState
+          size="hub"
+          heading
+          title={t('hub.unpairedTitle')}
+          description={t('hub.unpairedBody')}
+        />
       </main>
     );
   }

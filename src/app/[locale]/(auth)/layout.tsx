@@ -30,6 +30,17 @@ export const dynamic = 'force-dynamic';
  *    — enough to make the white card sit *on* something.
  *  - a **grid ceiling** (`max-w-md` lives on the cards) plus 24px container
  *    margins, per the design system's mobile gutter.
+ *
+ * The mark itself is `<BrandMark variant="horizontal" />`, not the raw
+ * `logo-horizontal.svg` asset: that SVG is `docs/design/brand.md`'s
+ * *light-card* lockup — it bakes its own white `#fff`/`#e1e3e4`-bordered card
+ * into the file (see the asset's `<rect>`), which would float as a second,
+ * competing card on top of this screen's tonal wash instead of sitting on the
+ * plain white ground the doc's spec assumes; its `<text>` wordmark also has no
+ * access to this page's `@font-face` rules through `next/image`, so it falls
+ * back to the system sans. `BrandMark`'s `horizontal` variant composes the
+ * icon mark (self-contained, scales cleanly) with real HTML text in Baloo 2
+ * instead, for exactly this reason — see its own doc comment.
  */
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -42,7 +53,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(80%_60%_at_50%_-10%,var(--brand)_0%,transparent_55%),radial-gradient(60%_50%_at_110%_110%,var(--gold)_0%,transparent_50%)] opacity-[0.10]"
       />
 
-      <BrandMark className="h-9" />
+      <BrandMark className="[&_span]:text-[28px]" />
 
       {children}
     </main>

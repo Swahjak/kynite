@@ -107,7 +107,7 @@ const server = createServer((request, response) => {
         {
           id: CALENDAR_ID,
           summary: 'Gezinsagenda (Google)',
-          backgroundColor: '#13ec92',
+          backgroundColor: '#5d5fef',
           accessRole: 'owner',
           primary: true,
           timeZone: 'Europe/Amsterdam',

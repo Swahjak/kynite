@@ -2,6 +2,7 @@
 
 import { Icon } from '@/components/ui/icon';
 import { cn } from '@/lib/utils';
+import { StarCount } from '@/components/kynite';
 import type { StoreTile } from '../page-data';
 import { CATEGORY_TILE } from './tokens';
 
@@ -74,17 +75,13 @@ export function RewardCard({ tile, copy, onRequest }: RewardCardProps) {
         ) : null}
       </span>
 
-      <span
+      <StarCount
         data-testid="reward-cost"
-        className={cn(
-          'flex shrink-0 items-center gap-2 rounded-4xl px-4 py-2 font-display font-bold',
-          affordable ? 'bg-gold/25 text-gold-ink' : 'bg-surface-container-high text-ink-secondary'
-        )}
-      >
-        <Icon name="star" size="sm" filled />
-        <span className="tabular-time">{tile.costStars}</span>
-        <span className="sr-only">{copy.cost}</span>
-      </span>
+        value={tile.costStars}
+        srLabel={copy.cost}
+        size="md"
+        className={cn(!affordable && 'bg-surface-container-high text-ink-secondary')}
+      />
     </>
   );
 
