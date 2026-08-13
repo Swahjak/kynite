@@ -314,7 +314,7 @@ test.describe('pending sync', () => {
   });
 });
 
-test.describe('per-person columns', () => {
+test.describe('the day board', () => {
   test('orders columns by sortOrder and carries each member colour', async ({ page, family }) => {
     await withDb(async (client) => {
       await seedMembers(client, family.familyId, [
@@ -324,6 +324,9 @@ test.describe('per-person columns', () => {
     });
 
     await page.goto('/nl/today');
+    // M23: the board opens on the merged list, so the columns are one tap away
+    // rather than the landing arrangement.
+    await page.getByTestId('day-view-columns').click();
 
     const columns = page.locator('[data-slot="member-column"]');
     await expect(columns).toHaveCount(3);
@@ -335,6 +338,57 @@ test.describe('per-person columns', () => {
 
     await expect(columns.nth(1).locator('.bg-cat-purple-solid')).toBeVisible();
     await expect(columns.nth(2).locator('.bg-cat-orange-solid')).toBeVisible();
+  });
+
+  test('merges a shared event into one row and remembers the arrangement', async ({
+    page,
+    family,
+  }) => {
+    // Today in the *household's* zone, not UTC's — between midnight and 02:00
+    // Amsterdam the two disagree and the event would land on yesterday's board.
+    const [year, month, day] = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Amsterdam' })
+      .format(new Date())
+      .split('-')
+      .map(Number);
+    const at = (hour: number) => new Date(Date.UTC(year, month - 1, day, hour)).toISOString();
+
+    await withDb(async (client) => {
+      const owner = await ownerMemberOf(client, family.familyId);
+      const [mila, daan] = await seedMembers(client, family.familyId, [
+        { displayName: 'Mila', role: 'child', color: 'purple', sortOrder: 1 },
+        { displayName: 'Daan', role: 'child', color: 'orange', sortOrder: 2 },
+      ]);
+
+      await seedEvents(client, family.familyId, [
+        {
+          title: 'Zwemles',
+          startsAt: at(15),
+          endsAt: at(16),
+          ownerMemberId: mila.id,
+          attendeeMemberIds: [daan.id, owner.id],
+        },
+      ]);
+    });
+
+    await page.goto('/nl/today');
+
+    // The columns would draw this event three times, once per member. The
+    // merged list draws it once, with all three faces on the row.
+    const rows = page.locator('[data-slot="day-board"] [data-slot="event-row"]', {
+      hasText: 'Zwemles',
+    });
+    await expect(rows).toHaveCount(1);
+    await expect(
+      rows.first().locator('[data-slot="event-row-faces"] [data-slot="avatar"]')
+    ).toHaveCount(3);
+
+    // The choice is per device and survives a reload — no round trip, no save.
+    await page.getByTestId('day-view-columns').click();
+    await expect(page.locator('[data-slot="member-column"]')).toHaveCount(3);
+
+    await page.reload();
+    await expect(page.locator('[data-slot="member-column"]')).toHaveCount(3);
+    await expect(page.locator('[data-slot="combined-day-list"]')).toHaveCount(0);
   });
 });
 

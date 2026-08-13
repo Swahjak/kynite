@@ -69,6 +69,13 @@ export {
   type RecurrencePreset,
 } from './domain/presets';
 
+export {
+  combineDayEvents,
+  type CombinableEvent,
+  type CombineDayOptions,
+  type CombinedDayRow,
+} from './domain/day-board';
+
 export { addExdate, exdateLine, formatDate, formatDateTime } from './domain/ical';
 
 export {
@@ -121,6 +128,8 @@ export {
 export { AgendaView } from './ui/agenda-view';
 export { CalendarDisplayList, type CalendarDisplayView } from './ui/calendar-display-list';
 export { CalendarShell } from './ui/calendar-shell';
+export { CombinedDayList, type CombinedDayListProps } from './ui/combined-day-list';
+export { DayBoard, type DayBoardProps } from './ui/day-board';
 export { EventChip } from './ui/event-chip';
 export { EventDialog, type WritableCalendar } from './ui/event-dialog';
 export { EventRow, type EventRowPerson, type EventRowProps } from './ui/event-row';
@@ -130,3 +139,11 @@ export { NewEventFab, type NewEventFabProps } from './ui/new-event-fab';
 export { PersonColumns } from './ui/person-columns';
 export { TimeGrid } from './ui/time-grid';
 export { CATEGORY_CLASSES, EVENT_TYPE_ICONS, HOUR_HEIGHT, SNAP_MINUTES } from './ui/tokens';
+export {
+  DAY_VIEW_MODES,
+  DAY_VIEW_STORAGE_KEY,
+  DEFAULT_DAY_VIEW,
+  parseDayViewMode,
+  useDayViewMode,
+  type DayViewMode,
+} from './ui/use-day-view-mode';

@@ -319,6 +319,11 @@
       "month": "Maand",
       "agenda": "Agenda"
     },
+    "dayView": {
+      "label": "Weergave van de dag",
+      "combined": "Alle agenda's",
+      "columns": "Per persoon"
+    },
     "actions": {
       "add": "Afspraak",
       "edit": "Bewerken",
@@ -454,7 +459,7 @@
       "balance": "{count, plural, one {# ster} other {# sterren}} te besteden"
     },
     "board": {
-      "title": "De dag per persoon"
+      "title": "De dag"
     }
   },
   "routines": {

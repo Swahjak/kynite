@@ -1,8 +1,7 @@
 import { getFormatter, getTranslations } from 'next-intl/server';
-import { cn } from '@/lib/utils';
 import {
+  DayBoard,
   NewEventFab,
-  PersonColumns,
   dayKeysOf,
   isSameDay,
   loadCalendarPage,
@@ -35,11 +34,15 @@ export const dynamic = 'force-dynamic';
  * ring, an **Up Next** grid of tinted blocks, and a **Kids' Progress** sidebar
  * — over a 12-column 8/4 split on a desktop and a single stack at 390px.
  *
- * The per-person board is *kept*, below the flow. It is still the only view
- * that answers "what does each of us have today" at a glance, and it carries
- * the `member-column` hooks the e2e suite reads; the flow above it answers a
- * different question ("what is happening, and what is next") that the board
- * never did.
+ * The day board is *kept*, below the flow. It is still the only thing that
+ * answers "what does each of us have today" at a glance; the flow above it
+ * answers a different question ("what is happening, and what is next") that the
+ * board never did.
+ *
+ * M23 gives that board two arrangements — a merged chronological list of every
+ * member's day, and the original per-person columns — behind a segmented pill
+ * remembered per device (`calendar/ui/day-board.tsx`), and lays the page out as
+ * one full-width column with "Kids' Progress" underneath rather than beside it.
  *
  * Route files hold no logic (architecture §2 rule 4): everything here is two
  * loaders, one pure `flowOf` call and the slices' own components.
@@ -132,43 +135,45 @@ export default async function TodayPage({
         </p>
       </header>
 
-      <div className="grid min-h-0 flex-1 gap-6 lg:grid-cols-12">
-        <div
-          className={cn(
-            'flex min-w-0 flex-col gap-6',
-            progress ? 'lg:col-span-8' : 'lg:col-span-12'
-          )}
-        >
-          <NowHero
-            event={flow.hero}
-            mode={flow.mode}
-            members={data.members}
-            now={reference.now}
-            timeZone={data.timeZone}
-            dayKey={dayKey}
-          />
+      {/* M23: one column, not an 8/4 split.
+          The day board is the widest thing on this page — four or five member
+          columns, or one merged list of everybody's events — and it was living
+          in two thirds of the width while a four-row progress panel held the
+          rest. On a laptop that pushed the board's columns into the same
+          horizontal rail the phone needs, for no reason other than the sidebar
+          beside it. So the board takes the whole width and "Hoe gaat het met de
+          kinderen" moves *below* it: it is a check-in, read after the day, and
+          it reads perfectly well as a full-width row of cards. */}
+      <div className="flex min-h-0 flex-1 flex-col gap-6">
+        <NowHero
+          event={flow.hero}
+          mode={flow.mode}
+          members={data.members}
+          now={reference.now}
+          timeZone={data.timeZone}
+          dayKey={dayKey}
+        />
 
-          <UpNextGrid
-            events={flow.upNext}
-            members={data.members}
-            timeZone={data.timeZone}
-            limit={UP_NEXT_LIMIT}
-            mode={flow.mode}
-          />
+        <UpNextGrid
+          events={flow.upNext}
+          members={data.members}
+          timeZone={data.timeZone}
+          limit={UP_NEXT_LIMIT}
+          mode={flow.mode}
+        />
 
-          <section className="flex min-h-0 flex-col gap-3">
-            <h3 className="pl-1 text-overline text-ink-muted uppercase">{t('board.title')}</h3>
-            <PersonColumns
-              members={data.members}
-              events={data.events}
-              timeZone={data.timeZone}
-              day={data.anchor}
-              now={data.now}
-            />
-          </section>
-        </div>
+        {/* Two arrangements of one board, picked on the device and remembered
+            there — see `ui/day-board.tsx`. */}
+        <DayBoard
+          title={t('board.title')}
+          members={data.members}
+          events={data.events}
+          timeZone={data.timeZone}
+          day={data.anchor}
+          now={data.now}
+        />
 
-        {progress ? <KidsProgress kids={progress.kids} className="lg:col-span-4" /> : null}
+        {progress ? <KidsProgress kids={progress.kids} /> : null}
       </div>
 
       {/* The shell positions it; this page owns what it does (`ui/fab.tsx`). */}

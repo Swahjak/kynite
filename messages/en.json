@@ -319,6 +319,11 @@
       "month": "Month",
       "agenda": "Agenda"
     },
+    "dayView": {
+      "label": "How the day is shown",
+      "combined": "All calendars",
+      "columns": "Per person"
+    },
     "actions": {
       "add": "Event",
       "edit": "Edit",
@@ -454,7 +459,7 @@
       "balance": "{count, plural, one {# star} other {# stars}} to spend"
     },
     "board": {
-      "title": "The day, per person"
+      "title": "The day"
     }
   },
   "routines": {
