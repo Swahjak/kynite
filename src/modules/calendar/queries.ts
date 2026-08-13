@@ -71,6 +71,22 @@ export type ListEventsOptions = {
    * accidentally become a second authorization authority.
    */
   privateDetail: boolean;
+  /**
+   * The member whose *own* private calendars stay legible to them (M23).
+   *
+   * §7 grades `calendar:view_private` `own` for an adult, and `own` is a
+   * statement about a concrete resource — which a page-level read has none of,
+   * so `decide()` fails closed and the flag above comes back false. Taken
+   * literally that means a second parent's private calendar renders as a wall
+   * of "bezet" blocks *to her*, unclickable, which is neither what the matrix
+   * says nor anything a household would ask for.
+   *
+   * So the `own` grade is carried here instead of being collapsed at the call
+   * site: the resource it needs is `calendar.owner_member_id`, and only this
+   * query is holding one. Null (and every non-member principal) keeps the
+   * old, strict behaviour.
+   */
+  privateDetailFor?: string | null;
 };
 
 /** The label a redacted event renders under. Translated at the UI boundary. */
@@ -85,7 +101,7 @@ export const BUSY_LABEL = 'busy';
  * decides. Non-recurring rows get the tight overlap predicate the index serves.
  */
 export async function listEvents(options: ListEventsOptions): Promise<CalendarEvent[]> {
-  const { familyId, window, privateDetail } = options;
+  const { familyId, window, privateDetail, privateDetailFor = null } = options;
 
   const rows = await getDb()
     .select({
@@ -98,6 +114,7 @@ export async function listEvents(options: ListEventsOptions): Promise<CalendarEv
       calendarCategory: calendarDisplay.category,
       calendarVisibility: calendar.visibility,
       calendarWritable: calendar.writable,
+      calendarOwnerMemberId: calendar.ownerMemberId,
     })
     .from(event)
     .leftJoin(calendar, eq(event.calendarId, calendar.id))
@@ -145,7 +162,10 @@ export async function listEvents(options: ListEventsOptions): Promise<CalendarEv
 
   for (const row of rows) {
     const isPrivate = row.calendarVisibility === 'private';
-    const redacted = isPrivate && !privateDetail;
+    // "Own" beats "private": a calendar's own member always reads their own
+    // detail, whatever the surface-level flag says.
+    const ownPrivate = privateDetailFor !== null && row.calendarOwnerMemberId === privateDetailFor;
+    const redacted = isPrivate && !privateDetail && !ownPrivate;
 
     for (const occurrence of expandSeries(row.event, {
       ...window,
@@ -220,6 +240,7 @@ type EventRow = {
   calendarCategory: EventCategory | null;
   calendarVisibility: 'family' | 'private' | null;
   calendarWritable: boolean | null;
+  calendarOwnerMemberId: string | null;
 };
 
 function toCalendarEvent(row: EventRow, occurrence: Occurrence, redacted: boolean): CalendarEvent {

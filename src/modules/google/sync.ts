@@ -35,15 +35,14 @@ export function apiForAccount(googleAccountId: string): GoogleCalendarApi {
   return createGoogleCalendarApi({ getAccessToken: accessTokenProvider(googleAccountId) });
 }
 
-function syncState(row: Calendar, ownerMemberId: string | null = null): CalendarSyncState {
+function syncState(row: Calendar): CalendarSyncState {
   return {
     id: row.id,
     familyId: row.familyId,
     googleCalendarId: row.googleCalendarId,
     syncToken: row.syncToken,
     timeZone: row.timeZone,
-    ownerMemberId,
-    isPrimary: row.isPrimary,
+    ownerMemberId: row.ownerMemberId,
   };
 }
 
@@ -52,36 +51,19 @@ async function loadCalendar(calendarId: string): Promise<Calendar | null> {
   return row ?? null;
 }
 
-/**
- * The member behind a calendar's Google account (M18) — one join, because
- * attribution needs "whose calendar is this" and the calendar row only knows
- * which *account* it hangs off.
- */
-async function calendarOwnerMemberId(googleAccountId: string): Promise<string | null> {
-  const [row] = await getDb()
-    .select({ ownerMemberId: googleAccount.ownerMemberId })
-    .from(googleAccount)
-    .where(eq(googleAccount.id, googleAccountId))
-    .limit(1);
-
-  return row?.ownerMemberId ?? null;
-}
-
 /** One calendar, one incremental (or full) pass. The `google:sync-calendar` job body. */
 export async function syncCalendarById(calendarId: string): Promise<SyncResult | null> {
   const row = await loadCalendar(calendarId);
   if (!row || !row.syncEnabled) return null;
 
-  // M18: both halves of attribution are resolved once, here, and handed to the
-  // pure engine — "whose calendar is this" and "which addresses does this
-  // household own".
-  const [ownerMemberId, directory] = await Promise.all([
-    calendarOwnerMemberId(row.googleAccountId),
-    loadMemberDirectory(row.familyId),
-  ]);
+  // M23: "whose calendar is this" is now a column on the row itself
+  // (`calendar.owner_member_id`, written by discovery), so the only thing left
+  // to resolve here is the other half of attribution — which addresses this
+  // household owns.
+  const directory = await loadMemberDirectory(row.familyId);
 
   return syncCalendar({
-    calendar: syncState(row, ownerMemberId),
+    calendar: syncState(row),
     api: apiForAccount(row.googleAccountId),
     store: syncStore,
     emit: publishEmitter,
@@ -160,6 +142,16 @@ export async function discoverCalendars(googleAccountId: string): Promise<Calend
       // input to attribution's owner fallback (M18, `attributeEvent`). Refreshed
       // on every pass like the other Google-owned facts, because it is one.
       isPrimary: resource.primary === true,
+      /**
+       * "Is this the account holder's own calendar" (M23) — `primary`, or any
+       * calendar they *own*. `accessRole: 'owner'` is exactly the calendars a
+       * person created themselves ("Werk", "Sport"), and exactly not the ones
+       * they subscribed to (a holiday feed: `reader`) or were given access on
+       * (a colleague's diary: `reader`/`writer`). Refreshed on every pass like
+       * the other Google-owned facts, because access can be revoked.
+       */
+      ownerMemberId:
+        resource.primary === true || resource.accessRole === 'owner' ? account.ownerMemberId : null,
       syncEnabled: initialSyncEnabled(resource),
     };
 
@@ -174,6 +166,7 @@ export async function discoverCalendars(googleAccountId: string): Promise<Calend
           timeZone: values.timeZone,
           writable: values.writable,
           isPrimary: values.isPrimary,
+          ownerMemberId: values.ownerMemberId,
           updatedAt: new Date(),
         },
       })

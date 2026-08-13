@@ -7,7 +7,15 @@ import { getDb } from '@/server/db';
 // query module — and make this file unimportable from a plain Node test. The
 // barrel is for *behaviour*; `server/db/schema.ts` is for tables (§2).
 import { calendar, calendarDisplay, googleAccount } from '@/server/db/schema';
-import { can, decide, getFamily, getPrincipal, listMembers, type Member } from '@/modules/family';
+import {
+  can,
+  decide,
+  getFamily,
+  getPrincipal,
+  grade,
+  listMembers,
+  type Member,
+} from '@/modules/family';
 import { resolveCategory } from './domain/category';
 import { fetchWindow, isCalendarView, viewWindow, type CalendarView } from './domain/window';
 import { fromWall, parseDateKey, startOfDay } from './domain/zone';
@@ -91,13 +99,34 @@ export async function loadCalendarPage(options: LoadOptions): Promise<CalendarPa
         viewWindow(view, { anchor, timeZone, weekStartsOn })
       : fetchWindow({ anchor, timeZone, weekStartsOn });
 
-  const privateDetail =
-    options.surface !== 'hub' &&
-    decide(principal, 'calendar:view_private', { familyId: principal.familyId }) === 'allow';
+  /**
+   * The private-calendar rule, in the two halves §7 actually grades it in.
+   *
+   * `allow` (an owner) is a household-wide grant and stays a boolean. `own` (an
+   * adult) is not: it is a statement about a *resource*, and this read has
+   * none, so `decide()` fails closed — which is right for everybody else's
+   * private calendars and wrong for the caller's own, where it left a second
+   * parent looking at a day of "bezet" blocks she could not open (M23). The
+   * grade is therefore carried into the query, which is the only layer holding
+   * the resource it needs (`calendar.owner_member_id`).
+   *
+   * The hub keeps forcing both off: an ambient wall display shows free/busy
+   * for private calendars regardless of who is signed in on it.
+   */
+  const privateGrade =
+    options.surface === 'hub'
+      ? 'busy-only'
+      : grade(principal, 'calendar:view_private') === 'own'
+        ? 'own'
+        : decide(principal, 'calendar:view_private', { familyId: principal.familyId });
+
+  const privateDetail = privateGrade === 'allow';
+  const privateDetailFor =
+    privateGrade === 'own' && principal.kind === 'member' ? principal.memberId : null;
 
   const [members, events, writableCalendars] = await Promise.all([
     listMembers(principal.familyId),
-    listEvents({ familyId: principal.familyId, window, privateDetail }),
+    listEvents({ familyId: principal.familyId, window, privateDetail, privateDetailFor }),
     listWritableCalendars(principal.familyId),
   ]);
 

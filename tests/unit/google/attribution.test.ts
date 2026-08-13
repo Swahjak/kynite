@@ -33,11 +33,16 @@ const directory: MemberDirectory = {
   },
 };
 
-/** The account's own calendar: the only one whose owner is a participant. */
-const calendar = { ownerMemberId: PARENT, isPrimary: true };
+/** One of the parent's own calendars — primary or a secondary they created. */
+const calendar = { ownerMemberId: PARENT };
 
-/** A subscription or a colleague's shared diary on the same account. */
-const subscription = { ownerMemberId: PARENT, isPrimary: false };
+/**
+ * A subscription or a colleague's shared diary on the same account. M23 moved
+ * the distinction upstream: discovery leaves `owner_member_id` null for a
+ * calendar the account holder does not own, so "whose calendar is this" is a
+ * value here rather than a rule in `attributeEvent`.
+ */
+const subscription = { ownerMemberId: null };
 
 describe('isStatusOnly', () => {
   it('names exactly the three status types', () => {
@@ -144,7 +149,7 @@ describe('attributeEvent', () => {
     expect(
       attributeEvent(
         googleEvent({ attendees: [{ email: 'stranger@work.example' }] }),
-        { ownerMemberId: null, isPrimary: true },
+        { ownerMemberId: null },
         directory
       )
     ).toEqual(NO_ATTRIBUTION);
@@ -166,7 +171,22 @@ describe('attributeEvent', () => {
     expect(attributed.attendeeMemberIds).toEqual([PARENT]);
   });
 
-  describe('non-primary calendars', () => {
+  it('attributes a secondary calendar its member created, not just the primary one', () => {
+    // The M23 report: an invited adult connected Google, and every event on
+    // the "Werk" calendar she made herself rendered in the shared "Iedereen"
+    // block. It is not `primary`, but it is hers, so discovery gives it an
+    // owning member and every event on it is hers.
+    const attributed = attributeEvent(
+      googleEvent({ summary: 'Sprintreview' }),
+      { ownerMemberId: OTHER_PARENT },
+      directory
+    );
+
+    expect(attributed.ownerMemberId).toBe(OTHER_PARENT);
+    expect(attributed.attendeeMemberIds).toEqual([OTHER_PARENT]);
+  });
+
+  describe('calendars with no owning member', () => {
     it('never falls back to the account owner — a subscription is nobody’s event', () => {
       // "Nederlandse feestdagen" is on the account, not on the parent's day.
       expect(

@@ -137,28 +137,33 @@ function personEmail(person: GoogleEventPerson | undefined): string | null {
  *   routes reminders (§6 step 4) and what the person columns key off, so it has
  *   to be the person whose event it is rather than whoever happens to be listed
  *   first.
- * - **The owner of the account's *primary* calendar is always a participant.**
- *   This is the rule that makes the feature visible at all: most events on a
- *   parent's personal calendar list no attendees whatsoever, and without it
- *   every one of them would still land unattributed, in nobody's column —
- *   which is exactly the gap this closes.
+ * - **The calendar's own member is always a participant.** This is the rule
+ *   that makes the feature visible at all: most events on a parent's own
+ *   calendar list no attendees whatsoever, and without it every one of them
+ *   would still land unattributed, in nobody's column — which is exactly the
+ *   gap this closes.
  *
- *   It applies to the primary calendar and to nothing else. A Google account
- *   also carries subscriptions ("Nederlandse feestdagen") and colleagues'
- *   shared diaries, and the account holder is not a participant of those: the
- *   fallback there would put every national holiday and every colleague's
- *   dentist appointment in one parent's person column. Non-primary calendars
+ *   *Which* calendars have a member is decided upstream, once, and written to
+ *   `calendar.owner_member_id` by discovery (M23): the account holder's own
+ *   calendars — `primary` plus anything they created themselves — and nothing
+ *   else. A Google account also carries subscriptions ("Nederlandse
+ *   feestdagen") and colleagues' shared diaries; those have no owner member,
  *   attribute from matched organizer/attendees only, and land unattributed
  *   when nobody matches — which is the honest answer.
+ *
+ *   Reading a column rather than `isPrimary` is the M23 fix: a second parent's
+ *   own *secondary* calendar ("Werk") is not `primary`, so the old rule put
+ *   every one of her work appointments in the shared "Iedereen" block rather
+ *   than in her column.
  * - **A declined attendee is not a participant.** Somebody who said no to the
  *   invitation is not going, so they do not belong in that day's column.
  */
 export function attributeEvent(
   resource: GoogleEventResource,
-  calendar: Pick<CalendarSyncState, 'ownerMemberId' | 'isPrimary'>,
+  calendar: Pick<CalendarSyncState, 'ownerMemberId'>,
   directory: MemberDirectory
 ): EventAttribution {
-  const calendarOwnerId = calendar.isPrimary ? (calendar.ownerMemberId ?? null) : null;
+  const calendarOwnerId = calendar.ownerMemberId ?? null;
 
   const attendeeIds = new Set<string>();
   for (const attendee of resource.attendees ?? []) {

@@ -202,21 +202,15 @@ export type CalendarSyncState = {
    */
   timeZone?: string | null;
   /**
-   * The member who owns the Google account this calendar hangs off
-   * (`google_account.owner_member_id`). Legacy parity: the owner is a
-   * participant of everything on their *own* calendar, matched attendee list or
-   * not — which is what puts a parent's imported work meeting in that parent's
-   * column rather than in nobody's.
+   * The member this calendar *belongs to* (`calendar.owner_member_id`, M23).
+   * Legacy parity: they are a participant of everything on their own calendar,
+   * matched attendee list or not — which is what puts an imported work meeting
+   * in that parent's column rather than in nobody's.
    *
-   * Only consulted when `isPrimary` is true (see `attributeEvent`).
+   * Null for the subscriptions and colleagues' diaries that hang off the same
+   * account, where the fallback would be the wrong person entirely.
    */
   ownerMemberId?: string | null;
-  /**
-   * Google's `primary` flag: the account holder's own calendar. False for the
-   * subscriptions and shared diaries that hang off the same account, where the
-   * owner fallback above would be the wrong person entirely.
-   */
-  isPrimary?: boolean;
 };
 
 /**

@@ -75,6 +75,8 @@ describe.skipIf(!databaseUrl)('calendar read path (integration)', () => {
           color: '#a855f7',
           visibility: 'private',
           writable: true,
+          // Whose calendar it is — the input the `own` grade needs (M23).
+          ownerMemberId: household.parentId,
         },
         {
           familyId: household.familyId,
@@ -224,8 +226,8 @@ describe.skipIf(!databaseUrl)('calendar read path (integration)', () => {
     await pool.end();
   });
 
-  async function read(privateDetail: boolean) {
-    return listEvents({ familyId: household.familyId, window, privateDetail });
+  async function read(privateDetail: boolean, privateDetailFor: string | null = null) {
+    return listEvents({ familyId: household.familyId, window, privateDetail, privateDetailFor });
   }
 
   it('expands a series that began years before the window', async () => {
@@ -309,6 +311,27 @@ describe.skipIf(!databaseUrl)('calendar read path (integration)', () => {
     expect(shown!.busyOnly).toBe(false);
     expect(shown!.location).toBe('Utrecht');
     expect(shown!.editable).toBe(true);
+  });
+
+  it('keeps a member’s own private calendar legible to them', async () => {
+    // §7 grades `calendar:view_private` `own` for an adult, and this is what
+    // `own` means: her own "Werk" calendar is hers to read and to open, while
+    // the household-wide grant stays off (M23 — the bug was a second parent
+    // looking at a day of unclickable "bezet" blocks she had created herself).
+    const events = await read(false, household.parentId);
+    const shown = events.find((item) => item.title === 'Sollicitatiegesprek');
+
+    expect(shown).toBeDefined();
+    expect(shown!.busyOnly).toBe(false);
+    expect(shown!.editable).toBe(true);
+    expect(events.some((item) => item.busyOnly)).toBe(false);
+  });
+
+  it('still redacts somebody else’s private calendar', async () => {
+    const events = await read(false, household.childId);
+
+    expect(events.filter((item) => item.busyOnly)).toHaveLength(1);
+    expect(events.map((item) => item.title)).not.toContain('Sollicitatiegesprek');
   });
 
   it('marks a read-only calendar uneditable and a native event editable', async () => {

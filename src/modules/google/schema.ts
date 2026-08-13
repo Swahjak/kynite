@@ -85,14 +85,32 @@ export const calendar = pgTable(
      * Google's `primary` flag from the calendar list — "this is the account
      * holder's own calendar", exactly one per account.
      *
-     * It is persisted rather than derived because attribution keys off it
-     * (M18): the account owner is a participant of everything on *their own*
-     * calendar, and of nothing on the subscriptions and colleagues' diaries
-     * that hang off the same account. Without the distinction, "Nederlandse
-     * feestdagen" put a national holiday in one parent's person column every
-     * single time.
+     * It is persisted rather than derived because it is one of the two inputs
+     * `ownerMemberId` below is computed from, and because a calendar list pass
+     * is the only place it can be observed.
      */
     isPrimary: boolean('is_primary').notNull().default(false),
+    /**
+     * The member whose calendar this *is* — the attribution target for every
+     * event on it that names no family member of its own (M23).
+     *
+     * It exists because `isPrimary` was doing this job and could not. The rule
+     * it encoded — "the account owner participates in everything on their
+     * primary calendar, and in nothing else on the account" — is right about
+     * subscriptions ("Nederlandse feestdagen") and colleagues' diaries and
+     * wrong about the case a second parent hits on day one: a *secondary*
+     * calendar they created themselves, "Werk", whose events therefore landed
+     * attributed to nobody and rendered in the shared "Iedereen" block instead
+     * of in their own column.
+     *
+     * Discovery fills it from Google's own answer to "is this person's own
+     * calendar": `primary`, or `accessRole: 'owner'` — which is true of every
+     * calendar the account holder created and false for everything they merely
+     * subscribed to or were granted access on. Null means "attribute from the
+     * event's own organizer/attendees only", which is what a holiday feed and
+     * a colleague's diary deserve.
+     */
+    ownerMemberId: uuid('owner_member_id').references(() => member.id, { onDelete: 'set null' }),
     syncEnabled: boolean('sync_enabled').notNull().default(true),
     /** Google's incremental cursor; null forces the next sync to be a full one. */
     syncToken: text('sync_token'),

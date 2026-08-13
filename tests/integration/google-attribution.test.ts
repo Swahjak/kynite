@@ -47,7 +47,6 @@ describe.skipIf(!databaseUrl)('google attribution (integration)', () => {
     googleCalendarId: 'family@group.calendar.google.com',
     syncToken: null,
     ownerMemberId: household.parentId,
-    isPrimary: true,
   });
 
   const emit = async () => {};
@@ -91,6 +90,7 @@ describe.skipIf(!databaseUrl)('google attribution (integration)', () => {
         googleCalendarId: 'family@group.calendar.google.com',
         summary: 'Gezin',
         isPrimary: true,
+        ownerMemberId: household.parentId,
       })
       .returning();
     calendarId = calendar.id;
@@ -103,6 +103,7 @@ describe.skipIf(!databaseUrl)('google attribution (integration)', () => {
         googleCalendarId: 'nl.dutch#holiday@group.v.calendar.google.com',
         summary: 'Nederlandse feestdagen',
         isPrimary: false,
+        ownerMemberId: null,
       })
       .returning();
     subscriptionCalendarId = subscription.id;
@@ -266,9 +267,9 @@ describe.skipIf(!databaseUrl)('google attribution (integration)', () => {
         familyId: household.familyId,
         googleCalendarId: 'nl.dutch#holiday@group.v.calendar.google.com',
         syncToken: null,
-        // Same account, same owner — and not the account's own calendar.
-        ownerMemberId: household.parentId,
-        isPrimary: false,
+        // Same account — and not one of the account holder's own calendars,
+        // so discovery left it without an owning member (M23).
+        ownerMemberId: null,
       },
       api,
       store: store.syncStore,
