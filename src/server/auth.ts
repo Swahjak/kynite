@@ -105,14 +105,37 @@ function createAuth() {
    *    hook drops them, and `account.encryptOAuthTokens` encrypts whatever any
    *    future flow does persist. Nothing crosses over in either direction.
    *
-   * Account linking is left at better-auth's defaults on purpose. A Google
-   * sign-in whose address already belongs to an email/password account is
-   * *refused* ("account not linked") rather than merged, because this app has
-   * no outbound mailer yet (`requireEmailVerification: false`): every local
-   * account is unverified, so implicit linking would let anyone who registers
-   * `victim@gmail.com` with a password inherit the real owner's household the
-   * moment they sign in with Google. The refusal surfaces on the sign-in form
-   * as `errors.oauthNotLinked`. Revisit when M10 lands verification.
+   * Account linking: `requireLocalEmailVerified: false` below turns on
+   * *implicit* linking — a Google sign-in whose address already belongs to
+   * an email/password account is merged into it rather than refused. This is
+   * a known, accepted risk, not an oversight: this app has no outbound
+   * mailer yet (`requireEmailVerification: false`), so every local account
+   * is unverified, and implicit linking means anyone who pre-registers
+   * `victim@gmail.com` with a password they choose can inherit the real
+   * owner's household the moment that owner later signs in with Google —
+   * the attacker's password keeps working against the now-linked account.
+   *
+   * Owner decision, 2026-08-13: accept that risk for now and ship the
+   * linking so existing email/password users aren't locked out of "Continue
+   * with Google" (bug report: same-email Google sign-in was refused with
+   * "account not linked"). This is a small, closed-audience family install,
+   * which is the only reason the trade-off is acceptable short-term. Without
+   * this, `requireLocalEmailVerified` defaults to `true` and blocks linking
+   * unconditionally, since local `emailVerified` can never become `true`
+   * without a verification flow — `trustedProviders` alone (which only
+   * vouches for the *provider's* email, not the local account being merged
+   * into) does not and cannot fix that refusal on its own.
+   *
+   * Retire this the moment email verification (M10) ships: once local
+   * accounts can actually become `emailVerified: true`, remove the
+   * `requireLocalEmailVerified: false` override below (falling back to
+   * better-auth's safe default of `true`) so linking again requires the
+   * existing local account to be verified. Until then the refusal's old
+   * error copy stays live as a fallback — see the note on
+   * `errors.oauthNotLinked` near the sign-in error mapping.
+   *
+   * Full write-up, accepted risk, and the MUST-fix-before-public-launch
+   * condition: `docs/adr/20260813-implicit-google-account-linking.md`.
    */
   const googleSignIn = isSocialSignInConfigured()
     ? {
@@ -150,6 +173,18 @@ function createAuth() {
        * behind the hook below, which is what stops the tokens existing at all.
        */
       encryptOAuthTokens: true,
+      accountLinking: {
+        enabled: true,
+        // Google only: it verifies the address before issuing an id token.
+        // Deliberately no other provider is trusted, and `allowDifferentEmails`
+        // is deliberately not set — this must stay scoped to "same email,
+        // Google-verified", never "any email the provider hands us".
+        trustedProviders: ['google'],
+        // See the design note above `googleSignIn`: this is what actually
+        // permits linking, since local accounts are never emailVerified in
+        // this app. Accepted risk, revisit when M10 ships.
+        requireLocalEmailVerified: false,
+      },
     },
     session: {
       expiresIn: 60 * 60 * 24 * 30,

@@ -403,3 +403,19 @@ Consolidated tallies, all runs env-isolated (`.env.local` moved aside per CLAUDE
 - **Deploy:** `railway up --service kynite --ci` to `patient-mercy`/`kynite` (production, ams region); new deployment `512ee6b2` went live and passed Railway's own healthcheck against `/api/health`.
 - **Post-deploy verification:** `GET https://kynite.app/api/health` → `{"status":"ok","database":{"ok":true},...}`; `GET https://kynite.app/nl` → HTTP 200. New brand confirmed live in the served CSS chunks: `--brand:#5d5fef` and `Baloo` font-family references present (the previous `#0040e0` stitch-era indigo is gone from the deployed bundle).
 - **Environment hygiene:** `.env.local` moved aside before the e2e run and restored after; test DB (`docker-compose.test.yml`) torn down; ports 3100/3101 confirmed free; no leftover Playwright/Next webservers.
+
+### Follow-up (2026-08-13): implicit Google account linking enabled
+
+The M19 carry-forward note above ("account linking for social sign-in deliberately
+refused (unverified-email takeover risk) — revisit if wanted") was revisited: a bug
+report showed an existing email/password user's "Continue with Google" was refused
+outright. Root cause and fix are recorded in
+`docs/adr/20260813-implicit-google-account-linking.md` — in short, `src/server/auth.ts`
+now sets `account.accountLinking.requireLocalEmailVerified: false` (with
+`trustedProviders: ['google']`) to unblock linking, since local accounts can never reach
+`emailVerified: true` without an email-verification flow this app doesn't have yet.
+
+This is an owner-accepted, **temporary** trade-off for a small closed-audience install,
+not a closed-out decision — the ADR is flagged **must be revisited before any public
+launch**: ship email verification, then flip `requireLocalEmailVerified` back to
+better-auth's safe default (`true`).
