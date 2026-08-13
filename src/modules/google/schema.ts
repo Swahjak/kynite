@@ -9,6 +9,7 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core';
 import { primaryId, timestamps } from '@/server/db/columns';
+import { eventType } from '@/server/db/enums';
 import { family, member } from '@/modules/family/schema';
 
 /** docs/architecture.md §3 "Devices & Google". */
@@ -111,6 +112,22 @@ export const calendar = pgTable(
      * a colleague's diary deserve.
      */
     ownerMemberId: uuid('owner_member_id').references(() => member.id, { onDelete: 'set null' }),
+    /**
+     * The type every event on this calendar inherits when it has none of its
+     * own (M23).
+     *
+     * This is what makes the taxonomy survive contact with Google. A synced
+     * event carries no type — there is no such field in the API — so without a
+     * per-calendar answer, a household that links "Schoolagenda Mila" and
+     * "Sportclub" gets two hundred identical purple "Overig" rows and the
+     * eleven categories exist only for the handful of events somebody typed by
+     * hand. One choice per calendar, made once in settings, types all of them.
+     *
+     * `other` by default, including for a newly linked calendar: Overig is the
+     * honest answer until a parent gives a better one, and it is a dropdown in
+     * the calendars list away.
+     */
+    defaultType: eventType('default_type').notNull().default('other'),
     syncEnabled: boolean('sync_enabled').notNull().default(true),
     /** Google's incremental cursor; null forces the next sync to be a full one. */
     syncToken: text('sync_token'),

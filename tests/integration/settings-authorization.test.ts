@@ -303,7 +303,7 @@ describe.skipIf(!databaseUrl)('settings authorization (integration)', () => {
 
       const result = await setCalendarDisplayAction(
         { status: 'idle' },
-        form({ calendarId: foreignCalendarId, visibility: 'private' })
+        form({ calendarId: foreignCalendarId, visibility: 'private', defaultType: 'school' })
       );
 
       expect(result).toEqual({ status: 'error', error: 'calendarNotFound' });
@@ -318,7 +318,7 @@ describe.skipIf(!databaseUrl)('settings authorization (integration)', () => {
 
       const result = await setCalendarDisplayAction(
         { status: 'idle' },
-        form({ calendarId, visibility: 'private' })
+        form({ calendarId, visibility: 'private', defaultType: 'school' })
       );
 
       expect(result).toEqual({ status: 'error', error: 'forbidden' });
@@ -331,7 +331,7 @@ describe.skipIf(!databaseUrl)('settings authorization (integration)', () => {
 
       const result = await setCalendarDisplayAction(
         { status: 'idle' },
-        form({ calendarId, visibility: 'private' })
+        form({ calendarId, visibility: 'private', defaultType: 'school' })
       );
 
       expect(result).toEqual({ status: 'error', error: 'forbidden' });

@@ -1026,6 +1026,8 @@
       "description": "Welke agenda's meetellen en wat er op het wandscherm te lezen is.",
       "empty": "Er is nog geen agenda gekoppeld.",
       "readOnly": "Alleen ouders kunnen de weergave aanpassen.",
+      "defaultType": "Standaardtype",
+      "defaultTypeHint": "Wat afspraken uit deze agenda zijn, als ze zelf geen soort hebben.",
       "visibility": "Zichtbaarheid",
       "visibilities": {
         "family": "Voor het hele gezin",

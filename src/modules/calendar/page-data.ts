@@ -196,6 +196,7 @@ export async function loadCalendarDisplay(): Promise<CalendarDisplayData | null>
       accountEmail: googleAccount.email,
       visibility: calendar.visibility,
       color: calendar.color,
+      defaultType: calendar.defaultType,
     })
     .from(calendar)
     .innerJoin(googleAccount, eq(calendar.googleAccountId, googleAccount.id))
@@ -208,6 +209,7 @@ export async function loadCalendarDisplay(): Promise<CalendarDisplayData | null>
       summary: row.summary,
       accountEmail: row.accountEmail,
       visibility: row.visibility,
+      defaultType: row.defaultType,
       // Provenance only (M23): the dot beside the calendar's name, in Google's
       // own colour mapped onto a token the design system can draw. It says
       // "which calendar is this", and nothing about how its events look.

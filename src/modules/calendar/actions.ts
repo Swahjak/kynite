@@ -536,11 +536,13 @@ export async function rescheduleEventAction(
 const calendarDisplaySchema = z.object({
   calendarId: z.uuid(),
   visibility: z.enum(CALENDAR_VISIBILITIES),
+  /** The type every untyped event on this calendar inherits (M23). */
+  defaultType: z.enum(EVENT_TYPES),
 });
 
 /**
  * How one calendar behaves: whether it is a family calendar or a private one
- * (PRD FR28, M16).
+ * (PRD FR28, M16), and the type its events inherit (M23).
  *
  * It used to carry a colour too. M23 took that away, and the reason is the
  * colouring policy: an event's hue comes from its *type* and from nothing
@@ -564,10 +566,11 @@ export async function setCalendarDisplayAction(
   const parsed = calendarDisplaySchema.safeParse({
     calendarId: read(formData, 'calendarId'),
     visibility: read(formData, 'visibility'),
+    defaultType: read(formData, 'defaultType'),
   });
   if (!parsed.success) return failure('invalidInput');
 
-  const { calendarId, visibility } = parsed.data;
+  const { calendarId, visibility, defaultType } = parsed.data;
   const db = getDb();
 
   // Scoped by the *principal's* family, never by the form: a forged calendar id
@@ -585,7 +588,7 @@ export async function setCalendarDisplayAction(
   await db.transaction(async (tx) => {
     await tx
       .update(calendar)
-      .set({ visibility, updatedAt: now })
+      .set({ visibility, defaultType, updatedAt: now })
       .where(and(eq(calendar.id, calendarId), eq(calendar.familyId, principal.familyId)));
 
     // The hub has no other way to learn about this: nobody is standing at the
@@ -596,7 +599,7 @@ export async function setCalendarDisplayAction(
         type: 'settings.updated',
         entity: { id: principal.familyId },
         actor: { ...actorOf(principal), source: 'mobile' },
-        patch: { calendarId, visibility },
+        patch: { calendarId, visibility, defaultType },
       },
       tx
     );

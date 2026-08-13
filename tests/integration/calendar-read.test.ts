@@ -85,6 +85,8 @@ describe.skipIf(!databaseUrl)('calendar read path (integration)', () => {
           summary: 'Schoolrooster',
           visibility: 'family',
           writable: false,
+          // M23: the rung that types an imported event nobody typed.
+          defaultType: 'school',
         },
       ])
       .returning();
@@ -339,6 +341,25 @@ describe.skipIf(!databaseUrl)('calendar read path (integration)', () => {
 
     expect(events.find((item) => item.title === 'Schoolfoto')!.editable).toBe(false);
     expect(events.find((item) => item.title === 'Eigen notitie')!.editable).toBe(true);
+  });
+
+  it('inherits its calendar’s default type when it has none of its own', async () => {
+    const events = await read(true);
+    const imported = events.find((item) => item.title === 'Schoolfoto')!;
+
+    // Nothing typed this row — Google has no such field — so it takes the
+    // calendar's answer, and the hue follows the type (M23).
+    expect(imported.eventType).toBe('school');
+    expect(imported.category).toBe('blue');
+
+    // A calendar nobody has answered for stays on Overig.
+    expect(events.find((item) => item.title === 'Tandarts')!.eventType).toBe('other');
+  });
+
+  it('keeps an explicit type over its calendar’s default', async () => {
+    const events = await read(true);
+
+    expect(events.find((item) => item.title === 'Eigen notitie')!.eventType).toBe('health');
   });
 
   it('takes the hue from the event type, not from the calendar', async () => {

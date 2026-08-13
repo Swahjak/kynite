@@ -11,6 +11,11 @@ import {
   type AnyPgColumn,
 } from 'drizzle-orm/pg-core';
 import { primaryId, timestamps } from '@/server/db/columns';
+// The enum itself lives at the assembly point: `calendar.default_type` needs
+// it too, and this file already imports the google slice's tables — declaring
+// it here and importing it back would put a cycle between two `pgTable`
+// modules. See `server/db/enums.ts`.
+import { eventType } from '@/server/db/enums';
 import { family, member } from '@/modules/family/schema';
 import { calendar } from '@/modules/google/schema';
 
@@ -32,19 +37,7 @@ import { calendar } from '@/modules/google/schema';
  * settings. One fact, one cue — the reason the per-event colour override and
  * the per-calendar colour that used to compete with it are gone.
  */
-export const eventType = pgEnum('event_type', [
-  'school',
-  'childcare',
-  'sport',
-  'music',
-  'play',
-  'health',
-  'family',
-  'birthday',
-  'holiday',
-  'work',
-  'other',
-]);
+export { eventType };
 
 /**
  * The eight design-system category colors (src/app/globals.css) — the palette
@@ -96,7 +89,22 @@ export const event = pgTable(
     /** Ownership routes reminders; null = a household-wide event. */
     ownerMemberId: uuid('owner_member_id').references(() => member.id, { onDelete: 'set null' }),
     attendeeMemberIds: uuid('attendee_member_ids').array().notNull().default([]),
-    eventType: eventType('event_type').notNull().default('other'),
+    /**
+     * The event's *own* type, or null to inherit its calendar's (M23).
+     *
+     * Nullable on purpose, and it is the whole of the inheritance rule. An
+     * imported Google event has no type — Google has no such field — so a
+     * NOT NULL column with a default would have to invent one, and inventing
+     * `other` for every synced row is exactly what makes a board of eleven
+     * categories render as one. Null instead means "ask the calendar", which
+     * is a question a parent can answer once per calendar rather than once per
+     * event (`calendar.default_type`).
+     *
+     * A type chosen in the event form is always explicit — the picker has no
+     * "inherit" option, because at that point the parent is looking at one
+     * event and the honest thing to ask is what it is.
+     */
+    eventType: eventType('event_type'),
     rrule: text('rrule'),
     rdates: text('rdates').array().notNull().default([]),
     exdates: text('exdates').array().notNull().default([]),

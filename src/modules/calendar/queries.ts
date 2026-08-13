@@ -108,6 +108,7 @@ export async function listEvents(options: ListEventsOptions): Promise<CalendarEv
     .select({
       event,
       calendarSummary: calendar.summary,
+      calendarDefaultType: calendar.defaultType,
       calendarVisibility: calendar.visibility,
       calendarWritable: calendar.writable,
       calendarOwnerMemberId: calendar.ownerMemberId,
@@ -231,6 +232,7 @@ function isNotEmptyRecurrence() {
 type EventRow = {
   event: typeof event.$inferSelect;
   calendarSummary: string | null;
+  calendarDefaultType: EventType | null;
   calendarVisibility: 'family' | 'private' | null;
   calendarWritable: boolean | null;
   calendarOwnerMemberId: string | null;
@@ -238,6 +240,18 @@ type EventRow = {
 
 function toCalendarEvent(row: EventRow, occurrence: Occurrence, redacted: boolean): CalendarEvent {
   const source = row.event;
+
+  /**
+   * The type, most specific first (M23): the event's own, then its calendar's
+   * default, then Overig.
+   *
+   * The middle rung is the one that matters in practice. An imported Google
+   * event has no type of its own — the API has no such field — so a household
+   * that has told us "Schoolagenda Mila is School" gets two hundred school
+   * events typed for free, and this is the line that does it. A native event
+   * always has its own, because the form's picker has no inherit option.
+   */
+  const resolvedType: EventType = source.eventType ?? row.calendarDefaultType ?? 'other';
 
   return {
     key: occurrence.key,
@@ -254,10 +268,10 @@ function toCalendarEvent(row: EventRow, occurrence: Occurrence, redacted: boolea
     tz: source.tz,
     ownerMemberId: source.ownerMemberId,
     attendeeMemberIds: redacted ? [] : source.attendeeMemberIds,
-    eventType: source.eventType,
+    eventType: resolvedType,
     // The whole colouring policy (M23): the hue is a function of the type, on
     // every surface, resolved once here so no view has to.
-    category: categoryForType(source.eventType),
+    category: categoryForType(resolvedType),
     calendarId: source.calendarId,
     calendarSummary: redacted ? null : row.calendarSummary,
     isRecurringInstance: occurrence.isRecurringInstance,

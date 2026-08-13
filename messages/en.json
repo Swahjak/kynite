@@ -1026,6 +1026,8 @@
       "description": "Which calendars count, and what the wall display shows.",
       "empty": "No calendar has been linked yet.",
       "readOnly": "Only parents can change how things look.",
+      "defaultType": "Default type",
+      "defaultTypeHint": "What events from this calendar are, when they carry no type of their own.",
       "visibility": "Visibility",
       "visibilities": {
         "family": "For the whole family",
