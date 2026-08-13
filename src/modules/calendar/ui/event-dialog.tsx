@@ -38,11 +38,12 @@ import {
 import type { Member } from '@/modules/family';
 import { idleState } from '../action-state';
 import { createEventAction, deleteEventAction, updateEventAction } from '../actions';
+import { categoryForType } from '../domain/event-type';
 import { presetFor, RECURRENCE_PRESETS } from '../domain/presets';
 import { toWall } from '../domain/zone';
-import { EVENT_CATEGORIES, EVENT_TYPES } from '../schema';
+import { EVENT_TYPES } from '../schema';
 import type { CalendarEvent } from '../queries';
-import { CATEGORY_CLASSES } from './tokens';
+import { CATEGORY_CLASSES, EVENT_TYPE_ICONS } from './tokens';
 
 /**
  * Event create/edit/delete, from the parent app only (`event:write` is `deny`
@@ -195,59 +196,33 @@ export function EventDialog({
               <FieldDescription>{t('form.descriptionHint')}</FieldDescription>
             </Field>
 
+            {/* The taxonomy picker (M23). Icon + label per option, because the
+                glyph is what the parent will see on the board afterwards — a
+                list of eleven words with no cues is a list nobody reads twice.
+                It carries the colour too, so the choice made here is visibly
+                the choice that lands on the wall. */}
             <Field>
               <FieldLabel>{t('form.eventType')}</FieldLabel>
-              <Select name="eventType" defaultValue={event?.eventType ?? 'appointment'}>
-                <SelectTrigger size="hub" className="w-full">
+              <Select name="eventType" defaultValue={event?.eventType ?? 'other'}>
+                <SelectTrigger size="hub" className="w-full" data-testid="event-type">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {EVENT_TYPES.map((type) => (
                     <SelectItem key={type} value={type} size="hub">
-                      {t(`types.${type}`)}
+                      <span className="flex items-center gap-2">
+                        <Icon
+                          name={EVENT_TYPE_ICONS[type]}
+                          size="sm"
+                          className={cn('shrink-0', CATEGORY_CLASSES[categoryForType(type)].text)}
+                        />
+                        {t(`types.${type}`)}
+                      </span>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-            </Field>
-
-            <Field>
-              <FieldLabel>{t('form.category')}</FieldLabel>
-              {/* Radios, not a select: the whole point of a colour is seeing it. */}
-              <div
-                role="radiogroup"
-                aria-label={t('form.category')}
-                className="flex flex-wrap gap-2"
-              >
-                <label className="flex min-h-12 cursor-pointer items-center gap-1.5 rounded-4xl border border-border px-4 transition-colors has-checked:border-ring has-checked:bg-accent">
-                  <input
-                    type="radio"
-                    name="category"
-                    value=""
-                    defaultChecked={!event?.category}
-                    className="sr-only"
-                  />
-                  <Icon name="palette" size="sm" />
-                  <span className="text-caption">{t('form.categoryInherit')}</span>
-                </label>
-                {EVENT_CATEGORIES.map((category) => (
-                  <label
-                    key={category}
-                    className="flex size-12 cursor-pointer items-center justify-center rounded-4xl border-2 border-transparent transition-transform hover:scale-105 has-checked:border-ring"
-                    title={t(`categories.${category}`)}
-                  >
-                    <input
-                      type="radio"
-                      name="category"
-                      value={category}
-                      defaultChecked={event?.category === category}
-                      className="sr-only"
-                    />
-                    <span className="sr-only">{t(`categories.${category}`)}</span>
-                    <span className={cn('size-7 rounded-full', CATEGORY_CLASSES[category].solid)} />
-                  </label>
-                ))}
-              </div>
+              <FieldDescription>{t('form.eventTypeHint')}</FieldDescription>
             </Field>
           </Section>
 

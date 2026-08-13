@@ -22,7 +22,7 @@ import {
 } from './domain/presets';
 import { addExdate, exdateLine } from './domain/ical';
 import { fromWall, parseDateKey } from './domain/zone';
-import { EVENT_CATEGORIES, EVENT_TYPES, calendarDisplay, event } from './schema';
+import { EVENT_TYPES, event } from './schema';
 import { pushToGoogle } from './sync-bridge';
 
 /**
@@ -54,7 +54,6 @@ const eventSchema = z
     ownerMemberId: z.uuid().optional().or(z.literal('')),
     attendeeMemberIds: z.array(z.uuid()).max(50),
     eventType: z.enum(EVENT_TYPES),
-    category: z.enum(EVENT_CATEGORIES).optional().or(z.literal('')),
     calendarId: z.uuid().optional().or(z.literal('')),
     recurrence: z.enum(RECURRENCE_PRESETS),
   })
@@ -80,7 +79,6 @@ function eventInput(formData: FormData) {
       .getAll('attendeeMemberIds')
       .filter((value): value is string => typeof value === 'string' && value !== ''),
     eventType: read(formData, 'eventType'),
-    category: read(formData, 'category'),
     calendarId: read(formData, 'calendarId'),
     recurrence: read(formData, 'recurrence') || 'none',
   });
@@ -131,7 +129,6 @@ type Resolved = {
     ownerMemberId: string | null;
     attendeeMemberIds: string[];
     eventType: (typeof EVENT_TYPES)[number];
-    category: (typeof EVENT_CATEGORIES)[number] | null;
     calendarId: string | null;
     rrule: string | null;
   };
@@ -206,7 +203,6 @@ async function resolveInput(
         ownerMemberId: input.ownerMemberId || null,
         attendeeMemberIds: input.attendeeMemberIds,
         eventType: input.eventType,
-        category: input.category || null,
         calendarId,
         rrule: ruleForPreset(input.recurrence),
       },
@@ -539,30 +535,24 @@ export async function rescheduleEventAction(
 
 const calendarDisplaySchema = z.object({
   calendarId: z.uuid(),
-  /** `''` = inherit Google's own colour again (the `calendar_display` row's null). */
-  category: z.enum(EVENT_CATEGORIES).or(z.literal('')),
   visibility: z.enum(CALENDAR_VISIBILITIES),
 });
 
 /**
- * How one calendar renders everywhere: its colour, and whether it is a family
- * calendar or a private one (PRD FR28, M16).
+ * How one calendar behaves: whether it is a family calendar or a private one
+ * (PRD FR28, M16).
+ *
+ * It used to carry a colour too. M23 took that away, and the reason is the
+ * colouring policy: an event's hue comes from its *type* and from nothing
+ * else, so a per-calendar colour was a second answer to a question that may
+ * only have one. A calendar's own colour survives as a dot beside its name in
+ * this very list — provenance, not category.
  *
  * `display:manage`, so both parents may do it — see that capability's note in
  * `modules/family/authorize.ts`. Nothing here can widen what anyone may read:
  * `calendar:view_private` still decides who sees a private calendar's detail,
  * and marking a calendar private only ever shows *less* (the hub drops it to
  * free/busy on the very next render, via `listEvents`' `privateDetail` flag).
- *
- * The two fields live in two tables and that is not an accident — see
- * `calendarDisplay`'s note in `./schema.ts` for why the colour cannot be a
- * column on `calendar`. One transaction covers both, so a half-applied
- * preference is not a state the UI has to render.
- *
- * The colour is stored as *our* palette entry rather than a hex: the eight
- * design-system tokens are what the app has contrast ratios for, and a picker
- * that offered anything else would be offering a colour the hub cannot draw
- * legibly from six feet.
  */
 export async function setCalendarDisplayAction(
   _previous: ActionState,
@@ -573,12 +563,11 @@ export async function setCalendarDisplayAction(
 
   const parsed = calendarDisplaySchema.safeParse({
     calendarId: read(formData, 'calendarId'),
-    category: read(formData, 'category'),
     visibility: read(formData, 'visibility'),
   });
   if (!parsed.success) return failure('invalidInput');
 
-  const { calendarId, category, visibility } = parsed.data;
+  const { calendarId, visibility } = parsed.data;
   const db = getDb();
 
   // Scoped by the *principal's* family, never by the form: a forged calendar id
@@ -599,18 +588,6 @@ export async function setCalendarDisplayAction(
       .set({ visibility, updatedAt: now })
       .where(and(eq(calendar.id, calendarId), eq(calendar.familyId, principal.familyId)));
 
-    await tx
-      .insert(calendarDisplay)
-      .values({
-        familyId: principal.familyId,
-        calendarId,
-        category: category === '' ? null : category,
-      })
-      .onConflictDoUpdate({
-        target: calendarDisplay.calendarId,
-        set: { category: category === '' ? null : category, updatedAt: now },
-      });
-
     // The hub has no other way to learn about this: nobody is standing at the
     // wall to navigate, and the board is `force-dynamic` rather than polled.
     await publish(
@@ -619,7 +596,7 @@ export async function setCalendarDisplayAction(
         type: 'settings.updated',
         entity: { id: principal.familyId },
         actor: { ...actorOf(principal), source: 'mobile' },
-        patch: { calendarId, category: category || null, visibility },
+        patch: { calendarId, visibility },
       },
       tx
     );

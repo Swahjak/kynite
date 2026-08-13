@@ -55,11 +55,13 @@ export {
   type Window,
 } from './domain/window';
 
+export { EVENT_CATEGORIES as CATEGORY_KEYS, nearestCategory } from './domain/category';
+
 export {
-  EVENT_CATEGORIES as CATEGORY_KEYS,
-  nearestCategory,
-  resolveCategory,
-} from './domain/category';
+  EVENT_TYPE_CATEGORY,
+  categoryForType,
+  EVENT_TYPE_ICONS as EVENT_TYPE_ICON_NAMES,
+} from './domain/event-type';
 
 export {
   RECURRENCE_PRESETS,

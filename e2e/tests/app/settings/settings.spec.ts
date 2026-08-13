@@ -242,17 +242,13 @@ test.describe('hub display preferences', () => {
     await kiosk.close();
   });
 
-  test('carry a per-calendar colour and a private calendar onto the board', async ({
-    page,
-    family,
-  }) => {
+  test('carry a private calendar onto the board, and colour by type', async ({ page, family }) => {
     const { owner, calendarId } = await seedHousehold(family.familyId);
 
-    // BLOCKING B-2: the settings write is asserted against the database above,
-    // but nothing proved the colour actually *reaches a board* — the middle
-    // rung of `resolveCategory` (`calendarCategory`, `domain/category.ts`).
-    // An event with no per-event override on this calendar, so its chip's
-    // colour can only have come from the calendar-level rung this test sets.
+    // M23: the per-calendar colour picker is gone — an event's hue comes from
+    // its *type* on every surface. This event is `work`, so it is teal on the
+    // board no matter which calendar it lives on or what colour Google gives
+    // that calendar.
     const now = new Date();
     await withDb((client) =>
       seedEvents(client, family.familyId, [
@@ -261,6 +257,7 @@ test.describe('hub display preferences', () => {
           startsAt: now.toISOString(),
           endsAt: new Date(now.getTime() + 30 * 60 * 1000).toISOString(),
           ownerMemberId: owner.id,
+          eventType: 'work',
           calendarId,
         },
       ])
@@ -270,41 +267,32 @@ test.describe('hub display preferences', () => {
 
     const row = page.getByTestId('calendar-display-row').filter({ hasText: 'Werk' });
     await expect(row).toBeVisible();
+    // Provenance only: Google's colour for this calendar, as a dot.
+    await expect(row.getByTestId('calendar-color-dot')).toBeVisible();
 
-    await row.getByTestId('calendar-color-purple').click();
     await row.getByTestId('calendar-visibility').click();
     await page.getByRole('option', { name: 'Privé — alleen bezet' }).click();
     await row.getByTestId('save-calendar-display').click();
     await expect(row.getByTestId('save-calendar-display')).toBeEnabled();
 
-    // Persisted, both halves of the one transaction.
     await page.reload();
     const saved = page.getByTestId('calendar-display-row').filter({ hasText: 'Werk' });
-    await expect(saved.getByTestId('calendar-color-purple')).toHaveAttribute(
-      'aria-pressed',
-      'true'
-    );
     await expect(saved.getByTestId('calendar-visibility')).toContainText('Privé');
 
     const stored = await withDb(async (client) => {
-      const { rows } = await client.query<{ category: string; visibility: string }>(
-        `select d.category, c.visibility
-           from calendar c join calendar_display d on d.calendar_id = c.id
-          where c.family_id = $1`,
+      const { rows } = await client.query<{ visibility: string }>(
+        `select c.visibility from calendar c where c.family_id = $1`,
         [family.familyId]
       );
       return rows[0];
     });
 
-    expect(stored).toMatchObject({ category: 'purple', visibility: 'private' });
+    expect(stored).toMatchObject({ visibility: 'private' });
 
-    // The colour reaching a board, not just the row: `resolveCategory`'s
-    // middle rung (`calendarCategory`) is what paints this chip purple — the
-    // event itself carries no per-event `category` override.
+    // The hue on the board is the type's, and the owner still reads her own
+    // private calendar in full (M23).
     await page.goto('/nl/today');
-    // `/today`'s per-person board draws its events as `EventRow` (M22 —
-    // `calendar.md` § "Event list item"), not as the grid/month `EventChip`.
-    await expect(page.locator('[data-slot="event-row"][data-category="purple"]')).toBeVisible();
+    await expect(page.locator('[data-slot="event-row"][data-category="teal"]')).toBeVisible();
   });
 });
 

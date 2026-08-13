@@ -82,8 +82,8 @@ export type SeedEvent = {
   allDay?: boolean;
   ownerMemberId?: string | null;
   attendeeMemberIds?: string[];
+  /** One of the M23 taxonomy values; it decides the hue and the glyph. */
   eventType?: string;
-  category?: string | null;
   rrule?: string | null;
   exdates?: string[];
   calendarId?: string | null;
@@ -108,10 +108,10 @@ export async function seedEvents(
     const { rows } = await client.query<{ id: string }>(
       `insert into event (
          family_id, calendar_id, title, starts_at, ends_at, all_day, tz,
-         owner_member_id, attendee_member_ids, event_type, category, rrule,
+         owner_member_id, attendee_member_ids, event_type, rrule,
          exdates, pending_sync_at, location
        )
-       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
        returning id`,
       [
         familyId,
@@ -123,8 +123,7 @@ export async function seedEvents(
         event.tz ?? 'Europe/Amsterdam',
         event.ownerMemberId ?? null,
         event.attendeeMemberIds ?? [],
-        event.eventType ?? 'appointment',
-        event.category ?? null,
+        event.eventType ?? 'other',
         event.rrule ?? null,
         event.exdates ?? [],
         event.pendingSync ? new Date().toISOString() : null,
@@ -284,7 +283,7 @@ export async function markPendingSync(client: Client, eventId: string): Promise<
 export async function readEvent(client: Client, eventId: string) {
   const { rows } = await client.query(
     `select id, title, starts_at, ends_at, version, rrule, exdates,
-            recurrence_parent_id, pending_sync_at, deleted_at, category
+            recurrence_parent_id, pending_sync_at, deleted_at
        from event where id = $1`,
     [eventId]
   );

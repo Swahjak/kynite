@@ -358,8 +358,7 @@
       "ownerHint": "Bepaalt in wiens kolom de afspraak staat.",
       "everyone": "Iedereen",
       "eventType": "Soort",
-      "category": "Kleur",
-      "categoryInherit": "Van de agenda",
+      "eventTypeHint": "Bepaalt de kleur en het icoon op het bord.",
       "attendees": "Wie gaat er mee",
       "recurrence": "Herhaling",
       "calendar": "Agenda",
@@ -374,22 +373,17 @@
       "series": "De hele reeks"
     },
     "types": {
-      "appointment": "Afspraak",
-      "custody": "Zorgregeling",
-      "reward": "Beloning",
-      "routine": "Routine",
-      "birthday": "Verjaardag",
+      "school": "School",
+      "childcare": "Opvang",
+      "sport": "Sport",
+      "music": "Muziek & les",
+      "play": "Spelen & vrienden",
+      "health": "Gezondheid",
+      "family": "Familie & uitjes",
+      "birthday": "Verjaardag & feest",
+      "holiday": "Feestdagen & vakantie",
+      "work": "Werk",
       "other": "Overig"
-    },
-    "categories": {
-      "blue": "Blauw",
-      "purple": "Paars",
-      "orange": "Oranje",
-      "green": "Groen",
-      "red": "Rood",
-      "yellow": "Geel",
-      "pink": "Roze",
-      "teal": "Turquoise"
     },
     "recurrence": {
       "none": "Niet herhalen",
@@ -1028,25 +1022,13 @@
     },
     "calendars": {
       "title": "Agenda's en wandscherm",
-      "description": "Welke kleur elke agenda krijgt en wat er op het wandscherm te lezen is.",
+      "description": "Welke agenda's meetellen en wat er op het wandscherm te lezen is.",
       "empty": "Er is nog geen agenda gekoppeld.",
       "readOnly": "Alleen ouders kunnen de weergave aanpassen.",
-      "color": "Kleur",
-      "inherit": "Kleur van Google volgen",
       "visibility": "Zichtbaarheid",
       "visibilities": {
         "family": "Voor het hele gezin",
         "private": "Privé — alleen bezet"
-      },
-      "colors": {
-        "blue": "Blauw",
-        "purple": "Paars",
-        "orange": "Oranje",
-        "green": "Groen",
-        "red": "Rood",
-        "yellow": "Geel",
-        "pink": "Roze",
-        "teal": "Turquoise"
       },
       "save": "Opslaan",
       "manageGoogle": "Google-accounts beheren",

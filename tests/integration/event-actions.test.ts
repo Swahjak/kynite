@@ -63,8 +63,7 @@ const baseEventInput = {
   startsAt: '2026-03-11T08:00',
   endsAt: '2026-03-11T09:00',
   allDay: 'false',
-  eventType: 'appointment',
-  category: '',
+  eventType: 'other',
   calendarId: '',
   recurrence: 'none',
 };

@@ -1,4 +1,6 @@
-import type { EventCategory } from '../schema';
+import type { IconName } from '@/components/ui/icon-codepoints';
+import { EVENT_TYPE_ICONS as TYPE_ICONS } from '../domain/event-type';
+import type { EventCategory, EventType } from '../schema';
 
 /**
  * Category → design-system classes.
@@ -87,15 +89,16 @@ export const CATEGORY_CLASSES: Record<
   },
 };
 
-/** Material Symbols name per event type — the glyph on a chip. */
-export const EVENT_TYPE_ICONS = {
-  appointment: 'event',
-  custody: 'family_restroom',
-  reward: 'redeem',
-  routine: 'checklist',
-  birthday: 'cake',
-  other: 'label',
-} as const;
+/**
+ * Material Symbols name per event type — the glyph on a chip, a row, a picker.
+ *
+ * The table itself lives in `domain/event-type.ts`, beside the hue it travels
+ * with; this is the UI-typed view of it. The assertion is what `pnpm
+ * icons:check` exists to keep honest: a name that never made it into the
+ * subsetted font would render as a blank box, so the check fails the build
+ * instead.
+ */
+export const EVENT_TYPE_ICONS = TYPE_ICONS as Record<EventType, IconName>;
 
 /** The hours a time grid renders. Outside this, events stack into an overflow row. */
 export const GRID_START_HOUR = 6;

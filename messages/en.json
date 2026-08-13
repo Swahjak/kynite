@@ -358,8 +358,7 @@
       "ownerHint": "Decides whose column it appears in.",
       "everyone": "Everyone",
       "eventType": "Type",
-      "category": "Color",
-      "categoryInherit": "From the calendar",
+      "eventTypeHint": "Sets the colour and the icon on the board.",
       "attendees": "Who is coming",
       "recurrence": "Repeat",
       "calendar": "Calendar",
@@ -374,22 +373,17 @@
       "series": "The whole series"
     },
     "types": {
-      "appointment": "Appointment",
-      "custody": "Custody",
-      "reward": "Reward",
-      "routine": "Routine",
-      "birthday": "Birthday",
+      "school": "School",
+      "childcare": "Childcare",
+      "sport": "Sport",
+      "music": "Music & lessons",
+      "play": "Playdates & friends",
+      "health": "Health",
+      "family": "Family & outings",
+      "birthday": "Birthday & party",
+      "holiday": "Holidays & breaks",
+      "work": "Work",
       "other": "Other"
-    },
-    "categories": {
-      "blue": "Blue",
-      "purple": "Purple",
-      "orange": "Orange",
-      "green": "Green",
-      "red": "Red",
-      "yellow": "Yellow",
-      "pink": "Pink",
-      "teal": "Teal"
     },
     "recurrence": {
       "none": "Does not repeat",
@@ -1028,25 +1022,13 @@
     },
     "calendars": {
       "title": "Calendars and wall display",
-      "description": "Which colour each calendar gets, and what the wall display shows.",
+      "description": "Which calendars count, and what the wall display shows.",
       "empty": "No calendar has been linked yet.",
       "readOnly": "Only parents can change how things look.",
-      "color": "Colour",
-      "inherit": "Follow Google's colour",
       "visibility": "Visibility",
       "visibilities": {
         "family": "For the whole family",
         "private": "Private — busy only"
-      },
-      "colors": {
-        "blue": "Blue",
-        "purple": "Purple",
-        "orange": "Orange",
-        "green": "Green",
-        "red": "Red",
-        "yellow": "Yellow",
-        "pink": "Pink",
-        "teal": "Teal"
       },
       "save": "Save",
       "manageGoogle": "Manage Google accounts",

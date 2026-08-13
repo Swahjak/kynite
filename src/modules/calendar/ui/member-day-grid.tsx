@@ -174,13 +174,12 @@ export function MemberDayGrid({
                   key={member.id}
                   data-slot="all-day-member"
                   data-member-id={member.id}
-                  className={cn(
-                    // Same 4px rule as an event card, in the member's own solid
-                    // hue (`calendar.md` § "Event list item") — not the pale
-                    // `--cat-*-border` chip outline it used to take.
-                    'flex min-w-32 flex-1 items-center gap-1.5 rounded-xl border-l-4 py-0.5 pl-1.5',
-                    palette.rule
-                  )}
+                  // The rule is neutral, deliberately (M23): this bracket holds
+                  // one member's all-day events, and colouring it in *their*
+                  // hue would put member colour on an event surface — where the
+                  // only hue allowed is the event type's, carried by the chips
+                  // inside it. The face beside it is what says whose these are.
+                  className="flex min-w-32 flex-1 items-center gap-1.5 rounded-xl border-l-4 border-line-subtle py-0.5 pl-1.5"
                 >
                   <MemberFace
                     size="sm"

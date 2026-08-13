@@ -32,7 +32,7 @@ function baseEvent(overrides: Partial<CalendarEvent> = {}): CalendarEvent {
     tz: 'America/New_York',
     ownerMemberId: null,
     attendeeMemberIds: [],
-    eventType: 'appointment',
+    eventType: 'school',
     category: 'blue',
     calendarId: null,
     calendarSummary: null,

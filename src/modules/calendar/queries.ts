@@ -7,10 +7,10 @@ import { getDb } from '@/server/db';
 // query module — and make this file unimportable from a plain Node test. The
 // barrel is for *behaviour*; `server/db/schema.ts` is for tables (§2).
 import { calendar } from '@/server/db/schema';
-import { resolveCategory } from './domain/category';
+import { categoryForType } from './domain/event-type';
 import { dayKeysOf, expandSeries, isSeries, type Occurrence } from './domain/expand';
 import { toDateKey, toWall } from './domain/zone';
-import { calendarDisplay, event, type EventCategory, type EventType } from './schema';
+import { event, type EventCategory, type EventType } from './schema';
 
 /**
  * Reads for the calendar slice.
@@ -38,6 +38,7 @@ export type CalendarEvent = {
   ownerMemberId: string | null;
   attendeeMemberIds: string[];
   eventType: EventType;
+  /** The hue, a pure function of `eventType` — never stored (M23). */
   category: EventCategory;
   calendarId: string | null;
   calendarSummary: string | null;
@@ -107,18 +108,12 @@ export async function listEvents(options: ListEventsOptions): Promise<CalendarEv
     .select({
       event,
       calendarSummary: calendar.summary,
-      calendarColor: calendar.color,
-      // FR28's per-calendar colour. A `leftJoin` because the row is the
-      // exception: a calendar nobody has recoloured has none, and that must
-      // read as "inherit Google's colour", not as "no events".
-      calendarCategory: calendarDisplay.category,
       calendarVisibility: calendar.visibility,
       calendarWritable: calendar.writable,
       calendarOwnerMemberId: calendar.ownerMemberId,
     })
     .from(event)
     .leftJoin(calendar, eq(event.calendarId, calendar.id))
-    .leftJoin(calendarDisplay, eq(calendarDisplay.calendarId, calendar.id))
     .where(
       and(
         eq(event.familyId, familyId),
@@ -236,8 +231,6 @@ function isNotEmptyRecurrence() {
 type EventRow = {
   event: typeof event.$inferSelect;
   calendarSummary: string | null;
-  calendarColor: string | null;
-  calendarCategory: EventCategory | null;
   calendarVisibility: 'family' | 'private' | null;
   calendarWritable: boolean | null;
   calendarOwnerMemberId: string | null;
@@ -262,11 +255,9 @@ function toCalendarEvent(row: EventRow, occurrence: Occurrence, redacted: boolea
     ownerMemberId: source.ownerMemberId,
     attendeeMemberIds: redacted ? [] : source.attendeeMemberIds,
     eventType: source.eventType,
-    category: resolveCategory({
-      category: source.category,
-      calendarCategory: row.calendarCategory,
-      calendarColor: row.calendarColor,
-    }),
+    // The whole colouring policy (M23): the hue is a function of the type, on
+    // every surface, resolved once here so no view has to.
+    category: categoryForType(source.eventType),
     calendarId: source.calendarId,
     calendarSummary: redacted ? null : row.calendarSummary,
     isRecurringInstance: occurrence.isRecurringInstance,

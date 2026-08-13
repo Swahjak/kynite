@@ -17,29 +17,44 @@ import { calendar } from '@/modules/google/schema';
 /** docs/architecture.md §3 "Calendar events". */
 
 /**
- * §3 lists `'appointment'|'custody'|'reward'|…`; the tail is filled in here.
- * `custody` is first-class because the custody-week recurrence patterns (FR5)
- * are the reason the recurrence model is stored verbatim rather than expanded.
+ * What an event *is*, in the vocabulary a family actually uses (M23).
+ *
+ * The first cut of this enum was a shape a developer recognises —
+ * `appointment`, `routine`, `reward` — which is a statement about where a row
+ * came from rather than about what is happening. A parent scanning the wall at
+ * 07:45 is not looking for "an appointment"; they are looking for gym kit,
+ * a dentist, or the day somebody is turning seven.
+ *
+ * So the eleven values below are the owner-approved taxonomy, and they are the
+ * *only* dimension that colours an event anywhere in the app: type carries the
+ * hue and the glyph (`domain/event-type.ts`), member colour carries identity
+ * and nothing else, and a calendar's own colour is demoted to a dot in
+ * settings. One fact, one cue — the reason the per-event colour override and
+ * the per-calendar colour that used to compete with it are gone.
  */
 export const eventType = pgEnum('event_type', [
-  'appointment',
-  'custody',
-  'reward',
-  'routine',
+  'school',
+  'childcare',
+  'sport',
+  'music',
+  'play',
+  'health',
+  'family',
   'birthday',
+  'holiday',
+  'work',
   'other',
 ]);
 
 /**
- * The eight design-system category colors (src/app/globals.css), as the
- * *visual* dimension of an event. Deliberately its own enum rather than a
- * reuse of `member_color`: a member's color is their identity across every
- * surface, an event's category is a property of the event, and the day one of
- * the two palettes gains a value the other must not follow.
+ * The eight design-system category colors (src/app/globals.css) — the palette
+ * itself, not a per-row choice.
  *
- * Nullable on purpose — an event with no category inherits its calendar's
- * color (`modules/calendar/domain/category.ts`), so a synced Google event does
- * not need a per-row decision before it can render.
+ * It was a column on `event` until M23, one of three competing colour sources
+ * (per-event override, per-calendar choice, Google's own hex). The taxonomy
+ * above replaced all three: the hue of an event is a function of its type, so
+ * nothing writes a colour any more. The enum survives as the *type* of a hue —
+ * `domain/event-type.ts` maps into it, and the tokens table keys off it.
  */
 export const eventCategory = pgEnum('event_category', [
   'blue',
@@ -81,9 +96,7 @@ export const event = pgTable(
     /** Ownership routes reminders; null = a household-wide event. */
     ownerMemberId: uuid('owner_member_id').references(() => member.id, { onDelete: 'set null' }),
     attendeeMemberIds: uuid('attendee_member_ids').array().notNull().default([]),
-    eventType: eventType('event_type').notNull().default('appointment'),
-    /** Per-event override of the calendar's color; null = inherit (M06). */
-    category: eventCategory('category'),
+    eventType: eventType('event_type').notNull().default('other'),
     rrule: text('rrule'),
     rdates: text('rdates').array().notNull().default([]),
     exdates: text('exdates').array().notNull().default([]),
@@ -135,46 +148,7 @@ export const event = pgTable(
   ]
 );
 
-/**
- * Per-calendar display preferences (PRD FR28, M16).
- *
- * A *separate* table rather than a column on `calendar`, for one structural
- * reason: `calendar` is owned by the google slice, whose `schema.ts` this file
- * already imports for the foreign key. Putting an `event_category` column
- * there would mean google importing this file back for the enum — a module
- * cycle between two `pgTable` modules, which drizzle evaluates at import time
- * and would leave one side holding `undefined`. The category dimension belongs
- * to the calendar slice anyway (`domain/category.ts` is what resolves it), so
- * the row lives with the code that reads it.
- *
- * Null `category` means "keep deriving from Google's own colour" — the same
- * inherit-by-default rule `event.category` follows, one level up. A calendar a
- * parent has never recoloured therefore has no row at all, and a sync that
- * changes Google's colour still moves it.
- */
-export const calendarDisplay = pgTable(
-  'calendar_display',
-  {
-    id: primaryId(),
-    familyId: uuid('family_id')
-      .notNull()
-      .references(() => family.id, { onDelete: 'cascade' }),
-    calendarId: uuid('calendar_id')
-      .notNull()
-      .references(() => calendar.id, { onDelete: 'cascade' }),
-    /** The parent's colour choice; null = inherit Google's. */
-    category: eventCategory('category'),
-    ...timestamps,
-  },
-  (table) => [
-    // One preference row per calendar: the upsert's conflict target.
-    uniqueIndex('calendar_display_calendar_unique').on(table.calendarId),
-    index('calendar_display_family_id_idx').on(table.familyId),
-  ]
-);
-
 export type Event = typeof event.$inferSelect;
-export type CalendarDisplay = typeof calendarDisplay.$inferSelect;
 export type EventType = (typeof eventType.enumValues)[number];
 export type EventCategory = (typeof eventCategory.enumValues)[number];
 

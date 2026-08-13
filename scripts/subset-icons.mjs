@@ -70,13 +70,27 @@ export const BUDGET_BYTES = 64 * 1024;
  * something renders it.
  */
 const EXTRA_ICONS = [
-  // modules/calendar/ui/tokens.ts — EVENT_TYPE_ICONS, indexed by event type.
+  // modules/calendar/domain/event-type.ts — EVENT_TYPE_ICONS, one per value of
+  // the M23 taxonomy, indexed by event type.
+  'school',
+  'child_care',
+  'sports_soccer',
+  'music_note',
+  'toys',
+  'medical_services',
+  'celebration',
+  'cake',
+  'beach_access',
+  'work',
   'event',
-  'family_restroom',
+  // Still rendered elsewhere: `redeem` by the rewards tokens below.
   'redeem',
   'checklist',
-  'cake',
-  'label',
+  // modules/routines/ui/tokens.ts — ROUTINE_ICONS and the part-of-day table,
+  // indexed by `routine.icon` / `routine.partOfDay`. Same blind spot as the
+  // calendar's: the scanner sees `<Icon name="…">` and nothing else.
+  'wb_sunny',
+  'event_available',
   // app/dev/design — ICON_SAMPLES, plus the theme toggle's conditional pair.
   'dashboard',
   'schedule',

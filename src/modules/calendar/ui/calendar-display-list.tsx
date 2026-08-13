@@ -1,10 +1,10 @@
 'use client';
 
-import { useActionState, useId, useState } from 'react';
+import { useActionState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { useActionToast } from '@/components/ui/use-action-toast';
-import { Field, FieldGroupLabel, FieldLabel } from '@/components/ui/field';
+import { Field, FieldLabel } from '@/components/ui/field';
 import {
   Select,
   SelectContent,
@@ -15,7 +15,7 @@ import {
 import { cn } from '@/lib/utils';
 import { idleState } from '../action-state';
 import { setCalendarDisplayAction } from '../actions';
-import { EVENT_CATEGORIES, type EventCategory } from '../schema';
+import type { EventCategory } from '../schema';
 import { CATEGORY_CLASSES } from './tokens';
 
 /**
@@ -30,10 +30,14 @@ export type CalendarDisplayView = {
   summary: string;
   accountEmail: string;
   visibility: 'family' | 'private';
-  /** Null = still inheriting Google's colour. */
-  category: EventCategory | null;
-  /** What that inheritance resolves to today, for the "inherit" swatch. */
-  inheritedCategory: EventCategory;
+  /**
+   * Google's own colour for this calendar, mapped onto the palette (M23).
+   *
+   * Provenance, not category: it draws the dot beside the name so a parent can
+   * tell two "Werk" calendars apart, and it decides nothing about how the
+   * events on it render — those take their hue from their type.
+   */
+  color: EventCategory;
 };
 
 /**
@@ -55,11 +59,12 @@ const VISIBILITY_OPTIONS: readonly CalendarDisplayView['visibility'][] = ['famil
  * to. Both fields of a row travel together because they land in one
  * transaction (`setCalendarDisplayAction`).
  *
- * The colour picker offers the eight design-system tokens plus "inherit",
- * which is the *default* and is shown with the colour it currently resolves
- * to. Inherit is not the absence of a choice — it is the choice to keep
- * following Google, and a family who has never thought about colours gets a
- * board that is already colour-coded.
+ * The colour picker that used to sit here is gone (M23). An event's hue comes
+ * from its type on every surface, so a per-calendar colour was a second answer
+ * to a question that may only have one — and the one it gave was the one a
+ * parent saw on the wall, which made the taxonomy invisible. Google's colour
+ * survives as the dot beside the calendar's name: it answers "which calendar
+ * is this", which is the only question this list is actually asking.
  */
 export function CalendarDisplayList({ calendars }: { calendars: CalendarDisplayView[] }) {
   const t = useTranslations('settings.calendars');
@@ -84,8 +89,6 @@ function CalendarDisplayRow({ calendar }: { calendar: CalendarDisplayView }) {
   const tCommon = useTranslations('common');
   const [state, formAction, pending] = useActionState(setCalendarDisplayAction, idleState);
   useActionToast(state, pending, { success: tCommon('saved') });
-  const [category, setCategory] = useState<string>(calendar.category ?? '');
-  const labelId = useId();
 
   return (
     <form
@@ -100,59 +103,19 @@ function CalendarDisplayRow({ calendar }: { calendar: CalendarDisplayView }) {
       data-calendar-id={calendar.id}
     >
       <input type="hidden" name="calendarId" value={calendar.id} />
-      <input type="hidden" name="category" value={category} />
 
-      <div className="flex flex-col gap-0.5">
-        <span className="font-display text-body font-semibold text-ink">{calendar.summary}</span>
-        <span className="text-caption break-all text-ink-muted">{calendar.accountEmail}</span>
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <FieldGroupLabel id={labelId}>{t('color')}</FieldGroupLabel>
-        <div role="group" aria-labelledby={labelId} className="flex flex-wrap gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="icon-hub"
-            aria-pressed={category === ''}
-            aria-label={t('inherit')}
-            onClick={() => setCategory('')}
-            className={cn(category === '' && 'border-ring ring-3 ring-ring/50')}
-            data-testid="calendar-color-inherit"
-          >
-            {/* The colour inheritance currently resolves to, drawn hollow so it
-                reads as "whatever Google says" rather than as a ninth choice. */}
-            <span
-              aria-hidden
-              className={cn(
-                // The hue it currently inherits, at the *solid* tone — the
-                // pale `--cat-*-border` chip outline is a 1px chip edge, and a
-                // dashed ring drawn in it is close to invisible against the
-                // card. `colors.md`: the dot/solid tone is what carries a
-                // colour cue at this size.
-                'size-6 rounded-full border-2 border-dashed',
-                CATEGORY_CLASSES[calendar.inheritedCategory].rule
-              )}
-            />
-          </Button>
-          {EVENT_CATEGORIES.map((option) => (
-            <Button
-              key={option}
-              type="button"
-              variant="outline"
-              size="icon-hub"
-              aria-pressed={category === option}
-              aria-label={t(`colors.${option}`)}
-              onClick={() => setCategory(option)}
-              className={cn(category === option && 'border-ring ring-3 ring-ring/50')}
-              data-testid={`calendar-color-${option}`}
-            >
-              <span
-                aria-hidden
-                className={cn('size-6 rounded-full', CATEGORY_CLASSES[option].solid)}
-              />
-            </Button>
-          ))}
+      <div className="flex items-center gap-2.5">
+        {/* Provenance dot: Google's own colour for this calendar, at the solid
+            tone `colors.md` gives a colour cue at this size. */}
+        <span
+          aria-hidden
+          data-testid="calendar-color-dot"
+          data-color={calendar.color}
+          className={cn('size-3 shrink-0 rounded-full', CATEGORY_CLASSES[calendar.color].solid)}
+        />
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <span className="font-display text-body font-semibold text-ink">{calendar.summary}</span>
+          <span className="text-caption break-all text-ink-muted">{calendar.accountEmail}</span>
         </div>
       </div>
 

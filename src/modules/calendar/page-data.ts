@@ -6,7 +6,7 @@ import { getDb } from '@/server/db';
 // so importing it here would pull a React client graph into a `server-only`
 // query module — and make this file unimportable from a plain Node test. The
 // barrel is for *behaviour*; `server/db/schema.ts` is for tables (§2).
-import { calendar, calendarDisplay, googleAccount } from '@/server/db/schema';
+import { calendar, googleAccount } from '@/server/db/schema';
 import {
   can,
   decide,
@@ -16,7 +16,7 @@ import {
   listMembers,
   type Member,
 } from '@/modules/family';
-import { resolveCategory } from './domain/category';
+import { nearestCategory } from './domain/category';
 import { fetchWindow, isCalendarView, viewWindow, type CalendarView } from './domain/window';
 import { fromWall, parseDateKey, startOfDay } from './domain/zone';
 import { listEvents, type CalendarEvent } from './queries';
@@ -182,8 +182,8 @@ export type CalendarDisplayData = {
  * The per-calendar half of FR28 (M16).
  *
  * Reads every calendar the family has linked, not only the writable ones:
- * colour and visibility are display facts, and a read-only calendar renders on
- * the wall exactly like a writable one does.
+ * visibility is a display fact, and a read-only calendar renders on the wall
+ * exactly like a writable one does.
  */
 export async function loadCalendarDisplay(): Promise<CalendarDisplayData | null> {
   const principal = await getPrincipal();
@@ -196,11 +196,9 @@ export async function loadCalendarDisplay(): Promise<CalendarDisplayData | null>
       accountEmail: googleAccount.email,
       visibility: calendar.visibility,
       color: calendar.color,
-      category: calendarDisplay.category,
     })
     .from(calendar)
     .innerJoin(googleAccount, eq(calendar.googleAccountId, googleAccount.id))
-    .leftJoin(calendarDisplay, eq(calendarDisplay.calendarId, calendar.id))
     .where(eq(calendar.familyId, principal.familyId))
     .orderBy(asc(googleAccount.email), asc(calendar.summary));
 
@@ -210,11 +208,10 @@ export async function loadCalendarDisplay(): Promise<CalendarDisplayData | null>
       summary: row.summary,
       accountEmail: row.accountEmail,
       visibility: row.visibility,
-      category: row.category,
-      // The same resolution the events themselves go through, minus the
-      // per-event override — so the hint under the picker cannot disagree with
-      // what the board draws.
-      inheritedCategory: resolveCategory({ category: null, calendarColor: row.color }),
+      // Provenance only (M23): the dot beside the calendar's name, in Google's
+      // own colour mapped onto a token the design system can draw. It says
+      // "which calendar is this", and nothing about how its events look.
+      color: nearestCategory(row.color) ?? 'blue',
     })),
     canManage: can(principal, 'display:manage', { familyId: principal.familyId }),
   };

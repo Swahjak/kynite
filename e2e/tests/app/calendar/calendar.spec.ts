@@ -32,7 +32,7 @@ test.describe('calendar views', () => {
           startsAt: '2026-03-11T08:00:00Z',
           endsAt: '2026-03-11T09:00:00Z',
           ownerMemberId: owner.id,
-          category: 'teal',
+          eventType: 'health',
         },
       ]);
     });
@@ -151,7 +151,7 @@ test.describe('recurring series', () => {
           startsAt: '2026-03-02T07:30:00Z',
           endsAt: '2026-03-02T08:30:00Z',
           ownerMemberId: owner.id,
-          eventType: 'custody',
+          eventType: 'family',
           rrule: 'FREQ=WEEKLY;INTERVAL=2;BYDAY=MO',
         },
       ]);

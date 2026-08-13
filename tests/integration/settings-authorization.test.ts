@@ -286,12 +286,13 @@ describe.skipIf(!databaseUrl)('settings authorization (integration)', () => {
       return row.id;
     }
 
-    async function calendarDisplayRow(calendarId: string) {
+    /** The one column the action writes, read back — nothing else moved. */
+    async function calendarVisibility(calendarId: string) {
       return db
-        .select()
-        .from(schema.calendarDisplay)
-        .where(eq(schema.calendarDisplay.calendarId, calendarId))
-        .then((rows) => rows[0]);
+        .select({ visibility: schema.calendar.visibility })
+        .from(schema.calendar)
+        .where(eq(schema.calendar.id, calendarId))
+        .then((rows) => rows[0]?.visibility);
     }
 
     it('refuses a forged cross-family calendarId — calendarNotFound, nothing written', async () => {
@@ -302,11 +303,11 @@ describe.skipIf(!databaseUrl)('settings authorization (integration)', () => {
 
       const result = await setCalendarDisplayAction(
         { status: 'idle' },
-        form({ calendarId: foreignCalendarId, category: 'purple', visibility: 'family' })
+        form({ calendarId: foreignCalendarId, visibility: 'private' })
       );
 
       expect(result).toEqual({ status: 'error', error: 'calendarNotFound' });
-      expect(await calendarDisplayRow(foreignCalendarId)).toBeUndefined();
+      expect(await calendarVisibility(foreignCalendarId)).toBe('family');
 
       await db.delete(family).where(eq(family.id, other.familyId));
     });
@@ -317,11 +318,11 @@ describe.skipIf(!databaseUrl)('settings authorization (integration)', () => {
 
       const result = await setCalendarDisplayAction(
         { status: 'idle' },
-        form({ calendarId, category: 'purple', visibility: 'family' })
+        form({ calendarId, visibility: 'private' })
       );
 
       expect(result).toEqual({ status: 'error', error: 'forbidden' });
-      expect(await calendarDisplayRow(calendarId)).toBeUndefined();
+      expect(await calendarVisibility(calendarId)).toBe('family');
     });
 
     it('denies a device principal — and writes nothing', async () => {
@@ -330,11 +331,11 @@ describe.skipIf(!databaseUrl)('settings authorization (integration)', () => {
 
       const result = await setCalendarDisplayAction(
         { status: 'idle' },
-        form({ calendarId, category: 'purple', visibility: 'family' })
+        form({ calendarId, visibility: 'private' })
       );
 
       expect(result).toEqual({ status: 'error', error: 'forbidden' });
-      expect(await calendarDisplayRow(calendarId)).toBeUndefined();
+      expect(await calendarVisibility(calendarId)).toBe('family');
     });
   });
 

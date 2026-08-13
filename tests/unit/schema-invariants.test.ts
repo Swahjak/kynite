@@ -86,7 +86,6 @@ describe('schema-wide invariants', () => {
         'calendar',
         // M16: FR28's per-calendar colour. A table rather than a column on
         // `calendar` — see its own note for the module-cycle reason.
-        'calendar_display',
         'completion',
         'device',
         'device_pairing_attempt',

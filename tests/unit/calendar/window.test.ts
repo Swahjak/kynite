@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { resolveCategory, nearestCategory } from '@/modules/calendar/domain/category';
+import { nearestCategory } from '@/modules/calendar/domain/category';
+import { EVENT_TYPE_CATEGORY, categoryForType } from '@/modules/calendar/domain/event-type';
+import { EVENT_TYPES } from '@/modules/calendar/schema';
 import {
   CALENDAR_VIEWS,
   daysOf,
@@ -252,45 +254,39 @@ describe('isCalendarView', () => {
 });
 
 describe('category resolution', () => {
-  it('prefers the per-event override', () => {
-    expect(resolveCategory({ category: 'pink', calendarColor: '#3b82f6' })).toBe('pink');
+  it('takes the hue from the event type, for every type', () => {
+    // M23's colouring policy in one assertion: the map is total, so no surface
+    // in the app has to handle a colourless event.
+    for (const type of EVENT_TYPES) {
+      expect(categoryForType(type)).toBe(EVENT_TYPE_CATEGORY[type]);
+      expect(typeof categoryForType(type)).toBe('string');
+    }
   });
 
-  it('falls back to the calendar color, mapped onto the palette', () => {
-    expect(resolveCategory({ category: null, calendarColor: '#3f51b5' })).toBe('blue');
-    expect(resolveCategory({ category: null, calendarColor: '#0b8043' })).toBe('green');
+  it('gives the taxonomy the hues the owner approved', () => {
+    expect(categoryForType('school')).toBe('blue');
+    expect(categoryForType('childcare')).toBe('blue');
+    expect(categoryForType('sport')).toBe('green');
+    expect(categoryForType('music')).toBe('yellow');
+    expect(categoryForType('play')).toBe('yellow');
+    expect(categoryForType('health')).toBe('red');
+    expect(categoryForType('family')).toBe('pink');
+    expect(categoryForType('birthday')).toBe('pink');
+    expect(categoryForType('holiday')).toBe('orange');
+    expect(categoryForType('work')).toBe('teal');
+    expect(categoryForType('other')).toBe('purple');
   });
 
-  it('always returns a color, so no view has to handle a colorless event', () => {
-    expect(resolveCategory({ category: null, calendarColor: null })).toBe('blue');
-    expect(resolveCategory({ category: null, calendarColor: 'not-a-color' })).toBe('blue');
-  });
-
-  it('maps each palette color to itself', () => {
+  it('maps a Google hex onto the palette — the settings provenance dot', () => {
     expect(nearestCategory('#a855f7')).toBe('purple');
     expect(nearestCategory('#14b8a6')).toBe('teal');
     expect(nearestCategory('#eab308')).toBe('yellow');
+    expect(nearestCategory('#3f51b5')).toBe('blue');
+    expect(nearestCategory('#0b8043')).toBe('green');
   });
 
-  // BLOCKING B-2: the per-calendar colour rung (`calendarCategory`, PRD FR28,
-  // M16) sits between the per-event override and Google's raw hex — untested
-  // before this, which is how a whole rung of `resolveCategory` could be
-  // deleted with every existing test still green.
-  it('prefers the per-event override over the calendar override', () => {
-    expect(
-      resolveCategory({ category: 'pink', calendarCategory: 'green', calendarColor: '#3b82f6' })
-    ).toBe('pink');
-  });
-
-  it('prefers the calendar override over the Google hex', () => {
-    expect(
-      resolveCategory({ category: null, calendarCategory: 'green', calendarColor: '#3b82f6' })
-    ).toBe('green');
-  });
-
-  it('falls back to the Google hex when neither override is set', () => {
-    expect(
-      resolveCategory({ category: null, calendarCategory: null, calendarColor: '#3f51b5' })
-    ).toBe('blue');
+  it('answers null for a colour it cannot read', () => {
+    expect(nearestCategory(null)).toBeNull();
+    expect(nearestCategory('not-a-color')).toBeNull();
   });
 });

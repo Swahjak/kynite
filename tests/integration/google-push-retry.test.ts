@@ -168,7 +168,7 @@ describe.skipIf(!databaseUrl)('google push retry (integration)', () => {
   it('N6: a native event (no calendar) is a skip too, and clears pendingSyncAt', async () => {
     const row = await seedEvent({
       calendarId: null,
-      eventType: 'reward',
+      eventType: 'play',
       pendingSyncAt: new Date(),
     });
     currentApi = createFakeApi({});

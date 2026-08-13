@@ -109,7 +109,7 @@ describe.skipIf(!databaseUrl)('calendar read path (integration)', () => {
         title: 'Papa-week',
         startsAt: new Date('2019-01-07T07:30:00.000Z'),
         endsAt: new Date('2019-01-07T08:30:00.000Z'),
-        eventType: 'custody',
+        eventType: 'family',
         rrule: 'FREQ=WEEKLY;BYDAY=MO',
       },
       {
@@ -157,7 +157,7 @@ describe.skipIf(!databaseUrl)('calendar read path (integration)', () => {
         title: 'Eigen notitie',
         startsAt: new Date('2026-03-10T18:00:00.000Z'),
         endsAt: new Date('2026-03-10T19:00:00.000Z'),
-        category: 'pink',
+        eventType: 'health',
         pendingSyncAt: new Date(),
       },
     ]);
@@ -341,13 +341,14 @@ describe.skipIf(!databaseUrl)('calendar read path (integration)', () => {
     expect(events.find((item) => item.title === 'Eigen notitie')!.editable).toBe(true);
   });
 
-  it('resolves category from the override, else the calendar colour', async () => {
+  it('takes the hue from the event type, not from the calendar', async () => {
     const events = await read(true);
 
-    // Explicit per-event override.
-    expect(events.find((item) => item.title === 'Eigen notitie')!.category).toBe('pink');
-    // Inherited: the family calendar's #0b8043 maps onto the green palette.
-    expect(events.find((item) => item.title === 'Tandarts')!.category).toBe('green');
+    // M23: one source. "Eigen notitie" is a `health` event, so it is red
+    // wherever it renders — and "Tandarts" is on a calendar Google colours
+    // green (#0b8043), which now decides nothing at all.
+    expect(events.find((item) => item.title === 'Eigen notitie')!.category).toBe('red');
+    expect(events.find((item) => item.title === 'Tandarts')!.category).toBe('purple');
   });
 
   it('surfaces pendingSyncAt as the flag the sync pip renders from', async () => {

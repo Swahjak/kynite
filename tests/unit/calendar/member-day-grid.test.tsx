@@ -54,7 +54,7 @@ function event(overrides: Partial<CalendarEvent> = {}): CalendarEvent {
     tz: TZ,
     ownerMemberId: null,
     attendeeMemberIds: [],
-    eventType: 'appointment',
+    eventType: 'school',
     category: 'blue',
     calendarId: null,
     calendarSummary: null,
