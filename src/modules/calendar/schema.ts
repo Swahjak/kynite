@@ -91,6 +91,24 @@ export const event = pgTable(
     recurrenceParentId: uuid('recurrence_parent_id').references((): AnyPgColumn => event.id, {
       onDelete: 'cascade',
     }),
+    /**
+     * The slot an override instance *replaces* — Google's `originalStartTime`.
+     *
+     * A Kynite-authored "this occurrence only" edit writes an EXDATE onto the
+     * parent (see `modules/calendar/actions.ts`), so the parent stops
+     * generating that instant. Google does **not**: it leaves the master's
+     * recurrence untouched and expresses the exception as a separate instance
+     * resource. Without this column an imported override was therefore stored
+     * as a child row while its parent kept generating the very slot the child
+     * replaces — the "every recurring event shows twice" duplicate.
+     *
+     * Null for a native override, where the parent's EXDATE already covers the
+     * slot. A row imported before this column existed is also null until the
+     * sync engine backfills it (`needsExceptionBackfill`), and a null subtracts
+     * nothing — guessing the slot from the child's own start would delete a
+     * legitimate occurrence whenever the override was *moved* onto one.
+     */
+    recurrenceOriginalStart: timestamp('recurrence_original_start', { withTimezone: true }),
     /** Last-write-wins inputs: our `If-Match` token and Google's `updated`. */
     etag: text('etag'),
     updatedAtRemote: timestamp('updated_at_remote', { withTimezone: true }),

@@ -64,6 +64,15 @@ function parseInstant(value: GoogleEventDateTime | undefined, label: string): Da
  * The set is closed and named from Google's documented enum rather than
  * inferred from a shape, because the alternative — guessing from a missing
  * `summary` or a transparent event — would also drop real all-day events.
+ *
+ * The two sibling types Google emits are deliberately *not* in it:
+ *
+ * - `birthday` is an appointment in every sense a family cares about — it is
+ *   the one imported event a child looks for, and the app has a first-class
+ *   `birthday` event type of its own.
+ * - `fromGmail` is a flight, a hotel or a restaurant booking Google parsed out
+ *   of a mail. It has a real time and a real place, and a parent who lands at
+ *   17:40 wants that on the board.
  */
 export const STATUS_ONLY_EVENT_TYPES: ReadonlySet<string> = new Set([
   'workingLocation',
@@ -74,6 +83,26 @@ export const STATUS_ONLY_EVENT_TYPES: ReadonlySet<string> = new Set([
 /** True for an entry that must never become a wall-board event. */
 export function isStatusOnly(resource: GoogleEventResource): boolean {
   return !!resource.eventType && STATUS_ONLY_EVENT_TYPES.has(resource.eventType);
+}
+
+/**
+ * The slot an override instance replaces — Google's `originalStartTime`.
+ *
+ * Google expresses "this occurrence was moved/edited" as a separate instance
+ * resource and leaves the master's `recurrence` alone, so this value is the
+ * *only* thing that tells the expander which generated instant the child row
+ * supersedes. Dropping it is what made every imported override render twice.
+ *
+ * Tolerant by design: a value we cannot parse costs one series one suppressed
+ * instant, which is not worth failing an entire sync pass over.
+ */
+function parseOriginalStart(resource: GoogleEventResource): Date | null {
+  if (!resource.recurringEventId || !resource.originalStartTime) return null;
+  try {
+    return parseInstant(resource.originalStartTime, 'originalStartTime');
+  } catch {
+    return null;
+  }
 }
 
 /** The two attribution columns, as `fromGoogleEvent` receives them. */
@@ -184,6 +213,7 @@ export function fromGoogleEvent(
     rdates: recurrence.rdates,
     exdates: recurrence.exdates,
     recurringEventId: resource.recurringEventId ?? null,
+    recurrenceOriginalStart: parseOriginalStart(resource),
     etag: resource.etag ?? null,
     updatedAtRemote: updated && !Number.isNaN(updated.getTime()) ? updated : null,
   };

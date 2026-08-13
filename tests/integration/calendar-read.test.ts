@@ -159,6 +159,64 @@ describe.skipIf(!databaseUrl)('calendar read path (integration)', () => {
         pendingSyncAt: new Date(),
       },
     ]);
+
+    // Two imported series whose 9/10 March occurrence was edited in Google.
+    // Neither master carries an EXDATE, because Google does not write one — the
+    // exception is the child row alone, which is why the parent used to
+    // generate the slot a second time.
+    const masters = await db
+      .insert(event)
+      .values([
+        {
+          familyId: household.familyId,
+          calendarId: familyCalendarId,
+          googleEventId: `weekly-${randomUUID()}`,
+          title: 'Teamoverleg',
+          startsAt: new Date('2026-03-02T07:30:00.000Z'),
+          endsAt: new Date('2026-03-02T08:30:00.000Z'),
+          rrule: 'FREQ=WEEKLY;BYDAY=MO',
+        },
+        {
+          // A Kynite-authored "this occurrence only" *move*: the parent carries
+          // the EXDATE for 11 March and the child sits on the 12th, which the
+          // daily rule also generates. The child has a `google_event_id`
+          // (`claimGoogleEventId` stamps one before insert) and no original
+          // start — so any read that guessed the slot from the child's own
+          // start would delete the legitimate occurrence on the 12th.
+          familyId: household.familyId,
+          calendarId: familyCalendarId,
+          googleEventId: `tutor-${randomUUID()}`,
+          title: 'Bijles',
+          startsAt: new Date('2026-03-09T16:00:00.000Z'),
+          endsAt: new Date('2026-03-09T17:00:00.000Z'),
+          rrule: 'FREQ=DAILY',
+          exdates: ['EXDATE:20260311T160000Z'],
+        },
+      ])
+      .returning();
+
+    await db.insert(event).values([
+      {
+        familyId: household.familyId,
+        calendarId: familyCalendarId,
+        googleEventId: `weekly-instance-${randomUUID()}`,
+        title: 'Teamoverleg (met Sanne)',
+        startsAt: new Date('2026-03-09T07:30:00.000Z'),
+        endsAt: new Date('2026-03-09T08:30:00.000Z'),
+        recurrenceParentId: masters[0].id,
+        recurrenceOriginalStart: new Date('2026-03-09T07:30:00.000Z'),
+      },
+      {
+        // The moved occurrence: 11 March, dragged onto the 12th.
+        familyId: household.familyId,
+        calendarId: familyCalendarId,
+        googleEventId: `tutor-instance-${randomUUID()}`,
+        title: 'Bijles (verzet)',
+        startsAt: new Date('2026-03-12T16:00:00.000Z'),
+        endsAt: new Date('2026-03-12T17:00:00.000Z'),
+        recurrenceParentId: masters[1].id,
+      },
+    ]);
   });
 
   afterAll(async () => {
@@ -189,6 +247,33 @@ describe.skipIf(!databaseUrl)('calendar read path (integration)', () => {
 
     expect(instances).toHaveLength(1);
     expect(instances[0].startsAt.toISOString()).toBe('2026-03-12T13:00:00.000Z');
+  });
+
+  it('renders an imported override once, not alongside the slot it replaces', async () => {
+    const events = await read(true);
+    const instances = events.filter((item) => item.title.startsWith('Teamoverleg'));
+
+    expect(instances.map((item) => item.title)).toEqual(['Teamoverleg (met Sanne)']);
+    expect(instances[0].startsAt.toISOString()).toBe('2026-03-09T07:30:00.000Z');
+  });
+
+  it('keeps the occurrence a moved override happens to land on', async () => {
+    const events = await read(true);
+    const starts = (title: string) =>
+      events.filter((item) => item.title === title).map((item) => item.startsAt.toISOString());
+
+    // 11 March is gone (the parent's EXDATE) and the 12th is *not*: the moved
+    // child shares that instant with a legitimate occurrence of the series, and
+    // a child with no recorded original slot must subtract nothing.
+    expect(starts('Bijles')).toEqual([
+      '2026-03-09T16:00:00.000Z',
+      '2026-03-10T16:00:00.000Z',
+      '2026-03-12T16:00:00.000Z',
+      '2026-03-13T16:00:00.000Z',
+      '2026-03-14T16:00:00.000Z',
+      '2026-03-15T16:00:00.000Z',
+    ]);
+    expect(starts('Bijles (verzet)')).toEqual(['2026-03-12T16:00:00.000Z']);
   });
 
   it('omits soft-deleted rows', async () => {

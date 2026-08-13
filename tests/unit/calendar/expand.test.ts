@@ -185,6 +185,63 @@ describe('EXDATE / RDATE', () => {
     ]);
   });
 
+  it('removes the slot an imported Google override replaces, which carries no EXDATE', () => {
+    // Google never writes an EXDATE onto the master: the exception is a
+    // separate instance resource, stored as a child row with the original slot
+    // on it (`event.recurrence_original_start`). Without the subtraction the
+    // parent generates 9 March *and* the child renders it — the duplicate.
+    const imported = series({ rrule: 'FREQ=WEEKLY;BYDAY=MO' });
+    const window = {
+      from: new Date('2026-03-01T00:00:00.000Z'),
+      to: new Date('2026-03-24T00:00:00.000Z'),
+    };
+
+    expect(localStarts(expandSeries(imported, window))).toContain('2026-03-09 08:30');
+
+    const deduped = expandSeries(imported, {
+      ...window,
+      excludeStarts: [new Date('2026-03-09T07:30:00.000Z')],
+    });
+
+    expect(localStarts(deduped)).toEqual([
+      '2026-03-02 08:30',
+      '2026-03-16 08:30',
+      '2026-03-23 08:30',
+    ]);
+  });
+
+  it('matches an all-day exclusion on the day, across a DST boundary', () => {
+    // All-day dates are stored as exact UTC midnights, but expansion is
+    // wall-clock in the series zone — so after the clocks go forward the
+    // generated instant is an hour off the midnight the override carries.
+    // Birthdays and holiday feeds are all-day series, so an instant comparison
+    // would fail on exactly the imports a family has most of.
+    const yearly = series({
+      startsAt: new Date('2026-03-02T00:00:00.000Z'),
+      endsAt: new Date('2026-03-03T00:00:00.000Z'),
+      allDay: true,
+      rrule: 'FREQ=WEEKLY;BYDAY=MO',
+    });
+    const window = {
+      from: new Date('2026-03-23T00:00:00.000Z'),
+      to: new Date('2026-04-07T00:00:00.000Z'),
+    };
+
+    // 30 March is in CEST; the rule generates 23:00Z on the 29th for it.
+    const before = expandSeries(yearly, window);
+    expect(before.map((item) => item.startsAt.toISOString())).toContain('2026-03-29T23:00:00.000Z');
+
+    const deduped = expandSeries(yearly, {
+      ...window,
+      excludeStarts: [new Date('2026-03-30T00:00:00.000Z')],
+    });
+
+    expect(deduped).toHaveLength(before.length - 1);
+    expect(deduped.map((item) => item.startsAt.toISOString())).not.toContain(
+      '2026-03-29T23:00:00.000Z'
+    );
+  });
+
   it('honours a UTC EXDATE value as UTC, not as the series zone', () => {
     // 07:30Z *is* 08:30 Amsterdam — the same instant the rule generates.
     const occurrences = expandSeries(

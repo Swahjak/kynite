@@ -10,10 +10,13 @@
  *
  *   (every RRULE ∪ every RDATE) − every EXDATE
  *
- * Overrides need no step of their own. "Edit this one occurrence" writes a
- * child row carrying `recurrenceParentId` *and* an EXDATE on the parent — the
- * same shape Google uses — so the parent stops generating that instant and the
- * child expands as the single-instance series it now is.
+ * Overrides are the one asymmetry. "Edit this one occurrence" in Kynite writes
+ * a child row carrying `recurrenceParentId` *and* an EXDATE on the parent, so
+ * the parent stops generating that instant and the child expands as the
+ * single-instance series it now is. Google does the first half only: its
+ * override is a separate instance resource and the master's recurrence is left
+ * untouched. So an imported exception arrives as `excludeStarts` instead —
+ * same subtraction, a slot the caller supplies rather than one the row carries.
  */
 
 import { parseRule, parseDateTimeValue, occurrencesOf, type Rule } from './rrule';
@@ -52,6 +55,19 @@ export type ExpandOptions = {
   to: Date;
   /** Ceiling on instances per series — a runaway rule cannot flood a view. */
   maxPerSeries?: number;
+  /**
+   * Extra instants this series must not generate, on top of its own EXDATEs.
+   *
+   * These are the original slots of *imported* override instances (Google's
+   * `originalStartTime`). Google expresses "this occurrence moved" as a
+   * separate instance resource and leaves the master's recurrence untouched,
+   * so an imported series has no EXDATE for the slot its child replaces —
+   * without this, the parent generates the occurrence and the child row
+   * renders it again, which is the duplicate every recurring Google event
+   * showed. A Kynite-authored occurrence edit needs nothing here: it writes
+   * the EXDATE itself (`modules/calendar/actions.ts`).
+   */
+  excludeStarts?: Iterable<Date>;
 };
 
 const DEFAULT_MAX_PER_SERIES = 750;
@@ -165,6 +181,9 @@ export function expandSeries(series: ExpandableSeries, options: ExpandOptions): 
   for (const line of series.exdates) {
     for (const instant of parseDateLine(line, series.tz)) starts.delete(instant.getTime());
   }
+  // Imported overrides, which carry their exception on the child rather than as
+  // an EXDATE on this row (see `excludeStarts`).
+  subtractExcluded(starts, options.excludeStarts, series);
 
   return [...starts]
     .sort((a, b) => a - b)
@@ -181,6 +200,44 @@ export function expandSeries(series: ExpandableSeries, options: ExpandOptions): 
       };
     })
     .filter((occurrence) => overlaps(occurrence.startsAt, occurrence.endsAt, from, to));
+}
+
+/**
+ * Remove the excluded slots from a generated set — by instant for a timed
+ * series, by *day* for an all-day one.
+ *
+ * The two halves of an all-day series do not meet on the instant. A stored
+ * all-day date is an exact UTC midnight (M05's `parseAllDay`, so the date
+ * carries no zone), and that is what an override's `originalStartTime` maps to
+ * as well — but expansion is wall-clock in the series zone, so a rule anchored
+ * at 00:00Z generates 01:00 Amsterdam in winter and, once the clocks go
+ * forward, an instant an hour off the midnight it means. Comparing instants
+ * would therefore stop matching at the DST boundary, and silently: birthdays
+ * and holiday feeds are all-day series, which is most of what a family
+ * imports. The calendar day is the thing both sides actually agree on — read
+ * in the series zone for the generated instant (where the wall clock is intact)
+ * and in UTC for the stored date (where the date means what it says), exactly
+ * as `dayKeysOf` splits it.
+ */
+function subtractExcluded(
+  starts: Set<number>,
+  excludeStarts: Iterable<Date> | undefined,
+  series: ExpandableSeries
+): void {
+  if (!excludeStarts) return;
+
+  if (!series.allDay) {
+    for (const instant of excludeStarts) starts.delete(instant.getTime());
+    return;
+  }
+
+  const excludedDays = new Set<string>();
+  for (const instant of excludeStarts) excludedDays.add(toDateKey(toWall(instant, 'UTC')));
+  if (excludedDays.size === 0) return;
+
+  for (const start of [...starts]) {
+    if (excludedDays.has(toDateKey(toWall(new Date(start), series.tz)))) starts.delete(start);
+  }
 }
 
 /** Half-open overlap, with zero-length events counted at their own instant. */

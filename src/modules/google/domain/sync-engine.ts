@@ -7,6 +7,7 @@ import type {
   GoogleEventResource,
   MappedEvent,
   MemberDirectory,
+  StoredEvent,
   SyncStore,
 } from './types';
 import type { EchoRegistry } from './echo';
@@ -207,9 +208,14 @@ async function applyItems({
      * `continue`, and that is deliberate: a household that synced before this
      * filter existed already has these rows on its board, and a filter that
      * only stopped *new* ones would leave yesterday's "Working location: Home"
-     * on the wall forever. Treating a known status entry as a deletion is what
-     * repairs those boards on the next incremental pass; an unknown one is
-     * simply skipped, because there is nothing to remove.
+     * on the wall forever. Treating a known status entry as a deletion removes
+     * those rows the moment Google hands the entry back; an entry we never
+     * stored is simply skipped, because there is nothing to remove.
+     *
+     * That last clause is why `drizzle/0018` clears every calendar's sync
+     * token: an incremental pass is handed *only* what changed, so a stale
+     * status entry nobody has touched since it was imported would never come
+     * back round to be tombstoned. One forced full pass per calendar does it.
      */
     if (isTombstone(item) || isStatusOnly(item)) {
       const removed = await store.tombstone(calendar, item.id, now());
@@ -238,7 +244,7 @@ async function applyItems({
     );
     const known = existing.get(item.id);
 
-    if (isEcho(mapped.etag, known?.etag, echo)) {
+    if (isEcho(mapped.etag, known?.etag, echo) && !needsExceptionBackfill(mapped, known)) {
       counts.skipped += 1;
       continue;
     }
@@ -260,6 +266,28 @@ async function applyItems({
   }
 
   return counts;
+}
+
+/**
+ * The one thing an unchanged etag is *not* proof of: that we recorded the slot
+ * an override replaces.
+ *
+ * `recurrence_original_start` is younger than the rows that need it. Every
+ * override imported before it existed comes back from the forced full pass
+ * (`drizzle/0018`) carrying the etag we already stored, and echo suppression
+ * would skip it — leaving the column null forever, and the parent generating
+ * the occurrence its child already renders. So an override Google says has an
+ * original start, whose stored row has none, is written through the echo check.
+ *
+ * Deliberately narrow: it fires only for a row that *is* an override, only when
+ * the value is missing, and it converges — once the backfill lands, the same
+ * item on the next pass is an ordinary echo again. Etag semantics are untouched,
+ * which matters because `If-Match` on the push path reads the same column.
+ */
+function needsExceptionBackfill(mapped: MappedEvent, known: StoredEvent | undefined): boolean {
+  return (
+    !!known && mapped.recurrenceOriginalStart !== null && known.recurrenceOriginalStart === null
+  );
 }
 
 /**

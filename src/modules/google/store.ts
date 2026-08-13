@@ -57,6 +57,10 @@ function upsertValues(
     rdates: input.rdates,
     exdates: input.exdates,
     recurrenceParentId: parentId,
+    // The slot this override replaces on its master. Null on a master (and on
+    // an override Google sent without one), which the expander reads as
+    // "nothing to suppress".
+    recurrenceOriginalStart: input.recurrenceOriginalStart,
     // M18 attribution. On an *insert* these are simply what the pass resolved;
     // the conflict branch below is where the interesting rule lives.
     ownerMemberId: input.ownerMemberId,
@@ -86,6 +90,29 @@ async function upsertEvent(
         // Keep the parent link when this pass did not resolve one (an override
         // whose master arrives in a later page).
         recurrenceParentId: parentId ?? sql`${event.recurrenceParentId}`,
+        /**
+         * The slot an override replaces, with one asymmetry against the line
+         * above: `recurringEventId` is what decides, not the value itself.
+         *
+         * An instance resource *always* carries both fields, so "Google says
+         * this is still an override" and "it has an original start" arrive
+         * together. When Google **detaches** an exception it sends the event
+         * with neither, and the row must stop suppressing a slot on a series it
+         * no longer belongs to — hence the explicit null rather than a sticky
+         * keep. The `??` inside the override branch is only for a malformed
+         * `originalStartTime` the mapper could not read.
+         *
+         * `recurrenceParentId` above deliberately stays sticky through the same
+         * shape. A Kynite-authored occurrence edit is a *native* child whose
+         * parent link is the app's own data, and its push echo comes back from
+         * Google as a plain standalone event with no `recurringEventId` — the
+         * detached-exception shape exactly. Clearing on that signal would cut a
+         * native override loose from its series; clearing the original start
+         * cannot, because a native child never had one.
+         */
+        recurrenceOriginalStart: input.recurringEventId
+          ? (input.recurrenceOriginalStart ?? sql`${event.recurrenceOriginalStart}`)
+          : null,
         /**
          * Attribution is **never destructive on update** (M18).
          *
@@ -139,6 +166,7 @@ export const syncStore: SyncStore = {
         id: event.id,
         googleEventId: event.googleEventId,
         etag: event.etag,
+        recurrenceOriginalStart: event.recurrenceOriginalStart,
         updatedAtRemote: event.updatedAtRemote,
         updatedAt: event.updatedAt,
         version: event.version,

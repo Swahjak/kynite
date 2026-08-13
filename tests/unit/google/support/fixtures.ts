@@ -71,3 +71,43 @@ export function custodySeries(): { master: GoogleEventResource; override: Google
 
   return { master, override };
 }
+
+/**
+ * The shape Google *actually* sends for an edited occurrence, which
+ * `custodySeries` above does not: the master's `recurrence` carries no EXDATE
+ * for the instance, because Google expresses the exception as a separate
+ * instance resource and leaves the series rule untouched. The override here
+ * also keeps its original slot — the everyday case, where somebody replied to
+ * the invitation or renamed one week rather than moving it — which is exactly
+ * the pair that rendered twice on the board.
+ */
+export function importedSeries(): { master: GoogleEventResource; override: GoogleEventResource } {
+  const master = googleEvent({
+    id: 'weekly-master',
+    summary: 'Teamoverleg',
+    etag: '"etag-weekly"',
+    start: { dateTime: '2026-03-02T08:30:00+01:00', timeZone: 'Europe/Amsterdam' },
+    end: { dateTime: '2026-03-02T09:30:00+01:00', timeZone: 'Europe/Amsterdam' },
+    recurrence: ['RRULE:FREQ=WEEKLY;BYDAY=MO'],
+  });
+
+  const override = googleEvent({
+    id: 'weekly-master_20260309T073000Z',
+    summary: 'Teamoverleg (met Sanne)',
+    etag: '"etag-weekly-override"',
+    recurringEventId: 'weekly-master',
+    originalStartTime: { dateTime: '2026-03-09T08:30:00+01:00', timeZone: 'Europe/Amsterdam' },
+    start: { dateTime: '2026-03-09T08:30:00+01:00', timeZone: 'Europe/Amsterdam' },
+    end: { dateTime: '2026-03-09T09:30:00+01:00', timeZone: 'Europe/Amsterdam' },
+  });
+
+  return { master, override };
+}
+
+/** A working-location status entry — Google's "in office" strip, not an event. */
+export function statusEntry(
+  eventType: GoogleEventResource['eventType'],
+  id = 'status-1'
+): GoogleEventResource {
+  return googleEvent({ id, summary: 'Kantoor', eventType, etag: `"etag-${id}"` });
+}
