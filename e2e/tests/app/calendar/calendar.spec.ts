@@ -73,55 +73,59 @@ test.describe('calendar views', () => {
 });
 
 test.describe('event CRUD', () => {
-  test('creates, edits and deletes an event from the parent app', async ({ page, family }) => {
-    await page.goto(`/nl/calendar?view=day&date=${ANCHOR}`);
+  test(
+    'creates, edits and deletes an event from the parent app',
+    { tag: '@smoke' },
+    async ({ page, family }) => {
+      await page.goto(`/nl/calendar?view=day&date=${ANCHOR}`);
 
-    await page.getByTestId('event-create').click();
-    await expect(page.getByTestId('event-dialog')).toBeVisible();
+      await page.getByTestId('event-create').click();
+      await expect(page.getByTestId('event-dialog')).toBeVisible();
 
-    await page.getByTestId('event-title').fill('Zwemles');
-    await page.getByTestId('event-starts-at').fill('2026-03-11T16:00');
-    await page.getByLabel('Eindigt om').fill('2026-03-11T17:00');
-    await page.getByTestId('event-save').click();
+      await page.getByTestId('event-title').fill('Zwemles');
+      await page.getByTestId('event-starts-at').fill('2026-03-11T16:00');
+      await page.getByLabel('Eindigt om').fill('2026-03-11T17:00');
+      await page.getByTestId('event-save').click();
 
-    await expect(page.getByTestId('event-dialog')).toBeHidden();
-    await expect(page.getByText('Zwemles').first()).toBeVisible();
+      await expect(page.getByTestId('event-dialog')).toBeHidden();
+      await expect(page.getByText('Zwemles').first()).toBeVisible();
 
-    const created = await withDb(async (client) => {
-      const { rows } = await client.query<{ id: string; version: number }>(
-        `select id, version from event where family_id = $1 and title = 'Zwemles'`,
-        [family.familyId]
-      );
-      return rows[0];
-    });
-    expect(created).toBeDefined();
-    expect(created.version).toBe(0);
+      const created = await withDb(async (client) => {
+        const { rows } = await client.query<{ id: string; version: number }>(
+          `select id, version from event where family_id = $1 and title = 'Zwemles'`,
+          [family.familyId]
+        );
+        return rows[0];
+      });
+      expect(created).toBeDefined();
+      expect(created.version).toBe(0);
 
-    // Edit: the version must bump.
-    await page.getByText('Zwemles').first().click();
-    await expect(page.getByTestId('event-dialog')).toBeVisible();
-    await page.getByTestId('event-title').fill('Zwemles gevorderden');
-    await page.getByTestId('event-save').click();
+      // Edit: the version must bump.
+      await page.getByText('Zwemles').first().click();
+      await expect(page.getByTestId('event-dialog')).toBeVisible();
+      await page.getByTestId('event-title').fill('Zwemles gevorderden');
+      await page.getByTestId('event-save').click();
 
-    await expect(page.getByText('Zwemles gevorderden').first()).toBeVisible();
+      await expect(page.getByText('Zwemles gevorderden').first()).toBeVisible();
 
-    const edited = await withDb((client) => readEvent(client, created.id));
-    expect(edited.title).toBe('Zwemles gevorderden');
-    expect(edited.version).toBe(1);
+      const edited = await withDb((client) => readEvent(client, created.id));
+      expect(edited.title).toBe('Zwemles gevorderden');
+      expect(edited.version).toBe(1);
 
-    // Delete: a soft delete, so the row survives for the sync engine (§3).
-    // M18: it is confirmed first — one stray tap on a phone used to be enough
-    // to take a custody arrangement off the household's calendar.
-    await page.getByText('Zwemles gevorderden').first().click();
-    await page.getByTestId('event-delete').click();
-    await expect(page.getByTestId('event-delete-confirm')).toBeVisible();
-    await page.getByTestId('event-delete-confirm-yes').click();
+      // Delete: a soft delete, so the row survives for the sync engine (§3).
+      // M18: it is confirmed first — one stray tap on a phone used to be enough
+      // to take a custody arrangement off the household's calendar.
+      await page.getByText('Zwemles gevorderden').first().click();
+      await page.getByTestId('event-delete').click();
+      await expect(page.getByTestId('event-delete-confirm')).toBeVisible();
+      await page.getByTestId('event-delete-confirm-yes').click();
 
-    await expect(page.getByText('Zwemles gevorderden')).toHaveCount(0);
+      await expect(page.getByText('Zwemles gevorderden')).toHaveCount(0);
 
-    const deleted = await withDb((client) => readEvent(client, created.id));
-    expect(deleted.deleted_at).not.toBeNull();
-  });
+      const deleted = await withDb((client) => readEvent(client, created.id));
+      expect(deleted.deleted_at).not.toBeNull();
+    }
+  );
 
   test('rejects an event that ends before it starts', async ({ page }) => {
     await page.goto(`/nl/calendar?view=day&date=${ANCHOR}`);
@@ -207,7 +211,7 @@ test.describe('recurring series', () => {
   });
 });
 
-test.describe('drag and drop', () => {
+test.describe('drag and drop', { tag: '@heavy' }, () => {
   test('rescheduling a block updates the times and bumps the version', async ({ page, family }) => {
     const [eventId] = await withDb(async (client) => {
       const owner = await ownerMemberOf(client, family.familyId);

@@ -171,7 +171,7 @@ async function seedBoardDay(familyId: string) {
 }
 
 for (const [name, viewport] of Object.entries(VIEWPORTS)) {
-  test.describe(`calendar visuals — ${name}`, () => {
+  test.describe(`calendar visuals — ${name}`, { tag: '@visual' }, () => {
     test.use({ viewport });
 
     for (const view of ['day', 'week', 'month', 'agenda'] as const) {

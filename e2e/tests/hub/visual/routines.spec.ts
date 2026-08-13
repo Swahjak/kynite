@@ -130,7 +130,7 @@ for (const [name, viewport] of Object.entries(VIEWPORTS) as [
   ViewportName,
   (typeof VIEWPORTS)[ViewportName],
 ][]) {
-  test.describe(`routine visuals — ${name}`, () => {
+  test.describe(`routine visuals — ${name}`, { tag: '@visual' }, () => {
     test.use({ viewport });
 
     for (const locale of ['nl', 'en'] as const) {

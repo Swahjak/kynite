@@ -94,7 +94,7 @@ async function tapAndMeasure(
   }, stepId);
 }
 
-test.describe('completion performance guard', () => {
+test.describe('completion performance guard', { tag: '@heavy' }, () => {
   test('tap → visual done stays under 100ms', async ({ page, family }) => {
     // M12: hub surfaces run behind a device principal, never an account
     // session — this browser is the wall tablet for the rest of the test.

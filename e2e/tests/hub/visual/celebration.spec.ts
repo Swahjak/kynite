@@ -53,7 +53,7 @@ const SEEDED_RANDOM = `
   })();
 `;
 
-test.describe('celebration visuals — hub tablet', () => {
+test.describe('celebration visuals — hub tablet', { tag: '@visual' }, () => {
   test('the end frame after a completion tap', async ({ page, family }) => {
     const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Amsterdam' }).format(
       new Date()

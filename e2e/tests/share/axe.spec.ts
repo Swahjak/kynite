@@ -17,7 +17,7 @@ import { seedCalendar, seedEvents, seedShareLink, withDb } from '@e2e/utils/seed
  * signed in to anything.
  */
 
-test.describe('share view accessibility', () => {
+test.describe('share view accessibility', { tag: '@heavy' }, () => {
   for (const role of ['viewer', 'contributor'] as const) {
     test(`a ${role} link has no WCAG AA violations`, async ({ browser, family }) => {
       const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Amsterdam' }).format(

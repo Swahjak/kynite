@@ -7,7 +7,7 @@ import { gotoDesignPage } from '@e2e/utils/design-page';
  * M02 acceptance criterion: zero WCAG AA contrast violations on /dev/design in
  * both themes. Colour tokens are the fix — never the exclusion list.
  */
-test.describe('design system accessibility', () => {
+test.describe('design system accessibility', { tag: '@heavy' }, () => {
   for (const theme of ['light', 'dark'] as const) {
     test(`has no WCAG AA contrast violations in ${theme} mode`, async ({ page }) => {
       await gotoDesignPage(page, theme);

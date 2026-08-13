@@ -131,7 +131,7 @@ for (const [name, viewport] of Object.entries(VIEWPORTS) as [
   ViewportName,
   (typeof VIEWPORTS)[ViewportName],
 ][]) {
-  test.describe(`routine builder visuals — ${name}`, () => {
+  test.describe(`routine builder visuals — ${name}`, { tag: '@visual' }, () => {
     test.use({ viewport });
 
     test('routine builder', async ({ page, family }) => {

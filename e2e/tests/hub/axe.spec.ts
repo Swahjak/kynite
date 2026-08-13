@@ -27,7 +27,7 @@ const SURFACES = [
   { name: 'timers', path: () => `/nl/hub/timers` },
 ] as const;
 
-test.describe('hub accessibility', () => {
+test.describe('hub accessibility', { tag: '@heavy' }, () => {
   for (const surface of SURFACES) {
     test(`the hub ${surface.name} has no WCAG AA violations`, async ({ page, family }) => {
       const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Amsterdam' }).format(

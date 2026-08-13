@@ -24,7 +24,7 @@ const NOW_MS = Date.UTC(2026, 2, 11, 7, 45, 0);
 
 const ID = (suffix: string) => `00000000-0000-4000-8000-0000000e${suffix}`;
 
-test.describe('timer visuals — tablet', () => {
+test.describe('timer visuals — tablet', { tag: '@visual' }, () => {
   test.use({ viewport: VIEWPORT });
 
   test('hub timer board', async ({ page, family }) => {

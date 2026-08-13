@@ -154,7 +154,7 @@ async function undersizedTargets(page: import('@playwright/test').Page): Promise
   return undersized;
 }
 
-test.describe('kiosk layout audit', () => {
+test.describe('kiosk layout audit', { tag: '@heavy' }, () => {
   test.use({ viewport: { width: 1280, height: 800 } });
 
   // The e2e server is `next dev`, so the first visit to each hub route in a

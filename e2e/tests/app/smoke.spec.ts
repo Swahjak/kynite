@@ -31,7 +31,7 @@ function landed(page: import('@playwright/test').Page) {
   };
 }
 
-test.describe('smoke', () => {
+test.describe('smoke', { tag: '@smoke' }, () => {
   test('home page redirects to the default locale and renders', async ({ page }) => {
     await page.goto('/');
 

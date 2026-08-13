@@ -89,21 +89,25 @@ test.describe('sign-up', () => {
 });
 
 test.describe('sign-in', () => {
-  test('signs a returning parent back into their own family', async ({ page }) => {
-    const familyName = `Familie Terug ${Date.now()}`;
-    const email = await signUp(page, familyName);
-    await expect(page).toHaveURL(/\/nl\/family$/);
+  test(
+    'signs a returning parent back into their own family',
+    { tag: '@smoke' },
+    async ({ page }) => {
+      const familyName = `Familie Terug ${Date.now()}`;
+      const email = await signUp(page, familyName);
+      await expect(page).toHaveURL(/\/nl\/family$/);
 
-    await page.getByRole('button', { name: 'Uitloggen' }).click();
-    await expect(page).toHaveURL(/\/nl\/sign-in$/);
+      await page.getByRole('button', { name: 'Uitloggen' }).click();
+      await expect(page).toHaveURL(/\/nl\/sign-in$/);
 
-    await page.getByLabel('E-mailadres').fill(email);
-    await page.getByLabel('Wachtwoord').fill(PASSWORD);
-    await page.getByRole('button', { name: 'Inloggen' }).click();
+      await page.getByLabel('E-mailadres').fill(email);
+      await page.getByLabel('Wachtwoord').fill(PASSWORD);
+      await page.getByRole('button', { name: 'Inloggen' }).click();
 
-    await expect(page).toHaveURL(/\/nl\/family$/);
-    await expect(page.getByRole('heading', { name: familyName })).toBeVisible();
-  });
+      await expect(page).toHaveURL(/\/nl\/family$/);
+      await expect(page.getByRole('heading', { name: familyName })).toBeVisible();
+    }
+  );
 
   test('refuses a wrong password', async ({ page }) => {
     await page.goto('/nl/sign-in');

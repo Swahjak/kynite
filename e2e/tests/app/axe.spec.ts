@@ -20,7 +20,7 @@ const SURFACES = [
   { name: 'settings', path: () => '/nl/settings' },
 ] as const;
 
-test.describe('parent app accessibility', () => {
+test.describe('parent app accessibility', { tag: '@heavy' }, () => {
   for (const surface of SURFACES) {
     test(`${surface.name} has no WCAG AA violations`, async ({ page, family }) => {
       const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Amsterdam' }).format(

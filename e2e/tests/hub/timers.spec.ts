@@ -147,21 +147,22 @@ test.describe('hub timers', () => {
     expect(shown).toBeGreaterThan(0);
   });
 
-  test('renders an active timer on the ambient board without navigation', async ({
-    page,
-    family,
-  }) => {
-    // M12: hub surfaces run behind a device principal, never an account
-    // session — this browser is the wall tablet for the rest of the test.
-    await pairHub(page, family.familyId);
+  test(
+    'renders an active timer on the ambient board without navigation',
+    { tag: '@smoke' },
+    async ({ page, family }) => {
+      // M12: hub surfaces run behind a device principal, never an account
+      // session — this browser is the wall tablet for the rest of the test.
+      await pairHub(page, family.familyId);
 
-    await seedRunningTimer(family.familyId, 'Jassen aan');
+      await seedRunningTimer(family.familyId, 'Jassen aan');
 
-    await page.goto('/nl/hub');
+      await page.goto('/nl/hub');
 
-    await expect(page.getByTestId('ambient-timers')).toBeVisible();
-    await expect(page.getByTestId('timer-label')).toHaveText('Jassen aan');
-  });
+      await expect(page.getByTestId('ambient-timers')).toBeVisible();
+      await expect(page.getByTestId('timer-label')).toHaveText('Jassen aan');
+    }
+  );
 
   test('states the time is up without marking anything', async ({ page, family }) => {
     // M12: hub surfaces run behind a device principal, never an account

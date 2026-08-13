@@ -6,7 +6,7 @@ import { gotoDesignPage } from '@e2e/utils/design-page';
  * Visual regression baseline for the design system (M02).
  * Update with `pnpm e2e:visual:update` after an intentional token change.
  */
-test.describe('design system visuals', () => {
+test.describe('design system visuals', { tag: '@visual' }, () => {
   test.use({ viewport: { width: 1280, height: 900 } });
 
   for (const theme of ['light', 'dark'] as const) {

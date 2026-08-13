@@ -149,7 +149,7 @@ const SCOPE: Record<string, Record<string, string>> = {
 };
 
 for (const [name, viewport] of Object.entries(VIEWPORTS)) {
-  test.describe(`reward visuals — ${name}`, () => {
+  test.describe(`reward visuals — ${name}`, { tag: '@visual' }, () => {
     test.use({ viewport });
 
     test('store, instant horizon (ages 4-7)', async ({ page, family }) => {

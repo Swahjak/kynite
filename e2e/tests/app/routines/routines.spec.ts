@@ -158,42 +158,48 @@ test.describe('routine builder', () => {
 });
 
 test.describe('the hub routine screen', () => {
-  test('one tap completes a step — no dialog, no spinner', async ({ page, family }) => {
-    // M12: hub surfaces run behind a device principal, never an account
-    // session — this browser is the wall tablet for the rest of the test.
-    await pairHub(page, family.familyId);
+  test(
+    'one tap completes a step — no dialog, no spinner',
+    { tag: '@smoke' },
+    async ({ page, family }) => {
+      // M12: hub surfaces run behind a device principal, never an account
+      // session — this browser is the wall tablet for the rest of the test.
+      await pairHub(page, family.familyId);
 
-    const { mila, morning } = await seedChildWithRoutines(family.familyId);
+      const { mila, morning } = await seedChildWithRoutines(family.familyId);
 
-    await page.goto(`/nl/hub/routines/${mila.id}`);
+      await page.goto(`/nl/hub/routines/${mila.id}`);
 
-    const card = page.getByTestId('routine-card').filter({ hasText: 'Klaarmaken voor school' });
-    await expect(card).toHaveAttribute('data-expanded', 'true');
+      const card = page.getByTestId('routine-card').filter({ hasText: 'Klaarmaken voor school' });
+      await expect(card).toHaveAttribute('data-expanded', 'true');
 
-    const first = card.getByTestId('routine-step').first();
-    await expect(first).toHaveAttribute('data-state', 'todo');
+      const first = card.getByTestId('routine-step').first();
+      await expect(first).toHaveAttribute('data-state', 'todo');
 
-    await first.getByTestId('step-tap').click();
+      await first.getByTestId('step-tap').click();
 
-    // Done immediately, with the praise as the visible headline. No dialog was
-    // ever shown and no progress indicator exists to wait for.
-    await expect(first).toHaveAttribute('data-state', 'done');
-    await expect(first.getByTestId('step-praise')).toBeVisible();
-    await expect(page.getByRole('alertdialog')).toHaveCount(0);
-    await expect(page.getByRole('progressbar')).toHaveCount(0);
+      // Done immediately, with the praise as the visible headline. No dialog was
+      // ever shown and no progress indicator exists to wait for.
+      await expect(first).toHaveAttribute('data-state', 'done');
+      await expect(first.getByTestId('step-praise')).toBeVisible();
+      await expect(page.getByRole('alertdialog')).toHaveCount(0);
+      await expect(page.getByRole('progressbar')).toHaveCount(0);
 
-    await expect
-      .poll(async () => (await withDb((client) => readCompletions(client, family.familyId))).length)
-      .toBe(1);
+      await expect
+        .poll(
+          async () => (await withDb((client) => readCompletions(client, family.familyId))).length
+        )
+        .toBe(1);
 
-    const completions = await withDb((client) => readCompletions(client, family.familyId));
-    expect(completions[0].routine_step_id).toBe(morning.stepIds[0]);
-    expect(completions[0].occurrence_date).toBeTruthy();
+      const completions = await withDb((client) => readCompletions(client, family.familyId));
+      expect(completions[0].routine_step_id).toBe(morning.stepIds[0]);
+      expect(completions[0].occurrence_date).toBeTruthy();
 
-    const ledger = await withDb((client) => readStarLedger(client, family.familyId));
-    expect(ledger).toHaveLength(1);
-    expect(ledger[0].amount).toBe(2);
-  });
+      const ledger = await withDb((client) => readStarLedger(client, family.familyId));
+      expect(ledger).toHaveLength(1);
+      expect(ledger[0].amount).toBe(2);
+    }
+  );
 
   test('the praise is the headline and the star follows it', async ({ page, family }) => {
     // M12: hub surfaces run behind a device principal, never an account

@@ -27,7 +27,7 @@ test.use({ viewport: { width: 390, height: 844 } });
 
 const SECOND_PARENT = 'Papa';
 
-test.describe('second-parent onboarding', () => {
+test.describe('second-parent onboarding', { tag: '@visual' }, () => {
   test('renders all three steps', async ({ page, browser }) => {
     const family = await signUpFamily(page, 'Familie Kynite');
 
