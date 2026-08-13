@@ -32,7 +32,16 @@ pnpm e2e:setup        # Start test DB + run migrations
 pnpm e2e:teardown     # Stop test DB
 pnpm e2e:run          # Run tests (requires e2e:setup first)
 pnpm e2e:full         # Full cycle: setup → run → teardown
+```
 
+### E2E gotchas
+
+- `.env.local` leaks the machine's real `GOOGLE_CLIENT_ID` into Playwright's `webServer` (Playwright merges `process.env`; Next loads `.env.local` for absent vars) → tests hit real Google OAuth (`redirect_uri_mismatch`). Before running e2e: `mv .env.local .env.local.e2e-bak`; ALWAYS restore after. Do NOT set `GOOGLE_CLIENT_ID=''` — the env schema (`src/server/env.ts`) requires `min(1)` or absent; an empty string crashes the server.
+- Always run Playwright with `--workers=1` on this machine (shared CPU).
+- Tag tiers exist since `ee3b5df`: `--grep @smoke` (quick gate), `@visual`, `@heavy` — see `e2e/README.md`. The perf project needs `--no-deps` (its config `dependencies` replay app/hub/share).
+- After runs, verify ports 3100/3101 are free — Playwright sometimes leaves webServers alive.
+
+```bash
 # Database (Drizzle + PostgreSQL)
 pnpm db:generate      # Generate migrations from schema changes
 pnpm db:migrate       # Run pending migrations
