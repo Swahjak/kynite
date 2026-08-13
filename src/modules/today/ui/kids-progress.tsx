@@ -45,53 +45,60 @@ export async function KidsProgress({ kids, className }: KidsProgressProps) {
       {kids.length === 0 ? (
         <p className="text-body-sm text-ink-secondary">{t('kids.empty')}</p>
       ) : (
-        kids.map((kid) => (
-          <Link
-            key={kid.memberId}
-            // The builder, not a per-child deep link: `/routines` takes no
-            // member parameter, and inventing one here would be a promise this
-            // page cannot keep.
-            href="/routines"
-            data-slot="kid-progress-card"
-            data-member-id={kid.memberId}
-            className="flex flex-col gap-3 rounded-2xl bg-surface-container-lowest p-4 shadow-sm transition-shadow duration-200 ease-brand hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-          >
-            <div className="flex items-center gap-3">
-              <MemberAvatar
-                displayName={kid.displayName}
-                avatarUrl={kid.avatarUrl}
-                color={kid.color}
-                size="lg"
-              />
-              <div className="flex min-w-0 flex-col">
-                <span className="truncate font-display text-h3">{kid.displayName}</span>
-                <span className="flex items-center gap-1 text-body-sm text-ink-secondary">
-                  <Icon name="task_alt" size="sm" />
-                  {kid.totalSteps === 0
-                    ? t('kids.noRoutines')
-                    : t('kids.steps', { done: kid.doneSteps, total: kid.totalSteps })}
-                </span>
+        // M23: the panel moved out of a narrow right-hand column and under the
+        // full-width day board, so the cards lay out across the width instead
+        // of stacking one 1200px-wide card per child. It is still a single
+        // column wherever the panel is narrow — a phone, or any future caller
+        // that puts it back in a sidebar.
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {kids.map((kid) => (
+            <Link
+              key={kid.memberId}
+              // The builder, not a per-child deep link: `/routines` takes no
+              // member parameter, and inventing one here would be a promise this
+              // page cannot keep.
+              href="/routines"
+              data-slot="kid-progress-card"
+              data-member-id={kid.memberId}
+              className="flex flex-col gap-3 rounded-2xl bg-surface-container-lowest p-4 shadow-sm transition-shadow duration-200 ease-brand hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            >
+              <div className="flex items-center gap-3">
+                <MemberAvatar
+                  displayName={kid.displayName}
+                  avatarUrl={kid.avatarUrl}
+                  color={kid.color}
+                  size="lg"
+                />
+                <div className="flex min-w-0 flex-col">
+                  <span className="truncate font-display text-h3">{kid.displayName}</span>
+                  <span className="flex items-center gap-1 text-body-sm text-ink-secondary">
+                    <Icon name="task_alt" size="sm" />
+                    {kid.totalSteps === 0
+                      ? t('kids.noRoutines')
+                      : t('kids.steps', { done: kid.doneSteps, total: kid.totalSteps })}
+                  </span>
+                </div>
+                <StarCount
+                  className="ml-auto"
+                  value={kid.starsToday}
+                  srLabel={t('kids.starsToday', { count: kid.starsToday })}
+                />
               </div>
-              <StarCount
-                className="ml-auto"
-                value={kid.starsToday}
-                srLabel={t('kids.starsToday', { count: kid.starsToday })}
-              />
-            </div>
 
-            <div className="flex flex-col gap-1.5">
-              <div className="flex justify-between text-overline text-ink-muted uppercase">
-                <span>{t('kids.progressLabel')}</span>
-                <span className="tabular-nums">
-                  {t('kids.balance', { count: kid.starBalance })}
-                </span>
-              </div>
-              {/* `aria-hidden`: the same numbers are already spelled out above,
+              <div className="flex flex-col gap-1.5">
+                <div className="flex justify-between text-overline text-ink-muted uppercase">
+                  <span>{t('kids.progressLabel')}</span>
+                  <span className="tabular-nums">
+                    {t('kids.balance', { count: kid.starBalance })}
+                  </span>
+                </div>
+                {/* `aria-hidden`: the same numbers are already spelled out above,
                   and a second announcement of the same ratio is noise. */}
-              <ProgressBar value={Math.round(kid.ratio * 100)} tone="gold" />
-            </div>
-          </Link>
-        ))
+                <ProgressBar value={Math.round(kid.ratio * 100)} tone="gold" />
+              </div>
+            </Link>
+          ))}
+        </div>
       )}
     </aside>
   );
