@@ -123,6 +123,7 @@ export { CalendarDisplayList, type CalendarDisplayView } from './ui/calendar-dis
 export { CalendarShell } from './ui/calendar-shell';
 export { EventChip } from './ui/event-chip';
 export { EventDialog, type WritableCalendar } from './ui/event-dialog';
+export { EventRow, type EventRowPerson, type EventRowProps } from './ui/event-row';
 export { HubBoard, type HubBoardSnapshot } from './ui/hub-board';
 export { MonthView } from './ui/month-view';
 export { NewEventFab, type NewEventFabProps } from './ui/new-event-fab';

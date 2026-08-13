@@ -394,7 +394,9 @@ test.describe('private calendars on the hub', () => {
     await expect(page.getByTestId('hub-board')).toBeVisible();
     await expect(page.getByText('Sollicitatiegesprek')).toHaveCount(0);
 
-    const busy = page.locator('[data-slot="event-chip"][data-busy-only]').first();
+    // The hub board is `PersonColumns`, whose events are `EventRow`s (M22) —
+    // the chip is what the time grids and month cells draw.
+    const busy = page.locator('[data-slot="event-row"][data-busy-only]').first();
     await expect(busy).toBeVisible();
     await expect(busy).toContainText('Bezet');
   });

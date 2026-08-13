@@ -302,7 +302,9 @@ test.describe('hub display preferences', () => {
     // middle rung (`calendarCategory`) is what paints this chip purple — the
     // event itself carries no per-event `category` override.
     await page.goto('/nl/today');
-    await expect(page.locator('[data-slot="event-chip"][data-category="purple"]')).toBeVisible();
+    // `/today`'s per-person board draws its events as `EventRow` (M22 —
+    // `calendar.md` § "Event list item"), not as the grid/month `EventChip`.
+    await expect(page.locator('[data-slot="event-row"][data-category="purple"]')).toBeVisible();
   });
 });
 

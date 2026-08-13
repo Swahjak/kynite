@@ -14,7 +14,7 @@ import type { Member } from '@/modules/family';
 import { dayKeysOf } from '../domain/expand';
 import { toDateKey, toWall } from '../domain/zone';
 import type { CalendarEvent } from '../queries';
-import { EventChip } from './event-chip';
+import { EventRow, type EventRowPerson } from './event-row';
 import { CATEGORY_CLASSES } from './tokens';
 
 /**
@@ -77,6 +77,23 @@ export function PersonColumns({
     return { byMember: columns, shared: sharedEvents };
   }, [members, events, timeZone, dayKey]);
 
+  /**
+   * Who else is on an event, for `EventRow`'s trailing avatar slot
+   * (`calendar.md` § "Event list item" item 4).
+   *
+   * *Else* is the point: inside Mila's column every row is already Mila's, so
+   * repeating her face on each line would say nothing. A face here means "this
+   * one is shared with someone", which is the fact the column cannot otherwise
+   * show.
+   */
+  const facesFor = (event: CalendarEvent, columnMemberId: string): EventRowPerson[] => {
+    const others = new Set<string>(event.attendeeMemberIds);
+    if (event.ownerMemberId) others.add(event.ownerMemberId);
+    others.delete(columnMemberId);
+
+    return members.filter((member) => others.has(member.id));
+  };
+
   return (
     <div data-slot="person-columns" className="flex min-h-0 flex-1 flex-col gap-3">
       {shared.length > 0 && (
@@ -84,17 +101,23 @@ export function PersonColumns({
         // nested content cards — white, rounded, `0 1px 2px rgba(0,0,0,0.04)`
         // and *no* border (`components.md` § Cards: elevation, not outline, is
         // what separates a card from the ground). `Card` is that shape.
-        <Card data-slot="shared-events" size="sm" className={cn('gap-2 p-3', hub && 'p-4')}>
-          <h3 className="label-overline text-ink-muted">{t('everyone')}</h3>
-          <div className={cn('flex flex-wrap gap-2')}>
+        // `calendar.md` § "Event list item": the list container takes
+        // `padding:8px` rather than the card's own 20px, "since rows carry
+        // their own padding".
+        <Card data-slot="shared-events" size="sm" className="gap-1 p-2">
+          <h3 className="label-overline px-2 pt-1 text-ink-muted">{t('everyone')}</h3>
+          <div className="flex flex-col">
             {shared.map((event) => (
-              <EventChip
+              // No faces: nobody owns a shared event by definition, and the
+              // block's own label already says "everyone". The first row keeps
+              // its divider — the spec puts one "right after the section
+              // eyebrow label".
+              <EventRow
                 key={event.key}
                 event={event}
-                variant="row"
                 hub={hub}
                 onSelect={onSelect}
-                className="min-w-40 flex-1"
+                past={Boolean(now && event.endsAt.getTime() < now.getTime())}
               />
             ))}
           </div>
@@ -103,10 +126,28 @@ export function PersonColumns({
 
       <div
         data-slot="member-columns"
+        // Keyboard-reachable, because it scrolls: a column whose only content
+        // is the "free day" zero-state holds nothing focusable, so without this
+        // the pane would be unreachable without a pointer (WCAG 2.1.1, and
+        // axe's `scrollable-region-focusable`).
+        tabIndex={0}
         className={cn(
-          'grid min-h-0 flex-1 gap-3',
-          // Columns on a wide/hub board, a scrollable stack on a phone.
-          'grid-cols-1 sm:grid-cols-2',
+          'min-h-0 flex-1 gap-3',
+          // Phone: a horizontal rail. Four columns squeezed into 390px is four
+          // unreadable slivers — a household board has to be readable from the
+          // doorway, so the columns keep a legible width and the *board*
+          // moves instead. 240px (`min-w-60`) puts one column plus a peek of
+          // the next on a 390px screen, which is what makes it read as a rail
+          // rather than a page. Snap is `proximity`, not `mandatory`: a parent
+          // scanning two columns at once should be allowed to stop between
+          // them. (The design system has no horizontal-scroll pattern of its
+          // own — its week strip is a 7-column grid — so this follows its
+          // spacing and card rules rather than a documented rail.)
+          'flex snap-x snap-proximity overflow-x-auto overscroll-x-contain scroll-smooth pb-1 [-webkit-overflow-scrolling:touch]',
+          // Tablet and up it already fits, so nothing about those widths
+          // changes: back to the grid, no scrolling, no snapping.
+          'sm:grid sm:snap-none sm:overflow-visible sm:pb-0',
+          'sm:grid-cols-2',
           members.length >= 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-2',
           members.length >= 4 && 'xl:grid-cols-4'
         )}
@@ -123,12 +164,17 @@ export function PersonColumns({
               data-slot="member-column"
               data-member-id={member.id}
               size="sm"
-              className="min-h-0 min-w-0 gap-2 p-3"
+              className={cn(
+                'min-h-0 gap-1 p-2',
+                // The rail's cells: a readable fixed width that snaps, until
+                // the grid takes over at `sm` and they become 1fr again.
+                'w-60 shrink-0 snap-start sm:w-auto sm:min-w-0 sm:shrink'
+              )}
             >
               {/* `Card/Stat`'s header rule: "Header row separated by
                   `border-bottom:1px solid #e1e3e4`" — the `#e1e3e4` divider
                   tone (`--line-subtle`), not the darker `#c4c5d9` outline. */}
-              <header className="flex items-center gap-2 border-b border-line-subtle pb-2">
+              <header className="flex items-center gap-2 border-b border-line-subtle px-2 pt-1 pb-2">
                 <MemberFace
                   size={hub ? 'hub' : 'default'}
                   avatarUrl={member.avatarUrl}
@@ -152,7 +198,7 @@ export function PersonColumns({
                 <CategoryDot size="md" className={cn('size-3', palette.solid)} />
               </header>
 
-              <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">
+              <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
                 {memberEvents.length === 0 ? (
                   <EmptyState
                     size={hub ? 'page' : 'inline'}
@@ -161,27 +207,24 @@ export function PersonColumns({
                     className="flex-1 justify-center"
                   />
                 ) : (
-                  memberEvents.map((event) => (
-                    <EventChip
+                  memberEvents.map((event, index) => (
+                    <EventRow
                       key={event.key}
                       event={event}
-                      variant="row"
                       hub={hub}
+                      people={facesFor(event, member.id)}
                       onSelect={onSelect}
-                      className={cn(
-                        // A finished event stays visible but recedes; nothing
-                        // in this product marks a past thing as a failure.
-                        //
-                        // The recede is on the *fill*, not the whole chip. It
-                        // used to be `opacity-50`, which took the text down
-                        // with it: M17's axe sweep measured the title at
-                        // 2.27:1 on the wall display, and the arithmetic says
-                        // opacity would have to stay above 0.85 to clear AA —
-                        // by which point it is not a recede at all. Draining
-                        // the category tint to a neutral surface reads as
-                        // "done" just as well and leaves every word legible.
-                        now && event.endsAt.getTime() < now.getTime() && 'border-line bg-surface/60'
-                      )}
+                      // A finished event stays visible but recedes; nothing in
+                      // this product marks a past thing as a failure. The
+                      // recede is never `opacity-*` over text — M17's axe sweep
+                      // measured a dimmed chip title at 2.27:1 on the wall
+                      // display — so `EventRow` drains the row to `--ink-muted`
+                      // instead, which still clears AA.
+                      past={Boolean(now && event.endsAt.getTime() < now.getTime())}
+                      // The header's own bottom rule is this list's first
+                      // divider (`calendar.md` puts one right after the section
+                      // label); a second line 8px below it would read as a gap.
+                      first={index === 0}
                     />
                   ))
                 )}
