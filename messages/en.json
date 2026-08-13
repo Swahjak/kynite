@@ -307,6 +307,7 @@
     "empty": "Nothing scheduled in this period.",
     "freeDay": "Free day",
     "everyone": "Everyone",
+    "now": "Now",
     "allDay": "All day",
     "continuesBefore": "Started earlier",
     "continuesAfter": "Continues later",

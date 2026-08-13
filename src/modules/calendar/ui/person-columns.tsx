@@ -14,7 +14,8 @@ import type { Member } from '@/modules/family';
 import { dayKeysOf } from '../domain/expand';
 import { toDateKey, toWall } from '../domain/zone';
 import type { CalendarEvent } from '../queries';
-import { EventRow, type EventRowPerson } from './event-row';
+import { DayAgendaRow } from './day-agenda-row';
+import { isCurrent, useNowTick } from './use-now-tick';
 import { CATEGORY_CLASSES } from './tokens';
 
 /**
@@ -52,6 +53,8 @@ export function PersonColumns({
   const t = useTranslations('calendar');
   const format = useFormatter();
   const dayKey = toDateKey(toWall(day, timeZone));
+  // The board is server-rendered; "which of these is happening" is not.
+  const tick = useNowTick(now);
 
   const { byMember, shared } = useMemo(() => {
     const columns = new Map<string, CalendarEvent[]>(members.map((member) => [member.id, []]));
@@ -64,7 +67,8 @@ export function PersonColumns({
       if (event.ownerMemberId) targets.add(event.ownerMemberId);
       for (const attendee of event.attendeeMemberIds) targets.add(attendee);
 
-      const owned = [...targets].filter((id) => columns.has(id));
+      // A household event is everybody's, whatever attribution says (M23).
+      const owned = event.householdWide ? [] : [...targets].filter((id) => columns.has(id));
       if (owned.length === 0) sharedEvents.push(event);
       else for (const id of owned) columns.get(id)!.push(event);
     }
@@ -78,20 +82,25 @@ export function PersonColumns({
   }, [members, events, timeZone, dayKey]);
 
   /**
-   * Who else is on an event, for `EventRow`'s trailing avatar slot
-   * (`calendar.md` § "Event list item" item 4).
+   * The *who* sub-label inside a member's column (`calendar.md` § "Day
+   * agenda").
    *
-   * *Else* is the point: inside Mila's column every row is already Mila's, so
-   * repeating her face on each line would say nothing. A face here means "this
-   * one is shared with someone", which is the fact the column cannot otherwise
-   * show.
+   * Everyone *else*, and that is the point: inside Mila's column every row is
+   * already Mila's, so repeating her name on each line would say nothing. A
+   * name here means "this one is shared with somebody", which is the fact the
+   * column cannot otherwise show — and an empty result falls through to
+   * "Iedereen" only for a household event, since a row in Mila's column that
+   * names nobody else is simply hers alone.
    */
-  const facesFor = (event: CalendarEvent, columnMemberId: string): EventRowPerson[] => {
+  const withFor = (event: CalendarEvent, columnMember: Member): string[] => {
+    if (event.householdWide) return [];
+
     const others = new Set<string>(event.attendeeMemberIds);
     if (event.ownerMemberId) others.add(event.ownerMemberId);
-    others.delete(columnMemberId);
+    others.delete(columnMember.id);
 
-    return members.filter((member) => others.has(member.id));
+    const names = members.filter((member) => others.has(member.id)).map((m) => m.displayName);
+    return names.length > 0 ? [columnMember.displayName, ...names] : [columnMember.displayName];
   };
 
   return (
@@ -107,17 +116,17 @@ export function PersonColumns({
         <Card data-slot="shared-events" size="sm" className="gap-1 p-2">
           <h3 className="label-overline px-2 pt-1 text-ink-muted">{t('everyone')}</h3>
           <div className="flex flex-col">
-            {shared.map((event) => (
-              // No faces: nobody owns a shared event by definition, and the
-              // block's own label already says "everyone". The first row keeps
-              // its divider — the spec puts one "right after the section
-              // eyebrow label".
-              <EventRow
+            {shared.map((event, index) => (
+              // No names: the block's own label already says "Iedereen", which
+              // is exactly what the row's sub-label falls back to.
+              <DayAgendaRow
                 key={event.key}
                 event={event}
                 hub={hub}
                 onSelect={onSelect}
-                past={Boolean(now && event.endsAt.getTime() < now.getTime())}
+                current={isCurrent(event, tick)}
+                past={Boolean(tick && event.endsAt.getTime() < tick.getTime())}
+                last={index === shared.length - 1}
               />
             ))}
           </div>
@@ -208,23 +217,21 @@ export function PersonColumns({
                   />
                 ) : (
                   memberEvents.map((event, index) => (
-                    <EventRow
+                    <DayAgendaRow
                       key={event.key}
                       event={event}
                       hub={hub}
-                      people={facesFor(event, member.id)}
+                      people={withFor(event, member)}
                       onSelect={onSelect}
+                      current={isCurrent(event, tick)}
                       // A finished event stays visible but recedes; nothing in
                       // this product marks a past thing as a failure. The
                       // recede is never `opacity-*` over text — M17's axe sweep
                       // measured a dimmed chip title at 2.27:1 on the wall
-                      // display — so `EventRow` drains the row to `--ink-muted`
-                      // instead, which still clears AA.
-                      past={Boolean(now && event.endsAt.getTime() < now.getTime())}
-                      // The header's own bottom rule is this list's first
-                      // divider (`calendar.md` puts one right after the section
-                      // label); a second line 8px below it would read as a gap.
-                      first={index === 0}
+                      // display — so the row drains title and dot to
+                      // `--ink-muted` instead, which still clears AA.
+                      past={Boolean(tick && event.endsAt.getTime() < tick.getTime())}
+                      last={index === memberEvents.length - 1}
                     />
                   ))
                 )}

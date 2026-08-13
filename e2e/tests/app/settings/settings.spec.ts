@@ -281,7 +281,10 @@ test.describe('hub display preferences', () => {
 
     const stored = await withDb(async (client) => {
       const { rows } = await client.query<{ visibility: string }>(
-        `select c.visibility from calendar c where c.family_id = $1`,
+        // Scoped to the Google calendar: every household also has its own
+        // built-in "Gezin" row now (M23), which is never private.
+        `select c.visibility from calendar c
+          where c.family_id = $1 and c.is_household = false`,
         [family.familyId]
       );
       return rows[0];
@@ -292,7 +295,7 @@ test.describe('hub display preferences', () => {
     // The hue on the board is the type's, and the owner still reads her own
     // private calendar in full (M23).
     await page.goto('/nl/today');
-    await expect(page.locator('[data-slot="event-row"][data-category="teal"]')).toBeVisible();
+    await expect(page.locator('[data-slot="day-agenda-row"][data-category="teal"]')).toBeVisible();
   });
 });
 

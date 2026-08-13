@@ -419,3 +419,50 @@ This is an owner-accepted, **temporary** trade-off for a small closed-audience i
 not a closed-out decision — the ADR is flagged **must be revisited before any public
 launch**: ship email verification, then flip `requireLocalEmailVerified` back to
 better-auth's safe default (`true`).
+
+## M23 — Event taxonomy, colouring policy, Gezin calendar, attribution fix, day-agenda fidelity
+
+- [x] Status
+- **Scope:** One owner-reported production bug plus four owner-approved product changes, shipped as five ordered commits.
+
+### 1. Owner attribution of a linked adult's calendars (`100d965`)
+
+- **Report:** an invited adult ("Veerle") connected her Google account, and every event on the **Werk** calendar she had created herself rendered in the shared "Iedereen" block instead of in her own column. She also could not open those events.
+- **Root cause (attribution):** `attributeEvent` gated its owner fallback on Google's `primary` flag — "the account holder participates in everything on their *primary* calendar and in nothing else on the account". That rule is correct about what it was written for (a subscribed holiday feed, a colleague's shared diary) and wrong about the case every second parent hits: a **secondary calendar they own themselves**. Non-primary meant no attribution, no attribution meant no member ids, and no member ids meant "shared".
+- **Fix:** "whose calendar is this" became a column, `calendar.owner_member_id`, written by discovery from Google's own answer — `primary`, *or* `accessRole: 'owner'` (precisely the calendars the account holder created; precisely not the ones they subscribed to or were granted access on). `attributeEvent` reads the column; the sync wiring drops the account join it needed to guess.
+- **Data repair (migration `0019`):** incremental sync never revisits an untouched row, so two backfills — the column, from `writable` (the closest fact stored today, refined on the next calendar-list pass); and the events on those calendars, using `0013`'s never-attributed-before predicate (`owner_member_id IS NULL AND cardinality(attendee_member_ids) = 0`), so nobody's own choice is overwritten.
+- **Root cause (could not open):** `editable` is *not* ownership-gated — a non-owner adult may edit anybody's event; it is false only for a read-only Google calendar and for a redacted one. The redaction was the bug: §7 grades `calendar:view_private` as `own` for an adult, but `own` is a statement about a resource and the page-level read passed none, so `decide()` failed closed and **her own private "Werk" calendar came back to her as a day of unclickable "bezet" blocks**. The grade is now carried into `listEvents` (`privateDetailFor`), the only layer holding the resource it needs.
+
+### 2. Event taxonomy + colouring policy (`b196771`)
+
+- Eleven owner-approved values replace the six developer-shaped ones: School, Opvang, Sport, Muziek & les, Spelen & vrienden, Gezondheid, Familie & uitjes, Verjaardag & feest, Feestdagen & vakantie, Werk, Overig.
+- **Colouring policy, app-wide:** an event's hue *and* glyph are a function of its **type**, on every surface (chips, list rows, dots, month pips, up-next, hub board). Member colour is identity only (avatars, rings, column headers) and never fills an event surface. A calendar's own colour is demoted to a provenance dot in settings.
+- That retired three competing colour sources: `event.category` (per-event override, column dropped), `calendar_display` (per-calendar colour, **table dropped**), and Google's hex for a calendar. `domain/event-type.ts` is the single source for hue + icon; `ui/tokens.ts` is its Tailwind view.
+- **Old → new mapping** (migration `0020`, remapped while the column is plain `text` — casting straight across throws on the first `appointment` row): `custody → family`, `birthday → birthday`, everything else (`appointment`, `reward`, `routine`, `other`) `→ other`.
+- Icon subset rebuilt (55.1 KB of a 64 KB budget, 62 glyphs). The rebuild also had to re-add `wb_sunny` / `event_available`: the scanner only sees `<Icon name="…">`, so the routines token table's icons were about to be silently dropped.
+
+### 3. Per-calendar default type (`5e3466e`)
+
+- `event.event_type` becomes **nullable** (null = "ask the calendar"), and `calendar.default_type` is the answer. Resolution: event's own type → calendar default → Overig, in `queries.ts`.
+- Why: a synced Google event carries no type (the API has no such field), so without this the taxonomy would exist only for hand-typed events and a linked "Schoolagenda Mila" would be two hundred identical purple rows.
+- **How existing events resolve** (migration `0021`): every row `0020` landed on `other` is nulled, because `other` was never a decision anybody made — it was what the old enum had to say about `appointment`/`reward`/`routine`. Those rows now inherit. The rows that *were* decisions (`family`, `birthday`) keep their type. Every calendar starts at Overig, including newly linked ones.
+- Settings gains a **Standaardtype** select per calendar row (icons + labels, both locales).
+
+### 4. Built-in "Gezin" calendar (`e30828b`)
+
+- One per household, created inside the family-creation transaction, backfilled for existing families (migration `0022`), undeletable, never private, default type Familie & uitjes.
+- Events on it are household-wide **by construction**: `listEvents` marks them `householdWide`, and `groupByMember`/`combineDayEvents`/`PersonColumns` read that *before* attribution — so they land in the "Iedereen" block with everybody's faces rather than in one parent's column.
+- Event form: "Iedereen" under *who* is now a real destination — it moves the event onto this calendar, and picking a person moves it back off.
+- It is a row in `calendar` (everything about it is a calendar); what it lacks is a Google account, so `google_account_id`/`google_calendar_id` become nullable and every entry into the sync/push engines narrows through `isGoogleBacked()` first.
+- **Google binding is a pointer, not a merge.** `calendar.bound_calendar_id` names a Google calendar that keeps its own row, sync token, channel and events, so the sync engine is untouched: reads arrive through the existing pass, writes leave through the existing push, and unbinding is one write that takes nothing with it.
+
+### 5. Day-agenda fidelity on `/today` (`this commit`)
+
+- `docs/design/calendar.md` § "Day agenda" implemented literally for **both** board modes (combined list and per-person columns): start time only in a 44px centred rail, bold indigo when current and muted otherwise, a 1px vertical connector between rows, an 8px category dot before the title (not the 4px left bar), a *who* sub-label under the title, a tinted full-width row plus a NOW badge for the current event, and past rows receding through muted title + dot. No calendar icon, no recurrence icon, no location.
+- The current event is derived live: `useNowTick` seeds from the server's `now` (no hydration flash) and ticks every 30s, so "NU" is not a photograph of build time.
+- `EventRow` ("Event list item") was left with no callers by the swap and is **deleted**; `DayAgendaRow` replaces it in the barrel. Test ids preserved where they still mean the same thing (`pending-sync-pip`, `data-busy-only`, `data-event-id`); `[data-slot="event-row"]` became `[data-slot="day-agenda-row"]` in the three e2e specs that assert on it.
+
+### Gates and verification
+
+- `pnpm typecheck && pnpm lint && pnpm test:run` green before every commit; final run 1257 tests / 103 files, integration suites included (DB-backed, `docker-compose.test.yml` on 5435).
+- Playwright, `--workers=1`, `.env.local` moved aside and restored: hub + app `@visual` 28 passed with today/hub-board baselines regenerated; app calendar + settings functional 30 passed.
