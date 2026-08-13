@@ -76,7 +76,7 @@ export function HubBoard({
       <header className="flex items-baseline justify-between gap-4">
         <div>
           <h1 className="font-display text-display-md font-extrabold">{t('hub.title')}</h1>
-          <p className="text-body-lg text-ink-secondary">
+          <p data-testid="hub-date" className="text-body-lg text-ink-secondary">
             {format.dateTime(board.anchor, { dateStyle: 'full' })}
           </p>
         </div>

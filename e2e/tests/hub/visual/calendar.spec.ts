@@ -180,6 +180,12 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
 
         await page.goto(`/nl/calendar?view=${view}&date=${ANCHOR}`);
         await expect(page.getByTestId(`calendar-view-${view}`)).toBeVisible();
+        // `(app)/layout.tsx` wraps every one of these views in the glass
+        // header, whose `AppClock` renders a live time *and* weekday/date
+        // (`app-clock`/`app-clock-date`) — unrelated to this test's own fixed
+        // `ANCHOR`, so it needs its own pin, same mechanism as `hub-clock`.
+        await pinLiveText(page, 'app-clock');
+        await pinLiveText(page, 'app-clock-date', 'woensdag 1 januari');
         await settlePage(page);
 
         await expect(page).toHaveScreenshot(`calendar-${view}-${name}.png`, { fullPage: true });
@@ -191,6 +197,15 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
 
       await page.goto(`/nl/today?date=${FUTURE_ANCHOR}`);
       await expect(page.getByTestId('today-board')).toBeVisible();
+      // Same glass-header clock/date pin as the calendar views above.
+      await pinLiveText(page, 'app-clock');
+      await pinLiveText(page, 'app-clock-date', 'woensdag 1 januari');
+      // `today-greeting` (M18) picks morning/afternoon/evening off the real
+      // wall clock (`greetingSlotFor(hourIn(data.now, ...))` in
+      // `(app)/today/page.tsx` — `data.now` is `new Date()`, not derived from
+      // `?date=`), so it rotates under the suite the same way the header does
+      // and needs the same durable pin.
+      await pinLiveText(page, 'today-greeting', 'Goedemorgen, Sanne');
       await settlePage(page);
 
       await expect(page).toHaveScreenshot(`today-${name}.png`, { fullPage: true });

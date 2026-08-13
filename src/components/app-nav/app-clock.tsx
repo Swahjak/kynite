@@ -26,12 +26,13 @@ export function AppClock() {
   return (
     <div className="flex flex-col justify-center">
       <time
+        data-testid="app-clock"
         dateTime={now.toISOString()}
         className="tabular-time text-h2 leading-none font-bold text-ink"
       >
         {format.dateTime(now, { hour: '2-digit', minute: '2-digit' })}
       </time>
-      <span className="label-overline mt-1 text-ink-secondary">
+      <span data-testid="app-clock-date" className="label-overline mt-1 text-ink-secondary">
         {format.dateTime(now, { weekday: 'long', day: 'numeric', month: 'short' })}
       </span>
     </div>

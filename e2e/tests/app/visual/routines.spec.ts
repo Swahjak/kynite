@@ -1,6 +1,6 @@
 import { expect, test } from '@e2e/fixtures/exclusive';
 import { ownerMemberOf, seedCompletions, seedMembers, seedRoutines, withDb } from '@e2e/utils/seed';
-import { settlePage } from '@e2e/utils/settle';
+import { pinLiveText, settlePage } from '@e2e/utils/settle';
 
 /**
  * Visual regression for the routine builder (`/nl/routines`), at the parent
@@ -28,8 +28,10 @@ const VIEWPORTS = {
 } as const;
 
 /** A fixed Wednesday — carried over from the hub visual spec's ANCHOR, only
- *  used here as the completions' occurrence date; the builder page renders no
- *  clock-pinned board, so it does not otherwise need a fixed "now". */
+ *  used here as the completions' occurrence date. The builder page has no
+ *  clock-pinned board of its own, but it does share the `(app)` layout's
+ *  glass header, whose `AppClock` renders a live time *and* weekday/date —
+ *  both pinned below with `pinLiveText`, same as the hub board's clock. */
 const ANCHOR = '2026-03-11';
 /** DTSTART well before the anchor, so every occurrence below exists. */
 const SERIES_START = '2026-01-05T06:00:00Z';
@@ -137,6 +139,8 @@ for (const [name, viewport] of Object.entries(VIEWPORTS) as [
 
       await page.goto('/nl/routines');
       await expect(page.getByTestId('routine-row').first()).toBeVisible();
+      await pinLiveText(page, 'app-clock');
+      await pinLiveText(page, 'app-clock-date', 'woensdag 1 januari');
       await settlePage(page);
 
       await expect(page).toHaveScreenshot(`routines-builder-${name}.png`, { fullPage: true });
