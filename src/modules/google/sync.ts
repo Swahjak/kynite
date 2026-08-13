@@ -35,7 +35,25 @@ export function apiForAccount(googleAccountId: string): GoogleCalendarApi {
   return createGoogleCalendarApi({ getAccessToken: accessTokenProvider(googleAccountId) });
 }
 
-function syncState(row: Calendar): CalendarSyncState {
+/**
+ * A calendar row that Google is actually behind (M23).
+ *
+ * The `calendar` table now also holds the household's own "Gezin" calendar,
+ * which has no account and no remote id — so every entry point into the sync
+ * and push engines narrows to this shape first. A household calendar reaching
+ * `apiForAccount(null)` would be a token lookup for an account that does not
+ * exist; skipping it is the correct answer, not an error.
+ */
+export type GoogleBackedCalendar = Calendar & {
+  googleAccountId: string;
+  googleCalendarId: string;
+};
+
+export function isGoogleBacked(row: Calendar): row is GoogleBackedCalendar {
+  return row.googleAccountId !== null && row.googleCalendarId !== null;
+}
+
+function syncState(row: GoogleBackedCalendar): CalendarSyncState {
   return {
     id: row.id,
     familyId: row.familyId,
@@ -54,7 +72,7 @@ async function loadCalendar(calendarId: string): Promise<Calendar | null> {
 /** One calendar, one incremental (or full) pass. The `google:sync-calendar` job body. */
 export async function syncCalendarById(calendarId: string): Promise<SyncResult | null> {
   const row = await loadCalendar(calendarId);
-  if (!row || !row.syncEnabled) return null;
+  if (!row || !row.syncEnabled || !isGoogleBacked(row)) return null;
 
   // M23: "whose calendar is this" is now a column on the row itself
   // (`calendar.owner_member_id`, written by discovery), so the only thing left
@@ -197,6 +215,9 @@ export async function pushEventById(eventId: string): Promise<PushEventOutcome> 
 
   const calendarRow = await loadCalendar(row.calendarId);
   if (!calendarRow) return { status: 'skipped', reason: 'event-not-found' };
+  // The household's own calendar is native: there is nothing to push to until
+  // somebody binds it, and a bound event lives on the Google row instead.
+  if (!isGoogleBacked(calendarRow)) return { status: 'skipped', reason: 'native' };
   if (!calendarRow.writable) return { status: 'skipped', reason: 'not-writable' };
   if (!calendarRow.syncEnabled) return { status: 'skipped', reason: 'sync-disabled' };
 

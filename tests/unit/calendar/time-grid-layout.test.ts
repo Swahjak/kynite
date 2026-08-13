@@ -43,6 +43,7 @@ function event(overrides: Partial<CalendarEvent> = {}): CalendarEvent {
     recurring: false,
     rrule: null,
     pendingSync: false,
+    householdWide: false,
     busyOnly: false,
     editable: true,
     ...overrides,

@@ -8,6 +8,7 @@ import { getDb } from '@/server/db';
 // barrel is for *behaviour*; `server/db/schema.ts` is for tables (§2).
 import { calendar } from '@/server/db/schema';
 import { categoryForType } from './domain/event-type';
+import { householdCalendarIds } from './household';
 import { dayKeysOf, expandSeries, isSeries, type Occurrence } from './domain/expand';
 import { toDateKey, toWall } from './domain/zone';
 import { event, type EventCategory, type EventType } from './schema';
@@ -58,6 +59,17 @@ export type CalendarEvent = {
   busyOnly: boolean;
   /** False for read-only Google calendars and for busy-only instances. */
   editable: boolean;
+  /**
+   * The event belongs to the whole household (M23) — it is on the "Gezin"
+   * calendar, or on the Google calendar that calendar is bound to.
+   *
+   * Every board that splits events between people and everybody reads this
+   * first: a household event goes in the "Iedereen" block and gets the whole
+   * family's faces, whatever its attribution happens to say. A bound Google
+   * calendar is somebody's own calendar as far as attribution is concerned, so
+   * without this the family dinner would land in one parent's column.
+   */
+  householdWide: boolean;
 };
 
 export type EventWindow = { from: Date; to: Date };
@@ -103,6 +115,9 @@ export const BUSY_LABEL = 'busy';
  */
 export async function listEvents(options: ListEventsOptions): Promise<CalendarEvent[]> {
   const { familyId, window, privateDetail, privateDetailFor = null } = options;
+
+  // One small read, before the window: which calendars are the household's.
+  const householdIds = await householdCalendarIds(familyId);
 
   const rows = await getDb()
     .select({
@@ -163,11 +178,17 @@ export async function listEvents(options: ListEventsOptions): Promise<CalendarEv
     const ownPrivate = privateDetailFor !== null && row.calendarOwnerMemberId === privateDetailFor;
     const redacted = isPrivate && !privateDetail && !ownPrivate;
 
+    const sourceCalendarId = row.event.calendarId;
+
     for (const occurrence of expandSeries(row.event, {
       ...window,
       excludeStarts: exceptions.get(row.event.id),
     })) {
-      events.push(toCalendarEvent(row, occurrence, redacted));
+      events.push(
+        toCalendarEvent(row, occurrence, redacted, {
+          householdWide: !!sourceCalendarId && householdIds.has(sourceCalendarId),
+        })
+      );
     }
   }
 
@@ -238,7 +259,12 @@ type EventRow = {
   calendarOwnerMemberId: string | null;
 };
 
-function toCalendarEvent(row: EventRow, occurrence: Occurrence, redacted: boolean): CalendarEvent {
+function toCalendarEvent(
+  row: EventRow,
+  occurrence: Occurrence,
+  redacted: boolean,
+  { householdWide }: { householdWide: boolean }
+): CalendarEvent {
   const source = row.event;
 
   /**
@@ -283,6 +309,7 @@ function toCalendarEvent(row: EventRow, occurrence: Occurrence, redacted: boolea
     // a writable calendar. Redacted events are never editable — you cannot
     // meaningfully edit what you are not allowed to read.
     editable: !redacted && (source.calendarId === null || row.calendarWritable === true),
+    householdWide,
   };
 }
 
@@ -336,7 +363,10 @@ export function groupByMember(
     if (item.ownerMemberId) owners.add(item.ownerMemberId);
     for (const attendee of item.attendeeMemberIds) owners.add(attendee);
 
-    const targets = [...owners].filter((id) => byMember.has(id));
+    // A household event is everybody's, whatever attribution says (M23) — a
+    // bound Google calendar is one parent's own calendar as far as the sync is
+    // concerned, and the family dinner on it must not land in her column.
+    const targets = item.householdWide ? [] : [...owners].filter((id) => byMember.has(id));
 
     if (targets.length === 0) shared.push(item);
     else for (const id of targets) byMember.get(id)!.push(item);

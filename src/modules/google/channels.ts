@@ -4,7 +4,7 @@ import { and, eq, lt, or, isNull } from 'drizzle-orm';
 import { getDb } from '@/server/db';
 import { channelTokenFor, googleConfig } from './config';
 import { GoogleApiError } from './domain/errors';
-import { apiForAccount } from './sync';
+import { apiForAccount, isGoogleBacked } from './sync';
 import { calendar, googleAccount, type Calendar } from './schema';
 
 /**
@@ -25,7 +25,8 @@ export const RENEWAL_WINDOW_MS = 2 * 60 * 60 * 1000;
  * duplicate notifications to a channel id we have forgotten.
  */
 export async function watchCalendar(row: Calendar): Promise<Calendar | null> {
-  if (!row.syncEnabled) return null;
+  // A household calendar has no remote to watch (M23).
+  if (!row.syncEnabled || !isGoogleBacked(row)) return null;
 
   const api = apiForAccount(row.googleAccountId);
   const { webhookAddress } = googleConfig();
@@ -107,7 +108,7 @@ export async function renewExpiringChannels(now: Date = new Date()): Promise<{
 
 /** Stop a channel and forget it — used when a calendar is disabled or unlinked. */
 export async function stopChannel(row: Calendar): Promise<void> {
-  if (row.channelId && row.channelResourceId) {
+  if (row.channelId && row.channelResourceId && isGoogleBacked(row)) {
     await apiForAccount(row.googleAccountId)
       .stopChannel(row.channelId, row.channelResourceId)
       .catch(() => {

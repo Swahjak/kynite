@@ -30,7 +30,12 @@ import { CATEGORY_CLASSES, EVENT_TYPE_ICONS } from './tokens';
 export type CalendarDisplayView = {
   id: string;
   summary: string;
-  accountEmail: string;
+  /** Null for the household's own calendar, which hangs off no account. */
+  accountEmail: string | null;
+  /** The built-in "Gezin" calendar (M23): undeletable, never private. */
+  isHousehold: boolean;
+  /** The Google calendar it is bound to, if the owner has bound one. */
+  boundCalendarId: string | null;
   visibility: 'family' | 'private';
   /**
    * Google's own colour for this calendar, mapped onto the palette (M23).
@@ -70,7 +75,14 @@ const VISIBILITY_OPTIONS: readonly CalendarDisplayView['visibility'][] = ['famil
  * survives as the dot beside the calendar's name: it answers "which calendar
  * is this", which is the only question this list is actually asking.
  */
-export function CalendarDisplayList({ calendars }: { calendars: CalendarDisplayView[] }) {
+export function CalendarDisplayList({
+  calendars,
+  bindable = [],
+}: {
+  calendars: CalendarDisplayView[];
+  /** Google calendars the household calendar may be bound to. */
+  bindable?: { id: string; summary: string }[];
+}) {
   const t = useTranslations('settings.calendars');
 
   if (calendars.length === 0) {
@@ -81,14 +93,20 @@ export function CalendarDisplayList({ calendars }: { calendars: CalendarDisplayV
     <ul className="flex flex-col gap-4" data-testid="calendar-display-list">
       {calendars.map((entry) => (
         <li key={entry.id}>
-          <CalendarDisplayRow calendar={entry} />
+          <CalendarDisplayRow calendar={entry} bindable={bindable} />
         </li>
       ))}
     </ul>
   );
 }
 
-function CalendarDisplayRow({ calendar }: { calendar: CalendarDisplayView }) {
+function CalendarDisplayRow({
+  calendar,
+  bindable,
+}: {
+  calendar: CalendarDisplayView;
+  bindable: { id: string; summary: string }[];
+}) {
   const t = useTranslations('settings.calendars');
   const tTypes = useTranslations('calendar');
   const tCommon = useTranslations('common');
@@ -120,7 +138,9 @@ function CalendarDisplayRow({ calendar }: { calendar: CalendarDisplayView }) {
         />
         <div className="flex min-w-0 flex-col gap-0.5">
           <span className="font-display text-body font-semibold text-ink">{calendar.summary}</span>
-          <span className="text-caption break-all text-ink-muted">{calendar.accountEmail}</span>
+          <span className="text-caption break-all text-ink-muted">
+            {calendar.accountEmail ?? t('householdHint')}
+          </span>
         </div>
       </div>
 
@@ -152,21 +172,52 @@ function CalendarDisplayRow({ calendar }: { calendar: CalendarDisplayView }) {
         <FieldDescription>{t('defaultTypeHint')}</FieldDescription>
       </Field>
 
-      <Field>
-        <FieldLabel>{t('visibility')}</FieldLabel>
-        <Select name="visibility" defaultValue={calendar.visibility}>
-          <SelectTrigger size="hub" data-testid="calendar-visibility">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {VISIBILITY_OPTIONS.map((option) => (
-              <SelectItem key={option} value={option}>
-                {t(`visibilities.${option}`)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </Field>
+      {/* Binding (M23): the household calendar may follow one Google calendar,
+          and the events on that calendar then read as the family's. A pointer,
+          not a merge — the bound calendar keeps its own row and syncs through
+          the engine untouched, so unbinding takes nothing with it. */}
+      {calendar.isHousehold && (
+        <Field>
+          <FieldLabel>{t('boundCalendar')}</FieldLabel>
+          <Select name="boundCalendarId" defaultValue={calendar.boundCalendarId ?? ''}>
+            <SelectTrigger size="hub" data-testid="calendar-bound">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">{t('boundCalendarNone')}</SelectItem>
+              {bindable.map((option) => (
+                <SelectItem key={option.id} value={option.id}>
+                  {option.summary}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <FieldDescription>{t('boundCalendarHint')}</FieldDescription>
+        </Field>
+      )}
+
+      {/* The household calendar is never private: it is the one calendar the
+          whole family is meant to read, and a wall display that redacted it
+          would redact the thing it exists to show. */}
+      {calendar.isHousehold ? (
+        <input type="hidden" name="visibility" value="family" />
+      ) : (
+        <Field>
+          <FieldLabel>{t('visibility')}</FieldLabel>
+          <Select name="visibility" defaultValue={calendar.visibility}>
+            <SelectTrigger size="hub" data-testid="calendar-visibility">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {VISIBILITY_OPTIONS.map((option) => (
+                <SelectItem key={option} value={option}>
+                  {t(`visibilities.${option}`)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Field>
+      )}
 
       <div className="flex items-center gap-3">
         <Button type="submit" size="hub" disabled={pending} data-testid="save-calendar-display">

@@ -25,12 +25,22 @@ export type CombinableEvent = {
   allDay: boolean;
   ownerMemberId: string | null;
   attendeeMemberIds: string[];
+  /**
+   * On the household's own calendar (M23) — everyone's, by construction.
+   *
+   * It takes precedence over attribution rather than adding to it: an event on
+   * a *bound* Google calendar carries that calendar owner's id, and letting
+   * that through would draw one face on the family dinner instead of all of
+   * them.
+   */
+  householdWide?: boolean;
 };
 
 export type CombinedDayRow<E extends CombinableEvent> = {
   event: E;
   /**
-   * Owner plus attendees, restricted to members of this family and ordered by
+   * Owner plus attendees — or the whole family, for a household event —
+   * restricted to members of this family and ordered by
    * the family's own order — never by the order they happened to be attached
    * to the event, so the same two children always stack the same way.
    */
@@ -76,6 +86,8 @@ export function combineDayEvents<E extends CombinableEvent>(
   });
 
   return onDay.map((event) => {
+    if (event.householdWide) return { event, memberIds: [...memberOrder] };
+
     const participants = new Set<string>(event.attendeeMemberIds);
     if (event.ownerMemberId) participants.add(event.ownerMemberId);
 

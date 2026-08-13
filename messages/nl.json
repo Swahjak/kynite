@@ -1025,9 +1025,13 @@
       "title": "Agenda's en wandscherm",
       "description": "Welke agenda's meetellen en wat er op het wandscherm te lezen is.",
       "empty": "Er is nog geen agenda gekoppeld.",
+      "householdHint": "Ingebouwd — voor het hele gezin",
       "readOnly": "Alleen ouders kunnen de weergave aanpassen.",
       "defaultType": "Standaardtype",
       "defaultTypeHint": "Wat afspraken uit deze agenda zijn, als ze zelf geen soort hebben.",
+      "boundCalendar": "Gekoppelde Google-agenda",
+      "boundCalendarNone": "Niet gekoppeld",
+      "boundCalendarHint": "Afspraken uit deze Google-agenda tellen als afspraken van het hele gezin.",
       "visibility": "Zichtbaarheid",
       "visibilities": {
         "family": "Voor het hele gezin",

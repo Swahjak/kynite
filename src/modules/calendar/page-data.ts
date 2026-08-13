@@ -1,5 +1,5 @@
 import 'server-only';
-import { and, asc, eq } from 'drizzle-orm';
+import { and, asc, desc, eq } from 'drizzle-orm';
 import { getDb } from '@/server/db';
 // Table objects come from the schema assembly point, not from the owning
 // slice's barrel. `@/modules/google` re-exports that slice's client components,
@@ -17,6 +17,7 @@ import {
   type Member,
 } from '@/modules/family';
 import { nearestCategory } from './domain/category';
+import { ensureHouseholdCalendar } from './household';
 import { fetchWindow, isCalendarView, viewWindow, type CalendarView } from './domain/window';
 import { fromWall, parseDateKey, startOfDay } from './domain/zone';
 import { listEvents, type CalendarEvent } from './queries';
@@ -151,17 +152,25 @@ export async function loadCalendarPage(options: LoadOptions): Promise<CalendarPa
  * offering a destination that can only fail is worse than not offering it.
  */
 async function listWritableCalendars(familyId: string): Promise<WritableCalendar[]> {
-  return getDb()
-    .select({ id: calendar.id, summary: calendar.summary })
-    .from(calendar)
-    .where(
-      and(
-        eq(calendar.familyId, familyId),
-        eq(calendar.writable, true),
-        eq(calendar.syncEnabled, true)
+  // The household calendar is one of them, and it must exist before anybody
+  // opens the form — "Iedereen" in the who-section targets it (M23).
+  await ensureHouseholdCalendar(familyId);
+
+  return (
+    getDb()
+      .select({ id: calendar.id, summary: calendar.summary, isHousehold: calendar.isHousehold })
+      .from(calendar)
+      .where(
+        and(
+          eq(calendar.familyId, familyId),
+          eq(calendar.writable, true),
+          eq(calendar.syncEnabled, true)
+        )
       )
-    )
-    .orderBy(asc(calendar.summary));
+      // The household's own calendar first — it is the default destination for
+      // an event that belongs to everybody (M23).
+      .orderBy(desc(calendar.isHousehold), asc(calendar.summary))
+  );
 }
 
 /* ---------------------------------------------------------------------------
@@ -169,6 +178,11 @@ async function listWritableCalendars(familyId: string): Promise<WritableCalendar
  * ------------------------------------------------------------------------ */
 
 export type CalendarDisplayData = {
+  /**
+   * The Google calendars the household calendar may be bound to (M23):
+   * writable, syncing, and actually backed by Google.
+   */
+  bindable: WritableCalendar[];
   /**
    * One row per linked calendar. The view type is declared by the component
    * that renders it (`ui/calendar-display-list.tsx`) — see its note on why the
@@ -189,25 +203,40 @@ export async function loadCalendarDisplay(): Promise<CalendarDisplayData | null>
   const principal = await getPrincipal();
   if (!principal || principal.kind !== 'member') return null;
 
+  // Every household has one, including the ones created before it existed.
+  await ensureHouseholdCalendar(principal.familyId);
+
   const rows = await getDb()
     .select({
       id: calendar.id,
       summary: calendar.summary,
       accountEmail: googleAccount.email,
+      isHousehold: calendar.isHousehold,
+      boundCalendarId: calendar.boundCalendarId,
       visibility: calendar.visibility,
       color: calendar.color,
       defaultType: calendar.defaultType,
+      writable: calendar.writable,
+      syncEnabled: calendar.syncEnabled,
     })
     .from(calendar)
-    .innerJoin(googleAccount, eq(calendar.googleAccountId, googleAccount.id))
+    // A `leftJoin`, because the household's own calendar hangs off no account.
+    .leftJoin(googleAccount, eq(calendar.googleAccountId, googleAccount.id))
     .where(eq(calendar.familyId, principal.familyId))
-    .orderBy(asc(googleAccount.email), asc(calendar.summary));
+    // The household calendar first: it is the one every family has, and the
+    // one a parent looking for "where does a family dinner go" is after.
+    .orderBy(desc(calendar.isHousehold), asc(googleAccount.email), asc(calendar.summary));
 
   return {
+    bindable: rows
+      .filter((row) => !row.isHousehold && row.writable && row.syncEnabled)
+      .map((row) => ({ id: row.id, summary: row.summary })),
     calendars: rows.map((row) => ({
       id: row.id,
       summary: row.summary,
       accountEmail: row.accountEmail,
+      isHousehold: row.isHousehold,
+      boundCalendarId: row.boundCalendarId,
       visibility: row.visibility,
       defaultType: row.defaultType,
       // Provenance only (M23): the dot beside the calendar's name, in Google's

@@ -57,7 +57,12 @@ import { CATEGORY_CLASSES, EVENT_TYPE_ICONS } from './tokens';
  * series update.
  */
 
-export type WritableCalendar = { id: string; summary: string };
+export type WritableCalendar = {
+  id: string;
+  summary: string;
+  /** The household's built-in "Gezin" calendar (M23) — at most one. */
+  isHousehold?: boolean;
+};
 
 export type EventDialogProps = {
   open: boolean;
@@ -120,6 +125,20 @@ export function EventDialog({
   // a `key` derived from the selection, so picking a different event remounts
   // it and every field re-seeds — no state-syncing effect required.
   const [allDay, setAllDay] = useState(event?.allDay ?? false);
+  /**
+   * "Who" and "which calendar" move together (M23), so both are controlled.
+   *
+   * Picking "Iedereen" is now a destination rather than the absence of one: it
+   * puts the event on the household's "Gezin" calendar, which is what makes
+   * every board draw it as the whole family's instead of leaving it shared by
+   * accident. Picking a person moves it back off, because an event that is
+   * one child's is not the household's.
+   */
+  const householdCalendarId = calendars.find((entry) => entry.isHousehold)?.id ?? null;
+  const [ownerMemberId, setOwnerMemberId] = useState(event?.ownerMemberId ?? '');
+  const [calendarId, setCalendarId] = useState(
+    event?.calendarId ?? (event ? '' : (householdCalendarId ?? ''))
+  );
   const [scope, setScope] = useState<'series' | 'occurrence'>('occurrence');
   // M18: a delete is confirmed rather than performed on the first tap.
   const [confirmingDelete, setConfirmingDelete] = useState(false);
@@ -308,9 +327,24 @@ export function EventDialog({
           </Section>
 
           <Section title={t('dialog.sections.who')}>
+            {/* "Iedereen" is a real destination now, not the absence of a
+                choice (M23): picking it moves the event onto the household's
+                "Gezin" calendar, where every board reads it as the whole
+                family's. Picking a person moves it back off. */}
             <Field>
               <FieldLabel>{t('form.owner')}</FieldLabel>
-              <Select name="ownerMemberId" defaultValue={event?.ownerMemberId ?? ''}>
+              <Select
+                name="ownerMemberId"
+                value={ownerMemberId}
+                onValueChange={(value) => {
+                  setOwnerMemberId(value ?? '');
+                  if (value === '' || value === null) {
+                    if (householdCalendarId) setCalendarId(householdCalendarId);
+                  } else if (calendarId === householdCalendarId) {
+                    setCalendarId('');
+                  }
+                }}
+              >
                 <SelectTrigger size="hub" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
@@ -364,7 +398,11 @@ export function EventDialog({
 
             <Field>
               <FieldLabel>{t('form.calendar')}</FieldLabel>
-              <Select name="calendarId" defaultValue={event?.calendarId ?? ''}>
+              <Select
+                name="calendarId"
+                value={calendarId}
+                onValueChange={(value) => setCalendarId(value ?? '')}
+              >
                 <SelectTrigger size="hub" className="w-full">
                   <SelectValue />
                 </SelectTrigger>

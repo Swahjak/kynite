@@ -1025,9 +1025,13 @@
       "title": "Calendars and wall display",
       "description": "Which calendars count, and what the wall display shows.",
       "empty": "No calendar has been linked yet.",
+      "householdHint": "Built in — for the whole family",
       "readOnly": "Only parents can change how things look.",
       "defaultType": "Default type",
       "defaultTypeHint": "What events from this calendar are, when they carry no type of their own.",
+      "boundCalendar": "Linked Google calendar",
+      "boundCalendarNone": "Not linked",
+      "boundCalendarHint": "Events from this Google calendar count as the whole family's.",
       "visibility": "Visibility",
       "visibilities": {
         "family": "For the whole family",

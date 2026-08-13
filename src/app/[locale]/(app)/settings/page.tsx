@@ -142,7 +142,7 @@ export default async function SettingsHubPage() {
           <HubDisplayForm defaultView={settings.family.hubDefaultView} />
         ) : null}
         {calendars?.canManage ? (
-          <CalendarDisplayList calendars={calendars.calendars} />
+          <CalendarDisplayList calendars={calendars.calendars} bindable={calendars.bindable} />
         ) : (
           <p className="text-body-sm text-ink-secondary">{t('calendars.readOnly')}</p>
         )}

@@ -538,6 +538,8 @@ const calendarDisplaySchema = z.object({
   visibility: z.enum(CALENDAR_VISIBILITIES),
   /** The type every untyped event on this calendar inherits (M23). */
   defaultType: z.enum(EVENT_TYPES),
+  /** Household calendar only: the Google calendar it follows. `''` = none. */
+  boundCalendarId: z.uuid().optional().or(z.literal('')),
 });
 
 /**
@@ -567,28 +569,65 @@ export async function setCalendarDisplayAction(
     calendarId: read(formData, 'calendarId'),
     visibility: read(formData, 'visibility'),
     defaultType: read(formData, 'defaultType'),
+    boundCalendarId: read(formData, 'boundCalendarId'),
   });
   if (!parsed.success) return failure('invalidInput');
 
-  const { calendarId, visibility, defaultType } = parsed.data;
+  const { calendarId, visibility, defaultType, boundCalendarId } = parsed.data;
   const db = getDb();
 
   // Scoped by the *principal's* family, never by the form: a forged calendar id
   // from another household matches nothing and the action reports it as gone.
   const [existing] = await db
-    .select({ id: calendar.id })
+    .select({ id: calendar.id, isHousehold: calendar.isHousehold })
     .from(calendar)
     .where(and(eq(calendar.id, calendarId), eq(calendar.familyId, principal.familyId)))
     .limit(1);
 
   if (!existing) return failure('calendarNotFound');
 
+  /**
+   * The household calendar's two invariants, enforced here rather than trusted
+   * to the form (M23): it is never private — it is the one calendar the whole
+   * family is meant to read, and a wall display that redacted it would redact
+   * the thing it exists to show — and it is the only calendar that may bind.
+   *
+   * The binding target is re-read family-scoped for the same reason the
+   * calendar itself is: a forged id from another household must resolve to
+   * nothing rather than to a pointer across the family boundary.
+   */
+  const nextVisibility = existing.isHousehold ? 'family' : visibility;
+  let nextBoundCalendarId: string | null = null;
+
+  if (existing.isHousehold && boundCalendarId) {
+    const [target] = await db
+      .select({ id: calendar.id })
+      .from(calendar)
+      .where(
+        and(
+          eq(calendar.id, boundCalendarId),
+          eq(calendar.familyId, principal.familyId),
+          eq(calendar.isHousehold, false),
+          eq(calendar.writable, true)
+        )
+      )
+      .limit(1);
+
+    if (!target) return failure('calendarNotFound');
+    nextBoundCalendarId = target.id;
+  }
+
   const now = new Date();
 
   await db.transaction(async (tx) => {
     await tx
       .update(calendar)
-      .set({ visibility, defaultType, updatedAt: now })
+      .set({
+        visibility: nextVisibility,
+        defaultType,
+        ...(existing.isHousehold ? { boundCalendarId: nextBoundCalendarId } : {}),
+        updatedAt: now,
+      })
       .where(and(eq(calendar.id, calendarId), eq(calendar.familyId, principal.familyId)));
 
     // The hub has no other way to learn about this: nobody is standing at the
@@ -599,7 +638,7 @@ export async function setCalendarDisplayAction(
         type: 'settings.updated',
         entity: { id: principal.familyId },
         actor: { ...actorOf(principal), source: 'mobile' },
-        patch: { calendarId, visibility, defaultType },
+        patch: { calendarId, visibility: nextVisibility, defaultType },
       },
       tx
     );

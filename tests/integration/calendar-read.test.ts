@@ -2,7 +2,8 @@ import { randomUUID } from 'node:crypto';
 import { eq } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import * as schema from '@/server/db/schema';
-import { listEvents } from '@/modules/calendar/queries';
+import { ensureHouseholdCalendar } from '@/modules/calendar/household';
+import { groupByMember, listEvents } from '@/modules/calendar/queries';
 import { createTestDb, databaseUrl, seedHousehold, type Household } from './support/db';
 
 /**
@@ -341,6 +342,37 @@ describe.skipIf(!databaseUrl)('calendar read path (integration)', () => {
 
     expect(events.find((item) => item.title === 'Schoolfoto')!.editable).toBe(false);
     expect(events.find((item) => item.title === 'Eigen notitie')!.editable).toBe(true);
+  });
+
+  it('reads events on the household calendar as the whole family’s', async () => {
+    const householdId = (await ensureHouseholdCalendar(household.familyId)).id;
+
+    await db.insert(event).values({
+      familyId: household.familyId,
+      calendarId: householdId,
+      title: 'Familiediner',
+      startsAt: new Date('2026-03-11T17:00:00.000Z'),
+      endsAt: new Date('2026-03-11T18:30:00.000Z'),
+      // Attributed to one parent on purpose: a bound Google calendar is
+      // somebody's own calendar as far as sync is concerned, and the household
+      // rule has to beat attribution or the family dinner lands in her column.
+      ownerMemberId: household.parentId,
+    });
+
+    const events = await read(true);
+    const dinner = events.find((item) => item.title === 'Familiediner')!;
+
+    expect(dinner.householdWide).toBe(true);
+    // It inherits the household calendar's default type, Familie & uitjes.
+    expect(dinner.eventType).toBe('family');
+
+    const { byMember, shared } = groupByMember(events, [household.parentId, household.childId]);
+    expect(shared.map((item) => item.title)).toContain('Familiediner');
+    expect(byMember.get(household.parentId)!.map((item) => item.title)).not.toContain(
+      'Familiediner'
+    );
+
+    await db.delete(event).where(eq(event.id, dinner.seriesId));
   });
 
   it('inherits its calendar’s default type when it has none of its own', async () => {

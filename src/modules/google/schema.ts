@@ -1,5 +1,6 @@
 import {
   boolean,
+  type AnyPgColumn,
   index,
   pgEnum,
   pgTable,
@@ -66,10 +67,18 @@ export const calendar = pgTable(
     familyId: uuid('family_id')
       .notNull()
       .references(() => family.id, { onDelete: 'cascade' }),
-    googleAccountId: uuid('google_account_id')
-      .notNull()
-      .references(() => googleAccount.id, { onDelete: 'cascade' }),
-    googleCalendarId: text('google_calendar_id').notNull(),
+    /**
+     * Null for the household's own "Gezin" calendar (M23), which is the one
+     * calendar row that came from us rather than from Google. Everything else
+     * about a calendar — its events, its colour, its default type, its place
+     * in the settings list — is the same whether Google is behind it or not,
+     * which is why it is this table rather than a second one.
+     */
+    googleAccountId: uuid('google_account_id').references(() => googleAccount.id, {
+      onDelete: 'cascade',
+    }),
+    /** Null for the same reason, and for the same row. */
+    googleCalendarId: text('google_calendar_id'),
     summary: text('summary').notNull(),
     color: text('color'),
     /**
@@ -128,6 +137,32 @@ export const calendar = pgTable(
      * the calendars list away.
      */
     defaultType: eventType('default_type').notNull().default('other'),
+    /**
+     * The household's built-in calendar: exactly one per family, created with
+     * the family and never deletable or hideable (M23).
+     *
+     * It exists to give "this is for all of us" a home. Before it, a family
+     * dinner was an event with no owner and no attendees — shared by accident,
+     * because nothing claimed it — and there was nowhere to *put* one on
+     * purpose. Events on this calendar are household-wide by construction:
+     * every board treats them as everyone's, whatever attribution says.
+     */
+    isHousehold: boolean('is_household').notNull().default(false),
+    /**
+     * The Google calendar this household calendar is *bound to*, if the owner
+     * has bound one (M23). Null = a plain native Kynite calendar.
+     *
+     * A pointer rather than a merge, and that is the whole design. The bound
+     * calendar keeps its own row, its own sync token, its own channel and its
+     * own events, so the sync engine is untouched: reads come through the
+     * existing pass and writes go out through the existing push. All this
+     * column changes is *meaning* — events on the target read as the
+     * household's rather than as one member's, and unbinding is one write that
+     * takes nothing with it.
+     */
+    boundCalendarId: uuid('bound_calendar_id').references((): AnyPgColumn => calendar.id, {
+      onDelete: 'set null',
+    }),
     syncEnabled: boolean('sync_enabled').notNull().default(true),
     /** Google's incremental cursor; null forces the next sync to be a full one. */
     syncToken: text('sync_token'),

@@ -13,6 +13,9 @@ import { locales } from '@/i18n/routing';
 import { redirect } from '@/i18n/navigation';
 import { getAuth } from '@/server/auth';
 import { getDb } from '@/server/db';
+// The `calendar` table from the schema assembly point (§2) rather than from
+// the google slice's barrel: this file needs the table object and nothing else.
+import { calendar } from '@/server/db/schema';
 import { session as sessionTable, user } from '@/server/db/auth-schema';
 import { env } from '@/server/env';
 import { sanitizeCallbackUrl, withoutLocalePrefix } from '@/lib/callback-url';
@@ -28,6 +31,29 @@ import {
 import { inviteStateOf } from './domain/invite';
 import { claimInvite, mintInvite, resolveInvite, revokeInvite } from './invites';
 import { assertCan, getPrincipal } from './principal';
+
+/**
+ * The household's built-in calendar, written with the family (M23).
+ *
+ * The shape is duplicated rather than imported: `modules/calendar`'s barrel
+ * re-exports that slice's client components, and pulling it into a `'use
+ * server'` module would drag a React client graph into every server action in
+ * this file (§2, and the note at the top of that barrel). The reasoning behind
+ * each value — and the idempotent repair for a household that predates this —
+ * lives in `modules/calendar/household.ts`, which is the source of truth; this
+ * is the one write that has to happen inside the family transaction.
+ */
+function householdCalendar(familyId: string) {
+  return {
+    familyId,
+    summary: 'Gezin',
+    isHousehold: true,
+    defaultType: 'family' as const,
+    writable: true,
+    syncEnabled: true,
+    visibility: 'family' as const,
+  };
+}
 import {
   HUB_VIEWS,
   MEMBER_COLORS,
@@ -169,6 +195,14 @@ export async function signUpAction(
         rewardHorizon: 'savings',
         sortOrder: 0,
       });
+
+      // The household's own "Gezin" calendar, in the same transaction as the
+      // family and the owner: a household is never half-made, and this is now
+      // part of what a household *is* (M23).
+      // The household's own "Gezin" calendar, in the same transaction as the
+      // family and the owner: a household is never half-made, and this is now
+      // part of what a household *is* (M23).
+      await tx.insert(calendar).values(householdCalendar(created.id));
     });
   } catch (error) {
     // The auth user now exists with no household: unfixed, that's an orphan
@@ -436,6 +470,8 @@ export async function createFamilyForSocialUserAction(
         rewardHorizon: 'savings',
         sortOrder: 0,
       });
+
+      await tx.insert(calendar).values(householdCalendar(created.id));
 
       return false;
     });

@@ -112,6 +112,11 @@ export async function bootstrapAccount(accountId: string): Promise<{ calendars: 
  * sync left to echo to.
  */
 export async function removeCalendar(row: Calendar): Promise<void> {
+  // The household's own calendar is not removable (M23). Every caller already
+  // reaches it through a join on `google_account`, which a native row can
+  // never satisfy — this is the guard that survives the day one of them stops.
+  if (row.isHousehold) return;
+
   if (row.channelId && row.channelResourceId) {
     await stopChannel(row).catch(() => {});
   }
