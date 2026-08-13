@@ -806,6 +806,7 @@
       "namePlaceholder": "Keuken",
       "generate": "Code aanmaken",
       "codeFor": "Code voor {name}",
+      "enterAt": "Ga op het scherm naar {url} en voer daar de code in.",
       "expiresAt": "Geldig tot {time}. {digits} cijfers, één keer te gebruiken."
     },
     "list": {

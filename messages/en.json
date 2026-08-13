@@ -806,6 +806,7 @@
       "namePlaceholder": "Kitchen",
       "generate": "Create code",
       "codeFor": "Code for {name}",
+      "enterAt": "On the device, go to {url} and enter the code there.",
       "expiresAt": "Valid until {time}. {digits} digits, single use."
     },
     "list": {

@@ -72,6 +72,11 @@ export function PairDevicePanel() {
           >
             {state.code}
           </span>
+          <span className="text-body-sm text-ink-secondary" data-testid="pairing-code-hint">
+            {t('pair.enterAt', {
+              url: `${typeof window === 'undefined' ? '' : window.location.host}/hub`,
+            })}
+          </span>
           <span className="text-body-sm text-ink-secondary">
             {t('pair.expiresAt', {
               time: format.dateTime(new Date(state.expiresAt), {
