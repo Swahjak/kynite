@@ -392,3 +392,14 @@ Consolidated tallies, all runs env-isolated (`.env.local` moved aside per CLAUDE
 - Add `https://kynite.app/api/auth/callback/google` as an authorized redirect URI in the Google Cloud console — Google sign-in fails on prod until then.
 - Re-upload recovered avatars from `~/Downloads/avatars/{joep,fien,veerle,peep}.svg` via Settings → Family → member edit.
 - Visual sign-off of the stitch design on kynite.app.
+
+## M22 — Design-system rebrand
+
+- [x] Status
+- **Scope:** Install `docs/design` (extracted from the standalone design-system export) as the single source of truth, purging the old green/Lexend brand. New foundation: Baloo 2 + Poppins fonts, indigo `#5d5fef` token palette with a derived dark theme, restyled shadcn primitives, a shared component library under `src/components/kynite`, regenerated logo/favicon/app icons. Calendar, hub, routines, rewards, timers, settings, family, auth, share and the app shell restyled against the new docs.
+- **Commit:** `f5f3112` — `feat(m22): rebrand to new Kynite design system`.
+- **Review cycle:** BLOCK → fixed → APPROVE. Review findings on the first pass covered contrast, focus indicators, single-iteration animations, and aria roles; all fixed in the same commit before merge.
+- **Post-rebrand e2e regen (this session, 2026-08-13):** with `.env.local` isolated per the CLAUDE.md E2E gotcha, full `@visual` suite re-baselined — 40 snapshot PNGs updated across app (design-system, invite, routines) and hub (calendar, celebration, rewards, routines, timers) projects, 42/42 visual tests passing on rerun against the new baselines. `@smoke` gate: 9/9 passing. Snapshot churn committed as `d78acd3` (`test(e2e): regenerate visual baselines for design-system rebrand`) with no incidental spec-file changes.
+- **Deploy:** `railway up --service kynite --ci` to `patient-mercy`/`kynite` (production, ams region); new deployment `512ee6b2` went live and passed Railway's own healthcheck against `/api/health`.
+- **Post-deploy verification:** `GET https://kynite.app/api/health` → `{"status":"ok","database":{"ok":true},...}`; `GET https://kynite.app/nl` → HTTP 200. New brand confirmed live in the served CSS chunks: `--brand:#5d5fef` and `Baloo` font-family references present (the previous `#0040e0` stitch-era indigo is gone from the deployed bundle).
+- **Environment hygiene:** `.env.local` moved aside before the e2e run and restored after; test DB (`docker-compose.test.yml`) torn down; ports 3100/3101 confirmed free; no leftover Playwright/Next webservers.
