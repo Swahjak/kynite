@@ -207,7 +207,7 @@ export function TimeGrid({ days, events, timeZone, now, onSelect, hub = false }:
               <div
                 className={cn(
                   'label-overline',
-                  isToday ? 'text-primary-foreground/75' : 'text-ink-muted'
+                  isToday ? 'text-primary-foreground' : 'text-ink-muted'
                 )}
               >
                 {format.dateTime(day, { weekday: 'short' })}

@@ -114,7 +114,7 @@ export function NowHeroClock({
         <span className="font-display text-h3">
           {live ? t('now.remainingTitle') : t('now.startsTitle')}
         </span>
-        <span className="text-body text-primary-foreground/80">
+        <span className="text-body text-primary-foreground">
           {live ? t('now.endsAt', { time: at(endsAt) }) : t('now.inMinutes', { minutes: until })}
         </span>
       </div>

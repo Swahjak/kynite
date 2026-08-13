@@ -72,7 +72,7 @@ export function SavingsGoalCard({
         </span>
 
         <div className="z-10 flex w-full flex-1 flex-col gap-4">
-          <span className="label-overline text-primary-foreground/80">{copy.eyebrow}</span>
+          <span className="label-overline text-primary-foreground">{copy.eyebrow}</span>
           <h2 id={headingId} className="font-display text-display-md font-extrabold">
             {goal.title}
           </h2>

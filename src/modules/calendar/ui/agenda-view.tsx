@@ -120,7 +120,7 @@ export function AgendaView({
                   strips the size (or the color); a plain string has no
                   conflict resolver to fool. */}
                 <div
-                  className={`label-overline ${hub ? 'text-body' : ''} ${isToday ? 'text-primary-foreground/75' : 'text-ink-muted'}`}
+                  className={`label-overline ${hub ? 'text-body' : ''} ${isToday ? 'text-primary-foreground' : 'text-ink-muted'}`}
                 >
                   {format.dateTime(date, { weekday: 'short' })}
                 </div>
@@ -130,7 +130,7 @@ export function AgendaView({
                   {format.dateTime(date, { day: 'numeric' })}
                 </div>
                 <div
-                  className={`${hub ? 'text-body' : 'text-caption'} ${isToday ? 'text-primary-foreground/75' : 'text-ink-muted'}`}
+                  className={`${hub ? 'text-body' : 'text-caption'} ${isToday ? 'text-primary-foreground' : 'text-ink-muted'}`}
                 >
                   {format.dateTime(date, { month: 'short' })}
                 </div>

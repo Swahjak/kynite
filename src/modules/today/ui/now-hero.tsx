@@ -64,7 +64,7 @@ export async function NowHero({ event, mode, members, now, timeZone, dayKey }: N
           <h2 className="font-display text-h1">
             {past ? t('now.pastClearTitle') : t('now.clearTitle')}
           </h2>
-          <p className="text-body text-primary-foreground/80">
+          <p className="text-body text-primary-foreground">
             {past ? t('now.pastClearBody') : t('now.clearBody')}
           </p>
         </div>
@@ -93,7 +93,7 @@ export async function NowHero({ event, mode, members, now, timeZone, dayKey }: N
                 : t('now.eyebrowNext')}
           </span>
           <h2 className="font-display text-h1 break-words">{event.title}</h2>
-          <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-body text-primary-foreground/80">
+          <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-body text-primary-foreground">
             <span className="tabular-nums">
               {event.allDay ? t('allDay') : `${at(event.startsAt)} – ${at(event.endsAt)}`}
             </span>
@@ -134,7 +134,7 @@ export async function NowHero({ event, mode, members, now, timeZone, dayKey }: N
               <span className="font-display text-h3">
                 {past ? t('now.pastTitle') : t('now.startsTitle')}
               </span>
-              <span className="text-body text-primary-foreground/80">
+              <span className="text-body text-primary-foreground">
                 {event.allDay
                   ? t('allDay')
                   : past
