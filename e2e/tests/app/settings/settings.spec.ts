@@ -301,7 +301,9 @@ test.describe('hub display preferences', () => {
     // The hue on the board is the type's, and the owner still reads her own
     // private calendar in full (M23).
     await page.goto('/nl/today');
-    await expect(page.locator('[data-slot="day-agenda-row"][data-category="teal"]')).toBeVisible();
+    await expect(
+      page.locator('[data-testid="today-timeline-row"][data-category="teal"]')
+    ).toBeVisible();
   });
 });
 

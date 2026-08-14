@@ -102,6 +102,7 @@ export async function TodayTabDag({
         key={event.key}
         data-testid="today-timeline-row"
         data-state={live ? 'now' : 'default'}
+        data-category={event.category}
         className="relative flex gap-3.5"
       >
         {/* The rail sits at the *card's* left edge, not the row's: `-left-5`
