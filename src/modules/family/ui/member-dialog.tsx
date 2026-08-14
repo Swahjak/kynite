@@ -13,6 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { DateField } from '@/components/ui/date-field';
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import {
@@ -107,11 +108,11 @@ export function MemberDialog({ member }: { member?: Member }) {
 
           <Field>
             <FieldLabel>{t('form.birthDate')}</FieldLabel>
-            {/* Native `<input type="date">`: the picker follows the browser's
-                locale, not the household's `formattingLocale` setting
-                (`src/i18n/formatting-locale.ts`) — no API overrides that. */}
-            <Input
-              type="date"
+            {/* `DateField`, not `<input type="date">`: a native picker follows
+                the browser's locale, not the household's `formattingLocale`
+                setting (`src/i18n/formatting-locale.ts`), which no API
+                overrides. Same ISO `yyyy-MM-dd` value in and out. */}
+            <DateField
               name="birthDate"
               size="hub"
               defaultValue={member?.birthDate ?? ''}

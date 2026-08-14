@@ -1,3 +1,4 @@
+import type { Locator } from '@playwright/test';
 import { pairHub } from '@e2e/fixtures/hub';
 import { expect, test } from '@e2e/fixtures/family';
 import {
@@ -18,6 +19,18 @@ import {
 
 /** A Wednesday, far enough out that "today" never collides with the fixtures. */
 const ANCHOR = '2026-03-11';
+
+/**
+ * The start/end controls are a `DateTimeField` — a labelled group holding a
+ * date and a time input — not a single `<input type="datetime-local">`, since
+ * a native one renders in the *browser's* locale rather than the household's
+ * (`src/components/ui/date-time-field.tsx`). Both halves accept the wire
+ * format, so the values below are still ISO.
+ */
+async function fillWhen(group: Locator, date: string, time: string) {
+  await group.getByLabel('Datum').fill(date);
+  await group.getByLabel('Tijd').fill(time);
+}
 
 test.describe('calendar views', () => {
   test('renders all four layouts and switches between them without a reload', async ({
@@ -83,8 +96,8 @@ test.describe('event CRUD', () => {
       await expect(page.getByTestId('event-dialog')).toBeVisible();
 
       await page.getByTestId('event-title').fill('Zwemles');
-      await page.getByTestId('event-starts-at').fill('2026-03-11T16:00');
-      await page.getByLabel('Eindigt om').fill('2026-03-11T17:00');
+      await fillWhen(page.getByTestId('event-starts-at'), ANCHOR, '16:00');
+      await fillWhen(page.getByTestId('event-ends-at'), ANCHOR, '17:00');
       await page.getByTestId('event-save').click();
 
       await expect(page.getByTestId('event-dialog')).toBeHidden();
@@ -132,8 +145,8 @@ test.describe('event CRUD', () => {
 
     await page.getByTestId('event-create').click();
     await page.getByTestId('event-title').fill('Onmogelijk');
-    await page.getByTestId('event-starts-at').fill('2026-03-11T17:00');
-    await page.getByLabel('Eindigt om').fill('2026-03-11T16:00');
+    await fillWhen(page.getByTestId('event-starts-at'), ANCHOR, '17:00');
+    await fillWhen(page.getByTestId('event-ends-at'), ANCHOR, '16:00');
     await page.getByTestId('event-save').click();
 
     await expect(page.getByRole('alert')).toContainText('eindtijd');

@@ -10,7 +10,16 @@
       "afternoon": "Good afternoon, {name}",
       "evening": "Good evening, {name}"
     },
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "dateField": {
+      "invalid": "Enter a date like {pattern}.",
+      "outOfRange": "That date isn't allowed."
+    },
+    "timeField": {
+      "invalid": "Enter a time like {pattern}."
+    },
+    "date": "Date",
+    "time": "Time"
   },
   "nav": {
     "today": "Today",

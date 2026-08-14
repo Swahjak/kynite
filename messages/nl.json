@@ -10,7 +10,16 @@
       "afternoon": "Goedemiddag, {name}",
       "evening": "Goedenavond, {name}"
     },
-    "cancel": "Annuleren"
+    "cancel": "Annuleren",
+    "dateField": {
+      "invalid": "Vul een datum in als {pattern}.",
+      "outOfRange": "Deze datum kan niet."
+    },
+    "timeField": {
+      "invalid": "Vul een tijd in als {pattern}."
+    },
+    "date": "Datum",
+    "time": "Tijd"
   },
   "nav": {
     "today": "Vandaag",

@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useEffect, useRef, useState, type ReactNode } from 'react';
+import { useActionState, useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
@@ -23,7 +23,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
+import { DateField } from '@/components/ui/date-field';
+import { DateTimeField } from '@/components/ui/date-time-field';
+import { Field, FieldDescription, FieldGroupLabel, FieldLabel } from '@/components/ui/field';
 import { Icon } from '@/components/ui/icon';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -91,6 +93,58 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
       <h3 className="label-overline text-ink-muted">{title}</h3>
       {children}
     </section>
+  );
+}
+
+/**
+ * One end of the event's window — a date on its own when the event is all-day,
+ * a date *and* a time otherwise.
+ *
+ * The two shapes need different labelling, which is the whole reason this is a
+ * component rather than a ternary inline: a single control belongs in a
+ * `Field` (Base UI binds the label to it), while the date+time pair is a
+ * `role="group"` named by a `FieldGroupLabel`, because a `Field` label can
+ * only ever point at one of the two inputs.
+ */
+function WhenField({
+  name,
+  label,
+  allDay,
+  value,
+  testId,
+}: {
+  name: string;
+  label: string;
+  allDay: boolean;
+  value: string;
+  testId: string;
+}) {
+  const t = useTranslations('common');
+  const labelId = useId();
+
+  if (allDay) {
+    return (
+      <Field>
+        <FieldLabel>{label}</FieldLabel>
+        <DateField name={name} size="hub" required defaultValue={value} data-testid={testId} />
+      </Field>
+    );
+  }
+
+  return (
+    <div className="flex w-full flex-col gap-1.5">
+      <FieldGroupLabel id={labelId}>{label}</FieldGroupLabel>
+      <DateTimeField
+        name={name}
+        size="hub"
+        required
+        defaultValue={value}
+        aria-labelledby={labelId}
+        dateLabel={t('date')}
+        timeLabel={t('time')}
+        data-testid={testId}
+      />
+    </div>
   );
 }
 
@@ -259,36 +313,30 @@ export function EventDialog({
               </label>
             </Field>
 
-            {/* Native `<input type="date"/"datetime-local">`: field order and
-                12/24-hour display follow the *browser's* locale, not the
+            {/* `DateField`/`DateTimeField`, not the native `date` /
+                `datetime-local` inputs: those render field order and
+                12/24-hour display in the *browser's* locale, ignoring the
                 household's `formattingLocale` setting
-                (`src/i18n/formatting-locale.ts`) — there is no API to
-                override that, so these are deliberately left as native
-                inputs rather than rebuilt as custom widgets. */}
+                (`src/i18n/formatting-locale.ts`) with no API to override it.
+                The submitted values are unchanged — `yyyy-MM-dd` all-day,
+                `yyyy-MM-ddTHH:mm` timed. */}
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field>
-                <FieldLabel>{t('form.startsAt')}</FieldLabel>
-                <Input
-                  type={allDay ? 'date' : 'datetime-local'}
-                  name="startsAt"
-                  size="hub"
-                  required
-                  defaultValue={toLocalInput(start, timeZone, allDay)}
-                  key={`start-${allDay}`}
-                  data-testid="event-starts-at"
-                />
-              </Field>
-              <Field>
-                <FieldLabel>{t('form.endsAt')}</FieldLabel>
-                <Input
-                  type={allDay ? 'date' : 'datetime-local'}
-                  name="endsAt"
-                  size="hub"
-                  required
-                  defaultValue={toLocalInput(end, timeZone, allDay)}
-                  key={`end-${allDay}`}
-                />
-              </Field>
+              <WhenField
+                key={`start-${allDay}`}
+                name="startsAt"
+                label={t('form.startsAt')}
+                allDay={allDay}
+                value={toLocalInput(start, timeZone, allDay)}
+                testId="event-starts-at"
+              />
+              <WhenField
+                key={`end-${allDay}`}
+                name="endsAt"
+                label={t('form.endsAt')}
+                allDay={allDay}
+                value={toLocalInput(end, timeZone, allDay)}
+                testId="event-ends-at"
+              />
             </div>
 
             <Field>

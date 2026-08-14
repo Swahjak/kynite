@@ -14,9 +14,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { DateField } from '@/components/ui/date-field';
 import { Field, FieldDescription, FieldGroupLabel, FieldLabel } from '@/components/ui/field';
 import { Icon } from '@/components/ui/icon';
 import { Input } from '@/components/ui/input';
+import { TimeField } from '@/components/ui/time-field';
 import {
   Select,
   SelectContent,
@@ -301,13 +303,11 @@ function RoutineForm({
       {kind === 'once' ? (
         <Field>
           <FieldLabel>{t('form.onceDate')}</FieldLabel>
-          {/* Native `<input type="date">`: the picker and the displayed digit
-              order follow the *browser's* locale, not the household's
-              `formattingLocale` setting (`src/i18n/formatting-locale.ts`) —
-              there is no API to override that, so this is deliberately left
-              alone rather than rebuilt as a custom widget. */}
-          <Input
-            type="date"
+          {/* `DateField`, not `<input type="date">`: a native picker renders in
+              the *browser's* locale, which ignored the household's
+              `formattingLocale` setting (`src/i18n/formatting-locale.ts`).
+              Same ISO `yyyy-MM-dd` value in and out. */}
+          <DateField
             name="onceDate"
             size="hub"
             required
@@ -317,7 +317,7 @@ function RoutineForm({
             // the stored date is already behind it (see `onceDateFloor`).
             min={onceDateFloor}
             value={onceDate}
-            onChange={(event) => setOnceDate(event.target.value)}
+            onValueChange={setOnceDate}
           />
           <FieldDescription>{t('form.onceDateHint')}</FieldDescription>
         </Field>
@@ -369,10 +369,9 @@ function RoutineForm({
       <div className="grid grid-cols-2 gap-4">
         <Field>
           <FieldLabel>{t('form.timeOfDay')}</FieldLabel>
-          {/* Native `<input type="time">` — same caveat as `onceDate` above:
-              12/24-hour display follows the browser, not `formattingLocale`. */}
-          <Input
-            type="time"
+          {/* `TimeField` — same reason as `onceDate` above: 12/24-hour display
+              followed the browser, not `formattingLocale`. Still `HH:mm`. */}
+          <TimeField
             name="timeOfDay"
             size="hub"
             required
