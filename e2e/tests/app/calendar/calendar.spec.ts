@@ -328,8 +328,11 @@ test.describe('pending sync', () => {
   });
 });
 
-test.describe('the day board', () => {
-  test('orders columns by sortOrder and carries each member colour', async ({ page, family }) => {
+test.describe('the today tabs', () => {
+  test('personen tab orders columns by sortOrder and carries each member colour', async ({
+    page,
+    family,
+  }) => {
     await withDb(async (client) => {
       await seedMembers(client, family.familyId, [
         { displayName: 'Mila', role: 'child', color: 'purple', sortOrder: 1 },
@@ -338,11 +341,11 @@ test.describe('the day board', () => {
     });
 
     await page.goto('/nl/today');
-    // M23: the board opens on the merged list, so the columns are one tap away
-    // rather than the landing arrangement.
-    await page.getByTestId('day-view-columns').click();
+    // Rebuilt as tabs (commit 102facd): the day board's own combined/columns
+    // switcher is gone, and "per person" is one of the four tab peers.
+    await page.getByTestId('pill-tab-personen').click();
 
-    const columns = page.locator('[data-slot="member-column"]');
+    const columns = page.locator('[data-testid="today-person-columns"] [data-member-id]');
     await expect(columns).toHaveCount(3);
 
     // Sign-up's owner is sortOrder 0, so the seeded children follow in order.
@@ -350,11 +353,11 @@ test.describe('the day board', () => {
     await expect(columns.nth(1)).toContainText('Mila');
     await expect(columns.nth(2)).toContainText('Daan');
 
-    await expect(columns.nth(1).locator('.bg-cat-purple-solid')).toBeVisible();
-    await expect(columns.nth(2).locator('.bg-cat-orange-solid')).toBeVisible();
+    await expect(columns.nth(1).locator('.bg-cat-purple-surface')).toBeVisible();
+    await expect(columns.nth(2).locator('.bg-cat-orange-surface')).toBeVisible();
   });
 
-  test('merges a shared event into one row and remembers the arrangement', async ({
+  test('the dag tab merges a shared event into one row, and the tab choice survives a reload', async ({
     page,
     family,
   }) => {
@@ -368,9 +371,14 @@ test.describe('the day board', () => {
 
     await withDb(async (client) => {
       const owner = await ownerMemberOf(client, family.familyId);
+      // A fourth child who is *not* invited, so the household has someone the
+      // event does not belong to — otherwise attendees + owner covers every
+      // member and the row collapses to "Iedereen" rather than naming names
+      // (the same `everyone` rule `today-tab-dag.tsx` and the strip share).
       const [mila, daan] = await seedMembers(client, family.familyId, [
         { displayName: 'Mila', role: 'child', color: 'purple', sortOrder: 1 },
         { displayName: 'Daan', role: 'child', color: 'orange', sortOrder: 2 },
+        { displayName: 'Lars', role: 'child', color: 'green', sortOrder: 3 },
       ]);
 
       await seedEvents(client, family.familyId, [
@@ -386,23 +394,33 @@ test.describe('the day board', () => {
 
     await page.goto('/nl/today');
 
-    // The columns would draw this event three times, once per member. The
-    // merged list draws it once, and its sub-label names all three (M23 —
-    // `calendar.md` § "Day agenda" puts *who* under the title).
-    const rows = page.locator('[data-slot="day-board"] [data-slot="day-agenda-row"]', {
-      hasText: 'Zwemles',
-    });
+    // A run late enough in the day finds this event already "past", which the
+    // dag tab collapses under a one-line summary
+    // (`today-past-rows.tsx`) — open it before looking for the row so the
+    // assertion below holds at any time of day the suite runs.
+    const pastToggle = page.getByTestId('today-past-toggle');
+    if (await pastToggle.count()) await pastToggle.click();
+
+    // The per-person columns would draw this event three times, once per
+    // member. The dag tab's timeline is the merged view and draws it once,
+    // with its sub-label naming all three.
+    const rows = page.locator('[data-testid="today-timeline-row"]', { hasText: 'Zwemles' });
     await expect(rows).toHaveCount(1);
     await expect(rows.first()).toContainText('Mila');
     await expect(rows.first()).toContainText('Daan');
 
-    // The choice is per device and survives a reload — no round trip, no save.
-    await page.getByTestId('day-view-columns').click();
-    await expect(page.locator('[data-slot="member-column"]')).toHaveCount(3);
+    // The tab choice is per device (`kynite.today.tab` in localStorage) and
+    // survives a reload — no round trip, no save.
+    await page.getByTestId('pill-tab-personen').click();
+    await expect(page.locator('[data-testid="today-person-columns"] [data-member-id]')).toHaveCount(
+      4
+    );
 
     await page.reload();
-    await expect(page.locator('[data-slot="member-column"]')).toHaveCount(3);
-    await expect(page.locator('[data-slot="combined-day-list"]')).toHaveCount(0);
+    await expect(page.getByTestId('today-tab-personen')).toBeVisible();
+    await expect(page.locator('[data-testid="today-person-columns"] [data-member-id]')).toHaveCount(
+      4
+    );
   });
 });
 
@@ -443,11 +461,12 @@ test.describe('private calendars on the hub', () => {
 
     // The parent's own device: the owner may read their private calendar.
     await page.goto('/nl/today');
-    // `.first()` because M19's `/today` shows the next event twice — once as
-    // the "up next" hero heading and once as its chip on the timeline. The
-    // claim under test is that the title is legible *at all* on the parent's
-    // own device; the hub half below still asserts the exact opposite with
-    // `toHaveCount(0)`, which is the assertion that has to stay strict.
+    // `.first()` because the rebuilt `/today` (102facd) shows the next event
+    // twice — once in the NU strip and once as its row on the dag tab's
+    // timeline. The claim under test is that the title is legible *at all* on
+    // the parent's own device; the hub half below still asserts the exact
+    // opposite with `toHaveCount(0)`, which is the assertion that has to stay
+    // strict.
     await expect(page.getByText('Sollicitatiegesprek').first()).toBeVisible();
 
     // Now the same browser becomes the wall tablet. Pairing happens *here*,
