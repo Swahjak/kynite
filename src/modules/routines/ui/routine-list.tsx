@@ -1,8 +1,9 @@
-import { getFormatter, getTranslations } from 'next-intl/server';
+import { getTranslations } from 'next-intl/server';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { IconMedallion, StarCount } from '@/components/kynite';
-import type { Member } from '@/modules/family';
+import { formatDateTime } from '@/i18n/formatting-locale';
+import { getHouseholdFormattingLocale, type Member } from '@/modules/family';
 import { hasGraduated } from '../domain/stars';
 import { oneOffDateOf, weekdaysOfRule } from '../domain/schedule';
 import type { RoutineWithSteps } from '../queries';
@@ -31,14 +32,17 @@ export async function RoutineList({
   canWrite: boolean;
 }) {
   const t = await getTranslations('routines');
-  const format = await getFormatter();
+  const formattingLocale = await getHouseholdFormattingLocale();
   /**
    * A date key rendered in the reader's locale. Noon UTC, not midnight: the
    * key already *is* the family's calendar day, and reading it back at midnight
    * would let any zone west of UTC render the day before.
    */
   const dayOf = (dateKey: string) =>
-    format.dateTime(new Date(`${dateKey}T12:00:00Z`), { day: 'numeric', month: 'long' });
+    formatDateTime(new Date(`${dateKey}T12:00:00Z`), formattingLocale, {
+      day: 'numeric',
+      month: 'long',
+    });
   const nameOf = (memberId: string) =>
     members.find((member) => member.id === memberId)?.displayName ?? '';
 

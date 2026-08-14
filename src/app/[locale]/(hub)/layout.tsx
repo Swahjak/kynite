@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { NextIntlClientProvider } from 'next-intl';
+import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import {
   DARK_FROM_HOUR,
   DARK_UNTIL_HOUR,
@@ -7,8 +7,11 @@ import {
   KioskShell,
 } from '@/components/hub';
 import { BrandMark } from '@/components/brand';
+import { FormattingLocaleProvider } from '@/components/formatting';
 import { HubReloadController, ServiceWorkerRegistrar } from '@/components/offline';
 import { RealtimeProvider } from '@/components/realtime';
+import { defaultFormattingLocale } from '@/i18n/formatting-locale';
+import { routing } from '@/i18n/routing';
 import { getFamily, getPrincipal } from '@/modules/family';
 import { getDevice } from '@/modules/devices';
 import { ChimeSettingsPanel } from '@/modules/timers';
@@ -69,10 +72,12 @@ export default async function HubLayout({
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 }) {
-  // `params` is awaited (and unused) so the segment stays dynamic under Next
-  // 16's async params — the shell must never be prerendered into the static
-  // shell with one family's device name baked in.
-  await params;
+  // `params` is only read for its locale segment (the pre-paint theme script
+  // and everything else in this shell is otherwise device-driven) — the
+  // segment still keeps this dynamic under Next 16's async params, so the
+  // shell can never be prerendered into a static shell with one family's
+  // device name baked in.
+  const { locale } = await params;
 
   const principal = await getPrincipal();
   const paired =
@@ -84,13 +89,20 @@ export default async function HubLayout({
   // default rather than a lookup with no family to key it by.
   const family = principal?.kind === 'device' ? await getFamily(principal.familyId) : null;
   const timeZone = family?.timezone ?? 'Europe/Amsterdam';
+  // The household's date/time convention (`src/i18n/formatting-locale.ts`) —
+  // see `FormattingLocaleProvider`'s doc comment for why this is a second,
+  // next-intl-independent context rather than a `NextIntlClientProvider`
+  // `locale` override (it would break the rail's `Link`s).
+  const uiLocale = hasLocale(routing.locales, locale) ? locale : routing.defaultLocale;
+  const formattingLocale = family?.formattingLocale ?? defaultFormattingLocale(uiLocale);
 
   return (
     // One stream for the whole wall display (§4): the board, the timers and the
     // star chart share a connection instead of opening one each.
     <NextIntlClientProvider timeZone={timeZone}>
-      <RealtimeProvider>
-        {/* The 6-foot scale and the theme are applied before first paint, not in
+      <FormattingLocaleProvider formattingLocale={formattingLocale}>
+        <RealtimeProvider>
+          {/* The 6-foot scale and the theme are applied before first paint, not in
           an effect. Both hang off the *document* element (globals.css keys the
           kiosk type scale on `[data-surface='hub']`, and the design system's
           dark variant on `.dark`), and a wall display that painted the parent
@@ -99,23 +111,24 @@ export default async function HubLayout({
           worker reload. `useHubTheme` takes over from here and keeps both in
           sync; this only has to be right for the first frame, so it reads the
           same localStorage key and the same media query and nothing else. */}
-        <script dangerouslySetInnerHTML={{ __html: PRE_PAINT_THEME }} />
-        {/* B-1: registered per-surface now, not from the root `[locale]`
+          <script dangerouslySetInnerHTML={{ __html: PRE_PAINT_THEME }} />
+          {/* B-1: registered per-surface now, not from the root `[locale]`
           layout — see `(app)/layout.tsx` for why. */}
-        <ServiceWorkerRegistrar />
-        <HubReloadController />
-        {/* The chime control is rendered here, not inside the shell: the shell is
+          <ServiceWorkerRegistrar />
+          <HubReloadController />
+          {/* The chime control is rendered here, not inside the shell: the shell is
           a client component and `@/modules/timers` carries `server-only`
           queries (see `chime-settings-panel.tsx`). A server component may
           import the barrel, so the slice's own boundary stays intact. */}
-        <KioskShell
-          device={paired ? { id: paired.id, name: paired.name } : null}
-          chimeSettings={<ChimeSettingsPanel />}
-          brand={<BrandMark variant="icon" className="h-7" />}
-        >
-          {children}
-        </KioskShell>
-      </RealtimeProvider>
+          <KioskShell
+            device={paired ? { id: paired.id, name: paired.name } : null}
+            chimeSettings={<ChimeSettingsPanel />}
+            brand={<BrandMark variant="icon" className="h-7" />}
+          >
+            {children}
+          </KioskShell>
+        </RealtimeProvider>
+      </FormattingLocaleProvider>
     </NextIntlClientProvider>
   );
 }

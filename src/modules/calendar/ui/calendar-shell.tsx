@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useMemo, useState } from 'react';
-import { useFormatter, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
+import { useDateTimeFormat } from '@/components/formatting';
 import { useRouter } from '@/i18n/navigation';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -67,7 +68,7 @@ export function CalendarShell({
   canWrite,
 }: CalendarShellProps) {
   const t = useTranslations('calendar');
-  const format = useFormatter();
+  const formatDateTime = useDateTimeFormat();
   const router = useRouter();
 
   const [view, setView] = useState<CalendarView>(initialView);
@@ -134,10 +135,10 @@ export function CalendarShell({
 
   const heading =
     view === 'month'
-      ? format.dateTime(anchor, { month: 'long', year: 'numeric' })
+      ? formatDateTime(anchor, { month: 'long', year: 'numeric' })
       : view === 'day'
-        ? format.dateTime(anchor, { weekday: 'long', day: 'numeric', month: 'long' })
-        : `${format.dateTime(days[0], { day: 'numeric', month: 'short' })} – ${format.dateTime(
+        ? formatDateTime(anchor, { weekday: 'long', day: 'numeric', month: 'long' })
+        : `${formatDateTime(days[0], { day: 'numeric', month: 'short' })} – ${formatDateTime(
             days[days.length - 1],
             { day: 'numeric', month: 'short' }
           )}`;

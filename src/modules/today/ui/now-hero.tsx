@@ -1,10 +1,11 @@
-import { getFormatter, getTranslations } from 'next-intl/server';
+import { getTranslations } from 'next-intl/server';
 import { Card } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
 import { Link } from '@/i18n/navigation';
+import { formatDateTime } from '@/i18n/formatting-locale';
 import { cn } from '@/lib/utils';
 import { EVENT_TYPE_ICONS, type CalendarEvent } from '@/modules/calendar';
-import type { Member } from '@/modules/family';
+import { getHouseholdFormattingLocale, type Member } from '@/modules/family';
 import type { FlowMode } from '../domain/flow';
 import { MemberFaces, participantsOf } from './member-faces';
 import { NowHeroClock } from './now-hero-clock';
@@ -48,10 +49,10 @@ export type NowHeroProps = {
 
 export async function NowHero({ event, mode, members, now, timeZone, dayKey }: NowHeroProps) {
   const t = await getTranslations('today');
-  const format = await getFormatter();
+  const formattingLocale = await getHouseholdFormattingLocale();
 
   const at = (instant: Date) =>
-    format.dateTime(instant, { hour: '2-digit', minute: '2-digit', timeZone });
+    formatDateTime(instant, formattingLocale, { hour: '2-digit', minute: '2-digit', timeZone });
 
   const past = mode === 'past';
 

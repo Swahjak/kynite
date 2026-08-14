@@ -1,6 +1,7 @@
 'use client';
 
-import { useFormatter, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
+import { useDateTimeFormat } from '@/components/formatting';
 import { PageHeader } from '@/components/kynite';
 import { useMirroredHubState } from '@/components/offline';
 // Type-only, like `person-columns.tsx` — `@/modules/family` re-exports
@@ -70,7 +71,7 @@ export function HubBoard({
 }) {
   const board = useMirroredHubState(familyId, snapshot);
   const t = useTranslations('calendar');
-  const format = useFormatter();
+  const formatDateTime = useDateTimeFormat();
 
   return (
     <>
@@ -87,7 +88,7 @@ export function HubBoard({
         surface="hub"
         title={t('hub.title')}
         subtitle={
-          <span data-testid="hub-date">{format.dateTime(board.anchor, { dateStyle: 'full' })}</span>
+          <span data-testid="hub-date">{formatDateTime(board.anchor, { dateStyle: 'full' })}</span>
         }
         className="items-baseline"
         action={
@@ -95,7 +96,7 @@ export function HubBoard({
             data-testid="hub-clock"
             className="tabular-time text-display-hub font-extrabold text-brand-ink"
           >
-            {format.dateTime(board.now, { hour: '2-digit', minute: '2-digit' })}
+            {formatDateTime(board.now, { hour: '2-digit', minute: '2-digit' })}
           </span>
         }
       />

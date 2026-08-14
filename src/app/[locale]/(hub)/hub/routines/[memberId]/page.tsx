@@ -1,7 +1,9 @@
-import { getFormatter, getTranslations } from 'next-intl/server';
+import { getTranslations } from 'next-intl/server';
 import { EmptyState } from '@/components/kynite';
 import { ChildTabs } from '@/components/hub';
+import { formatDateTime } from '@/i18n/formatting-locale';
 import { requireHubDevice } from '@/modules/devices';
+import { getHouseholdFormattingLocale } from '@/modules/family';
 import { RoutineBoard, loadMemberRoutines } from '@/modules/routines';
 
 /** Session-dependent: never prerendered, so `next build` needs no database. */
@@ -35,7 +37,7 @@ export default async function HubRoutinesPage({
 
   const board = await loadMemberRoutines({ memberId, date, time });
   const t = await getTranslations('routines');
-  const format = await getFormatter();
+  const formattingLocale = await getHouseholdFormattingLocale();
 
   if (!board) {
     return (
@@ -65,7 +67,7 @@ export default async function HubRoutinesPage({
             {t('hub.title', { name: board.member.displayName })}
           </h1>
           <p className="text-body-lg text-ink-secondary">
-            {format.dateTime(board.now, { dateStyle: 'full' })}
+            {formatDateTime(board.now, formattingLocale, { dateStyle: 'full' })}
           </p>
         </div>
         {/* M19: the Stitch board clock token (72px), not the 56px display-md
@@ -75,7 +77,7 @@ export default async function HubRoutinesPage({
           data-testid="hub-routines-clock"
           className="tabular-time text-display-hub font-extrabold text-brand-ink"
         >
-          {format.dateTime(board.now, { hour: '2-digit', minute: '2-digit' })}
+          {formatDateTime(board.now, formattingLocale, { hour: '2-digit', minute: '2-digit' })}
         </span>
       </header>
 

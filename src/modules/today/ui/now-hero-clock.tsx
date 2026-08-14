@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useFormatter, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
+import { useDateTimeFormat } from '@/components/formatting';
 import { useRouter } from '@/i18n/navigation';
 import { elapsedRatio, minutesRemaining, minutesUntil } from '../domain/flow';
 import { ProgressRing } from './progress-ring';
@@ -56,7 +57,7 @@ export function NowHeroClock({
   timeZone,
 }: NowHeroClockProps) {
   const t = useTranslations('today');
-  const format = useFormatter();
+  const formatDateTime = useDateTimeFormat();
   const router = useRouter();
 
   const [now, setNow] = useState(initialNow);
@@ -81,7 +82,7 @@ export function NowHeroClock({
 
   const block = { startsAt, endsAt, allDay };
   const at = (instant: Date) =>
-    format.dateTime(instant, { hour: '2-digit', minute: '2-digit', timeZone });
+    formatDateTime(instant, { hour: '2-digit', minute: '2-digit', timeZone });
 
   const live = state === 'live';
   const ratio = live ? elapsedRatio(block, now) : 0;

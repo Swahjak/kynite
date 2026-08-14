@@ -1,6 +1,7 @@
 'use client';
 
-import { useFormatter, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
+import { useDateTimeFormat } from '@/components/formatting';
 import { cn } from '@/lib/utils';
 import { CategoryDot } from '@/components/kynite';
 import { Icon } from '@/components/ui/icon';
@@ -63,7 +64,7 @@ export function EventChip({
   style,
 }: EventChipProps) {
   const t = useTranslations('calendar');
-  const format = useFormatter();
+  const formatDateTime = useDateTimeFormat();
   const palette = CATEGORY_CLASSES[event.category];
 
   // A redacted event has no title to show — it is a shape in the day, which is
@@ -243,9 +244,9 @@ export function EventChip({
             hub ? 'text-body' : 'text-caption'
           )}
         >
-          {format.dateTime(event.startsAt, { hour: '2-digit', minute: '2-digit' })}
+          {formatDateTime(event.startsAt, { hour: '2-digit', minute: '2-digit' })}
           {' – '}
-          {format.dateTime(event.endsAt, { hour: '2-digit', minute: '2-digit' })}
+          {formatDateTime(event.endsAt, { hour: '2-digit', minute: '2-digit' })}
         </span>
       )}
 

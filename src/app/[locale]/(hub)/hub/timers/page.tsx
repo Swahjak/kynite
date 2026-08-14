@@ -1,6 +1,8 @@
-import { getFormatter, getTranslations } from 'next-intl/server';
+import { getTranslations } from 'next-intl/server';
 import { EmptyState } from '@/components/kynite';
+import { formatDateTime } from '@/i18n/formatting-locale';
 import { requireHubDevice } from '@/modules/devices';
+import { getHouseholdFormattingLocale } from '@/modules/family';
 import {
   DURATION_PRESETS,
   TimerBoard,
@@ -37,7 +39,7 @@ export default async function HubTimersPage({
   const board = await loadTimerBoard({ now });
   const t = await getTranslations('timers');
   const hub = await getTranslations('hub.timers');
-  const format = await getFormatter();
+  const formattingLocale = await getHouseholdFormattingLocale();
 
   // M19, owner decision: the wall starts timers, it does not only display them.
   // `timer:control` is `allow` for a device principal (§7), so the Server
@@ -82,7 +84,10 @@ export default async function HubTimersPage({
         <h1 className="font-display text-display-md font-extrabold">{t('hub.title')}</h1>
         {/* The Stitch board clock token (72px) — see the routines screen. */}
         <span className="tabular-time text-display-hub font-extrabold text-brand-ink">
-          {format.dateTime(new Date(board.serverNow), { hour: '2-digit', minute: '2-digit' })}
+          {formatDateTime(new Date(board.serverNow), formattingLocale, {
+            hour: '2-digit',
+            minute: '2-digit',
+          })}
         </span>
       </header>
 

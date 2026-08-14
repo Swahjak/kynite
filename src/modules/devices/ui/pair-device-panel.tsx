@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { useFormatter, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
+import { useDateTimeFormat } from '@/components/formatting';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import { Input } from '@/components/ui/input';
@@ -20,7 +21,7 @@ import { createPairingCodeAction } from '../actions';
  */
 export function PairDevicePanel() {
   const t = useTranslations('devices');
-  const format = useFormatter();
+  const formatDateTime = useDateTimeFormat();
   const [state, setState] = useState<PairingCodeState>(pairingCodeIdle);
   const [deviceName, setDeviceName] = useState('');
   const [pending, startTransition] = useTransition();
@@ -79,7 +80,7 @@ export function PairDevicePanel() {
           </span>
           <span className="text-body-sm text-ink-secondary">
             {t('pair.expiresAt', {
-              time: format.dateTime(new Date(state.expiresAt), {
+              time: formatDateTime(new Date(state.expiresAt), {
                 hour: '2-digit',
                 minute: '2-digit',
               }),

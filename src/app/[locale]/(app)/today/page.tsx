@@ -1,4 +1,4 @@
-import { getFormatter, getTranslations } from 'next-intl/server';
+import { getTranslations } from 'next-intl/server';
 import {
   DayBoard,
   NewEventFab,
@@ -8,7 +8,15 @@ import {
   toDateKey,
   toWall,
 } from '@/modules/calendar';
-import { firstNameOf, getMember, getPrincipal, greetingSlotFor, hourIn } from '@/modules/family';
+import { formatDateTime } from '@/i18n/formatting-locale';
+import {
+  firstNameOf,
+  getHouseholdFormattingLocale,
+  getMember,
+  getPrincipal,
+  greetingSlotFor,
+  hourIn,
+} from '@/modules/family';
 import {
   KidsProgress,
   NowHero,
@@ -65,7 +73,7 @@ export default async function TodayPage({
 
   const t = await getTranslations('today');
   const tCommon = await getTranslations('common');
-  const format = await getFormatter();
+  const formattingLocale = await getHouseholdFormattingLocale();
 
   /**
    * The greeting (M18).
@@ -131,7 +139,7 @@ export default async function TodayPage({
             screen is one clock too many. */}
         <p className="flex items-center gap-2 text-body text-ink-secondary">
           <span aria-hidden="true" className="size-2 shrink-0 rounded-4xl bg-success" />
-          {format.dateTime(data.anchor, { dateStyle: 'full' })}
+          {formatDateTime(data.anchor, formattingLocale, { dateStyle: 'full' })}
         </p>
       </header>
 

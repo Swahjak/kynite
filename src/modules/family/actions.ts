@@ -11,6 +11,7 @@ import { and, eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { locales } from '@/i18n/routing';
 import { redirect } from '@/i18n/navigation';
+import { FORMATTING_LOCALES } from '@/i18n/formatting-locale';
 import { getAuth } from '@/server/auth';
 import { getDb } from '@/server/db';
 // The `calendar` table from the schema assembly point (§2) rather than from
@@ -692,7 +693,7 @@ export async function deleteMemberAction(
  * Not an enum: the IANA list is ~600 entries, it changes with the tzdata
  * release the runtime ships, and pinning a copy of it in this file would mean
  * a family in a newly-split zone cannot select their own clock until we
- * redeploy. `Intl` is the same database every `format.dateTime()` in the app
+ * redeploy. `Intl` is the same database every date/time render in the app
  * resolves against, so "valid" here means exactly "renders correctly there".
  */
 function isKnownTimeZone(value: string): boolean {
@@ -707,24 +708,37 @@ function isKnownTimeZone(value: string): boolean {
 const familySettingsSchema = z.object({
   name: trimmed.min(1).max(80),
   locale: z.enum(locales),
+  /** The date/time convention (`src/i18n/formatting-locale.ts`), not the UI language above. */
+  formattingLocale: z.enum(FORMATTING_LOCALES),
   timezone: trimmed.min(1).max(64).refine(isKnownTimeZone),
   /** ISO-8601 weekday numbers; the UI offers Monday and Sunday. */
   weekStartsOn: z.coerce.number().int().min(1).max(7),
 });
 
 /**
- * The household's own identity: name, language, clock, week start (M16).
+ * The household's own identity: name, language, clock, date/time format, week
+ * start (M16, formatting locale added later — see `formattingLocale` below).
  *
  * Owner-only through `family:manage` — see that capability's note in
  * `authorize.ts` for why an adult second parent may run the household without
  * being able to redefine it.
  *
- * Two of these four fields are read by *every* surface on the next request and
- * neither needs a re-login, which is the acceptance criterion:
+ * Three of these five fields are read by *every* surface on the next request
+ * and neither needs a re-login, which is the acceptance criterion:
  *
  *  - **timezone** is resolved per request in `(app)/layout.tsx` and
  *    `(hub)/layout.tsx` from the family row (M15), so a changed zone reaches
- *    every `useFormatter()` below them on the next render.
+ *    every `useFormatter()`/`useDateTimeFormat()` below them on the next
+ *    render.
+ *  - **formattingLocale** (`src/i18n/formatting-locale.ts`) is the household's
+ *    date/time *convention* — `nl-NL` | `en-GB` | `en-US` — resolved the same
+ *    way as `timezone`, through `FormattingLocaleProvider`
+ *    (`components/formatting/`) rather than through next-intl's own `locale`:
+ *    that context is shared with `Link`/`redirect()`/`useRouter()`, so
+ *    repointing it here would also repoint every URL this tree builds. It
+ *    fixes the bug `locale` below cannot: bare `en` has no `Intl` convention
+ *    of its own and silently renders `en-US` dates until a household picks
+ *    one explicitly.
  *  - **locale** is the *household's* language: it drives the hub and push copy
  *    (`notifications/copy.ts` already reads it per family). It deliberately
  *    does **not** move the parent's own URL: `/nl/...` and `/en/...` are the
@@ -750,6 +764,7 @@ export async function updateFamilyAction(
   const parsed = familySettingsSchema.safeParse({
     name: read(formData, 'name'),
     locale: read(formData, 'locale'),
+    formattingLocale: read(formData, 'formattingLocale'),
     timezone: read(formData, 'timezone'),
     weekStartsOn: read(formData, 'weekStartsOn'),
   });
@@ -763,6 +778,7 @@ export async function updateFamilyAction(
       .set({
         name: input.name,
         locale: input.locale,
+        formattingLocale: input.formattingLocale,
         timezone: input.timezone,
         weekStartsOn: input.weekStartsOn,
         updatedAt: new Date(),
@@ -775,7 +791,11 @@ export async function updateFamilyAction(
         type: 'settings.updated',
         entity: { id: principal.familyId },
         actor: { memberId: principal.memberId, source: 'mobile' },
-        patch: { locale: input.locale, timezone: input.timezone },
+        patch: {
+          locale: input.locale,
+          formattingLocale: input.formattingLocale,
+          timezone: input.timezone,
+        },
       },
       tx
     );

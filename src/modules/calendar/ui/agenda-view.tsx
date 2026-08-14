@@ -1,7 +1,8 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useFormatter, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
+import { useDateTimeFormat } from '@/components/formatting';
 import { cn } from '@/lib/utils';
 import { EmptyState } from '@/components/kynite';
 import { dayKeysOf } from '../domain/expand';
@@ -37,7 +38,7 @@ export function AgendaView({
   onSelect,
 }: AgendaViewProps) {
   const t = useTranslations('calendar');
-  const format = useFormatter();
+  const formatDateTime = useDateTimeFormat();
   const todayKey = today ? toDateKey(toWall(today, timeZone)) : null;
 
   const groups = useMemo(() => {
@@ -122,17 +123,17 @@ export function AgendaView({
                 <div
                   className={`label-overline ${hub ? 'text-body' : ''} ${isToday ? 'text-primary-foreground' : 'text-ink-muted'}`}
                 >
-                  {format.dateTime(date, { weekday: 'short' })}
+                  {formatDateTime(date, { weekday: 'short' })}
                 </div>
                 <div
                   className={`tabular-time font-bold ${hub ? 'text-display-md' : 'text-h2'} ${isToday ? 'text-primary-foreground' : 'text-ink'}`}
                 >
-                  {format.dateTime(date, { day: 'numeric' })}
+                  {formatDateTime(date, { day: 'numeric' })}
                 </div>
                 <div
                   className={`${hub ? 'text-body' : 'text-caption'} ${isToday ? 'text-primary-foreground' : 'text-ink-muted'}`}
                 >
-                  {format.dateTime(date, { month: 'short' })}
+                  {formatDateTime(date, { month: 'short' })}
                 </div>
               </div>
 

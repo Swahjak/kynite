@@ -1,4 +1,8 @@
 import 'server-only';
+import { hasLocale } from 'next-intl';
+import { getLocale } from 'next-intl/server';
+import { defaultFormattingLocale, type FormattingLocale } from '@/i18n/formatting-locale';
+import { routing } from '@/i18n/routing';
 import { decide } from '@/modules/family/authorize';
 import { getFamily, listMembers } from '@/modules/family/queries';
 import { MS_PER_DAY, startOfDay, toDateKey, toWall } from '@/modules/calendar/domain/zone';
@@ -93,6 +97,10 @@ export type ShareView = {
   label: string | null;
   role: ShareLinkRole;
   timeZone: string;
+  /** The family's date/time convention (`src/i18n/formatting-locale.ts`) — a
+   * caregiver's own browser locale governs `messages`, but the schedule
+   * itself reads in the household's chosen convention, same as `timeZone`. */
+  formattingLocale: FormattingLocale;
   /** Server clock in epoch ms — a caregiver's tablet may be hours off. */
   serverNow: number;
   members: ShareMember[];
@@ -115,6 +123,11 @@ export async function loadShareView(rawToken: string): Promise<ShareViewResult> 
 
   const family = await getFamily(familyId);
   const timeZone = family?.timezone ?? 'Europe/Amsterdam';
+  const requestedLocale = await getLocale();
+  const uiLocale = hasLocale(routing.locales, requestedLocale)
+    ? requestedLocale
+    : routing.defaultLocale;
+  const formattingLocale = family?.formattingLocale ?? defaultFormattingLocale(uiLocale);
   const now = new Date();
 
   const allMembers = await listMembers(familyId);
@@ -139,6 +152,7 @@ export async function loadShareView(rawToken: string): Promise<ShareViewResult> 
     label: resolution.label,
     role: resolution.role,
     timeZone,
+    formattingLocale,
     serverNow: now.getTime(),
     members: members.map((entry) => ({
       id: entry.id,

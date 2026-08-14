@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useRef, useState, useEffect } from 'react';
-import { useFormatter } from 'next-intl';
+import { useDateTimeFormat } from '@/components/formatting';
 import { cn } from '@/lib/utils';
 import { dayKeysOf } from '../domain/expand';
 import { minutesIntoDay, toDateKey, toWall } from '../domain/zone';
@@ -131,7 +131,7 @@ function verticalSpan(
 }
 
 export function TimeGrid({ days, events, timeZone, now, onSelect, hub = false }: TimeGridProps) {
-  const format = useFormatter();
+  const formatDateTime = useDateTimeFormat();
   const columnsRef = useRef<HTMLDivElement>(null);
   const [columnWidth, setColumnWidth] = useState(0);
 
@@ -210,7 +210,7 @@ export function TimeGrid({ days, events, timeZone, now, onSelect, hub = false }:
                   isToday ? 'text-primary-foreground' : 'text-ink-muted'
                 )}
               >
-                {format.dateTime(day, { weekday: 'short' })}
+                {formatDateTime(day, { weekday: 'short' })}
               </div>
               <div
                 className={cn(
@@ -219,7 +219,7 @@ export function TimeGrid({ days, events, timeZone, now, onSelect, hub = false }:
                   isToday ? 'text-primary-foreground' : 'text-ink'
                 )}
               >
-                {format.dateTime(day, { day: 'numeric' })}
+                {formatDateTime(day, { day: 'numeric' })}
               </div>
             </div>
           );

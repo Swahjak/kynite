@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { useFormatter, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
+import { useDateTimeFormat } from '@/components/formatting';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import { Input } from '@/components/ui/input';
@@ -34,7 +35,7 @@ export function CreateShareLinkPanel({
   calendars: SharingPageData['calendars'];
 }) {
   const t = useTranslations('sharing');
-  const format = useFormatter();
+  const formatDateTime = useDateTimeFormat();
 
   const [state, setState] = useState<CreateShareLinkState>(createShareLinkIdle);
   const [role, setRole] = useState<'viewer' | 'contributor'>('viewer');
@@ -228,7 +229,7 @@ export function CreateShareLinkPanel({
             {state.expiresAt ? (
               <span className="text-body-sm text-ink-secondary">
                 {t('created.expiresAt', {
-                  date: format.dateTime(new Date(state.expiresAt), {
+                  date: formatDateTime(new Date(state.expiresAt), {
                     day: 'numeric',
                     month: 'long',
                   }),

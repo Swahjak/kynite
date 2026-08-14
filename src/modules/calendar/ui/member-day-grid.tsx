@@ -1,7 +1,8 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useFormatter, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
+import { useDateTimeFormat } from '@/components/formatting';
 import { cn } from '@/lib/utils';
 import { CategoryDot, EmptyState, MemberFace } from '@/components/kynite';
 import { Icon } from '@/components/ui/icon';
@@ -67,7 +68,7 @@ export function MemberDayGrid({
   onSelect,
 }: MemberDayGridProps) {
   const t = useTranslations('calendar');
-  const format = useFormatter();
+  const formatDateTime = useDateTimeFormat();
   const dayKey = toDateKey(toWall(day, timeZone));
 
   const { byMember, sharedTimed, allDayByMember, sharedAllDay } = useMemo(() => {
@@ -364,7 +365,7 @@ export function MemberDayGrid({
         </div>
       </div>
 
-      <p className="sr-only">{format.dateTime(day, { dateStyle: 'full' })}</p>
+      <p className="sr-only">{formatDateTime(day, { dateStyle: 'full' })}</p>
     </div>
   );
 }

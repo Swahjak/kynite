@@ -61,6 +61,8 @@ export {
 
 export { getFamily, getMember, getMemberByUserId, hasEverBeenMember, listMembers } from './queries';
 
+export { getHouseholdFormattingLocale } from './formatting-locale';
+
 export {
   loadFamilyPage,
   loadFamilySettings,

@@ -1,4 +1,5 @@
 import 'server-only';
+import { cache } from 'react';
 import { asc, eq } from 'drizzle-orm';
 import { getDb } from '@/server/db';
 import { family, formerMember, member, type Family, type Member } from './schema';
@@ -10,10 +11,20 @@ import { family, formerMember, member, type Family, type Member } from './schema
  * browser.
  */
 
-export async function getFamily(familyId: string): Promise<Family | null> {
+/**
+ * `React.cache`d per request: `(app)/layout.tsx`, `(hub)/layout.tsx`,
+ * `loadCalendarPage` and `getHouseholdFormattingLocale()` (the date/time
+ * formatting split, `src/i18n/formatting-locale.ts`) each resolve the same
+ * family row independently rather than threading it through props — this is
+ * what keeps that from being one query per caller instead of one per request.
+ * Safe across a mutation within the same render because nothing here ever
+ * mutates and re-reads in one pass; a changed row is only ever seen on the
+ * *next* request, after the Server Action's `revalidatePath`.
+ */
+export const getFamily = cache(async (familyId: string): Promise<Family | null> => {
   const [row] = await getDb().select().from(family).where(eq(family.id, familyId)).limit(1);
   return row ?? null;
-}
+});
 
 /** Members in board order — `sortOrder` drives every per-person column in the UI. */
 export async function listMembers(familyId: string): Promise<Member[]> {

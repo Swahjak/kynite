@@ -1,6 +1,7 @@
 'use client';
 
-import { useFormatter, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
+import { useDateTimeFormat } from '@/components/formatting';
 import { cn } from '@/lib/utils';
 import { CategoryDot } from '@/components/kynite';
 import { Badge } from '@/components/ui/badge';
@@ -76,7 +77,7 @@ export function DayAgendaRow({
   onSelect,
 }: DayAgendaRowProps) {
   const t = useTranslations('calendar');
-  const format = useFormatter();
+  const formatDateTime = useDateTimeFormat();
   const palette = CATEGORY_CLASSES[event.category];
 
   const title = event.busyOnly
@@ -132,7 +133,7 @@ export function DayAgendaRow({
         >
           {event.allDay
             ? t('allDay')
-            : format.dateTime(event.startsAt, { hour: '2-digit', minute: '2-digit' })}
+            : formatDateTime(event.startsAt, { hour: '2-digit', minute: '2-digit' })}
         </span>
         {!last && (
           <span

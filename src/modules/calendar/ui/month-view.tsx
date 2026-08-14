@@ -1,7 +1,8 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useFormatter, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
+import { useDateTimeFormat } from '@/components/formatting';
 import { cn } from '@/lib/utils';
 import { dayKeysOf } from '../domain/expand';
 import { toDateKey, toWall } from '../domain/zone';
@@ -46,7 +47,7 @@ export function MonthView({
   onOpenDay,
 }: MonthViewProps) {
   const t = useTranslations('calendar');
-  const format = useFormatter();
+  const formatDateTime = useDateTimeFormat();
   const anchorMonth = toWall(anchor, timeZone).month;
   const todayKey = today ? toDateKey(toWall(today, timeZone)) : null;
 
@@ -76,7 +77,7 @@ export function MonthView({
             key={day.toISOString()}
             className="label-overline px-2 py-3 text-center text-ink-muted"
           >
-            {format.dateTime(day, { weekday: 'short' })}
+            {formatDateTime(day, { weekday: 'short' })}
           </div>
         ))}
       </div>
@@ -114,7 +115,7 @@ export function MonthView({
                       : 'font-medium'
                   )}
                 >
-                  {format.dateTime(day, { day: 'numeric' })}
+                  {formatDateTime(day, { day: 'numeric' })}
                 </span>
                 {dayEvents.length > MAX_ROWS_PER_CELL &&
                   (onOpenDay ? (
@@ -123,7 +124,7 @@ export function MonthView({
                       data-testid="month-more"
                       data-day={key}
                       aria-label={t('month.openDay', {
-                        date: format.dateTime(day, { day: 'numeric', month: 'long' }),
+                        date: formatDateTime(day, { day: 'numeric', month: 'long' }),
                       })}
                       onClick={() => onOpenDay(key)}
                       className="rounded-4xl bg-surface-container px-2 py-0.5 text-caption font-semibold text-ink-secondary transition-colors hover:bg-surface-container-high hover:text-ink focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"

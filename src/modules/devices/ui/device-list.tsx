@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
+import { useDateTimeFormat } from '@/components/formatting';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import { Input } from '@/components/ui/input';
@@ -35,6 +36,7 @@ export function DeviceList({
 }) {
   const t = useTranslations('devices');
   const format = useFormatter();
+  const formatDateTime = useDateTimeFormat();
   const [pendingId, setPendingId] = useState<string | null>(null);
   // The device whose name is currently being edited, and the draft value.
   const [renamingId, setRenamingId] = useState<string | null>(null);
@@ -148,7 +150,7 @@ export function DeviceList({
                 for one that has been quiet for a week. */}
             <span className="text-caption text-ink-muted" data-testid="device-paired-at">
               {t('list.pairedAt', {
-                date: format.dateTime(new Date(entry.pairedAt), { dateStyle: 'medium' }),
+                date: formatDateTime(new Date(entry.pairedAt), { dateStyle: 'medium' }),
               })}
             </span>
           </div>

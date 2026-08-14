@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { FORMATTING_LOCALES } from '@/i18n/formatting-locale';
 import { locales } from '@/i18n/routing';
 import { idleState } from '../action-state';
 import { updateFamilyAction } from '../actions';
@@ -80,6 +81,27 @@ export function FamilySettingsForm({ family }: { family: Family }) {
           </SelectContent>
         </Select>
         <FieldDescription>{t('localeHint')}</FieldDescription>
+      </Field>
+
+      <Field>
+        <FieldLabel>{t('formattingLocale')}</FieldLabel>
+        <Select name="formattingLocale" defaultValue={family.formattingLocale}>
+          <SelectTrigger size="hub" data-testid="family-formatting-locale">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {FORMATTING_LOCALES.map((option) => (
+              <SelectItem key={option} value={option}>
+                {t(`formattingLocales.${option}`)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {/* Native `<input type="date/time/datetime-local">` fields (the routine,
+            member and event dialogs) follow the browser's own locale, not this
+            setting — there is no API to override that, so this control only
+            ever changes the app's own rendered text. */}
+        <FieldDescription>{t('formattingLocaleHint')}</FieldDescription>
       </Field>
 
       <Field>

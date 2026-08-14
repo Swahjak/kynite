@@ -107,6 +107,9 @@ export function MemberDialog({ member }: { member?: Member }) {
 
           <Field>
             <FieldLabel>{t('form.birthDate')}</FieldLabel>
+            {/* Native `<input type="date">`: the picker follows the browser's
+                locale, not the household's `formattingLocale` setting
+                (`src/i18n/formatting-locale.ts`) — no API overrides that. */}
             <Input
               type="date"
               name="birthDate"

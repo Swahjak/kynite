@@ -1,8 +1,9 @@
-import { getFormatter, getTranslations } from 'next-intl/server';
+import { getTranslations } from 'next-intl/server';
 import { Icon } from '@/components/ui/icon';
+import { formatDateTime } from '@/i18n/formatting-locale';
 import { cn } from '@/lib/utils';
 import { CATEGORY_CLASSES, EVENT_TYPE_ICONS, type CalendarEvent } from '@/modules/calendar';
-import type { Member } from '@/modules/family';
+import { getHouseholdFormattingLocale, type Member } from '@/modules/family';
 import type { FlowMode } from '../domain/flow';
 import { MemberFaces, participantsOf } from './member-faces';
 
@@ -33,7 +34,7 @@ export type UpNextGridProps = {
 
 export async function UpNextGrid({ events, members, timeZone, limit, mode }: UpNextGridProps) {
   const t = await getTranslations('today');
-  const format = await getFormatter();
+  const formattingLocale = await getHouseholdFormattingLocale();
 
   const past = mode === 'past';
 
@@ -67,7 +68,7 @@ export async function UpNextGrid({ events, members, timeZone, limit, mode }: UpN
                 <span className={cn('font-display font-bold tabular-nums', palette.text)}>
                   {event.allDay
                     ? t('allDay')
-                    : format.dateTime(event.startsAt, {
+                    : formatDateTime(event.startsAt, formattingLocale, {
                         hour: '2-digit',
                         minute: '2-digit',
                         timeZone,

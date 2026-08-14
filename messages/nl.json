@@ -962,7 +962,9 @@
       "description": "De naam, de taal en de klok van dit huishouden.",
       "name": "Naam van het gezin",
       "locale": "Taal van het huis",
+      "formattingLocale": "Datum- en tijdnotatie",
       "localeHint": "Deze taal gebruikt het wandscherm, en elk bericht op je telefoon. Jouw eigen app blijft in de taal die je in de adresbalk kiest.",
+      "formattingLocaleHint": "Bepaalt hoe datums en tijden overal in de app worden geschreven (bijv. 14-08-2026 of 08/14/2026). Los van de taal hierboven.",
       "timezone": "Tijdzone",
       "timezoneHint": "Elke datum en tijd in de app wordt in deze zone getoond.",
       "weekStartsOn": "Week begint op",
@@ -970,6 +972,11 @@
       "locales": {
         "nl": "Nederlands",
         "en": "Engels"
+      },
+      "formattingLocales": {
+        "nl-NL": "Nederlands (24-uurs)",
+        "en-GB": "Brits (24-uurs)",
+        "en-US": "Amerikaans (12-uurs)"
       },
       "weekdays": {
         "1": "Maandag",

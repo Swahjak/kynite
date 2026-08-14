@@ -1,7 +1,8 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useFormatter, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
+import { useDateTimeFormat } from '@/components/formatting';
 import { cn } from '@/lib/utils';
 import { CategoryDot, EmptyState, MemberFace } from '@/components/kynite';
 import { Card } from '@/components/ui/card';
@@ -51,7 +52,7 @@ export function PersonColumns({
   onSelect,
 }: PersonColumnsProps) {
   const t = useTranslations('calendar');
-  const format = useFormatter();
+  const formatDateTime = useDateTimeFormat();
   const dayKey = toDateKey(toWall(day, timeZone));
   // The board is server-rendered; "which of these is happening" is not.
   const tick = useNowTick(now);
@@ -241,7 +242,7 @@ export function PersonColumns({
         })}
       </div>
 
-      <p className="sr-only">{format.dateTime(day, { dateStyle: 'full' })}</p>
+      <p className="sr-only">{formatDateTime(day, { dateStyle: 'full' })}</p>
     </div>
   );
 }

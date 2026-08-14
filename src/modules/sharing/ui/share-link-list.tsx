@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
+import { useDateTimeFormat } from '@/components/formatting';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { revokeShareLinkAction } from '../actions';
@@ -36,6 +37,7 @@ export function ShareLinkList({
 }) {
   const t = useTranslations('sharing');
   const format = useFormatter();
+  const formatDateTime = useDateTimeFormat();
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -113,7 +115,7 @@ export function ShareLinkList({
                     })
                   : link.expiresAt
                     ? t('list.expiresAt', {
-                        date: format.dateTime(new Date(link.expiresAt), {
+                        date: formatDateTime(new Date(link.expiresAt), {
                           day: 'numeric',
                           month: 'long',
                         }),

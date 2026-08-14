@@ -1,4 +1,5 @@
-import { getFormatter, getTranslations } from 'next-intl/server';
+import { getTranslations } from 'next-intl/server';
+import { formatDateTime, type FormattingLocale } from '@/i18n/formatting-locale';
 import { ShareStepButton } from './share-step-button';
 import type { ShareDay, ShareMember, ShareRoutine, ShareView } from './load';
 
@@ -66,7 +67,13 @@ export async function ShareBoard({ token, view }: { token: string; view: ShareVi
         <section className="flex flex-col gap-6">
           <h2 className="text-overline text-ink-muted uppercase">{t('scheduleTitle')}</h2>
           {view.days.map((day) => (
-            <DayRow key={day.dateKey} day={day} members={view.members} timeZone={view.timeZone} />
+            <DayRow
+              key={day.dateKey}
+              day={day}
+              members={view.members}
+              timeZone={view.timeZone}
+              formattingLocale={view.formattingLocale}
+            />
           ))}
         </section>
       ) : null}
@@ -139,22 +146,29 @@ async function DayRow({
   day,
   members,
   timeZone,
+  formattingLocale,
 }: {
   day: ShareDay;
   members: ShareMember[];
   /** The shared family's zone (`ShareView.timeZone`) — a caregiver's own
    *  browser locale/zone must never leak into what "today" means here. */
   timeZone: string;
+  /** The shared family's date/time convention (`ShareView.formattingLocale`). */
+  formattingLocale: FormattingLocale;
 }) {
   const t = await getTranslations('sharing.view');
-  const format = await getFormatter();
 
   const date = new Date(`${day.dateKey}T12:00:00Z`);
 
   return (
     <div className="flex flex-col gap-2" data-testid="share-day" data-date={day.dateKey}>
       <h3 className="font-display text-body font-bold">
-        {format.dateTime(date, { weekday: 'long', day: 'numeric', month: 'long', timeZone })}
+        {formatDateTime(date, formattingLocale, {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long',
+          timeZone,
+        })}
       </h3>
 
       {day.events.length === 0 ? (
@@ -171,7 +185,7 @@ async function DayRow({
               <span className="tabular-time text-ink-secondary w-16 shrink-0 text-body-sm">
                 {item.allDay
                   ? t('allDay')
-                  : format.dateTime(new Date(item.startsAt), {
+                  : formatDateTime(new Date(item.startsAt), formattingLocale, {
                       hour: '2-digit',
                       minute: '2-digit',
                       timeZone,

@@ -1,6 +1,7 @@
 'use client';
 
-import { useFormatter, useNow } from 'next-intl';
+import { useNow } from 'next-intl';
+import { useDateTimeFormat } from '@/components/formatting';
 
 /**
  * The shell's live clock — weekday + date over a tabular time.
@@ -21,7 +22,7 @@ import { useFormatter, useNow } from 'next-intl';
  */
 export function AppClock() {
   const now = useNow({ updateInterval: 30_000 });
-  const format = useFormatter();
+  const formatDateTime = useDateTimeFormat();
 
   return (
     <div className="flex flex-col justify-center">
@@ -30,10 +31,10 @@ export function AppClock() {
         dateTime={now.toISOString()}
         className="tabular-time text-h2 leading-none font-bold text-ink"
       >
-        {format.dateTime(now, { hour: '2-digit', minute: '2-digit' })}
+        {formatDateTime(now, { hour: '2-digit', minute: '2-digit' })}
       </time>
       <span data-testid="app-clock-date" className="label-overline mt-1 text-ink-secondary">
-        {format.dateTime(now, { weekday: 'long', day: 'numeric', month: 'short' })}
+        {formatDateTime(now, { weekday: 'long', day: 'numeric', month: 'short' })}
       </span>
     </div>
   );

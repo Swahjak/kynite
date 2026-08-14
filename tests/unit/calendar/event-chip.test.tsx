@@ -1,17 +1,22 @@
 import { NextIntlClientProvider } from 'next-intl';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
+import { FormattingLocaleProvider } from '@/components/formatting';
 import { EventChip } from '@/modules/calendar/ui/event-chip';
 import type { CalendarEvent } from '@/modules/calendar/queries';
 import calendarMessages from '../../../messages/en.json';
 
 /**
- * BLOCKING 2 coverage: `EventChip` formats through `useFormatter()`, which has
- * no zone of its own — it reads whatever `NextIntlClientProvider` was given.
- * `(app)/layout.tsx` and `(hub)/layout.tsx` now resolve that zone from the
- * family row and pass it down explicitly, instead of letting the *server's*
- * zone (this test runner's container, effectively UTC) leak into what a
- * family reads as the event's wall time.
+ * BLOCKING 2 coverage: `EventChip` formats through `useDateTimeFormat()`,
+ * which has no zone of its own — it reads whatever `NextIntlClientProvider`'s
+ * `timeZone` was given (the household's convention and the timezone are two
+ * separate, next-intl-independent-vs-native props now — see
+ * `FormattingLocaleProvider`'s doc comment for why formatting locale can't
+ * live on `NextIntlClientProvider`'s own `locale`). `(app)/layout.tsx` and
+ * `(hub)/layout.tsx` resolve the zone from the family row and pass it down
+ * explicitly, instead of letting the *server's* zone (this test runner's
+ * container, effectively UTC) leak into what a family reads as the event's
+ * wall time.
  *
  * The regression this guards against: a family in a zone other than the
  * server's — proven here with `America/New_York`, which is never the CI
@@ -51,12 +56,16 @@ describe('EventChip — timezone-aware formatting (BLOCKING 2)', () => {
     const event = baseEvent();
     const zone = 'America/New_York';
 
-    const expectedStart = new Intl.DateTimeFormat('en', {
+    // `en-GB`, not bare `en`: `EventChip` formats through the household's
+    // convention (`FormattingLocaleProvider`), and `en-GB` is what an English
+    // household gets by default — bare `en` has no convention of its own and
+    // is exactly the ambiguity this split exists to remove.
+    const expectedStart = new Intl.DateTimeFormat('en-GB', {
       hour: '2-digit',
       minute: '2-digit',
       timeZone: zone,
     }).format(event.startsAt);
-    const expectedEnd = new Intl.DateTimeFormat('en', {
+    const expectedEnd = new Intl.DateTimeFormat('en-GB', {
       hour: '2-digit',
       minute: '2-digit',
       timeZone: zone,
@@ -65,7 +74,7 @@ describe('EventChip — timezone-aware formatting (BLOCKING 2)', () => {
     // Sanity: the New York wall time actually differs from a naive
     // UTC/Amsterdam read of the same instant, so this test would fail if the
     // zone prop were silently ignored.
-    const utcStart = new Intl.DateTimeFormat('en', {
+    const utcStart = new Intl.DateTimeFormat('en-GB', {
       hour: '2-digit',
       minute: '2-digit',
       timeZone: 'UTC',
@@ -78,7 +87,9 @@ describe('EventChip — timezone-aware formatting (BLOCKING 2)', () => {
         timeZone={zone}
         messages={{ calendar: calendarMessages.calendar }}
       >
-        <EventChip event={event} />
+        <FormattingLocaleProvider formattingLocale="en-GB">
+          <EventChip event={event} />
+        </FormattingLocaleProvider>
       </NextIntlClientProvider>
     );
 

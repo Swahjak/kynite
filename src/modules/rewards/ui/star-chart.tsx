@@ -1,7 +1,9 @@
-import { getFormatter, getTranslations } from 'next-intl/server';
+import { getTranslations } from 'next-intl/server';
 import { Icon } from '@/components/ui/icon';
+import { formatDateTime } from '@/i18n/formatting-locale';
 import { cn } from '@/lib/utils';
 import { StarMedallion } from '@/components/kynite';
+import { getHouseholdFormattingLocale } from '@/modules/family';
 import type { StarChartData } from '../page-data';
 
 /**
@@ -32,7 +34,7 @@ import type { StarChartData } from '../page-data';
  */
 export async function StarChart({ chart }: { chart: StarChartData }) {
   const t = await getTranslations('rewards');
-  const format = await getFormatter();
+  const formattingLocale = await getHouseholdFormattingLocale();
 
   const savings = chart.horizon === 'savings';
   const peak = Math.max(1, ...chart.week.map((bar) => bar.total));
@@ -144,10 +146,10 @@ export async function StarChart({ chart }: { chart: StarChartData }) {
                         : 'text-ink-secondary opacity-70'
                     )}
                   >
-                    {format.dateTime(date, { day: 'numeric' })}
+                    {formatDateTime(date, formattingLocale, { day: 'numeric' })}
                   </span>
                   <span className="label-overline text-ink-secondary">
-                    {format.dateTime(date, { weekday: 'short' })}
+                    {formatDateTime(date, formattingLocale, { weekday: 'short' })}
                   </span>
                 </li>
               );

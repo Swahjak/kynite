@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { useFormatter, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
+import { useDateTimeFormat } from '@/components/formatting';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -54,7 +55,7 @@ export function MemberInvite({
 }) {
   const t = useTranslations('family.invite.manage');
   const tErrors = useTranslations('family.errors');
-  const format = useFormatter();
+  const formatDateTime = useDateTimeFormat();
 
   const [open, setOpen] = useState(false);
   const [result, setResult] = useState<CreateInviteState>(createInviteIdle);
@@ -109,7 +110,7 @@ export function MemberInvite({
     return (
       <span className="flex flex-wrap items-center gap-2" data-testid="member-invite-pending">
         <Badge variant="secondary">
-          {t('pendingUntil', { date: format.dateTime(new Date(invite!.expiresAt)) })}
+          {t('pendingUntil', { date: formatDateTime(new Date(invite!.expiresAt)) })}
         </Badge>
         {error ? (
           <span role="alert" className="text-body-sm text-destructive">
@@ -183,7 +184,7 @@ export function MemberInvite({
               data-testid="member-invite-url"
             />
             <FieldDescription>
-              {t('expires', { date: format.dateTime(new Date(result.expiresAt)) })}
+              {t('expires', { date: formatDateTime(new Date(result.expiresAt)) })}
             </FieldDescription>
           </Field>
         ) : (

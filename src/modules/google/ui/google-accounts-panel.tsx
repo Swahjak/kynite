@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
+import { useDateTimeFormat } from '@/components/formatting';
 import {
   AlertDialog,
   AlertDialogClose,
@@ -121,6 +122,7 @@ export function GoogleAccountsPanel({
 function AccountCard({ account }: { account: LinkedAccount }) {
   const t = useTranslations('google');
   const format = useFormatter();
+  const formatDateTime = useDateTimeFormat();
   const [state, action, pending] = useActionState<ActionState, FormData>(
     unlinkGoogleAccountAction,
     idleState
@@ -150,7 +152,7 @@ function AccountCard({ account }: { account: LinkedAccount }) {
           </div>
           <span className="text-caption text-ink-muted" data-testid="linked-since">
             {t('linkedSince', {
-              date: format.dateTime(account.linkedAt, { dateStyle: 'medium' }),
+              date: formatDateTime(account.linkedAt, { dateStyle: 'medium' }),
             })}
           </span>
           <span className="text-caption text-ink-muted" data-testid="account-last-sync">

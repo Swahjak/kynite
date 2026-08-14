@@ -12,6 +12,7 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core';
 import { user } from '@/server/db/auth-schema';
+import { FORMATTING_LOCALES } from '@/i18n/formatting-locale';
 
 /** docs/architecture.md §3 "Identity & household". */
 
@@ -47,10 +48,22 @@ export const memberColor = pgEnum('member_color', [
  */
 export const hubView = pgEnum('hub_view', ['day', 'agenda']);
 
+/**
+ * The date/time convention every `useDateTimeFormat()`/`formatDateTime()` call
+ * in the app formats with (`src/i18n/formatting-locale.ts`) — distinct from
+ * `locale` above, which is the household's *language*. Bare `en` resolves to
+ * `en-US` conventions (`m/d/yyyy`, 12-hour) in `Intl`, which is the bug this
+ * column exists to fix: `nl` never had this problem, so `nl-NL` is the default
+ * for everyone until a household explicitly picks otherwise.
+ */
+export const formattingLocale = pgEnum('formatting_locale', FORMATTING_LOCALES);
+
 export const family = pgTable('family', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: text('name').notNull(),
   locale: text('locale').notNull().default('nl'),
+  /** `src/i18n/formatting-locale.ts` — the date/time convention, not the language. */
+  formattingLocale: formattingLocale('formatting_locale').notNull().default('nl-NL'),
   timezone: text('timezone').notNull().default('Europe/Amsterdam'),
   /** ISO-8601: 1 = Monday. */
   weekStartsOn: smallint('week_starts_on').notNull().default(1),

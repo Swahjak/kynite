@@ -259,6 +259,12 @@ export function EventDialog({
               </label>
             </Field>
 
+            {/* Native `<input type="date"/"datetime-local">`: field order and
+                12/24-hour display follow the *browser's* locale, not the
+                household's `formattingLocale` setting
+                (`src/i18n/formatting-locale.ts`) — there is no API to
+                override that, so these are deliberately left as native
+                inputs rather than rebuilt as custom widgets. */}
             <div className="grid gap-4 sm:grid-cols-2">
               <Field>
                 <FieldLabel>{t('form.startsAt')}</FieldLabel>

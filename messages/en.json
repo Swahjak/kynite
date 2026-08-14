@@ -962,7 +962,9 @@
       "description": "This household's name, language and clock.",
       "name": "Family name",
       "locale": "Household language",
+      "formattingLocale": "Date & time format",
       "localeHint": "The wall display and every message on your phone use this language. Your own app stays in whichever language you pick in the address bar.",
+      "formattingLocaleHint": "Controls how dates and times are written everywhere in the app (e.g. 14/08/2026 or 08/14/2026). Independent of the language above.",
       "timezone": "Time zone",
       "timezoneHint": "Every date and time in the app is shown in this zone.",
       "weekStartsOn": "Week starts on",
@@ -970,6 +972,11 @@
       "locales": {
         "nl": "Dutch",
         "en": "English"
+      },
+      "formattingLocales": {
+        "nl-NL": "Dutch (24-hour)",
+        "en-GB": "British (24-hour)",
+        "en-US": "American (12-hour)"
       },
       "weekdays": {
         "1": "Monday",
