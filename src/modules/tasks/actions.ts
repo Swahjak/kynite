@@ -19,12 +19,14 @@ import { actionFailure, type ActionState } from './action-state';
  * Three actions, because a task has exactly three things a person can do to it:
  * write one down, tick it off (or un-tick it), and throw it away.
  *
- * **The capability is `routine:write`, not a new one.** §7's matrix grades
- * "Create/edit routines & chores" owner/adult `allow` and everyone else `deny`,
- * and a task *is* a chore — the lightweight one this product was missing.
- * Minting a `task:write` cell that would be a verbatim copy of an existing row
- * would add a column to the permission matrix without adding a permission, and
- * every surface that may author a chore may author a task by construction.
+ * **Two capabilities, not one** (docs/architecture.md §7): `task:write` for
+ * authoring — create and delete, owner/adult only, same grade `routine:write`
+ * has always carried — and `task:complete` for the tick, which is also open to
+ * a child member and a paired hub device. That split mirrors the one the
+ * routines slice already draws between `routine:write` and `completion:write`,
+ * and for the same reason: finishing something and being allowed to invent or
+ * remove it are different powers, and the wall display coming next may tick a
+ * task's box without ever being trusted to author the household's list.
  *
  * Every action opens with `assertCan` before any database identifier is
  * referenced, which is what `tests/unit/server-action-authorization.test.ts`
@@ -66,7 +68,7 @@ const createSchema = z.object({
 export type CreateTaskInput = z.infer<typeof createSchema>;
 
 export async function createTaskAction(input: CreateTaskInput): Promise<ActionState> {
-  const principal = await assertCan('routine:write').catch(() => null);
+  const principal = await assertCan('task:write').catch(() => null);
   if (!principal) return actionFailure('forbidden');
 
   const parsed = createSchema.safeParse(input);
@@ -128,7 +130,7 @@ export type ToggleTaskInput = z.infer<typeof toggleSchema>;
  * a replayed request is a no-op rather than an un-tick.
  */
 export async function toggleTaskAction(input: ToggleTaskInput): Promise<ActionState> {
-  const principal = await assertCan('routine:write').catch(() => null);
+  const principal = await assertCan('task:complete').catch(() => null);
   if (!principal) return actionFailure('forbidden');
 
   const parsed = toggleSchema.safeParse(input);
@@ -170,7 +172,7 @@ const deleteSchema = z.object({ taskId: z.uuid() });
 export type DeleteTaskInput = z.infer<typeof deleteSchema>;
 
 export async function deleteTaskAction(input: DeleteTaskInput): Promise<ActionState> {
-  const principal = await assertCan('routine:write').catch(() => null);
+  const principal = await assertCan('task:write').catch(() => null);
   if (!principal) return actionFailure('forbidden');
 
   const parsed = deleteSchema.safeParse(input);

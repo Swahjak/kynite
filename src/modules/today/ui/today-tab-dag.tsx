@@ -211,6 +211,7 @@ export async function TodayTabDag({
             displayName: member.displayName,
           }))}
           canWrite={tasks.canWrite}
+          canComplete={tasks.canComplete}
           title={t('tasks.title')}
           memberSurface={memberSurface}
         />

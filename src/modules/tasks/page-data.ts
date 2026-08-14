@@ -39,8 +39,10 @@ export type TodayTasksData = {
   timeZone: string;
   /** `YYYY-MM-DD` in the family's zone — what the quick-add dates "today" as. */
   todayKey: string;
-  /** False for a principal who may read the list but not write to it. */
+  /** False for a principal who may read the list but not author/delete rows. */
   canWrite: boolean;
+  /** False for a principal who may read the list but not tick a row off. */
+  canComplete: boolean;
 };
 
 /** `'2026-08-14'` in `timeZone` — never `toISOString().slice(0, 10)`, which is UTC. */
@@ -75,7 +77,8 @@ export async function loadTodayTasks(options: { now?: Date } = {}): Promise<Toda
     timeZone,
     todayKey,
     members,
-    canWrite: can(principal, 'routine:write', { familyId: principal.familyId }),
+    canWrite: can(principal, 'task:write', { familyId: principal.familyId }),
+    canComplete: can(principal, 'task:complete', { familyId: principal.familyId }),
     tasks: rows.map((row): TodayTask => {
       const member = row.assigneeMemberId ? byId.get(row.assigneeMemberId) : undefined;
 

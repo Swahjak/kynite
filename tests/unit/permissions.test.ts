@@ -61,6 +61,14 @@ const EXPECTED: Record<Capability, [Grade, Grade, Grade, Grade, Grade, Grade]> =
   'member:self': ['own', 'own', 'own', 'deny', 'deny', 'deny'],
   'routine:write': ['allow', 'allow', 'deny', 'deny', 'deny', 'deny'],
   'completion:write': ['allow', 'allow', 'allow', 'scoped', 'deny', 'allow'],
+  // M24: split the same way routines split write from completion. Authoring a
+  // task (create/edit/delete) stays owner/adult only; finishing one is also
+  // open to a child and a paired hub device, matching `completion:write`
+  // exactly except for `contributor`, which stays `deny` — no share-link
+  // route resolves a task completion's `memberId` yet, unlike routine steps'
+  // `POST /api/share/completions`.
+  'task:write': ['allow', 'allow', 'deny', 'deny', 'deny', 'deny'],
+  'task:complete': ['allow', 'allow', 'allow', 'deny', 'deny', 'allow'],
   'stars:award': ['allow', 'allow', 'deny', 'deny', 'deny', 'deny'],
   'stars:remove': ['deny', 'deny', 'deny', 'deny', 'deny', 'deny'],
   'redemption:request': ['allow', 'allow', 'allow', 'deny', 'deny', 'allow'],

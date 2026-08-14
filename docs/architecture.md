@@ -669,6 +669,8 @@ revocable/expiring with `lastUsedAt`/`useCount` visible to parents. Served with
 | Manage hub/calendar display (`display:manage`) | ✓ | ✓ | — | — | — | — |
 | Create/edit routines | ✓ | ✓ | — | — | — | — |
 | Complete a routine step | ✓ | ✓ | ✓ | ✓ | — | ✓ |
+| Create/edit/delete a task (`task:write`) | ✓ | ✓ | — | — | — | — |
+| Complete a task (`task:complete`) | ✓ | ✓ | ✓ | — | — | ✓ |
 | Award manual/bonus stars | ✓ | ✓ | — | — | — | — |
 | Remove stars | — | — | — | — | — | — |
 | Request redemption | ✓ | ✓ | ✓ | — | — | ✓ |
@@ -701,6 +703,16 @@ column, where "Manage members & roles" is correctly `—`; without a narrow
 capability for "your own presentation" that step would have to either
 escalate the invitee to `member:manage` or skip the chokepoint, and both are
 worse than the extra row.
+
+`task:write`/`task:complete` (M24) split a task the same way routines already
+split `routine:write` from `completion:write`: authoring (create/edit/delete)
+is owner/adult only, but finishing one — the tick — is also open to a child
+member and a paired hub device, because a wall-display tick is the point of
+`task:complete` existing at all. The caregiver `contributor` cell is `—`
+rather than the scoped grant `completion:write` has: a share link ticks a
+routine step through a dedicated route (`POST /api/share/completions`) that
+resolves the `memberId` a scoped check needs, and no equivalent route exists
+for tasks yet.
 
 Enforcement lives in one place: `modules/family/authorize.ts` exports
 `can(principal, action, resource)`, called at the top of every Server Action.

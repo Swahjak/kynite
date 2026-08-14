@@ -21,6 +21,8 @@ export const CAPABILITIES = [
   'member:self',
   'routine:write',
   'completion:write',
+  'task:write',
+  'task:complete',
   'stars:award',
   'stars:remove',
   'redemption:request',
@@ -209,6 +211,46 @@ const MATRIX: Record<Capability, Record<Column, Grade>> = {
     adult: 'allow',
     child: 'allow',
     contributor: 'scoped',
+    viewer: 'deny',
+    device: 'allow',
+  },
+  /**
+   * Author a task: write its title, its assignee, its due date, or remove it
+   * outright (M24). A task used to piggyback on `routine:write` on the theory
+   * that "a task is a chore" — true of *authoring* one, but the matrix has no
+   * row for *finishing* a routine step either, and that split
+   * (`routine:write` vs. `completion:write`) is exactly the shape a task
+   * needs too: the wall display is coming for tasks next, and the hub may
+   * tick a box without ever being trusted to invent or delete a household's
+   * list. So `task:write` takes over routine:write's own grade verbatim —
+   * owner/adult `allow`, everyone else `deny` — and `task:complete` below
+   * takes the completion half.
+   */
+  'task:write': {
+    owner: 'allow',
+    adult: 'allow',
+    child: 'deny',
+    contributor: 'deny',
+    viewer: 'deny',
+    device: 'deny',
+  },
+  /**
+   * Tick a task done, or take it back — the one write a kiosk or a child may
+   * make against a task, mirroring `completion:write`'s child/device `allow`
+   * (a tap on the hub, or a child signed into the household's own view). The
+   * `contributor` cell is `deny`, not `scoped` like `completion:write`: a
+   * caregiver share link ticks routine steps through
+   * `POST /api/share/completions`, a dedicated route that resolves the
+   * `memberId` the scope check needs, and no equivalent exists for tasks yet
+   * (a task's owner is its assignee, not "the member whose day this is"). Add
+   * the route before promoting this cell — don't grade a capability for a
+   * surface that cannot reach it.
+   */
+  'task:complete': {
+    owner: 'allow',
+    adult: 'allow',
+    child: 'allow',
+    contributor: 'deny',
     viewer: 'deny',
     device: 'allow',
   },

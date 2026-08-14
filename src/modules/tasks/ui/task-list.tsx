@@ -49,14 +49,28 @@ export type TaskListProps = {
   tasks: TodayTask[];
   /** The roster the assignee picker offers — names only; it is a picker. */
   members: { id: string; displayName: string }[];
+  /** Gates authoring: the quick-add form and (once it exists) delete. */
   canWrite: boolean;
+  /**
+   * Gates the tick itself (`task:complete`). Deliberately separate from
+   * `canWrite`: a child or a paired hub device may finish a task without
+   * ever being allowed to invent or remove one.
+   */
+  canComplete: boolean;
   /** The heading and the accessible name of the list. */
   title: string;
   /** `MEMBER_COLOR_CLASSES[color].surface` per member id, resolved server-side. */
   memberSurface: Record<string, string>;
 };
 
-export function TaskList({ tasks, members, canWrite, title, memberSurface }: TaskListProps) {
+export function TaskList({
+  tasks,
+  members,
+  canWrite,
+  canComplete,
+  title,
+  memberSurface,
+}: TaskListProps) {
   const t = useTranslations('today');
   const router = useRouter();
 
@@ -119,7 +133,7 @@ export function TaskList({ tasks, members, canWrite, title, memberSurface }: Tas
                     type="button"
                     aria-pressed={done}
                     aria-label={t(done ? 'tasks.undo' : 'tasks.complete', { title: item.title })}
-                    disabled={!canWrite}
+                    disabled={!canComplete}
                     onClick={() => toggle(item, !done)}
                     className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none"
                   >
