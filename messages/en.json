@@ -432,41 +432,62 @@
   "today": {
     "title": "Today",
     "allDay": "All day",
+    "dayNav": {
+      "label": "Pick a day",
+      "previous": "Previous day",
+      "next": "Next day"
+    },
+    "tabs": {
+      "label": "View",
+      "dag": "Day overview",
+      "personen": "Per person",
+      "routines": "Routines",
+      "sterren": "Star overview"
+    },
     "now": {
       "eyebrowLive": "Now",
       "eyebrowNext": "Next",
-      "remainingTitle": "In progress",
-      "remainingLabel": "{minutes} minutes remaining",
-      "minutesShort": "{minutes}m",
-      "endsAt": "Done at {time}",
-      "startsTitle": "Coming up",
-      "startsLabel": "Starts at {time}",
-      "inMinutes": "In {minutes} minutes",
-      "openDay": "Open this day in the calendar",
-      "clearTitle": "Nothing else planned",
-      "clearBody": "The rest of the day is yours.",
-      "eyebrowPast": "Earlier",
-      "pastTitle": "Already happened",
-      "pastBody": "From {start} to {end}",
-      "pastClearTitle": "Nothing was planned",
-      "pastClearBody": "This day stayed empty."
+      "startsLabel": "Starts at {time}"
     },
-    "upNext": {
-      "title": "Up next",
-      "free": "Free time!",
-      "pastTitle": "Earlier that day"
+    "nowStrip": {
+      "remaining": "{minutes} min left",
+      "startsIn": "in {minutes} min",
+      "clear": "Nothing else planned — the rest of the day is yours.",
+      "past": "This day is over."
+    },
+    "timeline": {
+      "title": "Day overview",
+      "done": "{count, plural, one {# done} other {# done}} — {title} ({time})",
+      "showDone": "Show what already happened"
+    },
+    "tasks": {
+      "title": "To-do list",
+      "empty": "No open tasks.",
+      "add": "Add task",
+      "startTimer": "Start timer",
+      "placeholder": "What needs doing?",
+      "assignee": "For whom",
+      "unassigned": "Everyone",
+      "save": "Save",
+      "complete": "Tick off {title}",
+      "undo": "Reopen {title}",
+      "overdue": "Overdue",
+      "otherDay": "The to-do list is about today."
+    },
+    "routines": {
+      "title": "Routines today",
+      "steps": "{done} of {total} steps",
+      "progressLabel": "{name}'s routines today",
+      "otherDay": "Routines are only shown for today."
+    },
+    "stars": {
+      "title": "Stars today",
+      "otherDay": "Stars are only shown for today."
     },
     "kids": {
-      "title": "Kids' progress",
       "empty": "No children in this family yet.",
       "noRoutines": "No routines today",
-      "steps": "{done} of {total} done",
-      "starsToday": "{count, plural, =0 {No stars yet today} one {# star today} other {# stars today}}",
-      "progressLabel": "Today",
-      "balance": "{count, plural, one {# star} other {# stars}} to spend"
-    },
-    "board": {
-      "title": "The day"
+      "starsToday": "{count, plural, =0 {No stars yet today} one {# star today} other {# stars today}}"
     }
   },
   "routines": {

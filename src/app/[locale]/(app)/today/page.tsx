@@ -1,6 +1,5 @@
 import { getTranslations } from 'next-intl/server';
 import {
-  DayBoard,
   NewEventFab,
   dayKeysOf,
   isSameDay,
@@ -8,22 +7,17 @@ import {
   toDateKey,
   toWall,
 } from '@/modules/calendar';
-import { formatDateTime } from '@/i18n/formatting-locale';
+import { firstNameOf, getMember, getPrincipal, greetingSlotFor, hourIn } from '@/modules/family';
+import { loadTodayTasks } from '@/modules/tasks';
 import {
-  firstNameOf,
-  getHouseholdFormattingLocale,
-  getMember,
-  getPrincipal,
-  greetingSlotFor,
-  hourIn,
-} from '@/modules/family';
-import {
-  KidsProgress,
-  NowHero,
-  TodayClock,
+  TodayHeader,
   TodayLive,
-  UP_NEXT_LIMIT,
-  UpNextGrid,
+  TodayNowStrip,
+  TodayTabDag,
+  TodayTabPersonen,
+  TodayTabRoutines,
+  TodayTabSterren,
+  TodayTabs,
   flowOf,
   loadTodayProgress,
   type DayReference,
@@ -34,27 +28,30 @@ import { redirect } from '@/i18n/navigation';
 export const dynamic = 'force-dynamic';
 
 /**
- * `(app)/today` — the family's day, recomposed to the mockup
- * (`docs/design/stitch/.../today_s_flow_light_mode/code.html`, and
- * `docs/rebuild-design-gaps.md` §3, which recorded that none of it existed).
+ * `(app)/today` — the family's day (`docs/design/vandaag-template.html`).
  *
- * M19 phase 2 turns what was a greeting over a column board into the three-part
- * flow the mockup describes: a filled-primary **NOW** hero with a progress
- * ring, an **Up Next** grid of tinted blocks, and a **Kids' Progress** sidebar
- * — over a 12-column 8/4 split on a desktop and a single stack at 390px.
+ * The page is three bands, and each answers one question:
  *
- * The day board is *kept*, below the flow. It is still the only thing that
- * answers "what does each of us have today" at a glance; the flow above it
- * answers a different question ("what is happening, and what is next") that the
- * board never did.
+ * 1. **The header** — who this is for, which day it is showing, what time it
+ *    is. The day pill is new: `?date=` has always worked, but nothing on the
+ *    page ever offered it.
+ * 2. **The NU strip** — what is happening right now, in one line. It replaces
+ *    M19's filled-primary hero plus its four-tile "Up Next" grid, which took
+ *    the whole first screen to say two things. The day itself is what deserves
+ *    that space.
+ * 3. **Four tabs** — the day as a timeline beside the household's task list;
+ *    the day per person; today's routine progress; today's stars. The day
+ *    board's own combined/columns switcher is gone from this page: its two
+ *    arrangements are now two of four peers, and the switcher lives on the
+ *    pills.
  *
- * M23 gives that board two arrangements — a merged chronological list of every
- * member's day, and the original per-person columns — behind a segmented pill
- * remembered per device (`calendar/ui/day-board.tsx`), and lays the page out as
- * one full-width column with "Kids' Progress" underneath rather than beside it.
+ * Everything the tabs need is loaded **here**, in one server pass, and handed
+ * down already rendered. Switching tabs is then a re-render over data that is
+ * already in the page — no request, no spinner, no loading state to design —
+ * which is also why the tab choice never enters the URL.
  *
- * Route files hold no logic (architecture §2 rule 4): everything here is two
- * loaders, one pure `flowOf` call and the slices' own components.
+ * Route files hold no logic (architecture §2 rule 4): everything below is three
+ * loaders, one pure `flowOf` call, and the slices' own components.
  */
 export default async function TodayPage({
   params,
@@ -74,19 +71,14 @@ export default async function TodayPage({
 
   const t = await getTranslations('today');
   const tCommon = await getTranslations('common');
-  const formattingLocale = await getHouseholdFormattingLocale();
 
   /**
    * The greeting (M18).
    *
-   * `/today` is the first screen a signed-in parent lands on, and until M18 it
-   * opened with the word "Vandaag" and a date — true, and completely anonymous.
    * The slot is resolved against the *household's* timezone (`data.timeZone`),
    * not the server's: a family in Curaçao must not be wished a good evening
-   * over breakfast.
-   *
-   * It degrades rather than fails: a principal with no member row, or a member
-   * with a blank display name, simply keeps the plain title.
+   * over breakfast. It degrades rather than fails — a principal with no member
+   * row, or a member with a blank display name, keeps the plain title.
    */
   const principal = await getPrincipal();
   const viewer =
@@ -112,84 +104,75 @@ export default async function TodayPage({
   const reference: DayReference = isToday
     ? { kind: 'today', now: data.now }
     : { kind: data.anchor.getTime() < data.now.getTime() ? 'past' : 'future', now: data.anchor };
-  const flow = flowOf(dayEvents, reference, UP_NEXT_LIMIT);
+  const flow = flowOf(dayEvents, reference);
 
-  // "Kids' Progress" is *today's* progress: routine steps due now, stars earned
-  // since this morning. There is no such thing for a day being browsed — a
-  // future day has no completions and a past one would need a historical read
-  // this panel does not do — so the sidebar is simply absent there rather than
-  // showing today's numbers under yesterday's date.
-  const progress = isToday ? await loadTodayProgress({ now: data.now }) : null;
+  /**
+   * The two reads that are only true of *today*.
+   *
+   * Routine progress is today's completions and today's stars; the task list is
+   * the household's open list, whose undated rows belong to no day at all.
+   * Neither has an honest form under yesterday's date, so a browsed day gets
+   * `null` and the panels say so rather than showing today's numbers.
+   */
+  const [progress, tasks] = await Promise.all([
+    isToday ? loadTodayProgress({ now: data.now }) : null,
+    isToday ? loadTodayTasks({ now: data.now }) : null,
+  ]);
+
+  const nowEventKey = flow.live ? (flow.hero?.key ?? null) : null;
 
   return (
     <main
-      className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col gap-6 p-4 sm:p-6"
+      className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col gap-5 p-4 sm:p-6"
       data-testid="today-board"
     >
       {/* A subscription, not a widget — see `TodayLive`. */}
       <TodayLive />
 
-      <header className="flex flex-col gap-1">
-        <h1 className="font-display text-h1 font-bold" data-testid="today-greeting">
-          {firstName ? tCommon(`greeting.${slot}`, { name: firstName }) : t('title')}
-        </h1>
-        {/* The mockup's "● Online • Monday, Oct 14" line. The dot is the
-            product's own liveness cue. The shell's glass header carried the
-            product's only clock until M20 removed that header; `TodayClock`
-            is what replaces it here — a live time + full date, ticking, and
-            also the thing that notices the household's day has rolled over
-            (see its own doc comment). Only "today" gets the rollover: a
-            browsed day (`?date=`) keeps its own static date instead. */}
-        <p className="flex items-center gap-2 text-body text-ink-secondary">
-          <span aria-hidden="true" className="size-2 shrink-0 rounded-4xl bg-success" />
-          {isToday ? (
-            <TodayClock now={data.now} timeZone={data.timeZone} dayKey={dayKey} />
-          ) : (
-            formatDateTime(data.anchor, formattingLocale, { dateStyle: 'full' })
-          )}
-        </p>
-      </header>
+      <TodayHeader
+        greeting={firstName ? tCommon(`greeting.${slot}`, { name: firstName }) : t('title')}
+        anchor={data.anchor}
+        now={data.now}
+        timeZone={data.timeZone}
+        dayKey={dayKey}
+        isToday={isToday}
+      />
 
-      {/* M23: one column, not an 8/4 split.
-          The day board is the widest thing on this page — four or five member
-          columns, or one merged list of everybody's events — and it was living
-          in two thirds of the width while a four-row progress panel held the
-          rest. On a laptop that pushed the board's columns into the same
-          horizontal rail the phone needs, for no reason other than the sidebar
-          beside it. So the board takes the whole width and "Hoe gaat het met de
-          kinderen" moves *below* it: it is a check-in, read after the day, and
-          it reads perfectly well as a full-width row of cards. */}
-      <div className="flex min-h-0 flex-1 flex-col gap-6">
-        <NowHero
-          event={flow.hero}
-          mode={flow.mode}
-          members={data.members}
-          now={reference.now}
-          timeZone={data.timeZone}
-          dayKey={dayKey}
-        />
+      <TodayNowStrip
+        event={flow.hero}
+        mode={flow.mode}
+        members={data.members}
+        now={reference.now}
+        timeZone={data.timeZone}
+      />
 
-        <UpNextGrid
-          events={flow.upNext}
-          members={data.members}
-          timeZone={data.timeZone}
-          limit={UP_NEXT_LIMIT}
-          mode={flow.mode}
-        />
-
-        {/* Two arrangements of one board, picked on the device and remembered
-            there — see `ui/day-board.tsx`. */}
-        <DayBoard
-          title={t('board.title')}
-          members={data.members}
-          events={data.events}
-          timeZone={data.timeZone}
-          day={data.anchor}
-          now={data.now}
-        />
-
-        {progress ? <KidsProgress kids={progress.kids} /> : null}
-      </div>
+      <TodayTabs
+        dag={
+          <TodayTabDag
+            members={data.members}
+            events={data.events}
+            timeZone={data.timeZone}
+            dayKey={dayKey}
+            now={data.now}
+            isToday={isToday}
+            nowEventKey={nowEventKey}
+            tasks={tasks}
+          />
+        }
+        personen={
+          <TodayTabPersonen
+            members={data.members}
+            events={data.events}
+            timeZone={data.timeZone}
+            dayKey={dayKey}
+            now={data.now}
+            isToday={isToday}
+            nowEventKey={nowEventKey}
+          />
+        }
+        routines={<TodayTabRoutines kids={progress?.kids ?? null} />}
+        sterren={<TodayTabSterren kids={progress?.kids ?? null} />}
+      />
 
       {/* The shell positions it; this page owns what it does (`ui/fab.tsx`). */}
       <NewEventFab

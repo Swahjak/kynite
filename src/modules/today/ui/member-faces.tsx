@@ -22,7 +22,7 @@ export function MemberFaces({
 }: {
   members: Member[];
   memberIds: readonly string[];
-  size?: 'sm' | 'default';
+  size?: 'xs' | 'sm' | 'default';
   className?: string;
 }) {
   const ids = new Set(memberIds);
@@ -55,6 +55,31 @@ export function MemberFaces({
       ))}
     </div>
   );
+}
+
+/**
+ * The display names behind a set of ids, in the family's own order.
+ *
+ * Ordered by `members`, never by the order the ids arrived in, for the same
+ * reason the faces above are: the same two children always read the same way.
+ */
+export function namesOf(members: Member[], memberIds: readonly string[]): string[] {
+  const ids = new Set(memberIds);
+  return members.filter((member) => ids.has(member.id)).map((member) => member.displayName);
+}
+
+/**
+ * `["Mila", "Daan"]` → `"Mila & Daan"`.
+ *
+ * Two names get the ampersand the mockups use; three or more get commas,
+ * because "Tom & Lotte & Mila" reads as a list somebody forgot to finish. A
+ * caller that has *everybody* should say "Iedereen" instead and never reach
+ * here — that is a different fact, not a longer list.
+ */
+export function joinNames(names: readonly string[]): string {
+  if (names.length === 0) return '';
+  if (names.length <= 2) return names.join(' & ');
+  return names.join(', ');
 }
 
 /** Owner plus attendees, de-duplicated — who a block is "for". */

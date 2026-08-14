@@ -53,7 +53,18 @@ export function TodayLive() {
   useEffect(() => () => void (timer.current && clearTimeout(timer.current)), []);
 
   useRealtimeEvents(
-    ['event.upserted', 'event.deleted', 'completion.created', 'completion.undone', 'stars.awarded'],
+    [
+      'event.upserted',
+      'event.deleted',
+      'completion.created',
+      'completion.undone',
+      'stars.awarded',
+      // The Takenlijst is the household's list, not one person's: a parent
+      // ticking something off on a phone has to strike it through on the
+      // tablet in the kitchen without anybody touching it.
+      'task.upserted',
+      'task.deleted',
+    ],
     refresh
   );
 

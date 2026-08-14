@@ -432,41 +432,62 @@
   "today": {
     "title": "Vandaag",
     "allDay": "Hele dag",
+    "dayNav": {
+      "label": "Dag kiezen",
+      "previous": "Vorige dag",
+      "next": "Volgende dag"
+    },
+    "tabs": {
+      "label": "Weergave",
+      "dag": "Dagoverzicht",
+      "personen": "Per persoon",
+      "routines": "Routines",
+      "sterren": "Sterren overzicht"
+    },
     "now": {
       "eyebrowLive": "Nu",
       "eyebrowNext": "Straks",
-      "remainingTitle": "Nu bezig",
-      "remainingLabel": "Nog {minutes} minuten",
-      "minutesShort": "{minutes}m",
-      "endsAt": "Klaar om {time}",
-      "startsTitle": "Hierna",
-      "startsLabel": "Begint om {time}",
-      "inMinutes": "Over {minutes} minuten",
-      "openDay": "Deze dag in de agenda openen",
-      "clearTitle": "Niets meer gepland",
-      "clearBody": "De rest van de dag is van jullie.",
-      "eyebrowPast": "Eerder",
-      "pastTitle": "Al geweest",
-      "pastBody": "Van {start} tot {end}",
-      "pastClearTitle": "Er stond niets gepland",
-      "pastClearBody": "Deze dag bleef leeg."
+      "startsLabel": "Begint om {time}"
     },
-    "upNext": {
-      "title": "Hierna",
-      "free": "Vrije tijd!",
-      "pastTitle": "Eerder die dag"
+    "nowStrip": {
+      "remaining": "nog {minutes} min",
+      "startsIn": "over {minutes} min",
+      "clear": "Niets meer gepland — de rest van de dag is van jullie.",
+      "past": "Deze dag is voorbij."
+    },
+    "timeline": {
+      "title": "Dagoverzicht",
+      "done": "{count, plural, one {# afgerond} other {# afgerond}} — {title} ({time})",
+      "showDone": "Toon wat al geweest is"
+    },
+    "tasks": {
+      "title": "Takenlijst",
+      "empty": "Geen taken open.",
+      "add": "Taak toevoegen",
+      "startTimer": "Timer starten",
+      "placeholder": "Wat moet er gebeuren?",
+      "assignee": "Voor wie",
+      "unassigned": "Iedereen",
+      "save": "Opslaan",
+      "complete": "{title} afvinken",
+      "undo": "{title} weer openzetten",
+      "overdue": "Te laat",
+      "otherDay": "De takenlijst gaat over vandaag."
+    },
+    "routines": {
+      "title": "Routines vandaag",
+      "steps": "{done} van {total} stappen",
+      "progressLabel": "Routines van {name} vandaag",
+      "otherDay": "Routines worden alleen voor vandaag getoond."
+    },
+    "stars": {
+      "title": "Sterren vandaag",
+      "otherDay": "Sterren worden alleen voor vandaag getoond."
     },
     "kids": {
-      "title": "Hoe gaat het met de kinderen",
       "empty": "Nog geen kinderen in dit gezin.",
       "noRoutines": "Vandaag geen routines",
-      "steps": "{done} van {total} klaar",
-      "starsToday": "{count, plural, =0 {Nog geen sterren vandaag} one {# ster vandaag} other {# sterren vandaag}}",
-      "progressLabel": "Vandaag",
-      "balance": "{count, plural, one {# ster} other {# sterren}} te besteden"
-    },
-    "board": {
-      "title": "De dag"
+      "starsToday": "{count, plural, =0 {Nog geen sterren vandaag} one {# ster vandaag} other {# sterren vandaag}}"
     }
   },
   "routines": {

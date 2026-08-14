@@ -36,6 +36,13 @@ export const REALTIME_EVENT_TYPES = [
   // something else happened to refresh it. `entity.id` is the family id: the
   // subject of this event is the household, not a row.
   'settings.updated',
+  // M24. The Takenlijst on `/today` is a household list, so one parent ticking
+  // "prullenbak buiten zetten" off on a phone has to strike it through on the
+  // tablet in the kitchen without anybody touching it. One verb covers writing
+  // a task down and ticking it off: every consumer's reaction is the same
+  // re-read, and splitting them would be two names for one refresh.
+  'task.upserted',
+  'task.deleted',
   'sync.status',
 ] as const;
 

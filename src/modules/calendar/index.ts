@@ -83,6 +83,7 @@ export { addExdate, exdateLine, formatDate, formatDateTime } from './domain/ical
 export {
   MS_PER_DAY,
   MS_PER_HOUR,
+  addDays,
   fromWall,
   isSameDay,
   isValidTimeZone,

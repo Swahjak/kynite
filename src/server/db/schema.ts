@@ -17,5 +17,6 @@ export * from '@/modules/rewards/schema';
 export * from '@/modules/routines/schema';
 export * from '@/modules/sharing/schema';
 export * from '@/modules/notifications/schema';
+export * from '@/modules/tasks/schema';
 export * from '@/modules/timers/schema';
 export * from '@/modules/realtime/schema';

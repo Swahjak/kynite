@@ -65,9 +65,19 @@ export function TodayClock({ now, timeZone, dayKey }: TodayClockProps) {
   const time = formatDateTime(current, { hour: '2-digit', minute: '2-digit' });
   const date = formatDateTime(current, { dateStyle: 'full' });
 
+  // Two lines, right-aligned: the time at heading scale over the full date at
+  // body scale. It reads as one block from across a kitchen — the old single
+  // "12:02, vrijdag 14 augustus 2026" run put the one glanceable fact in the
+  // middle of a sentence.
   return (
-    <time data-testid="today-clock" dateTime={current.toISOString()}>
-      {time}, {date}
-    </time>
+    <div data-testid="today-clock" className="flex flex-col items-end text-right">
+      <time
+        dateTime={current.toISOString()}
+        className="font-display text-h2 font-bold tabular-nums"
+      >
+        {time}
+      </time>
+      <span className="text-body-sm text-ink-secondary">{date}</span>
+    </div>
   );
 }

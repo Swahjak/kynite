@@ -22,7 +22,7 @@ export function MemberAvatar({
   displayName: string;
   avatarUrl: string | null;
   color: MemberColor;
-  size?: 'sm' | 'default' | 'lg' | 'hub';
+  size?: 'xs' | 'sm' | 'default' | 'lg' | 'hub';
   ringed?: boolean;
   className?: string;
 }) {

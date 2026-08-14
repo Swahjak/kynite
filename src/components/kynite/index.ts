@@ -20,6 +20,7 @@ export { IconMedallion, medallionVariants, type IconMedallionProps } from './ico
 export { MediaRow } from './media-row';
 export { MemberFace, initialsFor } from './member-face';
 export { PageHeader } from './page-header';
+export { PillTabs, PillTabsPanel, type PillTabItem } from './pill-tabs';
 export { ProgressBar } from './progress-bar';
 export { SectionHeading } from './section-heading';
 export { StarCount, StarMedallion } from './star-count';

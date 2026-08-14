@@ -103,6 +103,23 @@ const EXTRA_ICONS = [
   'timer',
   'light_mode',
   'dark_mode',
+  // modules/today/ui — the `/today` rebuild (M24). `wb_twilight` is the
+  // part-of-day glyph the NU strip falls back to; the four routine-step
+  // glyphs below are named by `routine.icon`, never by a literal, and `info`
+  // is the star matrix's hint line.
+  'wb_twilight',
+  // Named through a table or a ternary rather than a literal `name="…"`, which
+  // is all the scanner below can see: `today/ui/today-tabs.tsx`'s TAB_ICONS,
+  // `tasks/ui/task-list.tsx`'s checked/unchecked pair, and
+  // `routines/ui/tokens.ts`'s SECTION_ICONS.
+  'view_column',
+  'bar_chart',
+  'radio_button_unchecked',
+  'task_alt',
+  'brush',
+  'checkroom',
+  'backpack',
+  'info',
   // modules/rewards/ui/tokens.ts — REWARD_ICONS, rendered through
   // `rewardIconOf(reward.icon)` so no literal `name="…"` appears in source.
   // `redeem` and `star` are already above.

@@ -169,6 +169,13 @@
       "when": 1786689169419,
       "tag": "0023_odd_miss_america",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1786733949515,
+      "tag": "0024_windy_wild_child",
+      "breakpoints": true
     }
   ]
 }

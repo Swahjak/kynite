@@ -287,7 +287,9 @@ describe('every Server Action authorizes first', () => {
     // that is the point.
     // 47 → 49 in M19 phase 2: `signInWithGoogleAction` and
     // `createFamilyForSocialUserAction`, the two halves of Google sign-in.
-    expect(findings.length).toBe(49);
+    // 49 → 52 in M24: the tasks slice's `createTaskAction`, `toggleTaskAction`
+    // and `deleteTaskAction`.
+    expect(findings.length).toBe(52);
   });
 
   it('reports no unauthorized action anywhere in src/', () => {

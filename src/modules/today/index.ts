@@ -31,11 +31,22 @@ export {
 
 export { loadTodayProgress, type KidProgress, type TodayProgressData } from './page-data';
 
-export { KidsProgress, type KidsProgressProps } from './ui/kids-progress';
-export { MemberFaces, participantsOf } from './ui/member-faces';
-export { NowHero, type NowHeroProps } from './ui/now-hero';
-export { NowHeroClock, type NowHeroClockProps } from './ui/now-hero-clock';
-export { ProgressRing, type ProgressRingProps } from './ui/progress-ring';
+export { KidStatCard, type KidStatCardProps } from './ui/kid-stat-card';
+export { MemberFaces, joinNames, namesOf, participantsOf } from './ui/member-faces';
 export { TodayClock, type TodayClockProps } from './ui/today-clock';
+export { TodayHeader, type TodayHeaderProps } from './ui/today-header';
 export { TodayLive } from './ui/today-live';
-export { UpNextGrid, type UpNextGridProps } from './ui/up-next-grid';
+export { TodayNowStrip, type TodayNowStripProps } from './ui/today-now-strip';
+export { TodayTabDag, type TodayTabDagProps } from './ui/today-tab-dag';
+export { TodayTabPersonen, type TodayTabPersonenProps } from './ui/today-tab-personen';
+export { TodayTabRoutines, type TodayTabRoutinesProps } from './ui/today-tab-routines';
+export { TodayTabSterren, type TodayTabSterrenProps } from './ui/today-tab-sterren';
+export { TodayTabs, type TodayTabsProps } from './ui/today-tabs';
+export {
+  DEFAULT_TODAY_TAB,
+  TODAY_TABS,
+  TODAY_TAB_STORAGE_KEY,
+  parseTodayTab,
+  useTodayTab,
+  type TodayTab,
+} from './ui/use-today-tab';

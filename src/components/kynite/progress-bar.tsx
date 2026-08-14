@@ -24,6 +24,7 @@ export function ProgressBar({
   max = 100,
   size = 'md',
   tone = 'brand',
+  fillClassName,
   shimmer = false,
   label,
   orientation = 'horizontal',
@@ -34,6 +35,15 @@ export function ProgressBar({
   max?: number;
   size?: 'xs' | 'sm' | 'md' | 'lg';
   tone?: 'brand' | 'gold' | 'success' | 'inverse';
+  /**
+   * Overrides the tone's fill colour with an arbitrary class.
+   *
+   * For the one case a token cannot express: a bar drawn in a *member's* own
+   * hue (`MEMBER_COLOR_CLASSES[color].dot`), where the colour identifies a
+   * person rather than a meaning. Tones stay the default so nothing else is
+   * tempted to hand-pick a fill.
+   */
+  fillClassName?: string;
   /** The `kynite-shimmer-sweep` overlay from `motion.md`. */
   shimmer?: boolean;
   /**
@@ -82,7 +92,7 @@ export function ProgressBar({
       <span
         className={cn(
           'relative block overflow-hidden rounded-4xl ease-brand',
-          fillTone,
+          fillClassName ?? fillTone,
           vertical
             ? 'w-full transition-[height] duration-500'
             : 'h-full transition-[width] duration-500'

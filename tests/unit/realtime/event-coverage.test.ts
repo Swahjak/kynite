@@ -68,6 +68,10 @@ const OWNERS: Record<RealtimeEventType, string> = {
   // changes, which is additive (the same relationship `routines` has to
   // `stars.awarded`), not a second owner.
   'settings.updated': 'family',
+  // M24. The Takenlijst is a household list, so one parent's tick has to reach
+  // the tablet in the kitchen; the tasks slice owns both writes.
+  'task.upserted': 'tasks',
+  'task.deleted': 'tasks',
   'sync.status': 'google',
 };
 
@@ -193,6 +197,9 @@ describe('every realtime event type is published by its owning slice', () => {
       'google',
       'rewards',
       'routines',
+      // M24: the tasks slice publishes `task.upserted` / `task.deleted`, so a
+      // household's list stays the same list on every screen showing it.
+      'tasks',
       'timers',
     ]);
   });
