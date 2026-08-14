@@ -67,13 +67,34 @@ function layout(events: CalendarEvent[], timeZone: string, dayKey: string): Posi
   let cluster: CalendarEvent[] = [];
   let clusterEnd = -Infinity;
 
+  // Greedy first-free-column assignment: an event takes the lowest-index
+  // column whose last-placed event has already ended by this event's start
+  // (touching is fine — `end === start` does not overlap). This is what lets
+  // a run of short, disjoint events share one column instead of each opening
+  // its own, which is what produced the "waterfall" — a single long event
+  // plus several short, non-overlapping ones fanning out into as many columns
+  // as there were short events.
   const flush = () => {
-    for (const [index, event] of cluster.entries()) {
+    const columnEnds: number[] = [];
+    const columnIndexOf = new Map<CalendarEvent, number>();
+
+    for (const event of cluster) {
+      const start = event.startsAt.getTime();
+      let column = columnEnds.findIndex((end) => end <= start);
+      if (column === -1) {
+        column = columnEnds.length;
+        columnEnds.push(-Infinity);
+      }
+      columnEnds[column] = event.endsAt.getTime();
+      columnIndexOf.set(event, column);
+    }
+
+    for (const event of cluster) {
       positioned.push({
         event,
         ...verticalSpan(event, timeZone, dayKey),
-        columnIndex: index,
-        columnCount: cluster.length,
+        columnIndex: columnIndexOf.get(event)!,
+        columnCount: columnEnds.length,
       });
     }
     cluster = [];

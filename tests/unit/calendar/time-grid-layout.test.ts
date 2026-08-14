@@ -128,4 +128,93 @@ describe('time-grid layout()', () => {
     expect(positioned.map((entry) => entry.columnCount)).toEqual([2, 2]);
     expect(positioned.map((entry) => entry.columnIndex)).toEqual([0, 1]);
   });
+
+  it('reuses a freed column instead of waterfalling disjoint short events sideways', () => {
+    // The reported bug: one long event plus several short, non-overlapping
+    // ones. Every short event followed the previous one only in start time,
+    // never in overlap, so each opened its own column — 7 columns wide for a
+    // day with a single genuine overlap (the long event against each short
+    // one). They should all share column 1 instead.
+    const long = event({
+      key: 'long',
+      startsAt: new Date('2026-03-11T06:00:00.000Z'), // 07:00
+      endsAt: new Date('2026-03-11T18:00:00.000Z'), // 19:00
+    });
+    const short08 = event({
+      key: 'short08',
+      startsAt: new Date('2026-03-11T07:00:00.000Z'), // 08:00
+      endsAt: new Date('2026-03-11T07:30:00.000Z'),
+    });
+    const short10 = event({
+      key: 'short10',
+      startsAt: new Date('2026-03-11T09:00:00.000Z'), // 10:00
+      endsAt: new Date('2026-03-11T09:30:00.000Z'),
+    });
+    const short13 = event({
+      key: 'short13',
+      startsAt: new Date('2026-03-11T12:00:00.000Z'), // 13:00
+      endsAt: new Date('2026-03-11T12:30:00.000Z'),
+    });
+    const short14 = event({
+      key: 'short14',
+      startsAt: new Date('2026-03-11T13:00:00.000Z'), // 14:00
+      endsAt: new Date('2026-03-11T13:30:00.000Z'),
+    });
+
+    const positioned = layout([long, short08, short10, short13, short14], TZ, '2026-03-11');
+    const byKey = new Map(positioned.map((entry) => [entry.event.key, entry]));
+
+    expect(positioned.every((entry) => entry.columnCount === 2)).toBe(true);
+    expect(byKey.get('long')!.columnIndex).toBe(0);
+    expect(byKey.get('short08')!.columnIndex).toBe(1);
+    expect(byKey.get('short10')!.columnIndex).toBe(1);
+    expect(byKey.get('short13')!.columnIndex).toBe(1);
+    expect(byKey.get('short14')!.columnIndex).toBe(1);
+  });
+
+  it('opens a third column for a genuine three-way overlap', () => {
+    const a = event({
+      key: 'a',
+      startsAt: new Date('2026-03-11T08:00:00.000Z'),
+      endsAt: new Date('2026-03-11T10:00:00.000Z'),
+    });
+    const b = event({
+      key: 'b',
+      startsAt: new Date('2026-03-11T08:30:00.000Z'),
+      endsAt: new Date('2026-03-11T09:30:00.000Z'),
+    });
+    const c = event({
+      key: 'c',
+      startsAt: new Date('2026-03-11T09:00:00.000Z'),
+      endsAt: new Date('2026-03-11T09:15:00.000Z'),
+    });
+
+    const positioned = layout([a, b, c], TZ, '2026-03-11');
+    const byKey = new Map(positioned.map((entry) => [entry.event.key, entry]));
+
+    expect(positioned.every((entry) => entry.columnCount === 3)).toBe(true);
+    expect(byKey.get('a')!.columnIndex).toBe(0);
+    expect(byKey.get('b')!.columnIndex).toBe(1);
+    expect(byKey.get('c')!.columnIndex).toBe(2);
+  });
+
+  it('lets a touching event share a column instead of opening a new one', () => {
+    const first = event({
+      key: 'first',
+      startsAt: new Date('2026-03-11T09:00:00.000Z'), // 10:00
+      endsAt: new Date('2026-03-11T10:00:00.000Z'), // 11:00
+    });
+    const second = event({
+      key: 'second',
+      startsAt: new Date('2026-03-11T10:00:00.000Z'), // 11:00 — touches, doesn't overlap
+      endsAt: new Date('2026-03-11T11:00:00.000Z'), // 12:00
+    });
+
+    const positioned = layout([first, second], TZ, '2026-03-11');
+    const byKey = new Map(positioned.map((entry) => [entry.event.key, entry]));
+
+    expect(positioned.every((entry) => entry.columnCount === 1)).toBe(true);
+    expect(byKey.get('first')!.columnIndex).toBe(0);
+    expect(byKey.get('second')!.columnIndex).toBe(0);
+  });
 });
