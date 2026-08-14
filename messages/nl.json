@@ -35,7 +35,8 @@
     "devices": "Schermen",
     "sharing": "Delen",
     "more": "Meer",
-    "mainNavigation": "Hoofdnavigatie"
+    "mainNavigation": "Hoofdnavigatie",
+    "account": "Account"
   },
   "auth": {
     "signOut": "Uitloggen",

@@ -9,7 +9,6 @@ import { Card } from '@/components/ui/card';
 import { Fab } from '@/components/ui/fab';
 import { Icon } from '@/components/ui/icon';
 import type { IconName } from '@/components/ui/icon-codepoints';
-import { HEADER_SLOT_ID, SlotPortal } from '@/components/ui/slot-portal';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { Member } from '@/modules/family';
 import { CALENDAR_VIEWS, daysOf, shiftAnchor, type CalendarView } from '../domain/window';
@@ -148,45 +147,6 @@ export function CalendarShell({
       data-slot="calendar-shell"
       className="flex min-h-0 min-w-0 flex-1 flex-col gap-3 overflow-x-hidden p-3 sm:p-6"
     >
-      {/* M19: the segmented view pill lives in the *shell's* glass header, as
-          every mockup draws it — the page portals into the slot the header
-          renders (`components/ui/slot-portal.tsx`) rather than the layout
-          learning what a calendar view is. It is the same `Tabs`, the same
-          state and the same test ids; only its position moved.
-
-          `min-w-0` + `overflow-x-auto`: at 390px the header already carries a
-          clock and an avatar, so the pill takes the leftover width and any
-          spill scrolls inside the pill instead of widening the page. Below
-          `sm` the triggers are glyphs with an accessible name; the words come
-          back as soon as there is room for them. */}
-      <SlotPortal id={HEADER_SLOT_ID}>
-        <Tabs
-          value={view}
-          onValueChange={(value) => changeView(value as CalendarView)}
-          className="min-w-0 max-w-full"
-        >
-          <TabsList
-            data-testid="view-switcher"
-            // The height override carries the same `group-data-horizontal`
-            // variant the primitive's default does, or the default's higher
-            // specificity keeps the 32px track under 40px triggers.
-            className="max-w-full overflow-x-auto rounded-4xl bg-surface-container p-1 group-data-horizontal/tabs:h-12"
-          >
-            {CALENDAR_VIEWS.map((candidate) => (
-              <TabsTrigger
-                key={candidate}
-                value={candidate}
-                data-testid={`view-${candidate}`}
-                className="label-overline h-10 shrink-0 rounded-4xl px-3 data-active:bg-surface-container-lowest data-active:text-primary data-active:shadow-sm sm:px-5"
-              >
-                <Icon name={VIEW_ICONS[candidate]} size="sm" className="sm:hidden" />
-                <span className="sr-only sm:not-sr-only">{t(`views.${candidate}`)}</span>
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
-      </SlotPortal>
-
       {/* The mockups' FAB replaces the inline "add event" button — same
           action, same test id, positioned by the shell's `FabSlot`. */}
       {canWrite && (
@@ -218,6 +178,44 @@ export function CalendarShell({
             <Icon name="chevron_right" />
           </Button>
         </div>
+
+        {/* M21: the segmented view pill is back on the page that owns it.
+            M19 had portalled it into the shell's glass header, as the mockups
+            draw it; that header is gone (`(app)/layout.tsx`), and a pill is a
+            *calendar* control, so it now sits at the end of the page's own
+            heading row — same `Tabs`, same state, same test ids, and it wraps
+            under the heading rather than squeezing it when the row runs out of
+            width.
+
+            `min-w-0` + `overflow-x-auto`: at 390px the pill takes the leftover
+            width and any spill scrolls inside it instead of widening the page.
+            Below `sm` the triggers are glyphs with an accessible name; the
+            words come back as soon as there is room for them. */}
+        <Tabs
+          value={view}
+          onValueChange={(value) => changeView(value as CalendarView)}
+          className="min-w-0 max-w-full"
+        >
+          <TabsList
+            data-testid="view-switcher"
+            // The height override carries the same `group-data-horizontal`
+            // variant the primitive's default does, or the default's higher
+            // specificity keeps the 32px track under 40px triggers.
+            className="max-w-full overflow-x-auto rounded-4xl bg-surface-container p-1 group-data-horizontal/tabs:h-12"
+          >
+            {CALENDAR_VIEWS.map((candidate) => (
+              <TabsTrigger
+                key={candidate}
+                value={candidate}
+                data-testid={`view-${candidate}`}
+                className="label-overline h-10 shrink-0 rounded-4xl px-3 data-active:bg-surface-container-lowest data-active:text-primary data-active:shadow-sm sm:px-5"
+              >
+                <Icon name={VIEW_ICONS[candidate]} size="sm" className="sm:hidden" />
+                <span className="sr-only sm:not-sr-only">{t(`views.${candidate}`)}</span>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
       </header>
 
       {/* The view frame. `Card variant="outlined"` rather than a hand-built

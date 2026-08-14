@@ -6,11 +6,15 @@ import { createPortal } from 'react-dom';
 /**
  * Layout-owned slots that pages fill.
  *
- * The stitch mockups put two page-specific controls inside the *shell*: the
- * DAY / WEEK / MONTH pill in the glass header, and the FAB in the bottom-right
- * corner above the mobile bar. Both belong to a page, both are positioned by
- * the shell — and in the App Router a page cannot render into its layout,
- * because the layout is above it in the tree.
+ * The stitch mockups put a page-specific control inside the *shell*: the FAB,
+ * in the bottom-right corner above the mobile bar. It belongs to a page and is
+ * positioned by the shell — and in the App Router a page cannot render into its
+ * layout, because the layout is above it in the tree.
+ *
+ * M21: the calendar's DAY / WEEK / MONTH pill used to be the second such
+ * control, portalled into the shell's glass header. That header is gone and the
+ * pill went back onto the calendar page, so `HEADER_SLOT_ID` went with it —
+ * the FAB is the only slot left.
  *
  * So the shell renders an empty, absolutely-positioned container and the page
  * portals into it by id. The alternative — hoisting the state into the layout
@@ -22,7 +26,6 @@ import { createPortal } from 'react-dom';
  * escaping onto a wall display is worse than a missing one, and the kiosk is
  * documented as having no parent-app chrome at all.
  */
-export const HEADER_SLOT_ID = 'app-header-slot';
 export const FAB_SLOT_ID = 'app-fab-slot';
 
 /** The slot `<div>` never moves or changes identity, so there is nothing to subscribe to. */

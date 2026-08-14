@@ -211,7 +211,9 @@ test.describe('kiosk layout audit', { tag: '@heavy' }, () => {
 
     // No parent-app navigation reached the wall.
     await expect(page.getByRole('link', { name: 'Instellingen' })).toHaveCount(0);
-    await expect(page.getByRole('button', { name: 'Uitloggen' })).toHaveCount(0);
+    // M21: the parent app's sign-out lives in the rail's account menu, so the
+    // absence to assert is that menu's trigger rather than a bare button.
+    await expect(page.getByTestId('user-menu-trigger')).toHaveCount(0);
   });
 
   test('applies the 6-foot type scale to the shell and everything under it', async ({

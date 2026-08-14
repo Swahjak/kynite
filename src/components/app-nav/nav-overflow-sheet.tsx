@@ -19,9 +19,13 @@ import { OVERFLOW_NAV, isActiveHref, type NavLabels } from './nav-items';
 export function NavOverflowSheet({
   labels,
   renderTrigger,
+  footer,
 }: {
   labels: NavLabels;
   renderTrigger: (props: { onClick: () => void; active: boolean }) => ReactNode;
+  /** M21: the phone's account block, at the very bottom of the list. The rail
+   *  passes nothing — it carries its own avatar tile instead. */
+  footer?: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
@@ -49,6 +53,7 @@ export function NavOverflowSheet({
               {labels[label]}
             </SheetClose>
           ))}
+          {footer}
         </div>
       </SheetContent>
     </Sheet>

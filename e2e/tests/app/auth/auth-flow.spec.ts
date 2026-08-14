@@ -1,5 +1,6 @@
 import { getCookieCache } from 'better-auth/cookies';
 import { expect, test } from '@playwright/test';
+import { signOutFromNav } from '@e2e/utils/sign-out';
 
 /**
  * Every test in this file starts from a browser that has never been anything.
@@ -50,8 +51,10 @@ test.describe('sign-up', () => {
     await expect(page).toHaveURL(/\/nl\/family$/);
     await expect(page.getByRole('heading', { name: familyName })).toBeVisible();
 
-    // The owner member exists, with the owner badge.
-    await expect(page.getByText('Sarah', { exact: true })).toBeVisible();
+    // The owner member exists, with the owner badge. Scoped to the roster:
+    // since M21 the signed-in member's own name is also the label of the
+    // rail's account tile, so an unscoped `getByText` matches twice.
+    await expect(page.getByTestId('member-row').getByText('Sarah', { exact: true })).toBeVisible();
     await expect(page.getByText('Beheerder')).toBeVisible();
 
     // M03 contract: the session *cookie* carries the family scope, so
@@ -97,7 +100,7 @@ test.describe('sign-in', () => {
       const email = await signUp(page, familyName);
       await expect(page).toHaveURL(/\/nl\/family$/);
 
-      await page.getByRole('button', { name: 'Uitloggen' }).click();
+      await signOutFromNav(page);
       await expect(page).toHaveURL(/\/nl\/sign-in$/);
 
       await page.getByLabel('E-mailadres').fill(email);

@@ -35,7 +35,8 @@
     "devices": "Screens",
     "sharing": "Sharing",
     "more": "More",
-    "mainNavigation": "Main navigation"
+    "mainNavigation": "Main navigation",
+    "account": "Account"
   },
   "auth": {
     "signOut": "Sign out",

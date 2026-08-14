@@ -114,6 +114,5 @@ export { MemberList } from './ui/member-list';
 export { InviteGone } from './ui/invite-gone';
 export { InviteAcceptStep, InviteGoogleStep, InviteProfileStep } from './ui/invite-steps';
 export { SignInForm } from './ui/sign-in-form';
-export { SignOutButton } from './ui/sign-out-button';
 export { SignUpForm } from './ui/sign-up-form';
 export { MEMBER_AVATARS, MEMBER_COLOR_CLASSES, avatarUrlFor, initialsOf } from './ui/tokens';

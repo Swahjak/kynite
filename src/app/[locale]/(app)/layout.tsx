@@ -1,9 +1,9 @@
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
-import { AppHeader } from '@/components/app-nav/app-header';
 import { AppRail } from '@/components/app-nav/app-rail';
 import { MobileNav } from '@/components/app-nav/mobile-nav';
 import type { NavLabels } from '@/components/app-nav/nav-items';
+import type { UserMenuLabels, UserMenuUser } from '@/components/app-nav/user-menu';
 import { FormattingLocaleProvider } from '@/components/formatting';
 import { ServiceWorkerRegistrar } from '@/components/offline';
 import { RealtimeProvider } from '@/components/realtime';
@@ -12,7 +12,7 @@ import { Toaster } from '@/components/ui/toast';
 import { redirect } from '@/i18n/navigation';
 import { defaultFormattingLocale } from '@/i18n/formatting-locale';
 import { routing } from '@/i18n/routing';
-import { MemberAvatar, SignOutButton, getFamily, getMember, getPrincipal } from '@/modules/family';
+import { MemberAvatar, getFamily, getMember, getPrincipal, signOutAction } from '@/modules/family';
 import { GoogleReauthBanner } from '@/modules/google';
 
 /** Session-dependent: never prerendered, so `next build` needs no secrets. */
@@ -70,10 +70,25 @@ export default async function AppLayout({
   const uiLocale = hasLocale(routing.locales, locale) ? locale : routing.defaultLocale;
   const formattingLocale = family?.formattingLocale ?? defaultFormattingLocale(uiLocale);
 
-  // The signed-in member's face, for the header avatar the mockups put there
-  // (docs/rebuild-design-gaps.md §2). A member row that has gone missing is not
-  // an error here — the shell degrades to sign-out only, exactly as before.
+  // The signed-in member's face. M21 moved it from the (now deleted) glass
+  // header to the foot of the nav, where it also carries the sign-out. A member
+  // row that has gone missing is not an error here — the shell simply renders
+  // no account tile, exactly as the header degraded before.
   const me = await getMember(principal.familyId, principal.memberId);
+  const user: UserMenuUser | undefined = me
+    ? {
+        name: me.displayName,
+        avatar: (
+          <MemberAvatar
+            displayName={me.displayName}
+            avatarUrl={me.avatarUrl}
+            color={me.color}
+            size="default"
+            className="ring-2 ring-primary/20"
+          />
+        ),
+      }
+    : undefined;
 
   const labels: NavLabels = {
     today: t('today'),
@@ -91,6 +106,11 @@ export default async function AppLayout({
     appName: tCommon('appName'),
   };
 
+  const userLabels: UserMenuLabels = {
+    account: t('account'),
+    signOut: (await getTranslations('auth'))('signOut'),
+  };
+
   return (
     // One stream for the parent app, the mirror of the hub tree's layout (§4).
     <NextIntlClientProvider timeZone={timeZone}>
@@ -104,35 +124,34 @@ export default async function AppLayout({
           caregiver's browser must never install it at all. */}
             <ServiceWorkerRegistrar />
             {/* M19: the shell is the stitch shell — an 80px icon rail on tablet and
-          desktop, a glass sticky header, a bottom tab bar on phones and a FAB
+          desktop, a bottom tab bar on phones and a FAB
           slot pages can fill. It replaces the flat row of ten text links this
           layout used to be (docs/rebuild-design-gaps.md §2). Every one of those
           ten destinations is still reachable: six on the rail, four behind the
           "More" sheet both nav shapes open. `sm:pl-20` clears the fixed rail. */}
-            <AppRail labels={labels} />
-            <div className="flex min-h-dvh flex-col sm:pl-20">
-              <AppHeader>
-                {me ? (
-                  <MemberAvatar
-                    displayName={me.displayName}
-                    avatarUrl={me.avatarUrl}
-                    color={me.color}
-                    size="default"
-                    className="ring-2 ring-primary/20"
-                  />
-                ) : null}
-                <SignOutButton />
-              </AppHeader>
+            <AppRail labels={labels} user={user} userLabels={userLabels} signOut={signOutAction} />
+            {/* M21: no header. It carried a clock, the calendar's view pill, the
+          avatar and a bare sign-out button, and cost 80px of every page for
+          them. The avatar and its sign-out moved into the nav (`user-menu.tsx`),
+          the pill went back to the calendar page that owns it, and the clock —
+          decorative in a surface that is held in the hand, unlike the wall
+          tablet's — was dropped. `pt-safe` moves with it, so a notched phone
+          still keeps its first row of content out from under the status bar. */}
+            <div className="pt-safe flex min-h-dvh flex-col sm:pl-20">
               {/* A Google account that needs re-linking has stopped syncing silently —
           the one failure a family cannot be expected to notice (§5). */}
               <GoogleReauthBanner principal={principal} />
               {/* `pb-24` reserves room above the fixed mobile bottom bar so the last
-            row of content is never occluded by it; the rail and the sticky
-            header take no space out of the flow, so nothing is reserved for
-            them. */}
+            row of content is never occluded by it; the rail is fixed too and
+            takes no space out of the flow, so nothing is reserved for it. */}
               <div className="flex-1 pb-24 sm:pb-0">{children}</div>
             </div>
-            <MobileNav labels={labels} />
+            <MobileNav
+              labels={labels}
+              user={user}
+              userLabels={userLabels}
+              signOut={signOutAction}
+            />
             <FabSlot />
           </Toaster>
         </RealtimeProvider>

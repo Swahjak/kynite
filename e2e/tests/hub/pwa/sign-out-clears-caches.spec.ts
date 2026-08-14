@@ -1,4 +1,5 @@
 import { pairHub, unpairHub } from '@e2e/fixtures/hub';
+import { signOutFromNav } from '@e2e/utils/sign-out';
 import { expect, test } from '@e2e/fixtures/family';
 
 /**
@@ -71,9 +72,9 @@ test.describe('sign-out', () => {
     // account session, and `(app)` is member-only.
     await unpairHub(page);
     await page.goto('/nl/today');
-    await expect(page.getByRole('button', { name: 'Uitloggen' })).toBeVisible();
+    await expect(page.getByTestId('user-menu-trigger')).toBeVisible();
     await page.goto('/nl/today');
-    await expect(page.getByRole('button', { name: 'Uitloggen' })).toBeVisible();
+    await expect(page.getByTestId('user-menu-trigger')).toBeVisible();
 
     // The precondition, asserted rather than assumed: without this the test
     // could pass on a device that never cached anything.
@@ -91,7 +92,9 @@ test.describe('sign-out', () => {
       })
       .toBe(true);
 
-    await page.getByRole('button', { name: 'Uitloggen' }).click();
+    // M21: the sign-out moved out of the deleted glass header and into the
+    // account menu at the foot of the nav.
+    await signOutFromNav(page);
     await page.waitForURL(/\/nl\/sign-in$/);
 
     const remaining = urlsIn(await cacheContents(page));
@@ -108,14 +111,16 @@ test.describe('sign-out', () => {
 
   test('keeps the asset cache — fonts and celebrations belong to the device', async ({ page }) => {
     await page.goto('/nl/today');
-    await expect(page.getByRole('button', { name: 'Uitloggen' })).toBeVisible();
+    await expect(page.getByTestId('user-menu-trigger')).toBeVisible();
     await page.evaluate(() => navigator.serviceWorker.ready);
     await page.goto('/nl/today');
 
     const before = (await cacheContents(page)).find((entry) => entry.cache === 'kynite-assets-v1');
     test.skip(!before || before.urls.length === 0, 'no assets cached in this run');
 
-    await page.getByRole('button', { name: 'Uitloggen' }).click();
+    // M21: the sign-out moved out of the deleted glass header and into the
+    // account menu at the foot of the nav.
+    await signOutFromNav(page);
     await page.waitForURL(/\/nl\/sign-in$/);
 
     // §6 promises a celebration never waits on a network, and that promise is

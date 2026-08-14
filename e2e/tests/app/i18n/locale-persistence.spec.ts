@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { signOutFromNav } from '@e2e/utils/sign-out';
 
 /**
  * Every test in this file starts from a browser that has never been anything.
@@ -60,7 +61,7 @@ test.describe('locale persistence', () => {
 
     // See the comment in the navigation test below: first visit to a route
     // under the e2e dev server pays a one-time on-demand compile.
-    await page.getByRole('button', { name: 'Sign out' }).click();
+    await signOutFromNav(page);
     await expect(page).toHaveURL(/\/en\/sign-in$/, { timeout: 15000 });
     await expect(page.locator('html')).toHaveAttribute('lang', 'en');
 

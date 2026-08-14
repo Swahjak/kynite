@@ -7,6 +7,7 @@ import { Icon } from '@/components/ui/icon';
 import { cn } from '@/lib/utils';
 import { NavOverflowSheet } from './nav-overflow-sheet';
 import { RAIL_FOOTER_NAV, RAIL_NAV, isActiveHref, type NavItem, type NavLabels } from './nav-items';
+import { UserMenu, type UserMenuLabels, type UserMenuUser } from './user-menu';
 
 /**
  * The desktop/tablet navigation rail — the `code.html` of every stitch mockup.
@@ -19,8 +20,25 @@ import { RAIL_FOOTER_NAV, RAIL_NAV, isActiveHref, type NavItem, type NavLabels }
  * (docs/rebuild-design-gaps.md §2). Every one of those destinations is still
  * one click away: six sit on the rail, the other four behind the same "More"
  * sheet the mobile bar opens.
+ *
+ * M21: the signed-in member's face is pinned below `settings`, and the sign-out
+ * that used to sit in the shell's glass header now lives in the menu it opens
+ * (`user-menu.tsx`). The header itself is gone, so every page starts at the top
+ * of the viewport.
  */
-export function AppRail({ labels }: { labels: NavLabels }) {
+export function AppRail({
+  labels,
+  user,
+  userLabels,
+  signOut,
+}: {
+  labels: NavLabels;
+  /** Absent when the member row has gone missing mid-session — the rail then
+   *  simply has no account tile, exactly as the header degraded before. */
+  user?: UserMenuUser;
+  userLabels: UserMenuLabels;
+  signOut: () => Promise<void>;
+}) {
   const pathname = usePathname();
 
   return (
@@ -68,6 +86,8 @@ export function AppRail({ labels }: { labels: NavLabels }) {
       {RAIL_FOOTER_NAV.map((item) => (
         <RailLink key={item.href} item={item} labels={labels} pathname={pathname} />
       ))}
+
+      {user ? <UserMenu user={user} labels={userLabels} signOut={signOut} /> : null}
     </nav>
   );
 }

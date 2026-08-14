@@ -6,6 +6,7 @@ import { Icon } from '@/components/ui/icon';
 import { cn } from '@/lib/utils';
 import { NavOverflowSheet } from './nav-overflow-sheet';
 import { PRIMARY_NAV, isActiveHref, type NavLabels } from './nav-items';
+import { UserMenuSheetSection, type UserMenuLabels, type UserMenuUser } from './user-menu';
 
 /**
  * The phone bottom tab bar — `home_light_mode/code.html`.
@@ -21,7 +22,17 @@ import { PRIMARY_NAV, isActiveHref, type NavLabels } from './nav-items';
  * icon system: it was the last lucide holdout in the product, and it is the
  * most-seen nav on phones (docs/rebuild-design-gaps.md §5 root cause 3).
  */
-export function MobileNav({ labels }: { labels: NavLabels }) {
+export function MobileNav({
+  labels,
+  user,
+  userLabels,
+  signOut,
+}: {
+  labels: NavLabels;
+  user?: UserMenuUser;
+  userLabels: UserMenuLabels;
+  signOut: () => Promise<void>;
+}) {
   const pathname = usePathname();
 
   return (
@@ -46,6 +57,11 @@ export function MobileNav({ labels }: { labels: NavLabels }) {
       })}
       <NavOverflowSheet
         labels={labels}
+        footer={
+          user ? (
+            <UserMenuSheetSection user={user} labels={userLabels} signOut={signOut} />
+          ) : undefined
+        }
         renderTrigger={({ onClick, active }) => (
           <button
             type="button"
