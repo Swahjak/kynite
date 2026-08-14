@@ -457,8 +457,9 @@ test.describe('hub offline', () => {
     const board = page.getByTestId('hub-board');
     await expect(board).toBeVisible({ timeout: 20_000 });
     // The wall clock and the day are the two things a person reads from six
-    // feet away; both come from the cached render.
-    await expect(page.getByTestId('hub-clock')).toBeVisible();
+    // feet away; both come from the cached render. M25: the wall's clock is
+    // the same `today-clock` `(app)/today` renders, not a hub-only element.
+    await expect(page.getByTestId('today-clock')).toBeVisible();
     // And nothing on the board apologises for the network.
     await expect(board).not.toContainText(/offline|fout|error/i);
 

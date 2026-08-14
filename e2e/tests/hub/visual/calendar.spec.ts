@@ -239,7 +239,11 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
         // (M15's locale note survives the change: `en`'s `useFormatter()`
         // renders 12-hour "10:49 AM" where nl renders "10:49". The pin does not
         // care what shape it replaces.)
-        await pinLiveText(page, 'hub-clock');
+        //
+        // M25: the wall no longer draws its own `hub-clock` — it renders the
+        // same `TodayHeader` `(app)/today` does, whose clock carries both the
+        // time and the date line under `today-clock`.
+        await pinLiveText(page, 'today-clock');
 
         await settlePage(page);
 
@@ -269,7 +273,7 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
       await expect(page.getByTestId('kiosk-shell')).toHaveAttribute('data-hub-theme', 'dark');
 
       // Same live clock, same durable pin as the light variant above.
-      await pinLiveText(page, 'hub-clock');
+      await pinLiveText(page, 'today-clock');
 
       await settlePage(page);
 
@@ -277,13 +281,16 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
     });
 
     test('hub agenda board', async ({ page, family }) => {
-      // B-1: `family.hubDefaultView = 'agenda'` swaps the board from
-      // `PersonColumns` to `AgendaView` (`hub-board.tsx`), which needs its own
-      // baseline — the settings e2e spec seeds no events, so that spec's pass
-      // was an empty-state pass, not proof the agenda board renders content at
-      // hub scale. This baseline is seeded with `seedBoardDay` deliberately,
-      // so `AgendaView`'s date gutter and `EventChip`'s hub sizing actually
-      // paint something.
+      // B-1, M25: `family.hubDefaultView = 'agenda'` no longer swaps the board
+      // to a different component (`hub-board.tsx` only draws a distinct shape
+      // for the cached offline mirror now) — it picks which of the vandaag
+      // composition's tabs opens first. `'agenda'` maps to the chronological
+      // "dag" tab rather than the per-person "personen" one (the opposite of
+      // the default), which needs its own baseline — the settings e2e spec
+      // seeds no events, so that spec's pass was an empty-state pass, not
+      // proof the dag tab renders content at hub scale. This baseline is
+      // seeded with `seedBoardDay` deliberately, so the timeline rows and
+      // `EventChip`'s hub sizing actually paint something.
       await pairHub(page, family.familyId);
 
       await seedBoardDay(family.familyId);
@@ -293,7 +300,25 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
       await expect(page.getByTestId('hub-board')).toBeVisible();
       await expect(page.getByTestId('kiosk-shell')).toHaveAttribute('data-hub-theme', 'light');
 
-      await pinLiveText(page, 'hub-clock');
+      // The opening tab is the "dag" pill, not the default "personen" one —
+      // proof the setting actually steered the composition rather than the
+      // screenshot merely matching by accident.
+      await expect(page.getByTestId('pill-tab-dag')).toHaveAttribute('aria-selected', 'true');
+      await expect(page.getByTestId('today-tab-dag')).toBeVisible();
+      // The pill row (`PillTabs`) scrolls horizontally, and the browser's own
+      // scroll-into-view for the newly-focused active tab lands at a slightly
+      // different offset from run to run — a real difference in *scroll
+      // position*, not in the board itself, which made this baseline flaky.
+      // Pin it flush left, the layout's resting position before anyone has
+      // touched the row.
+      await page
+        .getByTestId('today-tabs')
+        .getByRole('tablist')
+        .evaluate((list) => {
+          list.scrollLeft = 0;
+        });
+
+      await pinLiveText(page, 'today-clock');
 
       await settlePage(page);
 

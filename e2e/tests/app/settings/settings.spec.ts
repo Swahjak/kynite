@@ -220,8 +220,11 @@ test.describe('hub display preferences', () => {
 
     await hub.goto('/nl/hub');
     await expect(hub.getByTestId('hub-board')).toBeVisible();
-    // The default board: one column per person.
-    await expect(hub.locator('[data-slot="person-columns"]')).toBeVisible();
+    // The default board: `family.hubDefaultView = 'day'` opens the per-person
+    // tab (M25 — the setting now picks the vandaag composition's opening tab
+    // rather than a board component of its own).
+    await expect(hub.getByTestId('pill-tab-personen')).toHaveAttribute('aria-selected', 'true');
+    await expect(hub.getByTestId('today-tab-personen')).toBeVisible();
 
     // --- The parent's phone -------------------------------------------------
     await page.goto('/nl/settings');
@@ -236,7 +239,10 @@ test.describe('hub display preferences', () => {
     // demands is that no *credential* changes, which is what is asserted
     // here — the device row is the one that was paired before the change.)
     await hub.reload();
-    await expect(hub.locator('[data-slot="agenda-view"]')).toBeVisible();
+    // `'agenda'` maps to the chronological "dag" tab, the opposite of the
+    // default above.
+    await expect(hub.getByTestId('pill-tab-dag')).toHaveAttribute('aria-selected', 'true');
+    await expect(hub.getByTestId('today-tab-dag')).toBeVisible();
     await expect(hub.getByTestId('hub-device-name')).toContainText(device.deviceName);
 
     await kiosk.close();
