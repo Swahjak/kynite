@@ -320,7 +320,9 @@ export function EventDialog({
                 (`src/i18n/formatting-locale.ts`) with no API to override it.
                 The submitted values are unchanged — `yyyy-MM-dd` all-day,
                 `yyyy-MM-ddTHH:mm` timed. */}
-            <div className="grid gap-4 sm:grid-cols-2">
+            {/* Stacked, never two-up: a timed row is a date + a time + two
+                picker icons, which truncates in half a dialog's width. */}
+            <div className="grid gap-4">
               <WhenField
                 key={`start-${allDay}`}
                 name="startsAt"
