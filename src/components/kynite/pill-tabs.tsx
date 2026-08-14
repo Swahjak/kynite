@@ -66,7 +66,14 @@ export function PillTabs<Value extends string>({
         // ring of the first and last pill from being clipped by the horizontal
         // scroller a phone needs.
         className={cn(
-          '-mx-1 w-full max-w-full justify-start overflow-x-auto px-1 py-1 group-data-horizontal/tabs:h-auto',
+          // `min-w-0` matters as much as `overflow-x-auto` here: this list is
+          // a flex item in the Tabs root's flex-col, and without it the item's
+          // content-based intrinsic width wins over `w-full`, so the row grows
+          // past the viewport instead of shrinking to it and scrolling
+          // internally — the page scrolls horizontally and the last pill is
+          // cut off instead. `[scrollbar-width:none]` + the webkit pseudo hide
+          // the scrollbar; there's no existing "no-scrollbar" utility to reuse.
+          '-mx-1 w-full max-w-full min-w-0 justify-start overflow-x-auto px-1 py-1 [scrollbar-width:none] group-data-horizontal/tabs:h-auto [&::-webkit-scrollbar]:hidden',
           listClassName
         )}
       >
@@ -78,8 +85,28 @@ export function PillTabs<Value extends string>({
             className={cn(
               'h-10 shrink-0 grow-0 gap-2 rounded-4xl border-line-subtle bg-card px-4 font-display text-body-sm font-bold whitespace-nowrap text-ink-secondary shadow-sm',
               'hover:bg-surface-container hover:text-ink',
-              // Filled primary, and white on it — the mockup's active pill.
-              'data-active:border-primary data-active:bg-primary data-active:text-primary-foreground data-active:shadow-brand dark:data-active:bg-primary dark:data-active:text-primary-foreground'
+              // `ui/tabs.tsx`'s `line` variant — which this skin builds on for
+              // its transparent, trackless list — styles its *own* active tab
+              // as an underline: `data-active:bg-transparent` scoped to
+              // `group-data-[variant=line]/tabs-list:`, plus an `after:`
+              // pseudo-element opacity toggle for the underline bar itself.
+              // Those declarations use a different variant chain than a plain
+              // `data-active:bg-primary`, so `cn()` (tailwind-merge) never
+              // recognizes them as the same conflict and drops neither — both
+              // land in the generated CSS with equal specificity, and which
+              // one wins becomes an accident of Tailwind's internal class
+              // order rather than of source order in this file. That's what
+              // produced the outlined pill with invisible text (the primary
+              // background lost to `bg-transparent`, leaving white text on a
+              // transparent/white pill) and the stray underline beneath it.
+              // The fix is to override with the *exact same variant chain* so
+              // tailwind-merge treats them as one group and this call's value
+              // deterministically wins, and to kill the underline's box
+              // outright via `content-none` rather than fight its opacity
+              // toggle.
+              'data-active:border-primary data-active:bg-primary data-active:text-primary-foreground data-active:shadow-brand',
+              'group-data-[variant=line]/tabs-list:data-active:bg-primary dark:group-data-[variant=line]/tabs-list:data-active:bg-primary dark:group-data-[variant=line]/tabs-list:data-active:border-primary dark:data-active:text-primary-foreground',
+              'after:content-none'
             )}
           >
             <Icon name={item.icon} size="sm" />
