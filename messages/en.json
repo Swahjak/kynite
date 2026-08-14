@@ -482,7 +482,14 @@
     },
     "stars": {
       "title": "Stars today",
-      "otherDay": "Stars are only shown for today."
+      "otherDay": "Stars are only shown for today.",
+      "hint": "Tap a square to tick it off",
+      "toggle": "{step} — {name}",
+      "summaryLabel": "Stars today",
+      "tableCaption": "Today's routine steps per child",
+      "stepColumn": "Step",
+      "noStep": "{name} does not have this step today",
+      "empty": "No routine steps for today yet."
     },
     "kids": {
       "empty": "No children in this family yet.",

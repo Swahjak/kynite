@@ -5,9 +5,15 @@
  * The slice is a *composition*, not a new domain: `/today` reads the calendar's
  * events through `loadCalendarPage` and the routines/rewards facts through
  * their own queries, and this slice owns only the two things neither of them
- * has — the shape of a day (`domain/flow.ts`) and the screen that draws it.
- * There is no `schema.ts` and no `actions.ts` here, deliberately: nothing on
- * this page writes.
+ * has — the shape of a day (`domain/flow.ts`), the shape of the star grid
+ * (`domain/star-matrix.ts`) and the screens that draw them.
+ *
+ * There is no `schema.ts` and no `actions.ts` here, deliberately. The star
+ * matrix does write — a parent tapping a cell ticks a routine step off — but
+ * it writes through the routines slice's own `completeStepAction` /
+ * `undoCompletionAction`, so a star earned here is the same star, on the same
+ * ledger, as one earned on the hub. A local action would be a second answer to
+ * a question this product already answers once.
  *
  * Like the other slice barrels this re-exports server components alongside
  * `server-only` reads, so it is importable from a route file and from nothing
@@ -29,7 +35,17 @@ export {
   type TimeBlock,
 } from './domain/flow';
 
+export {
+  resolveStepIcon,
+  starMatrixRows,
+  type StarMatrixMember,
+  type StarMatrixRow,
+  type StarMatrixStep,
+} from './domain/star-matrix';
+
 export { loadTodayProgress, type KidProgress, type TodayProgressData } from './page-data';
+
+export { StarMatrix, type StarMatrixColumn, type StarMatrixProps } from './ui/star-matrix';
 
 export { KidStatCard, type KidStatCardProps } from './ui/kid-stat-card';
 export { MemberFaces, joinNames, namesOf, participantsOf } from './ui/member-faces';

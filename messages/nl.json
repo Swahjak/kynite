@@ -482,7 +482,14 @@
     },
     "stars": {
       "title": "Sterren vandaag",
-      "otherDay": "Sterren worden alleen voor vandaag getoond."
+      "otherDay": "Sterren worden alleen voor vandaag getoond.",
+      "hint": "Tik op een vakje om af te vinken",
+      "toggle": "{step} — {name}",
+      "summaryLabel": "Sterren vandaag",
+      "tableCaption": "Routinestappen van vandaag per kind",
+      "stepColumn": "Stap",
+      "noStep": "{name} heeft deze stap vandaag niet",
+      "empty": "Vandaag staan er nog geen routinestappen klaar."
     },
     "kids": {
       "empty": "Nog geen kinderen in dit gezin.",

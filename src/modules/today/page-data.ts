@@ -2,7 +2,15 @@ import 'server-only';
 import { startOfDay } from '@/modules/calendar';
 import { getFamily, getPrincipal, listMembers, type Member } from '@/modules/family';
 import { listStarTotals, listStarsEarnedSince } from '@/modules/rewards';
-import { completionRatio, listCompletionsOn, listRoutines, timingAt } from '@/modules/routines';
+import {
+  completionRatio,
+  completionSeed,
+  listCompletionsOn,
+  listRoutines,
+  routineIconOf,
+  timingAt,
+} from '@/modules/routines';
+import { resolveStepIcon, type StarMatrixStep } from './domain/star-matrix';
 
 /**
  * The "Kids' Progress" read behind `/today` (M19,
@@ -38,6 +46,15 @@ export type KidProgress = {
   starsToday: number;
   /** Stars available to spend right now. */
   starBalance: number;
+  /**
+   * Today's steps for this child, in board order — the raw material of the
+   * star matrix (`domain/star-matrix.ts`), and the reason this loader returns
+   * more than the two counts above.
+   *
+   * Not a second query: the counts are *derived* from this list, so a card and
+   * the grid beside it cannot disagree about what today contains.
+   */
+  steps: StarMatrixStep[];
 };
 
 export type TodayProgressData = {
@@ -94,19 +111,38 @@ export async function loadTodayProgress(
     completions.map((entry) => `${entry.memberId}:${entry.routineStepId}:${entry.occurrenceDate}`)
   );
 
-  const totals = new Map<string, { done: number; total: number }>(
-    kids.map((kid) => [kid.id, { done: 0, total: 0 }])
-  );
+  /**
+   * Every open step, per child, in board order.
+   *
+   * The counts below are counted off this list rather than tallied alongside
+   * it: the stat card and the star matrix are then two readings of one fact,
+   * and a step that appears in the grid is by construction a step the card
+   * counted.
+   */
+  const stepsByKid = new Map<string, StarMatrixStep[]>(kids.map((kid) => [kid.id, []]));
 
   for (const { row, occurrence } of open) {
-    const bucket = totals.get(row.ownerMemberId);
+    const bucket = stepsByKid.get(row.ownerMemberId);
     if (!bucket) continue;
 
+    const fallbackIcon = routineIconOf(row.icon);
+
     for (const step of row.steps) {
-      bucket.total += 1;
-      if (done.has(`${row.ownerMemberId}:${step.id}:${occurrence.occurrenceDate}`)) {
-        bucket.done += 1;
-      }
+      bucket.push({
+        routineId: row.id,
+        stepId: step.id,
+        title: step.title,
+        icon: resolveStepIcon(step.icon, fallbackIcon),
+        occurrenceDate: occurrence.occurrenceDate,
+        done: done.has(`${row.ownerMemberId}:${step.id}:${occurrence.occurrenceDate}`),
+        // Derived, not random — the same key the hub board mints for this
+        // (member, step, day), so a tap here and a tap there are one write.
+        clientId: completionSeed({
+          memberId: row.ownerMemberId,
+          routineStepId: step.id,
+          occurrenceDate: occurrence.occurrenceDate,
+        }),
+      });
     }
   }
 
@@ -115,7 +151,8 @@ export async function loadTodayProgress(
     // `listMembers` already orders by `sortOrder`; the panel inherits it, so
     // the cards sit in the same order as the columns below them.
     kids: kids.map((kid) => {
-      const bucket = totals.get(kid.id) ?? { done: 0, total: 0 };
+      const steps = stepsByKid.get(kid.id) ?? [];
+      const bucket = { done: steps.filter((step) => step.done).length, total: steps.length };
 
       return {
         memberId: kid.id,
@@ -127,6 +164,7 @@ export async function loadTodayProgress(
         ratio: completionRatio(bucket.total, bucket.done),
         starsToday: starsToday.get(kid.id) ?? 0,
         starBalance: starTotals.get(kid.id)?.available ?? 0,
+        steps,
       };
     }),
   };
