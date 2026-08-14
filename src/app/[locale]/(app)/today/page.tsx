@@ -20,6 +20,7 @@ import {
 import {
   KidsProgress,
   NowHero,
+  TodayClock,
   TodayLive,
   UP_NEXT_LIMIT,
   UpNextGrid,
@@ -133,13 +134,19 @@ export default async function TodayPage({
           {firstName ? tCommon(`greeting.${slot}`, { name: firstName }) : t('title')}
         </h1>
         {/* The mockup's "● Online • Monday, Oct 14" line. The dot is the
-            product's own liveness cue and the date is the same one this page
-            has always carried. There is deliberately no second clock: M19 phase
-            1 put a live one in the shell's glass header, and two clocks on one
-            screen is one clock too many. */}
+            product's own liveness cue. The shell's glass header carried the
+            product's only clock until M20 removed that header; `TodayClock`
+            is what replaces it here — a live time + full date, ticking, and
+            also the thing that notices the household's day has rolled over
+            (see its own doc comment). Only "today" gets the rollover: a
+            browsed day (`?date=`) keeps its own static date instead. */}
         <p className="flex items-center gap-2 text-body text-ink-secondary">
           <span aria-hidden="true" className="size-2 shrink-0 rounded-4xl bg-success" />
-          {formatDateTime(data.anchor, formattingLocale, { dateStyle: 'full' })}
+          {isToday ? (
+            <TodayClock now={data.now} timeZone={data.timeZone} dayKey={dayKey} />
+          ) : (
+            formatDateTime(data.anchor, formattingLocale, { dateStyle: 'full' })
+          )}
         </p>
       </header>
 

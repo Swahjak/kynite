@@ -36,5 +36,6 @@ export { MemberFaces, participantsOf } from './ui/member-faces';
 export { NowHero, type NowHeroProps } from './ui/now-hero';
 export { NowHeroClock, type NowHeroClockProps } from './ui/now-hero-clock';
 export { ProgressRing, type ProgressRingProps } from './ui/progress-ring';
+export { TodayClock, type TodayClockProps } from './ui/today-clock';
 export { TodayLive } from './ui/today-live';
 export { UpNextGrid, type UpNextGridProps } from './ui/up-next-grid';
