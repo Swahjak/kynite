@@ -28,8 +28,9 @@ const ANCHOR = '2026-03-11';
  * format, so the values below are still ISO.
  */
 async function fillWhen(group: Locator, date: string, time: string) {
-  await group.getByLabel('Datum').fill(date);
-  await group.getByLabel('Tijd').fill(time);
+  // exact: the pickers' "Kies een datum"/"Kies een tijd" buttons substring-match otherwise
+  await group.getByLabel('Datum', { exact: true }).fill(date);
+  await group.getByLabel('Tijd', { exact: true }).fill(time);
 }
 
 test.describe('calendar views', () => {
