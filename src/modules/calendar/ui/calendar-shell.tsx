@@ -235,6 +235,7 @@ export function CalendarShell({
           <MonthView
             days={days}
             events={events}
+            members={members}
             timeZone={timeZone}
             anchor={anchor}
             today={now}
@@ -263,7 +264,14 @@ export function CalendarShell({
             onSelect={onSelect}
           />
         ) : (
-          <TimeGrid days={days} events={events} timeZone={timeZone} now={now} onSelect={onSelect} />
+          <TimeGrid
+            days={days}
+            events={events}
+            members={members}
+            timeZone={timeZone}
+            now={now}
+            onSelect={onSelect}
+          />
         )}
       </Card>
 

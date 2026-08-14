@@ -3,8 +3,13 @@
 import { useTranslations } from 'next-intl';
 import { useDateTimeFormat } from '@/components/formatting';
 import { cn } from '@/lib/utils';
-import { CategoryDot } from '@/components/kynite';
+import { CategoryDot, MemberFace } from '@/components/kynite';
 import { Icon } from '@/components/ui/icon';
+// Type-only: `@/modules/family` is `server-only` (it re-exports its query
+// module), so a value import here would pull the database driver into this
+// client component's bundle. `person-columns.tsx` establishes the same
+// pattern for the same reason.
+import type { Member } from '@/modules/family';
 import type { CalendarEvent } from '../queries';
 import { CATEGORY_CLASSES, EVENT_TYPE_ICONS } from './tokens';
 
@@ -46,6 +51,20 @@ export type EventChipProps = {
   continuesBefore?: boolean;
   /** The block ends after the rendered grid window. */
   continuesAfter?: boolean;
+  /**
+   * Week and month grids lost their "whose is this" cue when M23 made the
+   * chip's color and icon a pure function of event *type* — a family member's
+   * color is now identity-only, carried by their avatar rather than the
+   * chip's fill. This restores the answer as a small face top-left, in the
+   * slot the recurrence glyph used to occupy: the two would otherwise
+   * compete for the same corner, so a chip carrying a face drops the glyph.
+   * Other surfaces (agenda, the day board, the member day grid) already
+   * answer "whose" some other way — a name, a column — so they leave this
+   * off and keep the recurrence cue.
+   */
+  showOwner?: boolean;
+  /** The roster `showOwner` resolves `event.ownerMemberId` against. */
+  members?: Member[];
   className?: string;
   style?: React.CSSProperties;
 };
@@ -60,12 +79,24 @@ export function EventChip({
   suppressClick,
   continuesBefore = false,
   continuesAfter = false,
+  showOwner = false,
+  members,
   className,
   style,
 }: EventChipProps) {
   const t = useTranslations('calendar');
   const formatDateTime = useDateTimeFormat();
   const palette = CATEGORY_CLASSES[event.category];
+
+  // The owner's face, when there is one to show and the surface asked for it.
+  // No fallback to an attendee: the request is specifically "the owner's
+  // face", and a household event's face is the group glyph below instead —
+  // resolving an attendee here would draw a face for an event that has none
+  // of its own attribution.
+  const ownerMember =
+    showOwner && event.ownerMemberId
+      ? (members?.find((member) => member.id === event.ownerMemberId) ?? null)
+      : null;
 
   // A redacted event has no title to show — it is a shape in the day, which is
   // exactly what free/busy means (§7 `calendar:view_private` → `busy-only`).
@@ -146,7 +177,12 @@ export function EventChip({
         // oklch(58% 0.14 H)`"). The rule used to take `palette.border`, which
         // is the pale `oklch(85% 0.05 H)` **chip outline** — a tenth of the
         // contrast the bar is drawn at in the spec.
-        'group/chip relative flex min-w-0 flex-col justify-start gap-0.5 overflow-hidden rounded-lg border-l-4 px-2 py-1 text-left shadow-sm',
+        // `@container/chip`: the owner glyph below queries this, not the
+        // viewport — a week-view column and a month cell are narrow for
+        // reasons that have nothing to do with the device (seven days is
+        // seven days), so the space it has to work with is the chip's own
+        // rendered width, not a breakpoint.
+        'group/chip @container/chip relative flex min-w-0 flex-col justify-start gap-0.5 overflow-hidden rounded-lg border-l-4 px-2 py-1 text-left shadow-sm',
         palette.surface,
         palette.rule,
         variant === 'block' && 'absolute inset-x-1 select-none',
@@ -193,6 +229,41 @@ export function EventChip({
       )}
 
       <div className="flex min-w-0 items-center gap-1">
+        {/* Owner face (M24): top-left, ahead of the type glyph. Identity is
+            not the thing a busy-only block redacts — the content is — so this
+            renders even when the type icon below it is suppressed. A
+            household event gets the same "Iedereen" glyph the member day
+            grid's shared column already uses, rather than a stack of every
+            member's face, which the design system has no precedent for.
+
+            Gated on the chip's own rendered width (`@container/chip` above),
+            not the viewport: a week view is seven columns wide regardless of
+            whether the glass is a phone or a wall tablet, and a chip that
+            narrow has no room left for a title once a 24px face and its gap
+            are added on top of the type icon — the row would rather drop the
+            face than silently collapse the title to zero width. `hidden` by
+            default is the same "no glyph, full room for the title" shape the
+            chip drew before this feature existed. */}
+        {showOwner && event.householdWide && (
+          <span className="hidden shrink-0 @min-[6.5rem]/chip:inline-flex">
+            <Icon
+              name="group"
+              size={hub ? 'sm' : 'xs'}
+              label={t('everyone')}
+              className={palette.text}
+            />
+          </span>
+        )}
+        {showOwner && !event.householdWide && ownerMember && (
+          <span className="hidden shrink-0 @min-[6.5rem]/chip:inline-flex">
+            <MemberFace
+              name={ownerMember.displayName}
+              avatarUrl={ownerMember.avatarUrl}
+              surfaceClass={CATEGORY_CLASSES[ownerMember.color].surface}
+              size={hub ? 'sm' : 'xs'}
+            />
+          </span>
+        )}
         {!event.busyOnly && (
           <Icon
             name={EVENT_TYPE_ICONS[event.eventType]}
@@ -221,7 +292,10 @@ export function EventChip({
             className="ml-auto size-1.5 shrink-0 rounded-full bg-warning"
           />
         )}
-        {event.recurring && !event.pendingSync && (
+        {/* Week and month chips trade this for the owner face: a chip
+            already busy answering "whose" does not have room left to also
+            flag "repeats" without crowding the row. Other surfaces keep it. */}
+        {event.recurring && !event.pendingSync && !showOwner && (
           <Icon
             name="repeat"
             size="xs"

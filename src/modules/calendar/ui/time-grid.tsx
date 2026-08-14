@@ -3,6 +3,7 @@
 import { useMemo, useRef, useState, useEffect } from 'react';
 import { useDateTimeFormat } from '@/components/formatting';
 import { cn } from '@/lib/utils';
+import type { Member } from '@/modules/family';
 import { dayKeysOf } from '../domain/expand';
 import { minutesIntoDay, toDateKey, toWall } from '../domain/zone';
 import type { CalendarEvent } from '../queries';
@@ -24,6 +25,8 @@ import { useDragReschedule } from './use-drag-reschedule';
 export type TimeGridProps = {
   days: Date[];
   events: CalendarEvent[];
+  /** Resolves each chip's owner face — see `EventChip`'s `showOwner`. */
+  members: Member[];
   timeZone: string;
   /** Rendered as "now" — passed in rather than read, so snapshots are stable. */
   now?: Date | null;
@@ -130,7 +133,15 @@ function verticalSpan(
   };
 }
 
-export function TimeGrid({ days, events, timeZone, now, onSelect, hub = false }: TimeGridProps) {
+export function TimeGrid({
+  days,
+  events,
+  members,
+  timeZone,
+  now,
+  onSelect,
+  hub = false,
+}: TimeGridProps) {
   const formatDateTime = useDateTimeFormat();
   const columnsRef = useRef<HTMLDivElement>(null);
   const [columnWidth, setColumnWidth] = useState(0);
@@ -240,6 +251,8 @@ export function TimeGrid({ days, events, timeZone, now, onSelect, hub = false }:
                   event={event}
                   variant="row"
                   showTime={false}
+                  showOwner
+                  members={members}
                   hub={hub}
                   onSelect={onSelect}
                 />
@@ -296,6 +309,8 @@ export function TimeGrid({ days, events, timeZone, now, onSelect, hub = false }:
                     key={positioned.event.key}
                     event={positioned.event}
                     variant="block"
+                    showOwner
+                    members={members}
                     hub={hub}
                     onSelect={onSelect}
                     onPointerDown={drag.onPointerDown}

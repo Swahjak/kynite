@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { useDateTimeFormat } from '@/components/formatting';
 import { cn } from '@/lib/utils';
+import type { Member } from '@/modules/family';
 import { dayKeysOf } from '../domain/expand';
 import { toDateKey, toWall } from '../domain/zone';
 import type { CalendarEvent } from '../queries';
@@ -19,6 +20,8 @@ import { EventChip } from './event-chip';
 export type MonthViewProps = {
   days: Date[];
   events: CalendarEvent[];
+  /** Resolves each chip's owner face — see `EventChip`'s `showOwner`. */
+  members: Member[];
   timeZone: string;
   /** The month in focus; days outside it render dimmed. */
   anchor: Date;
@@ -40,6 +43,7 @@ const MAX_ROWS_PER_CELL = 3;
 export function MonthView({
   days,
   events,
+  members,
   timeZone,
   anchor,
   today,
@@ -145,6 +149,8 @@ export function MonthView({
                     event={event}
                     variant="row"
                     showTime={false}
+                    showOwner
+                    members={members}
                     onSelect={onSelect}
                     className="px-1 py-0 shadow-none"
                   />
