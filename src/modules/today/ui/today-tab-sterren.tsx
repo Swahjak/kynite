@@ -1,7 +1,11 @@
 import { getTranslations } from 'next-intl/server';
 import { Card } from '@/components/ui/card';
 import { MemberAvatar } from '@/modules/family';
-import { completeStepAction, undoCompletionAction } from '@/modules/routines';
+import {
+  completeStepAction,
+  undoCompletionAction,
+  type CompleteStepInput,
+} from '@/modules/routines';
 import type { KidProgress } from '../page-data';
 import { KidStatCard } from './kid-stat-card';
 import { StarMatrix } from './star-matrix';
@@ -27,9 +31,16 @@ import { StarMatrix } from './star-matrix';
 
 export type TodayTabSterrenProps = {
   kids: KidProgress[] | null;
+  /**
+   * `completion:write` for the surface's principal, resolved by the loader
+   * (`loadTodayProgress`) rather than inferred from which surface this is.
+   */
+  canComplete: boolean;
+  /** Which screen the tap happened on — `completion_source` on the ledger. */
+  source: CompleteStepInput['source'];
 };
 
-export async function TodayTabSterren({ kids }: TodayTabSterrenProps) {
+export async function TodayTabSterren({ kids, canComplete, source }: TodayTabSterrenProps) {
   const t = await getTranslations('today');
 
   if (kids === null || kids.length === 0) {
@@ -80,6 +91,8 @@ export async function TodayTabSterren({ kids }: TodayTabSterrenProps) {
           columns={columns}
           completeStep={completeStepAction}
           undoCompletion={undoCompletionAction}
+          canComplete={canComplete}
+          source={source}
         />
       </Card>
 

@@ -1,30 +1,81 @@
 import { getTranslations } from 'next-intl/server';
 import { EmptyState } from '@/components/kynite';
 import { ChildLauncher, type HubChild } from '@/components/hub';
-import { HubBoard, loadCalendarPage } from '@/modules/calendar';
+import {
+  HubBoard,
+  dayKeysOf,
+  isSameDay,
+  loadCalendarPage,
+  toDateKey,
+  toWall,
+} from '@/modules/calendar';
 import { requireHubDevice } from '@/modules/devices';
-import { MEMBER_COLOR_CLASSES, initialsOf } from '@/modules/family';
+import { MEMBER_COLOR_CLASSES, greetingSlotFor, hourIn, initialsOf } from '@/modules/family';
 import { loadFamilyRoutineTotals } from '@/modules/routines';
+import { loadTodayTasks } from '@/modules/tasks';
+import {
+  TodayHeader,
+  TodayLive,
+  TodayNowStrip,
+  TodayTabDag,
+  TodayTabPersonen,
+  TodayTabRoutines,
+  TodayTabSterren,
+  TodayTabs,
+  flowOf,
+  loadTodayProgress,
+  type DayReference,
+  type TodayTab,
+} from '@/modules/today';
 import { AmbientTimers, loadTimerBoard } from '@/modules/timers';
 
 /** Session-dependent: never prerendered, so `next build` needs no database. */
 export const dynamic = 'force-dynamic';
 
 /**
- * The hub ambient board (M06): one column per member in `sortOrder`, each in
- * their own color, at 6-foot legibility.
+ * The wall hub's home screen (M25) — **the same screen as `(app)/today`**.
  *
- * Two things are deliberately different from `(app)/today`. Private calendars
- * render free/busy only — a kitchen wall is not a private surface — which
- * `loadCalendarPage({ surface: 'hub' })` enforces. And there is no event
- * dialog at all: `event:write` is `deny` for a device principal (§7), so the
- * board offers no writes rather than offering some that would be refused.
+ * The hub used to draw a board of its own: one column per member, at 6-foot
+ * scale, and nothing else. That was a second answer to a question the product
+ * already answers once, and it drifted — the wall could not show the household's
+ * task list, today's routine progress or today's stars, all of which are things
+ * a family standing in the kitchen wants more than a second copy of the
+ * calendar. So the composition is now literally the same components
+ * (`@/modules/today`), fed the same way, and the only thing that differs is
+ * what a *device* principal is allowed to do with them.
  *
- * The board renders behind a **device** principal, not a parent's (M12): the
- * `(hub)` layout note records why the tree stays at `/hub/*`, and
- * `requireHubDevice` is why nothing here can be reached with an account
- * session. `loadCalendarPage` therefore sees `kind: 'device'` and grades
- * `calendar:view_private` as `busy-only` on its own, with no surface flag.
+ * ## What restricted permissions actually restrict
+ *
+ * Every gate below is read off the §7 matrix by the loader that owns the data,
+ * never from "this is the hub":
+ *
+ *  - **the schedule** — private calendars render free/busy only, because
+ *    `calendar:view_private` is `busy-only` for a device
+ *    (`loadCalendarPage({ surface: 'hub' })`). A kitchen wall is not a private
+ *    surface.
+ *  - **the task list** — tickable, not authorable: `task:complete` is `allow`
+ *    and `task:write` is `deny` for a device, so `loadTodayTasks` hands the
+ *    list `canComplete: true, canWrite: false` and the quick-add never renders.
+ *  - **the star matrix** — fully interactive, because `completion:write` is
+ *    `allow` for a device; that is the whole point of a screen kids can reach.
+ *    Taps are recorded with `source: 'hub'`, like every other hub completion.
+ *  - **events** — no FAB at all: `event:write` is `deny`, so the wall offers no
+ *    writes rather than offering some that would be refused.
+ *
+ * ## What stays hub-shaped
+ *
+ * The kiosk shell and its chrome, the 6-foot type scale (applied on the
+ * document element by `data-surface='hub'`, so every token in the composition
+ * is already the wall's size), `ChildLauncher`, the ambient timers, idle-return,
+ * and the IndexedDB mirror — see `HubBoard`, which is now the mirror's
+ * reconcile wrapper rather than a board of its own.
+ *
+ * The one thing the composition drops on the way over is the 72px
+ * `display-hub` heading. The vandaag layout was drawn *for* this wall
+ * ("stitch_wall_hub_daily_schedule", `docs/design/vandaag-template.html`) and
+ * already carries its own scale; stacking a second, larger header on top of the
+ * kiosk scale is what used to push a hub screen into an internal scroll, which
+ * a wall with no scrollbar must never do.
  */
 export default async function HubPage({
   params,
@@ -41,34 +92,50 @@ export default async function HubPage({
   // doesn't drop them.
   await requireHubDevice(locale, '/hub', { date, now });
 
-  // The board is an ambient "today" surface; `?date=` renders another day,
-  // which is what a tomorrow-preview needs and what makes the board
-  // snapshot-testable without freezing a clock.
+  // `?date=` renders another day, which is what a tomorrow-preview needs and
+  // what makes the board snapshot-testable without freezing a clock.
   // No `view`: the hub's board is the *family's* (FR28, M16), resolved inside
-  // the loader from `family.hubDefaultView`. Passing 'day' here would have
-  // pinned the wall to one shape and made the setting unobservable.
+  // the loader from `family.hubDefaultView` — which now picks the opening
+  // *tab* (see `defaultTab` below) as well as the cached board's layout.
   const data = await loadCalendarPage({ date, surface: 'hub' });
+  const t = await getTranslations('today');
+  const tCalendar = await getTranslations('calendar');
+
+  if (!data) {
+    // Unreachable in practice — `requireHubDevice` has already redirected a
+    // hub with no principal. Kept as the honest fallback for the case the
+    // loader itself declines (a family row deleted mid-request), because a
+    // blank board is the one thing a wall display must never show.
+    return (
+      <main className="min-h-full">
+        <EmptyState
+          size="hub"
+          heading
+          title={tCalendar('hub.unpairedTitle')}
+          description={tCalendar('hub.unpairedBody')}
+        />
+      </main>
+    );
+  }
+
   // Renders nothing when nothing is running, so the board is unchanged the
   // rest of the day.
   const timers = await loadTimerBoard({ now });
-  const t = await getTranslations('calendar');
 
   // M19: the board is the way *in*, not only a thing to read. One entry per
   // child, carrying today's step count so the tap is informed rather than
   // exploratory. Loaded here, on the server, because `ChildLauncher` is a
   // client component and `@/modules/routines` is `server-only`; the same seam
   // `AmbientTimers` uses. Adults are absent by design — the hub's interactive
-  // half is the child-facing one (§7: a device may complete steps and request
-  // redemptions, and nothing an adult does on the wall is a thing the wall
-  // should offer).
+  // half is the child-facing one.
   //
   // One family-wide read, not one board per child: this page re-renders on
   // every SSE event a wall display receives, and `loadMemberRoutines` per child
   // was an N+1 that built four full board sections per member to read two
   // integers off the end (M19 review, F11).
-  const totals = data ? await loadFamilyRoutineTotals({ date }) : null;
+  const totals = await loadFamilyRoutineTotals({ date });
 
-  const children: HubChild[] = (data?.members ?? [])
+  const children: HubChild[] = data.members
     .filter((member) => member.role === 'child')
     .map((member) => {
       const progress = totals?.get(member.id) ?? { done: 0, total: 0 };
@@ -84,38 +151,75 @@ export default async function HubPage({
       };
     });
 
-  if (!data) {
-    // Unreachable in practice — `requireHubDevice` has already redirected a
-    // hub with no principal. Kept as the honest fallback for the case the
-    // loader itself declines (a family row deleted mid-request), because a
-    // blank board is the one thing a wall display must never show.
-    return (
-      <main className="min-h-full">
-        <EmptyState
-          size="hub"
-          heading
-          title={t('hub.unpairedTitle')}
-          description={t('hub.unpairedBody')}
-        />
-      </main>
-    );
-  }
+  /**
+   * The greeting, at *household* scale.
+   *
+   * `(app)/today` greets the person signed in; a wall tablet has nobody signed
+   * in by construction (§7: "a wall tablet is physically unauthenticated"), and
+   * greeting the device — or the family's name, which a household writes as
+   * anything from "Jansen" to "Ons gezin" — would read as either wrong or
+   * arch. So the slot alone: "Goedemorgen". Resolved against the household's
+   * timezone, like the app's, so a family in Curaçao is not wished a good
+   * evening over breakfast.
+   */
+  const slot = greetingSlotFor(hourIn(data.now, data.timeZone));
+
+  const dayKey = toDateKey(toWall(data.anchor, data.timeZone));
+  const dayEvents = data.events.filter((event) =>
+    dayKeysOf(event, data.timeZone, event.allDay).includes(dayKey)
+  );
+
+  const isToday = isSameDay(data.anchor, data.now, data.timeZone);
+  const reference: DayReference = isToday
+    ? { kind: 'today', now: data.now }
+    : { kind: data.anchor.getTime() < data.now.getTime() ? 'past' : 'future', now: data.anchor };
+  const flow = flowOf(dayEvents, reference);
+
+  /**
+   * The two reads that are only true of *today* — the same rule `(app)/today`
+   * follows. A browsed day gets `null` and the panels say so rather than
+   * showing today's numbers under yesterday's date.
+   */
+  const [progress, tasks] = await Promise.all([
+    isToday ? loadTodayProgress({ now: data.now }) : null,
+    isToday ? loadTodayTasks({ now: data.now }) : null,
+  ]);
+
+  const nowEventKey = flow.live ? (flow.hero?.key ?? null) : null;
+
+  /**
+   * FR28's "default view", kept meaningful rather than retired.
+   *
+   * The setting's two options are already written as the two arrangements this
+   * composition offers — "Kolommen per persoon" and "Lijst van wat eraan komt"
+   * — so `day` opens the per-person tab and `agenda` opens the chronological
+   * one. The Controller's control and its copy are unchanged, it still reaches
+   * the wall without re-pairing (`SettingsWatcher`), and it still decides the
+   * cached board's layout inside `HubBoard`. It is only the *opening* tab: a
+   * tap on the wall moves to another one and that choice is the device's, like
+   * everywhere else (`use-today-tab.ts`).
+   */
+  const defaultTab: TodayTab = data.view === 'agenda' ? 'dag' : 'personen';
 
   return (
     <main
       className="flex min-h-full flex-col gap-4 bg-background px-6 py-4"
       data-testid="hub-board"
     >
-      {/* §6: family state is mirrored to IndexedDB on every load and every SSE
-          event, and a boot renders from IDB then reconciles. Both halves live
-          in `HubBoard`, because the reconcile has to swap the heading, the day
-          and the columns together or the wall contradicts itself.
+      {/* A subscription, not a widget — see `TodayLive`. It works unchanged
+          under a device principal: the stream is scoped to the family by the
+          server, and this tree already runs `SettingsWatcher` and the mirror
+          off the same connection (`RealtimeProvider`, in the hub layout). */}
+      <TodayLive />
 
-          `generatedAt` is the server's render instant and the only thing the
-          mirror compares: a snapshot is adopted over this document strictly
-          when it is newer, from the same family, and the stream is not up. */}
+      {/* §6: family state is mirrored to IndexedDB on every load and every SSE
+          event, and a boot renders from IDB then reconciles. The live
+          composition below is a pass-through in every ordinary case; only a
+          device holding a strictly *newer* snapshot than the document it was
+          served draws the cached board instead. See `HubBoard`. */}
       <HubBoard
         familyId={data.familyId}
+        greeting={t(`hubGreeting.${slot}`)}
         snapshot={{
           // The server's own render instant, not `Date.now()` in a client
           // component: two snapshots must be comparable across devices.
@@ -129,17 +233,77 @@ export default async function HubPage({
           events: data.events,
         }}
       >
-        {/* M09: a running timer is on the board without anyone navigating to
-            it. Passed as a child rather than mirrored — a countdown comes from
-            the server's clock, and a cached one would be a wrong number. */}
-        {timers ? <AmbientTimers board={timers} /> : null}
+        <TodayHeader
+          greeting={t(`hubGreeting.${slot}`)}
+          anchor={data.anchor}
+          now={data.now}
+          timeZone={data.timeZone}
+          dayKey={dayKey}
+          isToday={isToday}
+          // A chevron must not navigate the kiosk out of the `(hub)` tree.
+          href="/hub"
+        />
 
-        {/* M19: the per-child entry points. Not mirrored either — a step count
-            is a live number, and a board rendered from IndexedDB after a
-            reboot should show yesterday's schedule rather than yesterday's
-            progress. */}
-        <ChildLauncher entries={children} />
+        <TodayNowStrip
+          event={flow.hero}
+          mode={flow.mode}
+          members={data.members}
+          now={reference.now}
+          timeZone={data.timeZone}
+        />
+
+        <TodayTabs
+          defaultTab={defaultTab}
+          dag={
+            <TodayTabDag
+              members={data.members}
+              events={data.events}
+              timeZone={data.timeZone}
+              dayKey={dayKey}
+              now={data.now}
+              isToday={isToday}
+              nowEventKey={nowEventKey}
+              // `canWrite` / `canComplete` come from the matrix inside
+              // `loadTodayTasks`: a device may tick a task off and may not
+              // invent or delete one.
+              tasks={tasks}
+              // The kiosk's own timers screen, not the app's.
+              timersHref="/hub/timers"
+            />
+          }
+          personen={
+            <TodayTabPersonen
+              members={data.members}
+              events={data.events}
+              timeZone={data.timeZone}
+              dayKey={dayKey}
+              now={data.now}
+              isToday={isToday}
+              nowEventKey={nowEventKey}
+            />
+          }
+          routines={<TodayTabRoutines kids={progress?.kids ?? null} />}
+          sterren={
+            <TodayTabSterren
+              kids={progress?.kids ?? null}
+              canComplete={progress?.canComplete ?? false}
+              source="hub"
+            />
+          }
+        />
       </HubBoard>
+
+      {/* M09: a running timer is on the board without anyone navigating to it.
+          Outside the mirror rather than in it — a countdown comes from the
+          server's clock, and a cached one would be a wrong number. */}
+      {timers ? <AmbientTimers board={timers} /> : null}
+
+      {/* M19: the per-child entry points. Not mirrored either — a step count is
+          a live number, and a board rendered from IndexedDB after a reboot
+          should show yesterday's schedule rather than yesterday's progress. */}
+      <ChildLauncher entries={children} />
+
+      {/* No `NewEventFab`: `event:write` is `deny` for a device principal (§7). */}
     </main>
   );
 }

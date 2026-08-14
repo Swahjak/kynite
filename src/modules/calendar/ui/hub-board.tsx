@@ -2,7 +2,6 @@
 
 import { useTranslations } from 'next-intl';
 import { useDateTimeFormat } from '@/components/formatting';
-import { PageHeader } from '@/components/kynite';
 import { useMirroredHubState } from '@/components/offline';
 // Type-only, like `person-columns.tsx` — `@/modules/family` re-exports
 // `server-only` queries, and a value import here would put the database client
@@ -14,24 +13,40 @@ import { AgendaView } from './agenda-view';
 import { PersonColumns } from './person-columns';
 
 /**
- * The hub board, as the client component that owns its own state.
+ * The hub's IndexedDB mirror, as the component that can change its mind after
+ * mount (docs/architecture.md §6: family state is mirrored to IDB on every load
+ * and every SSE event, and "boot renders from IDB then reconciles").
  *
- * The page above is still the thing that *reads* the family (server-rendered,
- * per family, with the server's clock). What this adds is the second half of
- * docs/architecture.md §6's mirror sentence — "boot renders from IDB then
- * reconciles" — which needs a component that can change its mind after mount.
+ * ## What changed in M25, and why
  *
- * Everything a person reads from six feet away lives inside here for one
- * reason: the reconcile must be atomic across the board. A date heading from a
- * cached document sitting above columns from a newer snapshot would be a wall
- * display contradicting itself, which is worse than either version alone. So
- * the day, the clock and the columns all come from the same payload —
- * whichever payload won.
+ * This used to *be* the hub's board: it owned the heading, the clock and the
+ * columns, because the reconcile has to swap all of them together or the wall
+ * contradicts itself. The wall now renders the same composition `(app)/today`
+ * does — the hub is the app with restricted permissions, not a second product —
+ * and that composition is Server Components all the way down (`TodayHeader`,
+ * `TodayNowStrip`, the four tabs). None of it can be re-rendered from a
+ * snapshot in the browser.
  *
- * The wall clock is the one honest exception to "everything is from the
- * payload": it is the render instant, and it is what M09's countdowns are
- * derived from, so a cached document showing an old minute is corrected by the
- * next render rather than by this component pretending to know the time.
+ * So the mirror keeps its contract by changing what it swaps *to*. In the
+ * ordinary case — the document and the snapshot describe the same render, which
+ * is every online load and every ordinary offline reload — this component is a
+ * pass-through and the wall shows the full composition. Only when the device
+ * genuinely knows something **newer** than the document it was served (a tablet
+ * that kept receiving events after its last navigation, then rebooted offline)
+ * does it draw the cached board itself: the day, the clock and the events from
+ * that snapshot, in the compact shape this file has always drawn.
+ *
+ * That is a real degradation and it is stated rather than hidden: the cached
+ * board carries the schedule and not the tasks, the routine progress or the
+ * stars, because a snapshot of those is a *number* and a stale number on a wall
+ * is worse than an absent one (the same argument `AmbientTimers` and
+ * `ChildLauncher` are excluded from the payload for). The alternative — making
+ * the whole composition client-rendered so it could be replayed from IDB — buys
+ * a fresher board in one rare case at the cost of moving four server components
+ * and their queries into the browser bundle.
+ *
+ * The three rules of the swap are unchanged and live in `useMirroredHubState`:
+ * same family, strictly fresher, live data always wins.
  */
 
 export type HubBoardSnapshot = {
@@ -56,58 +71,61 @@ export type HubBoardSnapshot = {
 export function HubBoard({
   familyId,
   snapshot,
+  greeting,
   /**
-   * Rendered between the header and the columns — M09's ambient timers, which
-   * the *page* still owns. They are server-rendered children passed through,
-   * not part of the mirrored payload: a countdown is derived from a running
-   * row and the server clock, and a snapshot of one would be a wrong number on
-   * a wall (`HUB_NETWORK_TIMEOUT_SECONDS` makes the same argument).
+   * The live composition, server-rendered by the page. Rendered as-is unless a
+   * strictly fresher snapshot is adopted, in which case the cached board below
+   * takes its place.
    */
   children,
 }: {
   familyId: string;
   snapshot: HubBoardSnapshot;
+  /**
+   * The household greeting the live header shows, passed through so the cached
+   * board keeps the same `h1` rather than announcing itself differently the one
+   * time the wall is offline.
+   */
+  greeting: string;
   children?: React.ReactNode;
 }) {
   const board = useMirroredHubState(familyId, snapshot);
   const t = useTranslations('calendar');
   const formatDateTime = useDateTimeFormat();
 
+  // Adoption is by `generatedAt` and only ever upward, so this is exactly
+  // "the device knew something newer than the document".
+  if (board.generatedAt === snapshot.generatedAt) return <>{children}</>;
+
   return (
-    <>
-      {/* `PageHeader surface="hub"` is the shared shape for this row — title,
-          subtitle, right-aligned action — so the board's heading, the routine
-          screens' and the store's cannot drift from each other. The clock goes
-          in the action slot; it is the one deliberately live thing on the
-          board, and `display-hub` (72px) is the type step the design system
-          reserves for exactly that (`typography.md`).
-          FR21's offline indicator used to sit under it. M12 moved it into the
-          kiosk shell's chrome, which every hub surface shares: two of them on
-          one board is not a stronger signal, it is a duplicated one. */}
-      <PageHeader
-        surface="hub"
-        title={t('hub.title')}
-        subtitle={
-          <span data-testid="hub-date">{formatDateTime(board.anchor, { dateStyle: 'full' })}</span>
-        }
-        className="items-baseline"
-        action={
-          <span
-            data-testid="hub-clock"
-            className="tabular-time text-display-hub font-extrabold text-brand-ink"
-          >
+    <div data-testid="hub-cached-board" className="flex min-h-0 flex-1 flex-col gap-4">
+      {/* The same three-part row the live header draws — greeting, the day, the
+          clock — at the composition's own scale rather than the 72px
+          `display-hub` step the old ambient board used. The kiosk type scale is
+          applied on the document element (`[data-surface='hub']`), so every
+          token here is already the wall's size; a second, bigger heading on top
+          of that was what pushed the board into an internal scroll. */}
+      <header className="flex flex-wrap items-center justify-between gap-4">
+        <h1 className="font-display text-h1 font-extrabold" data-testid="today-greeting">
+          {greeting}
+        </h1>
+
+        <div data-testid="today-clock" className="flex flex-col items-end text-right">
+          <span className="font-display text-h2 font-bold tabular-nums">
             {formatDateTime(board.now, { hour: '2-digit', minute: '2-digit' })}
           </span>
-        }
-      />
+          <span className="text-body-sm text-ink-secondary">
+            {formatDateTime(board.anchor, { dateStyle: 'full' })}
+          </span>
+        </div>
+      </header>
 
-      {children}
+      <p className="text-body-sm text-ink-secondary">{t('hub.cachedBoard')}</p>
 
-      {/* FR28's "default view", as the only two shapes a wall display can
-          carry: the per-person day columns, or "what is coming up". The
-          switch is server-decided (`family.hubDefaultView`) and arrives in
-          the payload, so a change in the Controller reaches the wall on the
-          next render — no re-pairing, and nothing stored on the device. */}
+      {/* FR28's "default view", as the only two shapes a cached wall board can
+          carry: the per-person day columns, or "what is coming up". The switch
+          travelled with the snapshot, so a reconciled board draws the events it
+          was fetched for in the layout they were fetched for. */}
       {board.view === 'agenda' ? (
         <AgendaView
           days={daysOf('agenda', {
@@ -133,6 +151,6 @@ export function HubBoard({
           hub
         />
       )}
-    </>
+    </div>
   );
 }

@@ -33,6 +33,13 @@ export type TodayHeaderProps = {
   /** Household-local `YYYY-MM-DD` of `anchor`. */
   dayKey: string;
   isToday: boolean;
+  /**
+   * The route the day pill browses. `/today` in the parent app, `/hub` on the
+   * wall display — the composition is the same screen on both surfaces, and a
+   * chevron that navigated a kiosk out of the `(hub)` tree would hand it to a
+   * gate that sends it straight back to the pair screen.
+   */
+  href?: string;
 };
 
 export async function TodayHeader({
@@ -42,6 +49,7 @@ export async function TodayHeader({
   timeZone,
   dayKey,
   isToday,
+  href = '/today',
 }: TodayHeaderProps) {
   const t = await getTranslations('today');
   const formattingLocale = await getHouseholdFormattingLocale();
@@ -77,7 +85,7 @@ export async function TodayHeader({
         className="flex items-center gap-1.5 rounded-4xl border border-line-subtle bg-card p-1.5 shadow-sm"
       >
         <Link
-          href={`/today?date=${previous}`}
+          href={`${href}?date=${previous}`}
           aria-label={t('dayNav.previous')}
           data-testid="today-day-prev"
           className={chevron}
@@ -89,7 +97,7 @@ export async function TodayHeader({
           <span className="px-1 font-display text-body-sm font-bold">{label}</span>
         ) : (
           <Link
-            href="/today"
+            href={href}
             data-testid="today-day-reset"
             className="rounded-4xl px-2 font-display text-body-sm font-bold hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
           >
@@ -98,7 +106,7 @@ export async function TodayHeader({
         )}
 
         <Link
-          href={`/today?date=${next}`}
+          href={`${href}?date=${next}`}
           aria-label={t('dayNav.next')}
           data-testid="today-day-next"
           className={chevron}

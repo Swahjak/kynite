@@ -62,11 +62,34 @@ export type StarMatrixProps = {
   completeStep: (input: CompleteStepInput) => Promise<CompletionState>;
   /** `undoCompletionAction`, likewise. */
   undoCompletion: (input: UndoCompletionInput) => Promise<CompletionState>;
+  /**
+   * What the completion ledger records this tap as (`completion_source`).
+   *
+   * Resolved by the surface, never by this component: the same grid is the
+   * parent's correction surface on a phone and the household's own grid on the
+   * wall tablet, and "which screen was this tapped on" is a fact about the
+   * device, not about the star.
+   */
+  source: CompleteStepInput['source'];
+  /**
+   * `completion:write` for the surface's principal (§7). Every column of the
+   * matrix grades `allow` except a viewer share link, so this is normally true
+   * — but the gate is derived from the matrix rather than assumed, and a cell
+   * that cannot be written is rendered as a read-only mark instead of a button
+   * that would be refused.
+   */
+  canComplete: boolean;
 };
 
 type Patch = { clientId: string; done: boolean };
 
-export function StarMatrix({ columns, completeStep, undoCompletion }: StarMatrixProps) {
+export function StarMatrix({
+  columns,
+  completeStep,
+  undoCompletion,
+  source,
+  canComplete,
+}: StarMatrixProps) {
   const t = useTranslations('today');
   const router = useRouter();
   const [, startTransition] = useTransition();
@@ -89,7 +112,7 @@ export function StarMatrix({ columns, completeStep, undoCompletion }: StarMatrix
   );
 
   const toggle = (step: StarMatrixStep, memberId: string) => {
-    if (busy.has(step.clientId)) return;
+    if (!canComplete || busy.has(step.clientId)) return;
     const next = !isDone(step);
 
     setBusy((previous) => new Set(previous).add(step.clientId));
@@ -105,8 +128,7 @@ export function StarMatrix({ columns, completeStep, undoCompletion }: StarMatrix
             memberId,
             occurrenceDate: step.occurrenceDate,
             clientId: step.clientId,
-            // A parent's phone, even when the phone is on the fridge.
-            source: 'mobile',
+            source,
           });
         } else {
           await undoCompletion({ clientId: step.clientId });
@@ -201,7 +223,7 @@ export function StarMatrix({ columns, completeStep, undoCompletion }: StarMatrix
                           step: row.title,
                           name: column.displayName,
                         })}
-                        disabled={busy.has(step.clientId)}
+                        disabled={!canComplete || busy.has(step.clientId)}
                         onClick={() => toggle(step, column.memberId)}
                         className={cn(
                           // 44px, the touch minimum, on a control a thumb aims

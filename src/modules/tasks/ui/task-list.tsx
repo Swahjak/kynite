@@ -61,6 +61,13 @@ export type TaskListProps = {
   title: string;
   /** `MEMBER_COLOR_CLASSES[color].surface` per member id, resolved server-side. */
   memberSurface: Record<string, string>;
+  /**
+   * Where the "start a timer" shortcut goes. The two surfaces that render this
+   * list live in different route trees — `/timers` in the parent app,
+   * `/hub/timers` on the wall — and a kiosk that followed the app's link would
+   * be handed to a gate that bounces it straight back to the pair screen.
+   */
+  timersHref?: string;
 };
 
 export function TaskList({
@@ -70,6 +77,7 @@ export function TaskList({
   canComplete,
   title,
   memberSurface,
+  timersHref = '/timers',
 }: TaskListProps) {
   const t = useTranslations('today');
   const router = useRouter();
@@ -231,7 +239,7 @@ export function TaskList({
           variant="outline"
           className="flex-1 rounded-4xl border-primary/20 font-display font-bold text-primary"
           nativeButton={false}
-          render={<Link href="/timers" />}
+          render={<Link href={timersHref} />}
         >
           <Icon name="timer" size="sm" inline="start" />
           {t('tasks.startTimer')}

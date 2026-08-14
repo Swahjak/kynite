@@ -413,7 +413,8 @@
     "hub": {
       "title": "Vandaag",
       "unpairedTitle": "Dit scherm is nog niet gekoppeld",
-      "unpairedBody": "Koppel dit scherm aan je gezin om het gezinsbord te tonen."
+      "unpairedBody": "Koppel dit scherm aan je gezin om het gezinsbord te tonen.",
+      "cachedBoard": "Opgeslagen weergave — dit scherm is even offline."
     },
     "errors": {
       "forbidden": "Je hebt geen rechten om dit te doen.",
@@ -431,6 +432,11 @@
   },
   "today": {
     "title": "Vandaag",
+    "hubGreeting": {
+      "morning": "Goedemorgen",
+      "afternoon": "Goedemiddag",
+      "evening": "Goedenavond"
+    },
     "allDay": "Hele dag",
     "dayNav": {
       "label": "Dag kiezen",

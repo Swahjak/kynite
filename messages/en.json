@@ -413,7 +413,8 @@
     "hub": {
       "title": "Today",
       "unpairedTitle": "This screen is not paired yet",
-      "unpairedBody": "Pair this screen with your family to show the family board."
+      "unpairedBody": "Pair this screen with your family to show the family board.",
+      "cachedBoard": "Saved view — this screen is offline for a moment."
     },
     "errors": {
       "forbidden": "You are not allowed to do that.",
@@ -431,6 +432,11 @@
   },
   "today": {
     "title": "Today",
+    "hubGreeting": {
+      "morning": "Good morning",
+      "afternoon": "Good afternoon",
+      "evening": "Good evening"
+    },
     "allDay": "All day",
     "dayNav": {
       "label": "Pick a day",

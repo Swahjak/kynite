@@ -1,6 +1,6 @@
 import 'server-only';
 import { startOfDay } from '@/modules/calendar';
-import { getFamily, getPrincipal, listMembers, type Member } from '@/modules/family';
+import { can, getFamily, getPrincipal, listMembers, type Member } from '@/modules/family';
 import { listStarTotals, listStarsEarnedSince } from '@/modules/rewards';
 import {
   completionRatio,
@@ -60,6 +60,16 @@ export type KidProgress = {
 export type TodayProgressData = {
   kids: KidProgress[];
   timeZone: string;
+  /**
+   * `completion:write` for this principal (§7) — what decides whether the star
+   * matrix is a control surface or a read-out.
+   *
+   * Resolved here rather than by the page, for the same reason the rest of
+   * this loader is: route files hold no logic, and a surface that inferred
+   * "the hub is read-only" from its own name would be guessing at a matrix
+   * that already grades a device `allow` for exactly this.
+   */
+  canComplete: boolean;
 };
 
 /** Null when there is no principal — the caller has already redirected. */
@@ -84,8 +94,10 @@ export async function loadTodayProgress(
 
   // Only children get a card. An adult's routines exist and are counted
   // nowhere here: the panel is about the part of the day a parent is coaching.
+  const canComplete = can(principal, 'completion:write', { familyId: principal.familyId });
+
   const kids = members.filter((member) => member.role === 'child');
-  if (kids.length === 0) return { kids: [], timeZone };
+  if (kids.length === 0) return { kids: [], timeZone, canComplete };
 
   const kidIds = new Set(kids.map((kid) => kid.id));
 
@@ -148,6 +160,7 @@ export async function loadTodayProgress(
 
   return {
     timeZone,
+    canComplete,
     // `listMembers` already orders by `sortOrder`; the panel inherits it, so
     // the cards sit in the same order as the columns below them.
     kids: kids.map((kid) => {

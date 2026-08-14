@@ -171,7 +171,14 @@ export default async function TodayPage({
           />
         }
         routines={<TodayTabRoutines kids={progress?.kids ?? null} />}
-        sterren={<TodayTabSterren kids={progress?.kids ?? null} />}
+        sterren={
+          <TodayTabSterren
+            kids={progress?.kids ?? null}
+            canComplete={progress?.canComplete ?? false}
+            // A parent's phone, even when the phone is on the fridge.
+            source="mobile"
+          />
+        }
       />
 
       {/* The shell positions it; this page owns what it does (`ui/fab.tsx`). */}

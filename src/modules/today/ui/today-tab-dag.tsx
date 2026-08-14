@@ -49,6 +49,8 @@ export type TodayTabDagProps = {
   nowEventKey: string | null;
   /** Null while browsing another day: the list is today's, or it is nothing. */
   tasks: TodayTasksData | null;
+  /** The surface's own timers route — `/timers` in the app, `/hub/timers` on the wall. */
+  timersHref?: string;
 };
 
 export async function TodayTabDag({
@@ -60,6 +62,7 @@ export async function TodayTabDag({
   isToday,
   nowEventKey,
   tasks,
+  timersHref,
 }: TodayTabDagProps) {
   const t = await getTranslations('today');
   const tCalendar = await getTranslations('calendar');
@@ -214,6 +217,7 @@ export async function TodayTabDag({
           canComplete={tasks.canComplete}
           title={t('tasks.title')}
           memberSurface={memberSurface}
+          timersHref={timersHref}
         />
       ) : (
         <Card className="gap-3 p-5">

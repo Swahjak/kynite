@@ -35,8 +35,15 @@ export function parseTodayTab(value: unknown): TodayTab {
   return TODAY_TABS.includes(value as TodayTab) ? (value as TodayTab) : DEFAULT_TODAY_TAB;
 }
 
+/**
+ * `null` means "this device has never chosen", which is deliberately *not* the
+ * same as "this device chose the default". The wall hub's opening tab comes
+ * from the household (`family.hubDefaultView`, FR28) and the parent app's from
+ * `DEFAULT_TODAY_TAB`; collapsing the two at rest would mean a hub could never
+ * honour a setting it had not yet been tapped away from.
+ */
 const store = {
-  tab: DEFAULT_TODAY_TAB as TodayTab,
+  tab: null as TodayTab | null,
   loaded: false,
   listeners: new Set<() => void>(),
 };
@@ -48,25 +55,35 @@ function subscribe(listener: () => void): () => void {
   };
 }
 
-function snapshot(): TodayTab {
+function snapshot(): TodayTab | null {
   if (!store.loaded) {
     store.loaded = true;
     try {
-      store.tab = parseTodayTab(window.localStorage.getItem(TODAY_TAB_STORAGE_KEY));
+      const stored = window.localStorage.getItem(TODAY_TAB_STORAGE_KEY);
+      store.tab = stored === null ? null : parseTodayTab(stored);
     } catch {
-      // A locked-down profile, or storage disabled. The default is fine.
+      // A locked-down profile, or storage disabled. The caller's default is fine.
     }
   }
   return store.tab;
 }
 
-/** The server has no device, so it renders the default and hydrates over it. */
-function serverSnapshot(): TodayTab {
-  return DEFAULT_TODAY_TAB;
+/** The server has no device, so it renders the caller's default and hydrates over it. */
+function serverSnapshot(): TodayTab | null {
+  return null;
 }
 
-export function useTodayTab(): { tab: TodayTab; setTab: (next: TodayTab) => void } {
-  const tab = useSyncExternalStore(subscribe, snapshot, serverSnapshot);
+/**
+ * `fallback` is what this surface opens on before anyone has picked a tab on
+ * this device — `DEFAULT_TODAY_TAB` in the parent app, the household's hub
+ * board setting on the wall.
+ */
+export function useTodayTab(fallback: TodayTab = DEFAULT_TODAY_TAB): {
+  tab: TodayTab;
+  setTab: (next: TodayTab) => void;
+} {
+  const chosen = useSyncExternalStore(subscribe, snapshot, serverSnapshot);
+  const tab = chosen ?? fallback;
 
   const setTab = useCallback((next: TodayTab) => {
     store.tab = next;

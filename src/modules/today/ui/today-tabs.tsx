@@ -27,11 +27,19 @@ const TAB_ICONS: Record<TodayTab, IconName> = {
   sterren: 'bar_chart',
 };
 
-export type TodayTabsProps = Record<TodayTab, ReactNode>;
+export type TodayTabsProps = Record<TodayTab, ReactNode> & {
+  /**
+   * Which tab this surface opens on before anyone has picked one *on this
+   * device*. The parent app takes the slice's own default; the wall hub maps
+   * `family.hubDefaultView` onto it (FR28), so the Controller's "default view"
+   * control still decides what the wall shows on a cold boot.
+   */
+  defaultTab?: TodayTab;
+};
 
-export function TodayTabs({ dag, personen, routines, sterren }: TodayTabsProps) {
+export function TodayTabs({ dag, personen, routines, sterren, defaultTab }: TodayTabsProps) {
   const t = useTranslations('today');
-  const { tab, setTab } = useTodayTab();
+  const { tab, setTab } = useTodayTab(defaultTab);
 
   const items: PillTabItem<TodayTab>[] = TODAY_TABS.map((value) => ({
     value,
