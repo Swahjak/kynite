@@ -263,6 +263,7 @@
     "noCalendars": "No calendars found for this account.",
     "readOnly": "read-only",
     "unlink": "Unlink",
+    "reconnect": "Reconnect",
     "syncNow": "Sync now",
     "linkedNotice": "{email} is linked. The calendars are being imported.",
     "reauthBanner": "Kynite has lost access to {email}, so that calendar is no longer syncing.",

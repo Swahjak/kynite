@@ -131,7 +131,14 @@ export function verifyOAuthState(
   return parsed;
 }
 
-export function authorizationUrl(state: string): string {
+/**
+ * `loginHint` is exactly that — a hint. Google uses it to preselect an account
+ * on the consent screen (the repair path for a `reauth_required` link, where
+ * the parent must land on the *same* identity for the row to update in place),
+ * but the user can still switch accounts, so nothing downstream may trust it.
+ * Identity is read from userinfo after the exchange, as it always was.
+ */
+export function authorizationUrl(state: string, options: { loginHint?: string } = {}): string {
   const { clientId, redirectUri } = googleConfig();
   const url = new URL(googleOauthAuthorizeUrl());
 
@@ -144,6 +151,7 @@ export function authorizationUrl(state: string): string {
   url.searchParams.set('prompt', 'consent');
   url.searchParams.set('include_granted_scopes', 'true');
   url.searchParams.set('state', state);
+  if (options.loginHint) url.searchParams.set('login_hint', options.loginHint);
 
   return url.toString();
 }

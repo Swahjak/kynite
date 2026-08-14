@@ -162,15 +162,34 @@ function AccountCard({ account }: { account: LinkedAccount }) {
           </span>
         </div>
 
-        <Button
-          type="button"
-          variant="destructive-soft"
-          onClick={() => setConfirming(true)}
-          disabled={pending}
-          data-testid="unlink-account"
-        >
-          {t('unlink')}
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          {/* The repair path, at the one place the breakage is visible. Re-running
+              consent for the same identity updates the row in place (`linkGoogleAccount`
+              upserts on `googleUserId`), so this is a reconnect, not a second link —
+              hence the `email` hint, which asks Google to preselect that account.
+              Same anchor reasoning as the link button above. */}
+          {account.status === 'reauth_required' ? (
+            <Button
+              render={
+                <a href={`/api/google/oauth/start?email=${encodeURIComponent(account.email)}`} />
+              }
+              nativeButton={false}
+              data-testid="reconnect-account"
+            >
+              {t('reconnect')}
+            </Button>
+          ) : null}
+
+          <Button
+            type="button"
+            variant="destructive-soft"
+            onClick={() => setConfirming(true)}
+            disabled={pending}
+            data-testid="unlink-account"
+          >
+            {t('unlink')}
+          </Button>
+        </div>
       </div>
 
       <AlertDialog open={confirming} onOpenChange={setConfirming}>

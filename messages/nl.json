@@ -263,6 +263,7 @@
     "noCalendars": "Geen agenda's gevonden voor dit account.",
     "readOnly": "alleen lezen",
     "unlink": "Ontkoppelen",
+    "reconnect": "Opnieuw koppelen",
     "syncNow": "Nu synchroniseren",
     "linkedNotice": "{email} is gekoppeld. De agenda's worden opgehaald.",
     "reauthBanner": "Kynite heeft geen toegang meer tot {email}, die agenda synchroniseert niet meer.",

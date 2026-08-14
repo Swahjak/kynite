@@ -59,6 +59,16 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   const requested = request.nextUrl.searchParams.get('returnTo');
   const returnTo = isOAuthReturnTo(requested) ? requested : undefined;
 
+  /**
+   * Which account the consent screen should preselect — the reconnect path for
+   * an account whose refresh token died. Deliberately *not* in the signed
+   * state: it has no security meaning (the user may pick another account, and
+   * the callback reads the real identity from userinfo either way), so it is
+   * only length-bounded to keep a junk query string out of Google's URL.
+   */
+  const hint = request.nextUrl.searchParams.get('email');
+  const loginHint = hint && hint.length <= 254 ? hint : undefined;
+
   const { state, nonce } = createOAuthState(principal.familyId, principal.memberId, { returnTo });
 
   const store = await cookies();
@@ -71,5 +81,5 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   });
 
   // The one absolute redirect: it leaves our origin for Google's consent screen.
-  return NextResponse.redirect(authorizationUrl(state));
+  return NextResponse.redirect(authorizationUrl(state, { loginHint }));
 }
