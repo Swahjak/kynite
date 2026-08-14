@@ -13,10 +13,12 @@
     "cancel": "Annuleren",
     "dateField": {
       "invalid": "Vul een datum in als {pattern}.",
-      "outOfRange": "Deze datum kan niet."
+      "outOfRange": "Deze datum kan niet.",
+      "pickDate": "Kies een datum"
     },
     "timeField": {
-      "invalid": "Vul een tijd in als {pattern}."
+      "invalid": "Vul een tijd in als {pattern}.",
+      "pickTime": "Kies een tijd"
     },
     "date": "Datum",
     "time": "Tijd"

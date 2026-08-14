@@ -4,9 +4,17 @@ import * as React from 'react';
 import { useTranslations } from 'next-intl';
 
 import { useFormattingLocale } from '@/components/formatting';
+import type { FormattingLocale } from '@/i18n/formatting-locale';
 import { cn } from '@/lib/utils';
+import { FieldPicker } from './field-picker';
 import { Input } from './input';
-import { formatTimeValue, parseTimeInput, timePlaceholderFor, uses12Hour } from './date-time-parts';
+import {
+  QUARTER_HOUR_VALUES,
+  formatTimeValue,
+  parseTimeInput,
+  timePlaceholderFor,
+  uses12Hour,
+} from './date-time-parts';
 
 /**
  * The clock counterpart of `DateField` — same reasoning, same contract.
@@ -17,6 +25,10 @@ import { formatTimeValue, parseTimeInput, timePlaceholderFor, uses12Hour } from 
  *
  * The submitted value stays 24-hour `HH:mm` in every locale — the wire format
  * the routines schema and the calendar actions already validate.
+ *
+ * The trailing clock button lists the quarter hours as a shortcut. It is not a
+ * constraint: `07:20` typed into the field is as valid as it ever was, it
+ * simply isn't one of the 96 entries worth offering in a list.
  */
 export type TimeFieldProps = {
   name?: string;
@@ -89,8 +101,21 @@ export function TimeField({
     }
   }
 
+  /** A time picked from the list — written exactly as typing writes it. */
+  function commit(next: string) {
+    setText(formatTimeValue(next, locale));
+    if (next !== wire) {
+      setWire(next);
+      setSynced({ value: next, locale });
+      onValueChange?.(next);
+    }
+  }
+
+  const [pickerOpen, setPickerOpen] = React.useState(false);
+  const activeOptionRef = React.useRef<HTMLButtonElement>(null);
+
   return (
-    <>
+    <div data-slot="time-field" className={cn('relative w-full', className)}>
       {name ? <input type="hidden" name={name} value={wire} /> : null}
       <Input
         ref={inputRef}
@@ -105,7 +130,7 @@ export function TimeField({
         disabled={disabled}
         placeholder={placeholder}
         aria-invalid={unreadable || undefined}
-        className={cn(className)}
+        className={size === 'hub' ? 'pr-12' : 'pr-9'}
         value={text}
         onChange={(event) => handleChange(event.target.value)}
         onBlur={() => {
@@ -113,6 +138,109 @@ export function TimeField({
         }}
         {...aria}
       />
-    </>
+      <FieldPicker
+        icon="schedule"
+        label={t('pickTime')}
+        open={pickerOpen}
+        onOpenChange={setPickerOpen}
+        disabled={disabled}
+        size={size}
+        finalFocus={inputRef}
+        initialFocus={activeOptionRef}
+      >
+        <TimeOptionList
+          label={t('pickTime')}
+          locale={locale}
+          value={wire}
+          activeRef={activeOptionRef}
+          onPick={(next) => {
+            commit(next);
+            setPickerOpen(false);
+          }}
+        />
+      </FieldPicker>
+    </div>
+  );
+}
+
+/**
+ * The quarter hours as a scrollable listbox.
+ *
+ * Roving `tabIndex` rather than a focus trap: one Tab stop for the whole list,
+ * arrows (and Home/End) move between entries, Enter/Space picks — which comes
+ * free from each entry being a real `<button>`, so nothing here re-implements
+ * activation. The entry matching the field's value is the one that starts
+ * focused (and is scrolled into view), so opening the list on `14:30` puts the
+ * afternoon under the cursor instead of midnight.
+ */
+function TimeOptionList({
+  label,
+  locale,
+  value,
+  activeRef,
+  onPick,
+}: {
+  label: string;
+  locale: FormattingLocale;
+  value: string;
+  activeRef: React.RefObject<HTMLButtonElement | null>;
+  onPick: (value: string) => void;
+}) {
+  const selectedIndex = QUARTER_HOUR_VALUES.indexOf(value);
+  const [activeIndex, setActiveIndex] = React.useState(selectedIndex === -1 ? 0 : selectedIndex);
+  const itemsRef = React.useRef<Array<HTMLButtonElement | null>>([]);
+
+  React.useEffect(() => {
+    // jsdom has no `scrollIntoView`; the list is still perfectly usable there.
+    itemsRef.current[activeIndex]?.scrollIntoView?.({ block: 'center' });
+    // Only on mount — afterwards the browser scrolls focus into view itself.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function move(event: React.KeyboardEvent, next: number) {
+    event.preventDefault();
+    const clamped = Math.min(Math.max(next, 0), QUARTER_HOUR_VALUES.length - 1);
+    setActiveIndex(clamped);
+    itemsRef.current[clamped]?.focus();
+  }
+
+  return (
+    <div
+      role="listbox"
+      aria-label={label}
+      data-slot="time-option-list"
+      className="flex max-h-64 w-32 flex-col gap-0.5 overflow-y-auto"
+      onKeyDown={(event) => {
+        if (event.key === 'ArrowDown') move(event, activeIndex + 1);
+        else if (event.key === 'ArrowUp') move(event, activeIndex - 1);
+        else if (event.key === 'Home') move(event, 0);
+        else if (event.key === 'End') move(event, QUARTER_HOUR_VALUES.length - 1);
+      }}
+    >
+      {QUARTER_HOUR_VALUES.map((option, index) => {
+        const selected = option === value;
+        return (
+          <button
+            key={option}
+            type="button"
+            role="option"
+            aria-selected={selected}
+            data-time={option}
+            tabIndex={index === activeIndex ? 0 : -1}
+            ref={(node) => {
+              itemsRef.current[index] = node;
+              if (index === activeIndex && activeRef) activeRef.current = node;
+            }}
+            onClick={() => onPick(option)}
+            className={cn(
+              'tnum shrink-0 rounded-lg px-3 py-2 text-sm transition-colors duration-200 ease-brand hover:bg-brand/10 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none',
+              selected && 'bg-brand font-bold text-brand-foreground hover:bg-brand'
+            )}
+          >
+            {formatTimeValue(option, locale)}
+          </button>
+        );
+      })}
+    </div>
   );
 }

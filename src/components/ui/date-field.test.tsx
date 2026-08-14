@@ -79,6 +79,96 @@ describe('DateField', () => {
   });
 });
 
+/**
+ * The pickers are a shortcut laid over the typing, so what they have to prove
+ * is that they write the *same* wire value typing writes — and that a bound
+ * the typed path refuses is a bound the picker cannot get around either.
+ */
+describe('DateField calendar popover', () => {
+  /** The day cells live in a portal, so they are queried off `document`. */
+  function dayButton(iso: string): HTMLButtonElement | null {
+    return document.querySelector(`[data-day="${iso}"] button`);
+  }
+
+  it('writes the picked day as the same ISO value typing produces', async () => {
+    const user = userEvent.setup();
+    renderIn('nl-NL', <DateField name="birthDate" defaultValue="2026-08-05" aria-label="d" />);
+
+    await user.click(screen.getByRole('button', { name: 'Kies een datum' }));
+    const day = dayButton('2026-08-21');
+    expect(day).not.toBeNull();
+
+    await user.click(day!);
+
+    expect(submitted('birthDate')).toBe('2026-08-21');
+    expect(screen.getByLabelText('d')).toHaveValue('21-08-2026');
+    // Picking closes the popover — the grid is gone from the document.
+    expect(dayButton('2026-08-21')).toBeNull();
+  });
+
+  it('disables the days its `min` bound rules out', async () => {
+    const user = userEvent.setup();
+    renderIn(
+      'nl-NL',
+      <DateField name="onceDate" defaultValue="2026-08-20" min="2026-08-10" aria-label="d" />
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Kies een datum' }));
+
+    expect(dayButton('2026-08-05')).toBeDisabled();
+    expect(dayButton('2026-08-10')).not.toBeDisabled();
+    expect(dayButton('2026-08-15')).not.toBeDisabled();
+  });
+
+  it('does not offer a picker on a disabled field', () => {
+    renderIn('nl-NL', <DateField name="birthDate" disabled aria-label="d" />);
+    expect(screen.getByRole('button', { name: 'Kies een datum' })).toBeDisabled();
+  });
+});
+
+describe('TimeField clock popover', () => {
+  function timeOption(value: string): HTMLElement | null {
+    return document.querySelector(`[data-time="${value}"]`);
+  }
+
+  it('writes the picked time as a 24-hour wire value', async () => {
+    const user = userEvent.setup();
+    renderIn('nl-NL', <TimeField name="timeOfDay" defaultValue="08:00" aria-label="t" />);
+
+    await user.click(screen.getByRole('button', { name: 'Kies een tijd' }));
+    await user.click(timeOption('09:30')!);
+
+    expect(submitted('timeOfDay')).toBe('09:30');
+    expect(screen.getByLabelText('t')).toHaveValue('09:30');
+    expect(timeOption('09:30')).toBeNull();
+  });
+
+  it('lists the quarter hours in the household’s own clock', async () => {
+    const user = userEvent.setup();
+    renderIn('en-US', <TimeField name="timeOfDay" defaultValue="14:30" aria-label="t" />);
+
+    // The UI language is still Dutch here — only the *formatting* convention
+    // is American, which is exactly the split these fields exist for.
+    await user.click(screen.getByRole('button', { name: 'Kies een tijd' }));
+
+    expect(timeOption('14:30')).toHaveTextContent('2:30 PM');
+    expect(timeOption('14:30')).toHaveAttribute('aria-selected', 'true');
+    expect(timeOption('00:15')).toHaveTextContent('12:15 AM');
+  });
+
+  it('still accepts a typed time the list does not offer', async () => {
+    const user = userEvent.setup();
+    renderIn('nl-NL', <TimeField name="timeOfDay" aria-label="t" />);
+
+    await user.type(screen.getByLabelText('t'), '07:20');
+    expect(submitted('timeOfDay')).toBe('07:20');
+
+    await user.click(screen.getByRole('button', { name: 'Kies een tijd' }));
+    expect(timeOption('07:20')).toBeNull();
+    expect(timeOption('07:15')).not.toBeNull();
+  });
+});
+
 describe('Field labelling', () => {
   it('is named by its `FieldLabel`, the way the native input it replaced was', () => {
     renderIn(

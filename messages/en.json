@@ -13,10 +13,12 @@
     "cancel": "Cancel",
     "dateField": {
       "invalid": "Enter a date like {pattern}.",
-      "outOfRange": "That date isn't allowed."
+      "outOfRange": "That date isn't allowed.",
+      "pickDate": "Pick a date"
     },
     "timeField": {
-      "invalid": "Enter a time like {pattern}."
+      "invalid": "Enter a time like {pattern}.",
+      "pickTime": "Pick a time"
     },
     "date": "Date",
     "time": "Time"

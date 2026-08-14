@@ -222,6 +222,45 @@ export function parseTimeInput(text: string): string | null {
   return `${pad(hour)}:${pad(minute)}`;
 }
 
+/**
+ * A wire date (`yyyy-MM-dd`) → a `Date` the calendar popover can select, or
+ * `undefined`.
+ *
+ * Anchored at **noon local time**, not midnight: a calendar only ever cares
+ * about the day, and midnight is the one instant a DST jump or a UTC-parsing
+ * mistake can push across a date boundary. Noon has twelve hours of slack in
+ * both directions, so `dateToIso(isoToDate(x)) === x` everywhere.
+ */
+export function isoToDate(value: string): Date | undefined {
+  const match = ISO_DATE.exec(value.trim());
+  if (!match) return undefined;
+  const [, year, month, day] = match;
+  if (!isRealDate(Number(year), Number(month), Number(day))) return undefined;
+  return new Date(Number(year), Number(month) - 1, Number(day), 12, 0, 0, 0);
+}
+
+/** The inverse: a `Date` → the wire date of its **local** calendar day. */
+export function dateToIso(date: Date): string {
+  return `${String(date.getFullYear()).padStart(4, '0')}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+/** The step, in minutes, between the times the clock popover offers. */
+export const TIME_STEP_MINUTES = 15;
+
+/**
+ * Every quarter hour of the day as wire times — `00:00` … `23:45`.
+ *
+ * These are the *shortcuts* the clock popover lists, not a constraint: typing
+ * `07:20` in the field stays perfectly valid, it simply isn't on the list.
+ */
+export const QUARTER_HOUR_VALUES: readonly string[] = Array.from(
+  { length: (24 * 60) / TIME_STEP_MINUTES },
+  (_, index) => {
+    const minutes = index * TIME_STEP_MINUTES;
+    return `${pad(Math.floor(minutes / 60))}:${pad(minutes % 60)}`;
+  }
+);
+
 const WIRE_DATE_TIME = /^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})/;
 
 /** Splits a `datetime-local` wire value into its date and time halves. */

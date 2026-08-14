@@ -5,8 +5,16 @@ import { useTranslations } from 'next-intl';
 
 import { useFormattingLocale } from '@/components/formatting';
 import { cn } from '@/lib/utils';
+import { Calendar } from './calendar';
+import { FieldPicker } from './field-picker';
 import { Input } from './input';
-import { datePatternFor, formatDateValue, parseDateInput } from './date-time-parts';
+import {
+  datePatternFor,
+  dateToIso,
+  formatDateValue,
+  isoToDate,
+  parseDateInput,
+} from './date-time-parts';
 
 /**
  * A date field that reads and writes in the *household's* convention
@@ -27,6 +35,11 @@ import { datePatternFor, formatDateValue, parseDateInput } from './date-time-par
  * rather than a half-parsed date, and `setCustomValidity` blocks the submit
  * so the browser refuses on the field itself instead of the server refusing
  * afterwards.
+ *
+ * The trailing calendar button opens a month grid (`Calendar`) as a
+ * convenience on top of that, never as a replacement: picking a day writes the
+ * same wire value typing would have produced, and a field whose popover is
+ * never opened is byte-for-byte the field that shipped without one.
  */
 export type DateFieldProps = {
   /** Form field name — the hidden input that carries the ISO value. */
@@ -118,8 +131,21 @@ export function DateField({
     }
   }
 
+  /** A day picked from the calendar — written exactly as typing writes it. */
+  function commit(iso: string) {
+    setText(formatDateValue(iso, locale));
+    if (iso !== wire) {
+      setWire(iso);
+      setSynced({ value: iso, locale });
+      onValueChange?.(iso);
+    }
+  }
+
+  const [pickerOpen, setPickerOpen] = React.useState(false);
+  const selectedDay = isoToDate(wire);
+
   return (
-    <>
+    <div data-slot="date-field" className={cn('relative w-full', className)}>
       {name ? <input type="hidden" name={name} value={wire} /> : null}
       <Input
         ref={inputRef}
@@ -132,7 +158,7 @@ export function DateField({
         disabled={disabled}
         placeholder={pattern.placeholder}
         aria-invalid={unreadable || outOfRange || undefined}
-        className={cn(className)}
+        className={size === 'hub' ? 'pr-12' : 'pr-9'}
         value={text}
         onChange={(event) => handleChange(event.target.value)}
         onBlur={() => {
@@ -142,6 +168,27 @@ export function DateField({
         }}
         {...aria}
       />
-    </>
+      <FieldPicker
+        icon="calendar_month"
+        label={t('pickDate')}
+        open={pickerOpen}
+        onOpenChange={setPickerOpen}
+        disabled={disabled}
+        size={size}
+        finalFocus={inputRef}
+      >
+        <Calendar
+          formattingLocale={locale}
+          selected={selectedDay}
+          min={min ? isoToDate(min) : undefined}
+          max={max ? isoToDate(max) : undefined}
+          autoFocus
+          onSelect={(day) => {
+            commit(dateToIso(day));
+            setPickerOpen(false);
+          }}
+        />
+      </FieldPicker>
+    </div>
   );
 }
