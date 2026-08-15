@@ -174,6 +174,14 @@ Do NOT include Co-Authored-By or similar Claude references in commit messages. U
 # Notes
 
 - Nextjs 16+ uses proxy.ts instead of middleware.ts
+- **TypeScript is pinned to 6.0.3, not the latest 7.x — do not bump it.** Two
+  things break on TS 7: (1) `typescript-eslint` (latest 8.67.0) declares peer
+  `typescript >=4.8.4 <6.1.0`, so the whole lint gate falls outside its
+  supported range; (2) TS 7 is the native port and its npm package no longer
+  exports the JS compiler API, which `tests/unit/server-action-authorization.test.ts`
+  and `tests/unit/share-tree-no-server-actions.test.ts` use to walk the AST
+  (`ts.createSourceFile`, `ts.forEachChild`, `ts.isCallExpression`, …). Revisit
+  once typescript-eslint ships a TS 7 line and TS 7 exposes a public AST API.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
