@@ -5,6 +5,7 @@ import { FormattingLocaleProvider } from '@/components/formatting';
 import { EventChip } from '@/modules/calendar/ui/event-chip';
 import type { CalendarEvent } from '@/modules/calendar/queries';
 import calendarMessages from '../../../messages/en.json';
+import dutchMessages from '../../../messages/nl.json';
 
 /**
  * BLOCKING 2 coverage: `EventChip` formats through `useDateTimeFormat()`,
@@ -97,5 +98,49 @@ describe('EventChip — timezone-aware formatting (BLOCKING 2)', () => {
     expect(chip).not.toBeNull();
     expect(chip!.textContent).toContain(expectedStart);
     expect(chip!.textContent).toContain(expectedEnd);
+  });
+});
+
+/**
+ * The chip used to compare against a locally re-declared `(no title)` literal
+ * and had no emptiness check at all; it now asks `titleOf` (`domain/
+ * event-title.ts`), which is the one place the three ways an event can reach a
+ * surface without a usable name are decided. Dutch, because `calendar.untitled`
+ * in English is itself the string "(no title)" — the assertion would pass in
+ * English whether or not the sentinel was translated.
+ */
+describe('EventChip — what an event is called', () => {
+  const renderDutch = (event: CalendarEvent) =>
+    render(
+      <NextIntlClientProvider
+        locale="nl"
+        timeZone="Europe/Amsterdam"
+        messages={{ calendar: dutchMessages.calendar }}
+      >
+        <FormattingLocaleProvider formattingLocale="nl-NL">
+          <EventChip event={event} />
+        </FormattingLocaleProvider>
+      </NextIntlClientProvider>
+    );
+
+  it('translates the sentinel a nameless synced event carries', () => {
+    renderDutch(baseEvent({ title: '(no title)' }));
+    expect(screen.getByText('(zonder titel)')).toBeTruthy();
+  });
+
+  it('names a whitespace-only title untitled rather than drawing a blank chip', () => {
+    renderDutch(baseEvent({ title: '   ' }));
+    expect(screen.getByText('(zonder titel)')).toBeTruthy();
+  });
+
+  it('leaves a real title that merely contains the sentinel alone', () => {
+    renderDutch(baseEvent({ title: 'Vergadering (no title) bespreken' }));
+    expect(screen.getByText('Vergadering (no title) bespreken')).toBeTruthy();
+  });
+
+  it('shows the busy label instead of a redacted event’s stored title', () => {
+    renderDutch(baseEvent({ title: 'Therapie', busyOnly: true }));
+    expect(screen.getByText('Bezet')).toBeTruthy();
+    expect(screen.queryByText('Therapie')).toBeNull();
   });
 });

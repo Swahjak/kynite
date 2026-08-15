@@ -1,7 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import { Card, cn, Icon, SectionHeading } from '@kynite/ui';
 import { formatDateTime } from '@/i18n/formatting-locale';
-import { CATEGORY_CLASSES, dayKeysOf, titleOf, type CalendarEvent } from '@/modules/calendar';
+import { CATEGORY_CLASSES, splitByMember, titleOf, type CalendarEvent } from '@/modules/calendar';
 import { MemberAvatar, getHouseholdFormattingLocale, type Member } from '@/modules/family';
 
 /**
@@ -63,26 +63,17 @@ export async function TodayTabPersonen({
   const at = (instant: Date) =>
     formatDateTime(instant, formattingLocale, { hour: '2-digit', minute: '2-digit', timeZone });
 
-  const onDay = events.filter((event) => dayKeysOf(event, timeZone, event.allDay).includes(dayKey));
-
-  const columns = new Map<string, CalendarEvent[]>(members.map((member) => [member.id, []]));
-  const shared: CalendarEvent[] = [];
-
-  for (const event of onDay) {
-    const targets = new Set<string>(event.attendeeMemberIds);
-    if (event.ownerMemberId) targets.add(event.ownerMemberId);
-
-    // A household event is everybody's, whatever attribution says.
-    const owned = event.householdWide ? [] : [...targets].filter((id) => columns.has(id));
-    if (owned.length === 0) shared.push(event);
-    else for (const id of owned) columns.get(id)!.push(event);
-  }
-
-  const byStart = (a: CalendarEvent, b: CalendarEvent) =>
-    Number(a.allDay) - Number(b.allDay) || a.startsAt.getTime() - b.startsAt.getTime();
-
-  for (const list of columns.values()) list.sort(byStart);
-  shared.sort(byStart);
+  // The day gate, the split and the all-day-first order are all
+  // `calendar/domain/day-board.ts`. One rule there is not what this tab used
+  // to do: an event attributed only to members this tab does not render is
+  // *dropped* rather than promoted into the "Iedereen" column — that column
+  // spans the whole family, and a hidden member's appointment must not appear
+  // in it.
+  const { byMember: columns, shared } = splitByMember(
+    events,
+    members.map((member) => member.id),
+    { timeZone, dayKey }
+  );
 
   const row = (event: CalendarEvent) => {
     const palette = CATEGORY_CLASSES[event.category];

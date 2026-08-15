@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useDateTimeFormat } from '@/components/formatting';
 import { cn } from '@kynite/ui';
 import type { Member } from '@/modules/family';
+import { bucketByDay } from '../domain/day-board';
 import { dayKeysOf } from '../domain/expand';
 import { minutesIntoDay, toDateKey, toWall } from '../domain/zone';
 import type { CalendarEvent } from '../queries';
@@ -195,18 +196,23 @@ export function TimeGrid({
     [days, timeZone]
   );
 
+  // Two maps, because the two bands are two axes: the all-day rows sit in a
+  // header above the hour columns and never on them. That split is the
+  // caller's, per `bucketByDay` — hence two calls over the two halves of the
+  // list. `seedEmpty` keeps a column that nothing happens in an array rather
+  // than `undefined`, which is what the render below indexes into.
   const { timed, allDay } = useMemo(() => {
-    const timedByDay = new Map<string, CalendarEvent[]>(dayKeys.map((key) => [key, []]));
-    const allDayByDay = new Map<string, CalendarEvent[]>(dayKeys.map((key) => [key, []]));
-
-    for (const event of events) {
-      const target = event.allDay ? allDayByDay : timedByDay;
-      for (const key of dayKeysOf(event, timeZone, event.allDay)) {
-        target.get(key)?.push(event);
-      }
-    }
-
-    return { timed: timedByDay, allDay: allDayByDay };
+    const options = { timeZone, dayKeys, seedEmpty: true };
+    return {
+      timed: bucketByDay(
+        events.filter((event) => !event.allDay),
+        options
+      ),
+      allDay: bucketByDay(
+        events.filter((event) => event.allDay),
+        options
+      ),
+    };
   }, [events, dayKeys, timeZone]);
 
   const drag = useDragReschedule({

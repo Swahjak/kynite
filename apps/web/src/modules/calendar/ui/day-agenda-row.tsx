@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useDateTimeFormat } from '@/components/formatting';
 import { Badge, CategoryDot, cn } from '@kynite/ui';
+import { titleOf } from '../domain/event-title';
 import type { CalendarEvent } from '../queries';
 import { CATEGORY_CLASSES } from './tokens';
 
@@ -62,9 +63,6 @@ export type DayAgendaRowProps = {
   onSelect?: (event: CalendarEvent) => void;
 };
 
-/** Mirrors `EventChip`'s sentinel — see the note there for why it is a literal. */
-const UNTITLED_SENTINEL = '(no title)';
-
 export function DayAgendaRow({
   event,
   people,
@@ -78,11 +76,9 @@ export function DayAgendaRow({
   const formatDateTime = useDateTimeFormat();
   const palette = CATEGORY_CLASSES[event.category];
 
-  const title = event.busyOnly
-    ? t('busy')
-    : event.title === UNTITLED_SENTINEL
-      ? t('untitled')
-      : event.title;
+  // Redaction, the nameless-event sentinel and an empty title, decided once —
+  // see `domain/event-title.ts`.
+  const title = titleOf(event, { untitled: t('untitled'), busy: t('busy') });
 
   // An event nobody is named on is the household's — which is what the board
   // has always meant by putting it in the "Iedereen" block.

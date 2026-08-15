@@ -3,11 +3,11 @@
 import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { useDateTimeFormat } from '@/components/formatting';
-import { cn, EmptyState } from '@kynite/ui';
+import { cn, DateCircle, EmptyState } from '@kynite/ui';
 // Type-only: `@/modules/family` re-exports `server-only` queries, so a value
 // import would drag the Postgres client into this client bundle.
 import type { Member } from '@/modules/family';
-import { dayKeysOf } from '../domain/expand';
+import { bucketByDay } from '../domain/day-board';
 import { parseDateKey, toDateKey, toWall, fromWall } from '../domain/zone';
 import type { CalendarEvent } from '../queries';
 import { EventChip } from './event-chip';
@@ -47,24 +47,18 @@ export function AgendaView({
   const todayKey = today ? toDateKey(toWall(today, timeZone)) : null;
 
   const groups = useMemo(() => {
-    const buckets = new Map<string, CalendarEvent[]>();
-    const windowKeys = new Set(days.map((day) => toDateKey(toWall(day, timeZone))));
-
-    for (const event of events) {
-      for (const key of dayKeysOf(event, timeZone, event.allDay)) {
-        if (!windowKeys.has(key)) continue;
-        const bucket = buckets.get(key);
-        if (bucket) bucket.push(event);
-        else buckets.set(key, [event]);
-      }
-    }
+    // No `seedEmpty`: this view lists only the days something happens on, so a
+    // pre-created empty bucket would draw a date heading over nothing. The
+    // buckets arrive sorted by `bucketByDay`'s one order (all-day first), which
+    // is why there is no per-group sort left here.
+    const buckets = bucketByDay(events, {
+      timeZone,
+      dayKeys: days.map((day) => toDateKey(toWall(day, timeZone))),
+    });
 
     return [...buckets.entries()]
       .sort(([a], [b]) => a.localeCompare(b))
-      .map(([key, dayEvents]) => ({
-        key,
-        events: dayEvents.sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime()),
-      }));
+      .map(([key, dayEvents]) => ({ key, events: dayEvents }));
   }, [days, events, timeZone]);
 
   if (groups.length === 0) {
@@ -107,20 +101,17 @@ export function AgendaView({
                 the week strip and the month grid make, and three marks that
                 agree read as one system. */}
             <div className={cn('shrink-0 text-center', hub ? 'w-20' : 'w-11')}>
-              <span className={`label-overline block text-ink-muted ${hub ? 'text-body' : ''}`}>
-                {formatDateTime(date, { weekday: 'short' })}
-              </span>
-              <span
-                className={cn(
-                  'tabular-time mt-1 inline-flex items-center justify-center rounded-full font-display font-extrabold',
-                  hub ? 'size-14' : 'size-8.5',
-                  isToday ? 'bg-primary text-primary-foreground' : 'text-ink'
-                )}
-              >
-                <span className={hub ? 'text-display-md' : 'text-h3'}>
-                  {formatDateTime(date, { day: 'numeric' })}
-                </span>
-              </span>
+              {/* `selected`, not `today`: an agenda has no day *in focus* of
+                  its own, so today is the one day this list marks and it keeps
+                  the fill it has always had. `today`'s colour-only treatment
+                  exists for strips that can be browsed away from today, which
+                  this rail cannot. */}
+              <DateCircle
+                label={formatDateTime(date, { weekday: 'short' })}
+                number={formatDateTime(date, { day: 'numeric' })}
+                state={isToday ? 'selected' : 'default'}
+                size={hub ? 'xl' : 'lg'}
+              />
               <span className={`mt-0.5 block text-ink-muted ${hub ? 'text-body' : 'text-caption'}`}>
                 {formatDateTime(date, { month: 'short' })}
               </span>

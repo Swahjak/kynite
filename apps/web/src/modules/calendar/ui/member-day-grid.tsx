@@ -8,7 +8,7 @@ import { cn, EmptyState, Icon, MemberFace } from '@kynite/ui';
 // modules, and a value import would drag the Postgres client into this client
 // bundle — see the same note in `person-columns.tsx`.
 import type { Member } from '@/modules/family';
-import { dayKeysOf } from '../domain/expand';
+import { splitByMember } from '../domain/day-board';
 import { minutesIntoDay, toDateKey, toWall } from '../domain/zone';
 import type { CalendarEvent } from '../queries';
 import { EventChip } from './event-chip';
@@ -69,59 +69,42 @@ export function MemberDayGrid({
   const formatDateTime = useDateTimeFormat();
   const dayKey = toDateKey(toWall(day, timeZone));
 
+  /**
+   * Two splits, one rule (`domain/day-board.ts`): the all-day band above the
+   * grid and the hour columns below it are the same partition asked of two
+   * halves of the list, which is exactly what `splitByMember` documents as the
+   * way to keep all-day rows in a band of their own.
+   *
+   * Splitting on `allDay` *before* the partition is what keeps attribution:
+   * the branch this replaces read all-day first and threw the owner away, so
+   * "Mila — zwemkamp" landed in a household strip that reads as everyone's. An
+   * all-day block belongs to whoever it belongs to; only the clock is missing.
+   *
+   * The grid also never consulted `householdWide`, so an event on a Google
+   * calendar bound to the household's carried that calendar owner's member id
+   * and drew family dinner as one parent's appointment. The helper puts it in
+   * the shared lane, where it belongs (M23).
+   */
   const { byMember, sharedTimed, allDayByMember, sharedAllDay } = useMemo(() => {
-    const columns = new Map<string, CalendarEvent[]>(members.map((member) => [member.id, []]));
-    const allDayColumns = new Map<string, CalendarEvent[]>(
-      members.map((member) => [member.id, []])
+    const memberIds = members.map((member) => member.id);
+    const options = { timeZone, dayKey };
+
+    const timed = splitByMember(
+      events.filter((event) => !event.allDay),
+      memberIds,
+      options
     );
-    const shared: CalendarEvent[] = [];
-    const sharedAllDayEvents: CalendarEvent[] = [];
-
-    for (const event of events) {
-      if (!dayKeysOf(event, timeZone, event.allDay).includes(dayKey)) continue;
-
-      /**
-       * Attribution first, all-day second.
-       *
-       * The all-day branch used to run before this and threw the owner away, so
-       * "Mila — zwemkamp" landed in a household strip that reads as everyone's.
-       * An all-day block belongs to whoever it belongs to; only the clock is
-       * missing, not the ownership.
-       */
-      const targets = new Set<string>(event.attendeeMemberIds);
-      if (event.ownerMemberId) targets.add(event.ownerMemberId);
-
-      if (targets.size === 0) {
-        (event.allDay ? sharedAllDayEvents : shared).push(event);
-        continue;
-      }
-
-      const owned = [...targets].filter((id) => columns.has(id));
-      /**
-       * Attributed, but to nobody this grid renders — a soft-deleted member, or
-       * one filtered out of the board. It is *dropped*, not promoted into the
-       * household lane: that lane spans the whole family, so promoting it would
-       * show one person's appointment to everyone standing at the screen. A
-       * missing block is a display gap; a leaked one is a privacy failure.
-       */
-      if (owned.length === 0) continue;
-
-      const target = event.allDay ? allDayColumns : columns;
-      for (const id of owned) target.get(id)!.push(event);
-    }
-
-    const byStart = (a: CalendarEvent, b: CalendarEvent) =>
-      a.startsAt.getTime() - b.startsAt.getTime();
-
-    shared.sort(byStart);
-    sharedAllDayEvents.sort(byStart);
-    for (const list of allDayColumns.values()) list.sort(byStart);
+    const allDay = splitByMember(
+      events.filter((event) => event.allDay),
+      memberIds,
+      options
+    );
 
     return {
-      byMember: columns,
-      sharedTimed: shared,
-      allDayByMember: allDayColumns,
-      sharedAllDay: sharedAllDayEvents,
+      byMember: timed.byMember,
+      sharedTimed: timed.shared,
+      allDayByMember: allDay.byMember,
+      sharedAllDay: allDay.shared,
     };
   }, [members, events, timeZone, dayKey]);
 

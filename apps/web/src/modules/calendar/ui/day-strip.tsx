@@ -2,8 +2,8 @@
 
 import { useMemo } from 'react';
 import { useDateTimeFormat } from '@/components/formatting';
-import { CategoryDot, cn } from '@kynite/ui';
-import { dayKeysOf } from '../domain/expand';
+import { DateCircle } from '@kynite/ui';
+import { bucketByDay } from '../domain/day-board';
 import { toDateKey, toWall } from '../domain/zone';
 import type { CalendarEvent } from '../queries';
 
@@ -43,13 +43,13 @@ export function DayStrip({
   const formatDateTime = useDateTimeFormat();
   const todayKey = today ? toDateKey(toWall(today, timeZone)) : null;
 
-  const busyKeys = useMemo(() => {
-    const keys = new Set<string>();
-    for (const event of events) {
-      for (const key of dayKeysOf(event, timeZone, event.allDay)) keys.add(key);
-    }
-    return keys;
-  }, [events, timeZone]);
+  // Only the *set* of busy days — the strip asks "which days are busy", never
+  // "how busy" — so the buckets are thrown away and their keys kept, which is
+  // the shape `bucketByDay` documents for this caller.
+  const busyKeys = useMemo(
+    () => new Set(bucketByDay(events, { timeZone }).keys()),
+    [events, timeZone]
+  );
 
   return (
     <div
@@ -71,29 +71,21 @@ export function DayStrip({
             aria-current={selected ? 'date' : undefined}
             onClick={onSelectDay ? () => onSelectDay(key) : undefined}
             disabled={!onSelectDay}
-            className="flex flex-1 flex-col items-center gap-1 rounded-xl py-0.5 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none disabled:cursor-default"
+            className="flex flex-1 flex-col items-center rounded-xl py-0.5 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none disabled:cursor-default"
           >
-            <span className="label-overline text-ink-muted">
-              {formatDateTime(day, { weekday: 'short' })}
-            </span>
-            <span
-              className={cn(
-                'tabular-time inline-flex size-8 items-center justify-center rounded-full font-display text-body-sm font-bold',
-                selected && 'bg-primary text-primary-foreground',
-                !selected && key === todayKey && 'text-primary',
-                !selected && key !== todayKey && weekend && 'text-ink-muted'
-              )}
-            >
-              {formatDateTime(day, { day: 'numeric' })}
-            </span>
-            {dots ? (
-              <CategoryDot
-                size="xs"
-                className={cn(
-                  busyKeys.has(key) ? (selected ? 'bg-primary' : 'bg-line') : 'bg-transparent'
-                )}
-              />
-            ) : null}
+            {/* `dot={true}` is exactly the mark this strip drew by hand: brand
+                on the filled day, `--line` otherwise. A day with nothing on it
+                still gets a node rather than `false`, so the empty slot holds
+                its 4px and a week with one busy day does not sit taller than a
+                week with none. */}
+            <DateCircle
+              label={formatDateTime(day, { weekday: 'short' })}
+              number={formatDateTime(day, { day: 'numeric' })}
+              state={
+                selected ? 'selected' : key === todayKey ? 'today' : weekend ? 'muted' : 'default'
+              }
+              dot={dots ? busyKeys.has(key) || <span className="size-1" /> : false}
+            />
           </button>
         );
       })}

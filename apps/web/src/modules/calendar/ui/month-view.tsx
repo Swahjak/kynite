@@ -3,9 +3,9 @@
 import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { useDateTimeFormat } from '@/components/formatting';
-import { cn } from '@kynite/ui';
+import { cn, DateCircle } from '@kynite/ui';
 import { specialDaysOn } from '@/modules/holidays';
-import { dayKeysOf } from '../domain/expand';
+import { bucketByDay } from '../domain/day-board';
 import { toDateKey, toWall } from '../domain/zone';
 import type { CalendarEvent } from '../queries';
 import { EventChip } from './event-chip';
@@ -53,17 +53,12 @@ export function MonthView({
   const anchorMonth = toWall(anchor, timeZone).month;
   const todayKey = today ? toDateKey(toWall(today, timeZone)) : null;
 
-  const byDay = useMemo(() => {
-    const buckets = new Map<string, CalendarEvent[]>();
-    for (const event of events) {
-      for (const key of dayKeysOf(event, timeZone, event.allDay)) {
-        const bucket = buckets.get(key);
-        if (bucket) bucket.push(event);
-        else buckets.set(key, [event]);
-      }
-    }
-    return buckets;
-  }, [events, timeZone]);
+  // No window: the grid's leading and trailing spill are days like any other,
+  // and a cell reads whatever bucket its own key has. The buckets arrive in
+  // `bucketByDay`'s one order — all-day first — where this loop used to rely on
+  // whatever order `queries.ts` handed it, which put a "vrij" row wherever its
+  // stored UTC midnight happened to sort.
+  const byDay = useMemo(() => bucketByDay(events, { timeZone }), [events, timeZone]);
 
   const weekdays = days.slice(0, 7);
 
@@ -115,22 +110,25 @@ export function MonthView({
             >
               <div className="flex items-center justify-between gap-1">
                 <span className="flex min-w-0 items-center gap-1">
-                  {/* Date number: `class="tnum" font-size:13px`. The selected /
-                      today date is the documented pill — "`background:#5d5fef;
-                      border-radius:9999px;` with number `font-weight:700;
-                      color:#ffffff;`" — the pill *is* the indicator, so a today
-                      cell carries no dot of its own. */}
-                  <span
-                    className={cn(
-                      'tnum text-body-sm',
-                      outside ? 'text-ink-muted' : 'text-ink',
-                      isToday
-                        ? 'flex size-7 items-center justify-center rounded-4xl bg-primary font-bold text-primary-foreground'
-                        : 'font-medium'
-                    )}
-                  >
-                    {formatDateTime(day, { day: 'numeric' })}
-                  </span>
+                  {/* Date number: the shared `DateCircle` at its densest step,
+                      so a today cell and an ordinary one put their number in
+                      the same 28px box instead of the number jumping right by
+                      half a circle on the one day of the month that is filled.
+                      The selected / today date keeps the documented pill —
+                      "`background:#5d5fef;border-radius:9999px;`" — which *is*
+                      the indicator, so a today cell carries no dot of its own,
+                      and `selected` rather than `today` because a month grid
+                      has no separately focused day to reserve the fill for.
+
+                      No `label`: the weekday is stated once in the header row
+                      above the grid, and repeating it in all 35 cells is the
+                      thing that header exists to avoid. */}
+                  <DateCircle
+                    label={null}
+                    number={formatDateTime(day, { day: 'numeric' })}
+                    state={isToday ? 'selected' : outside ? 'muted' : 'default'}
+                    size="sm"
+                  />
 
                   {/* Beside the number, never instead of it: the date is what a
                       month cell is *for*. One emoji even on the rare day that

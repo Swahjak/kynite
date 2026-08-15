@@ -183,6 +183,43 @@ describe('MemberDayGrid', () => {
   });
 
   /**
+   * A household event (M23) is everyone's *by construction*, and that outranks
+   * whatever attribution it carries. An event on a Google calendar bound to
+   * "Gezin" carries that calendar owner's member id, so reading attribution
+   * first drew family dinner as one parent's appointment and left the
+   * children's columns empty. The grid never consulted the flag at all until
+   * it moved onto `splitByMember`.
+   */
+  it('puts a household event in the shared lane even when attribution names one member', () => {
+    const { container } = renderGrid(members, [
+      event({ title: 'Familiediner', householdWide: true, ownerMemberId: 'm1' }),
+    ]);
+
+    const lane = container.querySelector('[data-slot="shared-column"]');
+    expect(lane?.querySelectorAll('[data-slot="event-chip"]')).toHaveLength(1);
+    expect(screen.getAllByText('Familiediner')).toHaveLength(1);
+    for (const column of container.querySelectorAll('[data-slot="member-column"]')) {
+      expect(column.querySelectorAll('[data-slot="event-chip"]')).toHaveLength(0);
+    }
+  });
+
+  it('puts a household all-day event in the household strip, unmarked', () => {
+    const { container } = renderGrid(members, [
+      event({
+        title: 'Schoolvakantie',
+        allDay: true,
+        householdWide: true,
+        attendeeMemberIds: ['m1', 'm2'],
+      }),
+    ]);
+
+    const allDayRow = container.querySelector('[data-slot="all-day-row"]')!;
+    expect(allDayRow.querySelector('[data-slot="all-day-member"]')).toBeNull();
+    expect(allDayRow.textContent).toContain('Schoolvakantie');
+    expect(screen.getAllByText('Schoolvakantie')).toHaveLength(1);
+  });
+
+  /**
    * F18. The all-day branch used to run *before* attribution and threw the
    * owner away, so one child's holiday landed in a strip that reads as the
    * whole household's.

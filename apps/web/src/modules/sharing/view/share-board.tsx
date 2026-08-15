@@ -1,13 +1,13 @@
 import { getTranslations } from 'next-intl/server';
 import { formatDateTime, type FormattingLocale } from '@/i18n/formatting-locale';
+// A deep import of the calendar slice's `domain`, which is exactly what the
+// share view's boundary rule allows (`eslint.config.mjs`,
+// `shareViewBoundaryRule`) — and why the sentinel lives there rather than in
+// the Google slice this tree may not reach. Not the barrel: that re-exports
+// `queries.ts`, which is `server-only`.
+import { titleOf } from '@/modules/calendar/domain/event-title';
 import { ShareStepButton } from './share-step-button';
 import type { ShareDay, ShareMember, ShareRoutine, ShareView } from './load';
-
-/** Mirrors `UNTITLED` in `modules/google/domain/mapping.ts` — see the same
- *  constant in `modules/calendar/ui/event-chip.tsx` for why this is a literal
- *  copy rather than an import across slice boundaries (doubly true here,
- *  where the `(share)` tree may not import anything Google-sync-adjacent). */
-const UNTITLED_SENTINEL = '(no title)';
 
 /**
  * The caregiver's whole surface: a week of schedule, and today's routines.
@@ -197,11 +197,7 @@ async function DayRow({
                     than stored — the query withholds detail, the UI names the
                     withholding. */}
                 <span className={item.busyOnly ? 'text-ink-muted italic' : undefined}>
-                  {item.busyOnly
-                    ? t('busy')
-                    : item.title === UNTITLED_SENTINEL
-                      ? t('untitled')
-                      : item.title}
+                  {titleOf(item, { untitled: t('untitled'), busy: t('busy') })}
                 </span>
                 {!item.busyOnly && item.location ? (
                   <span className="text-ink-secondary text-body-sm">{item.location}</span>

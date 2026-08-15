@@ -8,18 +8,9 @@ import { CategoryDot, cn, Icon, MemberFace } from '@kynite/ui';
 // client component's bundle. `person-columns.tsx` establishes the same
 // pattern for the same reason.
 import type { Member } from '@/modules/family';
+import { titleOf } from '../domain/event-title';
 import type { CalendarEvent } from '../queries';
 import { CATEGORY_CLASSES, EVENT_TYPE_ICONS } from './tokens';
-
-/**
- * Mirrors `UNTITLED` in `modules/google/domain/mapping.ts` — not imported
- * from there, deliberately: that slice is the Google sync integration, and
- * this calendar-UI component has no business depending on it for anything
- * but a string constant. Both sides are covered by
- * `tests/unit/i18n/hardcoded-strings.test.ts`-adjacent unit coverage on the
- * mapping module, so a drift between the two literals fails loudly.
- */
-const UNTITLED_SENTINEL = '(no title)';
 
 /**
  * Free/busy is a **texture, not a colour** (`Kalender.dc.html`; the argument is
@@ -139,20 +130,12 @@ export function EventChip({
       : null;
 
   // A redacted event has no title to show — it is a shape in the day, which is
-  // exactly what free/busy means (§7 `calendar:view_private` → `busy-only`).
-  //
-  // A synced Google event with no summary persists the `UNTITLED` sentinel
-  // (`modules/google/domain/mapping.ts`) into `event.title` — deliberately:
-  // the row needs *a* string, and re-deriving "was this untitled?" from an
-  // empty string at read time would be one more place to get it wrong. The
-  // sentinel is translated here, at the UI boundary, the same way `busy-only`
-  // is — not stored pre-translated, which would hardcode English into the
-  // database for every locale a family ever opens the event in.
-  const title = event.busyOnly
-    ? t('busy')
-    : event.title === UNTITLED_SENTINEL
-      ? t('untitled')
-      : event.title;
+  // exactly what free/busy means (§7 `calendar:view_private` → `busy-only`) —
+  // and a synced event with no summary carries a sentinel rather than a name.
+  // Both, plus the empty-title case this used to miss, are decided once in
+  // `domain/event-title.ts`; the labels are translated here, at the UI
+  // boundary, rather than stored pre-translated.
+  const title = titleOf(event, { untitled: t('untitled'), busy: t('busy') });
 
   if (variant === 'dot') {
     return (

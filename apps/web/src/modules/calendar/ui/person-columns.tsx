@@ -10,7 +10,7 @@ import { Card, CategoryDot, cn, EmptyState, MemberFace } from '@kynite/ui';
 // its connection string) in the browser bundle — Next fails the build on it,
 // which is how this was caught. A type import is erased at compile time.
 import type { Member } from '@/modules/family';
-import { dayKeysOf } from '../domain/expand';
+import { splitByMember } from '../domain/day-board';
 import { toDateKey, toWall } from '../domain/zone';
 import type { CalendarEvent } from '../queries';
 import { DayAgendaRow } from './day-agenda-row';
@@ -55,30 +55,21 @@ export function PersonColumns({
   // The board is server-rendered; "which of these is happening" is not.
   const tick = useNowTick(now);
 
-  const { byMember, shared } = useMemo(() => {
-    const columns = new Map<string, CalendarEvent[]>(members.map((member) => [member.id, []]));
-    const sharedEvents: CalendarEvent[] = [];
-
-    for (const event of events) {
-      if (!dayKeysOf(event, timeZone, event.allDay).includes(dayKey)) continue;
-
-      const targets = new Set<string>();
-      if (event.ownerMemberId) targets.add(event.ownerMemberId);
-      for (const attendee of event.attendeeMemberIds) targets.add(attendee);
-
-      // A household event is everybody's, whatever attribution says (M23).
-      const owned = event.householdWide ? [] : [...targets].filter((id) => columns.has(id));
-      if (owned.length === 0) sharedEvents.push(event);
-      else for (const id of owned) columns.get(id)!.push(event);
-    }
-
-    for (const list of columns.values()) {
-      list.sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
-    }
-    sharedEvents.sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
-
-    return { byMember: columns, shared: sharedEvents };
-  }, [members, events, timeZone, dayKey]);
+  // The split, the day gate, the `householdWide` precedence and the order are
+  // all `domain/day-board.ts` — see the block on `splitByMember` there. Two of
+  // its rules were not what this board used to do: an event attributed only to
+  // members it does not render is *dropped* rather than promoted into the
+  // shared block (that block is captioned "Iedereen"), and all-day rows lead a
+  // column instead of sorting by the UTC midnight they are stored as.
+  const { byMember, shared } = useMemo(
+    () =>
+      splitByMember(
+        events,
+        members.map((member) => member.id),
+        { timeZone, dayKey }
+      ),
+    [members, events, timeZone, dayKey]
+  );
 
   /**
    * The *who* sub-label inside a member's column (`calendar.md` § "Day

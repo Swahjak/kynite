@@ -3,12 +3,12 @@
 import { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useDateTimeFormat } from '@/components/formatting';
-import { CategoryDot, cn, EmptyState } from '@kynite/ui';
+import { CategoryDot, DateCircle, EmptyState } from '@kynite/ui';
 // Type-only: `@/modules/family` re-exports `server-only` queries, so a value
 // import would drag the Postgres client into this client bundle.
 import type { Member } from '@/modules/family';
 import { specialDaysOn } from '@/modules/holidays';
-import { dayKeysOf } from '../domain/expand';
+import { bucketByDay } from '../domain/day-board';
 import { toDateKey, toWall } from '../domain/zone';
 import type { CalendarEvent } from '../queries';
 import { EventChip } from './event-chip';
@@ -56,20 +56,11 @@ export function MobileMonthView({
   const todayKey = today ? toDateKey(toWall(today, timeZone)) : null;
   const anchorKey = toDateKey(toWall(anchor, timeZone));
 
-  const byDay = useMemo(() => {
-    const buckets = new Map<string, CalendarEvent[]>();
-    for (const event of events) {
-      for (const key of dayKeysOf(event, timeZone, event.allDay)) {
-        const bucket = buckets.get(key);
-        if (bucket) bucket.push(event);
-        else buckets.set(key, [event]);
-      }
-    }
-    for (const bucket of buckets.values()) {
-      bucket.sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
-    }
-    return buckets;
-  }, [events, timeZone]);
+  // Sorted by `bucketByDay`'s one order, which puts all-day rows first — the
+  // local sort this replaces ordered by `startsAt` alone, and an all-day row is
+  // stored as a UTC midnight, so "vrij" read as 01:00 and landed in the middle
+  // of the morning. Both the grid's three pips and the panel's list read this.
+  const byDay = useMemo(() => bucketByDay(events, { timeZone }), [events, timeZone]);
 
   // The anchor is where the month opens; after that the panel follows the tap.
   const [selectedKey, setSelectedKey] = useState(todayKey ?? anchorKey);
@@ -110,44 +101,52 @@ export function MobileMonthView({
                 data-selected={selected || undefined}
                 aria-current={selected ? 'date' : undefined}
                 onClick={() => setSelectedKey(key)}
-                className="flex h-13 flex-col items-center gap-1 pt-1 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
+                className="flex h-13 flex-col items-center pt-1 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
               >
-                <span
-                  className={cn(
-                    // 30px, per the mock: big enough to be a tap target's
-                    // visible centre, small enough that seven fit at 390px
-                    // with the dots underneath still on screen.
-                    'tabular-time inline-flex size-7.5 items-center justify-center rounded-full font-display text-body-sm font-bold',
-                    selected && 'bg-primary text-primary-foreground',
-                    !selected && key === todayKey && 'text-primary',
-                    !selected && key !== todayKey && outside && 'text-ink-muted',
-                    !selected && key !== todayKey && !outside && 'text-ink'
-                  )}
-                >
-                  {formatDateTime(day, { day: 'numeric' })}
-                </span>
-                <span className="flex h-1 items-center gap-0.5">
-                  {special[0] ? (
-                    <span
-                      data-testid="month-special-day"
-                      data-slug={special[0].slug}
-                      aria-hidden
-                      className="text-[10px] leading-none"
-                    >
-                      {special[0].emoji}
+                {/* The shared circle at `md` (32px), two pixels up from the
+                    30px this cell drew by hand — seven still fit at 390px with
+                    the pips underneath on screen, and the row gains the tap
+                    target rather than a size of its own. The weekday lives in
+                    the header above the grid, so the label slot stays empty. */}
+                <DateCircle
+                  label={null}
+                  number={formatDateTime(day, { day: 'numeric' })}
+                  state={
+                    selected
+                      ? 'selected'
+                      : key === todayKey
+                        ? 'today'
+                        : outside
+                          ? 'muted'
+                          : 'default'
+                  }
+                  dot={
+                    // Always a node, never `false`: the slot is what keeps a
+                    // quiet day the same height as a busy one.
+                    <span className="flex items-center gap-0.5">
+                      {special[0] ? (
+                        <span
+                          data-testid="month-special-day"
+                          data-slug={special[0].slug}
+                          aria-hidden
+                          className="text-[10px] leading-none"
+                        >
+                          {special[0].emoji}
+                        </span>
+                      ) : (
+                        dayEvents
+                          .slice(0, MAX_DOTS)
+                          .map((event) => (
+                            <CategoryDot
+                              key={event.key}
+                              size="xs"
+                              className={CATEGORY_CLASSES[event.category].solid}
+                            />
+                          ))
+                      )}
                     </span>
-                  ) : (
-                    dayEvents
-                      .slice(0, MAX_DOTS)
-                      .map((event) => (
-                        <CategoryDot
-                          key={event.key}
-                          size="xs"
-                          className={CATEGORY_CLASSES[event.category].solid}
-                        />
-                      ))
-                  )}
-                </span>
+                  }
+                />
               </button>
             );
           })}
