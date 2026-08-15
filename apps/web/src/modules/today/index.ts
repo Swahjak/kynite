@@ -58,6 +58,7 @@ export { TodayHubHeader, type TodayHubHeaderProps } from './ui/today-hub-header'
 export { TodayLive } from './ui/today-live';
 export { TodayThemeBanner, type TodayThemeBannerProps } from './ui/today-theme-banner';
 export { TodayTimeline, type TodayTimelineProps } from './ui/today-timeline';
+export { TodayQuickActions, type TodayQuickActionsProps } from './ui/today-quick-actions';
 export { TodayNowStrip, type TodayNowStripProps } from './ui/today-now-strip';
 export { TodayTabDag, type TodayTabDagProps } from './ui/today-tab-dag';
 export { TodayTabPersonen, type TodayTabPersonenProps } from './ui/today-tab-personen';

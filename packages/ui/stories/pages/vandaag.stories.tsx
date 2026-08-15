@@ -1,10 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Badge } from '../../src/components/badge';
 import { Card } from '../../src/components/card';
 import { Icon } from '../../src/components/icon';
 import { MemberFace } from '../../src/components/member-face';
-import { cn } from '../../src/lib/utils';
 import {
   DeviceCaption,
   Overline,
@@ -16,7 +14,7 @@ import {
   DesignSheet,
 } from '../device';
 import { DAY, TODAY, TOM } from '../family';
-import { KidProgress, NowBlock, TaskList, VandaagHub } from './vandaag-hub';
+import { KidProgress, NowBlock, TaskList, TimelineRow, VandaagHub } from './vandaag-hub';
 
 /**
  * **Vandaag** — the hub's home screen, in both of its contexts.
@@ -129,42 +127,13 @@ export const Mobiel: Story = {
               </span>
             </div>
 
-            <div className="flex flex-col gap-2">
+            {/* One card with hairlines, not nine floating cards. The phone
+                shows the same row anatomy as the hub at a smaller size, so a
+                parent who reads the wall and then their pocket reads the same
+                object twice rather than learning two lists. */}
+            <div className="rounded-2xl border border-line-subtle bg-card px-2">
               {DAY.filter((event) => !event.done).map((event) => (
-                <div
-                  key={event.id}
-                  className={cn(
-                    'flex min-h-12 items-center gap-2.5 rounded-xl p-3',
-                    event.now ? 'bg-primary/7' : 'border border-line-subtle bg-card'
-                  )}
-                >
-                  <span
-                    className={cn(
-                      'tabular-time w-10.5 shrink-0 text-caption font-semibold',
-                      event.now ? 'font-bold text-brand' : 'text-ink-secondary'
-                    )}
-                  >
-                    {event.time}
-                  </span>
-                  <span className={cn('w-1 self-stretch rounded-full', event.solid)} />
-                  <div className="min-w-0 flex-1">
-                    <span
-                      className={cn(
-                        'block truncate text-body-sm font-semibold',
-                        event.busy && 'text-ink-muted'
-                      )}
-                    >
-                      {event.title}
-                    </span>
-                    <span className="block text-caption text-ink-secondary">{event.who}</span>
-                  </div>
-                  {event.now ? (
-                    <Badge variant="status" size="default" className="px-2.5">
-                      NU
-                    </Badge>
-                  ) : null}
-                  {event.busy ? <Icon name="lock" size="xs" className="text-ink-muted" /> : null}
-                </div>
+                <TimelineRow key={event.id} event={event} size="phone" />
               ))}
             </div>
 

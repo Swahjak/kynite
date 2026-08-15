@@ -2,10 +2,16 @@ import type { ReactNode } from 'react';
 import { getTranslations } from 'next-intl/server';
 import { Card, cn, Icon, SectionHeading } from '@kynite/ui';
 import { formatDateTime } from '@/i18n/formatting-locale';
-import { CATEGORY_CLASSES, combineDayEvents, type CalendarEvent } from '@/modules/calendar';
-import { getHouseholdFormattingLocale, type Member } from '@/modules/family';
+import {
+  CATEGORY_CLASSES,
+  EVENT_TYPE_ICONS,
+  combineDayEvents,
+  type CalendarEvent,
+} from '@/modules/calendar';
+import { getHouseholdFormattingLocale, MEMBER_COLOR_CLASSES, type Member } from '@/modules/family';
 import { MemberFaces, joinNames, namesOf } from './member-faces';
 import { TodayPastRows } from './today-past-rows';
+import { TodayTimelineFilter } from './today-timeline-filter';
 
 /**
  * "Dagoverzicht" — the whole household's day as one chronological list.
@@ -31,11 +37,11 @@ import { TodayPastRows } from './today-past-rows';
  * (`today-past-rows.tsx`). Nothing is dropped; the morning simply stops being
  * the first six rows of the afternoon's screen.
  *
- * The row itself follows the design's hub anatomy: a fixed time gutter, the
- * category as a dot (or a lock), the title, and the names underneath. The
- * mobile shape — a bordered card with a full-height colour bar — is
- * `density="card"`, which is what a 390px column can carry without the row
- * collapsing into a run-on sentence.
+ * The row's anatomy is documented on `render` below. `density` no longer
+ * changes its *shape* — since the August sheet both surfaces draw the same
+ * row, divided by hairlines inside one object — only its size, and what that
+ * object is: a card of its own on the wall, the page's own bordered list on a
+ * phone.
  */
 
 export type TodayTimelineProps = {
@@ -90,6 +96,26 @@ export async function TodayTimeline({
   const past = rows.filter(({ event }) => isPast(event));
   const rest = rows.filter(({ event }) => !isPast(event));
 
+  /**
+   * One row, in the anatomy the August sheet settled on: the category rail,
+   * the time *range* stacked start over end, the category glyph, the title,
+   * and the faces of whoever is on it.
+   *
+   * Two things the row used to do and no longer does:
+   *
+   * - **It named people in a second line.** "Mila & Daan" under every title
+   *   cost the row its second line and made a nine-event day scroll. The faces
+   *   say the same thing in the space of the title's own line, and the names
+   *   survive as the stack's accessible label.
+   * - **It drew the category as a dot.** Eleven types share eight hues
+   *   (`EVENT_TYPE_CATEGORY`), so colour alone cannot separate school from
+   *   opvang, or muziek from spelen. The glyph is the half that can, and a 4px
+   *   rail carries the hue better than a 8px dot did.
+   *
+   * The two densities now differ only in size — 24px glyph and 15px title on
+   * the wall, 18px and 14px on a phone — because a parent who reads the wall
+   * and then their pocket should read the same object twice.
+   */
   const render = ({ event, memberIds }: (typeof rows)[number]): ReactNode => {
     const palette = CATEGORY_CLASSES[event.category];
     const everyone =
@@ -98,63 +124,7 @@ export async function TodayTimeline({
     const faceIds = everyone ? members.map((member) => member.id) : memberIds;
     const live = isToday && event.key === nowEventKey;
     const done = isPast(event);
-
-    if (density === 'card') {
-      return (
-        <div
-          key={event.key}
-          data-testid="today-timeline-row"
-          data-state={live ? 'now' : done ? 'past' : 'default'}
-          data-category={event.category}
-          className={cn(
-            'flex min-h-12 items-center gap-2.5 rounded-xl p-3',
-            live ? 'bg-primary/7' : 'border border-line-subtle bg-card',
-            done && 'opacity-55'
-          )}
-        >
-          <span
-            className={cn(
-              'w-10.5 shrink-0 text-caption font-semibold tabular-nums',
-              live ? 'font-bold text-primary' : 'text-ink-secondary'
-            )}
-          >
-            {event.allDay ? t('allDay') : at(event.startsAt)}
-          </span>
-
-          {/* A 4px full-height bar rather than a dot: at this size a dot is
-              lost against the card's own border. */}
-          <span
-            aria-hidden="true"
-            className={cn(
-              'w-1 self-stretch rounded-4xl',
-              event.busyOnly ? 'bg-line' : palette.solid
-            )}
-          />
-
-          <div className="min-w-0 flex-1">
-            <span
-              className={cn(
-                'block truncate text-body-sm font-semibold',
-                done && 'line-through',
-                event.busyOnly && 'text-ink-muted'
-              )}
-            >
-              {event.busyOnly ? tCalendar('busy') : event.title}
-            </span>
-            <span className="block truncate text-caption text-ink-secondary">{people}</span>
-          </div>
-
-          {live ? (
-            <span className="shrink-0 rounded-4xl bg-primary px-2.5 py-0.5 text-overline text-primary-foreground uppercase">
-              {t('now.eyebrowLive')}
-            </span>
-          ) : null}
-          {event.busyOnly ? (
-            <Icon name="lock" size="xs" className="shrink-0 text-ink-muted" />
-          ) : null}
-        </div>
-      );
-    }
+    const phone = density === 'card';
 
     return (
       <div
@@ -163,45 +133,75 @@ export async function TodayTimeline({
         data-state={live ? 'now' : done ? 'past' : 'default'}
         data-category={event.category}
         className={cn(
-          'flex gap-3 rounded-xl px-2.5 py-2',
-          live && 'bg-primary/7',
+          'flex items-center border-t border-line-subtle first:border-t-0',
+          phone ? 'min-h-12 gap-2.5 px-2 py-3' : 'gap-3 p-3',
+          live && 'rounded-xl bg-primary/7',
           done && 'opacity-50'
         )}
       >
         <span
+          aria-hidden="true"
           className={cn(
-            'w-11 shrink-0 text-body-sm font-semibold tabular-nums',
-            live ? 'font-bold text-primary' : 'text-ink-secondary'
+            'w-1 shrink-0 self-stretch rounded-4xl',
+            event.busyOnly ? 'bg-line' : palette.solid
           )}
-        >
-          {event.allDay ? t('allDay') : at(event.startsAt)}
-        </span>
+        />
 
-        {event.busyOnly ? (
-          <Icon name="lock" size="xs" className="mt-0.5 shrink-0 text-ink-muted" />
-        ) : (
-          <span
-            aria-hidden="true"
-            className={cn('mt-1.5 size-2 shrink-0 rounded-4xl', palette.solid)}
-          />
-        )}
-
-        <div className="min-w-0 flex-1">
+        {/* Start over end. The end time is what turns "10:00 Tandarts" into a
+            block a parent can plan around, and it is the one fact the old row
+            spent its second line on something else to avoid showing. */}
+        <div className={cn('flex shrink-0 flex-col', phone ? 'w-10.5' : 'w-13')}>
           <span
             className={cn(
-              'block text-body-sm',
-              live && 'font-bold',
-              done && 'line-through',
-              event.busyOnly && 'text-ink-muted'
+              'font-semibold tabular-nums',
+              phone ? 'text-caption' : 'text-body-sm',
+              live && 'font-bold text-primary'
             )}
           >
-            {event.busyOnly ? tCalendar('busy') : event.title}
+            {event.allDay ? t('allDay') : at(event.startsAt)}
           </span>
-          <span className="flex min-w-0 items-center gap-1.5 text-caption text-ink-secondary">
-            <MemberFaces members={members} memberIds={faceIds} size="xs" />
-            <span className="truncate">{people}</span>
-          </span>
+          {event.allDay ? null : (
+            <span
+              className={cn(
+                'text-caption tabular-nums',
+                live ? 'text-primary/70' : 'text-ink-muted'
+              )}
+            >
+              {at(event.endsAt)}
+            </span>
+          )}
         </div>
+
+        <Icon
+          name={event.busyOnly ? 'lock' : EVENT_TYPE_ICONS[event.eventType]}
+          size={phone ? 'sm' : 'md'}
+          className={cn('shrink-0', event.busyOnly ? 'text-ink-muted' : palette.text)}
+        />
+
+        <span
+          className={cn(
+            'min-w-0 flex-1 truncate',
+            phone ? 'text-body-sm' : 'text-body',
+            live ? 'font-bold' : 'font-semibold',
+            done && 'line-through',
+            event.busyOnly && 'text-ink-muted'
+          )}
+        >
+          {event.busyOnly ? tCalendar('busy') : event.title}
+        </span>
+
+        <MemberFaces
+          members={members}
+          memberIds={faceIds}
+          size={phone ? 'xs' : 'sm'}
+          label={people}
+        />
+
+        {live ? (
+          <span className="shrink-0 rounded-4xl bg-primary px-2 py-0.5 text-overline text-primary-foreground uppercase">
+            {t('now.eyebrowLive')}
+          </span>
+        ) : null}
       </div>
     );
   };
@@ -233,30 +233,67 @@ export async function TodayTimeline({
 
   const body =
     rows.length === 0 ? (
-      <p className="text-body-sm text-ink-secondary">{tCalendar('freeDay')}</p>
+      <p className={cn('text-body-sm text-ink-secondary', density === 'card' ? '' : 'px-3')}>
+        {tCalendar('freeDay')}
+      </p>
     ) : (
-      <div className={cn('flex flex-col', density === 'card' ? 'gap-2' : '-mx-2.5 gap-0.5')}>
+      <div className="flex flex-col">
         {disclosure}
         {rest.map(render)}
       </div>
     );
 
-  // The phone's rows are already tiles with their own borders; wrapping them in
-  // a second white card put a card inside a card and cost 40px of a 390px
-  // column. The design draws them straight on the page ground.
+  /**
+   * A household-wide event belongs to everyone's day, so it carries the whole
+   * roster into the filter rather than the (empty) attendee list it was stored
+   * with. Filtering to Mila and losing the family dinner would be a lie of
+   * omission — the row is on her day too.
+   */
+  const memberIdsFor = ({ event, memberIds }: (typeof rows)[number]) =>
+    event.householdWide || memberIds.length === 0
+      ? members.map((member) => member.id)
+      : [...memberIds];
+
+  // One bordered list rather than nine floating tiles: the rows carry their own
+  // hairlines now, so a border each drew the same line twice and cost the
+  // column its rhythm. Same object as the wall's card, one step quieter.
   if (density === 'card') {
     return (
       <section data-testid="today-timeline" className={cn('flex flex-col gap-2', className)}>
         {disclosure ? null : eyebrow}
-        {body}
+        <div className="rounded-2xl border border-line-subtle bg-card px-2">{body}</div>
       </section>
     );
   }
 
+  // The wall's list carries the member filter in its heading row — the answer
+  // the "Per persoon" column used to give, in the width it used to cost.
   return (
-    <Card data-testid="today-timeline" className={cn('gap-4 p-5', className)}>
-      <SectionHeading title={t('timeline.title')} size="card" level={2} />
-      {body}
+    <Card data-testid="today-timeline" className={cn('gap-3.5 px-2 pt-5 pb-2', className)}>
+      {rows.length === 0 ? (
+        <>
+          <SectionHeading title={t('timeline.title')} size="card" level={2} className="px-3" />
+          {body}
+        </>
+      ) : (
+        <TodayTimelineFilter
+          heading={<SectionHeading title={t('timeline.title')} size="card" level={2} />}
+          faces={members.map((member) => ({
+            id: member.id,
+            name: member.displayName,
+            avatarUrl: member.avatarUrl,
+            surfaceClass: MEMBER_COLOR_CLASSES[member.color].surface,
+          }))}
+          rows={rest.map((row) => ({
+            id: row.event.key,
+            memberIds: memberIdsFor(row),
+            node: render(row),
+          }))}
+          disclosure={disclosure}
+          everyoneLabel={tCalendar('everyone')}
+          emptyLabel={tCalendar('freeDay')}
+        />
+      )}
     </Card>
   );
 }

@@ -16,6 +16,13 @@ full suite:
   tests; this is the gate to run when CPU budget is tight.
 - `@visual` — every screenshot/snapshot spec (`**/visual/*.spec.ts`).
   Slow and prone to pixel-diff noise; skip these for a fast functional pass.
+  **Out of the CI gate for the alpha** (`ci.yml` runs `--grep-invert @visual`):
+  while the interface is being rebuilt every snapshot diff is a deliberate
+  change, so the gate was red by design and told you nothing. 18 of the 40
+  baselines cover the calendar and Vandaag — both open work — and the two
+  design-system shots move with any token edit. Keep running them locally when
+  you want to _look_ at a change; `pnpm e2e:visual:update` re-blesses them. At
+  feature freeze: one full update run, then drop the flag from `ci.yml`.
 - `@heavy` — anything slow or load-sensitive: the `completion-perf` guard,
   `kiosk-audit.spec.ts`, the axe/accessibility specs, and the calendar
   drag-and-drop tests.

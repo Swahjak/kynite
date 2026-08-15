@@ -101,12 +101,16 @@ export const FACES = FAMILY.map((member) => ({
 export type DayEvent = {
   id: string;
   time: string;
-  /** `end` only where the sheet shows a range. */
-  end?: string;
+  /** Every row shows a range now: the sheet stacks start over end. */
+  end: string;
   title: string;
   who: string;
+  /** The category's glyph — the half of the taxonomy colour cannot carry. */
+  icon: IconName;
   /** Dot / rail colour — the *category*, not the member. */
   solid: string;
+  /** The glyph's ink, one step darker than `solid` so it reads at 20px. */
+  iconText: string;
   surface: string;
   border: string;
   /** Already happened, struck through. */
@@ -124,8 +128,11 @@ export const DAY: readonly DayEvent[] = [
   {
     id: 'ontbijt',
     time: '07:30',
+    end: '08:00',
     title: 'Ontbijt',
     who: 'Iedereen',
+    icon: 'restaurant',
+    iconText: 'text-cat-teal-fg',
     solid: 'bg-cat-teal-solid',
     surface: 'bg-cat-teal-surface',
     border: 'border-cat-teal-border',
@@ -134,9 +141,11 @@ export const DAY: readonly DayEvent[] = [
   {
     id: 'ochtendroutine',
     time: '08:15',
-    end: '09:15',
+    end: '09:00',
     title: 'Ochtendroutine',
     who: 'Mila & Daan',
+    icon: 'wb_twilight',
+    iconText: 'text-cat-teal-fg',
     solid: 'bg-cat-teal-solid',
     surface: 'bg-cat-teal-surface',
     border: 'border-cat-teal-border',
@@ -148,6 +157,8 @@ export const DAY: readonly DayEvent[] = [
     end: '11:30',
     title: 'Schoolreis',
     who: 'Mila & Daan',
+    icon: 'school',
+    iconText: 'text-cat-blue-fg',
     solid: 'bg-cat-blue-solid',
     surface: 'bg-cat-blue-surface',
     border: 'border-cat-blue-border',
@@ -155,8 +166,11 @@ export const DAY: readonly DayEvent[] = [
   {
     id: 'tandarts',
     time: '10:00',
+    end: '10:45',
     title: 'Tandarts',
     who: 'Lotte',
+    icon: 'medical_services',
+    iconText: 'text-cat-red-fg',
     solid: 'bg-cat-red-solid',
     surface: 'bg-cat-red-surface',
     border: 'border-cat-red-border',
@@ -164,9 +178,11 @@ export const DAY: readonly DayEvent[] = [
   {
     id: 'bezet',
     time: '11:00',
-    end: '12:30',
+    end: '12:00',
     title: 'Bezet',
     who: 'Tom',
+    icon: 'lock',
+    iconText: 'text-ink-muted',
     solid: 'bg-line',
     surface: 'bg-surface-container',
     border: 'border-line-subtle',
@@ -178,9 +194,11 @@ export const DAY: readonly DayEvent[] = [
     end: '13:30',
     title: 'Werklunch',
     who: 'Tom',
-    solid: 'bg-cat-yellow-solid',
-    surface: 'bg-cat-yellow-surface',
-    border: 'border-cat-yellow-border',
+    icon: 'work',
+    iconText: 'text-cat-teal-fg',
+    solid: 'bg-cat-teal-solid',
+    surface: 'bg-cat-teal-surface',
+    border: 'border-cat-teal-border',
   },
   {
     id: 'voetbal',
@@ -188,6 +206,8 @@ export const DAY: readonly DayEvent[] = [
     end: '16:30',
     title: 'Voetbaltraining',
     who: 'Mila',
+    icon: 'sports_soccer',
+    iconText: 'text-cat-green-fg',
     solid: 'bg-cat-green-solid',
     surface: 'bg-cat-green-surface',
     border: 'border-cat-green-border',
@@ -195,9 +215,11 @@ export const DAY: readonly DayEvent[] = [
   {
     id: 'etentje',
     time: '18:00',
-    end: '19:30',
+    end: '19:00',
     title: 'Etentje bij oma',
     who: 'Iedereen',
+    icon: 'celebration',
+    iconText: 'text-cat-pink-fg',
     solid: 'bg-cat-pink-solid',
     surface: 'bg-cat-pink-surface',
     border: 'border-cat-pink-border',
@@ -205,8 +227,11 @@ export const DAY: readonly DayEvent[] = [
   {
     id: 'bedtime',
     time: '19:30',
+    end: '20:00',
     title: 'Bedtime routine',
     who: 'Mila & Daan',
+    icon: 'bedtime',
+    iconText: 'text-cat-teal-fg',
     solid: 'bg-cat-teal-solid',
     surface: 'bg-cat-teal-surface',
     border: 'border-cat-teal-border',
@@ -220,6 +245,20 @@ export const PER_MEMBER: Record<string, readonly string[]> = {
   mila: ['ontbijt', 'ochtendroutine', 'schoolreis', 'voetbal', 'etentje', 'bedtime'],
   daan: ['ontbijt', 'ochtendroutine', 'schoolreis', 'etentje', 'bedtime'],
 };
+
+/**
+ * Who is on an event, read back out of `PER_MEMBER` rather than restated on the
+ * event. The day sheet now draws faces on every row instead of naming people in
+ * a subtitle, and two lists of the same fact drift the moment one is edited.
+ */
+export function facesOf(eventId: string) {
+  return FAMILY.filter((member) => PER_MEMBER[member.id]?.includes(eventId)).map((member) => ({
+    id: member.id,
+    name: member.name,
+    avatarUrl: member.avatar,
+    surfaceClass: member.surface,
+  }));
+}
 
 /* -------------------------------------------------------------------------- */
 /* Tasks                                                                       */

@@ -61,7 +61,10 @@ export const dynamic = 'force-dynamic';
  *    `allow` for a device; that is the whole point of a screen kids can reach.
  *    Taps are recorded with `source: 'hub'`, like every other hub completion.
  *  - **events** — no FAB at all: `event:write` is `deny`, so the wall offers no
- *    writes rather than offering some that would be refused.
+ *    writes rather than offering some that would be refused. The board's
+ *    quick-action grid drops its "Nieuw event" tile for the same reason, and
+ *    its "Taak erbij" tile because `task:write` is denied too: of the sheet's
+ *    four tiles the wall performs the two it is allowed to.
  *
  * ## What stays hub-shaped
  *
@@ -263,8 +266,8 @@ export default async function HubPage({
           defaultTab={defaultTab}
           fill
           dag={
-            /* The wall's three columns: what is happening now and the day as a
-               list, who has what, and how the routines and the task list stand.
+            /* The wall's two columns: what is happening now and the day as a
+               list, then how the routines and the task list stand.
                The NU strip lives *inside* the first column here rather than
                above the tabs — see `TodayHubDag`. */
             <TodayHubDag
@@ -293,6 +296,15 @@ export default async function HubPage({
               launcher={<ChildLauncher entries={children} />}
               // The kiosk's own timers screen, not the app's.
               timersHref="/hub/timers"
+              // No "Nieuw event" tile for the same reason there is no FAB
+              // below: `event:write` is `deny` for a device principal (§7).
+              newEventAction={null}
+              // Nor a "Taak erbij" tile: `task:write` is `deny` too, which is
+              // why the list's own quick-add never renders here either.
+              taskAction={null}
+              // `completion:write` *is* `allow` for a device — a screen kids
+              // can reach is the whole point — so the grid keeps this one.
+              canGiveStars={progress?.canComplete ?? false}
             />
           }
           personen={

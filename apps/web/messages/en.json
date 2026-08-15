@@ -672,7 +672,11 @@
       "noRoutines": "No routines today",
       "starsToday": "{count, plural, =0 {No stars yet today} one {# star today} other {# stars today}}"
     },
-    "familyLabel": "The family"
+    "familyLabel": "The family",
+    "actions": {
+      "newEvent": "New event",
+      "giveStar": "Give a star"
+    }
   },
   "routines": {
     "title": "Routines",

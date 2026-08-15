@@ -9,6 +9,7 @@
     "backpack",
     "bar_chart",
     "beach_access",
+    "bedtime",
     "brush",
     "cake",
     "calendar_month",
@@ -74,5 +75,5 @@
     "work",
     "workspace_premium"
   ],
-  "bytes": 64280
+  "bytes": 65288
 }

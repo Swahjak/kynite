@@ -672,7 +672,11 @@
       "noRoutines": "Vandaag geen routines",
       "starsToday": "{count, plural, =0 {Nog geen sterren vandaag} one {# ster vandaag} other {# sterren vandaag}}"
     },
-    "familyLabel": "Het gezin"
+    "familyLabel": "Het gezin",
+    "actions": {
+      "newEvent": "Nieuw event",
+      "giveStar": "Ster geven"
+    }
   },
   "routines": {
     "title": "Routines",

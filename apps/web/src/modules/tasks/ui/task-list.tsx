@@ -18,6 +18,7 @@ import {
 import { Link, useRouter } from '@/i18n/navigation';
 import { createTaskAction, toggleTaskAction } from '../actions';
 import type { TodayTask } from '../page-data';
+import { useTaskComposer } from './use-task-composer';
 
 /**
  * The Takenlijst on `/today` — the household's open list, and the one control
@@ -68,6 +69,14 @@ export type TaskListProps = {
    * be handed to a gate that bounces it straight back to the pair screen.
    */
   timersHref?: string;
+  /**
+   * The two pills at the foot of the list ("Timer starten", "Taak erbij").
+   *
+   * False on the wall board, where the August sheet promotes both into the
+   * quick-action grid at the top of the same column. The *field* they open
+   * still lives here; only the buttons moved.
+   */
+  showQuickActions?: boolean;
 };
 
 export function TaskList({
@@ -78,6 +87,7 @@ export function TaskList({
   title,
   memberSurface,
   timersHref = '/timers',
+  showQuickActions = true,
 }: TaskListProps) {
   const t = useTranslations('today');
   const router = useRouter();
@@ -88,7 +98,9 @@ export function TaskList({
   >(new Map<string, boolean>(), (previous, next) => new Map(previous).set(next.id, next.done));
   const [, startTransition] = useTransition();
 
-  const [adding, setAdding] = useState(false);
+  // Shared with the board's quick-action grid, which is where "Taak erbij"
+  // now lives on the wall — see `use-task-composer.ts`.
+  const { open: adding, setOpen: setAdding } = useTaskComposer();
   const [draft, setDraft] = useState('');
   const [assignee, setAssignee] = useState<string>(UNASSIGNED);
 
@@ -232,30 +244,39 @@ export function TaskList({
         ) : null}
       </Card>
 
-      {/* The mockup's two quick actions. Both are white pills with brand text:
-          one leaves the page, one opens the field above. */}
-      <div className="flex flex-wrap gap-2.5">
-        <Button
-          variant="outline"
-          className="flex-1 rounded-4xl border-primary/20 font-display font-bold text-primary"
-          nativeButton={false}
-          render={<Link href={timersHref} />}
-        >
-          <Icon name="timer" size="sm" inline="start" />
-          {t('tasks.startTimer')}
-        </Button>
+      {showQuickActions ? (
+        <>
+          {/* The mockup's two quick actions. Both are white pills with brand text:
+          one leaves the page, one opens the field above.
 
-        <Button
-          variant="outline"
-          data-testid="today-task-add-toggle"
-          disabled={!canWrite}
-          onClick={() => setAdding((previous) => !previous)}
-          className="flex-1 rounded-4xl border-primary/20 font-display font-bold text-primary"
-        >
-          <Icon name="add_task" size="sm" inline="start" />
-          {t('tasks.add')}
-        </Button>
-      </div>
+          `showQuickActions={false}` on the wall board: the August sheet
+          promotes both of these into the quick-action grid at the top of the
+          same column, and a second copy at the foot of the list would be the
+          same two buttons twice on one screen. */}
+          <div className="flex flex-wrap gap-2.5">
+            <Button
+              variant="outline"
+              className="flex-1 rounded-4xl border-primary/20 font-display font-bold text-primary"
+              nativeButton={false}
+              render={<Link href={timersHref} />}
+            >
+              <Icon name="timer" size="sm" inline="start" />
+              {t('tasks.startTimer')}
+            </Button>
+
+            <Button
+              variant="outline"
+              data-testid="today-task-add-toggle"
+              disabled={!canWrite}
+              onClick={() => setAdding(!adding)}
+              className="flex-1 rounded-4xl border-primary/20 font-display font-bold text-primary"
+            >
+              <Icon name="add_task" size="sm" inline="start" />
+              {t('tasks.add')}
+            </Button>
+          </div>
+        </>
+      ) : null}
     </div>
   );
 }

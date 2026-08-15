@@ -117,6 +117,13 @@ Uses shadcn/ui component library with CSS variables for theming (see `packages/u
 
 **Design source of truth**: `docs/design/README.md` — the Kynite design system (Baloo 2 / Poppins, indigo `#5d5fef` / orange `#ef8d5d` / cream `#fbf9f4`). It supersedes all older design references. Consult it before making any color, typography, spacing, or component-styling decision.
 
+**Upstream design mockups — Claude Design.** The `.dc.html` mockups in `docs/design/claude-design/` are exports of a Claude Design project the designs are actually edited in:
+
+- Project: **Kynite Design System**, `projectId` `3c19b279-cfe7-4b23-b09d-b468627219ce` (https://claude.ai/design/p/3c19b279-cfe7-4b23-b09d-b468627219ce).
+- Fetch with the `DesignSync` tool (load it via `ToolSearch` first): `get_project` → `list_files` → `get_file` per path. `list_projects` returns **empty** for this one — it is `PROJECT_TYPE_PROJECT`, not a design-system project, and that method only lists design-system projects. Always address it by the id above rather than concluding there is no project.
+- A `.dc.html` is a large single-file mockup (40–170 KB). Fetch and diff it in a **subagent** that writes the remote copy to a scratch file and reports only the design deltas; pulling several of these into the main context burns it for no reason.
+- When a design changes, the local export in `docs/design/claude-design/` is refreshed from the remote and committed, so a diff of that directory is the record of what moved.
+
 ### Calendar Component
 
 The calendar is the core feature, located in `src/components/calendar/`:

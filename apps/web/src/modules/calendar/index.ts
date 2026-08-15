@@ -140,6 +140,7 @@ export { DayAgendaRow, type DayAgendaRowProps } from './ui/day-agenda-row';
 export { HubBoard, type HubBoardSnapshot } from './ui/hub-board';
 export { MonthView } from './ui/month-view';
 export { NewEventFab, type NewEventFabProps } from './ui/new-event-fab';
+export { NewEventAction, type NewEventActionProps } from './ui/new-event-action';
 export { PersonColumns } from './ui/person-columns';
 export { TimeGrid } from './ui/time-grid';
 export { CATEGORY_CLASSES, EVENT_TYPE_ICONS, HOUR_HEIGHT, SNAP_MINUTES } from './ui/tokens';

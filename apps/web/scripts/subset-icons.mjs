@@ -116,6 +116,11 @@ const EXTRA_ICONS = [
   // glyphs below are named by `routine.icon`, never by a literal, and `info`
   // is the star matrix's hint line.
   'wb_twilight',
+  // The day list's own glyphs (M25): a meal and a bedtime are routines rather
+  // than calendar categories, so neither is in `EVENT_TYPE_ICONS` and neither
+  // is reachable by the scan.
+  'restaurant',
+  'bedtime',
   // Named through a table or a ternary rather than a literal `name="…"`, which
   // is all the scanner below can see: `today/ui/today-tabs.tsx`'s TAB_ICONS,
   // `tasks/ui/task-list.tsx`'s checked/unchecked pair, and

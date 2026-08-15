@@ -18,6 +18,7 @@ export const ICON_CODEPOINTS = {
   backpack: '\uf19c',
   bar_chart: '\ue26b',
   beach_access: '\ueb3e',
+  bedtime: '\uf159',
   brush: '\ue3ae',
   cake: '\ue7e9',
   calendar_month: '\uebcc',

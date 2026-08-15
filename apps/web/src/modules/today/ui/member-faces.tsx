@@ -15,11 +15,18 @@ export function MemberFaces({
   memberIds,
   size = 'sm',
   className,
+  label,
 }: {
   members: Member[];
   memberIds: readonly string[];
   size?: 'xs' | 'sm' | 'default';
   className?: string;
+  /**
+   * What the stack *says*, for a caller that dropped the names it used to
+   * print beside it — the day list's rows do exactly that. Without it the
+   * faces are decoration to a screen reader.
+   */
+  label?: string;
 }) {
   const ids = new Set(memberIds);
   const faces: StackedFace[] = members
@@ -31,7 +38,7 @@ export function MemberFaces({
       surfaceClass: MEMBER_COLOR_CLASSES[member.color].surface,
     }));
 
-  return <FaceStack faces={faces} size={size} className={className} />;
+  return <FaceStack faces={faces} size={size} className={className} label={label} />;
 }
 
 /**
