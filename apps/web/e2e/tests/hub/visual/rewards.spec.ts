@@ -179,7 +179,9 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
       await expect(page.getByTestId('reward-store')).toHaveAttribute('data-horizon', 'savings');
       // The featured goal: the nearest thing still out of reach (20, not 30).
       await expect(page.getByTestId('savings-goal')).toBeVisible();
-      await expect(page.getByTestId('goal-progress')).toHaveText('12 / 20');
+      // M26: `SavingsGoalCard` spells the progress out ("12 van 20 sterren")
+      // where the pre-redesign card wrote the bare fraction "12 / 20".
+      await expect(page.getByTestId('goal-progress')).toHaveText('12 van 20 sterren');
       await settlePage(page);
 
       await expect(page).toHaveScreenshot(`store-savings-${name}.png`, { fullPage: true });

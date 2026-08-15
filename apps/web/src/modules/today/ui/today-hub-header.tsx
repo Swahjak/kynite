@@ -65,10 +65,17 @@ export async function TodayHubHeader({
   const chevron =
     'flex size-9 items-center justify-center rounded-4xl text-ink-muted transition-colors duration-200 ease-brand hover:bg-surface-container hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring';
 
+  // The slot ("Goedemorgen"/"Goedemiddag"/"Goedenavond") is picked off the real
+  // wall clock on the server, so it is the one string on the board that changes
+  // without anything on the board having changed. `/today`'s own header labels
+  // its greeting for exactly that reason; the wall's needs the same handle, so
+  // a visual baseline can pin it rather than bake in the hour it was recorded.
+  const title = <span data-testid="today-greeting">{greeting}</span>;
+
   return (
     <PageHeader
       surface="hub"
-      title={greeting}
+      title={title}
       subtitle={formatDateTime(anchor, formattingLocale, { dateStyle: 'full', timeZone })}
       action={
         <div className="flex items-center gap-4">

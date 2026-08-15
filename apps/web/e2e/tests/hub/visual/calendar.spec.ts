@@ -25,8 +25,11 @@ import { pinLiveText, settlePage } from '@e2e/utils/settle';
  * once an event has ended, which would otherwise make the snapshot depend on
  * the hour the suite ran. A day that has not happened yet is never dimmed.
  *
- * The single genuinely live element left is the hub's wall clock, which is
- * masked — and nothing else is, so the snapshots still assert real layout.
+ * The single genuinely live element left is the greeting, whose morning /
+ * afternoon / evening slot comes off the real wall clock rather than `?date=`.
+ * Its *text* is pinned (`pinLiveText`) rather than the element masked, so the
+ * comparison stays deterministic without blanking anything — and nothing else
+ * is touched at all, so the snapshots still assert real layout.
  *
  * Update deliberately with `pnpm e2e:visual:update`.
  */
@@ -218,32 +221,22 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
         // the race with `settlePage()`'s screenshot under a loaded CPU).
         await expect(page.getByTestId('kiosk-shell')).toHaveAttribute('data-hub-theme', 'light');
 
-        // The wall clock is the one deliberately live element on the board, so
-        // its *text* is pinned rather than the element being masked.
+        // M26: the clock is no longer live *here* and must not be pinned here.
         //
-        // Masking looked equivalent and was not: Playwright sizes the mask to
-        // the element, the clock's digits are proportional rather than tabular
-        // in the subset display font, and so the mask rectangle was a different
-        // width at 11:11 than at 00:52 — a snapshot that failed by ~10 pixels
-        // depending on what time the suite ran. Pinning the text makes the
-        // comparison deterministic *and* actually compares the clock instead of
-        // blanking it.
+        // Every hub baseline browses `FUTURE_ANCHOR`, and `TodayHubHeader`
+        // renders `today-clock` as a plain server-formatted date ("10 mrt")
+        // rather than `TodayClock` whenever the board is not showing today —
+        // deterministic by construction. Pinning it anyway was actively
+        // harmful: `pinLiveText` rewrites the node before React hydrates, so
+        // React found "00:00" where the server had written "10 mrt" and logged
+        // a hydration mismatch on every hub spec, then discarded and re-created
+        // the subtree. That is where this file's residual flake lived.
         //
-        // M19 replaces F14b's "wait for a real-looking time, then overwrite
-        // once" with `pinLiveText`, which holds the pin against whatever
-        // rewrites the node. F14b's wait could not do that: the clock reads
-        // like a real time in the *server's* markup, so it matches long before
-        // React hydrates, and hydration then puts the live time back. See
-        // `utils/settle.ts` for the measurement.
-        //
-        // (M15's locale note survives the change: `en`'s `useFormatter()`
-        // renders 12-hour "10:49 AM" where nl renders "10:49". The pin does not
-        // care what shape it replaces.)
-        //
-        // M25: the wall no longer draws its own `hub-clock` — it renders the
-        // same `TodayHeader` `(app)/today` does, whose clock carries both the
-        // time and the date line under `today-clock`.
-        await pinLiveText(page, 'today-clock');
+        // What *is* live is the greeting: `greetingSlotFor(hourIn(data.now))`
+        // in `(hub)/hub/page.tsx` reads the real wall clock, not `?date=`, so
+        // an unpinned baseline records whichever half-day it was captured in
+        // and fails in the next one. Same durable pin `today board` above uses.
+        await pinLiveText(page, 'today-greeting', locale === 'nl' ? 'Goedemorgen' : 'Good morning');
 
         await settlePage(page);
 
@@ -272,8 +265,9 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
       await expect(page.getByTestId('hub-board')).toBeVisible();
       await expect(page.getByTestId('kiosk-shell')).toHaveAttribute('data-hub-theme', 'dark');
 
-      // Same live clock, same durable pin as the light variant above.
-      await pinLiveText(page, 'today-clock');
+      // Same live greeting, same durable pin as the light variant above (and
+      // the same reason the clock is *not* pinned — see there).
+      await pinLiveText(page, 'today-greeting', 'Goedemorgen');
 
       await settlePage(page);
 
@@ -318,7 +312,7 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
           list.scrollLeft = 0;
         });
 
-      await pinLiveText(page, 'today-clock');
+      await pinLiveText(page, 'today-greeting', 'Goedemorgen');
 
       await settlePage(page);
 
