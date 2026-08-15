@@ -20,15 +20,30 @@ import { HOLIDAY_BANNERS, ThemeBanner, VACATION_BANNERS } from './theme-banner';
  * banner-vorm, en die staat hieronder uit pakket-onderdelen en de
  * `--cat-*`-tokens opgebouwd.
  *
- * Twee dingen die dit specimen vastlegt:
+ * Drie dingen die dit specimen vastlegt:
  *
- * - **Het tegeltje is een emoji, geen icoon.** De icoonfont is een 64KB-subset
- *   van Material Symbols; daar zit geen mijter, geen pompoen en geen paasei in,
- *   en er is geen glyph die als Sinterklaas leest. Een emoji heeft geen asset
- *   nodig — dezelfde afweging die `modules/holidays/domain/nl.ts` maakt.
+ * - **Het tegeltje is het merkicoon in de kleuren van de dag.** "Het
+ *   icoon-tegeltje volgt de opbouw van het merkicoon (gelaagde kleurcirkels)":
+ *   een afgeronde vierkant die twee te grote cirkels afsnijdt, met een wit
+ *   silhouet erop. Geen emoji: elf emoji's naast elkaar zijn elf tekenstijlen
+ *   van elf makers, en dat leest als elf producten.
+ * - **Het silhouet is een vorm zodra de font geen glyph heeft.** De icoonfont
+ *   is een 64KB-subset; daar zit geen mijter, geen pompoen, geen paasei en
+ *   geen sneeuwvlok in. Het ontwerp tekent die zelf al in CSS (driehoeken,
+ *   ellipsen, een `clip-path`-kroon), dus doen wij dat ook — een glyph
+ *   toevoegen zou betekenen dat de font in `apps/web` opnieuw gebouwd moet
+ *   worden voor iets wat 20 bytes CSS ook doet.
  * - **De accentkleur komt uit de categorie-palet, niet uit een nieuw palet.**
  *   Acht tinten waren er al; een feestdag is een sorteersignaal net als een
  *   agendacategorie, en een negende kleur zou alleen maar een tweede taal zijn.
+ *   De twee diepere stappen (`--cat-*-deep`, `--cat-*-strong`) zijn dezelfde
+ *   acht tinten, donkerder — geen negende taal maar twee extra woorden.
+ *
+ * Rechts op elke kaart drijft, valt of vliegt een handvol vormen mee met de
+ * dag (`FloatingPiece`). Die laag is `aria-hidden` en vangt geen tik: de
+ * bovenregel noemt de dag al in woorden, en decoratie mag geen tik afpakken
+ * van de routine eronder. Wie minder beweging vraagt, krijgt een stille kaart —
+ * de vier keyframes vallen onder de globale `prefers-reduced-motion`-reset.
  */
 const meta: Meta = {
   title: 'Pages/Feestdagen & vakanties',

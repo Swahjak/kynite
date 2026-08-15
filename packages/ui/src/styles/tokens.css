@@ -79,6 +79,12 @@
      token is the same hue darkened until it clears AA — 6.00:1 on #ffffff,
      5.70:1 on the cream background. */
   --gold-ink: #9a4f14;
+  /* The far end of the reward gradient: the savings-goal bar in the Beloningen
+     sheet is `linear-gradient(90deg,#ef8d5d,#fea619)`, not a flat fill — a bar
+     a child watches fill for weeks is the one place the palette allows itself
+     to warm up as it goes. Decorative only; never used as text or as a ground
+     under text. */
+  --gold-bright: #fea619;
 
   /* -- Surfaces — colors.md § "Surface palette" -------------------------- */
   --background: #fbf9f4; /* Surface — app background (cream) */
@@ -171,6 +177,45 @@
   --cat-teal-border: oklch(85% 0.05 200);
   --cat-teal-fg: oklch(32% 0.08 200);
   --cat-teal-solid: oklch(58% 0.14 200);
+
+  /* -- Category palette, deep steps — the theme banner's brand-mark tile ---
+     The design system's "Feestdagen & vakanties" sheet builds every holiday
+     tile out of the brand mark's construction (layered colour circles clipped
+     by a rounded square) and its eyebrow out of a filled pill. Both need
+     saturated steps darker than `-solid`, and both appear at exactly two
+     lightnesses across all eleven themes:
+
+       deep    oklch(42% 0.14 H)     the tile's ground and its back circle
+       strong  oklch(34% 0.13 H)     the eyebrow pill, white text on it
+
+     Deliberately *not* re-tuned for dark mode below. `-surface`/`-fg` flip
+     because they are a tint and its ink; these two are the ground under white
+     text, so lightening them in dark mode would be the one change that breaks
+     their contrast. They read on both themes as-is. */
+  /* The one *fixed* dark ground: `#191c1d`, the On Surface value the design
+     system also uses as a surface ("Motion/Confetti pop — big celebration"
+     sits on it, and so does the Halloween banner). Unlike `--ink`/`--background`
+     it does not flip with the theme, because the surfaces that use it are dark
+     on purpose — a night-time holiday and a firework — rather than dark because
+     the room is. White reads 16.1:1 on it either way. */
+  --surface-night: #191c1d;
+
+  --cat-blue-deep: oklch(42% 0.14 245);
+  --cat-blue-strong: oklch(34% 0.13 245);
+  --cat-purple-deep: oklch(42% 0.14 290);
+  --cat-purple-strong: oklch(34% 0.13 290);
+  --cat-orange-deep: oklch(42% 0.14 65);
+  --cat-orange-strong: oklch(34% 0.13 65);
+  --cat-green-deep: oklch(42% 0.14 155);
+  --cat-green-strong: oklch(34% 0.13 155);
+  --cat-red-deep: oklch(42% 0.14 20);
+  --cat-red-strong: oklch(34% 0.13 20);
+  --cat-yellow-deep: oklch(42% 0.14 110);
+  --cat-yellow-strong: oklch(34% 0.13 110);
+  --cat-pink-deep: oklch(42% 0.14 335);
+  --cat-pink-strong: oklch(34% 0.13 335);
+  --cat-teal-deep: oklch(42% 0.14 200);
+  --cat-teal-strong: oklch(34% 0.13 200);
 
   /* -- shadcn / Base UI semantic aliases ---------------------------------- */
   --foreground: var(--ink);
@@ -452,6 +497,18 @@
   --duration-confetti-big: 1.6s;
   --duration-shimmer: 2.2s;
 
+  /* The theme banner's ambient decoration ("Vandaag met thema's"): a handful
+     of small shapes drifting, falling, flying or turning at the right edge of
+     the card. The design sheet gives every individual piece its own duration
+     between 3.3s and 7s and its own delay, so these are the *defaults* a piece
+     inherits when it does not stagger itself — not a fixed rate. Slow on
+     purpose: the banner is ambient, and anything that reads as "look here"
+     would be competing with the routine underneath it. */
+  --duration-drift: 3.6s;
+  --duration-fall: 5s;
+  --duration-fly: 6s;
+  --duration-spin-slow: 6s;
+
   /* Tap targets. motion.md § "Tap-target sizing rule": minimum 48px for any
      interactive target, 64px on tablet for primary/high-frequency actions,
      with the 56px FAB as the intermediate step. */
@@ -491,6 +548,7 @@
   --color-gold: var(--gold);
   --color-gold-hover: var(--gold-hover);
   --color-gold-ink: var(--gold-ink);
+  --color-gold-bright: var(--gold-bright);
   --color-gold-foreground: var(--gold-foreground);
 
   --color-surface: var(--surface);
@@ -549,6 +607,25 @@
   --color-cat-teal-border: var(--cat-teal-border);
   --color-cat-teal-fg: var(--cat-teal-fg);
   --color-cat-teal-solid: var(--cat-teal-solid);
+
+  --color-surface-night: var(--surface-night);
+
+  --color-cat-blue-deep: var(--cat-blue-deep);
+  --color-cat-blue-strong: var(--cat-blue-strong);
+  --color-cat-purple-deep: var(--cat-purple-deep);
+  --color-cat-purple-strong: var(--cat-purple-strong);
+  --color-cat-orange-deep: var(--cat-orange-deep);
+  --color-cat-orange-strong: var(--cat-orange-strong);
+  --color-cat-green-deep: var(--cat-green-deep);
+  --color-cat-green-strong: var(--cat-green-strong);
+  --color-cat-red-deep: var(--cat-red-deep);
+  --color-cat-red-strong: var(--cat-red-strong);
+  --color-cat-yellow-deep: var(--cat-yellow-deep);
+  --color-cat-yellow-strong: var(--cat-yellow-strong);
+  --color-cat-pink-deep: var(--cat-pink-deep);
+  --color-cat-pink-strong: var(--cat-pink-strong);
+  --color-cat-teal-deep: var(--cat-teal-deep);
+  --color-cat-teal-strong: var(--cat-teal-strong);
 
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);

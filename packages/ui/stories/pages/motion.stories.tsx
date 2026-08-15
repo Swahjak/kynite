@@ -7,6 +7,7 @@ import {
   CELEBRATION_LIMITS,
   CELEBRATION_PRESETS,
 } from '../../src/components/celebration-presets';
+import { ConfettiBurst } from '../../src/components/confetti-burst';
 import { Icon } from '../../src/components/icon';
 import { IconMedallion } from '../../src/components/icon-medallion';
 import { ProgressBar } from '../../src/components/progress-bar';
@@ -34,11 +35,21 @@ import { Section, Specimen, SpecimenGrid } from '../specimen';
  * The palette is the brand's, deliberately excluding red: red particles read as
  * an alert, and nothing in this product marks anything.
  *
- * The confetti *burst* itself is not in the package. `fireConfettiBurst` lives
- * in the app (`components/celebration/confetti-burst.ts`) because it draws on a
- * viewport canvas through a dynamically imported `canvas-confetti` — the
- * presets, the star pop and the CSS-driven specimens below are the parts that
- * are genuinely design system.
+ * The burst is told twice, on purpose. `fireConfettiBurst` lives in the app
+ * (`components/celebration/confetti-burst.ts`) and draws on a *viewport* canvas
+ * through a dynamically imported `canvas-confetti`: that is the burst a tap
+ * fires, over the whole screen, and the package does not depend on it so no
+ * consumer pays for a canvas library. `ConfettiBurst` is the same event in CSS,
+ * for the places a viewport canvas cannot go — a 140px specimen tile, a static
+ * Storybook build, a card that wants confetti behind its own heading. Both read
+ * their geometry and their palette from `celebration-presets.ts`, so there is
+ * one design and two renderers rather than two designs.
+ *
+ * The specimens below **loop**, and the product never does. A motion sheet that
+ * fires once is a motion sheet nobody ever sees fire; a checklist with looping
+ * confetti over it is wallpaper. `kynite-anim-pop-loop` and `<ConfettiBurst
+ * loop>` are the documentation forms, and the single-fire demo under them is
+ * the real thing.
  */
 const meta: Meta = {
   title: 'Pages/Motion & celebration',
@@ -71,11 +82,66 @@ function CheckboxPop() {
   );
 }
 
+/** The single fire, as the product does it: one burst per tap, nothing looping. */
+function ConfettiOnTap() {
+  const [fired, setFired] = useState(0);
+  return (
+    <button
+      type="button"
+      onClick={() => setFired((count) => count + 1)}
+      className="relative flex h-[140px] w-[220px] items-center justify-center overflow-hidden rounded-[20px] bg-card shadow-sm"
+    >
+      {fired > 0 ? <ConfettiBurst key={fired} intensity="big" /> : null}
+      <span className="relative flex items-center gap-2 rounded-full bg-brand px-4 py-2.5 font-display text-body-sm font-bold text-brand-foreground">
+        <Icon key={fired} name="celebration" filled className="kynite-anim-pop-big" size="sm" />
+        Claimed!
+      </span>
+    </button>
+  );
+}
+
 export const Specimens: Story = {
   render: () => (
     <div className="flex flex-col gap-12">
       <Section title="Motion — the specimens">
         <SpecimenGrid>
+          <Specimen
+            name="Motion/confetti burst"
+            note="Five pieces, ~60px of travel, staggered 0.15s apart. Looping here; one fire in the product."
+          >
+            <div className="relative flex h-[140px] w-[220px] items-center justify-center overflow-hidden rounded-[20px] bg-card shadow-sm">
+              <ConfettiBurst loop />
+              <Icon
+                name="star"
+                filled
+                size="2xl"
+                className="kynite-anim-pop-loop relative text-gold"
+              />
+            </div>
+          </Specimen>
+
+          <Specimen
+            name="Motion/confetti pop — big celebration"
+            note="Eight pieces, twice the travel, gold in the mix, and the bigger icon pop. Reward approvals and streak milestones only."
+          >
+            <div className="relative flex h-[140px] w-[220px] items-center justify-center overflow-hidden rounded-[20px] bg-surface-night shadow-sm">
+              <ConfettiBurst loop intensity="big" />
+              <Icon
+                name="celebration"
+                filled
+                size="2xl"
+                className="kynite-anim-pop-big-loop relative text-gold"
+              />
+            </div>
+          </Specimen>
+
+          <Specimen
+            name="Motion/confetti — the single fire"
+            note="What a tap actually does: one burst, then nothing. Tap it again to fire again."
+          >
+            <ConfettiOnTap />
+          </Specimen>
+
           <Specimen
             name="Motion/star pop"
             note="Scales up once and settles. A single non-repeating transform cannot strobe."
@@ -106,19 +172,6 @@ export const Specimens: Story = {
           >
             <Button size="hub">48px</Button>
             <Button size="tablet">64px</Button>
-          </Specimen>
-
-          <Specimen
-            name="Motion/big celebration"
-            note="Reserved for reward approvals. Bigger burst, bigger icon pop — same single fire."
-          >
-            <IconMedallion
-              icon="celebration"
-              tint="brand-container"
-              size="3xl"
-              filled
-              className="kynite-anim-pop"
-            />
           </Specimen>
         </SpecimenGrid>
       </Section>

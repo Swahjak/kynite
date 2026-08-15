@@ -34,7 +34,7 @@ export function ProgressBar({
   value: number;
   max?: number;
   size?: 'xs' | 'sm' | 'md' | 'lg';
-  tone?: 'brand' | 'gold' | 'success' | 'inverse';
+  tone?: 'brand' | 'gold' | 'gold-gradient' | 'success' | 'inverse';
   /**
    * Overrides the tone's fill colour with an arbitrary class.
    *
@@ -67,6 +67,11 @@ export function ProgressBar({
   const fillTone = {
     brand: 'bg-primary',
     gold: 'bg-gold',
+    /* The savings-goal bar, and only that: the Beloningen sheet fills it with
+       `linear-gradient(90deg,#ef8d5d,#fea619)`. The warm end arrives at the
+       right, so the bar reads as getting *closer* rather than merely longer —
+       the one bar in the product a child watches for weeks. */
+    'gold-gradient': 'bg-linear-to-r from-gold to-gold-bright',
     success: 'bg-success',
     /** On a filled card, where the track is the card's own tinted ground. */
     inverse: 'bg-card',

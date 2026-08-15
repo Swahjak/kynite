@@ -245,6 +245,122 @@
   animation: kynite-shimmer var(--duration-shimmer) linear infinite;
 }
 
+/* ---------------------------------------------------------------------------
+ * Looping variants — the *specimen* forms of the three pops.
+ *
+ * The design system's motion sheet renders each pop as a tile that repeats
+ * forever, because a specimen that fires once is a specimen nobody ever sees
+ * fire. Product UI must not loop (see `kynite-anim-pop` above), so the loop is
+ * its own class rather than a flag on the original: a component that reaches
+ * for `-loop` is saying "this is a demo", which is exactly the thing worth
+ * being explicit about.
+ * ------------------------------------------------------------------------- */
+
+/** Looping star/icon pop — motion specimens only. */
+@utility kynite-anim-pop-loop {
+  animation: kynite-pop var(--duration-pop) ease-in-out infinite;
+}
+
+/** Looping check-mark pop — motion specimens only. */
+@utility kynite-anim-check-loop {
+  animation: kynite-check-pop var(--duration-pop) ease-in-out infinite;
+}
+
+/** Looping big-celebration pop — motion specimens only. */
+@utility kynite-anim-pop-big-loop {
+  animation: kynite-pop-big var(--duration-pop-big) ease-in-out infinite;
+}
+
+/* ---------------------------------------------------------------------------
+ * Ambient theme motion — the theme banner's decoration.
+ *
+ * Four keyframes, copied verbatim from "Vandaag met thema's": a balloon or a
+ * gift *drifts*, a leaf or a snowflake *falls* past the card, a bat or a
+ * pumpkin *flies* a slow figure-of-eight, and a sun *turns*. Each reads `--rot`
+ * so a piece can sit at its own angle without a wrapper element, and each
+ * leaves `animation-duration`/`animation-delay` unset so every piece staggers
+ * itself — four shapes on identical timing read as a machine, not weather.
+ *
+ * All four are ambient loops rather than one-shot feedback, so unlike the pops
+ * they are subject to the global `prefers-reduced-motion` reset at the bottom
+ * of this file: a household that asked for less motion gets a still banner,
+ * and the banner still says what today is.
+ * ------------------------------------------------------------------------- */
+
+@keyframes kynite-fall {
+  0% {
+    transform: translateY(-16px) rotate(var(--rot, 0deg));
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(130px) rotate(var(--rot, 0deg));
+    opacity: 0;
+  }
+}
+
+@keyframes kynite-fly {
+  0% {
+    transform: translate(0, 0) rotate(var(--rot, 0deg));
+  }
+  25% {
+    transform: translate(16px, -12px) rotate(calc(var(--rot, 0deg) + 10deg));
+  }
+  50% {
+    transform: translate(-6px, -20px) rotate(var(--rot, 0deg));
+  }
+  75% {
+    transform: translate(-18px, -4px) rotate(calc(var(--rot, 0deg) - 10deg));
+  }
+  100% {
+    transform: translate(0, 0) rotate(var(--rot, 0deg));
+  }
+}
+
+@keyframes kynite-drift {
+  0%,
+  100% {
+    transform: translateY(0) rotate(var(--rot, 0deg));
+  }
+  50% {
+    transform: translateY(-8px) rotate(var(--rot, 0deg));
+  }
+}
+
+@keyframes kynite-spin-slow {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/** Falls past the card and fades — leaves, snow, stars. */
+@utility kynite-fall {
+  animation: kynite-fall var(--duration-fall) linear infinite;
+}
+
+/** Slow figure-of-eight — bats, pumpkins. */
+@utility kynite-fly {
+  animation: kynite-fly var(--duration-fly) ease-in-out infinite;
+}
+
+/** Bobs 8px and back — balloons, gifts, eggs, flowers. */
+@utility kynite-drift {
+  animation: kynite-drift var(--duration-drift) ease-in-out infinite;
+}
+
+/** One slow turn — the summer sun. */
+@utility kynite-spin-slow {
+  animation: kynite-spin-slow var(--duration-spin-slow) linear infinite;
+}
+
 @keyframes timer-breath {
   0%,
   100% {

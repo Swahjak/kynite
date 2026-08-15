@@ -157,12 +157,21 @@ export {
   CELEBRATION_INTENSITIES,
   CELEBRATION_LIMITS,
   CELEBRATION_PRESETS,
+  CONFETTI_BURST_PIECES,
+  CONFETTI_BURST_PIECES_BIG,
   prefersReducedMotion,
   type CelebrationIntensity,
   type CelebrationPreset,
+  type ConfettiPieceSpec,
 } from './components/celebration-presets';
+export { ConfettiBurst, type ConfettiBurstProps } from './components/confetti-burst';
 export { EmptyState, emptyStateVariants, type EmptyStateProps } from './components/empty-state';
 export { FaceStack, type StackedFace } from './components/face-stack';
+export {
+  FloatingPiece,
+  type FloatingMotion,
+  type FloatingPieceProps,
+} from './components/floating-piece';
 export {
   IconMedallion,
   medallionVariants,
@@ -191,3 +200,8 @@ export { SectionHeading } from './components/section-heading';
 export { StarCount, StarMedallion } from './components/star-count';
 export { StarPop, type StarPopProps } from './components/star-pop';
 export { StepRow, type StepRowProps } from './components/step-row';
+export {
+  ThemeBanner,
+  type ThemeBannerProps,
+  type ThemeBannerTile,
+} from './components/theme-banner';

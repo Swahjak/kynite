@@ -107,7 +107,7 @@ export function SavingsGoalCard({
               value={goal.progressStars}
               max={goal.costStars}
               label={goal.title}
-              tone="gold"
+              tone="gold-gradient"
               size="lg"
               className="bg-card/25"
             />

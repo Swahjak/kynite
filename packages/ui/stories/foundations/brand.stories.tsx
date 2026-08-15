@@ -21,35 +21,36 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+/**
+ * The three colours are the *tokens* the sheet's literals name —
+ * `oklch(58% 0.14 245)` is `--cat-blue-solid`, `oklch(58% 0.14 335)` is
+ * `--cat-pink-solid`, `#5d5fef` is `--brand`. Spelled as classes rather than as
+ * inline `oklch()` strings so the mark cannot drift away from the palette that
+ * feeds it, and so the theme banner's tile (which is this construction, in the
+ * day's colours) is demonstrably the same object.
+ */
 function AppIcon({ size = 120 }: { size?: number }) {
   return (
     <div
-      className="relative overflow-hidden shadow-2xl"
-      style={{
-        width: size,
-        height: size,
-        borderRadius: size * 0.233,
-        background: 'oklch(58% 0.14 245)',
-      }}
+      className="relative overflow-hidden bg-cat-blue-solid shadow-2xl"
+      style={{ width: size, height: size, borderRadius: size * 0.233 }}
     >
       <span
-        className="absolute rounded-full"
+        className="absolute rounded-full bg-cat-pink-solid/85"
         style={{
           width: size * 0.933,
           height: size * 0.933,
           left: -size * 0.317,
           top: -size * 0.25,
-          background: 'oklch(58% 0.14 335 / 0.85)',
         }}
       />
       <span
-        className="absolute rounded-full"
+        className="absolute rounded-full bg-brand/85"
         style={{
           width: size * 0.933,
           height: size * 0.933,
           right: -size * 0.342,
           bottom: -size * 0.317,
-          background: 'rgb(93 95 239 / 0.85)',
         }}
       />
       <span className="absolute inset-0 grid place-items-center">
@@ -96,7 +97,7 @@ export const Lockups: Story = {
           </div>
         </Specimen>
         <Specimen name="Lockup/Horizontal — dark">
-          <div className="flex items-center gap-3 rounded-xl bg-[#191c1d] px-6.5 py-4.5">
+          <div className="flex items-center gap-3 rounded-xl bg-surface-night px-6.5 py-4.5">
             <AppIcon size={36} />
             <span className="font-display text-[22px] font-bold text-white">Kynite</span>
           </div>
