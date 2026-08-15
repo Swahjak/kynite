@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 
-import { cn, type IconName } from '@kynite/ui';
+import { cn } from '../lib/utils';
+import { type IconName } from './icon-codepoints';
 import { IconMedallion } from './icon-medallion';
 
 /**

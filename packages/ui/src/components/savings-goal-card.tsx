@@ -1,9 +1,9 @@
 'use client';
 
-import { Card, Icon } from '@kynite/ui';
-import { ProgressBar } from '@/components/kynite';
-import type { Goal } from '../domain/economy';
-import { rewardIconOf } from './tokens';
+import { Card } from './card';
+import { Icon } from './icon';
+import type { IconName } from './icon-codepoints';
+import { ProgressBar } from './progress-bar';
 
 /**
  * The featured savings goal — the `savings` horizon's whole reason to exist
@@ -36,14 +36,31 @@ import { rewardIconOf } from './tokens';
  * primitive for one caller. It is named by its own heading via
  * `aria-labelledby`, because an unnamed `<section>` is not a landmark at all.
  */
+/**
+ * The read subset of the app's `Goal` (`modules/rewards/domain/economy.ts`),
+ * restated so the package does not import the rewards slice — a `Goal` is
+ * structurally assignable to it.
+ */
+export type SavingsGoal = {
+  rewardId: string;
+  title: string;
+  costStars: number;
+  progressStars: number;
+  /** 0..1 — the bar's width, and the `data-percent` the snapshots read. */
+  ratio: number;
+};
+
 export function SavingsGoalCard({
   goal,
   icon,
   copy,
 }: {
-  goal: Goal;
-  /** The goal reward's own icon name, as stored. */
-  icon: string | null;
+  goal: SavingsGoal;
+  /**
+   * The goal reward's icon, already resolved to a real glyph. The app narrows
+   * a stored string through `rewardIconOf`; the package only draws it.
+   */
+  icon: IconName;
   copy: { eyebrow: string; remaining: string; progress: string };
 }) {
   const percent = Math.round(goal.ratio * 100);
@@ -67,7 +84,7 @@ export function SavingsGoalCard({
           aria-hidden
           className="z-10 flex size-32 shrink-0 items-center justify-center rounded-full bg-card/30 backdrop-blur-md md:size-40"
         >
-          <Icon name={rewardIconOf(icon)} size="2xl" filled className="scale-[2] text-gold" />
+          <Icon name={icon} size="2xl" filled className="scale-[2] text-gold" />
         </span>
 
         <div className="z-10 flex w-full flex-1 flex-col gap-4">

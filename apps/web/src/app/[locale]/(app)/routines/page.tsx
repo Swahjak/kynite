@@ -1,6 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import { RoutineDialog, RoutineList, loadRoutinesPage } from '@/modules/routines';
-import { PageHeader } from '@/components/kynite';
+import { PageHeader } from '@kynite/ui';
 import { redirect } from '@/i18n/navigation';
 
 /** Session-dependent: never prerendered, so `next build` needs no database. */

@@ -3,8 +3,7 @@
 import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { useDateTimeFormat } from '@/components/formatting';
-import { Card, cn } from '@kynite/ui';
-import { CategoryDot, EmptyState, MemberFace } from '@/components/kynite';
+import { Card, CategoryDot, cn, EmptyState, MemberFace } from '@kynite/ui';
 // Type-only, and deliberately so: this is a client component, and
 // `@/modules/family` re-exports `queries.ts`, which is `server-only` and pulls
 // the Postgres client. A value import here would put the database driver (and

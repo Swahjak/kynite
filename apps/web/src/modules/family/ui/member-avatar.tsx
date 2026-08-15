@@ -1,4 +1,4 @@
-import { MemberFace } from '@/components/kynite';
+import { MemberFace } from '@kynite/ui';
 import type { MemberColor } from '../schema';
 import { MEMBER_COLOR_CLASSES } from './tokens';
 

@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
-import { PillTabs, PillTabsPanel, type PillTabItem } from '@/components/kynite';
+import { type PillTabItem, PillTabs, PillTabsPanel } from '@kynite/ui';
 import type { IconName } from '@kynite/ui';
 import { TODAY_TABS, useTodayTab, type TodayTab } from './use-today-tab';
 

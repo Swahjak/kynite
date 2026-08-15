@@ -48,6 +48,30 @@ const CHILD_FACING_ROOTS = [
 ];
 
 /**
+ * Child-facing composites that live in `@kynite/ui` since wave B.
+ *
+ * Named one by one rather than by scanning `packages/ui/src/components` whole,
+ * because that directory also holds the generic primitives — `Dialog` and
+ * `Sheet` render an `<Icon name="close">`, which is a dismiss affordance on an
+ * overlay and not a verdict on a child. The rule this file enforces is about
+ * *surfaces a child reads*, so the list is the surfaces, not the folder.
+ *
+ * The paths are relative to `apps/web` (this suite's root) so a finding still
+ * prints one comparable path whichever side of the workspace it came from.
+ */
+const CHILD_FACING_PACKAGE_FILES = [
+  '../../packages/ui/src/components/routine-card.tsx',
+  '../../packages/ui/src/components/step-row.tsx',
+  '../../packages/ui/src/components/reward-card.tsx',
+  '../../packages/ui/src/components/savings-goal-card.tsx',
+  '../../packages/ui/src/components/star-pop.tsx',
+  '../../packages/ui/src/components/kid-stat-card.tsx',
+  '../../packages/ui/src/components/star-count.tsx',
+  '../../packages/ui/src/components/progress-bar.tsx',
+  '../../packages/ui/src/components/celebration-presets.ts',
+];
+
+/**
  * Parent-only files inside those trees. Every entry is a surface that never
  * renders on the hub; the test below proves the list contains nothing else.
  */
@@ -135,8 +159,12 @@ function collect(dir: string, out: string[] = []): string[] {
 }
 
 function childFacingFiles(): { path: string; text: string }[] {
-  return CHILD_FACING_ROOTS.flatMap((tree) => collect(join(root, tree)))
-    .map((path) => relative(root, path))
+  return [
+    ...CHILD_FACING_ROOTS.flatMap((tree) => collect(join(root, tree))).map((path) =>
+      relative(root, path)
+    ),
+    ...CHILD_FACING_PACKAGE_FILES,
+  ]
     .filter((path) => !PARENT_ONLY.includes(path))
     .map((path) => ({ path, text: readFileSync(join(root, path), 'utf8') }));
 }
@@ -171,6 +199,12 @@ function resolveModuleFile(fromFile: string, specifier: string): string | null {
     base = resolve(dirname(fromFile), specifier);
   } else if (specifier.startsWith('@/')) {
     base = resolve(root, 'src', specifier.slice(2));
+  } else if (specifier === '@kynite/ui') {
+    // The design system is a workspace package, not a node_modules dependency:
+    // its source is right there and it now holds child-facing composites, so
+    // the graph has to cross into it or the reachability walk stops at the
+    // package boundary and silently answers "unreachable".
+    base = resolve(root, '../../packages/ui/src/index.ts');
   } else {
     return null; // external package — not part of the internal import graph
   }
@@ -292,12 +326,20 @@ describe('no negative marking on any child-facing surface', () => {
 
   it('scans a non-empty set of files (a scan of nothing always passes)', () => {
     expect(files.length).toBeGreaterThanOrEqual(6);
-    expect(files.map((file) => file.path)).toContain('src/modules/routines/ui/step-row.tsx');
-    expect(files.map((file) => file.path)).toContain('src/modules/routines/ui/routine-card.tsx');
+    // Wave B moved the two routine composites into `@kynite/ui`; they are in
+    // scope by their package path now, and the board still by its app path.
+    expect(files.map((file) => file.path)).toContain(
+      '../../packages/ui/src/components/step-row.tsx'
+    );
+    expect(files.map((file) => file.path)).toContain(
+      '../../packages/ui/src/components/routine-card.tsx'
+    );
     expect(files.map((file) => file.path)).toContain('src/modules/routines/ui/routine-board.tsx');
     // M08's child-facing surfaces. The store is where a "you cannot afford
     // this" mark would be most tempting, so it must be in scope by name.
-    expect(files.map((file) => file.path)).toContain('src/modules/rewards/ui/reward-card.tsx');
+    expect(files.map((file) => file.path)).toContain(
+      '../../packages/ui/src/components/reward-card.tsx'
+    );
     expect(files.map((file) => file.path)).toContain('src/modules/rewards/ui/reward-store.tsx');
     expect(files.map((file) => file.path)).toContain('src/modules/rewards/ui/star-chart.tsx');
     // M09's child-facing surfaces. A timer that has run out is where an alarm

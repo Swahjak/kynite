@@ -3,8 +3,7 @@
 import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { useDateTimeFormat } from '@/components/formatting';
-import { cn, Icon } from '@kynite/ui';
-import { CategoryDot, EmptyState, MemberFace } from '@/components/kynite';
+import { CategoryDot, cn, EmptyState, Icon, MemberFace } from '@kynite/ui';
 // Type-only, deliberately: `@/modules/family` re-exports `server-only` query
 // modules, and a value import would drag the Postgres client into this client
 // bundle — see the same note in `person-columns.tsx`.

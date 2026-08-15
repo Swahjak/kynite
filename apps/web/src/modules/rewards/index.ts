@@ -100,11 +100,10 @@ export {
 export { ApprovalQueue } from './ui/approval-queue';
 export { AwardStarsDialog } from './ui/award-stars-dialog';
 export { DeleteRewardButton } from './ui/delete-reward-button';
-export { RewardCard, type RewardCardCopy, type RewardCardProps } from './ui/reward-card';
+export { RewardCard, SavingsGoalCard, type RewardCardCopy, type RewardCardProps } from '@kynite/ui';
 export { RewardDialog } from './ui/reward-dialog';
 export { RewardList } from './ui/reward-list';
 export { RewardStore } from './ui/reward-store';
-export { SavingsGoalCard } from './ui/savings-goal-card';
 export { SeedPresetsButton } from './ui/seed-presets-button';
 export { StarChart } from './ui/star-chart';
 export {

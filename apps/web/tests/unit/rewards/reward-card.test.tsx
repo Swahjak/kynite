@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import { RewardCard } from '@/modules/rewards/ui/reward-card';
+import { RewardCard } from '@kynite/ui';
 import type { StoreTile } from '@/modules/rewards/page-data';
 
 /**

@@ -1,9 +1,9 @@
 'use client';
 
-import { cn, Icon } from '@kynite/ui';
-import { StarCount } from '@/components/kynite';
-import type { StoreTile } from '../page-data';
-import { CATEGORY_TILE } from './tokens';
+import { cn } from '../lib/utils';
+import { Icon } from './icon';
+import type { IconName } from './icon-codepoints';
+import { StarCount } from './star-count';
 
 /**
  * One reward on the child's shelf, in one of its three readings.
@@ -40,13 +40,37 @@ export type RewardCardCopy = {
   actionLabel: string;
 };
 
+/**
+ * The read subset of the app's `StoreTile` (`modules/rewards/page-data.ts`),
+ * restated so the package does not import the rewards slice. A `StoreTile` is
+ * structurally assignable to it, which is why no call site changed.
+ *
+ * `category` is deliberately *not* here. The category → hue mapping is a
+ * product decision (`modules/rewards/ui/tokens.ts` § `CATEGORY_TILE`), and the
+ * design system's job is only to draw a tinted disc, so the caller hands over
+ * the class pair it wants and the component never learns what a "treat" is.
+ */
+export type RewardTile = {
+  id: string;
+  title: string;
+  icon: IconName;
+  costStars: number;
+  state: 'affordable' | 'outOfReach' | 'requested';
+};
+
 export type RewardCardProps = {
-  tile: StoreTile;
+  tile: RewardTile;
+  /**
+   * The affordable tile's disc colour, e.g.
+   * `CATEGORY_TILE[tile.category]` — `bg-cat-blue-surface text-cat-blue-fg`.
+   * Ignored in the two settled states, which use the neutral container.
+   */
+  tileClass?: string;
   copy: RewardCardCopy;
   onRequest?: (origin: { x: number; y: number }) => void;
 };
 
-export function RewardCard({ tile, copy, onRequest }: RewardCardProps) {
+export function RewardCard({ tile, tileClass, copy, onRequest }: RewardCardProps) {
   const affordable = tile.state === 'affordable';
   const requested = tile.state === 'requested';
 
@@ -56,7 +80,7 @@ export function RewardCard({ tile, copy, onRequest }: RewardCardProps) {
         aria-hidden
         className={cn(
           'flex size-20 shrink-0 items-center justify-center rounded-full transition-transform duration-300 ease-brand group-hover/tile:scale-110',
-          affordable ? CATEGORY_TILE[tile.category] : 'bg-surface-container-high text-ink-secondary'
+          affordable ? tileClass : 'bg-surface-container-high text-ink-secondary'
         )}
       >
         <Icon name={tile.icon} size="2xl" filled={affordable} />

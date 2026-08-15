@@ -1,8 +1,10 @@
 'use client';
 
-import { Badge, cn, Icon } from '@kynite/ui';
-import { IconMedallion } from '@/components/kynite';
-import type { BoardRoutine } from '../page-data';
+import { cn } from '../lib/utils';
+import { Badge } from './badge';
+import { Icon } from './icon';
+import type { IconName } from './icon-codepoints';
+import { IconMedallion } from './icon-medallion';
 import { StepRow } from './step-row';
 
 /**
@@ -22,8 +24,38 @@ import { StepRow } from './step-row';
  * and the visual snapshot read; the classes are what a family sees.
  */
 
+/**
+ * The shape the card draws, stated structurally rather than imported.
+ *
+ * The app's `BoardRoutine` (`modules/routines/page-data.ts`) carries a good
+ * deal more — the occurrence date, the section, the idempotency keys, the
+ * counts — none of which this component reads. Restating the read subset here
+ * is what lets the package stay ignorant of the routines slice while a
+ * `BoardRoutine` still passes straight in: it is structurally assignable, so
+ * no call site changed when this moved.
+ */
+export type RoutineCardStep = {
+  id: string;
+  title: string;
+  done: boolean;
+  timerSeconds: number | null;
+  /** Selects the praise headline. Resolved to a sentence by `copy.praise`. */
+  praiseKey: string;
+};
+
+export type RoutineCardRoutine = {
+  id: string;
+  title: string;
+  icon: IconName;
+  /** `upcoming` and `grace` are the two dimmed readings; see above. */
+  state: 'upcoming' | 'due' | 'grace' | 'none';
+  complete: boolean;
+  starsPerCompletion: number;
+  steps: readonly RoutineCardStep[];
+};
+
 export type RoutineCardProps = {
-  routine: BoardRoutine;
+  routine: RoutineCardRoutine;
   expanded: boolean;
   /** Translated copy, resolved by the board so this stays presentational. */
   copy: {

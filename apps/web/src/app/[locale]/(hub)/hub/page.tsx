@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { EmptyState } from '@/components/kynite';
+import { EmptyState } from '@kynite/ui';
 import { ChildLauncher, type HubChild } from '@/components/hub';
 import {
   HubBoard,

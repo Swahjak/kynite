@@ -1,8 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Badge } from '@kynite/ui';
-import { EmptyState, MediaRow } from '@/components/kynite';
+import { Badge, EmptyState, MediaRow } from '@kynite/ui';
 import { GraduateRoutineButton } from './graduate-routine-button';
 
 /**

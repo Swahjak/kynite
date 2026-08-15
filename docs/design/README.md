@@ -71,27 +71,56 @@ except for the handful still in `apps/web/src/components/ui/` because they read
 | `Icon` (Material Symbols, `filled` = `FILL 1`) | `ui/icon.tsx` | `typography.md` § Material Symbols |
 | `Dialog`, `Sheet`, `Select`, `Tabs`, `Toast` | `ui/*.tsx` | — |
 
-**Composites** — `src/components/kynite/*`, barrel at `@/components/kynite`:
+**Composites** — `packages/ui/src/components/*`, same barrel as the primitives
+(`import { IconMedallion } from '@kynite/ui'`). Wave B moved them out of
+`apps/web/src/components/kynite/`, which no longer exists:
 
 | Component | File | Doc section |
 | --- | --- | --- |
-| `IconMedallion` | `kynite/icon-medallion.tsx` | `components.md` § Cards (`Card/Toast` icon badge), `motion.md` § "Checkbox pop" |
-| `MemberFace` (+ `initialsFor`) | `kynite/member-face.tsx` | `components.md` § Avatars |
-| `StarCount`, `StarMedallion` | `kynite/star-count.tsx` | `components.md` § `Chip/Star count`, `rewards.md` |
-| `CategoryChip`, `CategoryDot` | `kynite/category-chip.tsx` | `colors.md` § "Category palette" |
-| `ProgressBar` | `kynite/progress-bar.tsx` | `components.md` § `Card/Stat`, `motion.md` § "Streak shimmer" |
-| `SectionHeading` | `kynite/section-heading.tsx` | `typography.md` § "Additional sizes" |
-| `PageHeader` (`app` / `hub`) | `kynite/page-header.tsx` | `layout.md` § Header |
-| `EmptyState` (`inline` / `page` / `hub`) | `kynite/empty-state.tsx` | — (product pattern, styled from the type scale) |
-| `MediaRow` | `kynite/media-row.tsx` | `layout.md` § "Content area", `components.md` § `Card/Attention` |
+| `IconMedallion` | `ui/icon-medallion.tsx` | `components.md` § Cards (`Card/Toast` icon badge), `motion.md` § "Checkbox pop" |
+| `MemberFace` (+ `initialsFor`) | `ui/member-face.tsx` | `components.md` § Avatars |
+| `FaceStack` | `ui/face-stack.tsx` | `components.md` § Avatars (the overlapping group) |
+| `StarCount`, `StarMedallion` | `ui/star-count.tsx` | `components.md` § `Chip/Star count`, `rewards.md` |
+| `CategoryChip`, `CategoryDot` | `ui/category-chip.tsx` | `colors.md` § "Category palette" |
+| `ProgressBar` | `ui/progress-bar.tsx` | `components.md` § `Card/Stat`, `motion.md` § "Streak shimmer" |
+| `SectionHeading` | `ui/section-heading.tsx` | `typography.md` § "Additional sizes" |
+| `PageHeader` (`app` / `hub`) | `ui/page-header.tsx` | `layout.md` § Header |
+| `EmptyState` (`inline` / `page` / `hub`) | `ui/empty-state.tsx` | — (product pattern, styled from the type scale) |
+| `MediaRow` | `ui/media-row.tsx` | `layout.md` § "Content area", `components.md` § `Card/Attention` |
+| `PillTabs` | `ui/pill-tabs.tsx` | § Navigation (the standalone-pill switch) |
+| `RoutineCard`, `StepRow` | `ui/routine-card.tsx`, `ui/step-row.tsx` | § Routines |
+| `RewardCard`, `SavingsGoalCard` | `ui/reward-card.tsx`, `ui/savings-goal-card.tsx` | § Rewards |
+| `KidStatCard` | `ui/kid-stat-card.tsx` | § Rewards / § Routines (per-child stat block) |
+| `StarPop` (+ `CELEBRATION_PRESETS`) | `ui/star-pop.tsx`, `ui/celebration-presets.ts` | § "Motion & celebration" |
 
-Domain-aware wrapper: `MemberAvatar` (`src/modules/family/ui/member-avatar.tsx`)
-resolves a member row onto `MemberFace` — use it whenever you have a `Member`.
+Those last five take structural prop types (`RoutineCardRoutine`, `RewardTile`,
+`SavingsGoal`) that the app's own `BoardRoutine` / `StoreTile` / `Goal` satisfy
+without a conversion — the package restates the subset it reads rather than
+importing a slice.
+
+Domain-aware wrappers, in the app, resolving product tables onto the package's
+class props:
+
+- `MemberAvatar` (`src/modules/family/ui/member-avatar.tsx`) → `MemberFace`.
+- `MemberFaces` (`src/modules/today/ui/member-faces.tsx`) → `FaceStack`.
+- `KidStatCard` (`src/modules/today/ui/kid-stat-card.tsx`) → the package's, with
+  `MEMBER_COLOR_CLASSES` applied.
+
+Deliberately **not** moved, because their visual state is derived from a slice's
+domain rather than from props: `modules/calendar/ui/time-grid.tsx` (timezone,
+recurrence expansion, the drag hook) and `modules/timers/ui/timer-tile.tsx` (the
+countdown clock and the slice-wide `tokens.ts` its three sibling surfaces
+share). Both are covered in Storybook by specimen stories instead.
+
+Every composite has a story under `Components/*` in
+`packages/ui/stories/components/`, and the four design sections with no
+component of their own — Calendar, Calendar view patterns, Page layout, Motion &
+celebration, Feestdagen & vakanties — have specimen stories under `Pages/*`.
 
 Motion classes (`kynite-anim-pop`, `kynite-anim-check`, `kynite-anim-pop-big`,
 `kynite-confetti-piece`, `kynite-confetti-piece-big`, `kynite-shimmer-sweep`)
 and the `tnum` / `tabular-time` / `label-overline` utilities live in
-`src/app/globals.css` under the names `motion.md` and `typography.md` give them.
+`packages/ui/src/styles/utilities.css` under the names `motion.md` and `typography.md` give them.
 
 ## Assets
 

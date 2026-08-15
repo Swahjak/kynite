@@ -3,8 +3,7 @@
 import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { useDateTimeFormat } from '@/components/formatting';
-import { cn } from '@kynite/ui';
-import { EmptyState } from '@/components/kynite';
+import { cn, EmptyState } from '@kynite/ui';
 import { dayKeysOf } from '../domain/expand';
 import { parseDateKey, toDateKey, toWall, fromWall } from '../domain/zone';
 import type { CalendarEvent } from '../queries';

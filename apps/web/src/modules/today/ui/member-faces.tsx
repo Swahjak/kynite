@@ -1,18 +1,14 @@
-import { MemberAvatar, type Member } from '@/modules/family';
-import { cn } from '@kynite/ui';
+import { FaceStack, type StackedFace } from '@kynite/ui';
+import { MEMBER_COLOR_CLASSES, type Member } from '@/modules/family';
 
 /**
- * The overlapping avatar stack the mockups put on every block that belongs to
- * somebody (`today_s_flow_light_mode/code.html:64-67`).
+ * The overlapping avatar stack, for a set of member ids.
  *
- * Faces, not names: on a card sized for a glance from the other side of a
- * kitchen the face is the fastest possible answer to "whose is this", and the
- * name is still there for a screen reader through `MemberAvatar`'s fallback
- * initials and this list's own label.
- *
- * An event nobody owns renders nothing rather than an "everyone" placeholder —
- * `PersonColumns` already has a dedicated shared-events row for that, and two
- * different pictures of the same fact on one screen is one too many.
+ * Wave B moved the stack itself into `@kynite/ui` as `FaceStack`. What stays
+ * here is the half the package may not have: resolving ids against the family
+ * roster, in the family's own `sortOrder` rather than in the order they
+ * happened to be attached to the event (the same two children always stack the
+ * same way), and turning each `MemberColor` into its class pair.
  */
 export function MemberFaces({
   members,
@@ -26,35 +22,16 @@ export function MemberFaces({
   className?: string;
 }) {
   const ids = new Set(memberIds);
-  // Ordered by the family's own `sortOrder`, not by the order they happened to
-  // be attached to the event: the same two children always stack the same way.
-  const faces = members.filter((member) => ids.has(member.id));
-  if (faces.length === 0) return null;
+  const faces: StackedFace[] = members
+    .filter((member) => ids.has(member.id))
+    .map((member) => ({
+      id: member.id,
+      name: member.displayName,
+      avatarUrl: member.avatarUrl,
+      surfaceClass: MEMBER_COLOR_CLASSES[member.color].surface,
+    }));
 
-  return (
-    // `role="img"`: the stack *is* the picture of "whose is this", and a bare
-    // `<div>` carrying an `aria-label` is a generic container with a name no
-    // assistive technology is required to announce. The role makes the group one
-    // labelled image and hides the individual avatars' own text from the
-    // announcement, which would otherwise repeat every name twice.
-    <div
-      data-slot="member-faces"
-      role="img"
-      className={cn('flex -space-x-2', className)}
-      aria-label={faces.map((member) => member.displayName).join(', ')}
-    >
-      {faces.map((member) => (
-        <MemberAvatar
-          key={member.id}
-          displayName={member.displayName}
-          avatarUrl={member.avatarUrl}
-          color={member.color}
-          size={size}
-          className="ring-2 ring-card"
-        />
-      ))}
-    </div>
-  );
+  return <FaceStack faces={faces} size={size} className={className} />;
 }
 
 /**

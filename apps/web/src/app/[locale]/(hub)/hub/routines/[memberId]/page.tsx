@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { EmptyState } from '@/components/kynite';
+import { EmptyState } from '@kynite/ui';
 import { ChildTabs } from '@/components/hub';
 import { formatDateTime } from '@/i18n/formatting-locale';
 import { requireHubDevice } from '@/modules/devices';

@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
-import { PageHeader, SectionHeading } from '@/components/kynite';
-import { Card, CardContent, cn, Icon, type IconName } from '@kynite/ui';
+import { Card, CardContent, cn, Icon, type IconName, PageHeader, SectionHeading } from '@kynite/ui';
 import { Link } from '@/i18n/navigation';
 
 /**

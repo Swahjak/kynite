@@ -12,8 +12,8 @@ import {
   CardTitle,
   cn,
   Icon,
+  MemberFace,
 } from '@kynite/ui';
-import { MemberFace } from '@/components/kynite';
 import { MEMBER_COLORS, type MemberColor } from '../schema';
 import { idleState } from '../action-state';
 import { acceptInviteAction, chooseProfileAction } from '../actions';

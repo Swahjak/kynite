@@ -8,13 +8,13 @@ import {
   cn,
   Icon,
   Input,
+  MemberFace,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@kynite/ui';
-import { MemberFace } from '@/components/kynite';
 import { Link, useRouter } from '@/i18n/navigation';
 import { createTaskAction, toggleTaskAction } from '../actions';
 import type { TodayTask } from '../page-data';

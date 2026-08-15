@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { cn } from '@kynite/ui';
+import { cn } from '../lib/utils';
 
 /**
  * The progress track — `docs/design/components.md` § `Card/Stat`:

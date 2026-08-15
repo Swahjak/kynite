@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { cn } from '@kynite/ui';
+import { cn } from '../lib/utils';
 
 /**
  * The list row every module drew by hand: a leading visual (an

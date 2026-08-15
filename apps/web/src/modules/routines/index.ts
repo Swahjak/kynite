@@ -135,10 +135,9 @@ export {
 export { GraduateRoutineButton } from './ui/graduate-routine-button';
 export { RoutineGraduationList, type GraduationRoutine } from './ui/routine-graduation-list';
 export { RoutineBoard } from './ui/routine-board';
-export { RoutineCard } from './ui/routine-card';
+export { RoutineCard, StepRow, type StepRowProps } from '@kynite/ui';
 export { RoutineDialog } from './ui/routine-dialog';
 export { RoutineList } from './ui/routine-list';
-export { StepRow, type StepRowProps } from './ui/step-row';
 export {
   DEFAULT_ROUTINE_ICON,
   ROUTINE_ICONS,

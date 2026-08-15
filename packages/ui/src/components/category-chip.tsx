@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { cn } from '@kynite/ui';
+import { cn } from '../lib/utils';
 
 /**
  * `Chip/Category` and its dot — `docs/design/colors.md` § "Category palette".

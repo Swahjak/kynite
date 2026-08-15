@@ -3,13 +3,11 @@
 import { useOptimistic, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { fireConfettiBurst } from '@/components/celebration';
-import { cn, Icon } from '@kynite/ui';
+import { cn, Icon, MemberFace, RewardCard, SavingsGoalCard, SectionHeading } from '@kynite/ui';
 import { Link } from '@/i18n/navigation';
-import { MemberFace, SectionHeading } from '@/components/kynite';
 import { requestRedemptionAction } from '../actions';
 import type { StoreData, StoreTile } from '../page-data';
-import { RewardCard } from './reward-card';
-import { SavingsGoalCard } from './savings-goal-card';
+import { CATEGORY_TILE, rewardIconOf } from './tokens';
 
 /**
  * The child-facing reward store (M08's `(hub)/hub/store`).
@@ -139,7 +137,9 @@ export function RewardStore({ store }: { store: StoreData }) {
       {savings && store.goal ? (
         <SavingsGoalCard
           goal={store.goal}
-          icon={store.tiles.find((tile) => tile.id === store.goal!.rewardId)?.icon ?? null}
+          icon={rewardIconOf(
+            store.tiles.find((tile) => tile.id === store.goal!.rewardId)?.icon ?? null
+          )}
           copy={{
             eyebrow: t('store.currentGoal'),
             remaining: t('store.starsToGo', { count: store.goal.remainingStars }),
@@ -171,6 +171,7 @@ export function RewardStore({ store }: { store: StoreData }) {
                 <RewardCard
                   key={tile.id}
                   tile={tile}
+                  tileClass={CATEGORY_TILE[tile.category]}
                   copy={{
                     cost: t('starsCost', { count: tile.costStars }),
                     shortHint: t('store.moreStars', { count: tile.starsShort }),

@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { PageHeader, SectionHeading } from '@/components/kynite';
+import { PageHeader, SectionHeading } from '@kynite/ui';
 import {
   ApprovalQueue,
   AwardStarsDialog,

@@ -2,8 +2,7 @@
 
 import { useActionState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Badge, Button, Card, CardContent, cn, Icon } from '@kynite/ui';
-import { SectionHeading, StarCount } from '@/components/kynite';
+import { Badge, Button, Card, CardContent, cn, Icon, SectionHeading, StarCount } from '@kynite/ui';
 import { idleState } from '../action-state';
 import { decideRedemptionAction, fulfillRedemptionAction } from '../actions';
 import type { RedemptionWithReward } from '../queries';

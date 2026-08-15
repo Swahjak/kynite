@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
-import { ProgressBar } from '@/components/kynite';
+import { ProgressBar } from '@kynite/ui';
 import { useRouter } from '@/i18n/navigation';
 import { elapsedRatio, minutesRemaining, minutesUntil } from '../domain/flow';
 

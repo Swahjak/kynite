@@ -2,8 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { useDateTimeFormat } from '@/components/formatting';
-import { cn, Icon } from '@kynite/ui';
-import { CategoryDot, MemberFace } from '@/components/kynite';
+import { CategoryDot, cn, Icon, MemberFace } from '@kynite/ui';
 // Type-only: `@/modules/family` is `server-only` (it re-exports its query
 // module), so a value import here would pull the database driver into this
 // client component's bundle. `person-columns.tsx` establishes the same

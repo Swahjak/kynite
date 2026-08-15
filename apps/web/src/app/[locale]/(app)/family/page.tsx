@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import { PageHeader } from '@/components/kynite';
+import { PageHeader } from '@kynite/ui';
 import { SettingsPage } from '@/components/settings/settings-shell';
 import { MemberDialog, MemberList, loadFamilyPage } from '@/modules/family';
 

@@ -2,8 +2,16 @@
 
 import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
-import { Badge, Button, cn, Field, FieldLabel, Input } from '@kynite/ui';
-import { IconMedallion, SectionHeading } from '@/components/kynite';
+import {
+  Badge,
+  Button,
+  cn,
+  Field,
+  FieldLabel,
+  IconMedallion,
+  Input,
+  SectionHeading,
+} from '@kynite/ui';
 import { extendTimerAction, startTimerAction, stopTimerAction } from '../actions';
 import {
   DURATION_PRESETS,

@@ -1,7 +1,8 @@
 'use client';
 
-import { StarPop } from '@/components/celebration';
-import { cn, Icon } from '@kynite/ui';
+import { cn } from '../lib/utils';
+import { Icon } from './icon';
+import { StarPop } from './star-pop';
 
 /**
  * One routine step: the single control a child uses (FR8, research §"Yoto/

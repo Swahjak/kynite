@@ -1,6 +1,8 @@
 import { cva, type VariantProps } from 'class-variance-authority';
 
-import { cn, Icon, type IconName, type IconSize } from '@kynite/ui';
+import { cn } from '../lib/utils';
+import { Icon, type IconSize } from './icon';
+import { type IconName } from './icon-codepoints';
 
 /**
  * A tinted tile with one icon in it — the single most repeated shape in the

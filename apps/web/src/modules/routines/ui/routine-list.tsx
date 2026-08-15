@@ -1,6 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { Badge, Card, CardContent } from '@kynite/ui';
-import { IconMedallion, StarCount } from '@/components/kynite';
+import { Badge, Card, CardContent, IconMedallion, StarCount } from '@kynite/ui';
 import { formatDateTime } from '@/i18n/formatting-locale';
 import { getHouseholdFormattingLocale, type Member } from '@/modules/family';
 import { hasGraduated } from '../domain/stars';

@@ -8,6 +8,15 @@
  * what makes the boundary rule in `eslint.config.mjs` enforceable — there is
  * exactly one specifier to police.
  *
+ * Two layers live behind the one entry point. **Primitives** are the
+ * shadcn/Base-UI surface — button, input, card, badge, avatar, dialog. Wave B
+ * added the **components** layer above them: the composites the design system
+ * defines *on top of* the primitives (a section heading, a media row, a routine
+ * card, a reward tile) — the shapes that appear on more than one screen, so
+ * changing one of them is one edit rather than ten. Rule for page work: if you
+ * are about to hand-roll an avatar, a chip, a star count, a progress bar, a
+ * section heading or an empty state, it is already here.
+ *
  * What belongs here: client/presentational primitives with no knowledge of the
  * product. No `next-intl` (labels arrive as props), no `@/modules`, no
  * `@/server`, no `next/*`. A component that needs a link renders one through
@@ -136,3 +145,48 @@ export {
   useToastManager,
 } from './components/toast';
 export { useSubmitGuard } from './components/use-submit-guard';
+
+/* -------------------------------------------------------------------------- */
+/* Components — the composites over the primitives (wave B)                    */
+/* -------------------------------------------------------------------------- */
+
+export { CategoryChip, CategoryDot } from './components/category-chip';
+export {
+  CELEBRATION_COLORS,
+  CELEBRATION_INTENSITIES,
+  CELEBRATION_LIMITS,
+  CELEBRATION_PRESETS,
+  prefersReducedMotion,
+  type CelebrationIntensity,
+  type CelebrationPreset,
+} from './components/celebration-presets';
+export { EmptyState, emptyStateVariants, type EmptyStateProps } from './components/empty-state';
+export { FaceStack, type StackedFace } from './components/face-stack';
+export {
+  IconMedallion,
+  medallionVariants,
+  type IconMedallionProps,
+} from './components/icon-medallion';
+export { KidStatCard, type KidStatCardProps } from './components/kid-stat-card';
+export { MediaRow } from './components/media-row';
+export { MemberFace, initialsFor } from './components/member-face';
+export { PageHeader } from './components/page-header';
+export { PillTabs, PillTabsPanel, type PillTabItem } from './components/pill-tabs';
+export { ProgressBar } from './components/progress-bar';
+export {
+  RewardCard,
+  type RewardCardCopy,
+  type RewardCardProps,
+  type RewardTile,
+} from './components/reward-card';
+export {
+  RoutineCard,
+  type RoutineCardProps,
+  type RoutineCardRoutine,
+  type RoutineCardStep,
+} from './components/routine-card';
+export { SavingsGoalCard, type SavingsGoal } from './components/savings-goal-card';
+export { SectionHeading } from './components/section-heading';
+export { StarCount, StarMedallion } from './components/star-count';
+export { StarPop, type StarPopProps } from './components/star-pop';
+export { StepRow, type StepRowProps } from './components/step-row';

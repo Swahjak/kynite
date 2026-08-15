@@ -1,6 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { Badge, Card, CardContent, cn, Icon } from '@kynite/ui';
-import { StarCount } from '@/components/kynite';
+import { Badge, Card, CardContent, cn, Icon, StarCount } from '@kynite/ui';
 import type { Member } from '@/modules/family';
 import type { RewardPreset } from '../domain/economy';
 import type { Reward } from '../schema';

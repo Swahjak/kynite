@@ -13,11 +13,9 @@ import {
   type PendingCompletion,
 } from '@/components/realtime';
 import { useRouter } from '@/i18n/navigation';
-import { cn, Icon } from '@kynite/ui';
-import { ProgressBar } from '@/components/kynite';
+import { cn, Icon, ProgressBar, RoutineCard } from '@kynite/ui';
 import { completeStepAction } from '../actions';
 import type { BoardRoutine, BoardSection, RoutineBoard as RoutineBoardData } from '../page-data';
-import { RoutineCard } from './routine-card';
 import { SECTION_ICONS } from './tokens';
 
 /**

@@ -2,8 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { useDateTimeFormat } from '@/components/formatting';
-import { Badge, cn } from '@kynite/ui';
-import { CategoryDot } from '@/components/kynite';
+import { Badge, CategoryDot, cn } from '@kynite/ui';
 import type { CalendarEvent } from '../queries';
 import { CATEGORY_CLASSES } from './tokens';
 

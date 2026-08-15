@@ -1,6 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import { TimerControls, loadTimersPage } from '@/modules/timers';
-import { PageHeader } from '@/components/kynite';
+import { PageHeader } from '@kynite/ui';
 
 /** Session-dependent: never prerendered, so `next build` needs no database. */
 export const dynamic = 'force-dynamic';

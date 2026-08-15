@@ -1,9 +1,8 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Avatar, AvatarFallback, AvatarImage, cn, Icon } from '@kynite/ui';
+import { Avatar, AvatarFallback, AvatarImage, cn, Icon, ProgressBar } from '@kynite/ui';
 import { Link } from '@/i18n/navigation';
-import { ProgressBar } from '@/components/kynite';
 
 /**
  * The board's per-child entry points (M19) — the Stitch "Kids' Progress" panel,

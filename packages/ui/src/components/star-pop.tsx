@@ -1,8 +1,13 @@
 'use client';
 
 import * as React from 'react';
-import { cn, Icon } from '@kynite/ui';
-import { CELEBRATION_PRESETS, prefersReducedMotion, type CelebrationIntensity } from './presets';
+import { cn } from '../lib/utils';
+import { Icon } from './icon';
+import {
+  CELEBRATION_PRESETS,
+  prefersReducedMotion,
+  type CelebrationIntensity,
+} from './celebration-presets';
 
 /**
  * The star pop — the *second* animation module (one module per animation).

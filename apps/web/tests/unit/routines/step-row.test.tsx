@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import { StepRow } from '@/modules/routines/ui/step-row';
+import { StepRow } from '@kynite/ui';
 
 /**
  * The praise-before-star contract (FR15, research §Decisions 5), asserted

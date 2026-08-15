@@ -12,7 +12,7 @@
  * completion — the praise text is the headline, and it is plain DOM.
  */
 
-import { CELEBRATION_PRESETS, prefersReducedMotion, type CelebrationIntensity } from './presets';
+import { CELEBRATION_PRESETS, prefersReducedMotion, type CelebrationIntensity } from '@kynite/ui';
 
 export type ConfettiBurstOptions = {
   intensity?: CelebrationIntensity;
