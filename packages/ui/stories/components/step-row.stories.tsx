@@ -25,6 +25,12 @@ import { Section, Specimen } from '../specimen';
  * A step paying `stars={0}` (a graduated routine) renders no star at all. The
  * correct UI for "this no longer pays" is absence — never a struck-through or
  * greyed star, which reads as something taken away.
+ *
+ * `variant="tile"` is the other shape: the design sheets' two-column grid
+ * cell inside an expanded `RoutineCard` (`Routines.dc.html`) — a bordered
+ * 80px tile that turns green and strikes its own title through once done.
+ * Praise-before-star still holds; it just carries both at caption scale under
+ * the title, the smallest place they can honestly go.
  */
 const meta = {
   title: 'Components/Step row',
@@ -103,6 +109,67 @@ export const States: Story = {
       <Specimen
         name="StepRow/notes"
         note="Row 1 done · row 2 live (72px, accent bar, arrow) · row 3 ahead · row 4 done on a graduated routine — no star, by design."
+      >
+        <span />
+      </Specimen>
+    </Section>
+  ),
+};
+
+export const Tiles: Story = {
+  name: 'Tile variant — the expanded card grid',
+  render: () => (
+    <Section title="Step row — the tile shape, inside RoutineCard's expanded grid">
+      <ul className="grid w-full max-w-xl grid-cols-2 gap-3">
+        <StepRow
+          variant="tile"
+          stepId="uit-bed"
+          title="Uit bed"
+          done
+          timerSeconds={null}
+          praiseText="Goed bezig!"
+          stars={3}
+          starLabel="3 sterren verdiend"
+          actionLabel="Uit bed is klaar"
+        />
+        <StepRow
+          variant="tile"
+          stepId="tanden"
+          title="Tanden poetsen"
+          done={false}
+          active
+          timerSeconds={120}
+          praiseText="Knap gedaan!"
+          stars={3}
+          starLabel="3 sterren verdiend"
+          actionLabel="Markeer Tanden poetsen als klaar"
+        />
+        <StepRow
+          variant="tile"
+          stepId="tas"
+          title="Tas inpakken"
+          done={false}
+          timerSeconds={null}
+          praiseText="Top!"
+          stars={3}
+          starLabel="3 sterren verdiend"
+          actionLabel="Markeer Tas inpakken als klaar"
+        />
+        <StepRow
+          variant="tile"
+          stepId="ontbijt"
+          title="Ontbijt opeten"
+          done
+          timerSeconds={null}
+          praiseText="Helemaal zelf!"
+          stars={0}
+          starLabel=""
+          actionLabel="Ontbijt opeten is klaar"
+        />
+      </ul>
+      <Specimen
+        name="StepRow/tile notes"
+        note="Tile 1 done (green, struck) · tile 2 live (border, empty ring, timer) · tile 3 ahead · tile 4 done on a graduated routine — no star."
       >
         <span />
       </Specimen>
