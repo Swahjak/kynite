@@ -104,7 +104,9 @@ export function NowStripMeter({
         <ProgressBar
           data-testid="today-now-progress"
           value={Math.round(elapsedRatio(block, now) * 100)}
-          size="sm"
+          // 8px, the design's own ("Vandaag.dc.html":91). `sm` draws 6px,
+          // which on a wall read as a hairline rather than as a bar.
+          size="md"
           className="col-span-2 mt-3"
         />
       ) : null}

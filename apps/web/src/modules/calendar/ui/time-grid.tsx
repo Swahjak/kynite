@@ -351,6 +351,11 @@ export function TimeGrid({
                     showOwner
                     members={members}
                     hub={hub}
+                    past={
+                      !!now &&
+                      !positioned.event.allDay &&
+                      positioned.event.endsAt.getTime() <= now.getTime()
+                    }
                     onSelect={onSelect}
                     onPointerDown={drag.onPointerDown}
                     suppressClick={drag.shouldIgnoreClick}
@@ -372,18 +377,23 @@ export function TimeGrid({
                   />
                 );
               })}
-
-              {nowKey === key && (
-                <div
-                  data-testid="now-line"
-                  className="pointer-events-none absolute inset-x-0 z-20 h-0.5 bg-now"
-                  style={{ top: nowTop }}
-                >
-                  <span className="absolute -top-1 -left-1 size-2.5 rounded-full bg-now" />
-                </div>
-              )}
             </div>
           ))}
+
+          {/* One line across every column, not a line inside today's.
+              "Kalender.dc.html":141/215 draws it from the gutter's edge to the
+              grid's right edge in both the day and the *week* view — the hour
+              it marks is the same hour on Tuesday as on Friday, and a rule
+              that stopped at one column read as a property of that day. */}
+          {nowKey !== null && dayKeys.includes(nowKey) && (
+            <div
+              data-testid="now-line"
+              className="pointer-events-none absolute inset-x-0 z-20 h-0.5 bg-now"
+              style={{ top: nowTop }}
+            >
+              <span className="absolute -top-1 -left-1 size-2.5 rounded-full bg-now" />
+            </div>
+          )}
         </div>
       </div>
     </div>

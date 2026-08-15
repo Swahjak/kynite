@@ -4,11 +4,11 @@ import { useCallback, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useDateTimeFormat } from '@/components/formatting';
 import { useRouter } from '@/i18n/navigation';
-import { Button, Icon, type IconName, MemberFace, Tabs, TabsList, TabsTrigger } from '@kynite/ui';
+import { Button, Icon, MemberFace, Tabs, TabsList, TabsTrigger } from '@kynite/ui';
 import { Fab } from '@/components/ui/fab';
 import type { Member } from '@/modules/family';
 import { CALENDAR_VIEWS, daysOf, shiftAnchor, type CalendarView } from '../domain/window';
-import { toDateKey, toWall } from '../domain/zone';
+import { isoWeek, toDateKey, toWall } from '../domain/zone';
 import type { CalendarEvent } from '../queries';
 import { AgendaView } from './agenda-view';
 import { DayStrip } from './day-strip';
@@ -19,14 +19,6 @@ import { MonthView } from './month-view';
 import { TimeGrid } from './time-grid';
 import { CATEGORY_CLASSES } from './tokens';
 import { useIsWide } from './use-is-wide';
-
-/** One glyph per view, so the pill fits a 390px header without a scrollbar. */
-const VIEW_ICONS: Record<CalendarView, IconName> = {
-  day: 'event',
-  week: 'grid_view',
-  month: 'calendar_month',
-  agenda: 'event_available',
-};
 
 /**
  * The parent app's calendar surface.
@@ -204,9 +196,11 @@ export function CalendarShell({
    * household says it out loud.
    */
   const heading = useMemo(() => {
-    if (view === 'month') return formatDateTime(anchor, { month: 'long', year: 'numeric' });
+    if (view === 'month') {
+      return capitalise(formatDateTime(anchor, { month: 'long', year: 'numeric' }));
+    }
     if (view === 'day') {
-      return formatDateTime(anchor, { weekday: 'long', day: 'numeric', month: 'long' });
+      return capitalise(formatDateTime(anchor, { weekday: 'long', day: 'numeric', month: 'long' }));
     }
 
     const first = days[0];
@@ -225,6 +219,23 @@ export function CalendarShell({
           year: 'numeric',
         })}`;
   }, [view, anchor, days, timeZone, formatDateTime]);
+
+  /**
+   * The same heading, written for 390px ("Kalender.dc.html":502).
+   *
+   * A phone header holds about fifteen characters beside a control, and the
+   * wide heading is three times that — which is why the title used to end in an
+   * ellipsis on every phone in day and week view. The design's answer is not a
+   * smaller font, it is a *shorter sentence*: the day drops its weekday and its
+   * year, the week becomes its ISO number, and the month drops the year. None
+   * of the three loses a fact the screen underneath does not already show.
+   */
+  const mobileHeading = useMemo(() => {
+    if (view === 'month') return capitalise(formatDateTime(anchor, { month: 'long' }));
+    if (view === 'day') return formatDateTime(anchor, { day: 'numeric', month: 'long' });
+    if (view === 'week') return t('weekNumber', { week: isoWeek(toWall(days[0], timeZone)) });
+    return heading;
+  }, [view, anchor, days, timeZone, formatDateTime, heading, t]);
 
   const dayKey = toDateKey(toWall(days[0], timeZone));
   /**
@@ -288,10 +299,15 @@ export function CalendarShell({
             // row is ~180px tighter than the drawing and something has to
             // give. A heading that ellipsises is a smaller lie than a header
             // that reflows.
-            className="min-w-0 flex-1 basis-0 truncate font-display text-h1 font-extrabold tracking-tight"
+            className="min-w-0 flex-1 basis-0 truncate font-display text-h2 font-extrabold tracking-tight sm:text-h1"
             data-testid="calendar-heading"
           >
-            {heading}
+            {/* Two spellings of one heading, and only ever one in the
+                document's flow — the short one below `sm`, the full one above
+                it. Rendered as two spans rather than picked in JS so the choice
+                survives SSR without a layout shift. */}
+            <span className="sm:hidden">{mobileHeading}</span>
+            <span className="hidden sm:inline">{heading}</span>
           </h1>
 
           <Button variant="outline" size="sm" onClick={goToday} className="shrink-0">
@@ -332,7 +348,12 @@ export function CalendarShell({
                     name={member.displayName}
                     avatarUrl={member.avatarUrl}
                     surfaceClass={palette.surface}
-                    ringClass={palette.ring}
+                    // Indigo, not the member's own hue: the ring is the
+                    // *filter's* state ("Kalender.dc.html":70–73 draws every
+                    // included face with `box-shadow 0 0 0 2px #5d5fef`), and a
+                    // ring that changed colour per person said "this is Mila"
+                    // twice instead of saying "Mila is switched on" once.
+                    ringClass="ring-primary"
                     ringed={included}
                     className={included ? undefined : 'opacity-45'}
                   />
@@ -363,10 +384,19 @@ export function CalendarShell({
                 key={candidate}
                 value={candidate}
                 data-testid={`view-${candidate}`}
-                className="label-overline h-10 flex-1 rounded-4xl px-3 data-active:bg-surface-container-lowest data-active:text-primary data-active:shadow-sm sm:flex-none sm:px-3.5"
+                // Baloo, bold, *sentence case* — "Dag / Week / Maand", which
+                // is how the design writes it ("Kalender.dc.html":76–78). The
+                // caps of `label-overline` are the metadata register, and a
+                // view switcher is a control.
+                className="h-10 flex-1 rounded-4xl px-3 font-display text-body-sm font-bold data-active:bg-surface-container-lowest data-active:text-primary data-active:shadow-sm sm:flex-none sm:px-3.5"
               >
-                <Icon name={VIEW_ICONS[candidate]} size="sm" className="sm:hidden" />
-                <span className="sr-only sm:not-sr-only">{t(`views.${candidate}`)}</span>
+                {/* Words, not glyphs — on the phone too. The sheet's mobile
+                    segmented control is "Dag / Week / Maand" in Baloo
+                    ("Kalender.dc.html":270–274), and four calendar glyphs that
+                    all differ by a few pixels of internal grid is a puzzle,
+                    not a control. They fit: four labels at 14px come to about
+                    two thirds of a 390px row. */}
+                <span>{t(`views.${candidate}`)}</span>
               </TabsTrigger>
             ))}
           </TabsList>
@@ -504,4 +534,16 @@ export function CalendarShell({
       )}
     </div>
   );
+}
+
+/**
+ * "augustus 2026" → "Augustus 2026".
+ *
+ * `Intl` lower-cases Dutch month and weekday names because that is how they are
+ * written *inside a sentence*; a heading is not a sentence, and the design
+ * writes "Augustus 2026" ("Kalender.dc.html":502). Only the first character, so
+ * a two-word heading keeps its own casing.
+ */
+function capitalise(value: string): string {
+  return value.charAt(0).toLocaleUpperCase() + value.slice(1);
 }

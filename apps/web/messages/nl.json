@@ -27,7 +27,7 @@
     "today": "Vandaag",
     "family": "Gezin",
     "settings": "Instellingen",
-    "calendar": "Agenda",
+    "calendar": "Kalender",
     "routines": "Routines",
     "rewards": "Beloningen",
     "timers": "Timers",
@@ -496,14 +496,15 @@
       "memberNotFound": "Dit gezinslid bestaat niet meer."
     },
     "month": {
-      "more": "Nog {count}",
+      "more": "+{count} meer",
       "openDay": "Alles van {date} bekijken"
     },
     "filter": {
       "label": "Filter op gezinslid",
       "show": "{name} weer tonen",
       "hide": "{name} verbergen"
-    }
+    },
+    "weekNumber": "Week {week}"
   },
   "holidays": {
     "badgeLabel": "Speciale dag",
@@ -547,6 +548,54 @@
       "christmasDay": "De kerstboom mag aan!",
       "boxingDay": "Tweede Kerstdag: uitslapen en resten eten",
       "newYearsEve": "Oliebollen en aftellen tot middernacht"
+    },
+    "dateRange": "{from} t/m {to}",
+    "metaSuffix": {
+      "newYear": "een leeg jaar om vol te plannen",
+      "goodFriday": "een stille dag, samen thuis",
+      "easterSunday": "eieren zoeken in de tuin",
+      "easterMonday": "nog een dag eieren zoeken",
+      "kingsDay": "oranje aan en naar de vrijmarkt",
+      "liberationDay": "vlaggen uit, we vieren de vrijheid",
+      "mothersDay": "ontbijt op bed voor mama",
+      "ascension": "een vrije donderdag voor iedereen",
+      "whitSunday": "een lang weekend om buiten te zijn",
+      "whitMonday": "nog een dag vrij, samen",
+      "fathersDay": "ontbijt op bed voor papa",
+      "animalDay": "extra aandacht voor de beestenboel",
+      "halloween": "verkleden en langs de deuren",
+      "sinterklaas": "pakjesavond, schoen bij de kachel",
+      "christmasDay": "pyjama's aan, cadeautjes onder de boom",
+      "boxingDay": "uitslapen en de resten opeten",
+      "newYearsEve": "oliebollen en aftellen tot middernacht"
+    },
+    "school": {
+      "autumnBreak": "Herfstvakantie",
+      "christmasBreak": "Kerstvakantie",
+      "springBreak": "Voorjaarsvakantie",
+      "mayBreak": "Meivakantie",
+      "summerBreak": "Zomervakantie"
+    },
+    "schoolBanner": {
+      "autumnBreak": "Een week uitslapen en buiten spelen",
+      "christmasBreak": "Twee weken lekker niksen",
+      "springBreak": "Buiten spelen, de lente is er",
+      "mayBreak": "{days} dagen vrij om te spelen",
+      "summerBreak": "Zwemmen, kamperen en lekker niksen"
+    },
+    "schoolMeta": {
+      "autumnBreak": "geen schoolroutine deze week",
+      "christmasBreak": "{days} dagen zonder wekker",
+      "springBreak": "een week zonder schooltas",
+      "mayBreak": "de vrijste week van het voorjaar",
+      "summerBreak": "{days} dagen vrij"
+    },
+    "birthday": {
+      "eyebrow": "Jarig!",
+      "title": "{name} is vandaag jarig!",
+      "titleSoon": "{name} is bijna jarig",
+      "meta": "{age} jaar · taart bij het ontbijt, cadeautjes na het eten",
+      "metaNoAge": "taart bij het ontbijt, cadeautjes na het eten"
     }
   },
   "today": {

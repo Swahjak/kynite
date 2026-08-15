@@ -39,3 +39,25 @@ export {
   upcomingCountdown,
   type SpecialDayCountdown,
 } from './domain/special-days';
+
+export {
+  DEFAULT_SCHOOL_REGION,
+  SCHOOL_HOLIDAY_SLUGS,
+  schoolHolidayLength,
+  schoolHolidayOn,
+  schoolHolidays,
+  upcomingSchoolHoliday,
+  type SchoolHoliday,
+  type SchoolHolidayAccent,
+  type SchoolHolidayCountdown,
+  type SchoolHolidaySlug,
+  type SchoolRegion,
+} from './domain/school-holidays';
+
+export {
+  birthdaysOn,
+  upcomingBirthday,
+  type Birthday,
+  type BirthdayCountdown,
+  type BirthdayPerson,
+} from './domain/birthdays';

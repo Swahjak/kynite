@@ -496,14 +496,15 @@
       "memberNotFound": "That family member no longer exists."
     },
     "month": {
-      "more": "{count} more",
+      "more": "+{count} more",
       "openDay": "See everything on {date}"
     },
     "filter": {
       "label": "Filter by family member",
       "show": "Show {name} again",
       "hide": "Hide {name}"
-    }
+    },
+    "weekNumber": "Week {week}"
   },
   "holidays": {
     "badgeLabel": "Special day",
@@ -547,6 +548,54 @@
       "christmasDay": "The tree lights can go on!",
       "boxingDay": "Boxing Day: sleep in and eat leftovers",
       "newYearsEve": "Doughnuts and counting down to midnight"
+    },
+    "dateRange": "{from} to {to}",
+    "metaSuffix": {
+      "newYear": "an empty year to fill in",
+      "goodFriday": "a quiet day at home together",
+      "easterSunday": "egg hunt in the garden",
+      "easterMonday": "one more day of egg hunting",
+      "kingsDay": "orange on, off to the flea market",
+      "liberationDay": "flags out, we celebrate freedom",
+      "mothersDay": "breakfast in bed for mum",
+      "ascension": "a free Thursday for everyone",
+      "whitSunday": "a long weekend to spend outdoors",
+      "whitMonday": "one more day off, together",
+      "fathersDay": "breakfast in bed for dad",
+      "animalDay": "extra attention for the animals",
+      "halloween": "dress up and go door to door",
+      "sinterklaas": "presents tonight, shoe by the fire",
+      "christmasDay": "pyjamas on, presents under the tree",
+      "boxingDay": "sleep in and finish the leftovers",
+      "newYearsEve": "doughnuts and a countdown to midnight"
+    },
+    "school": {
+      "autumnBreak": "Autumn break",
+      "christmasBreak": "Christmas break",
+      "springBreak": "Spring break",
+      "mayBreak": "May break",
+      "summerBreak": "Summer holiday"
+    },
+    "schoolBanner": {
+      "autumnBreak": "A week of sleeping in and playing out",
+      "christmasBreak": "Two weeks of doing very little",
+      "springBreak": "Out to play — spring is here",
+      "mayBreak": "{days} days off to play",
+      "summerBreak": "Swimming, camping and doing nothing"
+    },
+    "schoolMeta": {
+      "autumnBreak": "no school routine this week",
+      "christmasBreak": "{days} days without an alarm",
+      "springBreak": "a week without a school bag",
+      "mayBreak": "the freest week of spring",
+      "summerBreak": "{days} days off"
+    },
+    "birthday": {
+      "eyebrow": "Birthday!",
+      "title": "It's {name}'s birthday today!",
+      "titleSoon": "{name}'s birthday is coming up",
+      "meta": "{age} years old · cake at breakfast, presents after dinner",
+      "metaNoAge": "cake at breakfast, presents after dinner"
     }
   },
   "today": {

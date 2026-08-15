@@ -19,38 +19,63 @@ import { Icon } from '@kynite/ui';
  * A `<button>` with `aria-expanded` rather than `<details>`: the summary has to
  * sit *outside* the timeline's own indentation while the rows sit inside it,
  * which `<details>` cannot express without duplicating the layout.
+ *
+ * On the phone the toggle is not a line of its own: the design puts the
+ * section's eyebrow on the left of one row and "1 afgerond ⌄" on the right of
+ * it ("Vandaag.dc.html":374–377). `header` is that left half — passed in rather
+ * than assumed, because the wall's list keeps the toggle inline under a real
+ * card heading and has no header to share the row with.
  */
 
 export function TodayPastRows({
   summary,
   label,
+  header,
   children,
 }: {
   /** "3 afgerond — Ontbijt (07:30)". */
   summary: string;
   /** Accessible name of the toggle, e.g. "Toon eerdere afspraken". */
   label: string;
+  /** The section's own heading, put on the toggle's row and pushed left. */
+  header?: ReactNode;
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
 
   return (
     <div className="flex flex-col">
-      <button
-        type="button"
-        data-testid="today-past-toggle"
-        aria-expanded={open}
-        aria-label={label}
-        onClick={() => setOpen((previous) => !previous)}
-        className="flex items-center gap-2 self-start rounded-lg py-1 pb-3.5 pl-14 text-ink-muted transition-colors duration-200 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-      >
-        <Icon
-          name="expand_more"
-          size="sm"
-          className={open ? 'rotate-180 transition-transform' : 'transition-transform'}
-        />
-        <span className="text-body-sm">{summary}</span>
-      </button>
+      <div className={header ? 'flex items-center justify-between gap-3 pb-2' : 'contents'}>
+        {header}
+        <button
+          type="button"
+          data-testid="today-past-toggle"
+          aria-expanded={open}
+          aria-label={label}
+          onClick={() => setOpen((previous) => !previous)}
+          className={
+            header
+              ? 'flex shrink-0 items-center gap-1.5 rounded-lg text-ink-muted transition-colors duration-200 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring'
+              : 'flex items-center gap-2 self-start rounded-lg py-1 pb-3.5 pl-14 text-ink-muted transition-colors duration-200 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring'
+          }
+        >
+          {header ? null : (
+            <Icon
+              name="expand_more"
+              size="sm"
+              className={open ? 'rotate-180 transition-transform' : 'transition-transform'}
+            />
+          )}
+          <span className="text-body-sm">{summary}</span>
+          {header ? (
+            <Icon
+              name="expand_more"
+              size="sm"
+              className={open ? 'rotate-180 transition-transform' : 'transition-transform'}
+            />
+          ) : null}
+        </button>
+      </div>
 
       {open ? <div className="flex flex-col">{children}</div> : null}
     </div>

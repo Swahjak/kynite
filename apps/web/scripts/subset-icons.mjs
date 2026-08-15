@@ -149,7 +149,6 @@ const EXTRA_ICONS = [
   // page can reach for them without a font rebuild in the same change.
   'grid_view',
   'space_dashboard',
-  'query_stats',
   'group',
   'home',
   'celebration',
@@ -158,10 +157,17 @@ const EXTRA_ICONS = [
   'arrow_forward',
   'check_circle',
   'person',
-  'bolt',
   'more_horiz',
   'share',
   'tablet_mac',
+  // D1 — the theme banner's school-holiday silhouettes and weather
+  // (`modules/today/ui/today-theme-banner.tsx`), named through the `LOOK`
+  // table rather than a literal `name="…"`, which is all the scanner sees.
+  // They arrive in the room `query_stats` and `bolt` vacated: both were held
+  // here in M19 against a phase-2 page that never asked for them, and the
+  // budget is hard, so a reserve glyph loses to a rendered one.
+  'eco',
+  'ac_unit',
 ];
 
 const ICON_USAGE = /<Icon\b[^>]*?\bname=(?:"([a-z0-9_]+)"|\{'([a-z0-9_]+)'\}|'([a-z0-9_]+)')/g;

@@ -3,11 +3,13 @@
  *
  * Material Symbols renders here by codepoint, not by ligature; see that script
  * for why. Every entry has a matching glyph in
- * src/styles/fonts/material-symbols-outlined.woff2, which `pnpm icons:check`
- * verifies against actual `<Icon name="…">` usage on every build.
+ * apps/web/src/styles/fonts/material-symbols-outlined.woff2, which
+ * `pnpm icons:check` verifies against actual `<Icon name="…">` usage on
+ * every build.
  */
 
 export const ICON_CODEPOINTS = {
+  ac_unit: '\ueb3b',
   add: '\ue145',
   add_task: '\uf23a',
   arrow_downward: '\ue5db',
@@ -16,7 +18,6 @@ export const ICON_CODEPOINTS = {
   backpack: '\uf19c',
   bar_chart: '\ue26b',
   beach_access: '\ueb3e',
-  bolt: '\uea0b',
   brush: '\ue3ae',
   cake: '\ue7e9',
   calendar_month: '\uebcc',
@@ -33,6 +34,7 @@ export const ICON_CODEPOINTS = {
   dashboard: '\ue871',
   delete: '\ue92e',
   diversity_3: '\uf8d9',
+  eco: '\uea35',
   event: '\ue878',
   event_available: '\ue614',
   expand_more: '\ue5cf',
@@ -58,7 +60,6 @@ export const ICON_CODEPOINTS = {
   person: '\uf0d3',
   pets: '\ue91d',
   pool: '\ueb48',
-  query_stats: '\ue4fc',
   radio_button_unchecked: '\ue836',
   redeem: '\ue8f6',
   repeat: '\ue040',

@@ -59,7 +59,7 @@ export async function TodayNowStrip({ event, mode, members, now, timeZone }: Tod
         data-state={mode}
         className="flex-row items-center gap-3 rounded-3xl p-4 sm:p-5"
       >
-        <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-surface-container-lowest text-ink-muted">
+        <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-surface-container-lowest text-ink-muted">
           <Icon name={clear ? 'celebration' : 'schedule'} size="lg" />
         </span>
         <p className="min-w-0 text-body-sm text-ink-secondary">
@@ -118,7 +118,11 @@ export async function TodayNowStrip({ event, mode, members, now, timeZone }: Tod
             a class pair. */}
         <span
           className={cn(
-            'row-span-2 flex size-12 shrink-0 items-center justify-center rounded-2xl',
+            // 48px at `rounded-xl`, not `rounded-2xl`: the design draws the
+            // tile as a squircle of radius 14 ("Vandaag.dc.html":82) and 12px
+            // is the token nearest it — `rounded-2xl` (16px) rounds a 48px box
+            // far enough to read as a circle once the kiosk scale is on.
+            'row-span-2 flex size-12 shrink-0 items-center justify-center rounded-xl',
             palette.surface
           )}
         >

@@ -108,7 +108,19 @@ export async function TodayHubHeader({
             </Link>
           </nav>
 
-          <FaceStack faces={faces} size="default" label={t('familyLabel')} />
+          {/* Four separate faces, not a stack. `FaceStack` overlaps by
+              default (`-space-x-2`), which is right on an event card where the
+              faces answer "whose is this" as one picture — but the wall
+              header's row *is* the household, drawn at the design's 34px with
+              a 6px gap ("Vandaag.dc.html":56–61), and at the kiosk type scale
+              the overlap was clipping the initials of every face but the
+              last. */}
+          <FaceStack
+            faces={faces}
+            size="default"
+            label={t('familyLabel')}
+            className="space-x-0 gap-1.5"
+          />
 
           {/* The one element on the screen sized for the far side of the
               kitchen, beside the NU block. A browsed day keeps its own date

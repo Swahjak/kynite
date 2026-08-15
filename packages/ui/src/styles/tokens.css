@@ -116,8 +116,14 @@
   --warning: #9a4f14; /* = --gold-ink; the docs have no separate warning tone */
   --error: #ba1a1a; /* colors.md "Error" — 6.46:1 on white */
   --info: #5d5fef;
-  --now: #ba1a1a;
-  --now-foreground: #ffffff; /* 6.46:1 on --now */
+  /* The "now" rule across the calendar grid. `#ef4444` is the sheet's own
+     (`Kalender.dc.html`:141/215) and the category palette's red solid — the
+     line marks *this moment*, which is a landmark, not an error, and the
+     6.46:1 error red it used to borrow said "something is wrong" across the
+     whole day. It is a 2px rule and a 10px dot, never a text colour, so the
+     contrast floor that governs `--error` does not govern it. */
+  --now: #ef4444;
+  --now-foreground: #ffffff;
 
   /* -- Category palette — colors.md § "Category palette" ------------------
      8 categories, each a 4-colour set generated from one hue in `oklch()`:

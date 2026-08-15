@@ -158,6 +158,7 @@ export function MonthView({
                     key={event.key}
                     event={event}
                     variant="line"
+                    past={!!today && !event.allDay && event.endsAt.getTime() <= today.getTime()}
                     onSelect={onSelect}
                     className={outside ? 'opacity-60' : undefined}
                   />

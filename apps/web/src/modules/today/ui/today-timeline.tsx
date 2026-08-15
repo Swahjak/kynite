@@ -208,27 +208,50 @@ export async function TodayTimeline({
 
   const lastPast = past.at(-1);
 
+  /**
+   * The phone's heading is an *eyebrow*, not a card title
+   * ("Vandaag.dc.html":374–377): uppercase Baloo at 12px in the muted ink,
+   * sharing its row with "1 afgerond ⌄". The wall keeps the real 19px card
+   * heading, because there the list genuinely is one card among three.
+   */
+  const eyebrow = <h2 className="label-overline text-ink-muted">{t('timeline.title')}</h2>;
+
+  const disclosure =
+    past.length > 0 && lastPast ? (
+      <TodayPastRows
+        summary={t('timeline.done', {
+          count: past.length,
+          title: lastPast.event.busyOnly ? tCalendar('busy') : lastPast.event.title,
+          time: lastPast.event.allDay ? t('allDay') : at(lastPast.event.startsAt),
+        })}
+        label={t('timeline.showDone')}
+        header={density === 'card' ? eyebrow : undefined}
+      >
+        {past.map(render)}
+      </TodayPastRows>
+    ) : null;
+
   const body =
     rows.length === 0 ? (
       <p className="text-body-sm text-ink-secondary">{tCalendar('freeDay')}</p>
     ) : (
       <div className={cn('flex flex-col', density === 'card' ? 'gap-2' : '-mx-2.5 gap-0.5')}>
-        {past.length > 0 && lastPast ? (
-          <TodayPastRows
-            summary={t('timeline.done', {
-              count: past.length,
-              title: lastPast.event.busyOnly ? tCalendar('busy') : lastPast.event.title,
-              time: lastPast.event.allDay ? t('allDay') : at(lastPast.event.startsAt),
-            })}
-            label={t('timeline.showDone')}
-          >
-            {past.map(render)}
-          </TodayPastRows>
-        ) : null}
-
+        {disclosure}
         {rest.map(render)}
       </div>
     );
+
+  // The phone's rows are already tiles with their own borders; wrapping them in
+  // a second white card put a card inside a card and cost 40px of a 390px
+  // column. The design draws them straight on the page ground.
+  if (density === 'card') {
+    return (
+      <section data-testid="today-timeline" className={cn('flex flex-col gap-2', className)}>
+        {disclosure ? null : eyebrow}
+        {body}
+      </section>
+    );
+  }
 
   return (
     <Card data-testid="today-timeline" className={cn('gap-4 p-5', className)}>

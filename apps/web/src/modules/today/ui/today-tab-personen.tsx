@@ -34,9 +34,14 @@ export type TodayTabPersonenProps = {
   isToday: boolean;
   nowEventKey: string | null;
   /**
-   * A fixed column count, for the hub's middle column — the design draws it as
-   * a 2 × 2 grid of short lists rather than one row of four. Left unset, the
-   * grid stays fluid, which is what a tab spanning the page needs.
+   * A fixed column count. The design draws the wall's middle card as a 2 × 2
+   * grid ("Vandaag.dc.html":148–183) and that is what this was for — but it
+   * draws it at 13px, where the kiosk type scale is 1.45× with a 16px floor,
+   * and "08:15 Ochtendroutine" at 20px does not fit half of a 230px card at
+   * any setting. Left unset the grid is fluid (`minmax(11rem, 1fr)`), which
+   * resolves to one column in the wall's middle card and to two or four across
+   * a full-width tab — the design's *shape* wherever the type allows it, and a
+   * readable line where it does not.
    */
   columnCount?: 2;
 };
@@ -102,9 +107,14 @@ export async function TodayTabPersonen({
             className={cn('size-1.5 shrink-0 self-center rounded-4xl', palette.solid)}
           />
         )}
+        {/* Wraps rather than truncates. The design writes every line out in
+            full ("Vandaag.dc.html":148–183) and it fits there at 13px; the
+            kiosk type scale is 1.45× with a 16px floor, so the same line in
+            the same column has to go somewhere, and a second line is a smaller
+            loss than "12:30 We…". */}
         <span
           className={cn(
-            'min-w-0 truncate text-body-sm',
+            'min-w-0 break-words text-body-sm',
             live && 'font-bold',
             past && 'line-through',
             event.busyOnly && 'text-ink-muted'

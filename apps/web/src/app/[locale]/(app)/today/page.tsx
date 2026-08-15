@@ -136,6 +136,7 @@ export default async function TodayPage({
         timeZone={data.timeZone}
         dayKey={dayKey}
         isToday={isToday}
+        viewer={viewer}
       />
 
       <TodayNowStrip

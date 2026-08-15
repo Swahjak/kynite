@@ -24,6 +24,7 @@ import {
   TodayThemeBanner,
   flowOf,
   loadTodayProgress,
+  resolveTodayTheme,
   type DayReference,
   type TodayTab,
 } from '@/modules/today';
@@ -188,6 +189,15 @@ export default async function HubPage({
   const nowEventKey = flow.live ? (flow.hero?.key ?? null) : null;
 
   /**
+   * The day's theme, resolved *here* rather than inside the banner, because the
+   * page is the only place that can act on the answer: on a themed day the
+   * banner takes the NU block's place ("Vandaag met thema's":404 wraps the NU
+   * card in `<sc-if geenThema>`), and a component that decides late cannot tell
+   * its sibling to stand down. Null on the ordinary majority of the year.
+   */
+  const theme = resolveTodayTheme({ dayKey, isToday, people: data.members });
+
+  /**
    * FR28's "default view", kept meaningful rather than retired.
    *
    * The setting's two options are already written as the two arrangements this
@@ -275,9 +285,12 @@ export default async function HubPage({
               kids={progress?.kids ?? null}
               // M26: one full-width row above the columns on a day that means
               // something, and nothing at all on the other 348.
-              banner={
-                <TodayThemeBanner dayKey={dayKey} isToday={isToday} timeZone={data.timeZone} />
-              }
+              banner={theme ? <TodayThemeBanner theme={theme} /> : null}
+              // The per-child entry points, inside the tab's own scroller. They
+              // used to sit under the board as a third band of the page, which
+              // took the bottom third of an 834px wall away from the columns
+              // the design gives the whole panel to ("Vandaag.dc.html":72–75).
+              launcher={<ChildLauncher entries={children} />}
               // The kiosk's own timers screen, not the app's.
               timersHref="/hub/timers"
             />
@@ -308,11 +321,6 @@ export default async function HubPage({
           Outside the mirror rather than in it — a countdown comes from the
           server's clock, and a cached one would be a wrong number. */}
       {timers ? <AmbientTimers board={timers} /> : null}
-
-      {/* M19: the per-child entry points. Not mirrored either — a step count is
-          a live number, and a board rendered from IndexedDB after a reboot
-          should show yesterday's schedule rather than yesterday's progress. */}
-      <ChildLauncher entries={children} />
 
       {/* No `NewEventFab`: `event:write` is `deny` for a device principal (§7). */}
     </main>

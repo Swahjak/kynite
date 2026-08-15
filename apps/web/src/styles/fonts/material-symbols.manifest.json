@@ -1,5 +1,6 @@
 {
   "icons": [
+    "ac_unit",
     "add",
     "add_task",
     "arrow_downward",
@@ -8,7 +9,6 @@
     "backpack",
     "bar_chart",
     "beach_access",
-    "bolt",
     "brush",
     "cake",
     "calendar_month",
@@ -25,6 +25,7 @@
     "dashboard",
     "delete",
     "diversity_3",
+    "eco",
     "event",
     "event_available",
     "expand_more",
@@ -50,7 +51,6 @@
     "person",
     "pets",
     "pool",
-    "query_stats",
     "radio_button_unchecked",
     "redeem",
     "repeat",
@@ -74,5 +74,5 @@
     "work",
     "workspace_premium"
   ],
-  "bytes": 62900
+  "bytes": 64280
 }

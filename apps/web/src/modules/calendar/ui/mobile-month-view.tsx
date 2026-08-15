@@ -174,7 +174,9 @@ export function MobileMonthView({
                 event={event}
                 variant="card"
                 showOwner
+                showPeople
                 members={members}
+                past={!!today && !event.allDay && event.endsAt.getTime() <= today.getTime()}
                 onSelect={onSelect}
               />
             ))}

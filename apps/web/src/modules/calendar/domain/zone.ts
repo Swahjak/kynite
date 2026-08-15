@@ -169,6 +169,25 @@ export function isoWeekday(wall: Pick<Wall, 'year' | 'month' | 'day'>): number {
   return day === 0 ? 7 : day;
 }
 
+/**
+ * ISO 8601 week number of a wall date, 1–53.
+ *
+ * "Week 33" is what a Dutch phone header says where a tablet has room for
+ * "10 – 16 augustus 2026" ("Kalender.dc.html":502), and it has to be the *ISO*
+ * week: the one every Dutch school, employer and calendar app counts in, whose
+ * first week is the one containing the first Thursday of the year. Pure wall
+ * arithmetic in UTC, like everything else in this file.
+ */
+export function isoWeek(wall: Pick<Wall, 'year' | 'month' | 'day'>): number {
+  // Move to the Thursday of this week: the ISO year is whichever year that
+  // Thursday falls in, which is the whole trick of the definition.
+  const thursday = new Date(Date.UTC(wall.year, wall.month - 1, wall.day));
+  thursday.setUTCDate(thursday.getUTCDate() + 4 - isoWeekday(wall));
+
+  const firstOfYear = Date.UTC(thursday.getUTCFullYear(), 0, 1);
+  return Math.floor((thursday.getTime() - firstOfYear) / MS_PER_DAY / 7) + 1;
+}
+
 /** Days in a wall month — the only calendar arithmetic RRULE needs. */
 export function daysInMonth(year: number, month: number): number {
   return new Date(Date.UTC(year, month, 0)).getUTCDate();

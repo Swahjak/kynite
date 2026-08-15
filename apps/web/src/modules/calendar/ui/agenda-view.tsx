@@ -133,8 +133,10 @@ export function AgendaView({
                   event={event}
                   variant="card"
                   showOwner
+                  showPeople
                   members={members}
                   hub={hub}
+                  past={!!today && !event.allDay && event.endsAt.getTime() <= today.getTime()}
                   onSelect={onSelect}
                 />
               ))}

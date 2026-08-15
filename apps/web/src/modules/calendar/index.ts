@@ -87,6 +87,7 @@ export {
   fromWall,
   isSameDay,
   isValidTimeZone,
+  isoWeek,
   minutesIntoDay,
   parseDateKey,
   startOfDay,

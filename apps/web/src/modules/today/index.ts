@@ -35,6 +35,8 @@ export {
   type TimeBlock,
 } from './domain/flow';
 
+export { resolveTodayTheme, type ResolveTodayThemeInput, type TodayTheme } from './domain/theme';
+
 export {
   resolveStepIcon,
   starMatrixRows,

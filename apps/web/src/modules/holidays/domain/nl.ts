@@ -174,18 +174,23 @@ export const SPECIAL_DAYS_NL: readonly SpecialDayDefinition[] = [
   { slug: 'animalDay', kind: 'fun', emoji: '🐾', accent: 'green', on: (y) => date(y, 10, 4) },
   { slug: 'halloween', kind: 'fun', emoji: '🎃', accent: 'orange', on: (y) => date(y, 10, 31) },
   { slug: 'sinterklaas', kind: 'fun', emoji: '🎁', accent: 'red', on: (y) => date(y, 12, 5) },
+  // Red, not the fir tree's green: the design sheet's Kerst is a warm red
+  // ground (`oklch(96% 0.015 25)`) carrying a red tile with a *green* and an
+  // indigo circle, which is the brand mark wearing Christmas rather than a
+  // green square with a tree on it. The green survives one step down, in the
+  // banner's falling stars (`today-theme-banner.tsx`).
   {
     slug: 'christmasDay',
     kind: 'official',
     emoji: '🎄',
-    accent: 'green',
+    accent: 'red',
     on: (y) => date(y, 12, 25),
   },
   {
     slug: 'boxingDay',
     kind: 'official',
     emoji: '🎄',
-    accent: 'green',
+    accent: 'red',
     on: (y) => date(y, 12, 26),
   },
   { slug: 'newYearsEve', kind: 'fun', emoji: '🎉', accent: 'purple', on: (y) => date(y, 12, 31) },

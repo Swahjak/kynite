@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { cn, Icon, type IconName } from '@kynite/ui';
 import { Link, usePathname } from '@/i18n/navigation';
@@ -23,6 +24,26 @@ import { Link, usePathname } from '@/i18n/navigation';
  * What it still is not: a browser. No back button, no sign-out, no settings
  * (that lives in the shell's settings corner, one tap away and out of the
  * room's eyeline), which `e2e/tests/hub/kiosk-audit.spec.ts` asserts by name.
+ *
+ * ## D1: the design's rail, not the design's destinations
+ *
+ * "Vandaag.dc.html":39–47 draws this rail 76px wide, with a 36px indigo brand
+ * tile above four 52px sentence-case tiles and the signed-in parent's face
+ * pinned below them. The *shape* is now that drawing: the tile, the width, the
+ * 52px targets, the 16px radius, the rgba(93,95,239,.10) active wash, the
+ * labels written rather than shouted.
+ *
+ * The *destinations* deliberately are not. The sheet's four are the parent
+ * app's tabs (Vandaag / Kalender / Routines / Sterren), which live in the
+ * `(app)` tree behind a member session; a device principal navigating there is
+ * sent straight back to the pair screen, so drawing them would be four tiles
+ * that bounce. What a wall tablet has instead is the board, the shelf and the
+ * timers — the three surfaces a child standing in front of it can actually
+ * reach — and per-child screens still arrive through a face on the board
+ * rather than through a nav rail that cannot name whose.
+ *
+ * The face at the foot of the sheet's rail is out for the same reason: there
+ * is nobody signed in at a kiosk by construction.
  */
 
 type RailItem = {
@@ -50,8 +71,19 @@ export function HubRail() {
     <nav
       data-testid="hub-rail"
       aria-label={t('label')}
-      className="flex w-24 shrink-0 flex-col items-center gap-3 bg-surface py-4"
+      className="flex w-19 shrink-0 flex-col items-center gap-1.5 border-r border-line-subtle bg-surface-container-low py-4.5"
     >
+      {/* The brand mark, at the design's 36px. Not a link: this rail's first
+          item already *is* the board, and a logo that navigated somewhere on a
+          kiosk is one more way for a five-year-old to leave the screen they
+          were sent to. */}
+      <span
+        aria-hidden="true"
+        className="mb-3.5 flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-xl"
+      >
+        <Image src="/images/logo-icon.svg" alt="" width={36} height={36} unoptimized priority />
+      </span>
+
       {ITEMS.map((item) => {
         const active = isActive(pathname, item.href);
 
@@ -63,17 +95,24 @@ export function HubRail() {
             data-active={active ? 'true' : 'false'}
             aria-current={active ? 'page' : undefined}
             className={cn(
-              // 80x80: past the 48px kiosk minimum, because this is a target a
-              // five-year-old aims at from standing height.
-              'flex size-20 flex-col items-center justify-center gap-1 rounded-2xl transition-colors duration-200 ease-brand',
+              // 52px square at a 16px radius — the sheet's own tile, and still
+              // past the 48px kiosk minimum for a target a five-year-old aims
+              // at from standing height.
+              'flex size-13 flex-col items-center justify-center gap-0.5 rounded-2xl transition-colors duration-200 ease-brand',
               'focus-visible:ring-3 focus-visible:ring-ring/50',
               active
-                ? 'bg-primary/12 text-primary'
+                ? 'bg-primary/10 text-primary'
                 : 'text-ink-secondary hover:bg-surface-hover hover:text-foreground'
             )}
           >
-            <Icon name={item.icon} size="xl" filled={active} />
-            <span className="label-overline">{t(item.key)}</span>
+            <Icon name={item.icon} size="md" filled={active} />
+            {/* Sentence case, Baloo, no tracking: "Bord", not "BORD". At the
+                `overline` step rather than `caption` because the kiosk scale
+                re-points both — 16px against 18px — and "Winkel" at 18px is
+                three pixels wider than the 52px tile it has to live in. */}
+            <span className="text-center font-display text-overline font-bold whitespace-nowrap">
+              {t(item.key)}
+            </span>
           </Link>
         );
       })}

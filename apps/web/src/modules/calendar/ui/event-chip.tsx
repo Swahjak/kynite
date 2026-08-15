@@ -84,6 +84,25 @@ export type EventChipProps = {
   showOwner?: boolean;
   /** The roster `showOwner` resolves `event.ownerMemberId` against. */
   members?: Member[];
+  /**
+   * It already finished. The calendar draws that the way the design sheet does
+   * — `opacity:0.55` and a line through the title ("Kalender.dc.html":106 on
+   * the tablet, :299 on the phone) — which is the same fact Vandaag's timeline
+   * and the per-person columns have always shown and the calendar never did.
+   *
+   * Opacity on the whole chip rather than muted ink, unlike `DayAgendaRow`:
+   * a grid block is a *shape in the day* before it is a line of text, and the
+   * shape is what has to recede. The label inside it is already the quietest
+   * type on the screen.
+   */
+  past?: boolean;
+  /**
+   * The `card` variant names who it is for after the time — "09:15 – 11:30 ·
+   * Mila & Daan" ("Kalender.dc.html":337). Off by default: the day board's
+   * lists already answer "whose" with a column, and saying it twice on one row
+   * is noise. `members` is what it resolves against.
+   */
+  showPeople?: boolean;
   className?: string;
   style?: React.CSSProperties;
 };
@@ -100,6 +119,8 @@ export function EventChip({
   continuesAfter = false,
   showOwner = false,
   members,
+  past = false,
+  showPeople = false,
   className,
   style,
 }: EventChipProps) {
@@ -171,6 +192,7 @@ export function EventChip({
     'data-occurrence-start': event.startsAt.toISOString(),
     'data-continues-before': continuesBefore || undefined,
     'data-continues-after': continuesAfter || undefined,
+    'data-past': past || undefined,
     role: interactive ? ('button' as const) : undefined,
     tabIndex: interactive ? 0 : undefined,
     onClick: interactive
@@ -193,6 +215,23 @@ export function EventChip({
     style: event.busyOnly ? { ...style, backgroundImage: BUSY_HATCH } : style,
   };
 
+  /**
+   * "Mila & Daan", or "Iedereen" for an event that belongs to the household or
+   * names nobody at all — which is a different fact from a list of names, not a
+   * longer one. Resolved here rather than passed in because every caller has
+   * the same roster and would otherwise each write this join.
+   */
+  const people = (() => {
+    if (!showPeople || !members) return '';
+    const ids = new Set(event.attendeeMemberIds);
+    if (event.ownerMemberId) ids.add(event.ownerMemberId);
+    const named = members.filter((member) => ids.has(member.id));
+    if (event.householdWide || named.length === 0 || named.length >= members.length) {
+      return t('everyone');
+    }
+    return named.map((member) => member.displayName).join(' & ');
+  })();
+
   const timeRange = event.allDay
     ? t('allDay')
     : `${formatDateTime(event.startsAt, { hour: '2-digit', minute: '2-digit' })} – ${formatDateTime(
@@ -213,12 +252,15 @@ export function EventChip({
         {...shellProps}
         className={cn(
           'flex min-w-0 items-center gap-1.5 rounded-sm',
+          past && 'opacity-55',
           interactive && 'cursor-pointer hover:bg-surface-container-low',
           className
         )}
       >
         <CategoryDot size="xs" className={cn('shrink-0', palette.solid)} />
-        <span className="truncate text-caption text-ink">{title}</span>
+        <span className={cn('truncate text-caption text-ink', past && 'line-through')}>
+          {title}
+        </span>
       </div>
     );
   }
@@ -229,6 +271,7 @@ export function EventChip({
         {...shellProps}
         className={cn(
           'flex min-h-12 min-w-0 items-center gap-2.5 rounded-xl border border-line-subtle bg-card px-3 py-2.5 text-left',
+          past && 'opacity-55',
           // The wall board reads from across the kitchen, so the card grows
           // rather than the type shrinking to fit it.
           hub && 'min-h-16 gap-4 rounded-2xl px-5 py-4',
@@ -250,14 +293,22 @@ export function EventChip({
         />
         <div className="min-w-0 flex-1">
           <span
-            className={`block truncate font-semibold text-ink ${hub ? 'text-h3' : 'text-body-sm'}`}
+            className={cn(
+              'block truncate font-semibold text-ink',
+              hub ? 'text-h3' : 'text-body-sm',
+              past && 'line-through'
+            )}
           >
             {title}
           </span>
           <span
-            className={`tabular-time block truncate text-ink-secondary ${hub ? 'text-body' : 'text-caption'}`}
+            className={cn(
+              'tabular-time block truncate text-ink-secondary',
+              hub ? 'text-body' : 'text-caption'
+            )}
           >
             {timeRange}
+            {people ? ` · ${people}` : ''}
             {event.location ? ` · ${event.location}` : ''}
           </span>
         </div>
@@ -310,9 +361,17 @@ export function EventChip({
         // `border-left:3px solid oklch(58% 0.14 H)`. The 4px figure in
         // `calendar.md` is the *list* item's bar, which this component no
         // longer draws — the phone's list is the `card` variant above.
-        'group/chip @container/chip relative flex min-w-0 flex-col justify-start gap-0.5 overflow-hidden rounded-lg border-l-3 px-2 py-1.5 text-left shadow-sm',
+        // `rounded-md` (8px) and no shadow: the sheet draws every grid block
+        // at `border-radius:8px` with nothing under it ("Kalender.dc.html":106
+        // and following). The 12px of `rounded-lg` plus a resting shadow made
+        // a 44px block read as a floating card rather than as a slice of the
+        // hour it occupies. `py-1` for the same reason — the sheet fits a
+        // title *and* a time inside 44px, which 6px of vertical padding does
+        // not (gap 25).
+        'group/chip @container/chip relative flex min-w-0 flex-col justify-start gap-0.5 overflow-hidden rounded-md border-l-3 px-2 py-1 text-left',
         palette.surface,
         palette.rule,
+        past && 'opacity-55',
         variant === 'block' && 'absolute inset-x-1 select-none',
         hub ? 'gap-1 px-3 py-2' : '',
         interactive &&
@@ -376,7 +435,16 @@ export function EventChip({
             face than silently collapse the title to zero width. `hidden` by
             default is the same "no glyph, full room for the title" shape the
             chip drew before this feature existed. */}
-        {showOwner && event.householdWide && (
+        {/* …but never on a grid block, and that is a measurement rather than
+            a taste. The row is `items-center`, so its tallest child sets its
+            height, and the smallest avatar this design system draws is 24px —
+            taller than the two lines of type it stands beside. A half-hour
+            appointment is 44px ("Kalender.dc.html":302 fits a title *and* a
+            time inside exactly that), and 4 + 24 + 2 + 16 + 4 is 50, which is
+            why the "Tandarts" block was cutting its own clock in half. The
+            sheet draws no face on a grid block for the same reason; the row
+            and card variants, which have the height, keep it. */}
+        {showOwner && variant !== 'block' && event.householdWide && (
           <span className="hidden shrink-0 @min-[6.5rem]/chip:inline-flex">
             <Icon
               name="group"
@@ -386,7 +454,7 @@ export function EventChip({
             />
           </span>
         )}
-        {showOwner && !event.householdWide && ownerMember && (
+        {showOwner && variant !== 'block' && !event.householdWide && ownerMember && (
           <span className="hidden shrink-0 @min-[6.5rem]/chip:inline-flex">
             <MemberFace
               name={ownerMember.displayName}
@@ -396,7 +464,13 @@ export function EventChip({
             />
           </span>
         )}
-        {!event.busyOnly && (
+        {/* Not on a grid block. The sheet's blocks carry a title and a time
+            and nothing else, and at the 44px a half-hour appointment gets, a
+            leading glyph costs about a third of the room the title has — the
+            category is already stated twice over by the fill and the rail.
+            The `row` variant (the all-day band, the day board) keeps it: those
+            lines have the width, and no rail of their own to read. */}
+        {!event.busyOnly && variant !== 'block' && (
           <Icon
             name={EVENT_TYPE_ICONS[event.eventType]}
             size={hub ? 'sm' : 'xs'}
@@ -406,6 +480,7 @@ export function EventChip({
         <span
           className={cn(
             'truncate font-display font-semibold',
+            past && 'line-through',
             // A hatched block carries no hue, so its label takes the neutral
             // secondary ink rather than a category foreground it no longer
             // has a fill to sit on.
@@ -443,6 +518,12 @@ export function EventChip({
       {showTime && !event.allDay && (
         <span
           className={cn(
+            // A week column is ~150px wide whatever the glass is, and the
+            // sheet's week block is a *title only* at 11px
+            // ("Kalender.dc.html":179–204) — the hour is already readable off
+            // the gutter the block is aligned to. Below 10rem of chip the time
+            // line is what makes the title truncate, so it is what goes.
+            variant === 'block' && 'hidden @min-[10rem]/chip:block',
             // No `opacity-*` on coloured text: an 80% blend of
             // `--cat-blue-fg` over its own tint lands at 4.13:1, which is a
             // WCAG AA failure the M17 axe sweep caught the moment `cn()`

@@ -50,7 +50,7 @@ export function MobileNav({
             aria-current={active ? 'page' : undefined}
           >
             <Icon name={icon} size="md" filled={active} />
-            <span className="label-overline w-full truncate text-center">{labels[label]}</span>
+            <span className={tabLabelClass}>{labels[label]}</span>
           </Link>
         );
       })}
@@ -70,7 +70,7 @@ export function MobileNav({
             data-testid="mobile-nav-more"
           >
             <Icon name="more_horiz" size="md" filled={active} />
-            <span className="label-overline w-full truncate text-center">{labels.more}</span>
+            <span className={tabLabelClass}>{labels.more}</span>
           </button>
         )}
       />
@@ -80,6 +80,14 @@ export function MobileNav({
 
 const tabClass =
   'flex min-h-14 flex-1 flex-col items-center justify-center gap-1 px-1 py-2 transition-all duration-200 ease-brand active:scale-95';
+/**
+ * Sentence case, Baloo, no tracking — the design's 10px tab label
+ * ("Vandaag.dc.html":479–482), at the 12px the type scale actually declares.
+ * The uppercase `label-overline` this replaced is the *metadata* register; a
+ * destination is a name, and "BELONINGEN" in caps at 12px does not fit a
+ * 78px tab, which is why every label but "Meer" used to end in an ellipsis.
+ */
+const tabLabelClass = 'w-full truncate text-center font-display text-caption font-bold';
 /**
  * `text-primary`, which the mockups use, is now legible as text: the stitch
  * indigo is 7.47:1 on the bar's surface where the old brand green was 1.46:1

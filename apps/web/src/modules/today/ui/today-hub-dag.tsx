@@ -29,10 +29,11 @@ import { TodayTimeline } from './today-timeline';
  * wall display is for.
  *
  * `banner` is the theme slot (M26, `Pages/Vandaag — thema's`): one full-width
- * row above the three columns on a day that means something. It **adds** and
- * rearranges nothing — the NU block keeps its place and its job in column one,
- * because decoration does not get to outrank the routine a child is standing
- * in front of.
+ * row above the three columns on a day that means something. It does not add to
+ * the NU block, it **replaces** it — the design sheet wraps the NU card in
+ * `<sc-if geenThema>`, so on Kerst or in the zomervakantie column one opens
+ * with the day list instead. Passing `null` (which is what the other 348 days
+ * resolve to) puts the NU block back.
  *
  * The column ratio is the design's own (`1.15fr 1fr 0.95fr`): the day list
  * carries the most text, the per-person grid is two columns of short lines, and
@@ -56,6 +57,13 @@ export type TodayHubDagProps = {
   kids: KidProgress[] | null;
   /** The day's theme row, already resolved by the page. */
   banner?: ReactNode;
+  /**
+   * The per-child entry points (`ChildLauncher`), rendered *inside* this tab's
+   * scroller rather than under the whole board — the design gives the tab panel
+   * the entire frame below the pills ("Vandaag.dc.html":72–75), and a band
+   * pinned under it was taking the bottom third of an 834px wall.
+   */
+  launcher?: ReactNode;
   timersHref?: string;
 };
 
@@ -73,6 +81,7 @@ export async function TodayHubDag({
   tasks,
   kids,
   banner,
+  launcher,
   timersHref,
 }: TodayHubDagProps) {
   const t = await getTranslations('today');
@@ -95,13 +104,21 @@ export async function TodayHubDag({
           composition exists to fit that frame without a scrollbar. */}
       <div className="grid items-start gap-5 lg:grid-cols-[1.15fr_1fr_0.95fr]">
         <div className="flex flex-col gap-4">
-          <TodayNowStrip
-            event={heroEvent}
-            mode={flowMode}
-            members={members}
-            now={referenceNow}
-            timeZone={timeZone}
-          />
+          {/* On a themed day the banner *is* the NU block: the design sheet
+              wraps this card in `<sc-if geenThema>` ("Vandaag met thema's":404),
+              so Kerst and the zomervakantie take its place rather than pushing
+              it down a row. Two full-width statements about the same moment,
+              one above the other, is the composition a wall display cannot be
+              read at a glance any more. */}
+          {banner ? null : (
+            <TodayNowStrip
+              event={heroEvent}
+              mode={flowMode}
+              members={members}
+              now={referenceNow}
+              timeZone={timeZone}
+            />
+          )}
           <TodayTimeline
             members={members}
             events={events}
@@ -121,7 +138,6 @@ export async function TodayHubDag({
           now={now}
           isToday={isToday}
           nowEventKey={nowEventKey}
-          columnCount={2}
         />
 
         <div className="flex flex-col gap-4">
@@ -148,6 +164,8 @@ export async function TodayHubDag({
           )}
         </div>
       </div>
+
+      {launcher}
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { cn, Icon } from '@kynite/ui';
 import { Link } from '@/i18n/navigation';
 import { formatDateTime } from '@/i18n/formatting-locale';
 import { CATEGORY_CLASSES, addDays, toDateKey, toWall } from '@/modules/calendar';
-import { getHouseholdFormattingLocale } from '@/modules/family';
+import { MemberAvatar, getHouseholdFormattingLocale, type Member } from '@/modules/family';
 import { CONFETTI_SLUGS, specialDaysOn, upcomingCountdown } from '@/modules/holidays';
 import { HolidayConfetti } from './holiday-confetti';
 import { TodayClock } from './today-clock';
@@ -48,6 +48,13 @@ export type TodayHeaderProps = {
    * gate that sends it straight back to the pair screen.
    */
   href?: string;
+  /**
+   * The signed-in member, for the face at the right of the phone's header row
+   * ("Vandaag.dc.html":350–357). Absent for a principal with no member row —
+   * the row then simply has no face, exactly as the greeting degrades to the
+   * plain title.
+   */
+  viewer?: Member | null;
 };
 
 export async function TodayHeader({
@@ -58,6 +65,7 @@ export async function TodayHeader({
   dayKey,
   isToday,
   href = '/today',
+  viewer,
 }: TodayHeaderProps) {
   const t = await getTranslations('today');
   const tHolidays = await getTranslations('holidays');
@@ -98,8 +106,15 @@ export async function TodayHeader({
     'flex size-8 items-center justify-center rounded-4xl text-ink-muted transition-colors duration-200 ease-brand hover:bg-surface-container hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring';
 
   return (
-    <header className="flex flex-wrap items-center justify-between gap-4">
-      <div className="flex min-w-0 flex-col gap-1.5">
+    // One row, and it stays one row at 390px. It used to be
+    // `flex-wrap`, which on a phone put the greeting on line one and gave the
+    // *entire* second line to a day-navigation pill nobody had asked for —
+    // where the design gives that row a greeting, a date and a face
+    // ("Vandaag.dc.html":350–357). The pill survives (it is the only way to
+    // browse another day) with its label hidden below `sm`, which is the two
+    // chevrons and nothing else.
+    <header className="flex items-center justify-between gap-3">
+      <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         {/* One step down on a phone: the design sets the greeting at 24px on
             390px and 32px once there is room for it. */}
         <h1 className="font-display text-h2 font-extrabold sm:text-h1" data-testid="today-greeting">
@@ -163,62 +178,83 @@ export async function TodayHeader({
           both get it without either page knowing. */}
       {celebrating && <HolidayConfetti dayKey={dayKey} />}
 
-      <nav
-        data-testid="today-day-nav"
-        aria-label={t('dayNav.label')}
-        className="flex items-center gap-1.5 rounded-4xl border border-line-subtle bg-card p-1.5 shadow-sm"
-      >
-        <Link
-          href={`${href}?date=${previous}`}
-          aria-label={t('dayNav.previous')}
-          data-testid="today-day-prev"
-          className={chevron}
+      <div className="flex shrink-0 items-center gap-2">
+        <nav
+          data-testid="today-day-nav"
+          aria-label={t('dayNav.label')}
+          className="flex items-center gap-1.5 rounded-4xl border border-line-subtle bg-card p-1.5 shadow-sm"
         >
-          <Icon name="chevron_left" size="sm" />
-        </Link>
-
-        {isToday ? (
-          <span className="px-1 font-display text-body-sm font-bold">{label}</span>
-        ) : (
           <Link
-            href={href}
-            data-testid="today-day-reset"
-            className="rounded-4xl px-2 font-display text-body-sm font-bold hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            href={`${href}?date=${previous}`}
+            aria-label={t('dayNav.previous')}
+            data-testid="today-day-prev"
+            className={chevron}
           >
-            {label}
+            <Icon name="chevron_left" size="sm" />
           </Link>
-        )}
 
-        <Link
-          href={`${href}?date=${next}`}
-          aria-label={t('dayNav.next')}
-          data-testid="today-day-next"
-          className={chevron}
-        >
-          <Icon name="chevron_right" size="sm" />
-        </Link>
-      </nav>
+          {isToday ? (
+            <span className="hidden px-1 font-display text-body-sm font-bold sm:inline">
+              {label}
+            </span>
+          ) : (
+            <Link
+              href={href}
+              data-testid="today-day-reset"
+              className="rounded-4xl px-2 font-display text-body-sm font-bold hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            >
+              {label}
+            </Link>
+          )}
 
-      {/* Only *today* gets a ticking clock. A browsed day keeps its own static
+          <Link
+            href={`${href}?date=${next}`}
+            aria-label={t('dayNav.next')}
+            data-testid="today-day-next"
+            className={chevron}
+          >
+            <Icon name="chevron_right" size="sm" />
+          </Link>
+        </nav>
+
+        {/* The phone's own face, at the design's 36px. Above `sm` the shell's
+          rail already carries it in the user menu, and two faces for one
+          person on one screen is one too many. */}
+        {viewer ? (
+          <MemberAvatar
+            displayName={viewer.displayName}
+            avatarUrl={viewer.avatarUrl}
+            color={viewer.color}
+            size="default"
+            className="shrink-0 sm:hidden"
+          />
+        ) : null}
+
+        {/* Only *today* gets a ticking clock. A browsed day keeps its own static
           date rather than silently jumping forward at midnight because a tab
           was left open on it — see `TodayClock`'s own note on the rollover.
           Hidden below `sm`: a phone already carries the time in its status bar,
           and the design gives that space back to the day itself. */}
-      {isToday ? (
-        <TodayClock now={now} timeZone={timeZone} dayKey={dayKey} className="hidden sm:flex" />
-      ) : (
-        <div
-          data-testid="today-clock"
-          className={cn('hidden flex-col items-end text-right sm:flex')}
-        >
-          <span className="font-display text-h2 font-bold tabular-nums">
-            {formatDateTime(anchor, formattingLocale, { day: 'numeric', month: 'short', timeZone })}
-          </span>
-          <span className="text-body-sm text-ink-secondary">
-            {formatDateTime(anchor, formattingLocale, { dateStyle: 'full', timeZone })}
-          </span>
-        </div>
-      )}
+        {isToday ? (
+          <TodayClock now={now} timeZone={timeZone} dayKey={dayKey} className="hidden sm:flex" />
+        ) : (
+          <div
+            data-testid="today-clock"
+            className={cn('hidden flex-col items-end text-right sm:flex')}
+          >
+            <span className="font-display text-h2 font-bold tabular-nums">
+              {formatDateTime(anchor, formattingLocale, {
+                day: 'numeric',
+                month: 'short',
+                timeZone,
+              })}
+            </span>
+            <span className="text-body-sm text-ink-secondary">
+              {formatDateTime(anchor, formattingLocale, { dateStyle: 'full', timeZone })}
+            </span>
+          </div>
+        )}
+      </div>
     </header>
   );
 }

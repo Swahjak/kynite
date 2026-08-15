@@ -77,7 +77,7 @@ export function AppRail({
             data-testid="app-rail-more"
           >
             <Icon name="more_horiz" size="lg" filled={active} />
-            <span className="label-overline w-full truncate text-center">{labels.more}</span>
+            <span className={railLabelClass}>{labels.more}</span>
           </button>
         )}
       />
@@ -91,9 +91,20 @@ export function AppRail({
   );
 }
 
-/** 64px tile: 28px glyph + caps micro-label, 48px minimum touch target. */
+/**
+ * 72px tile: a 28px glyph over a label that is *read*, not decoded.
+ *
+ * The label was `label-overline` — 12px Baloo, uppercased, 0.05em tracked —
+ * inside a 64px tile, which is about 62px of room for "VANDAAG" and 72px of
+ * "ROUTINES", so half the rail rendered as "VANDA…" / "ROUTIN…". The design
+ * writes them in sentence case at 9px ("Vandaag.dc.html":39–47); this app's
+ * scale has no step below 12px, so the three things that cost width and buy
+ * nothing go instead: the capitals, the tracking, and 8px of tile margin.
+ */
 const railTileClass =
-  'flex w-16 shrink-0 flex-col items-center justify-center gap-0.5 rounded-2xl px-1 py-2 transition-all duration-200 ease-brand active:scale-95';
+  'flex w-18 shrink-0 flex-col items-center justify-center gap-0.5 rounded-2xl px-0.5 py-2 transition-all duration-200 ease-brand active:scale-95';
+/** The rail's own micro-label: Baloo, bold, sentence case, no tracking. */
+const railLabelClass = 'w-full truncate text-center font-display text-caption font-bold';
 const railActiveClass = 'bg-accent text-accent-foreground';
 const railIdleClass = 'text-ink-secondary hover:bg-surface-container-high hover:text-ink';
 
@@ -115,7 +126,7 @@ function RailLink({
       aria-current={active ? 'page' : undefined}
     >
       <Icon name={item.icon} size="lg" filled={active} />
-      <span className="label-overline w-full truncate text-center">{labels[item.label]}</span>
+      <span className={railLabelClass}>{labels[item.label]}</span>
     </Link>
   );
 }
