@@ -318,6 +318,68 @@
       "cancel": "Annuleren"
     }
   },
+  "ics": {
+    "title": "Agenda-abonnementen",
+    "subtitle": "Schoolagenda of sportclub? Plak de agenda-link (ICS/webcal) en alles staat vanzelf op het bord.",
+    "empty": "Er zijn nog geen agenda-abonnementen.",
+    "readOnly": "alleen lezen",
+    "refreshNow": "Vernieuw nu",
+    "pause": "Pauzeren",
+    "resume": "Weer aanzetten",
+    "remove": "Uit Kynite halen",
+    "lastSynced": "Bijgewerkt {when}",
+    "never": "Nog niet opgehaald",
+    "lastFailed": "mislukt {when}",
+    "add": {
+      "title": "Agenda toevoegen",
+      "description": "Zoek op de site van de school of club naar “agenda abonneren” of “ICS” en plak die link hieronder. Kynite leest deze agenda alleen; je kunt er niets in wijzigen.",
+      "url": "Agenda-link (ICS of webcal)",
+      "urlPlaceholder": "https://school.nl/agenda.ics",
+      "name": "Naam (optioneel)",
+      "namePlaceholder": "Schoolagenda Mila",
+      "color": "Kleur",
+      "action": "Agenda toevoegen",
+      "pending": "Even ophalen…"
+    },
+    "status": {
+      "active": "Actief",
+      "paused": "Gepauzeerd"
+    },
+    "colors": {
+      "blue": "Blauw",
+      "purple": "Paars",
+      "orange": "Oranje",
+      "green": "Groen",
+      "red": "Rood",
+      "yellow": "Geel",
+      "pink": "Roze",
+      "teal": "Turquoise"
+    },
+    "removeConfirm": {
+      "title": "Dit abonnement stoppen?",
+      "body": "{name} verdwijnt uit Kynite. {count, plural, =0 {Er staan nog geen afspraken uit deze agenda in Kynite} one {# afspraak verdwijnt mee} other {# afspraken verdwijnen mee}}. Bij de school of club zelf verandert er niets.",
+      "confirm": "Ja, stoppen",
+      "cancel": "Annuleren"
+    },
+    "errors": {
+      "forbidden": "Dat mag je niet doen.",
+      "invalidInput": "Controleer de ingevulde gegevens.",
+      "duplicate": "Deze agenda staat er al bij.",
+      "subscriptionNotFound": "Dit abonnement bestaat niet meer.",
+      "urlInvalid": "Dit lijkt geen geldige link. Plak de hele link, inclusief https://.",
+      "urlScheme": "Alleen links die met https:// of webcal:// beginnen werken hier.",
+      "urlCredentials": "Deze link bevat een gebruikersnaam of wachtwoord. Gebruik de gewone agenda-link.",
+      "urlPrivateHost": "Deze link wijst naar een adres binnen een eigen netwerk. Dat kan Kynite niet ophalen.",
+      "urlTooLong": "Deze link is te lang.",
+      "tooManyRedirects": "De link stuurt te vaak door. Vraag de school of club om de directe agenda-link.",
+      "unreachable": "De agenda is niet bereikbaar. Controleer de link of probeer het later opnieuw.",
+      "timeout": "De agenda reageerde te traag. Probeer het later opnieuw.",
+      "httpError": "De server van de agenda gaf een fout terug. Controleer de link.",
+      "tooLarge": "Deze agenda is te groot om op te halen.",
+      "notCalendar": "Op deze link staat geen agenda. Zoek de link die eindigt op .ics.",
+      "parseFailed": "De agenda kon niet gelezen worden."
+    }
+  },
   "calendar": {
     "title": "Agenda",
     "todayTitle": "Vandaag",
@@ -1127,7 +1189,8 @@
         "forbidden": "Je hebt geen rechten om dit aan te passen.",
         "invalidInput": "Controleer de ingevulde gegevens.",
         "calendarNotFound": "Deze agenda bestaat niet meer."
-      }
+      },
+      "manageSubscriptions": "Agenda-abonnementen beheren"
     },
     "devices": {
       "title": "Apparaten",

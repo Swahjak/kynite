@@ -195,6 +195,10 @@ describe('every realtime event type is published by its owning slice', () => {
       // learn about them.
       'family',
       'google',
+      // M25: the ICS slice publishes `settings.updated` when a feed is added,
+      // paused, removed or refreshed with changes — a hub reads that as
+      // "re-read yourself", which is exactly what a new school calendar needs.
+      'ics',
       'rewards',
       'routines',
       // M24: the tasks slice publishes `task.upserted` / `task.deleted`, so a

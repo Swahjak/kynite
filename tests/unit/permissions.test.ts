@@ -54,6 +54,13 @@ const EXPECTED: Record<Capability, [Grade, Grade, Grade, Grade, Grade, Grade]> =
   'family:manage': ['allow', 'deny', 'deny', 'deny', 'deny', 'deny'],
   'display:manage': ['allow', 'allow', 'deny', 'deny', 'deny', 'deny'],
   'google:link': ['allow', 'own', 'deny', 'deny', 'deny', 'deny'],
+  // M25, not in §7's printed table until this milestone (the row is added
+  // there too). Subscribing the household to a published ICS feed is graded
+  // `allow` for the adult column rather than `own` like `google:link`: a
+  // subscription has no owner member to resolve `own` against, so that grade
+  // would deny every adult, and a school agenda is a household fact rather
+  // than one parent's identity.
+  'ics:manage': ['allow', 'allow', 'deny', 'deny', 'deny', 'deny'],
   'member:manage': ['allow', 'deny', 'deny', 'deny', 'deny', 'deny'],
   // M14 addition, not in §7's printed table: editing *your own* avatar/colour.
   // FR26's second interaction happens while the invitee holds the `adult`

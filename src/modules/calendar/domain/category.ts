@@ -38,6 +38,22 @@ const PALETTE_RGB: Record<EventCategory, [number, number, number]> = {
   teal: [0x14, 0xb8, 0xa6],
 };
 
+/**
+ * The reference hex of a palette entry — the inverse of `nearestCategory`.
+ *
+ * It exists because a calendar row stores a *colour*, not a category (the
+ * column predates the palette and holds Google's arbitrary hex), so a surface
+ * that lets a parent *pick* one — the feed subscription form (M25) — has to
+ * write a hex the round trip through `nearestCategory` maps back to the same
+ * entry. Derived from the same table rather than a second list of literals, so
+ * the two can never drift.
+ */
+export function hexForCategory(category: EventCategory): string {
+  const [red, green, blue] = PALETTE_RGB[category];
+  const hex = (value: number) => value.toString(16).padStart(2, '0');
+  return `#${hex(red)}${hex(green)}${hex(blue)}`;
+}
+
 function parseHex(color: string): [number, number, number] | null {
   const match = /^#?([0-9a-f]{6})$/i.exec(color.trim());
   if (!match) return null;

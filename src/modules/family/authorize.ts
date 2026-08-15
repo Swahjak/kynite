@@ -17,6 +17,7 @@ export const CAPABILITIES = [
   'family:manage',
   'display:manage',
   'google:link',
+  'ics:manage',
   'member:manage',
   'member:self',
   'routine:write',
@@ -160,6 +161,34 @@ const MATRIX: Record<Capability, Record<Column, Grade>> = {
   'google:link': {
     owner: 'allow',
     adult: 'own',
+    child: 'deny',
+    contributor: 'deny',
+    viewer: 'deny',
+    device: 'deny',
+  },
+  /**
+   * Subscribe the household to a published calendar feed — the school's
+   * holidays, the sports club's fixtures — and unsubscribe from one (M25).
+   *
+   * Its own row rather than a reuse of `google:link`, and `allow` for the adult
+   * column rather than that row's `own`, because a subscription has no owner to
+   * resolve `own` against. It is not one parent's identity plugged into the
+   * household the way a Google account is; it is a public URL that produces a
+   * *household* calendar, closer to `display:manage` — which both parents hold
+   * — than to linking somebody's personal Google account. Grading it `own`
+   * here would fail closed for every adult, since `decide()` treats an absent
+   * `ownerMemberId` as untestable, and the second parent could never add the
+   * school agenda.
+   *
+   * Everything below the adult column is `deny`, matching `google:link` exactly:
+   * a child cannot decide what appears on the family's wall, a caregiver link
+   * is a read of the calendar and never a change to which calendars exist, and
+   * a kiosk writes "completions, timers and redemption requests — never
+   * settings" (§7).
+   */
+  'ics:manage': {
+    owner: 'allow',
+    adult: 'allow',
     child: 'deny',
     contributor: 'deny',
     viewer: 'deny',

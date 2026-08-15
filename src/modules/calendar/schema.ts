@@ -78,6 +78,22 @@ export const event = pgTable(
     /** Null = a Kynite-native event that lives in no Google calendar. */
     calendarId: uuid('calendar_id').references(() => calendar.id, { onDelete: 'cascade' }),
     googleEventId: text('google_event_id'),
+    /**
+     * The identity of this row in a *subscribed feed* — an ICS `UID`, plus the
+     * `RECURRENCE-ID` for an override instance (M25, `modules/ics`).
+     *
+     * A separate column rather than a second meaning for `google_event_id`,
+     * because the two are different namespaces with different guarantees: a
+     * Google id is one we can also *write* back, and a feed UID is only ever
+     * read. Keeping them apart means the push path's "is this Google-backed"
+     * question stays a question about the calendar, and no future writer can
+     * mistake a school's UID for something it may PUT.
+     *
+     * Its unique index is what makes a refresh idempotent: a feed re-fetched
+     * every hour upserts onto (calendar_id, source_uid), so a school moving a
+     * studiedag updates one row instead of accumulating a new one per hour.
+     */
+    sourceUid: text('source_uid'),
     title: text('title').notNull(),
     description: text('description'),
     location: text('location'),
@@ -151,6 +167,10 @@ export const event = pgTable(
     index('event_family_starts_at_idx').on(table.familyId, table.startsAt),
     // Sync identity: one row per Google event per calendar.
     uniqueIndex('event_calendar_google_event_unique').on(table.calendarId, table.googleEventId),
+    // Feed identity: one row per ICS UID (plus RECURRENCE-ID) per calendar.
+    // Null `source_uid` rows — everything that is not from a feed — never
+    // collide, since Postgres treats nulls as distinct in a unique index.
+    uniqueIndex('event_calendar_source_uid_unique').on(table.calendarId, table.sourceUid),
     index('event_recurrence_parent_id_idx').on(table.recurrenceParentId),
     index('event_owner_member_id_idx').on(table.ownerMemberId),
   ]

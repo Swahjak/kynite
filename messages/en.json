@@ -318,6 +318,68 @@
       "cancel": "Cancel"
     }
   },
+  "ics": {
+    "title": "Calendar subscriptions",
+    "subtitle": "A school or club calendar? Paste its calendar link (ICS/webcal) and it appears on the board by itself.",
+    "empty": "No calendar subscriptions yet.",
+    "readOnly": "read-only",
+    "refreshNow": "Refresh now",
+    "pause": "Pause",
+    "resume": "Resume",
+    "remove": "Remove from Kynite",
+    "lastSynced": "Updated {when}",
+    "never": "Not fetched yet",
+    "lastFailed": "failed {when}",
+    "add": {
+      "title": "Add a calendar",
+      "description": "On the school or club website, look for “subscribe to calendar” or “ICS” and paste that link below. Kynite only reads this calendar; you cannot change anything in it.",
+      "url": "Calendar link (ICS or webcal)",
+      "urlPlaceholder": "https://school.example/calendar.ics",
+      "name": "Name (optional)",
+      "namePlaceholder": "Mila's school calendar",
+      "color": "Colour",
+      "action": "Add calendar",
+      "pending": "Fetching…"
+    },
+    "status": {
+      "active": "Active",
+      "paused": "Paused"
+    },
+    "colors": {
+      "blue": "Blue",
+      "purple": "Purple",
+      "orange": "Orange",
+      "green": "Green",
+      "red": "Red",
+      "yellow": "Yellow",
+      "pink": "Pink",
+      "teal": "Teal"
+    },
+    "removeConfirm": {
+      "title": "Stop this subscription?",
+      "body": "{name} disappears from Kynite. {count, plural, =0 {No events from this calendar are in Kynite yet} one {# event goes with it} other {# events go with it}}. Nothing changes at the school or club itself.",
+      "confirm": "Yes, stop it",
+      "cancel": "Cancel"
+    },
+    "errors": {
+      "forbidden": "You are not allowed to do that.",
+      "invalidInput": "Check the details you entered.",
+      "duplicate": "This calendar has already been added.",
+      "subscriptionNotFound": "This subscription no longer exists.",
+      "urlInvalid": "That does not look like a valid link. Paste the whole link, including https://.",
+      "urlScheme": "Only links starting with https:// or webcal:// work here.",
+      "urlCredentials": "This link contains a username or password. Use the plain calendar link.",
+      "urlPrivateHost": "This link points at an address inside a private network, which Kynite cannot fetch.",
+      "urlTooLong": "This link is too long.",
+      "tooManyRedirects": "The link redirects too many times. Ask the school or club for the direct calendar link.",
+      "unreachable": "The calendar could not be reached. Check the link or try again later.",
+      "timeout": "The calendar took too long to respond. Try again later.",
+      "httpError": "The calendar's server returned an error. Check the link.",
+      "tooLarge": "This calendar is too large to fetch.",
+      "notCalendar": "There is no calendar at this link. Look for the link ending in .ics.",
+      "parseFailed": "The calendar could not be read."
+    }
+  },
   "calendar": {
     "title": "Calendar",
     "todayTitle": "Today",
@@ -1127,7 +1189,8 @@
         "forbidden": "You are not allowed to change this.",
         "invalidInput": "Check the details you entered.",
         "calendarNotFound": "This calendar no longer exists."
-      }
+      },
+      "manageSubscriptions": "Manage calendar subscriptions"
     },
     "devices": {
       "title": "Devices",

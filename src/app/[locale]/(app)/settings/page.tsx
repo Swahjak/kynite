@@ -152,6 +152,15 @@ export default async function SettingsHubPage() {
           label={t('calendars.manageGoogle')}
           bordered
         />
+        {/* M25: the other half of "where do our calendars come from" — feeds
+            the household follows but nobody in it owns. Beside Google rather
+            than in its own section, because to a parent they are one question. */}
+        <SettingsNavRow
+          href="/settings/subscriptions"
+          icon="event"
+          label={t('calendars.manageSubscriptions')}
+          bordered
+        />
       </SettingsSection>
 
       <SettingsSection id="devices" title={t('devices.title')}>

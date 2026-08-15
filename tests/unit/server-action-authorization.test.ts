@@ -292,7 +292,11 @@ describe('every Server Action authorizes first', () => {
     // 52 → 53: the Google slice's `applyCalendarSelectionAction`, the one
     // submit behind the "which calendars sync?" picker that opens right after
     // an account is linked.
-    expect(findings.length).toBe(53);
+    // 53 → 57 in M25: the ICS-subscription slice's four —
+    // `addSubscriptionAction`, `refreshSubscriptionAction`,
+    // `setSubscriptionEnabledAction` and `removeSubscriptionAction`, all four
+    // behind `ics:manage`.
+    expect(findings.length).toBe(57);
   });
 
   it('reports no unauthorized action anywhere in src/', () => {

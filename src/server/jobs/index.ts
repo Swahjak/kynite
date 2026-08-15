@@ -1,5 +1,6 @@
 import 'server-only';
 import { registerGoogleJobs } from '@/modules/google';
+import { registerIcsJobs } from '@/modules/ics';
 import { registerNotificationJobs } from '@/modules/notifications';
 import { jobsEnabled, startBoss, stopBoss } from './boss';
 import { registerMaintenanceJobs } from './maintenance';
@@ -20,6 +21,7 @@ export async function startJobs(): Promise<void> {
   started ??= (async () => {
     const boss = await startBoss();
     await registerGoogleJobs(boss);
+    await registerIcsJobs(boss);
     await registerNotificationJobs(boss);
     await registerMaintenanceJobs(boss);
   })();

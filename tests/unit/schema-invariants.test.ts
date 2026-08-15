@@ -98,6 +98,10 @@ describe('schema-wide invariants', () => {
         // one taken away" distinguishable after a member row is hard-deleted.
         'former_member',
         'google_account',
+        // M25: one row per subscribed ICS/webcal feed. The events it imports
+        // live on an ordinary `calendar` row, which is why this table holds
+        // only what a feed has and a calendar does not.
+        'ics_subscription',
         'member',
         'member_invite',
         // M16: which notifications one member wants. Absent row = everything on.

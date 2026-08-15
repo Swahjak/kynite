@@ -176,6 +176,13 @@
       "when": 1786733949515,
       "tag": "0024_windy_wild_child",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1786781438011,
+      "tag": "0025_safe_sentinel",
+      "breakpoints": true
     }
   ]
 }

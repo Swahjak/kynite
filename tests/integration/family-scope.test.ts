@@ -106,6 +106,20 @@ describe.skipIf(!databaseUrl)('family scoping (integration)', () => {
       })
       .returning();
 
+    // M25: a subscribed feed. It hangs off both the family and the calendar it
+    // fills, so it is the one row here that could be orphaned by two different
+    // cascades — which is exactly why it needs a fixture row rather than a
+    // vacuous assertion.
+    const [feedCalendar] = await db
+      .insert(schema.calendar)
+      .values({ familyId, summary: 'Schoolagenda', writable: false })
+      .returning();
+    await db.insert(schema.icsSubscription).values({
+      familyId,
+      calendarId: feedCalendar.id,
+      url: `https://school.example/${randomUUID()}.ics`,
+    });
+
     const [reward] = await db
       .insert(schema.reward)
       .values({ familyId, title: 'Ijsje', costStars: 3, category: 'treat' })

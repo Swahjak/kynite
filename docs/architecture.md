@@ -688,6 +688,7 @@ revocable/expiring with `lastUsedAt`/`useCount` visible to parents. Served with
 | View private calendars | ✓ | own | — | — | — | busy-only |
 | Create/edit events | ✓ | ✓ | — | — | — | — |
 | Link/unlink Google account | ✓ | own | — | — | — | — |
+| Subscribe to an ICS feed (`ics:manage`) | ✓ | ✓ | — | — | — | — |
 | Manage the household (`family:manage`) | ✓ | — | — | — | — | — |
 | Manage members & roles | ✓ | — | — | — | — | — |
 | Manage hub/calendar display (`display:manage`) | ✓ | ✓ | — | — | — | — |
