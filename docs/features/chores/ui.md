@@ -97,10 +97,13 @@ Single column layout with vertically stacked sections.
 
 ### Filter Tabs
 
-| State    | Background        | Text      |
-| -------- | ----------------- | --------- |
-| Active   | Primary (#13ec92) | Dark      |
-| Inactive | Transparent       | Secondary |
+| State    | Background            | Text      |
+| -------- | --------------------- | --------- |
+| Active   | `--primary`           | Dark      |
+| Inactive | Transparent           | Secondary |
+
+Token values live in [`docs/design/README.md`](../../design/README.md); the hex
+this table used to quote was from the superseded green brand.
 
 ---
 

@@ -3,6 +3,13 @@
 Audit date: 2026-08-07. Read-only audit of the implemented app against
 `docs/design/stitch/` and `.claude/skills/brand-guidelines/`.
 
+> **Historical record — superseded.** Both references this audit was measured
+> against have since been deleted: the `stitch` mockups and the green
+> `#13ec92` / Lexend `brand-guidelines` skill. The design source of truth is now
+> [`docs/design/README.md`](./design/README.md). This file is kept for the
+> reasoning it captured, not as a live gap list; every hex, font, and file path
+> quoted below describes the world as of the audit date.
+
 Severity key:
 
 | Code   | Meaning                                                                          |

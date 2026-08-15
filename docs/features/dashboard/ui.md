@@ -356,14 +356,12 @@ The dashboard fully supports dark mode via the `dark` class on `<html>`.
 
 ### Color Mapping
 
-| Element         | Light   | Dark                |
-| --------------- | ------- | ------------------- |
-| Page background | #f6f8f7 | #10221a             |
-| Surface/Cards   | #ffffff | #1c2e26             |
-| Text Primary    | #111815 | #ffffff             |
-| Text Secondary  | #618979 | #8baea0             |
-| Borders         | #dbe6e1 | #2a3831             |
-| Primary         | #13ec92 | #13ec92 (unchanged) |
+Colors are not restated here. The dashboard paints entirely with the semantic
+tokens (`--background`, `--surface`, `--foreground`, `--muted-foreground`,
+`--border`, `--primary`), whose light and dark values are defined once in
+[`docs/design/README.md`](../../design/README.md) — the single source of truth.
+An earlier revision of this page hardcoded the superseded green `#13ec92`
+palette; consult the design system rather than any hex quoted in a feature spec.
 
 ---
 
