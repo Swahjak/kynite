@@ -126,6 +126,7 @@ export {
   SheetTrigger,
 } from './components/sheet';
 export { FAB_SLOT_ID, SlotPortal } from './components/slot-portal';
+export { Switch } from './components/switch';
 export { Tabs, TabsContent, TabsList, TabsTrigger, tabsListVariants } from './components/tabs';
 export { Textarea, textareaVariants } from './components/textarea';
 export { TimeField, type TimeFieldLabels, type TimeFieldProps } from './components/time-field';
