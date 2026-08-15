@@ -65,13 +65,7 @@
             <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:32px;line-height:1.1;letter-spacing:-0.02em;">Goedemorgen</span>
             <span style="display:block;font-size:16px;color:#434656;margin-top:2px;">vrijdag 14 augustus 2026</span>
           </div>
-          <div style="display:flex;align-items:center;gap:6px;">
-            <span style="width:34px;height:34px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 65);"><img src="uploads/parent1.svg" alt="Tom" style="width:100%;height:100%;object-fit:cover;display:block;"/></span>
-            <span style="width:34px;height:34px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 290);"><img src="uploads/parent2.svg" alt="Lotte" style="width:100%;height:100%;object-fit:cover;display:block;"/></span>
-            <span style="width:34px;height:34px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 335);"><img src="uploads/child1.svg" alt="Mila" style="width:100%;height:100%;object-fit:cover;display:block;"/></span>
-            <span style="width:34px;height:34px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 245);"><img src="uploads/child2.svg" alt="Daan" style="width:100%;height:100%;object-fit:cover;display:block;"/></span>
-          </div>
-          <span class="tnum" style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:44px;letter-spacing:-0.02em;">08:42</span>
+                    <span class="tnum" style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:44px;letter-spacing:-0.02em;">08:42</span>
         </div>
 
         <div style="display:flex;gap:8px;padding:14px 28px 0;flex-shrink:0;">
@@ -402,7 +396,7 @@
           <!-- kolom 1: NU + dagoverzicht -->
           <div style="display:flex;flex-direction:column;gap:16px;">
             <sc-if value="{{ geenThema }}" hint-placeholder-val="{{ false }}">
-            <div style="background:#f5f3ee;border-radius:22px;padding:18px 20px;position:relative;overflow:hidden;">
+            <div style="background:#f5f3ee;border-radius:20px;padding:18px 20px;position:relative;overflow:hidden;">
               <div style="position:absolute;top:-40px;right:-40px;width:120px;height:120px;background:rgba(93,95,239,0.07);border-radius:9999px;filter:blur(20px);"></div>
               <div style="display:flex;align-items:center;gap:14px;position:relative;">
                 <span style="width:48px;height:48px;border-radius:14px;background:oklch(94% 0.025 200);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:26px;color:oklch(40% 0.1 200);">wb_twilight</span></span>
@@ -418,60 +412,24 @@
             </div>
             </sc-if>
 
-            <div style="background:#fff;border:1px solid #e6e3dc;border-radius:22px;padding:20px;">
-              <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:19px;margin-bottom:16px;">Dagoverzicht</span>
-              <div style="display:flex;flex-direction:column;gap:14px;">
-                <div style="display:flex;gap:12px;opacity:0.5;">
-                  <span class="tnum" style="width:44px;flex-shrink:0;font-size:14px;font-weight:600;color:#434656;">07:30</span>
-                  <span style="width:8px;height:8px;border-radius:9999px;background:oklch(58% 0.14 200);margin-top:6px;flex-shrink:0;"></span>
-                  <span style="flex:1;font-size:15px;text-decoration:line-through;">Ontbijt</span>
-                </div>
-                <div style="display:flex;gap:12px;background:rgba(93,95,239,0.07);border-radius:12px;padding:8px 10px;margin:0 -10px;">
-                  <span class="tnum" style="width:44px;flex-shrink:0;font-size:14px;font-weight:700;color:#5d5fef;">08:15</span>
-                  <span style="width:8px;height:8px;border-radius:9999px;background:oklch(58% 0.14 200);margin-top:6px;flex-shrink:0;"></span>
-                  <div style="flex:1;"><span style="display:block;font-size:15px;font-weight:700;">Ochtendroutine</span><span style="display:block;font-size:13px;color:#434656;">Mila &amp; Daan</span></div>
-                </div>
-                <div style="display:flex;gap:12px;">
-                  <span class="tnum" style="width:44px;flex-shrink:0;font-size:14px;font-weight:600;color:#434656;">09:15</span>
-                  <span style="width:8px;height:8px;border-radius:9999px;background:oklch(58% 0.14 245);margin-top:6px;flex-shrink:0;"></span>
-                  <div style="flex:1;"><span style="display:block;font-size:15px;">Schoolreis</span><span style="display:block;font-size:13px;color:#434656;">Mila &amp; Daan</span></div>
-                </div>
-                <div style="display:flex;gap:12px;">
-                  <span class="tnum" style="width:44px;flex-shrink:0;font-size:14px;font-weight:600;color:#434656;">10:00</span>
-                  <span style="width:8px;height:8px;border-radius:9999px;background:oklch(58% 0.14 20);margin-top:6px;flex-shrink:0;"></span>
-                  <div style="flex:1;"><span style="display:block;font-size:15px;">Tandarts</span><span style="display:block;font-size:13px;color:#434656;">Lotte</span></div>
-                </div>
-                <div style="display:flex;gap:12px;">
-                  <span class="tnum" style="width:44px;flex-shrink:0;font-size:14px;font-weight:600;color:#434656;">11:00</span>
-                  <span class="material-symbols-outlined" style="font-size:14px;color:#747688;margin-top:2px;">lock</span>
-                  <div style="flex:1;"><span style="display:block;font-size:15px;color:#747688;">Bezet</span><span style="display:block;font-size:13px;color:#434656;">Tom</span></div>
-                </div>
-                <div style="display:flex;gap:12px;">
-                  <span class="tnum" style="width:44px;flex-shrink:0;font-size:14px;font-weight:600;color:#434656;">12:30</span>
-                  <span style="width:8px;height:8px;border-radius:9999px;background:oklch(58% 0.14 65);margin-top:6px;flex-shrink:0;"></span>
-                  <div style="flex:1;"><span style="display:block;font-size:15px;">Werklunch</span><span style="display:block;font-size:13px;color:#434656;">Tom</span></div>
-                </div>
-                <div style="display:flex;gap:12px;">
-                  <span class="tnum" style="width:44px;flex-shrink:0;font-size:14px;font-weight:600;color:#434656;">15:30</span>
-                  <span style="width:8px;height:8px;border-radius:9999px;background:oklch(58% 0.14 155);margin-top:6px;flex-shrink:0;"></span>
-                  <div style="flex:1;"><span style="display:block;font-size:15px;">Voetbaltraining</span><span style="display:block;font-size:13px;color:#434656;">Mila</span></div>
-                </div>
-                <div style="display:flex;gap:12px;">
-                  <span class="tnum" style="width:44px;flex-shrink:0;font-size:14px;font-weight:600;color:#434656;">18:00</span>
-                  <span style="width:8px;height:8px;border-radius:9999px;background:oklch(58% 0.14 335);margin-top:6px;flex-shrink:0;"></span>
-                  <div style="flex:1;"><span style="display:block;font-size:15px;">Etentje</span><span style="display:block;font-size:13px;color:#434656;">Iedereen</span></div>
-                </div>
-                <div style="display:flex;gap:12px;">
-                  <span class="tnum" style="width:44px;flex-shrink:0;font-size:14px;font-weight:600;color:#434656;">19:30</span>
-                  <span style="width:8px;height:8px;border-radius:9999px;background:oklch(58% 0.14 200);margin-top:6px;flex-shrink:0;"></span>
-                  <div style="flex:1;"><span style="display:block;font-size:15px;">Bedtime routine</span><span style="display:block;font-size:13px;color:#434656;">Mila &amp; Daan</span></div>
-                </div>
+            <div style="background:#fff;border:1px solid #e6e3dc;border-radius:20px;padding:20px 8px 8px;">
+              <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:19px;margin:0 12px 14px;">Dagoverzicht</span>
+              <div style="display:flex;flex-direction:column;">
+              <div style="display:flex;align-items:center;gap:12px;padding:12px;min-height:48px;box-sizing:border-box;border-top:1px solid #e1e3e4;border-radius:12px;opacity:0.5;"><span style="width:4px;align-self:stretch;border-radius:9999px;background:oklch(58% 0.14 290);flex-shrink:0;"></span><span style="display:flex;flex-direction:column;width:52px;flex-shrink:0;"><span class="tnum" style="font-size:14px;font-weight:600;color:#191c1d;">07:30</span><span class="tnum" style="font-size:12px;color:#747688;">08:00</span></span><span class="material-symbols-outlined" style="font-size:20px;color:oklch(45% 0.1 290);flex-shrink:0;">restaurant</span><span style="flex:1;min-width:0;display:flex;flex-direction:column;"><span style="font-size:15px;font-weight:600;text-decoration:line-through;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Ontbijt</span></span><span style="display:flex;flex-shrink:0;"><span style="width:24px;height:24px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 335);"><img src="uploads/child1.svg" alt="Mila" style="width:100%;height:100%;object-fit:cover;display:block;"/></span><span style="width:24px;height:24px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 245);margin-left:-8px;box-shadow:0 0 0 2px #ffffff;"><img src="uploads/child2.svg" alt="Daan" style="width:100%;height:100%;object-fit:cover;display:block;"/></span></span></div>
+              <div style="display:flex;align-items:center;gap:12px;padding:12px;min-height:48px;box-sizing:border-box;border-top:1px solid #e1e3e4;border-radius:12px;background:rgba(93,95,239,0.07);"><span style="width:4px;align-self:stretch;border-radius:9999px;background:oklch(58% 0.14 290);flex-shrink:0;"></span><span style="display:flex;flex-direction:column;width:52px;flex-shrink:0;"><span class="tnum" style="font-size:14px;font-weight:700;color:#5d5fef;">08:15</span><span class="tnum" style="font-size:12px;color:rgba(93,95,239,0.7);">09:00</span></span><span class="material-symbols-outlined" style="font-size:20px;color:oklch(45% 0.1 290);flex-shrink:0;">wb_twilight</span><span style="flex:1;min-width:0;display:flex;flex-direction:column;"><span style="font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Ochtendroutine</span></span><span style="display:flex;flex-shrink:0;"><span style="width:24px;height:24px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 335);"><img src="uploads/child1.svg" alt="Mila" style="width:100%;height:100%;object-fit:cover;display:block;"/></span><span style="width:24px;height:24px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 245);margin-left:-8px;box-shadow:0 0 0 2px #ffffff;"><img src="uploads/child2.svg" alt="Daan" style="width:100%;height:100%;object-fit:cover;display:block;"/></span></span><span style="background:#5d5fef;color:#ffffff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10px;padding:3px 9px;border-radius:9999px;flex-shrink:0;">NU</span></div>
+              <div style="display:flex;align-items:center;gap:12px;padding:12px;min-height:48px;box-sizing:border-box;border-top:1px solid #e1e3e4;border-radius:12px;"><span style="width:4px;align-self:stretch;border-radius:9999px;background:oklch(58% 0.14 245);flex-shrink:0;"></span><span style="display:flex;flex-direction:column;width:52px;flex-shrink:0;"><span class="tnum" style="font-size:14px;font-weight:600;color:#191c1d;">09:15</span><span class="tnum" style="font-size:12px;color:#747688;">11:30</span></span><span class="material-symbols-outlined" style="font-size:20px;color:oklch(45% 0.1 245);flex-shrink:0;">school</span><span style="flex:1;min-width:0;display:flex;flex-direction:column;"><span style="font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Schoolreis</span></span><span style="display:flex;flex-shrink:0;"><span style="width:24px;height:24px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 335);"><img src="uploads/child1.svg" alt="Mila" style="width:100%;height:100%;object-fit:cover;display:block;"/></span><span style="width:24px;height:24px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 245);margin-left:-8px;box-shadow:0 0 0 2px #ffffff;"><img src="uploads/child2.svg" alt="Daan" style="width:100%;height:100%;object-fit:cover;display:block;"/></span></span></div>
+              <div style="display:flex;align-items:center;gap:12px;padding:12px;min-height:48px;box-sizing:border-box;border-top:1px solid #e1e3e4;border-radius:12px;"><span style="width:4px;align-self:stretch;border-radius:9999px;background:oklch(58% 0.14 20);flex-shrink:0;"></span><span style="display:flex;flex-direction:column;width:52px;flex-shrink:0;"><span class="tnum" style="font-size:14px;font-weight:600;color:#191c1d;">10:00</span><span class="tnum" style="font-size:12px;color:#747688;">10:45</span></span><span class="material-symbols-outlined" style="font-size:20px;color:oklch(45% 0.1 20);flex-shrink:0;">medical_services</span><span style="flex:1;min-width:0;display:flex;flex-direction:column;"><span style="font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Tandarts</span></span><span style="display:flex;flex-shrink:0;"><span style="width:24px;height:24px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 290);"><img src="uploads/parent2.svg" alt="Lotte" style="width:100%;height:100%;object-fit:cover;display:block;"/></span></span></div>
+              <div style="display:flex;align-items:center;gap:12px;padding:12px;min-height:48px;box-sizing:border-box;border-top:1px solid #e1e3e4;border-radius:12px;"><span style="width:4px;align-self:stretch;border-radius:9999px;background:#dcdad4;flex-shrink:0;"></span><span style="display:flex;flex-direction:column;width:52px;flex-shrink:0;"><span class="tnum" style="font-size:14px;font-weight:600;color:#191c1d;">11:00</span><span class="tnum" style="font-size:12px;color:#747688;">12:00</span></span><span class="material-symbols-outlined" style="font-size:20px;color:#747688;flex-shrink:0;">lock</span><span style="flex:1;min-width:0;display:flex;flex-direction:column;"><span style="font-size:15px;font-weight:600;color:#747688;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Bezet</span></span><span style="display:flex;flex-shrink:0;"><span style="width:24px;height:24px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 65);"><img src="uploads/parent1.svg" alt="Tom" style="width:100%;height:100%;object-fit:cover;display:block;"/></span></span></div>
+              <div style="display:flex;align-items:center;gap:12px;padding:12px;min-height:48px;box-sizing:border-box;border-top:1px solid #e1e3e4;border-radius:12px;"><span style="width:4px;align-self:stretch;border-radius:9999px;background:oklch(58% 0.14 200);flex-shrink:0;"></span><span style="display:flex;flex-direction:column;width:52px;flex-shrink:0;"><span class="tnum" style="font-size:14px;font-weight:600;color:#191c1d;">12:30</span><span class="tnum" style="font-size:12px;color:#747688;">13:30</span></span><span class="material-symbols-outlined" style="font-size:20px;color:oklch(45% 0.1 200);flex-shrink:0;">work</span><span style="flex:1;min-width:0;display:flex;flex-direction:column;"><span style="font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Werklunch</span></span><span style="display:flex;flex-shrink:0;"><span style="width:24px;height:24px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 65);"><img src="uploads/parent1.svg" alt="Tom" style="width:100%;height:100%;object-fit:cover;display:block;"/></span></span></div>
+              <div style="display:flex;align-items:center;gap:12px;padding:12px;min-height:48px;box-sizing:border-box;border-top:1px solid #e1e3e4;border-radius:12px;"><span style="width:4px;align-self:stretch;border-radius:9999px;background:oklch(58% 0.14 155);flex-shrink:0;"></span><span style="display:flex;flex-direction:column;width:52px;flex-shrink:0;"><span class="tnum" style="font-size:14px;font-weight:600;color:#191c1d;">15:30</span><span class="tnum" style="font-size:12px;color:#747688;">16:30</span></span><span class="material-symbols-outlined" style="font-size:20px;color:oklch(45% 0.1 155);flex-shrink:0;">sports</span><span style="flex:1;min-width:0;display:flex;flex-direction:column;"><span style="font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Voetbaltraining</span></span><span style="display:flex;flex-shrink:0;"><span style="width:24px;height:24px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 335);"><img src="uploads/child1.svg" alt="Mila" style="width:100%;height:100%;object-fit:cover;display:block;"/></span></span></div>
+              <div style="display:flex;align-items:center;gap:12px;padding:12px;min-height:48px;box-sizing:border-box;border-top:1px solid #e1e3e4;border-radius:12px;"><span style="width:4px;align-self:stretch;border-radius:9999px;background:oklch(58% 0.14 335);flex-shrink:0;"></span><span style="display:flex;flex-direction:column;width:52px;flex-shrink:0;"><span class="tnum" style="font-size:14px;font-weight:600;color:#191c1d;">18:00</span><span class="tnum" style="font-size:12px;color:#747688;">19:00</span></span><span class="material-symbols-outlined" style="font-size:20px;color:oklch(45% 0.1 335);flex-shrink:0;">celebration</span><span style="flex:1;min-width:0;display:flex;flex-direction:column;"><span style="font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Etentje</span></span><span style="width:24px;height:24px;border-radius:9999px;background:#e6e3dc;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:18px;color:#434656;">groups</span></span></div>
+              <div style="display:flex;align-items:center;gap:12px;padding:12px;min-height:48px;box-sizing:border-box;border-top:1px solid #e1e3e4;border-radius:12px;"><span style="width:4px;align-self:stretch;border-radius:9999px;background:oklch(58% 0.14 290);flex-shrink:0;"></span><span style="display:flex;flex-direction:column;width:52px;flex-shrink:0;"><span class="tnum" style="font-size:14px;font-weight:600;color:#191c1d;">19:30</span><span class="tnum" style="font-size:12px;color:#747688;">20:00</span></span><span class="material-symbols-outlined" style="font-size:20px;color:oklch(45% 0.1 290);flex-shrink:0;">bedtime</span><span style="flex:1;min-width:0;display:flex;flex-direction:column;"><span style="font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Bedtime routine</span></span><span style="display:flex;flex-shrink:0;"><span style="width:24px;height:24px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 335);"><img src="uploads/child1.svg" alt="Mila" style="width:100%;height:100%;object-fit:cover;display:block;"/></span><span style="width:24px;height:24px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 245);margin-left:-8px;box-shadow:0 0 0 2px #ffffff;"><img src="uploads/child2.svg" alt="Daan" style="width:100%;height:100%;object-fit:cover;display:block;"/></span></span></div>
               </div>
             </div>
           </div>
 
           <!-- kolom 2: per persoon -->
-          <div style="background:#fff;border:1px solid #e6e3dc;border-radius:22px;padding:20px;">
+          <div style="background:#fff;border:1px solid #e6e3dc;border-radius:20px;padding:20px;">
             <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:19px;margin-bottom:16px;">Per persoon</span>            <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
               <div>
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><span style="width:26px;height:26px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 65);"><img src="uploads/parent1.svg" alt="Tom" style="width:100%;height:100%;object-fit:cover;display:block;"/></span><span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;">Tom</span></div>
@@ -512,7 +470,7 @@
 
           <!-- kolom 3: routines, taken -->
           <div style="display:flex;flex-direction:column;gap:16px;">
-            <div style="background:#fff;border:1px solid #e6e3dc;border-radius:22px;padding:20px;">
+            <div style="background:#fff;border:1px solid #e6e3dc;border-radius:20px;padding:20px;">
               <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:19px;margin-bottom:16px;">Routines vandaag</span>
               <div style="display:flex;flex-direction:column;gap:16px;">
                 <div>
@@ -534,7 +492,7 @@
               </div>
             </div>
 
-            <div style="background:#fff;border:1px solid #e6e3dc;border-radius:22px;padding:20px;">
+            <div style="background:#fff;border:1px solid #e6e3dc;border-radius:20px;padding:20px;">
               <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:19px;margin-bottom:12px;">Takenlijst</span>
               <div style="display:flex;flex-direction:column;">
                 <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #f0f1f2;">
@@ -565,20 +523,20 @@
 
         <sc-if value="{{ isPersonen }}" hint-placeholder-val="{{ false }}">
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px;">
-          <div style="background:#fff;border:1px solid #e6e3dc;border-radius:22px;padding:20px;">
+          <div style="background:#fff;border:1px solid #e6e3dc;border-radius:20px;padding:20px;">
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;"><span style="width:36px;height:36px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 65);"><img src="uploads/parent1.svg" alt="Tom" style="width:100%;height:100%;object-fit:cover;display:block;"/></span><span style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:20px;">Tom</span></div>
             <div style="display:flex;flex-direction:column;gap:12px;">
               <div style="display:flex;align-items:baseline;gap:8px;"><span class="material-symbols-outlined" style="font-size:15px;color:#747688;">lock</span><span style="font-size:15px;color:#747688;">11:00 Bezet</span></div>
               <div style="display:flex;align-items:baseline;gap:8px;"><span style="width:7px;height:7px;border-radius:9999px;background:oklch(58% 0.14 65);flex-shrink:0;"></span><span style="font-size:15px;">12:30 Werklunch</span></div>
             </div>
           </div>
-          <div style="background:#fff;border:1px solid #e6e3dc;border-radius:22px;padding:20px;">
+          <div style="background:#fff;border:1px solid #e6e3dc;border-radius:20px;padding:20px;">
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;"><span style="width:36px;height:36px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 290);"><img src="uploads/parent2.svg" alt="Lotte" style="width:100%;height:100%;object-fit:cover;display:block;"/></span><span style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:20px;">Lotte</span></div>
             <div style="display:flex;flex-direction:column;gap:12px;">
               <div style="display:flex;align-items:baseline;gap:8px;"><span style="width:7px;height:7px;border-radius:9999px;background:oklch(58% 0.14 20);flex-shrink:0;"></span><span style="font-size:15px;">10:00 Tandarts</span></div>
             </div>
           </div>
-          <div style="background:#fff;border:1px solid #e6e3dc;border-radius:22px;padding:20px;">
+          <div style="background:#fff;border:1px solid #e6e3dc;border-radius:20px;padding:20px;">
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;"><span style="width:36px;height:36px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 335);"><img src="uploads/child1.svg" alt="Mila" style="width:100%;height:100%;object-fit:cover;display:block;"/></span><span style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:20px;">Mila</span></div>
             <div style="display:flex;flex-direction:column;gap:12px;">
               <div style="display:flex;align-items:baseline;gap:8px;opacity:0.5;"><span style="width:7px;height:7px;border-radius:9999px;background:oklch(58% 0.14 200);flex-shrink:0;"></span><span style="font-size:15px;text-decoration:line-through;">07:30 Ontbijt</span></div>
@@ -589,7 +547,7 @@
               <div style="display:flex;align-items:baseline;gap:8px;"><span style="width:7px;height:7px;border-radius:9999px;background:oklch(58% 0.14 200);flex-shrink:0;"></span><span style="font-size:15px;">19:30 Bedtime routine</span></div>
             </div>
           </div>
-          <div style="background:#fff;border:1px solid #e6e3dc;border-radius:22px;padding:20px;">
+          <div style="background:#fff;border:1px solid #e6e3dc;border-radius:20px;padding:20px;">
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;"><span style="width:36px;height:36px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 245);"><img src="uploads/child2.svg" alt="Daan" style="width:100%;height:100%;object-fit:cover;display:block;"/></span><span style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:20px;">Daan</span></div>
             <div style="display:flex;flex-direction:column;gap:12px;">
               <div style="display:flex;align-items:baseline;gap:8px;opacity:0.5;"><span style="width:7px;height:7px;border-radius:9999px;background:oklch(58% 0.14 200);flex-shrink:0;"></span><span style="font-size:15px;text-decoration:line-through;">07:30 Ontbijt</span></div>
@@ -604,7 +562,7 @@
 
         <sc-if value="{{ isRoutines }}" hint-placeholder-val="{{ false }}">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
-            <div style="background:#fff;border:1px solid #e6e3dc;border-radius:22px;padding:22px;">
+            <div style="background:#fff;border:1px solid #e6e3dc;border-radius:20px;padding:22px;">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
                 <div style="display:flex;align-items:center;gap:12px;">
                   <span style="width:44px;height:44px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 335);"><img src="uploads/child1.svg" alt="Mila" style="width:100%;height:100%;object-fit:cover;display:block;"/></span>
@@ -614,7 +572,7 @@
               </div>
               <div style="width:100%;height:10px;border-radius:9999px;background:#e1e3e4;overflow:hidden;"><div style="width:60%;height:100%;background:oklch(58% 0.14 335);border-radius:9999px;"></div></div>
             </div>
-            <div style="background:#fff;border:1px solid #e6e3dc;border-radius:22px;padding:22px;">
+            <div style="background:#fff;border:1px solid #e6e3dc;border-radius:20px;padding:22px;">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
                 <div style="display:flex;align-items:center;gap:12px;">
                   <span style="width:44px;height:44px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 245);"><img src="uploads/child2.svg" alt="Daan" style="width:100%;height:100%;object-fit:cover;display:block;"/></span>
@@ -628,7 +586,7 @@
         </sc-if>
 
         <sc-if value="{{ isSterren }}" hint-placeholder-val="{{ false }}">
-        <div style="background:#fff;border:1px solid #e6e3dc;border-radius:22px;padding:24px;max-width:760px;">
+        <div style="background:#fff;border:1px solid #e6e3dc;border-radius:20px;padding:24px;max-width:760px;">
           <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:20px;margin-bottom:18px;">Sterren vandaag</span>
           <div style="display:grid;grid-template-columns:1fr 120px 120px;align-items:center;">
             <div></div>
@@ -703,55 +661,16 @@
           <span style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:#747688;"><span class="material-symbols-outlined" style="font-size:16px;">expand_more</span>1 afgerond</span>
         </div>
 
-        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:22px;">
-          <div style="display:flex;align-items:center;gap:10px;background:rgba(93,95,239,0.07);border:none;border-radius:12px;padding:12px;min-height:48px;box-sizing:border-box;">
-            <span class="tnum" style="width:42px;flex-shrink:0;font-size:13px;font-weight:700;color:#5d5fef;">08:15</span>
-            <span style="width:4px;align-self:stretch;border-radius:9999px;background:oklch(58% 0.14 200);"></span>
-            <div style="flex:1;min-width:0;"><span style="display:block;font-size:14px;font-weight:700;">Ochtendroutine</span><span style="display:block;font-size:12px;color:#434656;">Mila &amp; Daan</span></div>
-            <span style="background:#5d5fef;color:#fff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10px;padding:3px 9px;border-radius:9999px;">NU</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #eceae4;border-radius:12px;padding:12px;min-height:48px;box-sizing:border-box;">
-            <span class="tnum" style="width:42px;flex-shrink:0;font-size:13px;font-weight:600;color:#434656;">09:15</span>
-            <span style="width:4px;align-self:stretch;border-radius:9999px;background:oklch(58% 0.14 245);"></span>
-            <div style="flex:1;min-width:0;"><span style="display:block;font-size:14px;font-weight:600;">Schoolreis</span><span style="display:block;font-size:12px;color:#434656;">Mila &amp; Daan</span></div>
-            
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #eceae4;border-radius:12px;padding:12px;min-height:48px;box-sizing:border-box;">
-            <span class="tnum" style="width:42px;flex-shrink:0;font-size:13px;font-weight:600;color:#434656;">10:00</span>
-            <span style="width:4px;align-self:stretch;border-radius:9999px;background:oklch(58% 0.14 20);"></span>
-            <div style="flex:1;min-width:0;"><span style="display:block;font-size:14px;font-weight:600;">Tandarts</span><span style="display:block;font-size:12px;color:#434656;">Lotte</span></div>
-            
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #eceae4;border-radius:12px;padding:12px;min-height:48px;box-sizing:border-box;">
-            <span class="tnum" style="width:42px;flex-shrink:0;font-size:13px;font-weight:600;color:#434656;">11:00</span>
-            <span style="width:4px;align-self:stretch;border-radius:9999px;background:#dcdad4;"></span>
-            <div style="flex:1;min-width:0;"><span style="display:block;font-size:14px;font-weight:600;color:#747688;">Bezet</span><span style="display:block;font-size:12px;color:#434656;">Tom</span></div>
-            <span class="material-symbols-outlined" style="font-size:16px;color:#747688;">lock</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #eceae4;border-radius:12px;padding:12px;min-height:48px;box-sizing:border-box;">
-            <span class="tnum" style="width:42px;flex-shrink:0;font-size:13px;font-weight:600;color:#434656;">12:30</span>
-            <span style="width:4px;align-self:stretch;border-radius:9999px;background:oklch(58% 0.14 65);"></span>
-            <div style="flex:1;min-width:0;"><span style="display:block;font-size:14px;font-weight:600;">Werklunch</span><span style="display:block;font-size:12px;color:#434656;">Tom</span></div>
-            
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #eceae4;border-radius:12px;padding:12px;min-height:48px;box-sizing:border-box;">
-            <span class="tnum" style="width:42px;flex-shrink:0;font-size:13px;font-weight:600;color:#434656;">15:30</span>
-            <span style="width:4px;align-self:stretch;border-radius:9999px;background:oklch(58% 0.14 155);"></span>
-            <div style="flex:1;min-width:0;"><span style="display:block;font-size:14px;font-weight:600;">Voetbaltraining</span><span style="display:block;font-size:12px;color:#434656;">Mila</span></div>
-            
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #eceae4;border-radius:12px;padding:12px;min-height:48px;box-sizing:border-box;">
-            <span class="tnum" style="width:42px;flex-shrink:0;font-size:13px;font-weight:600;color:#434656;">18:00</span>
-            <span style="width:4px;align-self:stretch;border-radius:9999px;background:oklch(58% 0.14 335);"></span>
-            <div style="flex:1;min-width:0;"><span style="display:block;font-size:14px;font-weight:600;">Etentje</span><span style="display:block;font-size:12px;color:#434656;">Iedereen</span></div>
-            
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #eceae4;border-radius:12px;padding:12px;min-height:48px;box-sizing:border-box;">
-            <span class="tnum" style="width:42px;flex-shrink:0;font-size:13px;font-weight:600;color:#434656;">19:30</span>
-            <span style="width:4px;align-self:stretch;border-radius:9999px;background:oklch(58% 0.14 200);"></span>
-            <div style="flex:1;min-width:0;"><span style="display:block;font-size:14px;font-weight:600;">Bedtime routine</span><span style="display:block;font-size:12px;color:#434656;">Mila &amp; Daan</span></div>
-            
-          </div>
+        <div style="background:#fff;border:1px solid #eceae4;border-radius:20px;padding:0 8px;margin-bottom:22px;">
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;min-height:40px;box-sizing:border-box;border-top:1px solid #e1e3e4;border-radius:12px;opacity:0.5;"><span style="width:4px;align-self:stretch;border-radius:9999px;background:oklch(58% 0.14 290);flex-shrink:0;"></span><span style="display:flex;flex-direction:column;width:44px;flex-shrink:0;"><span class="tnum" style="font-size:12px;font-weight:600;color:#191c1d;">07:30</span><span class="tnum" style="font-size:11px;color:#747688;">08:00</span></span><span class="material-symbols-outlined" style="font-size:16px;color:oklch(45% 0.1 290);flex-shrink:0;">restaurant</span><span style="flex:1;min-width:0;display:flex;flex-direction:column;"><span style="font-size:13px;font-weight:600;text-decoration:line-through;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Ontbijt</span></span><span style="display:flex;flex-shrink:0;"><span style="width:16px;height:16px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 335);"><img src="uploads/child1.svg" alt="Mila" style="width:100%;height:100%;object-fit:cover;display:block;"/></span><span style="width:16px;height:16px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 245);margin-left:-5px;box-shadow:0 0 0 2px #ffffff;"><img src="uploads/child2.svg" alt="Daan" style="width:100%;height:100%;object-fit:cover;display:block;"/></span></span></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;min-height:40px;box-sizing:border-box;border-top:1px solid #e1e3e4;border-radius:12px;background:rgba(93,95,239,0.07);"><span style="width:4px;align-self:stretch;border-radius:9999px;background:oklch(58% 0.14 290);flex-shrink:0;"></span><span style="display:flex;flex-direction:column;width:44px;flex-shrink:0;"><span class="tnum" style="font-size:12px;font-weight:700;color:#5d5fef;">08:15</span><span class="tnum" style="font-size:11px;color:rgba(93,95,239,0.7);">09:00</span></span><span class="material-symbols-outlined" style="font-size:16px;color:oklch(45% 0.1 290);flex-shrink:0;">wb_twilight</span><span style="flex:1;min-width:0;display:flex;flex-direction:column;"><span style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Ochtendroutine</span></span><span style="display:flex;flex-shrink:0;"><span style="width:16px;height:16px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 335);"><img src="uploads/child1.svg" alt="Mila" style="width:100%;height:100%;object-fit:cover;display:block;"/></span><span style="width:16px;height:16px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 245);margin-left:-5px;box-shadow:0 0 0 2px #ffffff;"><img src="uploads/child2.svg" alt="Daan" style="width:100%;height:100%;object-fit:cover;display:block;"/></span></span><span style="background:#5d5fef;color:#ffffff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10px;padding:3px 9px;border-radius:9999px;flex-shrink:0;">NU</span></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;min-height:40px;box-sizing:border-box;border-top:1px solid #e1e3e4;border-radius:12px;"><span style="width:4px;align-self:stretch;border-radius:9999px;background:oklch(58% 0.14 245);flex-shrink:0;"></span><span style="display:flex;flex-direction:column;width:44px;flex-shrink:0;"><span class="tnum" style="font-size:12px;font-weight:600;color:#191c1d;">09:15</span><span class="tnum" style="font-size:11px;color:#747688;">11:30</span></span><span class="material-symbols-outlined" style="font-size:16px;color:oklch(45% 0.1 245);flex-shrink:0;">school</span><span style="flex:1;min-width:0;display:flex;flex-direction:column;"><span style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Schoolreis</span></span><span style="display:flex;flex-shrink:0;"><span style="width:16px;height:16px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 335);"><img src="uploads/child1.svg" alt="Mila" style="width:100%;height:100%;object-fit:cover;display:block;"/></span><span style="width:16px;height:16px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 245);margin-left:-5px;box-shadow:0 0 0 2px #ffffff;"><img src="uploads/child2.svg" alt="Daan" style="width:100%;height:100%;object-fit:cover;display:block;"/></span></span></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;min-height:40px;box-sizing:border-box;border-top:1px solid #e1e3e4;border-radius:12px;"><span style="width:4px;align-self:stretch;border-radius:9999px;background:oklch(58% 0.14 20);flex-shrink:0;"></span><span style="display:flex;flex-direction:column;width:44px;flex-shrink:0;"><span class="tnum" style="font-size:12px;font-weight:600;color:#191c1d;">10:00</span><span class="tnum" style="font-size:11px;color:#747688;">10:45</span></span><span class="material-symbols-outlined" style="font-size:16px;color:oklch(45% 0.1 20);flex-shrink:0;">medical_services</span><span style="flex:1;min-width:0;display:flex;flex-direction:column;"><span style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Tandarts</span></span><span style="display:flex;flex-shrink:0;"><span style="width:16px;height:16px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 290);"><img src="uploads/parent2.svg" alt="Lotte" style="width:100%;height:100%;object-fit:cover;display:block;"/></span></span></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;min-height:40px;box-sizing:border-box;border-top:1px solid #e1e3e4;border-radius:12px;"><span style="width:4px;align-self:stretch;border-radius:9999px;background:#dcdad4;flex-shrink:0;"></span><span style="display:flex;flex-direction:column;width:44px;flex-shrink:0;"><span class="tnum" style="font-size:12px;font-weight:600;color:#191c1d;">11:00</span><span class="tnum" style="font-size:11px;color:#747688;">12:00</span></span><span class="material-symbols-outlined" style="font-size:16px;color:#747688;flex-shrink:0;">lock</span><span style="flex:1;min-width:0;display:flex;flex-direction:column;"><span style="font-size:13px;font-weight:600;color:#747688;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Bezet</span></span><span style="display:flex;flex-shrink:0;"><span style="width:16px;height:16px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 65);"><img src="uploads/parent1.svg" alt="Tom" style="width:100%;height:100%;object-fit:cover;display:block;"/></span></span></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;min-height:40px;box-sizing:border-box;border-top:1px solid #e1e3e4;border-radius:12px;"><span style="width:4px;align-self:stretch;border-radius:9999px;background:oklch(58% 0.14 200);flex-shrink:0;"></span><span style="display:flex;flex-direction:column;width:44px;flex-shrink:0;"><span class="tnum" style="font-size:12px;font-weight:600;color:#191c1d;">12:30</span><span class="tnum" style="font-size:11px;color:#747688;">13:30</span></span><span class="material-symbols-outlined" style="font-size:16px;color:oklch(45% 0.1 200);flex-shrink:0;">work</span><span style="flex:1;min-width:0;display:flex;flex-direction:column;"><span style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Werklunch</span></span><span style="display:flex;flex-shrink:0;"><span style="width:16px;height:16px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 65);"><img src="uploads/parent1.svg" alt="Tom" style="width:100%;height:100%;object-fit:cover;display:block;"/></span></span></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;min-height:40px;box-sizing:border-box;border-top:1px solid #e1e3e4;border-radius:12px;"><span style="width:4px;align-self:stretch;border-radius:9999px;background:oklch(58% 0.14 155);flex-shrink:0;"></span><span style="display:flex;flex-direction:column;width:44px;flex-shrink:0;"><span class="tnum" style="font-size:12px;font-weight:600;color:#191c1d;">15:30</span><span class="tnum" style="font-size:11px;color:#747688;">16:30</span></span><span class="material-symbols-outlined" style="font-size:16px;color:oklch(45% 0.1 155);flex-shrink:0;">sports</span><span style="flex:1;min-width:0;display:flex;flex-direction:column;"><span style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Voetbaltraining</span></span><span style="display:flex;flex-shrink:0;"><span style="width:16px;height:16px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 335);"><img src="uploads/child1.svg" alt="Mila" style="width:100%;height:100%;object-fit:cover;display:block;"/></span></span></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;min-height:40px;box-sizing:border-box;border-top:1px solid #e1e3e4;border-radius:12px;"><span style="width:4px;align-self:stretch;border-radius:9999px;background:oklch(58% 0.14 335);flex-shrink:0;"></span><span style="display:flex;flex-direction:column;width:44px;flex-shrink:0;"><span class="tnum" style="font-size:12px;font-weight:600;color:#191c1d;">18:00</span><span class="tnum" style="font-size:11px;color:#747688;">19:00</span></span><span class="material-symbols-outlined" style="font-size:16px;color:oklch(45% 0.1 335);flex-shrink:0;">celebration</span><span style="flex:1;min-width:0;display:flex;flex-direction:column;"><span style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Etentje</span></span><span style="width:16px;height:16px;border-radius:9999px;background:#e6e3dc;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:10px;color:#434656;">groups</span></span></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;min-height:40px;box-sizing:border-box;border-top:1px solid #e1e3e4;border-radius:12px;"><span style="width:4px;align-self:stretch;border-radius:9999px;background:oklch(58% 0.14 290);flex-shrink:0;"></span><span style="display:flex;flex-direction:column;width:44px;flex-shrink:0;"><span class="tnum" style="font-size:12px;font-weight:600;color:#191c1d;">19:30</span><span class="tnum" style="font-size:11px;color:#747688;">20:00</span></span><span class="material-symbols-outlined" style="font-size:16px;color:oklch(45% 0.1 290);flex-shrink:0;">bedtime</span><span style="flex:1;min-width:0;display:flex;flex-direction:column;"><span style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Bedtime routine</span></span><span style="display:flex;flex-shrink:0;"><span style="width:16px;height:16px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 335);"><img src="uploads/child1.svg" alt="Mila" style="width:100%;height:100%;object-fit:cover;display:block;"/></span><span style="width:16px;height:16px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 245);margin-left:-5px;box-shadow:0 0 0 2px #ffffff;"><img src="uploads/child2.svg" alt="Daan" style="width:100%;height:100%;object-fit:cover;display:block;"/></span></span></div>
         </div>
 
         <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;margin-bottom:6px;">Routines</span>
@@ -860,4 +779,3 @@ class Component extends DCLogic {
 </script>
 </body>
 </html>
-
