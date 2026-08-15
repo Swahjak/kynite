@@ -1,3 +1,4 @@
+import type { FormattingLocale as UiFormattingLocale } from '@kynite/ui';
 import type { Locale } from './routing';
 
 /**
@@ -16,6 +17,22 @@ import type { Locale } from './routing';
 export const FORMATTING_LOCALES = ['nl-NL', 'en-GB', 'en-US'] as const;
 
 export type FormattingLocale = (typeof FORMATTING_LOCALES)[number];
+
+/**
+ * `@kynite/ui` carries the same union (`src/components/formatting-locale.ts`)
+ * because `Calendar`, `DateField` and `TimeField` take it as a prop and the
+ * package may not import from the app. This is the tripwire on that copy: the
+ * import is `type`-only, so nothing of the client barrel reaches the server
+ * modules that read this file, but a convention added on one side and not the
+ * other stops being assignable and `pnpm typecheck` says so.
+ */
+type _SameAsPackage = [FormattingLocale] extends [UiFormattingLocale]
+  ? [UiFormattingLocale] extends [FormattingLocale]
+    ? true
+    : never
+  : never;
+const _formattingLocalesAgree: _SameAsPackage = true;
+void _formattingLocalesAgree;
 
 export function isFormattingLocale(value: unknown): value is FormattingLocale {
   return typeof value === 'string' && (FORMATTING_LOCALES as readonly string[]).includes(value);

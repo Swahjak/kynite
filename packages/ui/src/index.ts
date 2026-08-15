@@ -38,6 +38,7 @@ export {
 } from './components/avatar';
 export { Badge, badgeVariants } from './components/badge';
 export { Button, buttonVariants } from './components/button';
+export { Calendar, type CalendarProps } from './components/calendar';
 export {
   Card,
   CardAction,
@@ -48,6 +49,39 @@ export {
   CardTitle,
 } from './components/card';
 export { Checkbox } from './components/checkbox';
+export { ConfirmButton } from './components/confirm-button';
+export { DateField, type DateFieldLabels, type DateFieldProps } from './components/date-field';
+export { DateTimeField, type DateTimeFieldProps } from './components/date-time-field';
+export {
+  QUARTER_HOUR_VALUES,
+  TIME_STEP_MINUTES,
+  type DateOrder,
+  type DatePattern,
+  dateToIso,
+  datePatternFor,
+  formatDateValue,
+  formatTimeValue,
+  isoToDate,
+  joinDateTimeValue,
+  parseDateInput,
+  parseTimeInput,
+  splitDateTimeValue,
+  timePlaceholderFor,
+  uses12Hour,
+} from './components/date-time-parts';
+export {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogOverlay,
+  DialogPortal,
+  DialogTitle,
+  DialogTrigger,
+} from './components/dialog';
+export { Fab, FabSlot, type FabProps } from './components/fab';
 export {
   Field,
   FieldDescription,
@@ -56,6 +90,7 @@ export {
   FieldLabel,
 } from './components/field';
 export { FieldPicker, type FieldPickerProps } from './components/field-picker';
+export { FORMATTING_LOCALES, type FormattingLocale } from './components/formatting-locale';
 export { Icon, ICON_SIZES, type IconProps, type IconSize } from './components/icon';
 export { ICON_CODEPOINTS, type IconName } from './components/icon-codepoints';
 export { Input, inputVariants } from './components/input';
@@ -71,7 +106,33 @@ export {
   SelectTrigger,
   SelectValue,
 } from './components/select';
+export {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from './components/sheet';
 export { FAB_SLOT_ID, SlotPortal } from './components/slot-portal';
 export { Tabs, TabsContent, TabsList, TabsTrigger, tabsListVariants } from './components/tabs';
 export { Textarea, textareaVariants } from './components/textarea';
+export { TimeField, type TimeFieldLabels, type TimeFieldProps } from './components/time-field';
+export {
+  Toast,
+  ToastAction,
+  ToastClose,
+  ToastContent,
+  ToastDescription,
+  ToastPortal,
+  ToastProvider,
+  ToastTitle,
+  ToastViewport,
+  Toaster,
+  createToastManager,
+  toast,
+  useToastManager,
+} from './components/toast';
 export { useSubmitGuard } from './components/use-submit-guard';

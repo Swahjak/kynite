@@ -1,5 +1,6 @@
 import js from '@eslint/js';
 import prettier from 'eslint-config-prettier';
+import reactHooks from 'eslint-plugin-react-hooks';
 import storybook from 'eslint-plugin-storybook';
 import tseslint from 'typescript-eslint';
 
@@ -66,6 +67,17 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   ...storybook.configs['flat/recommended'],
+  /**
+   * The Rules of Hooks, and the dependency check.
+   *
+   * Added with Wave A, which moved the first components in here that *have*
+   * non-trivial effects — `DateField`/`TimeField` adjust state during render
+   * and hold one deliberately mount-only effect each. Without the plugin the
+   * `eslint-disable-next-line react-hooks/exhaustive-deps` on that effect is a
+   * reference to a rule that does not exist, which ESLint 10 reports as an
+   * error: the escape hatch has to be as real as the rule it escapes.
+   */
+  reactHooks.configs.flat['recommended-latest'],
   {
     files: ['**/*.{ts,tsx,mjs}'],
     languageOptions: {

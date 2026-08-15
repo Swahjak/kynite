@@ -28,10 +28,13 @@ import { Section, Specimen, SpecimenGrid } from '../specimen';
  * `FieldPicker`.
  *
  * All three take their copy as props — there is no `useTranslations` anywhere
- * below, which is precisely what makes them renderable here at all. The app's
- * `Dialog`, `Sheet` and `Toast` do not appear in Storybook yet for the
- * opposite reason: they still read `next-intl` for their close/confirm labels,
- * so they stayed in `apps/web`. See the phase-3 notes.
+ * below, which is precisely what makes them renderable here at all.
+ *
+ * `Dialog`, `Sheet` and `Toast` used to be the counter-example named here:
+ * they read `next-intl` for their close labels and so stayed in `apps/web`.
+ * Wave A gave each of them a `closeLabel` prop and moved them in, and they now
+ * have stories of their own — `Primitives/Dialog`, `Primitives/Sheet`,
+ * `Primitives/Toast`.
  */
 const meta = {
   title: 'Primitives/Overlays',

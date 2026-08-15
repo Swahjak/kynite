@@ -1,4 +1,4 @@
-import type { FormattingLocale } from '@/i18n/formatting-locale';
+import type { FormattingLocale } from './formatting-locale';
 
 /**
  * The pure half of `DateField`/`TimeField` (`date-field.tsx`, `time-field.tsx`):

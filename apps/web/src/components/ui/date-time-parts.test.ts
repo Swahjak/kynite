@@ -10,7 +10,7 @@ import {
   splitDateTimeValue,
   timePlaceholderFor,
   uses12Hour,
-} from './date-time-parts';
+} from '@kynite/ui';
 
 /**
  * The bug these guard: an `<input type="date">`/`type="time"` renders in the
