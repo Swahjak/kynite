@@ -123,6 +123,35 @@ const serwist = new Serwist({
 serwist.addEventListeners();
 
 /**
+ * Documents cached by the *previous* build, dropped the moment this one is
+ * authoritative.
+ *
+ * `kynite-hub-shell-v1` and `kynite-app-pages-v1` hold rendered HTML, and
+ * rendered HTML names the content-hashed chunks of the build that produced it.
+ * A deploy retires those chunk names twice over: the origin serves only the
+ * new build's files, and Serwist's precache cleanup — which runs in this same
+ * activation — deletes the old ones from `serwist-precache-v2`. So from here
+ * on, a cached document from the previous build is not a stale board, it is an
+ * *unbootable* one: it would paint, then fail on its first missing chunk.
+ *
+ * Serving it is therefore never the better answer, including offline, where
+ * the alternative was already a page that could not finish loading. The cost
+ * is a single window — between this activation and the next successful
+ * navigation — in which a hub that goes offline has no cached document. The
+ * reload gate closes that window within minutes on an idle board, and any
+ * online navigation closes it at once.
+ *
+ * `CACHE.assets` is deliberately not touched: it is content-hashed build
+ * output and principal-free art, where an old entry is inert rather than
+ * wrong, and refilling it is the expensive one (§6, "celebrations must never
+ * wait on a network"). `CACHE.data` stays for the same reason — JSON is not
+ * bound to a build.
+ */
+async function dropPreviousBuildDocuments(): Promise<void> {
+  await Promise.all([caches.delete(CACHE.hubShell), caches.delete(CACHE.appPages)]);
+}
+
+/**
  * Tell the hub (and only the hub) that a new build is waiting.
  *
  * Posted on `activate`, which is the first moment the new worker is
@@ -133,6 +162,8 @@ serwist.addEventListeners();
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     (async () => {
+      await dropPreviousBuildDocuments();
+
       const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
       for (const client of clients) {
         if (!isHubUrl(client.url)) continue;

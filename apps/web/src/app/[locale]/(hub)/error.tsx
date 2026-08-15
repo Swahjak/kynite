@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { shouldReloadForChunkError } from '@/components/offline';
 
 /**
  * The kiosk error boundary (M18).
@@ -19,6 +20,12 @@ import { useTranslations } from 'next-intl';
  * and says what is about to happen. No red, no alert glyph, no exclamation
  * mark — a child walks past this screen, and a wall that shouts at the room
  * about a stack trace is worse than a wall that is briefly blank.
+ *
+ * **One error it cannot re-render its way out of.** A board that was open
+ * across a deploy is holding a module graph whose remaining chunks the origin
+ * no longer serves, so `reset()` reruns the same failing import forever. That
+ * one case takes a full document load instead — once, guarded by
+ * `shouldReloadForChunkError()`, which carries the argument.
  */
 
 /** Long enough to not hammer a failing server, short enough to be unnoticed. */
@@ -27,9 +34,12 @@ const RETRY_DELAY_MS = 5000;
 export default function HubError({
   error,
   reset,
+  /** Injectable for the test that must not actually navigate. */
+  reload,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
+  reload?: () => void;
 }) {
   const t = useTranslations('errors');
   const [attempt, setAttempt] = useState(0);
@@ -37,6 +47,20 @@ export default function HubError({
   useEffect(() => {
     console.error(error);
   }, [error]);
+
+  useEffect(() => {
+    // Before the retry timer: a missing chunk survives every `reset()`, and
+    // the board would otherwise sit on this screen until the reload gate got
+    // around to it (idle >5 min) or, on a busy hallway tablet, far longer.
+    if (
+      shouldReloadForChunkError({
+        error,
+        storage: typeof sessionStorage === 'undefined' ? null : sessionStorage,
+      })
+    ) {
+      (reload ?? (() => window.location.reload()))();
+    }
+  }, [error, reload]);
 
   useEffect(() => {
     // Backs off linearly rather than retrying every five seconds forever: a

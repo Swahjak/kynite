@@ -24,6 +24,14 @@ export {
 } from './sw-strategy';
 
 export {
+  CHUNK_RELOAD_COOLDOWN_MS,
+  CHUNK_RELOAD_KEY,
+  isChunkLoadError,
+  shouldReloadForChunkError,
+  type ChunkRecoveryInput,
+} from './chunk-reload';
+
+export {
   IDLE_BEFORE_RELOAD_MS,
   MAX_DEFERRAL_MS,
   NIGHTLY_WINDOW,
