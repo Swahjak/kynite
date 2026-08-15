@@ -28,7 +28,7 @@ export async function StarWeekCard({
   const t = await getTranslations('rewards');
   const formattingLocale = await getHouseholdFormattingLocale();
 
-  const bars: WeekBar[] = chart.week.map((bar, index) => ({
+  const bars: WeekBar[] = chart.week.map((bar) => ({
     key: bar.day,
     // Noon UTC: the key already *is* the family's calendar day, and reading it
     // back at midnight would let any zone west of UTC render the day before.
@@ -36,7 +36,9 @@ export async function StarWeekCard({
       weekday: 'short',
     }),
     value: bar.total,
-    today: index === chart.week.length - 1,
+    // Which column is marked is a *date* question now that the window is the
+    // fixed Monday-to-Sunday week: on a Wednesday the last bar is Sunday.
+    today: bar.day === chart.today,
     srLabel: t('chart.dayStars', {
       day: formatDateTime(new Date(`${bar.day}T12:00:00Z`), formattingLocale, { weekday: 'long' }),
       count: bar.total,
@@ -50,11 +52,15 @@ export async function StarWeekCard({
         size="card"
         level={2}
         action={
+          // Bare, beside a card heading: the sheet's own total is an orange
+          // star and a Baloo numeral (`Beloningen.dc.html` r70), not a pill —
+          // a filled chip next to "Deze week" reads as a second control.
           <StarCount
             data-testid="week-total"
             value={chart.weekTotal}
             srLabel={t('chart.weekTotal', { count: chart.weekTotal })}
-            size="md"
+            size="lg"
+            tone="bare"
           />
         }
       />

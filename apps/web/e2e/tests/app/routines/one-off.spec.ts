@@ -51,7 +51,7 @@ test('a parent schedules a one-off chore, the child taps it, and it leaves the b
   await dialog.getByLabel('Datum').fill(todayKey());
   // 00:01 so the chore is already due whenever this spec runs; it also puts it
   // in the morning band, which the board assertion below relies on.
-  await dialog.getByLabel('Tijd').fill('00:01');
+  await dialog.getByLabel('Starttijd').fill('00:01');
   // The reward is a stepper, not a number field: nine taps from its floor of 1.
   for (let index = 0; index < 9; index += 1) {
     await dialog.getByRole('button', { name: 'Meer sterren' }).click();

@@ -32,13 +32,14 @@ export default async function RoutinesPage({ params }: { params: Promise<{ local
       <header className="flex items-center justify-between gap-3">
         <h1 className="font-display text-h1 font-extrabold text-ink">{t('title')}</h1>
         {data.canWrite ? (
-          <RoutineDialog members={data.members} timeZone={data.timeZone} compact />
+          <RoutineDialog owners={data.owners} timeZone={data.timeZone} variant="add" />
         ) : null}
       </header>
 
       <RoutineManager
         routines={data.routines}
         members={data.members}
+        owners={data.owners}
         timeZone={data.timeZone}
         canWrite={data.canWrite}
       />

@@ -269,9 +269,11 @@ export type StarChartData = {
   horizon: RewardHorizon;
   totals: StarTotals;
   history: StarEntry[];
-  /** Seven bars ending today, zeros included — a gap is not a hole in a chart. */
+  /** The calendar week, Monday first, zeros included — a gap is not a hole. */
   week: WeekBar[];
   weekTotal: number;
+  /** The family-zone day key of `now` — which of the seven bars is marked. */
+  today: string;
   /** Routines that have graduated: the badge, never a downgrade (FR17). */
   graduated: GraduatedRoutine[];
   now: Date;
@@ -295,8 +297,20 @@ export async function loadStarChart(options: StarChartOptions): Promise<StarChar
   const timeZone = family?.timezone ?? 'Europe/Amsterdam';
 
   const now = options.date ? new Date(`${options.date}T12:00:00Z`) : new Date();
-  const since = new Date(now.getTime() - 6 * 86_400_000);
+  /**
+   * **The calendar week, Monday to Sunday** — not a rolling seven days ending
+   * today (`Beloningen.dc.html` r72-80, where "vr" is marked in a ma…zo row).
+   *
+   * A rolling window is the easier query and the wrong object: "deze week" is a
+   * thing a household says to each other, and a chart whose leftmost bar is a
+   * different weekday every day cannot be compared to yesterday's glance at it.
+   * The fixed week also makes the marked column mean something — it is *where
+   * in the week we are*, which is the second question the card answers.
+   */
+  const since = new Date(now.getTime());
   since.setUTCHours(0, 0, 0, 0);
+  // getUTCDay: 0 = Sunday. Monday is the week start, so Sunday steps back six.
+  since.setUTCDate(since.getUTCDate() - ((since.getUTCDay() + 6) % 7));
 
   const [totals, history, perDay, routines] = await Promise.all([
     getStarTotals(principal.familyId, member.id),
@@ -325,6 +339,7 @@ export async function loadStarChart(options: StarChartOptions): Promise<StarChar
     history,
     week,
     weekTotal: week.reduce((sum, bar) => sum + bar.total, 0),
+    today: dateKeyIn(now, timeZone),
     graduated: routines
       .filter((routine) => hasGraduated(routine))
       .map((routine) => ({ id: routine.id, title: routine.title })),

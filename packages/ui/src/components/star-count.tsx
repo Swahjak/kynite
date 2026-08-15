@@ -15,9 +15,21 @@ import { IconMedallion } from './icon-medallion';
  * padding:7px 14px;border-radius:9999px;
  * ```
  *
- * plus a leading filled star at `font-size:18px`. The star sits *after* the
- * number in the product's own reading order ("12 ★"), matching how the count
- * is spoken.
+ * plus a leading filled star at `font-size:18px`. **The star leads and the
+ * number follows** — "★ 12" — everywhere the design sheets draw this object:
+ * the hub header, the due card, the store tile, the parent's routine row. The
+ * glyph is what makes the number a *star* count at a glance, so it comes first
+ * the way a currency symbol does.
+ *
+ * Two tones, and the difference is whether the count is an object or an
+ * annotation:
+ *
+ * - `chip` (default) — the peach pill. A star count that stands on its own:
+ *   the balance in a header, the price on a queue card.
+ * - `bare` — the same star and number in orange with no pill at all
+ *   (`Routines.dc.html` r216-225, `Beloningen.dc.html` r271-282). What a
+ *   *row* carries, where a filled pill beside a title, a schedule line and a
+ *   switch is one competing surface too many.
  *
  * The visible number is `aria-hidden` and paired with a real, translated
  * sentence in `srLabel` — "12" next to a star glyph is not a sentence, and the
@@ -27,6 +39,7 @@ export function StarCount({
   value,
   srLabel,
   size = 'md',
+  tone = 'chip',
   className,
   ...props
 }: Omit<React.ComponentProps<'span'>, 'children'> & {
@@ -34,22 +47,41 @@ export function StarCount({
   /** Full translated phrase, e.g. `t('stars', { count: value })`. */
   srLabel: string;
   size?: 'sm' | 'md' | 'lg';
+  tone?: 'chip' | 'bare';
 }) {
   const badgeSize = ({ sm: 'default', md: 'md', lg: 'lg' } as const)[size];
   const iconSize = ({ sm: 'xs', md: 'sm', lg: 'md' } as const)[size];
+
+  const body = (
+    <>
+      <Icon name="star" filled size={iconSize} />
+      <span aria-hidden>{value}</span>
+      <span className="sr-only">{srLabel}</span>
+    </>
+  );
+
+  if (tone === 'bare') {
+    return (
+      <span
+        data-slot="star-count"
+        className={cn(
+          'tnum inline-flex shrink-0 items-center gap-1 font-display font-bold text-gold-ink',
+          { sm: 'text-body-sm', md: 'text-body', lg: 'text-h3' }[size],
+          className
+        )}
+        {...props}
+      >
+        {body}
+      </span>
+    );
+  }
 
   return (
     <Badge
       variant="gold"
       size={badgeSize}
       className={cn('tnum gap-1.5', className)}
-      render={
-        <span {...props}>
-          <span aria-hidden>{value}</span>
-          <Icon name="star" filled size={iconSize} />
-          <span className="sr-only">{srLabel}</span>
-        </span>
-      }
+      render={<span {...props}>{body}</span>}
     />
   );
 }

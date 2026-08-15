@@ -143,6 +143,19 @@ export function occursOn(input: OccurrenceInput, dateKey: string): boolean {
   return occurrenceStartOn(input, dateKey) !== null;
 }
 
+/**
+ * `HH:mm` on the family's own clock — the 24h form the schedule is stored in.
+ *
+ * The countdown chip needs an absolute time once a duration stops being a
+ * useful sentence about tonight ("om 19:30" rather than "over 11 uur"), and it
+ * has to be the *family's* wall clock rather than the reader's: a parent
+ * abroad looking at the board is still asking what time bedtime is at home.
+ */
+export function wallClockOf(instant: Date, timeZone: string): string {
+  const wall = toWall(instant, timeZone);
+  return `${String(wall.hour).padStart(2, '0')}:${String(wall.minute).padStart(2, '0')}`;
+}
+
 /** `YYYY-MM-DD` of the calendar day containing `instant` in `timeZone`. */
 export function dateKeyOf(instant: Date, timeZone: string): string {
   return toDateKey(toWall(instant, timeZone));

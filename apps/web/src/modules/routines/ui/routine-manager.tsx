@@ -8,7 +8,8 @@ import {
   type Member,
 } from '@/modules/family';
 import { hasGraduated } from '../domain/stars';
-import { oneOffDateOf, weekdaysOfRule } from '../domain/schedule';
+import { isSchedulable, oneOffDateOf, weekdaysOfRule } from '../domain/schedule';
+import type { OwnerOption } from '../page-data';
 import type { RoutineWithSteps } from '../queries';
 import { GraduateRoutineButton } from './graduate-routine-button';
 import { RoutineActiveSwitch } from './routine-active-switch';
@@ -40,11 +41,14 @@ export type ManagedRoutine = RoutineWithSteps;
 export async function RoutineManager({
   routines,
   members,
+  owners,
   timeZone,
   canWrite,
 }: {
   routines: ManagedRoutine[];
   members: Member[];
+  /** The builder's "Voor wie" options — faces already resolved (`page-data.ts`). */
+  owners: OwnerOption[];
   timeZone: string;
   canWrite: boolean;
 }) {
@@ -66,14 +70,17 @@ export async function RoutineManager({
     const onceDate = oneOffDateOf(routine.schedule);
     if (onceDate) return t('schedule.onceShort', { date: dayOf(onceDate) });
 
+    // A routine whose schedule names nothing a board can expand is not a daily
+    // routine — it is a routine that never runs. Saying so is the only reading
+    // a parent can act on; "Elke dag" over an empty board is the one that
+    // wastes an evening (`domain/schedule.ts` → `isSchedulable`).
+    if (!isSchedulable(routine.schedule)) return t('schedule.none');
+
     const days = weekdaysOfRule(routine.schedule.rrule, timeZone);
-    // A rule with no `BYDAY` at all (`FREQ=DAILY`) yields no weekdays rather
-    // than seven of them, and a row that names no days at all reads as a
-    // routine that never runs.
+    // `FREQ=DAILY` comes back as all seven — the same list the picker shows
+    // ticked, so the row and the builder cannot disagree.
     const when =
-      days.length === 0 || days.length === 7
-        ? t('schedule.daily')
-        : days.map((day) => t(`weekdays.${day}`)).join(' ');
+      days.length === 7 ? t('schedule.daily') : days.map((day) => t(`weekdays.${day}`)).join(' ');
     const time = routine.schedule.timeOfDay;
 
     return t('manage.scheduleLine', {
@@ -151,12 +158,24 @@ export async function RoutineManager({
                   className={routine.active ? ROUTINE_ICON_TILE[routineIconOf(routine.icon)] : ''}
                 />
 
-                <div className="min-w-0 flex-1">
-                  <span className="block truncate text-body-sm font-semibold">{routine.title}</span>
-                  <span className="tabular-time block truncate text-caption text-ink-secondary">
-                    {routine.active ? scheduleOf(routine) : t('manage.paused')}
-                  </span>
-                </div>
+                {canWrite ? (
+                  <RoutineDialog
+                    owners={owners}
+                    routine={routine}
+                    timeZone={timeZone}
+                    variant="row"
+                    scheduleLine={routine.active ? scheduleOf(routine) : t('manage.paused')}
+                  />
+                ) : (
+                  <div className="min-w-0 flex-1">
+                    <span className="block truncate text-body-sm font-semibold">
+                      {routine.title}
+                    </span>
+                    <span className="tnum block truncate text-caption text-ink-secondary">
+                      {routine.active ? scheduleOf(routine) : t('manage.paused')}
+                    </span>
+                  </div>
+                )}
 
                 {hasGraduated(routine) ? (
                   <Icon
@@ -167,27 +186,23 @@ export async function RoutineManager({
                     label={t('graduated')}
                   />
                 ) : routine.starsPerCompletion > 0 ? (
+                  // Bare, not a pill: the row already carries a medallion, a
+                  // title, a schedule line and a switch (`Routines.dc.html`
+                  // r216-225).
                   <StarCount
                     value={routine.starsPerCompletion}
                     srLabel={t('starsPerStep', { count: routine.starsPerCompletion })}
                     size="sm"
+                    tone="bare"
                   />
                 ) : null}
 
                 {canWrite ? (
-                  <>
-                    <RoutineDialog
-                      members={members}
-                      routine={routine}
-                      timeZone={timeZone}
-                      compact
-                    />
-                    <RoutineActiveSwitch
-                      routineId={routine.id}
-                      title={routine.title}
-                      active={routine.active}
-                    />
-                  </>
+                  <RoutineActiveSwitch
+                    routineId={routine.id}
+                    title={routine.title}
+                    active={routine.active}
+                  />
                 ) : null}
               </li>
             ))}

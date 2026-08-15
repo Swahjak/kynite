@@ -54,9 +54,15 @@ export function AwardStarsDialog({ members }: { members: QueueMember[] }) {
           </Button>
         }
       />
+      {/* No corner ✕: the grabber above the title is the affordance the sheet
+          draws, and a second dismiss control in the corner competes with the
+          one thumb this is designed for. The scrim goes to the design system's
+          35% so the sheet owns the screen. */}
       <SheetContent
         side="bottom"
-        className="max-h-[92dvh] gap-0 overflow-y-auto rounded-t-3xl px-5 pt-2.5 pb-7"
+        showCloseButton={false}
+        overlayClassName="bg-scrim/35"
+        className="max-h-[90dvh] gap-0 overflow-y-auto rounded-t-[28px] px-5 pt-2.5 pb-7"
       >
         {open ? <AwardForm members={members} onSaved={() => setOpen(false)} /> : null}
       </SheetContent>
@@ -125,6 +131,9 @@ function AwardForm({ members, onSaved }: { members: QueueMember[]; onSaved: () =
       </div>
 
       <Overline className="mb-2">{t('award.amount')}</Overline>
+      {/* A white card with the control centred in it (`Beloningen.dc.html`
+          r344-348) — the number is the thing being decided, so it sits in the
+          middle of its own surface rather than left-aligned against a label. */}
       <div className="mb-4.5 rounded-2xl border border-line-subtle bg-card p-3.5">
         {/* The stepper stops at one and has no subtract mode: there is no
             screen in Kynite that takes a star back. */}
@@ -153,7 +162,11 @@ function AwardForm({ members, onSaved }: { members: QueueMember[]; onSaved: () =
               key={option}
               data-testid={`award-reason-${option}`}
               className={cn(
-                'flex-1 cursor-pointer rounded-4xl py-2.5 text-center font-display text-body-sm font-bold transition-colors',
+                // 10px of vertical padding, not 14: two words in a pill next
+                // to a 44px stepper is a chip, and the sheet's own rhythm
+                // (r354-357) keeps it under the amount card rather than
+                // matching it.
+                'flex-1 cursor-pointer rounded-4xl py-2 text-center font-display text-body-sm font-bold transition-colors',
                 selected
                   ? 'border-2 border-primary bg-accent text-ink'
                   : 'border border-line-subtle bg-card text-ink-secondary'

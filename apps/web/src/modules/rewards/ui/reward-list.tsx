@@ -64,54 +64,68 @@ export async function RewardList({
   }
 
   return (
-    <ul className="flex flex-col gap-2">
-      {rewards.map((reward) => (
-        <li
-          key={reward.id}
-          data-testid="reward-row"
-          data-reward-id={reward.id}
-          className={cn(
-            'flex items-center gap-2.5 rounded-2xl border border-line-subtle bg-card px-3.5 py-3',
-            // Dimming, not a badge-only signal: an inactive reward is off the
-            // shelf, and the row says so the same quiet way the store does.
-            reward.active ? undefined : 'opacity-70'
-          )}
-        >
-          <IconMedallion
-            icon={rewardIconOf(reward.icon)}
-            tint="none"
-            shape="squircle"
-            size="md"
-            className={CATEGORY_TILE[reward.category]}
-          />
+    <div className="flex flex-col gap-3">
+      {/* The catalogue's own add control (`Beloningen.dc.html`, mobile beheer).
+          It used to be a second button in the page header beside "Sterren
+          geven", which gave the screen two primary actions for two unrelated
+          jobs — the sheet has one, and the one it has is the star. Adding a
+          reward is a catalogue action, so it lives on the catalogue. */}
+      {canWrite ? (
+        <div className="flex justify-end">
+          <RewardDialog members={assignableMembers} />
+        </div>
+      ) : null}
 
-          <div className="min-w-0 flex-1">
-            <span className="block truncate text-body-sm font-semibold">{reward.title}</span>
-            <span className="block truncate text-caption text-ink-secondary">
-              {t(`categories.${reward.category}`)} ·{' '}
-              {reward.availableToMemberIds.length === 0
-                ? t('availableToEveryone')
-                : reward.availableToMemberIds.map(nameOf).join(', ')}
-              {reward.active ? '' : ` · ${t('inactive')}`}
-            </span>
-          </div>
+      <ul className="flex flex-col gap-2">
+        {rewards.map((reward) => (
+          <li
+            key={reward.id}
+            data-testid="reward-row"
+            data-reward-id={reward.id}
+            className={cn(
+              'flex items-center gap-2.5 rounded-2xl border border-line-subtle bg-card px-3.5 py-3',
+              // Dimming, not a badge-only signal: an inactive reward is off the
+              // shelf, and the row says so the same quiet way the store does.
+              reward.active ? undefined : 'opacity-70'
+            )}
+          >
+            <IconMedallion
+              icon={rewardIconOf(reward.icon)}
+              tint="none"
+              shape="squircle"
+              size="md"
+              className={CATEGORY_TILE[reward.category]}
+            />
 
-          <StarCount
-            value={reward.costStars}
-            srLabel={t('starsCost', { count: reward.costStars })}
-            size="sm"
-          />
+            <div className="min-w-0 flex-1">
+              <span className="block truncate text-body-sm font-semibold">{reward.title}</span>
+              <span className="block truncate text-caption text-ink-secondary">
+                {t(`categories.${reward.category}`)} ·{' '}
+                {reward.availableToMemberIds.length === 0
+                  ? t('availableToEveryone')
+                  : reward.availableToMemberIds.map(nameOf).join(', ')}
+                {reward.active ? '' : ` · ${t('inactive')}`}
+              </span>
+            </div>
 
-          {canWrite ? (
-            <span className="flex shrink-0 items-center">
-              <RewardDialog members={assignableMembers} reward={reward} compact />
-              <DeleteRewardButton rewardId={reward.id} title={reward.title} compact />
-            </span>
-          ) : (
-            <Icon name="chevron_right" size="sm" className="shrink-0 text-ink-muted" />
-          )}
-        </li>
-      ))}
-    </ul>
+            <StarCount
+              value={reward.costStars}
+              srLabel={t('starsCost', { count: reward.costStars })}
+              size="sm"
+              tone="bare"
+            />
+
+            {canWrite ? (
+              <span className="flex shrink-0 items-center">
+                <RewardDialog members={assignableMembers} reward={reward} compact />
+                <DeleteRewardButton rewardId={reward.id} title={reward.title} compact />
+              </span>
+            ) : (
+              <Icon name="chevron_right" size="sm" className="shrink-0 text-ink-muted" />
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }

@@ -56,7 +56,13 @@ export async function StarBalances({
               <span className="tnum font-display text-h1 font-extrabold text-gold-ink">
                 {total.available}
               </span>
-              <span className="tnum truncate text-caption text-ink-secondary">
+              {/* Wraps rather than truncates. Two cards side by side on a
+                  390px phone leave 146px of text, and "62 verdiend · 34
+                  uitgegeven" needs ~165 — an ellipsis here would eat the
+                  second number, which is half of what the line exists to
+                  say. A ledger reads on two lines; it does not read as
+                  "62 verdiend · 34 uitge…". */}
+              <span className="tnum text-caption leading-snug text-ink-secondary">
                 {t('balance.line', { earned: total.earned, spent: total.spent })}
               </span>
             </Card>

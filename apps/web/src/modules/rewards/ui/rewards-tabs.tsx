@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
-import { Badge, Tabs, TabsContent, TabsList, TabsTrigger } from '@kynite/ui';
+import { Badge, cn, Tabs, TabsContent, TabsList, TabsTrigger } from '@kynite/ui';
 
 /**
  * The parent's three views of the same economy (`Beloningen.dc.html`, mobile
@@ -31,10 +31,29 @@ export function RewardsTabs({
   const t = useTranslations('rewards');
   const [value, setValue] = useState('queue');
 
+  /**
+   * The sheet's ink for the active tab: **indigo, three pixels**
+   * (`Beloningen.dc.html` r206). The primitive's default is a two-pixel
+   * foreground rule, which on cream reads as an underline in a document rather
+   * than as the brand saying which of three views you are in. Overridden here
+   * rather than in `@kynite/ui` because every other `line` tab set in the
+   * product still wants the neutral one.
+   */
+  const inkClass =
+    'group-data-horizontal/tabs:after:bottom-[-1px] group-data-horizontal/tabs:after:h-[3px] group-data-horizontal/tabs:after:rounded-full data-active:after:bg-primary data-active:text-ink';
+
   return (
     <Tabs value={value} onValueChange={(next) => setValue(next as string)} className="gap-4">
-      <TabsList variant="line" aria-label={t('tabs.label')} className="justify-start gap-4.5">
-        <TabsTrigger value="queue" data-testid="rewards-tab-queue" className="gap-1.5">
+      <TabsList
+        variant="line"
+        aria-label={t('tabs.label')}
+        className="w-full justify-start gap-4.5 border-b border-line-subtle"
+      >
+        <TabsTrigger
+          value="queue"
+          data-testid="rewards-tab-queue"
+          className={cn('gap-1.5', inkClass)}
+        >
           {t('tabs.queue')}
           {pendingCount > 0 ? (
             <Badge variant="default" className="tnum px-1.5">
@@ -42,10 +61,10 @@ export function RewardsTabs({
             </Badge>
           ) : null}
         </TabsTrigger>
-        <TabsTrigger value="catalogue" data-testid="rewards-tab-catalogue">
+        <TabsTrigger value="catalogue" data-testid="rewards-tab-catalogue" className={inkClass}>
           {t('tabs.catalogue')}
         </TabsTrigger>
-        <TabsTrigger value="balances" data-testid="rewards-tab-balances">
+        <TabsTrigger value="balances" data-testid="rewards-tab-balances" className={inkClass}>
           {t('tabs.balances')}
         </TabsTrigger>
       </TabsList>

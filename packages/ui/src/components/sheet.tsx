@@ -46,6 +46,7 @@ function SheetContent({
   showCloseButton = true,
   size = 'default',
   closeLabel = DEFAULT_CLOSE_LABEL,
+  overlayClassName,
   ...props
 }: SheetPrimitive.Popup.Props & {
   side?: 'top' | 'right' | 'bottom' | 'left';
@@ -54,12 +55,20 @@ function SheetContent({
   size?: 'default' | 'hub';
   /** Accessible name of the corner close button. */
   closeLabel?: string;
+  /**
+   * The scrim, for the sheets that need a darker one. The default 10% is right
+   * for a panel that slides over a page you are still reading; a bottom sheet
+   * that owns the screen wants the design system's own 35%
+   * (`Beloningen.dc.html` r317) so the sheet reads as *in front of* rather than
+   * as part of the page.
+   */
+  overlayClassName?: string;
 }) {
   const closeButtonSize = size === 'hub' ? 'icon-hub' : 'icon-sm';
 
   return (
     <SheetPortal>
-      <SheetOverlay />
+      <SheetOverlay className={overlayClassName} />
       <SheetPrimitive.Popup
         data-slot="sheet-content"
         data-side={side}

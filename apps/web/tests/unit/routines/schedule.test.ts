@@ -4,6 +4,7 @@ import {
   MAX_GRACE_DAYS,
   graceDaysOf,
   isOneOff,
+  isSchedulable,
   isSimpleWeeklyRule,
   isValidDateKey,
   isValidTimeOfDay,
@@ -124,5 +125,46 @@ describe('grace days', () => {
 
   it('ignores a non-numeric value instead of producing NaN days', () => {
     expect(graceDaysOf({ rrule: 'FREQ=DAILY', graceDays: Number.NaN })).toBe(0);
+  });
+});
+
+/**
+ * `weekdaysOfRule` answers "which boxes are ticked" and returns `[]` for two
+ * opposite situations: a rule the parser rejected, and a rule with no weekdays
+ * in it at all. The parent's list used to collapse both into "Elke dag", which
+ * is right for one and a lie about the other. `isSchedulable` is the question
+ * that separates them, asked before the picker's.
+ */
+describe('isSchedulable', () => {
+  it('is true for a rule the engine can expand', () => {
+    expect(isSchedulable({ rrule: 'FREQ=DAILY' })).toBe(true);
+    expect(isSchedulable({ rrule: 'FREQ=WEEKLY;BYDAY=MO,WE' })).toBe(true);
+    expect(isSchedulable({ rrule: 'FREQ=MONTHLY;BYMONTHDAY=1' })).toBe(true);
+  });
+
+  it('is true for a one-off with a real date', () => {
+    expect(isSchedulable({ kind: 'once', date: '2026-08-15' })).toBe(true);
+  });
+
+  it('is false for a one-off whose date is not a real day', () => {
+    expect(isSchedulable({ kind: 'once', date: '2026-02-30' })).toBe(false);
+    expect(isSchedulable({ kind: 'once' })).toBe(false);
+  });
+
+  it('is false for a schedule that names neither a rule nor a date', () => {
+    expect(isSchedulable({})).toBe(false);
+    expect(isSchedulable({ timeOfDay: '07:15', graceDays: 1 })).toBe(false);
+    // The row that emptied a child's board: a `kind` the domain does not know,
+    // and nothing else.
+    expect(isSchedulable({ kind: 'daily' } as never)).toBe(false);
+  });
+
+  it('round-trips the builder: all seven days save and read back as all seven', () => {
+    const rule = ruleForWeekdays(['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU']);
+    expect(rule).toBe('FREQ=DAILY');
+    expect(isSchedulable({ rrule: rule! })).toBe(true);
+    // The builder seeds its picker from this. Anything shorter than seven here
+    // is the bug where saving an "Elke dag" routine silently narrowed it.
+    expect(weekdaysOfRule(rule!, ZONE)).toHaveLength(7);
   });
 });

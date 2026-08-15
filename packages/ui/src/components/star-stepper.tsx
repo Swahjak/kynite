@@ -60,7 +60,15 @@ export function StarStepper({
         aria-label={copy.decrease}
         disabled={value <= min}
         onClick={() => onValueChange(Math.max(min, value - 1))}
-        className={cn('rounded-full', big ? 'size-11' : 'size-8.5')}
+        // At `lg` the sheet draws a *filled* neutral disc rather than an
+        // outlined one (`Beloningen.dc.html` r347): the pair reads as one
+        // control with two weights — plus is the thing you are doing, minus is
+        // the way back — and an outline beside a solid indigo circle reads as
+        // disabled instead.
+        className={cn(
+          'rounded-full',
+          big ? 'size-11 border-0 bg-surface-container text-ink-secondary' : 'size-8.5'
+        )}
       >
         <span aria-hidden>−</span>
       </Button>

@@ -2,7 +2,6 @@ import { getTranslations } from 'next-intl/server';
 import {
   ApprovalQueue,
   AwardStarsDialog,
-  RewardDialog,
   RewardList,
   RewardsTabs,
   StarBalances,
@@ -64,12 +63,12 @@ export default async function RewardsPage({ params }: { params: Promise<{ locale
             answer a request and hand out a star, and the catalogue is one tab
             of that rather than the name of the screen. */}
         <h1 className="font-display text-h1 font-extrabold text-ink">{t('manageTitle')}</h1>
-        <span className="flex items-center gap-2">
-          {data.canAward && data.children.length > 0 ? (
-            <AwardStarsDialog members={awardMembers} />
-          ) : null}
-          {data.canManage ? <RewardDialog members={data.children} compact /> : null}
-        </span>
+        {/* One action in this header, as the sheet draws it. Creating a
+            reward moved onto the "Catalogus" tab, where the thing being
+            created lives. */}
+        {data.canAward && data.children.length > 0 ? (
+          <AwardStarsDialog members={awardMembers} />
+        ) : null}
       </header>
 
       <RewardsTabs

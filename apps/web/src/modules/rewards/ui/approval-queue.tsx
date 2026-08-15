@@ -220,19 +220,30 @@ export function ApprovalQueue({
                     <span className="block truncate text-body-sm font-semibold">
                       {entry.rewardTitle}
                     </span>
+                    {/* An approved reward that became a real appointment is no
+                        longer waiting on anybody — it is *scheduled*, and the
+                        line says which day rather than when it was approved
+                        (`Beloningen.dc.html` r259-266). */}
                     <span className="block truncate text-caption text-ink-secondary">
-                      {t('queue.approvedOn', {
-                        when: entry.decidedAt
-                          ? format.dateTime(entry.decidedAt, { day: 'numeric', month: 'short' })
-                          : format.relativeTime(entry.requestedAt, now),
-                      })}
+                      {entry.createdEventId
+                        ? t('queue.onCalendar')
+                        : t('queue.approvedOn', {
+                            when: entry.decidedAt
+                              ? format.dateTime(entry.decidedAt, { day: 'numeric', month: 'short' })
+                              : format.relativeTime(entry.requestedAt, now),
+                          })}
                     </span>
                   </div>
-                  {canApprove ? (
+                  {entry.createdEventId ? (
+                    <Icon
+                      name="event_available"
+                      size="sm"
+                      className="shrink-0 text-brand"
+                      label={t('queue.onCalendar')}
+                    />
+                  ) : canApprove ? (
                     <FulfillButton redemptionId={entry.id} />
-                  ) : (
-                    <Icon name="event_available" size="sm" className="shrink-0 text-brand" />
-                  )}
+                  ) : null}
                 </li>
               );
             })}

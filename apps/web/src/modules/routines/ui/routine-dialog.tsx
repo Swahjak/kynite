@@ -1,7 +1,8 @@
 'use client';
 
-import { useActionState, useEffect, useId, useRef, useState } from 'react';
+import { useActionState, useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
+import { Menu } from '@base-ui/react/menu';
 import {
   Button,
   cn,
@@ -13,6 +14,7 @@ import {
   Overline,
   SegmentedControl,
   StarStepper,
+  type IconName,
 } from '@kynite/ui';
 import {
   Dialog,
@@ -24,7 +26,6 @@ import {
 } from '@/components/ui/dialog';
 import { DateField } from '@/components/ui/date-field';
 import { TimeField } from '@/components/ui/time-field';
-import type { Member } from '@/modules/family';
 import { idleState } from '../action-state';
 import { createRoutineAction, updateRoutineAction } from '../actions';
 import { moveStep } from '../domain/steps';
@@ -39,6 +40,7 @@ import {
   type ScheduleKind,
   type Weekday,
 } from '../domain/schedule';
+import type { OwnerOption } from '../page-data';
 import type { RoutineWithSteps } from '../queries';
 import { DeleteRoutineButton } from './delete-routine-button';
 import { ROUTINE_ICONS, ROUTINE_ICON_TILE, routineIconOf } from './tokens';
@@ -62,9 +64,66 @@ import { ROUTINE_ICONS, ROUTINE_ICON_TILE, routineIconOf } from './tokens';
  * Steps are a local draft list posted as three parallel form fields. Their
  * *array order is the order*, so `sortOrder` is the index and reordering
  * persists by saving — no separate reorder round-trip. The grip is the design's
- * affordance; the two arrow buttons beside it are the one that works with a
- * keyboard and a screen reader, and they are not hidden behind a hover.
+ * affordance; the menu beside it holds the reorder and delete actions, which is
+ * what makes them work with a keyboard and a screen reader rather than only
+ * with a pointer.
  */
+
+/**
+ * The one control on the right of a step row (`Routines.dc.html` r394-417).
+ *
+ * The sheet draws `more_vert`; the icon subset ships `more_horiz`, which is the
+ * substitution this product already made everywhere else. What matters is that
+ * reordering and deleting a step are *still keyboard- and screen-reader-
+ * reachable* — they were two visible buttons for exactly that reason, and a
+ * drag handle alone would have been a regression. A menu keeps them as real,
+ * labelled `menuitem`s and gives the step's name the row back.
+ */
+function StepRowMenu({
+  label,
+  timerField,
+  actions,
+}: {
+  label: string;
+  timerField: ReactNode;
+  actions: readonly {
+    key: string;
+    label: string;
+    icon: IconName;
+    disabled: boolean;
+    onSelect: () => void;
+  }[];
+}) {
+  return (
+    <Menu.Root>
+      <Menu.Trigger
+        render={
+          <Button type="button" variant="ghost" size="icon" className="shrink-0" aria-label={label}>
+            <Icon name="more_horiz" size="sm" />
+          </Button>
+        }
+      />
+      <Menu.Portal>
+        <Menu.Positioner sideOffset={6} align="end" className="z-50">
+          <Menu.Popup className="flex min-w-56 flex-col gap-0.5 rounded-2xl border border-line-subtle bg-popover p-1.5 shadow-lg outline-none">
+            {timerField}
+            {actions.map((action) => (
+              <Menu.Item
+                key={action.key}
+                disabled={action.disabled}
+                onClick={action.onSelect}
+                className="flex cursor-pointer items-center gap-2 rounded-xl px-2 py-2 text-body-sm outline-none select-none data-disabled:opacity-40 data-highlighted:bg-surface-container"
+              >
+                <Icon name={action.icon} size="sm" className="shrink-0 text-ink-muted" />
+                {action.label}
+              </Menu.Item>
+            ))}
+          </Menu.Popup>
+        </Menu.Positioner>
+      </Menu.Portal>
+    </Menu.Root>
+  );
+}
 
 type Draft = {
   /** Empty for a step that does not exist yet. */
@@ -95,32 +154,42 @@ function draftsFrom(routine: RoutineWithSteps | undefined): Draft[] {
 const DEFAULT_DAYS: Weekday[] = ['MO', 'TU', 'WE', 'TH', 'FR'];
 
 export function RoutineDialog({
-  members,
+  owners,
   routine,
   timeZone,
-  compact = false,
+  variant = 'button',
+  scheduleLine,
 }: {
-  members: Member[];
+  owners: OwnerOption[];
   routine?: RoutineWithSteps;
   timeZone: string;
-  /** The icon-only trigger the parent's list row uses, instead of a labelled button. */
-  compact?: boolean;
+  /**
+   * `add` is the header's round `+`. `row` is the parent list's own row: the
+   * design sheet puts no edit affordance on it at all because *the row is the
+   * affordance*, and a row that also carried a `…` button would be two ways to
+   * do one thing competing for the same 358 pixels. The whole row cannot be a
+   * button — it holds the active switch, and a control inside a control is
+   * invalid — so the trigger is the title block, which is what a thumb aims at.
+   */
+  variant?: 'button' | 'add' | 'row';
+  /** The row trigger's second line, e.g. "elke dag 07:15 · 5 stappen". */
+  scheduleLine?: string;
 }) {
   const t = useTranslations('routines');
   const isEdit = routine !== undefined;
   const [open, setOpen] = useState(false);
 
   const trigger =
-    compact && routine ? (
-      <Button
-        variant="ghost"
-        size="icon"
-        className="shrink-0"
+    variant === 'row' && routine ? (
+      <button
+        type="button"
+        className="min-w-0 flex-1 cursor-pointer text-left"
         aria-label={t('actions.editNamed', { title: routine.title })}
       >
-        <Icon name="more_horiz" size="sm" />
-      </Button>
-    ) : compact ? (
+        <span className="block truncate text-body-sm font-semibold">{routine.title}</span>
+        <span className="tnum block truncate text-caption text-ink-secondary">{scheduleLine}</span>
+      </button>
+    ) : variant === 'add' ? (
       <Button size="icon-hub" className="rounded-full" aria-label={t('actions.add')}>
         <Icon name="add" size="md" />
       </Button>
@@ -135,14 +204,20 @@ export function RoutineDialog({
       <DialogTrigger render={trigger} />
       {/* Full height on a phone: this is the sheets' whole-screen builder, and
           a form with six sections inside a floating box is a form that scrolls
-          twice. */}
-      <DialogContent size="hub" className="max-h-[92dvh] gap-0 overflow-hidden p-0 sm:max-w-lg">
+          twice. The corner ✕ is suppressed because the builder bar below draws
+          its own leave control — two of them land on top of each other, and the
+          one that wins is the one nobody aimed at. */}
+      <DialogContent
+        size="hub"
+        showCloseButton={false}
+        className="max-h-[90dvh] gap-0 overflow-hidden p-0 sm:max-w-lg"
+      >
         {/* Mounted only while open, so a cancelled edit leaves nothing behind:
             the draft state is seeded from props on mount rather than reset by
             an effect (which is a cascading render, and lint-banned for it). */}
         {open ? (
           <RoutineForm
-            members={members}
+            owners={owners}
             routine={routine}
             timeZone={timeZone}
             onSaved={() => setOpen(false)}
@@ -154,12 +229,12 @@ export function RoutineDialog({
 }
 
 function RoutineForm({
-  members,
+  owners,
   routine,
   timeZone,
   onSaved,
 }: {
-  members: Member[];
+  owners: OwnerOption[];
   routine?: RoutineWithSteps;
   timeZone: string;
   onSaved: () => void;
@@ -179,8 +254,9 @@ function RoutineForm({
     return existing.length > 0 ? existing : DEFAULT_DAYS;
   });
   const [icon, setIcon] = useState(() => routineIconOf(routine?.icon ?? null));
-  const [owner, setOwner] = useState(() => routine?.ownerMemberId ?? members[0]?.id ?? '');
+  const [owner, setOwner] = useState(() => routine?.ownerMemberId ?? owners[0]?.id ?? '');
   const [stars, setStars] = useState(() => routine?.starsPerCompletion ?? 1);
+  const [graceDays, setGraceDays] = useState(() => String(routine?.schedule.graceDays ?? 1));
 
   /**
    * M20's one-off. The toggle is a *mode*, not an extra field: a routine is
@@ -239,7 +315,7 @@ function RoutineForm({
   const formId = useId();
 
   return (
-    <div className="flex max-h-[92dvh] min-h-0 flex-col">
+    <div className="flex max-h-[90dvh] min-h-0 flex-col">
       {/* The sheets' builder bar: leave, what this is, save. Save is the only
           filled control on the screen. */}
       <div className="flex shrink-0 items-center justify-between gap-3 border-b border-line-subtle px-5 py-3">
@@ -303,7 +379,7 @@ function RoutineForm({
             <div
               role="radiogroup"
               aria-label={t('form.icon')}
-              className="mt-2.5 flex flex-wrap gap-2"
+              className="mt-2.5 flex flex-wrap items-center gap-2"
             >
               {ROUTINE_ICONS.map((option) => {
                 const selected = option === icon;
@@ -312,11 +388,18 @@ function RoutineForm({
                     key={option}
                     data-testid={`routine-icon-${option}`}
                     data-selected={selected ? 'true' : 'false'}
+                    // Squircles, not circles (`Routines.dc.html` r378-385):
+                    // 40px at radius 12, and the chosen one grows to 52 at
+                    // radius 16 with the indigo edge. The size *is* the
+                    // selection cue — a ring alone reads as focus.
                     className={cn(
-                      'flex size-10 cursor-pointer items-center justify-center rounded-2xl transition-colors',
+                      'flex cursor-pointer items-center justify-center transition-all',
                       selected
-                        ? cn('ring-2 ring-primary', ROUTINE_ICON_TILE[option])
-                        : 'bg-surface-container text-ink-muted hover:text-ink-secondary'
+                        ? cn(
+                            'size-13 rounded-xl border-2 border-primary',
+                            ROUTINE_ICON_TILE[option]
+                          )
+                        : 'size-10 rounded-lg bg-surface-container text-ink-muted hover:text-ink-secondary'
                     )}
                   >
                     <input
@@ -338,7 +421,7 @@ function RoutineForm({
           <div>
             <Overline className="mb-2">{t('form.owner')}</Overline>
             <div role="radiogroup" aria-label={t('form.owner')} className="flex flex-wrap gap-2">
-              {members.map((member) => {
+              {owners.map((member) => {
                 const selected = member.id === owner;
                 return (
                   <label key={member.id} className="cursor-pointer">
@@ -350,9 +433,16 @@ function RoutineForm({
                       onChange={() => setOwner(member.id)}
                       className="sr-only"
                     />
+                    {/* `initials` and `surfaceClass` are what make this a
+                        *face* rather than a grey disc — the same pair the
+                        give-stars sheet passes, resolved server-side in
+                        `ownerOptionsOf` because this module cannot reach the
+                        family barrel from the browser. */}
                     <MemberChip
                       name={member.displayName}
                       avatarUrl={member.avatarUrl}
+                      initials={member.initials}
+                      surfaceClass={member.colorClass}
                       selected={selected}
                       data-testid={`routine-owner-${member.id}`}
                     />
@@ -445,14 +535,25 @@ function RoutineForm({
               </label>
               <label className="flex flex-1 flex-col gap-1 rounded-xl bg-surface-container px-3.5 py-2.5">
                 <span className="text-[11px] text-ink-muted">{t('form.graceDays')}</span>
-                <Input
-                  type="number"
-                  name="graceDays"
-                  min={0}
-                  max={MAX_GRACE_DAYS}
-                  defaultValue={routine?.schedule.graceDays ?? 1}
-                  className="border-0 bg-transparent px-0 font-display text-h3 font-bold shadow-none"
-                />
+                {/* "1 dag", not "1" — the unit is the whole meaning of this
+                    field, and the sheet prints it (`Routines.dc.html` r369).
+                    It rides beside the input rather than inside it so the
+                    control stays a plain number and the count still agrees
+                    with itself while it is being changed. */}
+                <span className="flex items-baseline gap-1.5">
+                  <Input
+                    type="number"
+                    name="graceDays"
+                    min={0}
+                    max={MAX_GRACE_DAYS}
+                    value={graceDays}
+                    onChange={(event) => setGraceDays(event.target.value)}
+                    className="w-10 border-0 bg-transparent px-0 font-display text-h3 font-bold shadow-none"
+                  />
+                  <span className="text-body-sm text-ink-secondary">
+                    {t('form.graceDaysUnit', { count: Number(graceDays) || 0 })}
+                  </span>
+                </span>
               </label>
             </div>
           </div>
@@ -472,7 +573,19 @@ function RoutineForm({
                   className="flex items-center gap-2 rounded-xl border border-line-subtle bg-card px-2.5 py-2"
                 >
                   <input type="hidden" name="stepId" value={step.id} />
+                  {/* The timer posts from the row, never from the menu. The
+                      three step fields are parallel arrays read positionally by
+                      the Server Action, and a popup that unmounts when it
+                      closes would drop one entry and shift every timer onto the
+                      wrong step. The control inside the menu edits this. */}
+                  <input type="hidden" name="stepTimerSeconds" value={step.timerSeconds} />
                   <GripHandle />
+                  {/* The name owns the row (`Routines.dc.html` r394-417). A
+                      grip, a name and *one* control on the right — everything
+                      else moved under the `more_horiz` menu below, because four
+                      icon buttons and a number field beside the name left it
+                      82 pixels wide on a 390px phone and "Aanklede|" is not a
+                      step anybody wrote. */}
                   <Input
                     name="stepTitle"
                     maxLength={120}
@@ -488,57 +601,58 @@ function RoutineForm({
                     }
                     className="min-w-0 flex-1 border-0 bg-transparent px-1 shadow-none"
                   />
-                  <Input
-                    type="number"
-                    name="stepTimerSeconds"
-                    min={0}
-                    max={7200}
-                    placeholder={t('form.stepTimerShort')}
-                    aria-label={t('form.stepTimer', { number: index + 1 })}
-                    value={step.timerSeconds}
-                    onChange={(event) =>
-                      setSteps((current) =>
-                        current.map((entry) =>
-                          entry.key === step.key
-                            ? { ...entry, timerSeconds: event.target.value }
-                            : entry
-                        )
-                      )
+                  <StepRowMenu
+                    label={t('form.stepMenu', { number: index + 1 })}
+                    timerField={
+                      <label className="flex items-center gap-2 px-2 py-1.5">
+                        <Icon name="timer" size="sm" className="shrink-0 text-ink-muted" />
+                        <span className="flex-1 text-caption text-ink-secondary">
+                          {t('form.stepTimerShort')}
+                        </span>
+                        <Input
+                          type="number"
+                          min={0}
+                          max={7200}
+                          aria-label={t('form.stepTimer', { number: index + 1 })}
+                          value={step.timerSeconds}
+                          onChange={(event) =>
+                            setSteps((current) =>
+                              current.map((entry) =>
+                                entry.key === step.key
+                                  ? { ...entry, timerSeconds: event.target.value }
+                                  : entry
+                              )
+                            )
+                          }
+                          className="w-16 shrink-0 bg-surface-container px-2 text-caption"
+                        />
+                      </label>
                     }
-                    className="w-16 shrink-0 border-0 bg-surface-container px-2 text-caption shadow-none"
+                    actions={[
+                      {
+                        key: 'up',
+                        label: t('form.moveUp', { number: index + 1 }),
+                        icon: 'arrow_upward',
+                        disabled: index === 0,
+                        onSelect: () => move(step.key, 'up'),
+                      },
+                      {
+                        key: 'down',
+                        label: t('form.moveDown', { number: index + 1 }),
+                        icon: 'arrow_downward',
+                        disabled: index === steps.length - 1,
+                        onSelect: () => move(step.key, 'down'),
+                      },
+                      {
+                        key: 'remove',
+                        label: t('form.removeStep', { number: index + 1 }),
+                        icon: 'delete',
+                        disabled: steps.length <= 1,
+                        onSelect: () =>
+                          setSteps((current) => current.filter((entry) => entry.key !== step.key)),
+                      },
+                    ]}
                   />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    aria-label={t('form.moveUp', { number: index + 1 })}
-                    disabled={index === 0}
-                    onClick={() => move(step.key, 'up')}
-                  >
-                    <Icon name="arrow_upward" size="sm" />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    aria-label={t('form.moveDown', { number: index + 1 })}
-                    disabled={index === steps.length - 1}
-                    onClick={() => move(step.key, 'down')}
-                  >
-                    <Icon name="arrow_downward" size="sm" />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    aria-label={t('form.removeStep', { number: index + 1 })}
-                    disabled={steps.length <= 1}
-                    onClick={() =>
-                      setSteps((current) => current.filter((entry) => entry.key !== step.key))
-                    }
-                  >
-                    <Icon name="delete" size="sm" />
-                  </Button>
                 </li>
               ))}
             </ul>

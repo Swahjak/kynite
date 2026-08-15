@@ -1,9 +1,11 @@
 import 'server-only';
 import {
+  MEMBER_COLOR_CLASSES,
   can,
   getFamily,
   getMember,
   getPrincipal,
+  initialsOf,
   listMembers,
   type Member,
 } from '@/modules/family';
@@ -12,6 +14,7 @@ import {
   instantAt,
   sectionOf,
   timingAt,
+  wallClockOf,
   type RoutineState,
   type TimeSection,
 } from './domain/occurrence';
@@ -43,13 +46,47 @@ import { routineIconOf, type RoutineIcon } from './ui/tokens';
  * praise line says" cannot drift between components.
  */
 
+/**
+ * A candidate owner in the builder's "Voor wie" row.
+ *
+ * Face, name and colour resolved *here* rather than in the chip, for the same
+ * reason `rewards`' `QueueMember` is: the builder is a `'use client'` module,
+ * and importing `@/modules/family` from one pulls `principal.ts` and
+ * `next/headers` into the browser bundle, where it does not merely bloat — it
+ * fails to compile.
+ *
+ * Children lead. A routine belongs to whoever it is for and an adult may own
+ * one, but the sheet's row is a row of kids and that is the overwhelming case;
+ * ordering is the cheapest way to say so without removing the option.
+ */
+export type OwnerOption = {
+  id: string;
+  displayName: string;
+  avatarUrl: string | null;
+  initials: string;
+  colorClass: string;
+};
+
 export type RoutinesPageData = {
   familyId: string;
   members: Member[];
+  owners: OwnerOption[];
   routines: RoutineWithSteps[];
   timeZone: string;
   canWrite: boolean;
 };
+
+export function ownerOptionsOf(members: Member[]): OwnerOption[] {
+  return [...members]
+    .sort((left, right) => Number(right.role === 'child') - Number(left.role === 'child'))
+    .map((member) => ({
+      id: member.id,
+      displayName: member.displayName,
+      avatarUrl: member.avatarUrl,
+      initials: initialsOf(member.displayName),
+      colorClass: MEMBER_COLOR_CLASSES[member.color].surface,
+    }));
+}
 
 export async function loadRoutinesPage(): Promise<RoutinesPageData | null> {
   const principal = await getPrincipal();
@@ -64,6 +101,7 @@ export async function loadRoutinesPage(): Promise<RoutinesPageData | null> {
   return {
     familyId: principal.familyId,
     members,
+    owners: ownerOptionsOf(members),
     routines,
     timeZone: family?.timezone ?? 'Europe/Amsterdam',
     canWrite: can(principal, 'routine:write', { familyId: principal.familyId }),
@@ -91,6 +129,12 @@ export type BoardRoutine = {
   occurrenceDate: string;
   /** Whole minutes until the routine is due; null once it is. */
   minutesUntil: number | null;
+  /**
+   * `HH:mm` in the family's zone. The countdown chip switches to an absolute
+   * time once "over 11 uur" stops being a useful sentence about tonight
+   * (`Routines.dc.html` r168: "om 19:30").
+   */
+  dueTime: string;
   steps: BoardStep[];
   doneCount: number;
   total: number;
@@ -288,6 +332,7 @@ export async function loadMemberRoutines(options: BoardOptions): Promise<Routine
       state: timing.state,
       occurrenceDate: occurrence.occurrenceDate,
       minutesUntil: timing.minutesUntil,
+      dueTime: wallClockOf(occurrence.startsAt, timeZone),
       steps,
       doneCount,
       total: steps.length,

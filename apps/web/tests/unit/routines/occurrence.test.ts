@@ -356,3 +356,80 @@ describe('pinning the board clock', () => {
     expect(instantAt('nope', '07:45', ZONE)).toBeNull();
   });
 });
+
+/**
+ * The regression behind the empty child board.
+ *
+ * A hand-written routine row carried `{"kind": "daily"}` — no `rrule`, no
+ * `date`, and a `kind` that is not one of the two the domain knows. It produced
+ * no occurrences (correctly: there is no rule to expand), while the parent's
+ * list read the *absence* of weekdays as "Elke dag" and told the household the
+ * routine ran every morning. These lock down both halves: a real `FREQ=DAILY`
+ * genuinely runs every day including the weekend, and a schedule that names
+ * nothing is honestly unschedulable rather than quietly daily.
+ */
+describe('FREQ=DAILY without BYDAY', () => {
+  const DAILY: Schedule = { rrule: 'FREQ=DAILY', timeOfDay: '07:15', graceDays: 1 };
+
+  it('is due on every calendar day, weekends included', () => {
+    // 2026-08-10 (Mon) … 2026-08-16 (Sun).
+    for (const day of [
+      '2026-08-10',
+      '2026-08-11',
+      '2026-08-12',
+      '2026-08-13',
+      '2026-08-14',
+      '2026-08-15',
+      '2026-08-16',
+    ]) {
+      expect(occursOn(input(DAILY), day), day).toBe(true);
+    }
+  });
+
+  it('yields exactly one occurrence per day across a week', () => {
+    const from = new Date('2026-08-10T00:00:00+02:00');
+    const to = new Date('2026-08-17T00:00:00+02:00');
+    const starts = occurrenceStartsBetween(input(DAILY), from, to);
+
+    expect(starts).toHaveLength(7);
+    expect(starts.map((start) => dateKeyOf(start, ZONE))).toEqual([
+      '2026-08-10',
+      '2026-08-11',
+      '2026-08-12',
+      '2026-08-13',
+      '2026-08-14',
+      '2026-08-15',
+      '2026-08-16',
+    ]);
+  });
+
+  it('opens today rather than a grace day when today is due', () => {
+    const now = new Date('2026-08-15T09:30:00+02:00');
+    expect(openOccurrence(input(DAILY), now)).toMatchObject({
+      occurrenceDate: '2026-08-15',
+      daysLate: 0,
+    });
+  });
+
+  it('reads as due once its time has passed, upcoming before it', () => {
+    expect(timingAt(input(DAILY), new Date('2026-08-15T09:30:00+02:00')).state).toBe('due');
+    expect(timingAt(input(DAILY), new Date('2026-08-15T06:00:00+02:00')).state).toBe('upcoming');
+  });
+});
+
+describe('a schedule that names nothing', () => {
+  // The exact shape found in the database, `kind` and all.
+  const BROKEN = { kind: 'daily' } as unknown as Schedule;
+
+  it('produces no occurrence rather than a guessed one', () => {
+    expect(occursOn(input(BROKEN), '2026-08-15')).toBe(false);
+    expect(openOccurrence(input(BROKEN), new Date('2026-08-15T09:30:00+02:00'))).toBeNull();
+    expect(timingAt(input(BROKEN), new Date('2026-08-15T09:30:00+02:00')).state).toBe('none');
+  });
+
+  it('cannot be completed, so no tap can write against a day it never had', () => {
+    expect(
+      isCompletableOn(input(BROKEN), '2026-08-15', new Date('2026-08-15T09:30:00+02:00'))
+    ).toBe(false);
+  });
+});

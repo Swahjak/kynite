@@ -103,7 +103,7 @@ test.describe('routine builder', () => {
 
     await page.getByTestId('weekday-SA').click();
     await page.getByTestId('weekday-SU').click();
-    await page.getByLabel('Tijd').fill('19:30');
+    await page.getByLabel('Starttijd').fill('19:30');
 
     await page.getByLabel('Stap 1', { exact: true }).fill('Pyjama aan');
     await page.getByLabel('Stap 2', { exact: true }).fill('Tanden poetsen');
@@ -143,9 +143,12 @@ test.describe('routine builder', () => {
     await row.getByRole('button', { name: 'Bewerken' }).click();
 
     // Move the third step to the top: two moves, so the assertion cannot pass
-    // on an off-by-one swap.
-    await page.getByRole('button', { name: 'Stap 3 eerder zetten' }).click();
-    await page.getByRole('button', { name: 'Stap 2 eerder zetten' }).click();
+    // on an off-by-one swap. Reordering lives in each step's overflow menu
+    // since D2 — the name owns the row — so each move is open-then-choose.
+    await page.getByRole('button', { name: 'Meer voor stap 3' }).click();
+    await page.getByRole('menuitem', { name: 'Stap 3 eerder zetten' }).click();
+    await page.getByRole('button', { name: 'Meer voor stap 2' }).click();
+    await page.getByRole('menuitem', { name: 'Stap 2 eerder zetten' }).click();
     await page.getByRole('button', { name: 'Opslaan' }).click();
 
     await expect(page.getByRole('dialog')).toBeHidden();

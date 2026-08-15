@@ -106,6 +106,12 @@
      leading-icon/placeholder tone inside components, where it is decorative. */
   --ink-muted: #67697d;
 
+  /* The scrim behind a modal surface. Deliberately *not* derived from --ink:
+     it is the same near-black in both themes, because a dim behind a sheet is
+     shadow rather than text, and inverting it in dark mode would put a white
+     wash over the page. `Beloningen.dc.html` r317: rgba(25,28,29,0.35). */
+  --scrim: #191c1d;
+
   /* -- Lines ------------------------------------------------------------- */
   --line: #c4c5d9; /* Outline Variant — borders, unchecked controls */
   --line-subtle: #e1e3e4; /* Border — dividers, progress track */
@@ -569,6 +575,7 @@
   --color-ink: var(--ink);
   --color-ink-secondary: var(--ink-secondary);
   --color-ink-muted: var(--ink-muted);
+  --color-scrim: var(--scrim);
 
   --color-line: var(--line);
   --color-line-subtle: var(--line-subtle);

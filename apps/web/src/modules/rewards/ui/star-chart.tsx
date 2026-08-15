@@ -94,12 +94,15 @@ export async function StarChart({ chart }: { chart: StarChartData }) {
 
           {/* The mockup's weekly grid reads down seven day columns, with today
               as a filled medallion at the head of its column
-              (`mila_s_star_chart_light_mode/code.html`, "Column Headers"). The
-              week always ends today, so the last column is the filled one.
-              Earlier days are quieter, never marked. */}
+              (`mila_s_star_chart_light_mode/code.html`, "Column Headers").
+              The window is the calendar week now, Monday to Sunday, so *which*
+              column is filled is a date question rather than a position: on a
+              Wednesday the last column is Sunday and marking it would tell a
+              child they are four days further into the week than they are.
+              Earlier and later days are quieter, never marked. */}
           <ol className="flex items-end gap-2 sm:gap-3">
-            {chart.week.map((bar, index) => {
-              const today = index === chart.week.length - 1;
+            {chart.week.map((bar) => {
+              const today = bar.day === chart.today;
               const date = new Date(`${bar.day}T12:00:00Z`);
 
               return (

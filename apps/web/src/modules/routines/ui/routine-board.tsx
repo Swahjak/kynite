@@ -237,22 +237,37 @@ export function RoutineBoard({ board }: { board: RoutineBoardData }) {
   const subtitleFor = (routine: BoardRoutine, expanded: boolean) => {
     if (expanded) return t('stepProgress', { done: routine.doneCount, total: routine.total });
     if (routine.state === 'grace') return t('graceHint');
+    // A graduated routine no longer pays, so "3 stappen · +0 sterren" would be
+    // an arithmetic statement about nothing. The sheet's line is the promotion
+    // it actually is: "dat kun jij al zelf!" (`Routines.dc.html` r131).
+    if (routine.graduated) return t('graduatedHint');
     if (routine.oneOff) return t('oneOffAndStars', { stars: routine.starsPerCompletion });
     return t('stepsAndStars', { count: routine.total, stars: routine.starsPerCompletion });
+  };
+
+  /**
+   * The countdown chip, in the two readings the sheet draws.
+   *
+   * Close in, a duration is what a child can act on: "over 40 min", "over 4
+   * uur". Far out it stops being one — "over 11 uur" is a number nobody
+   * converts — so the chip names the clock time instead ("om 19:30"), which is
+   * also what the household already says to each other about bedtime. Six
+   * hours is the hinge: past it a routine belongs to a *later part of today*
+   * rather than to soon.
+   */
+  const countdownFor = (routine: BoardRoutine) => {
+    if (routine.state !== 'upcoming' || routine.minutesUntil === null) return null;
+    if (routine.minutesUntil <= 90) return t('startsIn', { minutes: routine.minutesUntil });
+    if (routine.minutesUntil <= 360)
+      return t('startsInHours', { hours: Math.round(routine.minutesUntil / 60) });
+    return t('startsAt', { time: routine.dueTime });
   };
 
   const copyFor = (routine: BoardRoutine, expanded: boolean) => ({
     stepCount: subtitleFor(routine, expanded),
     inProgress: t('inProgress'),
     doneLine: t(`routineDone.${routine.doneKey}`, { name: board.member.displayName }),
-    // Minutes are only meaningful close in; "starts in 705 min" is noise on a
-    // board a child glances at.
-    countdown:
-      routine.state === 'upcoming' && routine.minutesUntil !== null
-        ? routine.minutesUntil <= 90
-          ? t('startsIn', { minutes: routine.minutesUntil })
-          : t('startsInHours', { hours: Math.round(routine.minutesUntil / 60) })
-        : null,
+    countdown: countdownFor(routine),
     starLabel: (amount: number) => t('starsEarned', { count: amount }),
     actionLabel: (title: string) => t('completeStep', { title }),
     praise: (praiseKey: string) => t(`praise.${praiseKey}`),
@@ -337,17 +352,24 @@ export function RoutineBoard({ board }: { board: RoutineBoardData }) {
           className="min-w-24 flex-1"
         />
 
-        {/* Neutral board voice: "3 of 7 done", never "you still have to…". */}
+        {/* Neutral board voice: "3 of 7 done", never "you still have to…".
+            `shrink-0` because it is a fixed sentence beside a bar that gives:
+            without it the count wrapped under the band's own sun icon. */}
         <span
           data-testid={`section-progress-${section.section}`}
-          className="tnum font-display text-body font-bold text-ink-secondary"
+          className="tnum shrink-0 font-display text-body font-bold text-ink-secondary"
         >
           {t('sectionProgress', { done: section.doneCount, total: section.total })}
         </span>
       </div>
 
       {section.routines.length === 0 ? (
-        <p className="text-body text-ink-muted">{t('sectionEmpty')}</p>
+        // Only when *something else* on the board has content. A day with
+        // nothing at all says so once, underneath, rather than three times over
+        // three empty bands (`anythingToShow` below).
+        anythingToShow ? (
+          <p className="text-body text-ink-muted">{t('sectionEmpty')}</p>
+        ) : null
       ) : (
         <div className="flex flex-col gap-3">
           {section.routines.map((routine) => {

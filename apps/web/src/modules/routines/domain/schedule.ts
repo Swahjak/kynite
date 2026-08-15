@@ -146,6 +146,23 @@ export function weekdaysOfRule(rrule: string | undefined, timeZone: string): Wee
   return rule.freq === 'DAILY' ? [...WEEKDAYS] : [];
 }
 
+/**
+ * Can this schedule ever produce an occurrence?
+ *
+ * False for a routine that names neither a parseable rule nor a valid one-off
+ * date — a row that no board can ever surface. Such a schedule is not a
+ * theoretical shape: it is what a hand-written or half-migrated row looks like,
+ * and the parent's list used to describe one as "Elke dag" because *no*
+ * weekdays and *all seven* weekdays both come back from `weekdaysOfRule` as a
+ * list the caller had to disambiguate. They are opposites, so the list asks
+ * this question first and says the routine has no schedule rather than
+ * inventing the busiest one.
+ */
+export function isSchedulable(schedule: Schedule): boolean {
+  if (oneOffDateOf(schedule) !== null) return true;
+  return parseRule(schedule.rrule ?? '', 'UTC') !== null;
+}
+
 /** True for a rule this builder can round-trip without losing information. */
 export function isSimpleWeeklyRule(rrule: string | undefined, timeZone: string): boolean {
   const rule = parseRule(rrule ?? '', timeZone);
