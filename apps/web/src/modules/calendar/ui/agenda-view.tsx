@@ -4,6 +4,9 @@ import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { useDateTimeFormat } from '@/components/formatting';
 import { cn, EmptyState } from '@kynite/ui';
+// Type-only: `@/modules/family` re-exports `server-only` queries, so a value
+// import would drag the Postgres client into this client bundle.
+import type { Member } from '@/modules/family';
 import { dayKeysOf } from '../domain/expand';
 import { parseDateKey, toDateKey, toWall, fromWall } from '../domain/zone';
 import type { CalendarEvent } from '../queries';
@@ -21,6 +24,8 @@ import { EventChip } from './event-chip';
 export type AgendaViewProps = {
   days: Date[];
   events: CalendarEvent[];
+  /** Resolves each card's owner face — see `EventChip`'s `showOwner`. */
+  members?: Member[];
   timeZone: string;
   today?: Date | null;
   /** Hub surfaces render at 6-foot legibility — see `EventChip`'s `hub` prop. */
@@ -31,6 +36,7 @@ export type AgendaViewProps = {
 export function AgendaView({
   days,
   events,
+  members,
   timeZone,
   today,
   hub = false,
@@ -77,7 +83,7 @@ export function AgendaView({
       data-slot="agenda-view"
       className="flex min-h-0 flex-1 flex-col divide-y divide-line-subtle"
     >
-      {groups.map((group, index) => {
+      {groups.map((group) => {
         const wall = parseDateKey(group.key);
         const date = wall ? fromWall(wall, timeZone) : new Date(group.key);
         const isToday = group.key === todayKey;
@@ -90,65 +96,47 @@ export function AgendaView({
               // No row tint on today: the spec gives the *date pill* the
               // selected treatment and leaves the row on the card's own white,
               // so the day reads as marked without a second, weaker signal.
-              'flex gap-4 px-4 py-4 transition-colors',
+              'flex gap-3.5 px-5 py-3.5 transition-colors',
               hub && 'gap-6 px-6 py-5'
             )}
           >
-            {/* The time/date column of `calendar.md` § "Day agenda": a fixed,
-                centred rail (44px there; wider here because this rail carries a
-                whole date rather than one `HH:mm`), with a vertical connector
-                running from it to the next day — `width:1px;flex:1;
-                background:#c4c5d9;` — on every row but the last. The day the
-                board is showing takes the week strip's selected treatment:
-                "`background:#5d5fef;` with label `color:rgba(255,255,255,0.75)`
-                and date `font-weight:700;color:#ffffff`". */}
-            <div className={cn('flex shrink-0 flex-col items-center', hub ? 'w-24' : 'w-16')}>
-              <div
+            {/* The date rail — 44px on the phone, per `Kalender.dc.html`:
+                an overline weekday over a filled circle for the day in focus.
+                The rail used to be a whole tinted block carrying weekday,
+                date *and* month; a circle around the number is the same mark
+                the week strip and the month grid make, and three marks that
+                agree read as one system. */}
+            <div className={cn('shrink-0 text-center', hub ? 'w-20' : 'w-11')}>
+              <span className={`label-overline block text-ink-muted ${hub ? 'text-body' : ''}`}>
+                {formatDateTime(date, { weekday: 'short' })}
+              </span>
+              <span
                 className={cn(
-                  'flex w-full flex-col items-center gap-1.5 rounded-xl py-2 text-center',
-                  isToday && 'bg-primary'
+                  'tabular-time mt-1 inline-flex items-center justify-center rounded-full font-display font-extrabold',
+                  hub ? 'size-14' : 'size-8.5',
+                  isToday ? 'bg-primary text-primary-foreground' : 'text-ink'
                 )}
               >
-                {/* Plain string interpolation, not `cn()`, for the three lines
-                  below: `text-h2`/`text-caption`/`text-body`/`text-display-md`
-                  are this design system's custom font-size scale, which
-                  `tailwind-merge` (inside `cn()`) does not recognize — it
-                  buckets an unrecognized `text-*` token into the same
-                  conflict group as a real `text-*` *color* utility and drops
-                  whichever one of the two came first, no matter which one is
-                  actually the size. Routing these through `cn()` silently
-                  strips the size (or the color); a plain string has no
-                  conflict resolver to fool. */}
-                <div
-                  className={`label-overline ${hub ? 'text-body' : ''} ${isToday ? 'text-primary-foreground' : 'text-ink-muted'}`}
-                >
-                  {formatDateTime(date, { weekday: 'short' })}
-                </div>
-                <div
-                  className={`tabular-time font-bold ${hub ? 'text-display-md' : 'text-h2'} ${isToday ? 'text-primary-foreground' : 'text-ink'}`}
-                >
+                <span className={hub ? 'text-display-md' : 'text-h3'}>
                   {formatDateTime(date, { day: 'numeric' })}
-                </div>
-                <div
-                  className={`${hub ? 'text-body' : 'text-caption'} ${isToday ? 'text-primary-foreground' : 'text-ink-muted'}`}
-                >
-                  {formatDateTime(date, { month: 'short' })}
-                </div>
-              </div>
-
-              {/* The connector, omitted on the last row exactly as the spec
-                  omits it — a line running off the bottom of the list would
-                  promise a day that is not there. */}
-              {index < groups.length - 1 ? (
-                <span aria-hidden className="mt-1 w-px flex-1 bg-line" />
-              ) : null}
+                </span>
+              </span>
+              <span className={`mt-0.5 block text-ink-muted ${hub ? 'text-body' : 'text-caption'}`}>
+                {formatDateTime(date, { month: 'short' })}
+              </span>
             </div>
 
-            <div className={cn('flex min-w-0 flex-1 flex-col gap-1.5', hub && 'gap-2')}>
+            <div className={cn('flex min-w-0 flex-1 flex-col gap-2', hub && 'gap-3')}>
               {group.events.map((event) => (
-                <div key={event.key} className="flex min-w-0 flex-col gap-0.5">
-                  <EventChip event={event} variant="row" hub={hub} onSelect={onSelect} />
-                </div>
+                <EventChip
+                  key={event.key}
+                  event={event}
+                  variant="card"
+                  showOwner
+                  members={members}
+                  hub={hub}
+                  onSelect={onSelect}
+                />
               ))}
             </div>
           </section>

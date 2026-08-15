@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { useDateTimeFormat } from '@/components/formatting';
-import { CategoryDot, cn, EmptyState, Icon, MemberFace } from '@kynite/ui';
+import { cn, EmptyState, Icon, MemberFace } from '@kynite/ui';
 // Type-only, deliberately: `@/modules/family` re-exports `server-only` query
 // modules, and a value import would drag the Postgres client into this client
 // bundle — see the same note in `person-columns.tsx`.
@@ -230,15 +230,20 @@ export function MemberDayGrid({
               style={{ height: HEADER_HEIGHT }}
               data-slot="grid-corner"
             />
-            {hours.slice(0, -1).map((hour) => (
-              <div
-                key={hour}
-                style={{ height: HOUR_HEIGHT }}
-                className="relative -top-2 pr-2 text-right tabular-time text-caption text-ink-muted"
-              >
-                {String(hour).padStart(2, '0')}:00
-              </div>
-            ))}
+            {/* `pt-2` cancels the `-top-2` the labels are lifted by, so the
+                first one ("06:00") clears the sticky header instead of being
+                sheared in half by it. */}
+            <div className="pt-2">
+              {hours.slice(0, -1).map((hour) => (
+                <div
+                  key={hour}
+                  style={{ height: HOUR_HEIGHT }}
+                  className="relative -top-2 pr-2 text-right tabular-time text-caption text-ink-muted"
+                >
+                  {String(hour).padStart(2, '0')}:00
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="relative flex min-w-max flex-1">
@@ -266,11 +271,11 @@ export function MemberDayGrid({
                 className="relative flex w-36 min-w-0 grow flex-col border-l border-line-subtle bg-surface-container-low/40"
               >
                 <div
-                  className="glass sticky top-0 z-20 flex items-center justify-center gap-2 px-2"
+                  className="glass sticky top-0 z-20 flex items-center justify-center gap-2 border-b border-line-subtle px-2"
                   style={{ height: HEADER_HEIGHT }}
                 >
                   <Icon name="group" size="sm" className="text-ink-muted" />
-                  <span className="label-overline truncate text-ink-secondary">
+                  <span className="truncate font-display text-body-sm font-bold text-ink">
                     {t('everyone')}
                   </span>
                 </div>
@@ -302,7 +307,7 @@ export function MemberDayGrid({
                   className="relative flex w-36 min-w-0 grow flex-col border-l border-line-subtle"
                 >
                   <div
-                    className="glass sticky top-0 z-20 flex items-center justify-center gap-2 px-2"
+                    className="glass sticky top-0 z-20 flex items-center justify-center gap-2 border-b border-line-subtle px-2"
                     style={{ height: HEADER_HEIGHT }}
                   >
                     <MemberFace
@@ -310,11 +315,16 @@ export function MemberDayGrid({
                       avatarUrl={member.avatarUrl}
                       name={member.displayName}
                       surfaceClass={palette.surface}
+                      ringClass={palette.ring}
+                      ringed
                     />
-                    <span className="label-overline truncate text-ink-secondary">
+                    {/* Name in the display face at body-sm/bold, per the
+                        mock's column head — and no colour dot beside it. The
+                        face already carries the member's hue in its ring; a
+                        second pip repeats it and steals width from the name. */}
+                    <span className="truncate font-display text-body-sm font-bold text-ink">
                       {member.displayName}
                     </span>
-                    <CategoryDot size="sm" className={palette.solid} />
                   </div>
 
                   <div className="relative" style={{ height: bodyHeight }}>
@@ -353,10 +363,13 @@ export function MemberDayGrid({
             {showNow && (
               <div
                 data-testid="now-line"
-                className="pointer-events-none absolute inset-x-0 z-20 border-t border-now"
+                // A 2px rule with a 10px dot, per `Kalender.dc.html` — it used
+                // to be a 1px `border-t` with a 8px pip, which at kitchen
+                // distance is indistinguishable from an hour rule.
+                className="pointer-events-none absolute inset-x-0 z-20 h-0.5 bg-now"
                 style={{ top: HEADER_HEIGHT + nowTop }}
               >
-                <span className="absolute -top-1 -left-1 size-2 rounded-full bg-now" />
+                <span className="absolute -top-1 -left-1 size-2.5 rounded-full bg-now" />
               </div>
             )}
           </div>

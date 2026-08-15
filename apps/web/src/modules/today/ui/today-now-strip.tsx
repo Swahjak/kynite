@@ -59,8 +59,8 @@ export async function TodayNowStrip({ event, mode, members, now, timeZone }: Tod
         data-state={mode}
         className="flex-row items-center gap-3 rounded-3xl p-4 sm:p-5"
       >
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-surface-container-lowest text-ink-muted">
-          <Icon name={clear ? 'celebration' : 'schedule'} size="md" />
+        <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-surface-container-lowest text-ink-muted">
+          <Icon name={clear ? 'celebration' : 'schedule'} size="lg" />
         </span>
         <p className="min-w-0 text-body-sm text-ink-secondary">
           {clear ? t('nowStrip.clear') : t('nowStrip.past')}
@@ -111,16 +111,20 @@ export async function TodayNowStrip({ event, mode, members, now, timeZone }: Tod
       {/* A two-column grid rather than nested flexes: the progress bar has to
           span the *whole* strip, and the countdown beside it has to sit in the
           text column. One grid says both. */}
-      <div className="relative grid grid-cols-[2.5rem_minmax(0,1fr)] items-center gap-x-3.5">
+      <div className="relative grid grid-cols-[3rem_minmax(0,1fr)] items-center gap-x-3.5">
+        {/* A squircle tile in the event's own category tint, at the design's
+            48px. `IconMedallion` carries no category tints — category is the
+            calendar's vocabulary, not the medallion's — so the hue arrives as
+            a class pair. */}
         <span
           className={cn(
-            'row-span-2 flex size-10 shrink-0 items-center justify-center rounded-xl',
+            'row-span-2 flex size-12 shrink-0 items-center justify-center rounded-2xl',
             palette.surface
           )}
         >
           <Icon
             name={event.busyOnly ? 'lock' : EVENT_TYPE_ICONS[event.eventType]}
-            size="md"
+            size="lg"
             className={palette.text}
           />
         </span>
@@ -129,7 +133,10 @@ export async function TodayNowStrip({ event, mode, members, now, timeZone }: Tod
           <span className="rounded-4xl bg-primary px-2.5 py-0.5 text-overline text-primary-foreground uppercase">
             {live ? t('now.eyebrowLive') : t('now.eyebrowNext')}
           </span>
-          <span className="min-w-0 truncate font-display text-body-lg font-bold">
+          {/* One of the two elements on a wall display that has to read from
+              two metres — the other is the clock. Everything else on the board
+              is for whoever is standing at the tablet. */}
+          <span className="min-w-0 truncate font-display text-h3 font-extrabold">
             {event.busyOnly ? tCalendar('busy') : event.title}
           </span>
         </div>

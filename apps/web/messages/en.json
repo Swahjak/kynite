@@ -417,7 +417,8 @@
       "today": "Today",
       "deleteConfirmTitle": "Delete this event?",
       "deleteConfirmBody": "{title} disappears from the family calendar.",
-      "deleteConfirmYes": "Yes, delete"
+      "deleteConfirmYes": "Yes, delete",
+      "new": "New"
     },
     "dialog": {
       "addTitle": "Add event",
@@ -497,6 +498,11 @@
     "month": {
       "more": "{count} more",
       "openDay": "See everything on {date}"
+    },
+    "filter": {
+      "label": "Filter by family member",
+      "show": "Show {name} again",
+      "hide": "Hide {name}"
     }
   },
   "holidays": {
@@ -520,6 +526,27 @@
       "christmasDay": "Christmas Day",
       "boxingDay": "Boxing Day",
       "newYearsEve": "New Year's Eve"
+    },
+    "countdownPrefix": "in",
+    "countdownUnit": "{count, plural, one {day} other {days}}",
+    "banner": {
+      "newYear": "A brand new year to fill in",
+      "goodFriday": "A quiet day to spend together",
+      "easterSunday": "Who finds the most eggs?",
+      "easterMonday": "One more day of egg hunting",
+      "kingsDay": "Orange on, off to the flea market",
+      "liberationDay": "Today we celebrate freedom",
+      "mothersDay": "Today is all about mum",
+      "ascension": "A free Thursday for the whole family",
+      "whitSunday": "A long weekend to spend outside",
+      "whitMonday": "One more day off, together",
+      "fathersDay": "Today is all about dad",
+      "animalDay": "Extra fuss for the family pets",
+      "halloween": "Dress up and collect the sweets!",
+      "sinterklaas": "Time to put your shoe out",
+      "christmasDay": "The tree lights can go on!",
+      "boxingDay": "Boxing Day: sleep in and eat leftovers",
+      "newYearsEve": "Doughnuts and counting down to midnight"
     }
   },
   "today": {
@@ -593,7 +620,8 @@
       "empty": "No children in this family yet.",
       "noRoutines": "No routines today",
       "starsToday": "{count, plural, =0 {No stars yet today} one {# star today} other {# stars today}}"
-    }
+    },
+    "familyLabel": "The family"
   },
   "routines": {
     "title": "Routines",

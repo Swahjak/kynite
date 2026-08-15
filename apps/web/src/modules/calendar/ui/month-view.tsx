@@ -4,7 +4,6 @@ import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { useDateTimeFormat } from '@/components/formatting';
 import { cn } from '@kynite/ui';
-import type { Member } from '@/modules/family';
 import { specialDaysOn } from '@/modules/holidays';
 import { dayKeysOf } from '../domain/expand';
 import { toDateKey, toWall } from '../domain/zone';
@@ -21,8 +20,6 @@ import { EventChip } from './event-chip';
 export type MonthViewProps = {
   days: Date[];
   events: CalendarEvent[];
-  /** Resolves each chip's owner face — see `EventChip`'s `showOwner`. */
-  members: Member[];
   timeZone: string;
   /** The month in focus; days outside it render dimmed. */
   anchor: Date;
@@ -44,7 +41,6 @@ const MAX_ROWS_PER_CELL = 3;
 export function MonthView({
   days,
   events,
-  members,
   timeZone,
   anchor,
   today,
@@ -72,23 +68,29 @@ export function MonthView({
   const weekdays = days.slice(0, 7);
 
   return (
-    <div data-slot="month-view" className="flex min-h-0 flex-col">
+    <div data-slot="month-view" className="flex min-h-0 flex-1 flex-col px-3 pb-4 sm:px-6 sm:pb-5">
       {/* `calendar.md` § "Month view / date picker": the weekday header row is
           bare — "each letter: `text-align:center;font-family:'Baloo 2';
           font-weight:700;font-size:11px;color:#747688;`" on the card's own
           white ground, with no band behind it. */}
-      <div className="grid grid-cols-7 border-b border-line-subtle">
+      <div className="grid shrink-0 grid-cols-7 border-b border-line-subtle">
         {weekdays.map((day) => (
           <div
             key={day.toISOString()}
-            className="label-overline px-2 py-3 text-center text-ink-muted"
+            className="label-overline px-2 py-2.5 text-center text-ink-muted"
           >
             {formatDateTime(day, { weekday: 'short' })}
           </div>
         ))}
       </div>
 
-      <div className="grid min-h-0 flex-1 auto-rows-fr grid-cols-7">
+      {/* Hairline separators as *gaps*, not borders: `gap-px` over a
+          `bg-line-subtle` ground gives every cell the same 1px rule on all
+          four sides, including the outer edge, where per-cell `border-t
+          border-l` left the right and bottom of the grid open. The rounded
+          clip is then a property of the grid rather than something the corner
+          cells each have to know about. */}
+      <div className="mt-2.5 grid min-h-0 flex-1 auto-rows-fr grid-cols-7 gap-px overflow-hidden rounded-2xl border border-line-subtle bg-line-subtle">
         {days.map((day) => {
           const key = toDateKey(toWall(day, timeZone));
           const dayEvents = byDay.get(key) ?? [];
@@ -107,8 +109,8 @@ export function MonthView({
               data-day={key}
               data-outside={outside || undefined}
               className={cn(
-                'flex min-h-24 min-w-0 flex-col gap-1 border-t border-l border-line-subtle p-1.5 transition-colors',
-                outside ? 'bg-surface-container-low/50' : 'hover:bg-surface-container-low/40'
+                'flex min-h-24 min-w-0 flex-col gap-0.5 overflow-hidden p-1.5 transition-colors',
+                outside ? 'bg-surface-container-low' : 'bg-card hover:bg-surface-container-low/40'
               )}
             >
               <div className="flex items-center justify-between gap-1">
@@ -146,52 +148,46 @@ export function MonthView({
                     </span>
                   )}
                 </span>
-
-                {dayEvents.length > MAX_ROWS_PER_CELL &&
-                  (onOpenDay ? (
-                    <button
-                      type="button"
-                      data-testid="month-more"
-                      data-day={key}
-                      aria-label={t('month.openDay', {
-                        date: formatDateTime(day, { day: 'numeric', month: 'long' }),
-                      })}
-                      onClick={() => onOpenDay(key)}
-                      className="rounded-4xl bg-surface-container px-2 py-0.5 text-caption font-semibold text-ink-secondary transition-colors hover:bg-surface-container-high hover:text-ink focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
-                    >
-                      {t('month.more', { count: dayEvents.length - MAX_ROWS_PER_CELL })}
-                    </button>
-                  ) : (
-                    <span className="text-caption text-ink-muted">
-                      {t('month.more', { count: dayEvents.length - MAX_ROWS_PER_CELL })}
-                    </span>
-                  ))}
               </div>
 
+              {/* Dot + title, not a tinted chip — see `EventChip`'s `line`
+                  variant for why a month cell cannot afford the chip. */}
               <div className="flex min-w-0 flex-col gap-0.5">
                 {dayEvents.slice(0, MAX_ROWS_PER_CELL).map((event) => (
                   <EventChip
                     key={event.key}
                     event={event}
-                    variant="row"
-                    showTime={false}
-                    showOwner
-                    members={members}
+                    variant="line"
                     onSelect={onSelect}
-                    className="px-1 py-0 shadow-none"
+                    className={outside ? 'opacity-60' : undefined}
                   />
                 ))}
               </div>
 
-              {/* Past the row budget, the remaining events survive as pips, so
-                  a busy day still reads as busy rather than as a bare count. */}
-              {dayEvents.length > MAX_ROWS_PER_CELL && (
-                <div className="mt-auto flex items-center gap-1">
-                  {dayEvents.slice(MAX_ROWS_PER_CELL, MAX_ROWS_PER_CELL + 6).map((event) => (
-                    <EventChip key={event.key} event={event} variant="dot" />
-                  ))}
-                </div>
-              )}
+              {/* "+N meer" sits *under* the lines it is counting, not beside
+                  the date: it is the tail of the list, and next to the date it
+                  read as a property of the day. It navigates — see
+                  `onOpenDay` — because without it every event past the third
+                  is unreachable from this view. */}
+              {dayEvents.length > MAX_ROWS_PER_CELL &&
+                (onOpenDay ? (
+                  <button
+                    type="button"
+                    data-testid="month-more"
+                    data-day={key}
+                    aria-label={t('month.openDay', {
+                      date: formatDateTime(day, { day: 'numeric', month: 'long' }),
+                    })}
+                    onClick={() => onOpenDay(key)}
+                    className="self-start rounded-sm pl-3 text-left text-caption text-ink-muted transition-colors hover:text-ink focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
+                  >
+                    {t('month.more', { count: dayEvents.length - MAX_ROWS_PER_CELL })}
+                  </button>
+                ) : (
+                  <span className="pl-3 text-caption text-ink-muted">
+                    {t('month.more', { count: dayEvents.length - MAX_ROWS_PER_CELL })}
+                  </span>
+                ))}
             </div>
           );
         })}

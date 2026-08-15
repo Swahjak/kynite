@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { Card, cn, Icon } from '@kynite/ui';
+import { Card, cn, Icon, SectionHeading } from '@kynite/ui';
 import { formatDateTime } from '@/i18n/formatting-locale';
 import { CATEGORY_CLASSES, dayKeysOf, type CalendarEvent } from '@/modules/calendar';
 import { MemberAvatar, getHouseholdFormattingLocale, type Member } from '@/modules/family';
@@ -33,6 +33,12 @@ export type TodayTabPersonenProps = {
   now: Date;
   isToday: boolean;
   nowEventKey: string | null;
+  /**
+   * A fixed column count, for the hub's middle column — the design draws it as
+   * a 2 × 2 grid of short lists rather than one row of four. Left unset, the
+   * grid stays fluid, which is what a tab spanning the page needs.
+   */
+  columnCount?: 2;
 };
 
 export async function TodayTabPersonen({
@@ -43,6 +49,7 @@ export async function TodayTabPersonen({
   now,
   isToday,
   nowEventKey,
+  columnCount,
 }: TodayTabPersonenProps) {
   const t = await getTranslations('today');
   const tCalendar = await getTranslations('calendar');
@@ -112,9 +119,16 @@ export async function TodayTabPersonen({
 
   return (
     <Card data-testid="today-person-columns" className="gap-4 p-5">
-      <h3 className="font-display text-h3 font-bold">{t('tabs.personen')}</h3>
+      <SectionHeading title={t('tabs.personen')} size="card" level={2} />
 
-      <div className="grid gap-5 [grid-template-columns:repeat(auto-fit,minmax(11rem,1fr))]">
+      <div
+        className={cn(
+          'grid gap-x-4 gap-y-5',
+          columnCount === 2
+            ? 'grid-cols-2'
+            : '[grid-template-columns:repeat(auto-fit,minmax(11rem,1fr))]'
+        )}
+      >
         {members.map((member) => (
           <div key={member.id} data-member-id={member.id} className="flex flex-col gap-3">
             <div className="flex items-center gap-2">

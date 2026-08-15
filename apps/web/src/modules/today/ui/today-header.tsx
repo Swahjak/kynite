@@ -100,9 +100,23 @@ export async function TodayHeader({
   return (
     <header className="flex flex-wrap items-center justify-between gap-4">
       <div className="flex min-w-0 flex-col gap-1.5">
-        <h1 className="font-display text-h1 font-extrabold" data-testid="today-greeting">
+        {/* One step down on a phone: the design sets the greeting at 24px on
+            390px and 32px once there is room for it. */}
+        <h1 className="font-display text-h2 font-extrabold sm:text-h1" data-testid="today-greeting">
           {greeting}
         </h1>
+
+        {/* The day, under the greeting rather than only beside the clock — a
+            phone hides the clock (it has one of its own in the status bar), and
+            without this line nothing on the screen would say which day it is. */}
+        <span className="text-caption text-ink-secondary sm:hidden">
+          {formatDateTime(anchor, formattingLocale, {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+            timeZone,
+          })}
+        </span>
 
         {(special.length > 0 || countdown) && (
           <div className="flex flex-wrap items-center gap-2" data-testid="today-festive">
@@ -187,11 +201,16 @@ export async function TodayHeader({
 
       {/* Only *today* gets a ticking clock. A browsed day keeps its own static
           date rather than silently jumping forward at midnight because a tab
-          was left open on it — see `TodayClock`'s own note on the rollover. */}
+          was left open on it — see `TodayClock`'s own note on the rollover.
+          Hidden below `sm`: a phone already carries the time in its status bar,
+          and the design gives that space back to the day itself. */}
       {isToday ? (
-        <TodayClock now={now} timeZone={timeZone} dayKey={dayKey} />
+        <TodayClock now={now} timeZone={timeZone} dayKey={dayKey} className="hidden sm:flex" />
       ) : (
-        <div data-testid="today-clock" className={cn('flex flex-col items-end text-right')}>
+        <div
+          data-testid="today-clock"
+          className={cn('hidden flex-col items-end text-right sm:flex')}
+        >
           <span className="font-display text-h2 font-bold tabular-nums">
             {formatDateTime(anchor, formattingLocale, { day: 'numeric', month: 'short', timeZone })}
           </span>

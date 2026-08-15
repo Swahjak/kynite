@@ -14,14 +14,14 @@ import { MEMBER_COLOR_CLASSES, greetingSlotFor, hourIn, initialsOf } from '@/mod
 import { loadFamilyRoutineTotals } from '@/modules/routines';
 import { loadTodayTasks } from '@/modules/tasks';
 import {
-  TodayHeader,
+  TodayHubDag,
+  TodayHubHeader,
   TodayLive,
-  TodayNowStrip,
-  TodayTabDag,
   TodayTabPersonen,
   TodayTabRoutines,
   TodayTabSterren,
   TodayTabs,
+  TodayThemeBanner,
   flowOf,
   loadTodayProgress,
   type DayReference,
@@ -203,7 +203,11 @@ export default async function HubPage({
 
   return (
     <main
-      className="flex min-h-full flex-col gap-4 bg-background px-6 py-4"
+      // `h-full`, not `min-h-full`: the wall's header and its tab pills stay
+      // put and the panel scrolls inside what is left. A kiosk that scrolled as
+      // one page would take the clock and the day off the top of the screen,
+      // which are the two things a glance from across the room is looking for.
+      className="flex h-full min-h-0 flex-col gap-4 bg-background px-6 py-4"
       data-testid="hub-board"
     >
       {/* A subscription, not a widget — see `TodayLive`. It works unchanged
@@ -233,29 +237,27 @@ export default async function HubPage({
           events: data.events,
         }}
       >
-        <TodayHeader
+        <TodayHubHeader
           greeting={t(`hubGreeting.${slot}`)}
           anchor={data.anchor}
           now={data.now}
           timeZone={data.timeZone}
           dayKey={dayKey}
           isToday={isToday}
+          members={data.members}
           // A chevron must not navigate the kiosk out of the `(hub)` tree.
           href="/hub"
         />
 
-        <TodayNowStrip
-          event={flow.hero}
-          mode={flow.mode}
-          members={data.members}
-          now={reference.now}
-          timeZone={data.timeZone}
-        />
-
         <TodayTabs
           defaultTab={defaultTab}
+          fill
           dag={
-            <TodayTabDag
+            /* The wall's three columns: what is happening now and the day as a
+               list, who has what, and how the routines and the task list stand.
+               The NU strip lives *inside* the first column here rather than
+               above the tabs — see `TodayHubDag`. */
+            <TodayHubDag
               members={data.members}
               events={data.events}
               timeZone={data.timeZone}
@@ -263,10 +265,19 @@ export default async function HubPage({
               now={data.now}
               isToday={isToday}
               nowEventKey={nowEventKey}
+              heroEvent={flow.hero}
+              flowMode={flow.mode}
+              referenceNow={reference.now}
               // `canWrite` / `canComplete` come from the matrix inside
               // `loadTodayTasks`: a device may tick a task off and may not
               // invent or delete one.
               tasks={tasks}
+              kids={progress?.kids ?? null}
+              // M26: one full-width row above the columns on a day that means
+              // something, and nothing at all on the other 348.
+              banner={
+                <TodayThemeBanner dayKey={dayKey} isToday={isToday} timeZone={data.timeZone} />
+              }
               // The kiosk's own timers screen, not the app's.
               timersHref="/hub/timers"
             />

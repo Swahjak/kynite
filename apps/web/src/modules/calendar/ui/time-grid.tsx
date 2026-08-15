@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useRef, useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { useDateTimeFormat } from '@/components/formatting';
 import { cn } from '@kynite/ui';
 import type { Member } from '@/modules/family';
@@ -32,6 +33,12 @@ export type TimeGridProps = {
   now?: Date | null;
   onSelect?: (event: CalendarEvent) => void;
   hub?: boolean;
+  /**
+   * Off for the phone's day view, which is this grid with a single column and
+   * a `DayStrip` above it — the strip already names the day, and a second
+   * header under it would say it twice.
+   */
+  showHeader?: boolean;
 };
 
 type Positioned = {
@@ -162,7 +169,9 @@ export function TimeGrid({
   now,
   onSelect,
   hub = false,
+  showHeader = true,
 }: TimeGridProps) {
+  const t = useTranslations('calendar');
   const formatDateTime = useDateTimeFormat();
   const columnsRef = useRef<HTMLDivElement>(null);
   const [columnWidth, setColumnWidth] = useState(0);
@@ -218,54 +227,56 @@ export function TimeGrid({
 
   return (
     <div data-slot="time-grid" className="flex min-h-0 flex-col">
-      {/* Day headers — `calendar.md` § "Week strip". Each cell is
-          "`display:flex;flex-direction:column;align-items:center;gap:6px;
-          padding:10px 0;border-radius:16px;`" with a Baloo-2 700 11px weekday
-          label over a `tnum` date; **today fills the whole cell** with
-          `#5d5fef` (label at 75% white, date bold white) rather than putting a
-          circle around the number, which is what this drew before. */}
-      <div className="flex border-b border-line-subtle px-1 pt-1 pb-1 pl-14">
-        {days.map((day, index) => {
-          const isToday = nowKey === dayKeys[index];
+      {/* Day headers. `Kalender.dc.html` marks today with a **filled circle
+          around the date**, not by tinting the whole cell — the cell tint is
+          reserved for the column below, at `bg-primary/4`, so the two cues are
+          "this is the date" and "this is the column" rather than one loud
+          block. Weekend numbers recede to `--ink-muted`. */}
+      {showHeader && (
+        <div className="flex border-b border-line-subtle pt-1 pb-1 pl-14">
+          {days.map((day, index) => {
+            const isToday = nowKey === dayKeys[index];
+            const weekend = day.getDay() === 0 || day.getDay() === 6;
 
-          return (
-            <div
-              key={dayKeys[index]}
-              className={cn(
-                'mx-0.5 flex flex-1 flex-col items-center gap-1.5 rounded-xl px-1 py-2.5',
-                isToday && 'bg-primary'
-              )}
-            >
+            return (
               <div
-                className={cn(
-                  'label-overline',
-                  isToday ? 'text-primary-foreground' : 'text-ink-muted'
-                )}
+                key={dayKeys[index]}
+                className="flex flex-1 flex-col items-center gap-1 border-l border-line-subtle py-2.5"
               >
-                {formatDateTime(day, { weekday: 'short' })}
+                <div className="label-overline text-ink-muted">
+                  {formatDateTime(day, { weekday: 'short' })}
+                </div>
+                <div
+                  className={cn(
+                    'tabular-time inline-flex items-center justify-center rounded-full font-display font-bold',
+                    hub ? 'size-10 text-h2' : 'size-8 text-body',
+                    isToday && 'bg-primary text-primary-foreground',
+                    !isToday && weekend && 'text-ink-muted',
+                    !isToday && !weekend && 'text-ink'
+                  )}
+                >
+                  {formatDateTime(day, { day: 'numeric' })}
+                </div>
               </div>
-              <div
-                className={cn(
-                  'tabular-time font-bold',
-                  hub ? 'text-h2' : 'text-body-lg',
-                  isToday ? 'text-primary-foreground' : 'text-ink'
-                )}
-              >
-                {formatDateTime(day, { day: 'numeric' })}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
 
-      {/* All-day row: dates, not times, so they cannot live on the hour grid. */}
+      {/* All-day row: dates, not times, so they cannot live on the hour grid.
+          The gutter carries a "hele dag" label rather than a blank 56px, which
+          is what tells a reader the band is a *different axis* from the hours
+          starting underneath it. */}
       {dayKeys.some((key) => (allDay.get(key)?.length ?? 0) > 0) && (
         <div
-          className="flex border-b border-line bg-surface-container-low/40 pl-14"
+          className="flex border-b border-line-subtle bg-surface-container-low"
           data-slot="all-day-row"
         >
+          <div className="flex w-14 shrink-0 items-center justify-end pr-2">
+            <span className="text-caption text-ink-muted">{t('allDay')}</span>
+          </div>
           {dayKeys.map((key) => (
-            <div key={key} className="flex flex-1 flex-col gap-1 p-1">
+            <div key={key} className="flex flex-1 flex-col gap-1 border-l border-line-subtle p-1">
               {(allDay.get(key) ?? []).map((event) => (
                 <EventChip
                   key={event.key}
@@ -283,7 +294,11 @@ export function TimeGrid({
         </div>
       )}
 
-      <div className="relative flex min-h-0 flex-1 overflow-y-auto">
+      {/* `pt-2` matches the `-top-2` the hour labels are lifted by, so the
+          first one ("06:00") is not sheared off by the scroll container's
+          top edge. Gutter and columns both sit inside it, so the labels stay
+          aligned to their rules. */}
+      <div className="relative flex min-h-0 flex-1 overflow-y-auto pt-2">
         {/* Hour gutter */}
         <div className="w-14 shrink-0" aria-hidden>
           {hours.slice(0, -1).map((hour) => (
@@ -316,7 +331,10 @@ export function TimeGrid({
               data-day={key}
               className={cn(
                 'relative flex-1 border-l border-line-subtle',
-                nowKey === key && 'bg-accent/20'
+                // 4%, not 20%: today's column is a *hint* that the eye lands
+                // on, and a tint strong enough to read as a surface competes
+                // with the event blocks sitting on it.
+                nowKey === key && 'bg-primary/4'
               )}
               style={{ height: GRID_HOURS * HOUR_HEIGHT }}
             >
@@ -358,10 +376,10 @@ export function TimeGrid({
               {nowKey === key && (
                 <div
                   data-testid="now-line"
-                  className="pointer-events-none absolute inset-x-0 z-20 border-t border-now"
+                  className="pointer-events-none absolute inset-x-0 z-20 h-0.5 bg-now"
                   style={{ top: nowTop }}
                 >
-                  <span className="absolute -top-1 -left-1 size-2 rounded-full bg-now" />
+                  <span className="absolute -top-1 -left-1 size-2.5 rounded-full bg-now" />
                 </div>
               )}
             </div>

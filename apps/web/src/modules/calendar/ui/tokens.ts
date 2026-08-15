@@ -19,6 +19,15 @@ import type { EventCategory, EventType } from '../schema';
  * | `rule`    | `--cat-*-solid`      | `oklch(58% 0.14 H)`  | the **4px left rule** on an event card, as a border colour |
  * | `solid`   | `--cat-*-solid`      | `oklch(58% 0.14 H)`  | the same hue as a *fill* — dots, pips, swatches |
  * | `text`    | `--cat-*-fg`         | `oklch(32% 0.08 H)`  | chip text |
+ * | `ring`    | `--cat-*-solid`      | `oklch(58% 0.14 H)`  | the 2px identity ring around an avatar |
+ * | `deep`    | `--cat-*-deep`       | `oklch(42% 0.14 H)`  | the theme banner's brand-mark tile ground |
+ * | `strong`  | `--cat-*-strong`     | `oklch(34% 0.13 H)`  | the theme banner's eyebrow pill, white text on it |
+ *
+ * `deep`/`strong` are the two dark ends of the ramp, and they exist for one
+ * surface: the holiday banner (`modules/today/ui/today-theme-banner.tsx`). The
+ * tile is the brand mark wearing the day's colours, so it needs a ground the
+ * white silhouette reads on — `surface` is far too pale for that, and `solid`
+ * is the dot/rule tone, already spoken for.
  *
  * `rule` exists because `border` and the 4px rule are **not** the same tone:
  * `calendar.md` § "Event list item" draws the bar at `oklch(58% 0.14 H)` (the
@@ -29,7 +38,16 @@ import type { EventCategory, EventType } from '../schema';
  */
 export const CATEGORY_CLASSES: Record<
   EventCategory,
-  { surface: string; border: string; rule: string; solid: string; text: string }
+  {
+    surface: string;
+    border: string;
+    rule: string;
+    solid: string;
+    text: string;
+    ring: string;
+    deep: string;
+    strong: string;
+  }
 > = {
   blue: {
     surface: 'bg-cat-blue-surface',
@@ -37,6 +55,9 @@ export const CATEGORY_CLASSES: Record<
     rule: 'border-cat-blue-solid',
     solid: 'bg-cat-blue-solid',
     text: 'text-cat-blue-fg',
+    ring: 'ring-cat-blue-solid',
+    deep: 'bg-cat-blue-deep',
+    strong: 'bg-cat-blue-strong',
   },
   purple: {
     surface: 'bg-cat-purple-surface',
@@ -44,6 +65,9 @@ export const CATEGORY_CLASSES: Record<
     rule: 'border-cat-purple-solid',
     solid: 'bg-cat-purple-solid',
     text: 'text-cat-purple-fg',
+    ring: 'ring-cat-purple-solid',
+    deep: 'bg-cat-purple-deep',
+    strong: 'bg-cat-purple-strong',
   },
   orange: {
     surface: 'bg-cat-orange-surface',
@@ -51,6 +75,9 @@ export const CATEGORY_CLASSES: Record<
     rule: 'border-cat-orange-solid',
     solid: 'bg-cat-orange-solid',
     text: 'text-cat-orange-fg',
+    ring: 'ring-cat-orange-solid',
+    deep: 'bg-cat-orange-deep',
+    strong: 'bg-cat-orange-strong',
   },
   green: {
     surface: 'bg-cat-green-surface',
@@ -58,6 +85,9 @@ export const CATEGORY_CLASSES: Record<
     rule: 'border-cat-green-solid',
     solid: 'bg-cat-green-solid',
     text: 'text-cat-green-fg',
+    ring: 'ring-cat-green-solid',
+    deep: 'bg-cat-green-deep',
+    strong: 'bg-cat-green-strong',
   },
   red: {
     surface: 'bg-cat-red-surface',
@@ -65,6 +95,9 @@ export const CATEGORY_CLASSES: Record<
     rule: 'border-cat-red-solid',
     solid: 'bg-cat-red-solid',
     text: 'text-cat-red-fg',
+    ring: 'ring-cat-red-solid',
+    deep: 'bg-cat-red-deep',
+    strong: 'bg-cat-red-strong',
   },
   yellow: {
     surface: 'bg-cat-yellow-surface',
@@ -72,6 +105,9 @@ export const CATEGORY_CLASSES: Record<
     rule: 'border-cat-yellow-solid',
     solid: 'bg-cat-yellow-solid',
     text: 'text-cat-yellow-fg',
+    ring: 'ring-cat-yellow-solid',
+    deep: 'bg-cat-yellow-deep',
+    strong: 'bg-cat-yellow-strong',
   },
   pink: {
     surface: 'bg-cat-pink-surface',
@@ -79,6 +115,9 @@ export const CATEGORY_CLASSES: Record<
     rule: 'border-cat-pink-solid',
     solid: 'bg-cat-pink-solid',
     text: 'text-cat-pink-fg',
+    ring: 'ring-cat-pink-solid',
+    deep: 'bg-cat-pink-deep',
+    strong: 'bg-cat-pink-strong',
   },
   teal: {
     surface: 'bg-cat-teal-surface',
@@ -86,6 +125,9 @@ export const CATEGORY_CLASSES: Record<
     rule: 'border-cat-teal-solid',
     solid: 'bg-cat-teal-solid',
     text: 'text-cat-teal-fg',
+    ring: 'ring-cat-teal-solid',
+    deep: 'bg-cat-teal-deep',
+    strong: 'bg-cat-teal-strong',
   },
 };
 
@@ -104,8 +146,15 @@ export const EVENT_TYPE_ICONS = TYPE_ICONS as Record<EventType, IconName>;
 export const GRID_START_HOUR = 6;
 export const GRID_END_HOUR = 23;
 
-/** Pixels per hour in the day/week time grid — also the drag snap basis. */
-export const HOUR_HEIGHT = 56;
+/**
+ * Pixels per hour in the day/week time grid — also the drag snap basis.
+ *
+ * 58, not 56: `docs/design/claude-design/Kalender.dc.html` draws every hour row
+ * at 58px, and an hour that is two pixels short compounds into a 34px drift
+ * over the seventeen rendered hours — enough for the now line to sit visibly
+ * off its own hour rule near the bottom of the grid.
+ */
+export const HOUR_HEIGHT = 58;
 
 /** Drag-and-drop snaps to this many minutes. */
 export const SNAP_MINUTES = 15;

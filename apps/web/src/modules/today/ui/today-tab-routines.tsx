@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { Card } from '@kynite/ui';
+import { Card, SectionHeading } from '@kynite/ui';
 import type { KidProgress } from '../page-data';
 import { KidStatCard } from './kid-stat-card';
 
@@ -24,7 +24,7 @@ export async function TodayTabRoutines({ kids }: TodayTabRoutinesProps) {
 
   return (
     <Card data-testid="today-routines" className="gap-4 p-5">
-      <h3 className="text-overline text-ink-muted uppercase">{t('routines.title')}</h3>
+      <SectionHeading title={t('routines.title')} size="card" level={2} />
 
       {kids === null ? (
         <p className="text-body-sm text-ink-secondary">{t('routines.otherDay')}</p>

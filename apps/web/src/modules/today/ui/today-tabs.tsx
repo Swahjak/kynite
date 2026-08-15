@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
-import { type PillTabItem, PillTabs, PillTabsPanel } from '@kynite/ui';
+import { cn, type PillTabItem, PillTabs, PillTabsPanel } from '@kynite/ui';
 import type { IconName } from '@kynite/ui';
 import { TODAY_TABS, useTodayTab, type TodayTab } from './use-today-tab';
 
@@ -35,9 +35,18 @@ export type TodayTabsProps = Record<TodayTab, ReactNode> & {
    * control still decides what the wall shows on a cold boot.
    */
   defaultTab?: TodayTab;
+  /**
+   * The panel takes the height it is given and scrolls inside it.
+   *
+   * What the wall needs, and only the wall: a kiosk header that scrolled away
+   * would take the clock and the day with it, and those are the two things a
+   * glance from across the room is looking for. In the parent app the page
+   * scrolls as one, which is what a thumb expects.
+   */
+  fill?: boolean;
 };
 
-export function TodayTabs({ dag, personen, routines, sterren, defaultTab }: TodayTabsProps) {
+export function TodayTabs({ dag, personen, routines, sterren, defaultTab, fill }: TodayTabsProps) {
   const t = useTranslations('today');
   const { tab, setTab } = useTodayTab(defaultTab);
 
@@ -56,10 +65,16 @@ export function TodayTabs({ dag, personen, routines, sterren, defaultTab }: Toda
       onValueChange={setTab}
       label={t('tabs.label')}
       data-testid="today-tabs"
-      className="min-h-0 flex-1"
+      className={cn('min-h-0 flex-1', fill && 'flex-col')}
+      listClassName={fill ? 'shrink-0' : undefined}
     >
       {TODAY_TABS.map((value) => (
-        <PillTabsPanel key={value} value={value} data-testid={`today-tab-${value}`}>
+        <PillTabsPanel
+          key={value}
+          value={value}
+          data-testid={`today-tab-${value}`}
+          className={fill ? 'min-h-0 flex-1 overflow-y-auto' : undefined}
+        >
           {panels[value]}
         </PillTabsPanel>
       ))}

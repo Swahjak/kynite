@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { cn } from '@kynite/ui';
 import { useDateTimeFormat } from '@/components/formatting';
 import { useRouter } from '@/i18n/navigation';
 import { hasRolledOver } from '../domain/rollover';
@@ -40,9 +41,16 @@ export type TodayClockProps = {
   timeZone: string;
   /** Household-local `YYYY-MM-DD` the render was seeded with; omit while browsing another day. */
   dayKey?: string;
+  /**
+   * `app` is the two-line block over the full date; `hub` is the wall's bare
+   * time at display scale, because the date is already spelled out beside the
+   * greeting there and a wall must not say the same thing twice.
+   */
+  variant?: 'app' | 'hub';
+  className?: string;
 };
 
-export function TodayClock({ now, timeZone, dayKey }: TodayClockProps) {
+export function TodayClock({ now, timeZone, dayKey, variant = 'app', className }: TodayClockProps) {
   const [current, setCurrent] = useState(now);
   const formatDateTime = useDateTimeFormat();
   const router = useRouter();
@@ -65,12 +73,24 @@ export function TodayClock({ now, timeZone, dayKey }: TodayClockProps) {
   const time = formatDateTime(current, { hour: '2-digit', minute: '2-digit' });
   const date = formatDateTime(current, { dateStyle: 'full' });
 
+  if (variant === 'hub') {
+    return (
+      <time
+        data-testid="today-clock"
+        dateTime={current.toISOString()}
+        className={cn('font-display text-display-md font-extrabold tabular-nums', className)}
+      >
+        {time}
+      </time>
+    );
+  }
+
   // Two lines, right-aligned: the time at heading scale over the full date at
   // body scale. It reads as one block from across a kitchen — the old single
   // "12:02, vrijdag 14 augustus 2026" run put the one glanceable fact in the
   // middle of a sentence.
   return (
-    <div data-testid="today-clock" className="flex flex-col items-end text-right">
+    <div data-testid="today-clock" className={cn('flex flex-col items-end text-right', className)}>
       <time
         dateTime={current.toISOString()}
         className="font-display text-h2 font-bold tabular-nums"

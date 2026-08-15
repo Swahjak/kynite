@@ -22,6 +22,20 @@ import { CATEGORY_CLASSES, EVENT_TYPE_ICONS } from './tokens';
 const UNTITLED_SENTINEL = '(no title)';
 
 /**
+ * Free/busy is a **texture, not a colour** (`Kalender.dc.html`; the argument is
+ * spelled out in `stories/pages/kalender.stories.tsx`): every hue in the
+ * category palette already means "this kind of thing", so none of them is free
+ * to mean "you may not know what this is". A 45° hatch says it without
+ * borrowing a meaning.
+ *
+ * Both stops are design tokens, not literals — the rule in `docs/design` is
+ * that no colour is written outside `packages/ui/src/styles/tokens.css`, and a
+ * gradient is no exception.
+ */
+const BUSY_HATCH =
+  'repeating-linear-gradient(45deg, var(--color-surface-container-low) 0 6px, var(--color-line-subtle) 6px 12px)';
+
+/**
  * One event, as it appears in every view. The chip is the single place that
  * decides how an event *reads*, so a busy-only block, a pending-sync pip and a
  * recurring instance look the same in the day grid as in the agenda list.
@@ -29,8 +43,15 @@ const UNTITLED_SENTINEL = '(no title)';
 
 export type EventChipProps = {
   event: CalendarEvent;
-  /** `block` fills a time-grid slot; `row` is a list line; `dot` is a month pip. */
-  variant?: 'block' | 'row' | 'dot';
+  /**
+   * `block` fills a time-grid slot; `row` is a list line; `dot` is a month pip;
+   * `card` is the phone's agenda line — a white card with a rounded colour bar
+   * rather than a tinted fill (`Kalender.dc.html`, mobile week and mobile
+   * month). The card exists because a list of tinted chips at 390px reads as a
+   * stack of coloured blocks with no edges; the design gives the phone a card
+   * with a real border and moves the hue into a 4px rail.
+   */
+  variant?: 'block' | 'row' | 'dot' | 'card' | 'line';
   /** Hub surfaces render at 6-foot legibility. */
   hub?: boolean;
   showTime?: boolean;
@@ -133,41 +154,146 @@ export function EventChip({
 
   const interactive = onSelect !== undefined && event.editable;
 
+  /**
+   * Everything that makes a chip a chip *except* how it looks — the data
+   * attributes every view and every test select on, and the click/drag
+   * contract. Hoisted out of the JSX so the `card` shape below can be a
+   * genuinely different tree without re-stating (or drifting from) the
+   * post-drag click guard.
+   */
+  const shellProps = {
+    'data-slot': 'event-chip',
+    'data-category': event.category,
+    'data-busy-only': event.busyOnly || undefined,
+    'data-pending-sync': event.pendingSync || undefined,
+    'data-recurring': event.recurring || undefined,
+    'data-event-id': event.seriesId,
+    'data-occurrence-start': event.startsAt.toISOString(),
+    'data-continues-before': continuesBefore || undefined,
+    'data-continues-after': continuesAfter || undefined,
+    role: interactive ? ('button' as const) : undefined,
+    tabIndex: interactive ? 0 : undefined,
+    onClick: interactive
+      ? () => {
+          if (suppressClick?.()) return;
+          onSelect(event);
+        }
+      : undefined,
+    onPointerDown: onPointerDown
+      ? (pointerEvent: React.PointerEvent<HTMLElement>) => onPointerDown(pointerEvent, event)
+      : undefined,
+    onKeyDown: interactive
+      ? (keyboardEvent: React.KeyboardEvent<HTMLElement>) => {
+          if (keyboardEvent.key === 'Enter' || keyboardEvent.key === ' ') {
+            keyboardEvent.preventDefault();
+            onSelect(event);
+          }
+        }
+      : undefined,
+    style: event.busyOnly ? { ...style, backgroundImage: BUSY_HATCH } : style,
+  };
+
+  const timeRange = event.allDay
+    ? t('allDay')
+    : `${formatDateTime(event.startsAt, { hour: '2-digit', minute: '2-digit' })} – ${formatDateTime(
+        event.endsAt,
+        { hour: '2-digit', minute: '2-digit' }
+      )}`;
+
+  if (variant === 'line') {
+    /**
+     * The month cell's line: a 4px pip in the category hue and the title, on
+     * the cell's own ground. A month cell is ~120px wide and 24px tall per
+     * row; a tinted chip with a rail and its own padding fits two words there,
+     * where a dot and plain text fit four — and the hue survives either way,
+     * which is what makes a month scannable without reading it.
+     */
+    return (
+      <div
+        {...shellProps}
+        className={cn(
+          'flex min-w-0 items-center gap-1.5 rounded-sm',
+          interactive && 'cursor-pointer hover:bg-surface-container-low',
+          className
+        )}
+      >
+        <CategoryDot size="xs" className={cn('shrink-0', palette.solid)} />
+        <span className="truncate text-caption text-ink">{title}</span>
+      </div>
+    );
+  }
+
+  if (variant === 'card') {
+    return (
+      <div
+        {...shellProps}
+        className={cn(
+          'flex min-h-12 min-w-0 items-center gap-2.5 rounded-xl border border-line-subtle bg-card px-3 py-2.5 text-left',
+          // The wall board reads from across the kitchen, so the card grows
+          // rather than the type shrinking to fit it.
+          hub && 'min-h-16 gap-4 rounded-2xl px-5 py-4',
+          interactive &&
+            'cursor-pointer transition-all duration-200 ease-brand hover:shadow-md active:scale-95',
+          className
+        )}
+      >
+        {/* The hue moved out of the fill and into a rail: a white card with a
+            real border is what separates two agenda lines at 390px, and a
+            tinted card cannot also carry a visible edge. */}
+        <span
+          aria-hidden
+          className={cn(
+            'shrink-0 self-stretch rounded-full',
+            hub ? 'w-1.5' : 'w-1',
+            event.busyOnly ? 'bg-line' : palette.solid
+          )}
+        />
+        <div className="min-w-0 flex-1">
+          <span
+            className={`block truncate font-semibold text-ink ${hub ? 'text-h3' : 'text-body-sm'}`}
+          >
+            {title}
+          </span>
+          <span
+            className={`tabular-time block truncate text-ink-secondary ${hub ? 'text-body' : 'text-caption'}`}
+          >
+            {timeRange}
+            {event.location ? ` · ${event.location}` : ''}
+          </span>
+        </div>
+        {event.pendingSync && (
+          <span
+            data-testid="pending-sync-pip"
+            title={t('pendingSync')}
+            aria-label={t('pendingSync')}
+            role="img"
+            className="size-1.5 shrink-0 rounded-full bg-warning"
+          />
+        )}
+        {showOwner && event.householdWide && (
+          <Icon
+            name="group"
+            size={hub ? 'md' : 'sm'}
+            label={t('everyone')}
+            className="shrink-0 text-ink-muted"
+          />
+        )}
+        {showOwner && !event.householdWide && ownerMember && (
+          <MemberFace
+            name={ownerMember.displayName}
+            avatarUrl={ownerMember.avatarUrl}
+            surfaceClass={CATEGORY_CLASSES[ownerMember.color].surface}
+            size={hub ? 'default' : 'xs'}
+            className="shrink-0"
+          />
+        )}
+      </div>
+    );
+  }
+
   return (
     <div
-      data-slot="event-chip"
-      data-category={event.category}
-      data-busy-only={event.busyOnly || undefined}
-      data-pending-sync={event.pendingSync || undefined}
-      data-recurring={event.recurring || undefined}
-      data-event-id={event.seriesId}
-      data-occurrence-start={event.startsAt.toISOString()}
-      data-continues-before={continuesBefore || undefined}
-      data-continues-after={continuesAfter || undefined}
-      role={interactive ? 'button' : undefined}
-      tabIndex={interactive ? 0 : undefined}
-      onClick={
-        interactive
-          ? () => {
-              if (suppressClick?.()) return;
-              onSelect(event);
-            }
-          : undefined
-      }
-      onPointerDown={
-        onPointerDown ? (pointerEvent) => onPointerDown(pointerEvent, event) : undefined
-      }
-      onKeyDown={
-        interactive
-          ? (keyboardEvent) => {
-              if (keyboardEvent.key === 'Enter' || keyboardEvent.key === ' ') {
-                keyboardEvent.preventDefault();
-                onSelect(event);
-              }
-            }
-          : undefined
-      }
-      style={style}
+      {...shellProps}
       className={cn(
         // The design system's event card: a `oklch(94% 0.025 H)` tint carrying
         // a 4px left rule in the category's *solid* hue (`calendar.md` §
@@ -180,7 +306,11 @@ export function EventChip({
         // reasons that have nothing to do with the device (seven days is
         // seven days), so the space it has to work with is the chip's own
         // rendered width, not a breakpoint.
-        'group/chip @container/chip relative flex min-w-0 flex-col justify-start gap-0.5 overflow-hidden rounded-lg border-l-4 px-2 py-1 text-left shadow-sm',
+        // 3px, not 4: `Kalender.dc.html` draws every grid block's rail at
+        // `border-left:3px solid oklch(58% 0.14 H)`. The 4px figure in
+        // `calendar.md` is the *list* item's bar, which this component no
+        // longer draws — the phone's list is the `card` variant above.
+        'group/chip @container/chip relative flex min-w-0 flex-col justify-start gap-0.5 overflow-hidden rounded-lg border-l-3 px-2 py-1.5 text-left shadow-sm',
         palette.surface,
         palette.rule,
         variant === 'block' && 'absolute inset-x-1 select-none',
@@ -201,7 +331,11 @@ export function EventChip({
         // surface reads as "just context" just as well and leaves the label
         // legible. The dashed border stays; it is the shape cue, not the
         // contrast problem.
-        event.busyOnly && 'border-dashed border-line bg-surface/60',
+        // …and the hatch replaces the category rule entirely rather than
+        // sitting next to it: a left rail in a hue would still be saying
+        // "this kind of thing" about a block whose kind is precisely what is
+        // withheld. The fill comes from `BUSY_HATCH` above, on `style`.
+        event.busyOnly && 'border-l-0 bg-transparent shadow-none',
         className
       )}
     >
@@ -272,7 +406,10 @@ export function EventChip({
         <span
           className={cn(
             'truncate font-display font-semibold',
-            palette.text,
+            // A hatched block carries no hue, so its label takes the neutral
+            // secondary ink rather than a category foreground it no longer
+            // has a fill to sit on.
+            event.busyOnly ? 'text-ink-secondary' : palette.text,
             hub ? 'text-body-lg' : 'text-caption'
           )}
         >
@@ -312,13 +449,11 @@ export function EventChip({
             // stopped silently dropping `palette.text` (see `lib/utils.ts`).
             // The chip is already visually secondary through size and tint.
             'tabular-time truncate',
-            palette.text,
+            event.busyOnly ? 'text-ink-secondary' : palette.text,
             hub ? 'text-body' : 'text-caption'
           )}
         >
-          {formatDateTime(event.startsAt, { hour: '2-digit', minute: '2-digit' })}
-          {' – '}
-          {formatDateTime(event.endsAt, { hour: '2-digit', minute: '2-digit' })}
+          {timeRange}
         </span>
       )}
 
