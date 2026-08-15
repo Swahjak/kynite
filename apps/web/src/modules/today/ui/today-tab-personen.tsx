@@ -1,7 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import { Card, cn, Icon, SectionHeading } from '@kynite/ui';
 import { formatDateTime } from '@/i18n/formatting-locale';
-import { CATEGORY_CLASSES, dayKeysOf, type CalendarEvent } from '@/modules/calendar';
+import { CATEGORY_CLASSES, dayKeysOf, titleOf, type CalendarEvent } from '@/modules/calendar';
 import { MemberAvatar, getHouseholdFormattingLocale, type Member } from '@/modules/family';
 
 /**
@@ -121,7 +121,7 @@ export async function TodayTabPersonen({
           )}
         >
           <span className="tabular-nums">{event.allDay ? t('allDay') : at(event.startsAt)}</span>{' '}
-          {event.busyOnly ? tCalendar('busy') : event.title}
+          {titleOf(event, { untitled: tCalendar('untitled'), busy: tCalendar('busy') })}
         </span>
       </li>
     );

@@ -58,6 +58,12 @@ export {
   CardTitle,
 } from './components/card';
 export { Checkbox } from './components/checkbox';
+export {
+  DateCircle,
+  type DateCircleProps,
+  type DateCircleSize,
+  type DateCircleState,
+} from './components/date-circle';
 export { ConfirmButton } from './components/confirm-button';
 export { DateField, type DateFieldLabels, type DateFieldProps } from './components/date-field';
 export { DateTimeField, type DateTimeFieldProps } from './components/date-time-field';
@@ -90,6 +96,13 @@ export {
   DialogTitle,
   DialogTrigger,
 } from './components/dialog';
+export {
+  EventRow,
+  type EventRowFaces,
+  type EventRowProps,
+  type EventRowSize,
+  type EventRowState,
+} from './components/event-row';
 export { Fab, FabSlot, type FabProps } from './components/fab';
 export {
   Field,

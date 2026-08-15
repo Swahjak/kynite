@@ -72,11 +72,17 @@ export {
 } from './domain/presets';
 
 export {
+  bucketByDay,
   combineDayEvents,
+  splitByMember,
+  type BucketByDayOptions,
   type CombinableEvent,
   type CombineDayOptions,
   type CombinedDayRow,
+  type MemberSplit,
 } from './domain/day-board';
+
+export { titleOf, UNTITLED_TITLE, type TitledEvent, type TitleLabels } from './domain/event-title';
 
 export { addExdate, exdateLine, formatDate, formatDateTime } from './domain/ical';
 

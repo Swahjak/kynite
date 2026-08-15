@@ -1,11 +1,12 @@
 import type { ReactNode } from 'react';
 import { getTranslations } from 'next-intl/server';
-import { Card, cn, Icon, SectionHeading } from '@kynite/ui';
+import { Card, cn, EventRow, SectionHeading } from '@kynite/ui';
 import { formatDateTime } from '@/i18n/formatting-locale';
 import {
   CATEGORY_CLASSES,
   EVENT_TYPE_ICONS,
   combineDayEvents,
+  titleOf,
   type CalendarEvent,
 } from '@/modules/calendar';
 import { getHouseholdFormattingLocale, MEMBER_COLOR_CLASSES, type Member } from '@/modules/family';
@@ -127,82 +128,32 @@ export async function TodayTimeline({
     const phone = density === 'card';
 
     return (
-      <div
+      <EventRow
         key={event.key}
         data-testid="today-timeline-row"
-        data-state={live ? 'now' : done ? 'past' : 'default'}
         data-category={event.category}
-        className={cn(
-          'flex items-center border-t border-line-subtle first:border-t-0',
-          phone ? 'min-h-12 gap-2.5 px-2 py-3' : 'gap-3 p-3',
-          live && 'rounded-xl bg-primary/7',
-          done && 'opacity-50'
-        )}
-      >
-        <span
-          aria-hidden="true"
-          className={cn(
-            'w-1 shrink-0 self-stretch rounded-4xl',
-            event.busyOnly ? 'bg-line' : palette.solid
-          )}
-        />
-
-        {/* Start over end. The end time is what turns "10:00 Tandarts" into a
-            block a parent can plan around, and it is the one fact the old row
-            spent its second line on something else to avoid showing. */}
-        <div className={cn('flex shrink-0 flex-col', phone ? 'w-10.5' : 'w-13')}>
-          <span
-            className={cn(
-              'font-semibold tabular-nums',
-              phone ? 'text-caption' : 'text-body-sm',
-              live && 'font-bold text-primary'
-            )}
-          >
-            {event.allDay ? t('allDay') : at(event.startsAt)}
-          </span>
-          {event.allDay ? null : (
-            <span
-              className={cn(
-                'text-caption tabular-nums',
-                live ? 'text-primary/70' : 'text-ink-muted'
-              )}
-            >
-              {at(event.endsAt)}
-            </span>
-          )}
-        </div>
-
-        <Icon
-          name={event.busyOnly ? 'lock' : EVENT_TYPE_ICONS[event.eventType]}
-          size={phone ? 'sm' : 'md'}
-          className={cn('shrink-0', event.busyOnly ? 'text-ink-muted' : palette.text)}
-        />
-
-        <span
-          className={cn(
-            'min-w-0 flex-1 truncate',
-            phone ? 'text-body-sm' : 'text-body',
-            live ? 'font-bold' : 'font-semibold',
-            done && 'line-through',
-            event.busyOnly && 'text-ink-muted'
-          )}
-        >
-          {event.busyOnly ? tCalendar('busy') : event.title}
-        </span>
-
-        <MemberFaces
-          members={members}
-          memberIds={faceIds}
-          size={phone ? 'xs' : 'sm'}
-          label={people}
-        />
-
-        {live ? (
-          <span className="shrink-0 rounded-4xl bg-primary px-2 py-0.5 text-overline text-primary-foreground uppercase">
-            {t('now.eyebrowLive')}
-          </span>
-        ) : null}
-      </div>
+        size={phone ? 'compact' : 'default'}
+        state={live ? 'now' : done ? 'past' : 'default'}
+        busy={event.busyOnly}
+        railClass={palette.solid}
+        iconName={event.busyOnly ? 'lock' : EVENT_TYPE_ICONS[event.eventType]}
+        // The glyph's own step (45%), not the chip-text one (32%): the design
+        // system gives the icon a tone between the rail and the label so it
+        // reads at 20px without competing with the title.
+        iconClass={palette.icon}
+        startTime={event.allDay ? t('allDay') : at(event.startsAt)}
+        endTime={event.allDay ? undefined : at(event.endsAt)}
+        title={titleOf(event, { untitled: tCalendar('untitled'), busy: tCalendar('busy') })}
+        faces={
+          <MemberFaces
+            members={members}
+            memberIds={faceIds}
+            size={phone ? 'xs' : 'sm'}
+            label={people}
+          />
+        }
+        statusLabel={live ? t('now.eyebrowLive') : undefined}
+      />
     );
   };
 
@@ -221,7 +172,10 @@ export async function TodayTimeline({
       <TodayPastRows
         summary={t('timeline.done', {
           count: past.length,
-          title: lastPast.event.busyOnly ? tCalendar('busy') : lastPast.event.title,
+          title: titleOf(lastPast.event, {
+            untitled: tCalendar('untitled'),
+            busy: tCalendar('busy'),
+          }),
           time: lastPast.event.allDay ? t('allDay') : at(lastPast.event.startsAt),
         })}
         label={t('timeline.showDone')}

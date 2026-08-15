@@ -132,12 +132,26 @@
   --now-foreground: #ffffff;
 
   /* -- Category palette — colors.md § "Category palette" ------------------
-     8 categories, each a 4-colour set generated from one hue in `oklch()`:
+     8 categories, each a set generated from one hue in `oklch()`:
 
        solid   oklch(58% 0.14 H)     dot / 4px event rule / avatar fill
        surface oklch(94% 0.025 H)    chip background
        border  oklch(85% 0.05 H)     chip border
        fg      oklch(32% 0.08 H)     chip text
+
+     The refreshed sheet ("Kynite Design System.dc.html" § "Four-step ramp per
+     category") states the ramp a *row or block* is built from as bar → fill →
+     icon → text, which needs two steps the chip set never had:
+
+       icon    oklch(45% 0.1 H)      the category glyph beside a title
+       fill    oklch(95% 0.025 H)    the block/row ground behind that glyph
+
+     `fill` is one step lighter than `surface` on purpose: `surface` is a chip
+     — a small object read against the card — while `fill` is the ground of a
+     whole time-grid block or row, and at that area 94% reads as a colour wash
+     rather than a tint. `icon` sits between `fg` and `solid` because a 24px
+     glyph at `fg` goes muddy and at `solid` competes with the 4px rail; the
+     sheet's own swatch strip puts it at 45%/0.1.
 
      `oklch()` literals rather than the hex approximations, as colors.md
      instructs ("prefer using the `oklch()` string directly").
@@ -154,41 +168,57 @@
   --cat-blue-border: oklch(85% 0.05 245);
   --cat-blue-fg: oklch(32% 0.08 245);
   --cat-blue-solid: oklch(58% 0.14 245);
+  --cat-blue-icon: oklch(45% 0.1 245);
+  --cat-blue-fill: oklch(95% 0.025 245);
 
   --cat-purple-surface: oklch(94% 0.025 290);
   --cat-purple-border: oklch(85% 0.05 290);
   --cat-purple-fg: oklch(32% 0.08 290);
   --cat-purple-solid: oklch(58% 0.14 290);
+  --cat-purple-icon: oklch(45% 0.1 290);
+  --cat-purple-fill: oklch(95% 0.025 290);
 
   --cat-orange-surface: oklch(94% 0.025 65);
   --cat-orange-border: oklch(85% 0.05 65);
   --cat-orange-fg: oklch(32% 0.08 65);
   --cat-orange-solid: oklch(58% 0.14 65);
+  --cat-orange-icon: oklch(45% 0.1 65);
+  --cat-orange-fill: oklch(95% 0.025 65);
 
   --cat-green-surface: oklch(94% 0.025 155);
   --cat-green-border: oklch(85% 0.05 155);
   --cat-green-fg: oklch(32% 0.08 155);
   --cat-green-solid: oklch(58% 0.14 155);
+  --cat-green-icon: oklch(45% 0.1 155);
+  --cat-green-fill: oklch(95% 0.025 155);
 
   --cat-red-surface: oklch(94% 0.025 20);
   --cat-red-border: oklch(85% 0.05 20);
   --cat-red-fg: oklch(32% 0.08 20);
   --cat-red-solid: oklch(58% 0.14 20);
+  --cat-red-icon: oklch(45% 0.1 20);
+  --cat-red-fill: oklch(95% 0.025 20);
 
   --cat-yellow-surface: oklch(94% 0.025 110);
   --cat-yellow-border: oklch(85% 0.05 110);
   --cat-yellow-fg: oklch(32% 0.08 110);
   --cat-yellow-solid: oklch(58% 0.14 110);
+  --cat-yellow-icon: oklch(45% 0.1 110);
+  --cat-yellow-fill: oklch(95% 0.025 110);
 
   --cat-pink-surface: oklch(94% 0.025 335);
   --cat-pink-border: oklch(85% 0.05 335);
   --cat-pink-fg: oklch(32% 0.08 335);
   --cat-pink-solid: oklch(58% 0.14 335);
+  --cat-pink-icon: oklch(45% 0.1 335);
+  --cat-pink-fill: oklch(95% 0.025 335);
 
   --cat-teal-surface: oklch(94% 0.025 200);
   --cat-teal-border: oklch(85% 0.05 200);
   --cat-teal-fg: oklch(32% 0.08 200);
   --cat-teal-solid: oklch(58% 0.14 200);
+  --cat-teal-icon: oklch(45% 0.1 200);
+  --cat-teal-fill: oklch(95% 0.025 200);
 
   /* -- Category palette, deep steps — the theme banner's brand-mark tile ---
      The design system's "Feestdagen & vakanties" sheet builds every holiday
@@ -323,46 +353,68 @@
 
   /* Derived from the same per-category hue as light, re-tuned for a dark
      ground: the tint drops to L 26%, the border rises to L 45%, the text to
-     L 80%, and the solid brightens slightly so a 4px rule still reads. */
+     L 80%, and the solid brightens slightly so a 4px rule still reads.
+
+     The two ramp steps flip the same way they do in light — each keeps its
+     position *relative to its neighbours* rather than its absolute lightness.
+     `icon` sits between `fg` (80%) and `solid` (66%) at L 72%/C 0.11, and
+     `fill` sits one step quieter than `surface` (26%) at L 22%/C 0.04, because
+     on a dark ground "quieter and larger" means darker, not lighter. */
   --cat-blue-surface: oklch(26% 0.04 245);
   --cat-blue-border: oklch(45% 0.09 245);
   --cat-blue-fg: oklch(80% 0.09 245);
   --cat-blue-solid: oklch(66% 0.14 245);
+  --cat-blue-icon: oklch(72% 0.11 245);
+  --cat-blue-fill: oklch(22% 0.04 245);
 
   --cat-purple-surface: oklch(26% 0.04 290);
   --cat-purple-border: oklch(45% 0.09 290);
   --cat-purple-fg: oklch(80% 0.09 290);
   --cat-purple-solid: oklch(66% 0.14 290);
+  --cat-purple-icon: oklch(72% 0.11 290);
+  --cat-purple-fill: oklch(22% 0.04 290);
 
   --cat-orange-surface: oklch(26% 0.04 65);
   --cat-orange-border: oklch(45% 0.09 65);
   --cat-orange-fg: oklch(80% 0.09 65);
   --cat-orange-solid: oklch(66% 0.14 65);
+  --cat-orange-icon: oklch(72% 0.11 65);
+  --cat-orange-fill: oklch(22% 0.04 65);
 
   --cat-green-surface: oklch(26% 0.04 155);
   --cat-green-border: oklch(45% 0.09 155);
   --cat-green-fg: oklch(80% 0.09 155);
   --cat-green-solid: oklch(66% 0.14 155);
+  --cat-green-icon: oklch(72% 0.11 155);
+  --cat-green-fill: oklch(22% 0.04 155);
 
   --cat-red-surface: oklch(26% 0.04 20);
   --cat-red-border: oklch(45% 0.09 20);
   --cat-red-fg: oklch(80% 0.09 20);
   --cat-red-solid: oklch(66% 0.14 20);
+  --cat-red-icon: oklch(72% 0.11 20);
+  --cat-red-fill: oklch(22% 0.04 20);
 
   --cat-yellow-surface: oklch(26% 0.04 110);
   --cat-yellow-border: oklch(45% 0.09 110);
   --cat-yellow-fg: oklch(80% 0.09 110);
   --cat-yellow-solid: oklch(66% 0.14 110);
+  --cat-yellow-icon: oklch(72% 0.11 110);
+  --cat-yellow-fill: oklch(22% 0.04 110);
 
   --cat-pink-surface: oklch(26% 0.04 335);
   --cat-pink-border: oklch(45% 0.09 335);
   --cat-pink-fg: oklch(80% 0.09 335);
   --cat-pink-solid: oklch(66% 0.14 335);
+  --cat-pink-icon: oklch(72% 0.11 335);
+  --cat-pink-fill: oklch(22% 0.04 335);
 
   --cat-teal-surface: oklch(26% 0.04 200);
   --cat-teal-border: oklch(45% 0.09 200);
   --cat-teal-fg: oklch(80% 0.09 200);
   --cat-teal-solid: oklch(66% 0.14 200);
+  --cat-teal-icon: oklch(72% 0.11 200);
+  --cat-teal-fill: oklch(22% 0.04 200);
 
   --foreground: var(--ink);
   --card: var(--surface);
@@ -592,34 +644,50 @@
   --color-cat-blue-border: var(--cat-blue-border);
   --color-cat-blue-fg: var(--cat-blue-fg);
   --color-cat-blue-solid: var(--cat-blue-solid);
+  --color-cat-blue-icon: var(--cat-blue-icon);
+  --color-cat-blue-fill: var(--cat-blue-fill);
   --color-cat-purple-surface: var(--cat-purple-surface);
   --color-cat-purple-border: var(--cat-purple-border);
   --color-cat-purple-fg: var(--cat-purple-fg);
   --color-cat-purple-solid: var(--cat-purple-solid);
+  --color-cat-purple-icon: var(--cat-purple-icon);
+  --color-cat-purple-fill: var(--cat-purple-fill);
   --color-cat-orange-surface: var(--cat-orange-surface);
   --color-cat-orange-border: var(--cat-orange-border);
   --color-cat-orange-fg: var(--cat-orange-fg);
   --color-cat-orange-solid: var(--cat-orange-solid);
+  --color-cat-orange-icon: var(--cat-orange-icon);
+  --color-cat-orange-fill: var(--cat-orange-fill);
   --color-cat-green-surface: var(--cat-green-surface);
   --color-cat-green-border: var(--cat-green-border);
   --color-cat-green-fg: var(--cat-green-fg);
   --color-cat-green-solid: var(--cat-green-solid);
+  --color-cat-green-icon: var(--cat-green-icon);
+  --color-cat-green-fill: var(--cat-green-fill);
   --color-cat-red-surface: var(--cat-red-surface);
   --color-cat-red-border: var(--cat-red-border);
   --color-cat-red-fg: var(--cat-red-fg);
   --color-cat-red-solid: var(--cat-red-solid);
+  --color-cat-red-icon: var(--cat-red-icon);
+  --color-cat-red-fill: var(--cat-red-fill);
   --color-cat-yellow-surface: var(--cat-yellow-surface);
   --color-cat-yellow-border: var(--cat-yellow-border);
   --color-cat-yellow-fg: var(--cat-yellow-fg);
   --color-cat-yellow-solid: var(--cat-yellow-solid);
+  --color-cat-yellow-icon: var(--cat-yellow-icon);
+  --color-cat-yellow-fill: var(--cat-yellow-fill);
   --color-cat-pink-surface: var(--cat-pink-surface);
   --color-cat-pink-border: var(--cat-pink-border);
   --color-cat-pink-fg: var(--cat-pink-fg);
   --color-cat-pink-solid: var(--cat-pink-solid);
+  --color-cat-pink-icon: var(--cat-pink-icon);
+  --color-cat-pink-fill: var(--cat-pink-fill);
   --color-cat-teal-surface: var(--cat-teal-surface);
   --color-cat-teal-border: var(--cat-teal-border);
   --color-cat-teal-fg: var(--cat-teal-fg);
   --color-cat-teal-solid: var(--cat-teal-solid);
+  --color-cat-teal-icon: var(--cat-teal-icon);
+  --color-cat-teal-fill: var(--cat-teal-fill);
 
   --color-surface-night: var(--surface-night);
 

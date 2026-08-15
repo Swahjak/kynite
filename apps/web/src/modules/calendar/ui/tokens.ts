@@ -40,6 +40,10 @@ export const CATEGORY_CLASSES: Record<
   EventCategory,
   {
     surface: string;
+    /** `--cat-*-fill` (95%) — the *block* ground in a time grid, paler than `surface`. */
+    fill: string;
+    /** `--cat-*-icon` (45%) — the glyph's own step, between `text` (32%) and `solid` (58%). */
+    icon: string;
     border: string;
     rule: string;
     solid: string;
@@ -51,6 +55,8 @@ export const CATEGORY_CLASSES: Record<
 > = {
   blue: {
     surface: 'bg-cat-blue-surface',
+    fill: 'bg-cat-blue-fill',
+    icon: 'text-cat-blue-icon',
     border: 'border-cat-blue-border',
     rule: 'border-cat-blue-solid',
     solid: 'bg-cat-blue-solid',
@@ -61,6 +67,8 @@ export const CATEGORY_CLASSES: Record<
   },
   purple: {
     surface: 'bg-cat-purple-surface',
+    fill: 'bg-cat-purple-fill',
+    icon: 'text-cat-purple-icon',
     border: 'border-cat-purple-border',
     rule: 'border-cat-purple-solid',
     solid: 'bg-cat-purple-solid',
@@ -71,6 +79,8 @@ export const CATEGORY_CLASSES: Record<
   },
   orange: {
     surface: 'bg-cat-orange-surface',
+    fill: 'bg-cat-orange-fill',
+    icon: 'text-cat-orange-icon',
     border: 'border-cat-orange-border',
     rule: 'border-cat-orange-solid',
     solid: 'bg-cat-orange-solid',
@@ -81,6 +91,8 @@ export const CATEGORY_CLASSES: Record<
   },
   green: {
     surface: 'bg-cat-green-surface',
+    fill: 'bg-cat-green-fill',
+    icon: 'text-cat-green-icon',
     border: 'border-cat-green-border',
     rule: 'border-cat-green-solid',
     solid: 'bg-cat-green-solid',
@@ -91,6 +103,8 @@ export const CATEGORY_CLASSES: Record<
   },
   red: {
     surface: 'bg-cat-red-surface',
+    fill: 'bg-cat-red-fill',
+    icon: 'text-cat-red-icon',
     border: 'border-cat-red-border',
     rule: 'border-cat-red-solid',
     solid: 'bg-cat-red-solid',
@@ -101,6 +115,8 @@ export const CATEGORY_CLASSES: Record<
   },
   yellow: {
     surface: 'bg-cat-yellow-surface',
+    fill: 'bg-cat-yellow-fill',
+    icon: 'text-cat-yellow-icon',
     border: 'border-cat-yellow-border',
     rule: 'border-cat-yellow-solid',
     solid: 'bg-cat-yellow-solid',
@@ -111,6 +127,8 @@ export const CATEGORY_CLASSES: Record<
   },
   pink: {
     surface: 'bg-cat-pink-surface',
+    fill: 'bg-cat-pink-fill',
+    icon: 'text-cat-pink-icon',
     border: 'border-cat-pink-border',
     rule: 'border-cat-pink-solid',
     solid: 'bg-cat-pink-solid',
@@ -121,6 +139,8 @@ export const CATEGORY_CLASSES: Record<
   },
   teal: {
     surface: 'bg-cat-teal-surface',
+    fill: 'bg-cat-teal-fill',
+    icon: 'text-cat-teal-icon',
     border: 'border-cat-teal-border',
     rule: 'border-cat-teal-solid',
     solid: 'bg-cat-teal-solid',
