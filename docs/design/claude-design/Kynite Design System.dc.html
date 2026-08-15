@@ -428,6 +428,97 @@
   </div>
 </section>
 
+<!-- CALENDAR VIEW PATTERNS -->
+<section>
+  <h2 style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:24px;margin:0 0 8px;padding-bottom:14px;border-bottom:1px solid #e1e3e4;color:#191c1d;">Calendar view patterns</h2>
+  <p style="font-family:'Poppins',sans-serif;font-size:15px;color:#434656;margin:0 0 24px;max-width:680px;">Building blocks for day, week and month across the two contexts. On the hub, day splits into a column per family member. On mobile, week becomes an agenda list and month becomes a dot grid with the selected day below it — a 7-column time grid is unreadable at 390px.</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;">
+
+    <div>
+      <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;margin-bottom:10px;">Time grid column · person header, event block, now line</span>
+      <div style="background:#ffffff;border:1px solid #e1e3e4;border-radius:16px;overflow:hidden;">
+        <div style="display:flex;border-bottom:1px solid #e1e3e4;">
+          <div style="width:56px;flex-shrink:0;"></div>
+          <div style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 0;border-left:1px solid #eceae4;"><span style="width:22px;height:22px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 335);"><img src="uploads/child1.svg" alt="Mila" style="width:100%;height:100%;object-fit:cover;display:block;"/></span><span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;">Mila</span></div>
+          <div style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 0;border-left:1px solid #eceae4;"><span style="width:22px;height:22px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 65);"><img src="uploads/parent1.svg" alt="Tom" style="width:100%;height:100%;object-fit:cover;display:block;"/></span><span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;">Tom</span></div>
+        </div>
+        <div style="display:flex;position:relative;">
+          <div style="width:56px;flex-shrink:0;">
+            <div style="height:58px;padding-right:10px;text-align:right;"><span class="tnum" style="font-size:11px;color:#747688;position:relative;top:-7px;">09:00</span></div>
+            <div style="height:58px;padding-right:10px;text-align:right;"><span class="tnum" style="font-size:11px;color:#747688;position:relative;top:-7px;">10:00</span></div>
+            <div style="height:58px;padding-right:10px;text-align:right;"><span class="tnum" style="font-size:11px;color:#747688;position:relative;top:-7px;">11:00</span></div>
+          </div>
+          <div style="flex:1;position:relative;border-left:1px solid #eceae4;">
+            <div style="height:58px;border-top:1px solid #f0eee8;"></div><div style="height:58px;border-top:1px solid #f0eee8;"></div><div style="height:58px;border-top:1px solid #f0eee8;"></div>
+            <div style="position:absolute;left:4px;right:4px;top:14px;height:100px;background:oklch(95% 0.025 245);border-left:3px solid oklch(58% 0.14 245);border-radius:8px;padding:6px 8px;"><span style="display:block;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;">Schoolreis</span><span class="tnum" style="font-family:'Poppins',sans-serif;font-size:11px;color:#434656;">09:15 – 11:30</span></div>
+          </div>
+          <div style="flex:1;position:relative;border-left:1px solid #eceae4;">
+            <div style="height:58px;border-top:1px solid #f0eee8;"></div><div style="height:58px;border-top:1px solid #f0eee8;"></div><div style="height:58px;border-top:1px solid #f0eee8;"></div>
+            <div style="position:absolute;left:4px;right:4px;top:116px;height:58px;background:repeating-linear-gradient(45deg,#f0eee8,#f0eee8 6px,#e6e3dc 6px,#e6e3dc 12px);border-radius:8px;padding:6px 8px;"><span style="display:block;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;color:#747688;">Bezet</span></div>
+          </div>
+          <div style="position:absolute;left:48px;right:0;top:46px;height:2px;background:#ef4444;"><span style="position:absolute;left:-6px;top:-4px;width:10px;height:10px;border-radius:9999px;background:#ef4444;"></span></div>
+        </div>
+      </div>
+      <p style="font-family:'Poppins',sans-serif;font-size:13px;color:#747688;margin:8px 0 0;">58px per hour. "Bezet" (busy, no detail) uses a hatch fill instead of a category colour.</p>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:24px;">
+      <div>
+        <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;margin-bottom:10px;">Mobile day strip</span>
+        <div style="display:flex;justify-content:space-between;gap:2px;background:#ffffff;border:1px solid #e1e3e4;border-radius:16px;padding:8px 10px;">
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;"><span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;">ma</span><span class="tnum" style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9999px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;">10</span><span style="width:4px;height:4px;border-radius:9999px;background:#c4c5d9;"></span></div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;"><span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;">di</span><span class="tnum" style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9999px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;">11</span><span style="width:4px;height:4px;border-radius:9999px;background:#c4c5d9;"></span></div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;"><span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;">wo</span><span class="tnum" style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9999px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;">12</span><span style="width:4px;height:4px;border-radius:9999px;background:#c4c5d9;"></span></div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;"><span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;">do</span><span class="tnum" style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9999px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;">13</span><span style="width:4px;height:4px;border-radius:9999px;background:#c4c5d9;"></span></div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;"><span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;">vr</span><span class="tnum" style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9999px;background:#5d5fef;color:#ffffff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;">14</span><span style="width:4px;height:4px;border-radius:9999px;background:#5d5fef;"></span></div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;"><span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;">za</span><span class="tnum" style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9999px;color:#747688;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;">15</span><span style="width:4px;height:4px;border-radius:9999px;background:transparent;"></span></div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;"><span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;">zo</span><span class="tnum" style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9999px;color:#747688;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;">16</span><span style="width:4px;height:4px;border-radius:9999px;background:#c4c5d9;"></span></div>
+        </div>
+      </div>
+
+      <div>
+        <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;margin-bottom:10px;">Agenda row (mobile week &amp; month)</span>
+        <div style="display:flex;gap:14px;">
+          <div style="width:44px;flex-shrink:0;text-align:center;">
+            <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;">vr</span>
+            <span class="tnum" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;margin-top:3px;border-radius:9999px;background:#5d5fef;color:#ffffff;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:17px;">14</span>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;gap:10px;background:#ffffff;border:1px solid #e1e3e4;border-radius:12px;padding:10px 12px;min-height:48px;box-sizing:border-box;">
+              <span style="width:4px;align-self:stretch;border-radius:9999px;background:oklch(58% 0.14 245);"></span>
+              <div style="flex:1;min-width:0;"><span style="display:block;font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;">Schoolreis</span><span class="tnum" style="font-family:'Poppins',sans-serif;font-size:12px;color:#434656;">09:15 – 11:30 · Mila &amp; Daan</span></div>
+              <span style="width:22px;height:22px;border-radius:9999px;overflow:hidden;flex-shrink:0;background:oklch(94% 0.03 335);"><img src="uploads/child1.svg" alt="Mila" style="width:100%;height:100%;object-fit:cover;display:block;"/></span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;background:#ffffff;border:1px solid #e1e3e4;border-radius:12px;padding:10px 12px;min-height:48px;box-sizing:border-box;">
+              <span style="width:4px;align-self:stretch;border-radius:9999px;background:oklch(58% 0.14 65);"></span>
+              <div style="flex:1;min-width:0;"><span style="display:block;font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;">Werklunch</span><span class="tnum" style="font-family:'Poppins',sans-serif;font-size:12px;color:#434656;">12:30 · Tom</span></div>
+              <span style="width:22px;height:22px;border-radius:9999px;overflow:hidden;flex-shrink:0;background:oklch(94% 0.03 65);"><img src="uploads/parent1.svg" alt="Tom" style="width:100%;height:100%;object-fit:cover;display:block;"/></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;margin-bottom:10px;">Month cells — hub (titles) vs mobile (dots)</span>
+        <div style="display:flex;gap:16px;">
+          <div style="width:150px;height:96px;background:#ffffff;border:1px solid #e1e3e4;border-radius:12px;padding:8px 9px;display:flex;flex-direction:column;gap:4px;overflow:hidden;">
+            <span class="tnum" style="align-self:flex-start;display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;border-radius:9999px;background:#5d5fef;color:#ffffff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12px;">14</span>
+            <div style="display:flex;align-items:center;gap:5px;"><span style="width:6px;height:6px;border-radius:9999px;background:oklch(58% 0.14 245);flex-shrink:0;"></span><span style="font-family:'Poppins',sans-serif;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Schoolreis</span></div>
+            <div style="display:flex;align-items:center;gap:5px;"><span style="width:6px;height:6px;border-radius:9999px;background:oklch(58% 0.14 20);flex-shrink:0;"></span><span style="font-family:'Poppins',sans-serif;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Tandarts</span></div>
+            <span style="font-family:'Poppins',sans-serif;font-size:10px;color:#747688;padding-left:11px;">+2 meer</span>
+          </div>
+          <div style="width:54px;height:96px;background:#ffffff;border:1px solid #e1e3e4;border-radius:12px;display:flex;flex-direction:column;align-items:center;gap:4px;padding-top:10px;">
+            <span class="tnum" style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:9999px;background:#5d5fef;color:#ffffff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;">14</span>
+            <div style="display:flex;gap:3px;"><span style="width:5px;height:5px;border-radius:9999px;background:oklch(58% 0.14 245);"></span><span style="width:5px;height:5px;border-radius:9999px;background:oklch(58% 0.14 20);"></span><span style="width:5px;height:5px;border-radius:9999px;background:oklch(58% 0.14 65);"></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
 <!-- PAGE LAYOUT -->
 <section>
   <h2 style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:24px;margin:0 0 8px;padding-bottom:14px;border-bottom:1px solid #e1e3e4;color:#191c1d;">Page layout</h2>
@@ -579,6 +670,20 @@
         </div>
       </div>
 
+      <!-- Requested state -->
+      <div style="grid-column:1 / -1;background:#ffffff;border-radius:20px;padding:20px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+        <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:16px;margin-bottom:4px;">Reward tile · requested</span>
+        <p style="font-family:'Poppins',sans-serif;font-size:13px;color:#747688;margin:0 0 14px;">Between claim and approval. Not tappable, and the price is frozen — the stars stay with the child until a parent approves.</p>
+        <div style="background:rgba(93,95,239,0.06);border:2px solid #5d5fef;border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px;align-items:flex-start;max-width:220px;">
+          <span style="width:40px;height:40px;border-radius:12px;background:rgba(93,95,239,0.12);display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined" style="font-size:20px;color:#5d5fef;font-variation-settings:'FILL' 1;">nights_stay</span></span>
+          <span style="font-family:'Poppins',sans-serif;font-weight:600;font-size:14px;">Half uur later naar bed</span>
+          <div style="display:flex;align-items:center;gap:8px;background:#ffffff;border-radius:9999px;padding:10px 14px;width:100%;box-sizing:border-box;">
+            <span class="material-symbols-outlined" style="font-size:18px;color:#5d5fef;">hourglass_top</span>
+            <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;color:#5d5fef;">Papa kijkt ernaar</span>
+          </div>
+        </div>
+      </div>
+
       <!-- Approval queue -->
       <div style="background:#ffffff;border-radius:20px;padding:20px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
         <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:16px;margin-bottom:14px;">Approval queue</span>
@@ -618,6 +723,137 @@
         <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:#b8c3ff;margin-bottom:8px;">Celebration moment</span>
         <p style="font-family:'Poppins',sans-serif;font-size:13px;color:#f0f1f2;margin:0 0 12px;max-width:320px;">Confetti fires the instant a step or reward is tapped — under 100ms, before the server responds. Once fired, it's never walked back.</p>
         <button style="display:inline-flex;align-items:center;gap:8px;background:#5d5fef;color:#ffffff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;height:48px;padding:0 20px;border:none;border-radius:9999px;cursor:pointer;"><span class="material-symbols-outlined kynite-anim-pop-big" style="font-size:20px;">celebration</span>Claimed!</button>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ROUTINES -->
+<section>
+  <h2 style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:24px;margin:0 0 8px;padding-bottom:14px;border-bottom:1px solid #e1e3e4;color:#191c1d;">Routines</h2>
+  <p style="font-family:'Poppins',sans-serif;font-size:15px;color:#434656;margin:0 0 24px;max-width:680px;">The child's board on the hub and the parent's editor in the app. One routine is expanded at a time — the first that is actionable now. A missed routine has no visual state of its own: it is simply absent.</p>
+
+  <div style="display:flex;flex-direction:column;gap:24px;">
+
+    <!-- Day band -->
+    <div>
+      <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;margin-bottom:10px;">Day band — section header with progress</span>
+      <div style="display:flex;align-items:center;gap:14px;background:#ffffff;border-radius:20px;padding:16px 20px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+        <span class="material-symbols-outlined" style="font-size:26px;color:oklch(58% 0.14 65);font-variation-settings:'FILL' 1;">wb_twilight</span>
+        <span style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:22px;letter-spacing:-0.01em;">Ochtend</span>
+        <span style="flex:1;height:10px;border-radius:9999px;background:#e1e3e4;overflow:hidden;"><span style="display:block;width:43%;height:100%;border-radius:9999px;background:oklch(58% 0.14 65);"></span></span>
+        <span class="tnum" style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:16px;color:#434656;">3 van 7 klaar</span>
+      </div>
+      <p style="font-family:'Poppins',sans-serif;font-size:13px;color:#747688;margin:8px 0 0;">The counter keeps finished one-off chores even after their card disappears, so progress never jumps backwards.</p>
+    </div>
+
+    <!-- Routine card — due / expanded -->
+    <div>
+      <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;margin-bottom:10px;">Routine card · due (expanded)</span>
+      <div style="background:#ffffff;border:1px solid #e1e3e4;border-radius:24px;padding:22px;position:relative;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,0.05);max-width:620px;">
+        <span style="position:absolute;left:0;top:0;bottom:0;width:6px;background:#5d5fef;"></span>
+        <div style="display:flex;align-items:center;gap:14px;">
+          <span style="width:56px;height:56px;border-radius:18px;background:oklch(95% 0.025 200);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:30px;color:oklch(45% 0.12 200);">sunny</span></span>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:10px;"><span style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:26px;letter-spacing:-0.01em;">Ochtendroutine</span><span style="background:#5d5fef;color:#ffffff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12px;letter-spacing:0.05em;padding:4px 12px;border-radius:9999px;">NU</span></div>
+            <span style="display:block;font-family:'Poppins',sans-serif;font-size:15px;color:#434656;">3 van 5 stappen</span>
+          </div>
+          <span style="display:inline-flex;align-items:center;gap:6px;background:rgba(239,141,93,0.16);color:#ef8d5d;border-radius:9999px;padding:8px 16px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:18px;"><span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 1;">star</span>+3</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;background:rgba(93,95,239,0.07);border-radius:14px;padding:10px 16px;margin:14px 0 16px;">
+          <span class="material-symbols-outlined" style="font-size:20px;color:#5d5fef;font-variation-settings:'FILL' 1;">celebration</span>
+          <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:17px;color:#5d5fef;">Goed bezig! Nog twee stapjes.</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div style="display:flex;align-items:center;gap:14px;background:oklch(96% 0.03 155);border:2px solid oklch(88% 0.06 155);border-radius:18px;padding:16px 18px;min-height:76px;box-sizing:border-box;">
+            <span class="material-symbols-outlined" style="font-size:28px;color:oklch(52% 0.13 155);font-variation-settings:'FILL' 1;">check_circle</span>
+            <span style="flex:1;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:19px;color:#434656;text-decoration:line-through;text-decoration-color:oklch(80% 0.06 155);">Aankleden</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;background:#fbf9f4;border:2px solid #dcdad4;border-radius:18px;padding:16px 18px;min-height:76px;box-sizing:border-box;">
+            <span class="material-symbols-outlined" style="font-size:28px;color:#b6b3ab;">radio_button_unchecked</span>
+            <span style="flex:1;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:19px;">Tanden poetsen</span>
+            <span style="display:inline-flex;align-items:center;gap:5px;background:#f0eee8;border-radius:9999px;padding:5px 12px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;color:#434656;"><span class="material-symbols-outlined" style="font-size:18px;">timer</span>2:00</span>
+          </div>
+        </div>
+      </div>
+      <p style="font-family:'Poppins',sans-serif;font-size:13px;color:#747688;margin:8px 0 0;">Step tiles are 76px tall — tap to complete, tap again to undo. Stars are never paid twice.</p>
+    </div>
+
+    <!-- Collapsed states -->
+    <div>
+      <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;margin-bottom:10px;">Routine card · collapsed states</span>
+      <div style="display:flex;flex-direction:column;gap:10px;max-width:620px;">
+        <div style="display:flex;align-items:center;gap:16px;background:#f5f3ee;border-radius:20px;padding:14px 18px;">
+          <span class="material-symbols-outlined" style="font-size:28px;color:oklch(55% 0.14 155);font-variation-settings:'FILL' 1;">check_circle</span>
+          <span style="flex:1;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:20px;color:#434656;">Wakker worden</span>
+          <span style="display:inline-flex;align-items:center;gap:6px;color:#ef8d5d;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:17px;"><span class="material-symbols-outlined" style="font-size:20px;font-variation-settings:'FILL' 1;">star</span>+2</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px;background:#ffffff;border:1px solid #e1e3e4;border-radius:20px;padding:14px 18px;">
+          <span style="width:42px;height:42px;border-radius:14px;background:oklch(95% 0.03 290);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:22px;color:oklch(45% 0.12 290);">local_laundry_service</span></span>
+          <div style="flex:1;min-width:0;"><span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:20px;">Was opruimen</span><span style="display:block;font-family:'Poppins',sans-serif;font-size:14px;color:#434656;">van gisteren — mag nog tot vanavond</span></div>
+          <span style="display:inline-flex;align-items:center;gap:6px;background:#f0eee8;color:#434656;border-radius:9999px;padding:8px 16px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;"><span class="material-symbols-outlined" style="font-size:18px;">history</span>Nog te doen</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px;background:#ffffff;border:1px solid #e1e3e4;border-radius:20px;padding:14px 18px;">
+          <span style="width:42px;height:42px;border-radius:14px;background:oklch(95% 0.03 65);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:22px;color:oklch(45% 0.12 65);">breakfast_dining</span></span>
+          <div style="flex:1;min-width:0;"><span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:20px;">Ontbijt</span><span style="display:block;font-family:'Poppins',sans-serif;font-size:14px;color:#434656;">dat kun jij al zelf!</span></div>
+          <span style="display:inline-flex;align-items:center;gap:6px;background:rgba(93,95,239,0.10);color:#5d5fef;border-radius:9999px;padding:8px 16px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;"><span class="material-symbols-outlined" style="font-size:18px;font-variation-settings:'FILL' 1;">workspace_premium</span>Afgestudeerd</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px;background:#ffffff;border:1px solid #e1e3e4;border-radius:20px;padding:14px 18px;">
+          <span style="width:42px;height:42px;border-radius:14px;background:oklch(95% 0.03 245);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:22px;color:oklch(45% 0.12 245);">backpack</span></span>
+          <div style="flex:1;min-width:0;"><span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:20px;">Huiswerk</span><span style="display:block;font-family:'Poppins',sans-serif;font-size:14px;color:#434656;">3 stappen · +2 sterren</span></div>
+          <span class="tnum" style="background:#ffffff;border:1px solid #e1e3e4;color:#5d5fef;border-radius:9999px;padding:8px 16px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;">over 4 uur</span>
+        </div>
+      </div>
+      <p style="font-family:'Poppins',sans-serif;font-size:13px;color:#747688;margin:8px 0 0;">Done · grace · graduated · upcoming. Grace is phrased as an invitation, never as a penalty.</p>
+    </div>
+
+    <!-- Manage row + step editor -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;">
+      <div>
+        <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;margin-bottom:10px;">Manage row (app)</span>
+        <div style="display:flex;align-items:center;gap:12px;background:#ffffff;border:1px solid #e1e3e4;border-radius:14px;padding:12px 14px;">
+          <span class="material-symbols-outlined" style="font-size:20px;color:#c4c5d9;cursor:grab;">drag_indicator</span>
+          <span style="width:36px;height:36px;border-radius:12px;background:oklch(95% 0.025 200);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:20px;color:oklch(45% 0.12 200);">sunny</span></span>
+          <div style="flex:1;min-width:0;"><span style="display:block;font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;">Ochtendroutine</span><span class="tnum" style="display:block;font-family:'Poppins',sans-serif;font-size:12px;color:#434656;">elke schooldag 07:15 · 5 stappen</span></div>
+          <span style="display:inline-flex;align-items:center;gap:3px;color:#ef8d5d;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;"><span class="material-symbols-outlined" style="font-size:17px;font-variation-settings:'FILL' 1;">star</span>3</span>
+          <span style="width:38px;height:22px;border-radius:9999px;background:#5d5fef;position:relative;flex-shrink:0;"><span style="position:absolute;right:3px;top:3px;width:16px;height:16px;border-radius:9999px;background:#ffffff;"></span></span>
+        </div>
+      </div>
+      <div>
+        <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;margin-bottom:10px;">Step editor row · selected, with timer</span>
+        <div style="display:flex;align-items:center;gap:10px;background:#ffffff;border:2px solid #5d5fef;border-radius:12px;padding:10px 12px;min-height:48px;box-sizing:border-box;">
+          <span class="material-symbols-outlined" style="font-size:19px;color:#c4c5d9;">drag_indicator</span>
+          <span class="material-symbols-outlined" style="font-size:20px;color:#434656;">brush</span>
+          <span style="flex:1;font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;">Tanden poetsen</span>
+          <span class="tnum" style="display:inline-flex;align-items:center;gap:4px;background:rgba(93,95,239,0.10);color:#5d5fef;border-radius:9999px;padding:4px 10px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12px;"><span class="material-symbols-outlined" style="font-size:15px;">timer</span>2:00</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Weekday picker + star stepper -->
+    <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:20px;align-items:start;">
+      <div>
+        <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;margin-bottom:10px;">Weekday picker</span>
+        <div style="display:flex;gap:6px;">
+          <span style="flex:1;height:44px;border-radius:12px;background:#5d5fef;color:#ffffff;display:flex;align-items:center;justify-content:center;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;">ma</span>
+          <span style="flex:1;height:44px;border-radius:12px;background:#5d5fef;color:#ffffff;display:flex;align-items:center;justify-content:center;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;">di</span>
+          <span style="flex:1;height:44px;border-radius:12px;background:#5d5fef;color:#ffffff;display:flex;align-items:center;justify-content:center;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;">wo</span>
+          <span style="flex:1;height:44px;border-radius:12px;background:#5d5fef;color:#ffffff;display:flex;align-items:center;justify-content:center;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;">do</span>
+          <span style="flex:1;height:44px;border-radius:12px;background:#5d5fef;color:#ffffff;display:flex;align-items:center;justify-content:center;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;">vr</span>
+          <span style="flex:1;height:44px;border-radius:12px;background:#f3f2ee;color:#747688;display:flex;align-items:center;justify-content:center;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;">za</span>
+          <span style="flex:1;height:44px;border-radius:12px;background:#f3f2ee;color:#747688;display:flex;align-items:center;justify-content:center;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;">zo</span>
+        </div>
+      </div>
+      <div>
+        <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;margin-bottom:10px;">Star stepper — positive only</span>
+        <div style="display:flex;align-items:center;gap:12px;background:#ffffff;border:1px solid #e1e3e4;border-radius:14px;padding:12px 14px;">
+          <span class="material-symbols-outlined" style="font-size:22px;color:#ef8d5d;font-variation-settings:'FILL' 1;">star</span>
+          <span style="flex:1;font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;">Sterren per afronding</span>
+          <span style="width:34px;height:34px;border-radius:9999px;background:#f3f2ee;display:flex;align-items:center;justify-content:center;color:#434656;"><span class="material-symbols-outlined" style="font-size:19px;">remove</span></span>
+          <span class="tnum" style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:20px;min-width:18px;text-align:center;">3</span>
+          <span style="width:34px;height:34px;border-radius:9999px;background:#5d5fef;display:flex;align-items:center;justify-content:center;color:#ffffff;"><span class="material-symbols-outlined" style="font-size:19px;">add</span></span>
+        </div>
       </div>
     </div>
 

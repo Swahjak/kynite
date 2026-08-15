@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Poppins:wght@400;500;600;700&display=swap"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
+<style>
+  body{margin:0;-webkit-font-smoothing:antialiased;}
+  .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;vertical-align:middle;}
+  .tnum{font-variant-numeric:tabular-nums;}
+  a{color:#5d5fef;}
+  a:hover{color:#4547c9;}
+  .noscroll::-webkit-scrollbar{width:0;height:0;}
+  .noscroll{scrollbar-width:none;}
+</style>
+</helmet>
+
+<div style="background:#eceae4;min-height:100vh;font-family:'Poppins',sans-serif;color:#191c1d;padding:36px 40px 80px;">
+
+  <div style="margin-bottom:28px;">
+    <h1 style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:34px;line-height:1.1;letter-spacing:-0.02em;margin:0 0 6px;">Routines</h1>
+    <p style="margin:0;font-size:14px;color:#434656;max-width:720px;">Kindbord op de wandtablet (portrait) en het beheer in de app voor de ouder. Statische schermen — geen klikgedrag.</p>
+  </div>
+
+  <div style="display:flex;gap:48px;align-items:flex-start;flex-wrap:wrap;">
+
+  <!-- ══════════ TABLET PORTRAIT — KINDBORD ══════════ -->
+  <div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;"><span class="material-symbols-outlined" style="font-size:18px;">tablet_mac</span>Wandtablet landscape 1194 × 834 — kindbord</div>
+    <div style="width:1194px;height:834px;background:#fbf9f4;border-radius:32px;border:1px solid #dcdad4;box-shadow:0 18px 40px rgba(0,0,0,0.10);overflow:hidden;display:flex;flex-direction:column;">
+
+      <!-- header -->
+      <div style="display:flex;align-items:center;gap:20px;padding:28px 32px 22px;border-bottom:1px solid #eceae4;flex-shrink:0;">
+        <span class="material-symbols-outlined" style="font-size:30px;color:#747688;cursor:pointer;">arrow_back</span>
+        <span style="width:72px;height:72px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 335);flex-shrink:0;"><img src="uploads/child1.svg" alt="Mila" style="width:100%;height:100%;object-fit:cover;display:block;"/></span>
+        <div style="flex:1;min-width:0;">
+          <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:38px;line-height:1.1;letter-spacing:-0.02em;">Hoi Mila</span>
+          <span style="display:block;font-size:17px;color:#434656;margin-top:2px;">vrijdag 14 augustus</span>
+        </div>
+        <span style="display:inline-flex;align-items:center;gap:10px;background:rgba(239,141,93,0.16);color:#ef8d5d;border-radius:9999px;padding:12px 22px;"><span class="material-symbols-outlined" style="font-size:30px;font-variation-settings:'FILL' 1;">star</span><span class="tnum" style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:30px;">28</span></span>
+      </div>
+
+      <div class="noscroll" style="flex:1;overflow-y:auto;padding:24px 32px 32px;display:grid;grid-template-columns:1.4fr 1fr;gap:28px;align-items:start;">
+
+        <div>
+        <!-- ── BAND: OCHTEND ── -->
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+          <span class="material-symbols-outlined" style="font-size:28px;color:oklch(58% 0.14 65);font-variation-settings:'FILL' 1;">wb_twilight</span>
+          <span style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:24px;letter-spacing:-0.01em;">Ochtend</span>
+          <span style="flex:1;height:10px;border-radius:9999px;background:#e6e3dc;overflow:hidden;"><span style="display:block;width:43%;height:100%;border-radius:9999px;background:oklch(58% 0.14 65);"></span></span>
+          <span class="tnum" style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:17px;color:#434656;">3 van 7 klaar</span>
+        </div>
+
+        <!-- klaar, herhalend — ingeklapt -->
+        <div style="display:flex;align-items:center;gap:16px;background:#f5f3ee;border-radius:20px;padding:16px 20px;margin-bottom:12px;">
+          <span class="material-symbols-outlined" style="font-size:30px;color:oklch(55% 0.14 155);font-variation-settings:'FILL' 1;">check_circle</span>
+          <span style="flex:1;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:21px;color:#434656;">Wakker worden</span>
+          <span style="display:inline-flex;align-items:center;gap:6px;color:#ef8d5d;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:18px;"><span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 1;">star</span>+2</span>
+        </div>
+
+        <!-- DUE — uitgeklapt -->
+        <div style="background:#ffffff;border:1px solid #e6e3dc;border-radius:28px;padding:24px;margin-bottom:12px;box-shadow:0 4px 14px rgba(0,0,0,0.05);position:relative;overflow:hidden;">
+          <span style="position:absolute;left:0;top:0;bottom:0;width:6px;background:#5d5fef;"></span>
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:6px;">
+            <span style="width:60px;height:60px;border-radius:20px;background:oklch(95% 0.025 200);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:32px;color:oklch(45% 0.12 200);">sunny</span></span>
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:30px;letter-spacing:-0.01em;">Ochtendroutine</span>
+                <span style="background:#5d5fef;color:#fff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;letter-spacing:0.05em;padding:4px 12px;border-radius:9999px;">NU</span>
+              </div>
+              <span style="display:block;font-size:16px;color:#434656;margin-top:2px;">3 van 5 stappen</span>
+            </div>
+            <span style="display:inline-flex;align-items:center;gap:6px;background:rgba(239,141,93,0.16);color:#ef8d5d;border-radius:9999px;padding:8px 16px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:19px;"><span class="material-symbols-outlined" style="font-size:24px;font-variation-settings:'FILL' 1;">star</span>+3</span>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:10px;background:rgba(93,95,239,0.07);border-radius:14px;padding:10px 16px;margin:14px 0 18px;">
+            <span class="material-symbols-outlined" style="font-size:22px;color:#5d5fef;font-variation-settings:'FILL' 1;">celebration</span>
+            <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:18px;color:#5d5fef;">Goed bezig! Nog twee stapjes.</span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div style="display:flex;align-items:center;gap:14px;background:oklch(96% 0.03 155);border:2px solid oklch(88% 0.06 155);border-radius:18px;padding:16px 18px;min-height:80px;box-sizing:border-box;">
+              <span class="material-symbols-outlined" style="font-size:30px;color:oklch(52% 0.13 155);font-variation-settings:'FILL' 1;">check_circle</span>
+              <span style="flex:1;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:20px;color:#434656;text-decoration:line-through;text-decoration-color:oklch(80% 0.06 155);">Uit bed</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;background:oklch(96% 0.03 155);border:2px solid oklch(88% 0.06 155);border-radius:18px;padding:16px 18px;min-height:80px;box-sizing:border-box;">
+              <span class="material-symbols-outlined" style="font-size:30px;color:oklch(52% 0.13 155);font-variation-settings:'FILL' 1;">check_circle</span>
+              <span style="flex:1;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:20px;color:#434656;text-decoration:line-through;text-decoration-color:oklch(80% 0.06 155);">Aankleden</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;background:oklch(96% 0.03 155);border:2px solid oklch(88% 0.06 155);border-radius:18px;padding:16px 18px;min-height:80px;box-sizing:border-box;">
+              <span class="material-symbols-outlined" style="font-size:30px;color:oklch(52% 0.13 155);font-variation-settings:'FILL' 1;">check_circle</span>
+              <span style="flex:1;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:20px;color:#434656;text-decoration:line-through;text-decoration-color:oklch(80% 0.06 155);">Bed opmaken</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;background:#fbf9f4;border:2px solid #dcdad4;border-radius:18px;padding:16px 18px;min-height:80px;box-sizing:border-box;">
+              <span class="material-symbols-outlined" style="font-size:30px;color:#b6b3ab;">radio_button_unchecked</span>
+              <span style="flex:1;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:20px;">Tanden poetsen</span>
+              <span style="display:inline-flex;align-items:center;gap:5px;background:#f0eee8;border-radius:9999px;padding:5px 12px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;color:#434656;"><span class="material-symbols-outlined" style="font-size:19px;">timer</span>2:00</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;background:#fbf9f4;border:2px solid #dcdad4;border-radius:18px;padding:16px 18px;min-height:80px;box-sizing:border-box;">
+              <span class="material-symbols-outlined" style="font-size:30px;color:#b6b3ab;">radio_button_unchecked</span>
+              <span style="flex:1;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:20px;">Tas inpakken</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- GRACE — ingeklapt -->
+        <div style="display:flex;align-items:center;gap:16px;background:#ffffff;border:1px solid #e6e3dc;border-radius:20px;padding:16px 20px;margin-bottom:12px;">
+          <span style="width:44px;height:44px;border-radius:14px;background:oklch(95% 0.03 290);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:24px;color:oklch(45% 0.12 290);">local_laundry_service</span></span>
+          <div style="flex:1;min-width:0;">
+            <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:21px;">Was opruimen</span>
+            <span style="display:block;font-size:15px;color:#434656;">van gisteren — mag nog tot vanavond</span>
+          </div>
+          <span style="display:inline-flex;align-items:center;gap:6px;background:#f0eee8;color:#434656;border-radius:9999px;padding:8px 16px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;"><span class="material-symbols-outlined" style="font-size:19px;">history</span>Nog te doen</span>
+        </div>
+
+        <!-- AFGESTUDEERD — ingeklapt -->
+        <div style="display:flex;align-items:center;gap:16px;background:#ffffff;border:1px solid #e6e3dc;border-radius:20px;padding:16px 20px;margin-bottom:28px;">
+          <span style="width:44px;height:44px;border-radius:14px;background:oklch(95% 0.03 65);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:24px;color:oklch(45% 0.12 65);">breakfast_dining</span></span>
+          <div style="flex:1;min-width:0;">
+            <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:21px;">Ontbijt</span>
+            <span style="display:block;font-size:15px;color:#434656;">dat kun jij al zelf!</span>
+          </div>
+          <span style="display:inline-flex;align-items:center;gap:6px;background:rgba(93,95,239,0.10);color:#5d5fef;border-radius:9999px;padding:8px 16px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;"><span class="material-symbols-outlined" style="font-size:19px;font-variation-settings:'FILL' 1;">workspace_premium</span>Afgestudeerd</span>
+        </div>
+
+        </div>
+
+        <div>
+        <!-- ── BAND: MIDDAG ── -->
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+          <span class="material-symbols-outlined" style="font-size:28px;color:oklch(58% 0.14 200);font-variation-settings:'FILL' 1;">wb_sunny</span>
+          <span style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:24px;letter-spacing:-0.01em;">Middag</span>
+          <span style="flex:1;height:10px;border-radius:9999px;background:#e6e3dc;overflow:hidden;"><span style="display:block;width:0%;height:100%;border-radius:9999px;background:oklch(58% 0.14 200);"></span></span>
+          <span class="tnum" style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:17px;color:#434656;">0 van 2 klaar</span>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:16px;background:#ffffff;border:1px solid #e6e3dc;border-radius:20px;padding:16px 20px;margin-bottom:12px;">
+          <span style="width:44px;height:44px;border-radius:14px;background:oklch(95% 0.03 245);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:24px;color:oklch(45% 0.12 245);">backpack</span></span>
+          <div style="flex:1;min-width:0;">
+            <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:21px;">Huiswerk</span>
+            <span style="display:block;font-size:15px;color:#434656;">3 stappen · +2 sterren</span>
+          </div>
+          <span class="tnum" style="display:inline-flex;align-items:center;gap:6px;background:#ffffff;border:1px solid #e1e3e4;color:#5d5fef;border-radius:9999px;padding:8px 16px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:16px;">over 4 uur</span>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:16px;background:#ffffff;border:1px solid #e6e3dc;border-radius:20px;padding:16px 20px;margin-bottom:28px;">
+          <span style="width:44px;height:44px;border-radius:14px;background:oklch(95% 0.03 155);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:24px;color:oklch(45% 0.12 155);">sports_soccer</span></span>
+          <div style="flex:1;min-width:0;">
+            <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:21px;">Tas voor voetbal</span>
+            <span style="display:block;font-size:15px;color:#434656;">eenmalig klusje · +1 ster</span>
+          </div>
+          <span class="tnum" style="display:inline-flex;align-items:center;gap:6px;background:#ffffff;border:1px solid #e1e3e4;color:#5d5fef;border-radius:9999px;padding:8px 16px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:16px;">over 6 uur</span>
+        </div>
+
+        <!-- ── BAND: AVOND ── -->
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+          <span class="material-symbols-outlined" style="font-size:28px;color:oklch(58% 0.14 290);font-variation-settings:'FILL' 1;">bedtime</span>
+          <span style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:24px;letter-spacing:-0.01em;">Avond</span>
+          <span style="flex:1;height:10px;border-radius:9999px;background:#e6e3dc;overflow:hidden;"><span style="display:block;width:0%;height:100%;border-radius:9999px;background:oklch(58% 0.14 290);"></span></span>
+          <span class="tnum" style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:17px;color:#434656;">0 van 4 klaar</span>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:16px;background:#ffffff;border:1px solid #e6e3dc;border-radius:20px;padding:16px 20px;">
+          <span style="width:44px;height:44px;border-radius:14px;background:oklch(95% 0.03 290);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:24px;color:oklch(45% 0.12 290);">nights_stay</span></span>
+          <div style="flex:1;min-width:0;">
+            <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:21px;">Bedtime routine</span>
+            <span style="display:block;font-size:15px;color:#434656;">4 stappen · +3 sterren</span>
+          </div>
+          <span class="tnum" style="display:inline-flex;align-items:center;gap:6px;background:#ffffff;border:1px solid #e1e3e4;color:#5d5fef;border-radius:9999px;padding:8px 16px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:16px;">om 19:30</span>
+        </div>
+        </div>
+
+      </div>
+    </div>
+    <p style="width:1194px;margin:14px 0 0;font-size:13px;color:#434656;line-height:1.6;">Eén routine staat uitgeklapt: de eerste die nú actionable is. Afgeronde herhalende routines blijven als rustige succes-regel staan, eenmalige klusjes verdwijnen na de viering maar blijven in de bandteller. Gemiste routines krijgen geen eigen visuele staat.</p>
+  </div>
+
+  <!-- ══════════ MOBIEL — BEHEER ══════════ -->
+  <div style="display:flex;gap:40px;align-items:flex-start;">
+
+    <div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;"><span class="material-symbols-outlined" style="font-size:18px;">smartphone</span>Mobiel — routine-beheer</div>
+      <div style="width:390px;height:844px;background:#fbf9f4;border-radius:40px;border:1px solid #dcdad4;box-shadow:0 18px 40px rgba(0,0,0,0.10);overflow:hidden;display:flex;flex-direction:column;position:relative;">
+
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 26px 4px;flex-shrink:0;">
+          <span class="tnum" style="font-size:13px;font-weight:600;">08:42</span>
+          <div style="display:flex;align-items:center;gap:5px;"><span class="material-symbols-outlined" style="font-size:15px;">signal_cellular_alt</span><span class="material-symbols-outlined" style="font-size:15px;">wifi</span><span class="material-symbols-outlined" style="font-size:15px;">battery_full</span></div>
+        </div>
+
+        <div style="padding:8px 20px 12px;flex-shrink:0;">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <h2 style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:26px;letter-spacing:-0.02em;margin:0;">Routines</h2>
+            <div style="display:flex;align-items:center;gap:4px;">
+              <span style="width:44px;height:44px;border-radius:9999px;display:flex;align-items:center;justify-content:center;color:#434656;"><span class="material-symbols-outlined" style="font-size:22px;">swap_vert</span></span>
+              <span style="width:44px;height:44px;border-radius:9999px;background:#5d5fef;color:#fff;display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined" style="font-size:24px;">add</span></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="noscroll" style="flex:1;overflow-y:auto;padding:0 20px 24px;">
+
+          <div style="display:flex;align-items:center;gap:10px;margin:6px 0 10px;">
+            <span style="width:28px;height:28px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 335);"><img src="uploads/child1.svg" alt="Mila" style="width:100%;height:100%;object-fit:cover;display:block;"/></span>
+            <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:16px;">Mila</span>
+            <span style="font-size:13px;color:#747688;">4 routines</span>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:22px;">
+            <div style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #eceae4;border-radius:14px;padding:12px 14px;">
+              <span class="material-symbols-outlined" style="font-size:20px;color:#c4c5d9;cursor:grab;">drag_indicator</span>
+              <span style="width:36px;height:36px;border-radius:12px;background:oklch(95% 0.025 200);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:20px;color:oklch(45% 0.12 200);">sunny</span></span>
+              <div style="flex:1;min-width:0;">
+                <span style="display:block;font-size:15px;font-weight:600;">Ochtendroutine</span>
+                <span class="tnum" style="display:block;font-size:12px;color:#434656;">elke schooldag 07:15 · 5 stappen</span>
+              </div>
+              <span style="display:inline-flex;align-items:center;gap:3px;color:#ef8d5d;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;"><span class="material-symbols-outlined" style="font-size:17px;font-variation-settings:'FILL' 1;">star</span>3</span>
+              <span style="width:38px;height:22px;border-radius:9999px;background:#5d5fef;position:relative;flex-shrink:0;"><span style="position:absolute;right:3px;top:3px;width:16px;height:16px;border-radius:9999px;background:#fff;"></span></span>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #eceae4;border-radius:14px;padding:12px 14px;">
+              <span class="material-symbols-outlined" style="font-size:20px;color:#c4c5d9;cursor:grab;">drag_indicator</span>
+              <span style="width:36px;height:36px;border-radius:12px;background:oklch(95% 0.025 245);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:20px;color:oklch(45% 0.12 245);">backpack</span></span>
+              <div style="flex:1;min-width:0;">
+                <span style="display:block;font-size:15px;font-weight:600;">Huiswerk</span>
+                <span class="tnum" style="display:block;font-size:12px;color:#434656;">ma di do 16:00 · 3 stappen</span>
+              </div>
+              <span style="display:inline-flex;align-items:center;gap:3px;color:#ef8d5d;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;"><span class="material-symbols-outlined" style="font-size:17px;font-variation-settings:'FILL' 1;">star</span>2</span>
+              <span style="width:38px;height:22px;border-radius:9999px;background:#5d5fef;position:relative;flex-shrink:0;"><span style="position:absolute;right:3px;top:3px;width:16px;height:16px;border-radius:9999px;background:#fff;"></span></span>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #eceae4;border-radius:14px;padding:12px 14px;">
+              <span class="material-symbols-outlined" style="font-size:20px;color:#c4c5d9;cursor:grab;">drag_indicator</span>
+              <span style="width:36px;height:36px;border-radius:12px;background:oklch(95% 0.025 155);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:20px;color:oklch(45% 0.12 155);">sports_soccer</span></span>
+              <div style="flex:1;min-width:0;">
+                <span style="display:block;font-size:15px;font-weight:600;">Tas voor voetbal</span>
+                <span class="tnum" style="display:block;font-size:12px;color:#434656;">eenmalig — vr 14 aug</span>
+              </div>
+              <span style="display:inline-flex;align-items:center;gap:3px;color:#ef8d5d;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;"><span class="material-symbols-outlined" style="font-size:17px;font-variation-settings:'FILL' 1;">star</span>1</span>
+              <span style="width:38px;height:22px;border-radius:9999px;background:#5d5fef;position:relative;flex-shrink:0;"><span style="position:absolute;right:3px;top:3px;width:16px;height:16px;border-radius:9999px;background:#fff;"></span></span>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:12px;background:#faf8f3;border:1px solid #eceae4;border-radius:14px;padding:12px 14px;opacity:0.7;">
+              <span class="material-symbols-outlined" style="font-size:20px;color:#c4c5d9;cursor:grab;">drag_indicator</span>
+              <span style="width:36px;height:36px;border-radius:12px;background:#f0eee8;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:20px;color:#747688;">local_laundry_service</span></span>
+              <div style="flex:1;min-width:0;">
+                <span style="display:block;font-size:15px;font-weight:600;">Was opruimen</span>
+                <span class="tnum" style="display:block;font-size:12px;color:#434656;">inactief · zo 18:00</span>
+              </div>
+              <span style="width:38px;height:22px;border-radius:9999px;background:#dcdad4;position:relative;flex-shrink:0;"><span style="position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:9999px;background:#fff;"></span></span>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:10px;margin:0 0 10px;">
+            <span style="width:28px;height:28px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 245);"><img src="uploads/child2.svg" alt="Daan" style="width:100%;height:100%;object-fit:cover;display:block;"/></span>
+            <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:16px;">Daan</span>
+            <span style="font-size:13px;color:#747688;">2 routines</span>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:22px;">
+            <div style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #eceae4;border-radius:14px;padding:12px 14px;">
+              <span class="material-symbols-outlined" style="font-size:20px;color:#c4c5d9;cursor:grab;">drag_indicator</span>
+              <span style="width:36px;height:36px;border-radius:12px;background:oklch(95% 0.025 200);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:20px;color:oklch(45% 0.12 200);">sunny</span></span>
+              <div style="flex:1;min-width:0;">
+                <span style="display:block;font-size:15px;font-weight:600;">Ochtendroutine</span>
+                <span class="tnum" style="display:block;font-size:12px;color:#434656;">elke schooldag 07:15 · 5 stappen</span>
+              </div>
+              <span style="display:inline-flex;align-items:center;gap:3px;color:#ef8d5d;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;"><span class="material-symbols-outlined" style="font-size:17px;font-variation-settings:'FILL' 1;">star</span>3</span>
+              <span style="width:38px;height:22px;border-radius:9999px;background:#5d5fef;position:relative;flex-shrink:0;"><span style="position:absolute;right:3px;top:3px;width:16px;height:16px;border-radius:9999px;background:#fff;"></span></span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #eceae4;border-radius:14px;padding:12px 14px;">
+              <span class="material-symbols-outlined" style="font-size:20px;color:#c4c5d9;cursor:grab;">drag_indicator</span>
+              <span style="width:36px;height:36px;border-radius:12px;background:oklch(95% 0.025 290);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:20px;color:oklch(45% 0.12 290);">nights_stay</span></span>
+              <div style="flex:1;min-width:0;">
+                <span style="display:block;font-size:15px;font-weight:600;">Bedtime routine</span>
+                <span class="tnum" style="display:block;font-size:12px;color:#434656;">elke dag 19:00 · 4 stappen</span>
+              </div>
+              <span style="display:inline-flex;align-items:center;gap:3px;color:#ef8d5d;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;"><span class="material-symbols-outlined" style="font-size:17px;font-variation-settings:'FILL' 1;">star</span>3</span>
+              <span style="width:38px;height:22px;border-radius:9999px;background:#5d5fef;position:relative;flex-shrink:0;"><span style="position:absolute;right:3px;top:3px;width:16px;height:16px;border-radius:9999px;background:#fff;"></span></span>
+            </div>
+          </div>
+
+          <div style="background:#fff;border:1px solid #eceae4;border-radius:16px;padding:16px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+              <span class="material-symbols-outlined" style="font-size:19px;color:#5d5fef;font-variation-settings:'FILL' 1;">workspace_premium</span>
+              <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;">Klaar om af te studeren</span>
+            </div>
+            <p style="margin:0 0 12px;font-size:12px;color:#434656;line-height:1.5;">Mila doet dit al 3 weken zonder herinnering. Afstuderen stopt de sterren, de routine blijft staan.</p>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid #f0eee8;">
+              <span style="width:32px;height:32px;border-radius:10px;background:oklch(95% 0.025 65);display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined" style="font-size:18px;color:oklch(45% 0.12 65);">breakfast_dining</span></span>
+              <span style="flex:1;font-size:14px;font-weight:600;">Ontbijt · Mila</span>
+              <button style="background:#5d5fef;color:#fff;border:none;border-radius:9999px;padding:9px 14px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;cursor:pointer;">Laten afstuderen</button>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;padding-top:10px;border-top:1px solid #f0eee8;">
+              <span class="material-symbols-outlined" style="font-size:17px;color:#747688;">school</span>
+              <span style="font-size:13px;color:#434656;">2 afgestudeerde routines</span>
+              <span class="material-symbols-outlined" style="font-size:18px;color:#747688;margin-left:auto;">chevron_right</span>
+            </div>
+          </div>
+
+        </div>
+
+        <div style="flex-shrink:0;display:flex;justify-content:space-around;padding:10px 8px 26px;background:rgba(251,249,244,0.9);backdrop-filter:blur(12px);border-top:1px solid #eceae4;">
+          <span style="width:60px;height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#747688;"><span class="material-symbols-outlined" style="font-size:23px;">home</span><span style="font-size:10px;font-family:'Baloo 2',sans-serif;font-weight:700;">Vandaag</span></span>
+          <span style="width:60px;height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#747688;"><span class="material-symbols-outlined" style="font-size:23px;">calendar_month</span><span style="font-size:10px;font-family:'Baloo 2',sans-serif;font-weight:700;">Kalender</span></span>
+          <span style="width:60px;height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#5d5fef;"><span class="material-symbols-outlined" style="font-size:23px;font-variation-settings:'FILL' 1;">checklist</span><span style="font-size:10px;font-family:'Baloo 2',sans-serif;font-weight:700;">Routines</span></span>
+          <span style="width:60px;height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#747688;"><span class="material-symbols-outlined" style="font-size:23px;">star</span><span style="font-size:10px;font-family:'Baloo 2',sans-serif;font-weight:700;">Sterren</span></span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- routinebouwer -->
+    <div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;"><span class="material-symbols-outlined" style="font-size:18px;">edit_square</span>Mobiel — routinebouwer</div>
+      <div style="width:390px;height:844px;background:#fbf9f4;border-radius:40px;border:1px solid #dcdad4;box-shadow:0 18px 40px rgba(0,0,0,0.10);overflow:hidden;display:flex;flex-direction:column;position:relative;">
+
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 26px 4px;flex-shrink:0;">
+          <span class="tnum" style="font-size:13px;font-weight:600;">08:42</span>
+          <div style="display:flex;align-items:center;gap:5px;"><span class="material-symbols-outlined" style="font-size:15px;">signal_cellular_alt</span><span class="material-symbols-outlined" style="font-size:15px;">wifi</span><span class="material-symbols-outlined" style="font-size:15px;">battery_full</span></div>
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 20px 12px;border-bottom:1px solid #eceae4;flex-shrink:0;">
+          <span style="width:44px;height:44px;margin-left:-10px;display:flex;align-items:center;justify-content:center;color:#434656;"><span class="material-symbols-outlined" style="font-size:24px;">close</span></span>
+          <h2 style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:19px;margin:0;">Routine bewerken</h2>
+          <button style="background:#5d5fef;color:#fff;border:none;border-radius:9999px;padding:10px 18px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;cursor:pointer;">Opslaan</button>
+        </div>
+
+        <div class="noscroll" style="flex:1;overflow-y:auto;padding:16px 20px 32px;display:flex;flex-direction:column;gap:20px;">
+
+          <div>
+            <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;margin-bottom:8px;">Titel &amp; icoon</span>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <span style="width:52px;height:52px;border-radius:16px;background:oklch(95% 0.025 200);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:2px solid #5d5fef;"><span class="material-symbols-outlined" style="font-size:26px;color:oklch(45% 0.12 200);">sunny</span></span>
+              <div style="flex:1;background:#f3f2ee;border-bottom:2px solid #5d5fef;border-radius:10px 10px 0 0;padding:12px 14px;"><span style="font-size:15px;font-weight:600;">Ochtendroutine</span></div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+              <span style="width:40px;height:40px;border-radius:12px;background:#f3f2ee;display:flex;align-items:center;justify-content:center;color:#747688;"><span class="material-symbols-outlined" style="font-size:20px;">bedtime</span></span>
+              <span style="width:40px;height:40px;border-radius:12px;background:#f3f2ee;display:flex;align-items:center;justify-content:center;color:#747688;"><span class="material-symbols-outlined" style="font-size:20px;">backpack</span></span>
+              <span style="width:40px;height:40px;border-radius:12px;background:#f3f2ee;display:flex;align-items:center;justify-content:center;color:#747688;"><span class="material-symbols-outlined" style="font-size:20px;">brush</span></span>
+              <span style="width:40px;height:40px;border-radius:12px;background:#f3f2ee;display:flex;align-items:center;justify-content:center;color:#747688;"><span class="material-symbols-outlined" style="font-size:20px;">pets</span></span>
+              <span style="width:40px;height:40px;border-radius:12px;background:#f3f2ee;display:flex;align-items:center;justify-content:center;color:#747688;"><span class="material-symbols-outlined" style="font-size:20px;">local_laundry_service</span></span>
+              <span style="width:40px;height:40px;border-radius:12px;background:#f3f2ee;display:flex;align-items:center;justify-content:center;color:#747688;"><span class="material-symbols-outlined" style="font-size:20px;">more_horiz</span></span>
+            </div>
+          </div>
+
+          <div>
+            <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;margin-bottom:8px;">Voor wie</span>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <span style="display:inline-flex;align-items:center;gap:8px;background:rgba(93,95,239,0.10);border:2px solid #5d5fef;border-radius:9999px;padding:7px 14px 7px 7px;"><span style="width:26px;height:26px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 335);"><img src="uploads/child1.svg" alt="Mila" style="width:100%;height:100%;object-fit:cover;display:block;"/></span><span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;">Mila</span></span>
+              <span style="display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #e1e3e4;border-radius:9999px;padding:7px 14px 7px 7px;"><span style="width:26px;height:26px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 245);"><img src="uploads/child2.svg" alt="Daan" style="width:100%;height:100%;object-fit:cover;display:block;"/></span><span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;color:#434656;">Daan</span></span>
+            </div>
+          </div>
+
+          <div>
+            <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;margin-bottom:8px;">Schema</span>
+            <div style="display:flex;gap:4px;background:#f0eee8;border-radius:9999px;padding:4px;margin-bottom:12px;">
+              <span style="flex:1;text-align:center;background:#fff;border-radius:9999px;padding:9px 0;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;box-shadow:0 1px 3px rgba(0,0,0,0.10);">Herhalend</span>
+              <span style="flex:1;text-align:center;padding:9px 0;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;color:#747688;">Eenmalig klusje</span>
+            </div>
+            <div style="display:flex;gap:6px;margin-bottom:12px;">
+              <span style="flex:1;height:44px;border-radius:12px;background:#5d5fef;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;">ma</span>
+              <span style="flex:1;height:44px;border-radius:12px;background:#5d5fef;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;">di</span>
+              <span style="flex:1;height:44px;border-radius:12px;background:#5d5fef;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;">wo</span>
+              <span style="flex:1;height:44px;border-radius:12px;background:#5d5fef;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;">do</span>
+              <span style="flex:1;height:44px;border-radius:12px;background:#5d5fef;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;">vr</span>
+              <span style="flex:1;height:44px;border-radius:12px;background:#f3f2ee;color:#747688;display:flex;align-items:center;justify-content:center;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;">za</span>
+              <span style="flex:1;height:44px;border-radius:12px;background:#f3f2ee;color:#747688;display:flex;align-items:center;justify-content:center;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;">zo</span>
+            </div>
+            <div style="display:flex;gap:10px;">
+              <div style="flex:1;background:#f3f2ee;border-radius:12px;padding:10px 14px;">
+                <span style="display:block;font-size:11px;color:#747688;">Starttijd</span>
+                <span class="tnum" style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:18px;">07:15</span>
+              </div>
+              <div style="flex:1;background:#f3f2ee;border-radius:12px;padding:10px 14px;">
+                <span style="display:block;font-size:11px;color:#747688;">Gratie</span>
+                <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:18px;">1 dag</span>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+              <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;">Stappen</span>
+              <span style="font-size:12px;color:#747688;">sleep om te herordenen</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #eceae4;border-radius:12px;padding:10px 12px;min-height:48px;box-sizing:border-box;">
+                <span class="material-symbols-outlined" style="font-size:19px;color:#c4c5d9;">drag_indicator</span>
+                <span class="material-symbols-outlined" style="font-size:20px;color:#434656;">bed</span>
+                <span style="flex:1;font-size:14px;font-weight:600;">Uit bed</span>
+                <span class="material-symbols-outlined" style="font-size:19px;color:#747688;">more_vert</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #eceae4;border-radius:12px;padding:10px 12px;min-height:48px;box-sizing:border-box;">
+                <span class="material-symbols-outlined" style="font-size:19px;color:#c4c5d9;">drag_indicator</span>
+                <span class="material-symbols-outlined" style="font-size:20px;color:#434656;">checkroom</span>
+                <span style="flex:1;font-size:14px;font-weight:600;">Aankleden</span>
+                <span class="material-symbols-outlined" style="font-size:19px;color:#747688;">more_vert</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;background:#fff;border:2px solid #5d5fef;border-radius:12px;padding:10px 12px;min-height:48px;box-sizing:border-box;">
+                <span class="material-symbols-outlined" style="font-size:19px;color:#c4c5d9;">drag_indicator</span>
+                <span class="material-symbols-outlined" style="font-size:20px;color:#434656;">brush</span>
+                <span style="flex:1;font-size:14px;font-weight:600;">Tanden poetsen</span>
+                <span class="tnum" style="display:inline-flex;align-items:center;gap:4px;background:rgba(93,95,239,0.10);color:#5d5fef;border-radius:9999px;padding:4px 10px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12px;"><span class="material-symbols-outlined" style="font-size:15px;">timer</span>2:00</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #eceae4;border-radius:12px;padding:10px 12px;min-height:48px;box-sizing:border-box;">
+                <span class="material-symbols-outlined" style="font-size:19px;color:#c4c5d9;">drag_indicator</span>
+                <span class="material-symbols-outlined" style="font-size:20px;color:#434656;">backpack</span>
+                <span style="flex:1;font-size:14px;font-weight:600;">Tas inpakken</span>
+                <span class="material-symbols-outlined" style="font-size:19px;color:#747688;">more_vert</span>
+              </div>
+              <button style="display:flex;align-items:center;justify-content:center;gap:8px;background:transparent;border:2px dashed #dcdad4;border-radius:12px;padding:12px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;color:#5d5fef;cursor:pointer;min-height:48px;"><span class="material-symbols-outlined" style="font-size:19px;">add</span>Stap toevoegen</button>
+            </div>
+          </div>
+
+          <div>
+            <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;margin-bottom:8px;">Beloning</span>
+            <div style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #eceae4;border-radius:14px;padding:14px;">
+              <span class="material-symbols-outlined" style="font-size:24px;color:#ef8d5d;font-variation-settings:'FILL' 1;">star</span>
+              <span style="flex:1;font-size:14px;font-weight:600;">Sterren per afronding</span>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span style="width:34px;height:34px;border-radius:9999px;background:#f3f2ee;display:flex;align-items:center;justify-content:center;color:#434656;"><span class="material-symbols-outlined" style="font-size:19px;">remove</span></span>
+                <span class="tnum" style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:20px;min-width:18px;text-align:center;">3</span>
+                <span style="width:34px;height:34px;border-radius:9999px;background:#5d5fef;display:flex;align-items:center;justify-content:center;color:#fff;"><span class="material-symbols-outlined" style="font-size:19px;">add</span></span>
+              </div>
+            </div>
+          </div>
+
+          <button style="display:flex;align-items:center;justify-content:center;gap:8px;background:transparent;border:2px solid #ffdad6;border-radius:9999px;padding:13px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;color:#ba1a1a;cursor:pointer;"><span class="material-symbols-outlined" style="font-size:19px;">delete</span>Routine verwijderen</button>
+
+        </div>
+      </div>
+      <p style="width:390px;margin:14px 0 0;font-size:13px;color:#434656;line-height:1.6;">Eén doorlopend formulier in plaats van een wizard: alle velden zijn zichtbaar, zodat bewerken net zo snel gaat als aanmaken.</p>
+    </div>
+
+  </div>
+
+  </div>
+</div>
+
+</x-dc>
+</body>
+</html>
