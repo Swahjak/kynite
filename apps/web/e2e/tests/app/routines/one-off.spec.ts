@@ -38,9 +38,9 @@ test('a parent schedules a one-off chore, the child taps it, and it leaves the b
   const dialog = page.getByRole('dialog');
   await dialog.getByLabel('Naam').fill('Garage opruimen');
 
-  // Whose it is (FR9 — a routine is never unowned).
-  await dialog.getByRole('combobox').first().click();
-  await page.getByRole('option', { name: 'Mila' }).click();
+  // Whose it is (FR9 — a routine is never unowned). The builder picks the owner
+  // with a face chip rather than a dropdown since wave D2.
+  await dialog.getByRole('radio', { name: 'Mila' }).check();
 
   // The toggle: a single date instead of a weekly rhythm. The weekday picker
   // goes away with it — a schedule is one thing or the other.
@@ -52,7 +52,10 @@ test('a parent schedules a one-off chore, the child taps it, and it leaves the b
   // 00:01 so the chore is already due whenever this spec runs; it also puts it
   // in the morning band, which the board assertion below relies on.
   await dialog.getByLabel('Tijd').fill('00:01');
-  await dialog.getByLabel('Sterren per stap').fill('10');
+  // The reward is a stepper, not a number field: nine taps from its floor of 1.
+  for (let index = 0; index < 9; index += 1) {
+    await dialog.getByRole('button', { name: 'Meer sterren' }).click();
+  }
   await dialog.getByLabel('Stap 1', { exact: true }).fill('Dozen naar de kringloop');
   await dialog.getByLabel('Stap 2', { exact: true }).fill('Bezem erover');
 
@@ -62,7 +65,7 @@ test('a parent schedules a one-off chore, the child taps it, and it leaves the b
   const row = page.getByTestId('routine-row').filter({ hasText: 'Garage opruimen' });
   await expect(row).toBeVisible();
   // The roster says the day, not a weekday set.
-  await expect(row.getByTestId('routine-schedule-badge')).toContainText('Eén keer op');
+  await expect(row).toContainText('eenmalig');
 
   // ---- the child's board -------------------------------------------------
   // M12: hub surfaces run behind a device principal, never the parent session.

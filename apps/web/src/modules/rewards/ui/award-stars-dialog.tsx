@@ -2,160 +2,200 @@
 
 import { useActionState, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { Button, cn, Icon, Input, MemberChip, Overline, StarStepper } from '@kynite/ui';
 import {
-  Button,
-  Field,
-  FieldDescription,
-  FieldLabel,
-  Input,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@kynite/ui';
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import type { Member } from '@/modules/family';
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 import { idleState } from '../action-state';
 import { awardStarsAction } from '../actions';
+import type { QueueMember } from './approval-queue';
 
 /**
- * A parent hands out a star by hand (§7 `stars:award`).
+ * A parent hands out a star by hand (§7 `stars:award`) — `Beloningen.dc.html`,
+ * "sterren geven".
+ *
+ * A bottom sheet rather than a dialog, because that is what the sheets draw and
+ * what the action is: a thing done in ten seconds with one thumb while standing
+ * in a kitchen.
  *
  * The reason defaults to **surprise**, and that default is the point. The
  * overjustification literature (Deci, Koestner & Ryan; research §Part 1) is
  * unambiguous: a reward the child *expected in advance* for merely engaging is
  * the one that erodes intrinsic motivation, while an unexpected one does not —
- * and can boost it. So the cheapest, most-reached-for action in this dialog is
+ * and can boost it. So the cheapest, most-reached-for option in this sheet is
  * the one the research endorses, and raising a routine's guaranteed payout is
- * the one that takes more clicks.
+ * the one that takes more taps.
  *
- * The amount starts at 1 and cannot go below it. There is no "remove stars"
+ * The stepper starts at 1 and stops at 1. There is no "remove stars"
  * counterpart anywhere in this file, this slice, or the permission matrix:
  * `stars:remove` is `deny` in every column of §7 and `CHECK (amount > 0)`
  * makes it unbypassable even from a console.
+ *
+ * `members` arrives as faces already resolved to plain strings by the page.
+ * Importing `@/modules/family` from a `'use client'` module pulls the family
+ * barrel — and with it `principal.ts` and `next/headers` — into the browser
+ * bundle, which does not merely bloat it: it fails to compile.
  */
-export function AwardStarsDialog({ members }: { members: Member[] }) {
+export function AwardStarsDialog({ members }: { members: QueueMember[] }) {
   const t = useTranslations('rewards');
   const [open, setOpen] = useState(false);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger
         render={
-          <Button variant="gold" size="hub" data-testid="award-stars-trigger">
+          <Button size="sm" className="rounded-4xl" data-testid="award-stars-trigger">
+            <Icon name="star" size="sm" />
             {t('actions.awardStars')}
           </Button>
         }
       />
-      <DialogContent size="hub" className="sm:max-w-md">
+      <SheetContent
+        side="bottom"
+        className="max-h-[92dvh] gap-0 overflow-y-auto rounded-t-3xl px-5 pt-2.5 pb-7"
+      >
         {open ? <AwardForm members={members} onSaved={() => setOpen(false)} /> : null}
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }
 
-function AwardForm({ members, onSaved }: { members: Member[]; onSaved: () => void }) {
+/** The two reasons a parent picks between. `manual` stays available to the API. */
+const REASONS = ['surprise', 'bonus'] as const;
+
+function AwardForm({ members, onSaved }: { members: QueueMember[]; onSaved: () => void }) {
   const t = useTranslations('rewards');
   const [state, formAction, pending] = useActionState(awardStarsAction, idleState);
   const wasPending = useRef(false);
+
+  const [memberId, setMemberId] = useState(() => members[0]?.id ?? '');
+  const [amount, setAmount] = useState(1);
+  const [reason, setReason] = useState<(typeof REASONS)[number]>('surprise');
 
   useEffect(() => {
     if (wasPending.current && !pending && state.status === 'idle') onSaved();
     wasPending.current = pending;
   }, [pending, state, onSaved]);
 
+  const recipient = members.find((member) => member.id === memberId);
+
   return (
-    <form action={formAction} className="flex flex-col gap-4">
-      <DialogHeader>
-        <DialogTitle>{t('award.title')}</DialogTitle>
-        <DialogDescription>{t('award.description')}</DialogDescription>
-      </DialogHeader>
+    <form action={formAction} className="flex flex-col">
+      <span aria-hidden className="mx-auto mb-4 block h-1 w-10 rounded-full bg-line" />
 
-      <Field>
-        <FieldLabel>{t('award.member')}</FieldLabel>
-        <Select name="memberId" defaultValue={members[0]?.id}>
-          <SelectTrigger size="hub" className="w-full">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {members.map((member) => (
-              <SelectItem key={member.id} value={member.id} size="hub">
-                {member.displayName}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </Field>
+      <SheetTitle className="font-display text-h2 font-extrabold text-ink">
+        {t('award.title')}
+      </SheetTitle>
+      <SheetDescription className="mb-4.5 text-caption text-ink-secondary">
+        {t('award.description')}
+      </SheetDescription>
 
-      <div className="grid grid-cols-2 gap-4">
-        <Field>
-          <FieldLabel>{t('award.amount')}</FieldLabel>
-          <Input
-            type="number"
-            name="amount"
-            size="hub"
-            min={1}
-            max={20}
-            defaultValue={1}
-            required
-          />
-        </Field>
+      <input type="hidden" name="memberId" value={memberId} />
+      <input type="hidden" name="reason" value={reason} />
 
-        <Field>
-          <FieldLabel>{t('award.reason')}</FieldLabel>
-          {/* `surprise` first *and* default — see the note above. */}
-          <Select name="reason" defaultValue="surprise">
-            <SelectTrigger size="hub" className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {(['surprise', 'bonus', 'manual'] as const).map((reason) => (
-                <SelectItem key={reason} value={reason} size="hub">
-                  {t(`reasons.${reason}`)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
+      <Overline className="mb-2">{t('award.member')}</Overline>
+      <div role="radiogroup" aria-label={t('award.member')} className="mb-4.5 flex flex-wrap gap-2">
+        {members.map((member) => {
+          const selected = member.id === memberId;
+          return (
+            <label key={member.id} className="cursor-pointer">
+              <input
+                type="radio"
+                name="memberChoice"
+                value={member.id}
+                checked={selected}
+                onChange={() => setMemberId(member.id)}
+                className="sr-only"
+              />
+              <MemberChip
+                name={member.displayName}
+                avatarUrl={member.avatarUrl}
+                initials={member.initials}
+                surfaceClass={member.colorClass}
+                selected={selected}
+                data-testid={`award-member-${member.id}`}
+              />
+            </label>
+          );
+        })}
       </div>
 
-      <Field>
-        <FieldLabel>{t('award.note')}</FieldLabel>
-        <Input name="note" size="hub" maxLength={200} autoComplete="off" />
-        {/* Specific praise is the part with no downside at all (research
-            §Overjustification: verbal praise shows no undermining effect), so
-            the note field asks for the sentence rather than the reason code. */}
-        <FieldDescription>{t('award.noteHint')}</FieldDescription>
-      </Field>
+      <Overline className="mb-2">{t('award.amount')}</Overline>
+      <div className="mb-4.5 rounded-2xl border border-line-subtle bg-card p-3.5">
+        {/* The stepper stops at one and has no subtract mode: there is no
+            screen in Kynite that takes a star back. */}
+        <StarStepper
+          name="amount"
+          size="lg"
+          showStar
+          min={1}
+          max={20}
+          value={amount}
+          onValueChange={setAmount}
+          copy={{
+            decrease: t('award.fewer'),
+            increase: t('award.more'),
+            value: t('starsCost', { count: amount }),
+          }}
+        />
+      </div>
+
+      <Overline className="mb-2">{t('award.reason')}</Overline>
+      <div role="radiogroup" aria-label={t('award.reason')} className="mb-3 flex gap-2">
+        {REASONS.map((option) => {
+          const selected = option === reason;
+          return (
+            <label
+              key={option}
+              data-testid={`award-reason-${option}`}
+              className={cn(
+                'flex-1 cursor-pointer rounded-4xl py-2.5 text-center font-display text-body-sm font-bold transition-colors',
+                selected
+                  ? 'border-2 border-primary bg-accent text-ink'
+                  : 'border border-line-subtle bg-card text-ink-secondary'
+              )}
+            >
+              <input
+                type="radio"
+                name="reasonChoice"
+                value={option}
+                checked={selected}
+                onChange={() => setReason(option)}
+                className="sr-only"
+              />
+              {t(`reasons.${option}`)}
+            </label>
+          );
+        })}
+      </div>
+
+      {/* Specific praise is the part with no downside at all (research
+          §Overjustification: verbal praise shows no undermining effect), so the
+          note asks for the sentence rather than for a category. */}
+      <Input
+        name="note"
+        maxLength={200}
+        autoComplete="off"
+        aria-label={t('award.note')}
+        placeholder={t('award.noteHint')}
+        className="mb-4.5"
+      />
 
       {state.status === 'error' ? (
-        <p role="alert" className="text-sm text-destructive">
+        <p role="alert" className="mb-3 text-body-sm text-destructive">
           {t(`errors.${state.error}`)}
         </p>
       ) : null}
 
-      <DialogFooter>
-        <DialogClose
-          render={
-            <Button type="button" variant="ghost" size="hub">
-              {t('actions.cancel')}
-            </Button>
-          }
-        />
-        <Button type="submit" variant="gold" size="hub" disabled={pending}>
-          {t('actions.award')}
-        </Button>
-      </DialogFooter>
+      <Button type="submit" className="min-h-13 w-full rounded-4xl text-body" disabled={pending}>
+        {recipient
+          ? t('award.submitNamed', { count: amount, name: recipient.displayName })
+          : t('actions.award')}
+      </Button>
     </form>
   );
 }

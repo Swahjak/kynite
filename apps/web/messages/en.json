@@ -643,7 +643,8 @@
       "resumeStars": "Award stars again",
       "resumeStarsNamed": "Award stars for {title} again",
       "removeConfirm": "Delete this routine?",
-      "removeConfirmYes": "Yes, delete"
+      "removeConfirmYes": "Yes, delete",
+      "editNamed": "Edit {title}"
     },
     "dialog": {
       "addTitle": "New routine",
@@ -678,7 +679,13 @@
       "stepTimer": "Timer for step {number} in seconds",
       "moveUp": "Move step {number} earlier",
       "moveDown": "Move step {number} later",
-      "removeStep": "Remove step {number}"
+      "removeStep": "Remove step {number}",
+      "titleAndIcon": "Title & icon",
+      "stepsHint": "put them in the right order",
+      "reward": "Reward",
+      "fewerStars": "Fewer stars",
+      "moreStars": "More stars",
+      "stepTimerShort": "sec"
     },
     "weekdays": {
       "MO": "Mon",
@@ -703,7 +710,8 @@
       "daily": "Every day",
       "once": "One time on {date}",
       "noTime": "No fixed time",
-      "grace": "{days, plural, one {# extra day} other {# extra days}}"
+      "grace": "{days, plural, one {# extra day} other {# extra days}}",
+      "onceShort": "one time — {date}"
     },
     "sections": {
       "morning": "Morning",
@@ -714,7 +722,7 @@
     "sectionEmpty": "Nothing here today.",
     "boardEmpty": "Nothing on the list today.",
     "stepCount": "{count, plural, =0 {No steps} one {# step} other {# steps}}",
-    "inProgress": "Underway",
+    "inProgress": "NOW",
     "startsIn": "Starts in {minutes} min",
     "startsInHours": "Starts in {hours} h",
     "starsEarned": "{count, plural, =0 {No stars} one {# star earned} other {# stars earned}}",
@@ -735,7 +743,10 @@
     "hub": {
       "title": "{name}'s routines",
       "unavailableTitle": "No routines to show",
-      "unavailableBody": "This screen is not linked to a family member yet."
+      "unavailableBody": "This screen is not linked to a family member yet.",
+      "back": "Back",
+      "greeting": "Hi {name}",
+      "starBalance": "{count, plural, one {# star saved} other {# stars saved}}"
     },
     "errors": {
       "forbidden": "You are not allowed to do that.",
@@ -744,7 +755,22 @@
       "routineNotFound": "That routine no longer exists.",
       "notScheduled": "This routine is not on the list for that day.",
       "completionNotFound": "That completion no longer exists."
-    }
+    },
+    "manage": {
+      "routineCount": "{count, plural, one {# routine} other {# routines}}",
+      "scheduleLine": "{when} · {steps, plural, one {# step} other {# steps}}",
+      "paused": "Off — not on the board right now",
+      "activeToggle": "Turn {title} on or off",
+      "graduateTitle": "Ready to graduate",
+      "graduateBody": "Graduating stops the stars. The routine stays, and everything already earned stays the child’s.",
+      "graduatedCount": "{count, plural, =0 {Nothing graduated yet} one {# graduated routine} other {# graduated routines}}"
+    },
+    "stepProgress": "{done} of {total} steps",
+    "stepsAndStars": "{count, plural, one {# step} other {# steps}} · {stars, plural, one {+# star} other {+# stars}}",
+    "oneOffAndStars": "one-off chore · {stars, plural, one {+# star} other {+# stars}}",
+    "graceHint": "from yesterday — still fine until tonight",
+    "graceChip": "Still to do",
+    "praiseRemaining": "{count, plural, one {Nicely done! One more step.} other {Nicely done! # more steps.}}"
   },
   "rewards": {
     "title": "Rewards",
@@ -769,7 +795,8 @@
       "awardStars": "Give a star",
       "award": "Give",
       "removeConfirm": "Take this reward off the shelf?",
-      "removeConfirmYes": "Yes, take it off"
+      "removeConfirmYes": "Yes, take it off",
+      "editNamed": "Edit {title}"
     },
     "dialog": {
       "addTitle": "New reward",
@@ -829,11 +856,12 @@
       "favouriteSnack": "Your favourite snack"
     },
     "queue": {
-      "pendingTitle": "Asks",
+      "pendingTitle": "Waiting for you — oldest first",
       "pendingEmpty": "Nothing is waiting for an answer.",
-      "outstandingTitle": "Approved",
+      "outstandingTitle": "Outstanding",
       "outstandingHint": "Approved, not handed over yet.",
-      "historyTitle": "Earlier"
+      "historyTitle": "Earlier",
+      "approvedOn": "approved {when}"
     },
     "award": {
       "title": "Give a star",
@@ -842,23 +870,31 @@
       "amount": "How many",
       "reason": "What for",
       "note": "What you say",
-      "noteHint": "For example: you worked that out all by yourself!"
+      "noteHint": "For example: you worked that out all by yourself!",
+      "fewer": "Fewer stars",
+      "more": "More stars",
+      "submitNamed": "{count, plural, one {Give # star to {name}} other {Give # stars to {name}}}"
     },
     "store": {
       "title": "{name}'s shelf",
       "subtitle": "Everything you can choose with your stars.",
-      "shelf": "Choose",
+      "shelf": "What you can choose now",
       "empty": "Nothing on the shelf yet.",
       "availableStars": "Stars to spend",
       "chooseMember": "Choose who",
-      "asked": "Asked — waiting for an answer",
+      "asked": "Waiting for an answer",
       "askFor": "Ask for {title}",
       "moreStars": "{count, plural, one {# more star} other {# more stars}}",
       "currentGoal": "What you are saving for",
-      "starsToGo": "{count, plural, one {# star to go} other {# stars to go}}",
-      "goalProgress": "{have} / {need}",
+      "starsToGo": "{count} to go",
+      "goalProgress": "{have} of {need} stars",
       "unavailableTitle": "No shelf to show yet",
-      "unavailableBody": "This screen is not linked to a family member yet."
+      "unavailableBody": "This screen is not linked to a family member yet.",
+      "heading": "Shop",
+      "back": "Back",
+      "choose": "Choose",
+      "shortBy": "{count} to go",
+      "askNote": "What you choose is looked at first. Your stars stay yours until it is approved."
     },
     "chart": {
       "title": "{name}'s stars",
@@ -872,7 +908,9 @@
       "graduatedTitle": "Runs on its own now",
       "graduatedBody": "You do these yourself, without stars.",
       "unavailableTitle": "No star chart to show",
-      "unavailableBody": "This screen is not linked to a family member yet."
+      "unavailableBody": "This screen is not linked to a family member yet.",
+      "graduatedLine": "{title} graduated",
+      "dayStars": "{day}: {count, plural, =0 {no stars} one {# star} other {# stars}}"
     },
     "errors": {
       "forbidden": "You are not allowed to do that.",
@@ -882,6 +920,16 @@
       "redemptionNotFound": "That ask no longer exists.",
       "alreadyDecided": "This one already has an answer.",
       "notEnoughStars": "There are not enough stars for that yet."
+    },
+    "manageTitle": "Stars",
+    "balance": {
+      "line": "{earned} earned · {spent} spent"
+    },
+    "tabs": {
+      "label": "Stars and rewards",
+      "queue": "Queue",
+      "catalogue": "Catalogue",
+      "balances": "Balance"
     }
   },
   "timers": {

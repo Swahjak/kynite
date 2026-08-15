@@ -9,6 +9,7 @@ import {
   FieldDescription,
   FieldGroupLabel,
   FieldLabel,
+  Icon,
   Input,
   Select,
   SelectContent,
@@ -49,24 +50,41 @@ import { REWARD_ICONS, rewardIconOf } from './tokens';
 export function RewardDialog({
   members,
   reward,
+  compact = false,
 }: {
   /** The children a reward can be restricted to. */
   members: Member[];
   reward?: Reward;
+  /** The icon-only trigger the catalogue row uses, instead of a labelled button. */
+  compact?: boolean;
 }) {
   const t = useTranslations('rewards');
   const isEdit = reward !== undefined;
   const [open, setOpen] = useState(false);
 
+  const trigger =
+    compact && reward ? (
+      <Button
+        variant="ghost"
+        size="icon"
+        className="shrink-0"
+        aria-label={t('actions.editNamed', { title: reward.title })}
+      >
+        <Icon name="more_horiz" size="sm" />
+      </Button>
+    ) : compact ? (
+      <Button size="icon-hub" className="rounded-full" aria-label={t('actions.add')}>
+        <Icon name="add" size="md" />
+      </Button>
+    ) : (
+      <Button variant={isEdit ? 'outline' : 'default'} size="hub">
+        {isEdit ? t('actions.edit') : t('actions.add')}
+      </Button>
+    );
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger
-        render={
-          <Button variant={isEdit ? 'outline' : 'default'} size="hub">
-            {isEdit ? t('actions.edit') : t('actions.add')}
-          </Button>
-        }
-      />
+      <DialogTrigger render={trigger} />
       <DialogContent size="hub" className="max-h-[90dvh] overflow-y-auto sm:max-w-lg">
         {/* Mounted only while open, so a cancelled edit leaves nothing behind. */}
         {open ? (

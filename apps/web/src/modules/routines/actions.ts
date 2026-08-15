@@ -368,6 +368,70 @@ const fadeSchema = z.object({
   rewardEnabled: z.boolean(),
 });
 
+const activeSchema = z.object({
+  routineId: z.uuid(),
+  active: z.boolean(),
+});
+
+/**
+ * The switch on the parent's routine list (`Routines.dc.html`, mobile beheer).
+ *
+ * Pausing a routine is the lightest thing a parent does to one, and until now
+ * it cost a whole trip through the builder — open the form, find the toggle,
+ * save every step back. It is deliberately *not* a delete: the routine, its
+ * steps and every star it ever paid stay exactly where they are; it simply
+ * stops appearing on the child's board until it is switched back on. A summer
+ * without homework is a switch, not a demolition.
+ *
+ * Posts the *target* state rather than a toggle, so a double submit lands the
+ * same value twice instead of flipping back and forth.
+ */
+export async function setRoutineActiveAction(
+  _previous: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const principal = await assertCan('routine:write').catch(() => null);
+  if (!principal) return failure('forbidden');
+
+  const parsed = activeSchema.safeParse({
+    routineId: read(formData, 'routineId'),
+    active: read(formData, 'active') === 'true',
+  });
+  if (!parsed.success) return failure('invalidInput');
+
+  const { routineId, active } = parsed.data;
+  const db = getDb();
+
+  const [existing] = await db
+    .select({ id: routine.id, ownerMemberId: routine.ownerMemberId })
+    .from(routine)
+    .where(and(eq(routine.id, routineId), eq(routine.familyId, principal.familyId)))
+    .limit(1);
+
+  if (!existing) return failure('routineNotFound');
+
+  await db.transaction(async (tx) => {
+    await tx
+      .update(routine)
+      .set({ active, updatedAt: new Date() })
+      .where(and(eq(routine.id, routineId), eq(routine.familyId, principal.familyId)));
+
+    await publish(
+      {
+        familyId: principal.familyId,
+        type: 'routine.updated',
+        entity: { id: routineId },
+        actor: { ...actorOf(principal), source: 'mobile' },
+        patch: { active },
+      },
+      tx
+    );
+  });
+
+  await revalidateRoutines([existing.ownerMemberId]);
+  return idleState;
+}
+
 /**
  * The fade path, as a one-tap control (research §Decisions 7, FR17).
  *

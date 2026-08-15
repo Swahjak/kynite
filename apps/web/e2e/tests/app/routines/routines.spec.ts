@@ -115,7 +115,9 @@ test.describe('routine builder', () => {
     const row = page.getByTestId('routine-row');
     await expect(row).toBeVisible();
     await expect(row).toContainText('Bedtijd');
-    await expect(row.getByTestId('routine-step-name')).toHaveCount(3);
+    // The list row says how many steps there are; the steps themselves belong
+    // to the builder and to the child's board (wave D2).
+    await expect(row).toContainText('3 stappen');
 
     const steps = await withDb(async (client) => {
       const { rows } = await client.query<{ id: string }>(

@@ -17,7 +17,16 @@ import { deleteRewardAction } from '../actions';
  * cost stops being subtracted and the child's available balance can only rise.
  * Earned stars are untouched either way.
  */
-export function DeleteRewardButton({ rewardId, title }: { rewardId: string; title: string }) {
+export function DeleteRewardButton({
+  rewardId,
+  title,
+  compact = false,
+}: {
+  rewardId: string;
+  title: string;
+  /** The icon-only trigger a dense list row uses. */
+  compact?: boolean;
+}) {
   const t = useTranslations('rewards');
   const [state, formAction, pending] = useActionState(deleteRewardAction, idleState);
 
@@ -31,6 +40,7 @@ export function DeleteRewardButton({ rewardId, title }: { rewardId: string; titl
         question={t('actions.removeConfirm')}
         confirmLabel={t('actions.removeConfirmYes')}
         pending={pending}
+        compact={compact}
         testId="delete-reward"
       >
         {t('actions.remove')}

@@ -258,6 +258,9 @@ test.describe('the parent catalogue', () => {
     });
 
     await page.goto('/nl/rewards');
+    // The catalogue is the second tab since wave D2; the queue opens first,
+    // because it is the only one of the three where somebody is waiting.
+    await page.getByTestId('rewards-tab-catalogue').click();
     await expect(page.getByTestId('rewards-empty')).toBeVisible();
 
     await page.getByTestId('seed-presets').click();
@@ -278,8 +281,10 @@ test.describe('the parent catalogue', () => {
     await page.goto('/nl/rewards');
     await page.getByTestId('award-stars-trigger').click();
 
-    await page.getByRole('spinbutton', { name: 'Hoeveel' }).fill('3');
-    await page.getByRole('button', { name: 'Geven', exact: true }).click();
+    // A stepper, not a number field, and it starts at one: two taps to three.
+    await page.getByRole('button', { name: 'Meer sterren' }).click();
+    await page.getByRole('button', { name: 'Meer sterren' }).click();
+    await page.getByRole('button', { name: /sterren geven aan/i }).click();
 
     await expect
       .poll(async () => (await withDb((client) => readStarBalance(client, mila.id))).earned)

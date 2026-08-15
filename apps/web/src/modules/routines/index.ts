@@ -113,6 +113,7 @@ export {
   completeStepAction,
   createRoutineAction,
   deleteRoutineAction,
+  setRoutineActiveAction,
   setRoutineRewardAction,
   undoCompletionAction,
   updateRoutineAction,
@@ -137,11 +138,13 @@ export { RoutineGraduationList, type GraduationRoutine } from './ui/routine-grad
 export { RoutineBoard } from './ui/routine-board';
 export { RoutineCard, StepRow, type StepRowProps } from '@kynite/ui';
 export { RoutineDialog } from './ui/routine-dialog';
-export { RoutineList } from './ui/routine-list';
+export { RoutineManager, type ManagedRoutine } from './ui/routine-manager';
 export {
   DEFAULT_ROUTINE_ICON,
   ROUTINE_ICONS,
+  ROUTINE_ICON_TILE,
   SECTION_ICONS,
+  SECTION_TONE,
   STEP_ROW_HEIGHT,
   isRoutineIcon,
   routineIconOf,

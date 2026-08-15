@@ -167,6 +167,7 @@ export {
 export { ConfettiBurst, type ConfettiBurstProps } from './components/confetti-burst';
 export { EmptyState, emptyStateVariants, type EmptyStateProps } from './components/empty-state';
 export { FaceStack, type StackedFace } from './components/face-stack';
+export { GripHandle } from './components/grip-handle';
 export {
   FloatingPiece,
   type FloatingMotion,
@@ -179,7 +180,9 @@ export {
 } from './components/icon-medallion';
 export { KidStatCard, type KidStatCardProps } from './components/kid-stat-card';
 export { MediaRow } from './components/media-row';
+export { MemberChip } from './components/member-chip';
 export { MemberFace, initialsFor } from './components/member-face';
+export { Overline } from './components/overline';
 export { PageHeader } from './components/page-header';
 export { PillTabs, PillTabsPanel, type PillTabItem } from './components/pill-tabs';
 export { ProgressBar } from './components/progress-bar';
@@ -197,11 +200,14 @@ export {
 } from './components/routine-card';
 export { SavingsGoalCard, type SavingsGoal } from './components/savings-goal-card';
 export { SectionHeading } from './components/section-heading';
+export { SegmentedControl, type SegmentedOption } from './components/segmented-control';
 export { StarCount, StarMedallion } from './components/star-count';
 export { StarPop, type StarPopProps } from './components/star-pop';
+export { StarStepper } from './components/star-stepper';
 export { StepRow, type StepRowProps } from './components/step-row';
 export {
   ThemeBanner,
   type ThemeBannerProps,
   type ThemeBannerTile,
 } from './components/theme-banner';
+export { WeekBars, type WeekBar } from './components/week-bars';

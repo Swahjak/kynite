@@ -1,5 +1,7 @@
 'use client';
 
+import type { MouseEvent } from 'react';
+
 import { cn } from '../lib/utils';
 import { Icon } from './icon';
 import { StarPop } from './star-pop';
@@ -50,6 +52,20 @@ export type StepRowProps = {
    * ordinary, and neither carries a status.
    */
   active?: boolean;
+  /**
+   * `row` is the full-width single-tap row this component has always been.
+   * `tile` is the design sheets' two-column grid cell inside an expanded
+   * routine card (`Routines.dc.html`): a bordered 80px tile that turns green
+   * and strikes its own title through once it is done.
+   *
+   * The praise line and the star survive the change of shape. The sheet draws
+   * the finished tile as a struck-through title alone, but praise-before-star
+   * is a product rule (FR15) rather than a layout preference — a step that pays
+   * a star says which star it paid, and it says the sentence first. So the tile
+   * carries both, at caption scale under the title, which is the smallest place
+   * they can honestly go.
+   */
+  variant?: 'row' | 'tile';
   onComplete?: (origin: { x: number; y: number }) => void;
 };
 
@@ -70,9 +86,84 @@ export function StepRow({
   starLabel,
   actionLabel,
   active = false,
+  variant = 'row',
   onComplete,
 }: StepRowProps) {
   const live = active && !done;
+
+  /** Shared by both shapes: one tap, no confirmation, no second fire. */
+  const tap = (event: MouseEvent<HTMLButtonElement>) => {
+    if (done || !onComplete) return;
+    const box = event.currentTarget.getBoundingClientRect();
+    onComplete({
+      x: (box.left + box.width / 2) / Math.max(window.innerWidth, 1),
+      y: (box.top + box.height / 2) / Math.max(window.innerHeight, 1),
+    });
+  };
+
+  if (variant === 'tile') {
+    return (
+      <li data-testid="routine-step" data-step-id={stepId} data-state={done ? 'done' : 'todo'}>
+        <button
+          type="button"
+          data-testid="step-tap"
+          aria-label={actionLabel}
+          aria-pressed={done}
+          onClick={tap}
+          className={cn(
+            'flex min-h-20 w-full items-center gap-3.5 rounded-[18px] border-2 px-4.5 py-4 text-left transition-all duration-200 ease-brand',
+            'focus-visible:ring-3 focus-visible:ring-ring/50',
+            done
+              ? 'border-cat-green-border bg-cat-green-surface'
+              : 'border-line bg-background hover:bg-surface-container active:scale-[0.99]'
+          )}
+        >
+          {/* A done step is a green check; one still to do is an empty ring.
+              Never a cross, and nothing at all on the tiles around it. */}
+          <Icon
+            name={done ? 'check_circle' : 'radio_button_unchecked'}
+            filled={done}
+            size="lg"
+            className={cn('shrink-0', done ? 'text-cat-green-fg kynite-anim-check' : 'text-line')}
+          />
+
+          <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+            <span
+              className={cn(
+                'font-display text-h3 leading-tight font-bold text-balance',
+                done && 'text-ink-secondary line-through decoration-cat-green-border'
+              )}
+            >
+              {title}
+            </span>
+
+            {done ? (
+              <span className="flex items-center gap-2">
+                {/* Headline first, star after — FR15, in the smallest shape the
+                    tile allows. */}
+                <span
+                  data-testid="step-praise"
+                  className="min-w-0 font-display text-caption leading-snug font-bold text-brand-ink"
+                >
+                  {praiseText}
+                </span>
+                <span data-testid="step-star" className="shrink-0">
+                  <StarPop amount={stars} label={starLabel} />
+                </span>
+              </span>
+            ) : null}
+          </span>
+
+          {!done && timerSeconds ? (
+            <span className="flex shrink-0 items-center gap-1 rounded-4xl bg-surface-container px-3 py-1 font-display text-caption font-bold text-ink-secondary">
+              <Icon name="timer" size="sm" />
+              <span className="tabular-time">{formatTimer(timerSeconds)}</span>
+            </span>
+          ) : null}
+        </button>
+      </li>
+    );
+  }
 
   return (
     <li data-testid="routine-step" data-step-id={stepId} data-state={done ? 'done' : 'todo'}>
@@ -84,14 +175,7 @@ export function StepRow({
         // A completed step is not re-tappable, but it is not *disabled* either:
         // it keeps its accessible name and stays in the tab order so the board
         // reads as a list of what happened, not a list of dead controls.
-        onClick={(event) => {
-          if (done || !onComplete) return;
-          const box = event.currentTarget.getBoundingClientRect();
-          onComplete({
-            x: (box.left + box.width / 2) / Math.max(window.innerWidth, 1),
-            y: (box.top + box.height / 2) / Math.max(window.innerHeight, 1),
-          });
-        }}
+        onClick={tap}
         className={cn(
           // 56px — the Stitch hub step-row height, well past the 48px kiosk
           // minimum, because this is the one control that matters here. The

@@ -16,7 +16,16 @@ import { deleteRoutineAction } from '../actions';
  * is no equivalent anywhere on the hub, and removing a routine never touches
  * the star ledger — earned stars survive the routine that paid them.
  */
-export function DeleteRoutineButton({ routineId, title }: { routineId: string; title: string }) {
+export function DeleteRoutineButton({
+  routineId,
+  title,
+  compact = false,
+}: {
+  routineId: string;
+  title: string;
+  /** The icon-only trigger a dense list row uses. */
+  compact?: boolean;
+}) {
   const t = useTranslations('routines');
   const [state, formAction, pending] = useActionState(deleteRoutineAction, idleState);
 
@@ -30,6 +39,7 @@ export function DeleteRoutineButton({ routineId, title }: { routineId: string; t
         question={t('actions.removeConfirm')}
         confirmLabel={t('actions.removeConfirmYes')}
         pending={pending}
+        compact={compact}
         testId="delete-routine"
       >
         {t('actions.remove')}

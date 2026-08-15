@@ -97,15 +97,18 @@ export {
   type WeekBar,
 } from './page-data';
 
-export { ApprovalQueue } from './ui/approval-queue';
+export { ApprovalQueue, type QueueMember } from './ui/approval-queue';
 export { AwardStarsDialog } from './ui/award-stars-dialog';
 export { DeleteRewardButton } from './ui/delete-reward-button';
 export { RewardCard, SavingsGoalCard, type RewardCardCopy, type RewardCardProps } from '@kynite/ui';
 export { RewardDialog } from './ui/reward-dialog';
 export { RewardList } from './ui/reward-list';
 export { RewardStore } from './ui/reward-store';
+export { RewardsTabs } from './ui/rewards-tabs';
+export { StarBalances } from './ui/star-balances';
 export { SeedPresetsButton } from './ui/seed-presets-button';
 export { StarChart } from './ui/star-chart';
+export { StarWeekCard } from './ui/star-week-card';
 export {
   CATEGORY_TILE,
   DEFAULT_REWARD_ICON,

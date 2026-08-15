@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { cn } from '../lib/utils';
 import { Button } from './button';
+import { Icon } from './icon';
 
 /**
  * The M12 two-tap confirmation, extracted (M18).
@@ -53,6 +54,7 @@ export function ConfirmButton({
   pending = false,
   className,
   testId,
+  compact = false,
 }: {
   children: ReactNode;
   question: string;
@@ -64,6 +66,13 @@ export function ConfirmButton({
   pending?: boolean;
   className?: string;
   testId?: string;
+  /**
+   * The icon-only trigger a dense list row uses. The two-tap confirmation is
+   * unchanged — only the resting state shrinks, because a row of near-identical
+   * items should not be a column of large red buttons. `triggerLabel` becomes
+   * the control's whole accessible name, so it is required in practice.
+   */
+  compact?: boolean;
 }) {
   const [armed, setArmed] = useState(false);
   const confirmRef = useRef<HTMLButtonElement>(null);
@@ -83,15 +92,15 @@ export function ConfirmButton({
     return (
       <Button
         type="button"
-        variant="destructive"
-        size="hub"
+        variant={compact ? 'ghost' : 'destructive'}
+        size={compact ? 'icon' : 'hub'}
         disabled={disabled}
         aria-label={triggerLabel}
         onClick={() => setArmed(true)}
-        className={className}
+        className={cn(compact && 'shrink-0 text-ink-muted', className)}
         data-testid={testId}
       >
-        {children}
+        {compact ? <Icon name="delete" size="sm" /> : children}
       </Button>
     );
   }
@@ -103,7 +112,7 @@ export function ConfirmButton({
         ref={confirmRef}
         type="submit"
         variant="destructive"
-        size="hub"
+        size={compact ? 'sm' : 'hub'}
         disabled={disabled || pending}
         data-testid={testId ? `${testId}-yes` : undefined}
       >
@@ -112,7 +121,7 @@ export function ConfirmButton({
       <Button
         type="button"
         variant="ghost"
-        size="hub"
+        size={compact ? 'sm' : 'hub'}
         onClick={() => setArmed(false)}
         data-testid={testId ? `${testId}-cancel` : undefined}
       >

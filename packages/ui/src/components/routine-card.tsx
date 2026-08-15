@@ -5,20 +5,29 @@ import { Badge } from './badge';
 import { Icon } from './icon';
 import type { IconName } from './icon-codepoints';
 import { IconMedallion } from './icon-medallion';
+import { StarCount } from './star-count';
 import { StepRow } from './step-row';
 
 /**
- * A routine on the hub board, in one of its three readings.
+ * A routine on the hub board, in one of its four readings (`Routines.dc.html`).
  *
- * - **Expanded** — the routine that is live right now. Its steps are 56px
- *   single-tap rows; this is the only card a child interacts with.
- * - **Done** — collapses to a calm success line. Not a trophy, not a score:
- *   one sentence and a quiet icon, so a finished routine stops competing for
- *   attention with the one that has not started.
- * - **Dimmed** — either still ahead (with a countdown chip) or an occurrence
- *   from an earlier day still inside its grace window. Both use the *same*
- *   neutral dimming, and neither carries a mark, a colour change or a word
- *   about being late (research §Decisions 1 and 2).
+ * - **Expanded** — the one routine that is live right now, and the only card a
+ *   child interacts with. A 6px indigo rail down its left edge, the NU badge
+ *   beside the title, a praise line, and the steps as a two-column grid of
+ *   tiles. Exactly one card on the board is ever in this state.
+ * - **Done** — collapses to a calm success line on the container tone: a green
+ *   check, the title, and the stars it paid. Not a trophy and not a score; a
+ *   finished routine stops competing for attention with the one that has not
+ *   started.
+ * - **Grace / graduated** — a quiet white row with a chip on the right saying
+ *   which it is. A grace occurrence is an ordinary row that says how long it
+ *   still has; nothing marks it as late, because being late is not a failure a
+ *   wall display should announce to the household.
+ * - **Upcoming** — the same row with the countdown chip.
+ *
+ * What the card refuses, in every reading: a cross, a colour that means alarm,
+ * a badge that reports a miss. A missed routine has no state here at all — it
+ * is simply absent, decided one layer up in `loadMemberRoutines`.
  *
  * `data-state` and `data-complete` are the contract the Playwright assertions
  * and the visual snapshot read; the classes are what a family sees.
@@ -47,7 +56,7 @@ export type RoutineCardRoutine = {
   id: string;
   title: string;
   icon: IconName;
-  /** `upcoming` and `grace` are the two dimmed readings; see above. */
+  /** `upcoming` and `grace` are the two collapsed "not now" readings. */
   state: 'upcoming' | 'due' | 'grace' | 'none';
   complete: boolean;
   starsPerCompletion: number;
@@ -67,119 +76,192 @@ export type RoutineCardProps = {
     actionLabel: (title: string) => string;
     praise: (praiseKey: string) => string;
     graduated: string | null;
+    /**
+     * The expanded card's praise line — "Goed bezig! Nog twee stapjes." Shown
+     * only once something has actually been done, because praise for having
+     * done nothing yet is not praise.
+     */
+    praiseLine?: string | null;
+    /** The grace row's chip, e.g. "Nog te doen". */
+    graceLabel?: string | null;
+    /** The disc tint for this routine's icon, e.g. `bg-cat-teal-surface …`. */
+    tileClass?: string;
   };
   onComplete?: (stepId: string, origin: { x: number; y: number }) => void;
 };
 
 export function RoutineCard({ routine, expanded, copy, onComplete }: RoutineCardProps) {
-  const dimmed = !expanded && (routine.state === 'upcoming' || routine.state === 'grace');
   // The step the routine is *on*. Presentational only — the board's completion
-  // flow is unchanged; this just tells `StepRow` which row to draw large.
+  // flow is unchanged; this just tells `StepRow` which tile to draw as next.
   const activeStepId = routine.steps.find((step) => !step.done)?.id ?? null;
+  const open = expanded && !routine.complete;
+
+  const shared = {
+    'data-testid': 'routine-card',
+    'data-routine-id': routine.id,
+    'data-state': routine.state,
+    'data-complete': routine.complete ? 'true' : 'false',
+    'data-expanded': open ? 'true' : 'false',
+  };
+
+  /* ---------------------------------------------------------------------- */
+  /* Done — the quiet success line                                          */
+  /* ---------------------------------------------------------------------- */
+
+  if (routine.complete) {
+    return (
+      <article
+        {...shared}
+        className="flex items-center gap-4 rounded-3xl bg-surface-container-low px-5 py-4"
+      >
+        <Icon name="check_circle" filled size="lg" className="shrink-0 text-cat-green-fg" />
+        <h3 className="min-w-0 flex-1 font-display text-h3 font-bold text-ink-secondary">
+          {routine.title}
+        </h3>
+        <p
+          data-testid="routine-done-line"
+          className="flex shrink-0 items-center gap-1.5 font-display text-body font-bold text-gold-ink"
+        >
+          <Icon name="star" filled size="sm" />
+          <span className="sr-only">{copy.doneLine}</span>
+          <span aria-hidden className="tnum">
+            +{routine.starsPerCompletion}
+          </span>
+        </p>
+      </article>
+    );
+  }
+
+  /* ---------------------------------------------------------------------- */
+  /* Collapsed — grace, graduated, or still ahead                           */
+  /* ---------------------------------------------------------------------- */
+
+  if (!open) {
+    return (
+      <article
+        {...shared}
+        className="flex items-center gap-4 rounded-3xl border border-line-subtle bg-surface-container-lowest px-5 py-4"
+      >
+        <IconMedallion
+          icon={routine.icon}
+          tint={copy.tileClass ? 'none' : 'muted'}
+          shape="squircle"
+          size="md"
+          className={copy.tileClass}
+        />
+
+        <div className="min-w-0 flex-1">
+          <h3 className="font-display text-h3 font-bold text-balance text-ink">{routine.title}</h3>
+          <p className="text-body-sm text-ink-secondary">{copy.stepCount}</p>
+        </div>
+
+        {copy.graduated ? (
+          <Badge
+            data-testid="routine-graduated"
+            variant="soft"
+            size="md"
+            className="shrink-0 bg-accent text-brand-ink"
+          >
+            <Icon name="workspace_premium" filled size="xs" />
+            {copy.graduated}
+          </Badge>
+        ) : routine.state === 'grace' && copy.graceLabel ? (
+          <Badge data-testid="routine-grace" variant="soft" size="md" className="shrink-0">
+            <Icon name="schedule" size="xs" />
+            {copy.graceLabel}
+          </Badge>
+        ) : copy.countdown ? (
+          <Badge
+            data-testid="routine-countdown"
+            variant="outline"
+            size="md"
+            className="tnum shrink-0 border-line-subtle bg-surface-container-lowest text-brand-ink"
+          >
+            {copy.countdown}
+          </Badge>
+        ) : null}
+      </article>
+    );
+  }
+
+  /* ---------------------------------------------------------------------- */
+  /* Expanded — the one card a child is standing in front of                */
+  /* ---------------------------------------------------------------------- */
 
   return (
     <article
-      data-testid="routine-card"
-      data-routine-id={routine.id}
-      data-state={routine.state}
-      data-complete={routine.complete ? 'true' : 'false'}
-      data-expanded={expanded ? 'true' : 'false'}
-      className={cn(
-        'relative isolate overflow-hidden rounded-xl bg-surface-container-lowest transition-all duration-200 ease-brand',
-        expanded ? 'p-6 shadow-md hover:shadow-lg' : 'p-4 shadow-sm hover:shadow-md',
-        // The dimmed treatment. One opacity, no colour, no border, no icon —
-        // "missed" and "not yet" look the same because neither is a failure.
-        dimmed && 'opacity-60 hover:opacity-100'
-      )}
+      {...shared}
+      className="relative isolate overflow-hidden rounded-[28px] border border-line-subtle bg-surface-container-lowest py-6 pr-6 pl-7 shadow-sm"
     >
-      {/* The faint glow the mockup paints behind the live card
-          (`chores_routines_…/code.html`: a blurred `primary-container/20`
-          quarter-circle in the top-right). Ambience, not a status marker —
-          only the expanded card has it, and it carries no information the
-          `IN PROGRESS` pill does not already carry in words. */}
-      {expanded ? (
-        <span
-          aria-hidden
-          className="pointer-events-none absolute -top-16 -right-16 -z-10 size-40 rounded-full bg-primary/15 blur-3xl"
-        />
-      ) : null}
+      {/* The rail. Six pixels of indigo down the whole left edge is the board's
+          only "this one, now" marker that needs no reading at all. */}
+      <span aria-hidden className="absolute inset-y-0 left-0 w-1.5 bg-primary" />
 
       <header className="flex items-center gap-4">
         <IconMedallion
           icon={routine.icon}
-          filled={expanded}
-          tint={expanded ? 'brand-container' : 'muted'}
-          shape="circle"
-          size="lg"
+          tint={copy.tileClass ? 'none' : 'brand-container'}
+          shape="squircle"
+          size="2xl"
+          className={copy.tileClass}
         />
 
         <div className="min-w-0 flex-1">
-          <h3 className="truncate font-display text-h3 font-bold text-foreground">
-            {routine.title}
-          </h3>
-          {routine.complete ? (
-            <p
-              data-testid="routine-done-line"
-              className="flex items-center gap-1 text-body-sm text-brand-ink"
+          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+            <h3 className="min-w-0 font-display text-h1 font-extrabold text-balance text-ink">
+              {routine.title}
+            </h3>
+            <Badge
+              data-testid="routine-progress"
+              variant="status"
+              size="md"
+              className="label-overline shrink-0"
             >
-              <Icon name="star" size="sm" filled />
-              {copy.doneLine}
-            </p>
-          ) : (
-            <p className="truncate text-body-sm text-ink-secondary">{copy.stepCount}</p>
-          )}
+              {copy.inProgress}
+            </Badge>
+          </div>
+          <p className="text-body text-ink-secondary">{copy.stepCount}</p>
         </div>
 
-        {routine.complete ? (
-          /* `celebration`, per the mockup's finished-routine medallion. Still
-             one quiet glyph on a collapsed card — the celebration itself
-             happened at the tap. */
-          <IconMedallion
-            icon="celebration"
-            filled
-            tint="brand-container"
-            shape="circle"
+        {routine.starsPerCompletion > 0 ? (
+          <StarCount
+            value={routine.starsPerCompletion}
+            srLabel={copy.starLabel(routine.starsPerCompletion)}
             size="lg"
+            className="shrink-0"
           />
-        ) : copy.countdown ? (
-          <Badge data-testid="routine-countdown" variant="soft" size="md" className="shrink-0">
-            <Icon name="schedule" size="xs" />
-            {copy.countdown}
-          </Badge>
-        ) : expanded ? (
-          <Badge
-            data-testid="routine-progress"
-            variant="status"
-            size="md"
-            className="label-overline shrink-0"
-          >
-            {copy.inProgress}
-          </Badge>
         ) : null}
       </header>
 
-      {expanded && !routine.complete ? (
-        <ul className="mt-6 flex flex-col gap-3">
-          {routine.steps.map((step) => (
-            <StepRow
-              key={step.id}
-              stepId={step.id}
-              title={step.title}
-              done={step.done}
-              timerSeconds={step.timerSeconds}
-              praiseText={copy.praise(step.praiseKey)}
-              stars={routine.starsPerCompletion}
-              starLabel={copy.starLabel(routine.starsPerCompletion)}
-              actionLabel={copy.actionLabel(step.title)}
-              active={step.id === activeStepId}
-              onComplete={onComplete ? (origin) => onComplete(step.id, origin) : undefined}
-            />
-          ))}
-        </ul>
+      {copy.praiseLine ? (
+        <p
+          data-testid="routine-praise"
+          className="mt-3.5 mb-4.5 flex items-center gap-2.5 rounded-2xl bg-accent px-4 py-2.5 font-display text-body font-bold text-brand-ink"
+        >
+          <Icon name="celebration" filled size="sm" className="shrink-0" />
+          {copy.praiseLine}
+        </p>
       ) : null}
 
-      {/* The fade path's whole UI at M07: a quiet badge, never a downgrade.
-          M08 owns the full graduation surface. */}
+      <ul className={cn('grid gap-3 sm:grid-cols-2', copy.praiseLine ? undefined : 'mt-4.5')}>
+        {routine.steps.map((step) => (
+          <StepRow
+            key={step.id}
+            variant="tile"
+            stepId={step.id}
+            title={step.title}
+            done={step.done}
+            timerSeconds={step.timerSeconds}
+            praiseText={copy.praise(step.praiseKey)}
+            stars={routine.starsPerCompletion}
+            starLabel={copy.starLabel(routine.starsPerCompletion)}
+            actionLabel={copy.actionLabel(step.title)}
+            active={step.id === activeStepId}
+            onComplete={onComplete ? (origin) => onComplete(step.id, origin) : undefined}
+          />
+        ))}
+      </ul>
+
       {copy.graduated ? (
         <p data-testid="routine-graduated" className="mt-3 text-caption text-ink-secondary">
           {copy.graduated}

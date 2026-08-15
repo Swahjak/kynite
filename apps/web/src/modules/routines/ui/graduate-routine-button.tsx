@@ -23,10 +23,13 @@ export function GraduateRoutineButton({
   routineId,
   title,
   graduated,
+  compact = false,
 }: {
   routineId: string;
   title: string;
   graduated: boolean;
+  /** The small filled pill the routine list's graduation card uses. */
+  compact?: boolean;
 }) {
   const t = useTranslations('routines');
   const [state, formAction, pending] = useActionState(setRoutineRewardAction, idleState);
@@ -39,8 +42,9 @@ export function GraduateRoutineButton({
       <input type="hidden" name="rewardEnabled" value={graduated ? 'true' : 'false'} />
       <Button
         type="submit"
-        variant="brand-outline"
-        size="hub"
+        variant={compact ? 'default' : 'brand-outline'}
+        size={compact ? 'sm' : 'hub'}
+        className={compact ? 'rounded-4xl' : undefined}
         data-testid={graduated ? 'ungraduate-routine' : 'graduate-routine'}
         aria-label={t(graduated ? 'actions.resumeStarsNamed' : 'actions.graduateNamed', { title })}
         disabled={pending}

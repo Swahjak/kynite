@@ -643,7 +643,8 @@
       "resumeStars": "Weer sterren",
       "resumeStarsNamed": "Weer sterren voor {title}",
       "removeConfirm": "Deze routine verwijderen?",
-      "removeConfirmYes": "Ja, verwijderen"
+      "removeConfirmYes": "Ja, verwijderen",
+      "editNamed": "{title} bewerken"
     },
     "dialog": {
       "addTitle": "Nieuwe routine",
@@ -678,7 +679,13 @@
       "stepTimer": "Timer voor stap {number} in seconden",
       "moveUp": "Stap {number} eerder zetten",
       "moveDown": "Stap {number} later zetten",
-      "removeStep": "Stap {number} verwijderen"
+      "removeStep": "Stap {number} verwijderen",
+      "titleAndIcon": "Titel & icoon",
+      "stepsHint": "zet ze in de goede volgorde",
+      "reward": "Beloning",
+      "fewerStars": "Minder sterren",
+      "moreStars": "Meer sterren",
+      "stepTimerShort": "sec"
     },
     "weekdays": {
       "MO": "ma",
@@ -703,7 +710,8 @@
       "daily": "Elke dag",
       "once": "Eén keer op {date}",
       "noTime": "Geen vaste tijd",
-      "grace": "{days, plural, one {# extra dag} other {# extra dagen}}"
+      "grace": "{days, plural, one {# extra dag} other {# extra dagen}}",
+      "onceShort": "eenmalig — {date}"
     },
     "sections": {
       "morning": "Ochtend",
@@ -714,7 +722,7 @@
     "sectionEmpty": "Hier staat vandaag niets.",
     "boardEmpty": "Vandaag staat er niets op de lijst.",
     "stepCount": "{count, plural, =0 {Geen stappen} one {# stap} other {# stappen}}",
-    "inProgress": "Bezig",
+    "inProgress": "NU",
     "startsIn": "Begint over {minutes} min",
     "startsInHours": "Begint over {hours} u",
     "starsEarned": "{count, plural, =0 {Geen sterren} one {# ster verdiend} other {# sterren verdiend}}",
@@ -735,7 +743,10 @@
     "hub": {
       "title": "Routines van {name}",
       "unavailableTitle": "Geen routines om te tonen",
-      "unavailableBody": "Dit scherm is nog niet aan een gezinslid gekoppeld."
+      "unavailableBody": "Dit scherm is nog niet aan een gezinslid gekoppeld.",
+      "back": "Terug",
+      "greeting": "Hoi {name}",
+      "starBalance": "{count, plural, one {# ster gespaard} other {# sterren gespaard}}"
     },
     "errors": {
       "forbidden": "Dat mag je niet doen.",
@@ -744,7 +755,22 @@
       "routineNotFound": "Die routine bestaat niet meer.",
       "notScheduled": "Deze routine staat niet op de lijst voor die dag.",
       "completionNotFound": "Die afronding bestaat niet meer."
-    }
+    },
+    "manage": {
+      "routineCount": "{count, plural, one {# routine} other {# routines}}",
+      "scheduleLine": "{when} · {steps, plural, one {# stap} other {# stappen}}",
+      "paused": "Uit — staat even niet op het bord",
+      "activeToggle": "{title} aan of uit",
+      "graduateTitle": "Klaar om af te studeren",
+      "graduateBody": "Afstuderen stopt de sterren. De routine blijft staan en alles wat al verdiend is, blijft van het kind.",
+      "graduatedCount": "{count, plural, =0 {Nog niets afgestudeerd} one {# afgestudeerde routine} other {# afgestudeerde routines}}"
+    },
+    "stepProgress": "{done} van {total} stappen",
+    "stepsAndStars": "{count, plural, one {# stap} other {# stappen}} · {stars, plural, one {+# ster} other {+# sterren}}",
+    "oneOffAndStars": "eenmalig klusje · {stars, plural, one {+# ster} other {+# sterren}}",
+    "graceHint": "van gisteren — mag nog tot vanavond",
+    "graceChip": "Nog te doen",
+    "praiseRemaining": "{count, plural, one {Goed bezig! Nog één stapje.} other {Goed bezig! Nog # stapjes.}}"
   },
   "rewards": {
     "title": "Beloningen",
@@ -769,7 +795,8 @@
       "awardStars": "Ster geven",
       "award": "Geven",
       "removeConfirm": "Deze beloning van de plank halen?",
-      "removeConfirmYes": "Ja, weghalen"
+      "removeConfirmYes": "Ja, weghalen",
+      "editNamed": "{title} bewerken"
     },
     "dialog": {
       "addTitle": "Nieuwe beloning",
@@ -829,11 +856,12 @@
       "favouriteSnack": "Jouw lievelingssnack"
     },
     "queue": {
-      "pendingTitle": "Vragen",
+      "pendingTitle": "Wacht op jou — oudste eerst",
       "pendingEmpty": "Er staan nu geen vragen open.",
-      "outstandingTitle": "Goedgekeurd",
+      "outstandingTitle": "Uitstaand",
       "outstandingHint": "Goedgekeurd, nog niet gegeven.",
-      "historyTitle": "Eerder"
+      "historyTitle": "Eerder",
+      "approvedOn": "goedgekeurd {when}"
     },
     "award": {
       "title": "Een ster geven",
@@ -842,23 +870,31 @@
       "amount": "Hoeveel",
       "reason": "Waarvoor",
       "note": "Wat je zegt",
-      "noteHint": "Bijvoorbeeld: dat heb je helemaal zelf bedacht!"
+      "noteHint": "Bijvoorbeeld: dat heb je helemaal zelf bedacht!",
+      "fewer": "Minder sterren",
+      "more": "Meer sterren",
+      "submitNamed": "{count, plural, one {# ster geven aan {name}} other {# sterren geven aan {name}}}"
     },
     "store": {
       "title": "De winkel van {name}",
       "subtitle": "Alles wat je met je sterren kunt kiezen.",
-      "shelf": "Kiezen",
+      "shelf": "Wat je nu kunt kiezen",
       "empty": "Er staat nog niets in de winkel.",
       "availableStars": "Sterren om te kiezen",
       "chooseMember": "Kies wie",
-      "asked": "Gevraagd — wachten op antwoord",
+      "asked": "Er wordt naar gekeken",
       "askFor": "{title} vragen",
       "moreStars": "{count, plural, one {Nog # ster} other {Nog # sterren}}",
       "currentGoal": "Waar je voor spaart",
-      "starsToGo": "{count, plural, one {Nog # ster} other {Nog # sterren}}",
-      "goalProgress": "{have} / {need}",
+      "starsToGo": "nog {count}",
+      "goalProgress": "{have} van {need} sterren",
       "unavailableTitle": "Nog geen winkel om te tonen",
-      "unavailableBody": "Dit scherm is nog niet aan een gezinslid gekoppeld."
+      "unavailableBody": "Dit scherm is nog niet aan een gezinslid gekoppeld.",
+      "heading": "Winkel",
+      "back": "Terug",
+      "choose": "Kiezen",
+      "shortBy": "nog {count}",
+      "askNote": "Wat je kiest wordt eerst bekeken. Je sterren blijven van jou tot het is goedgekeurd."
     },
     "chart": {
       "title": "De sterren van {name}",
@@ -872,7 +908,9 @@
       "graduatedTitle": "Gaat nu vanzelf",
       "graduatedBody": "Deze doe je zelf, zonder sterren.",
       "unavailableTitle": "Geen sterrenkaart om te tonen",
-      "unavailableBody": "Dit scherm is nog niet aan een gezinslid gekoppeld."
+      "unavailableBody": "Dit scherm is nog niet aan een gezinslid gekoppeld.",
+      "graduatedLine": "{title} afgestudeerd",
+      "dayStars": "{day}: {count, plural, =0 {geen sterren} one {# ster} other {# sterren}}"
     },
     "errors": {
       "forbidden": "Dat mag je niet doen.",
@@ -882,6 +920,16 @@
       "redemptionNotFound": "Die vraag bestaat niet meer.",
       "alreadyDecided": "Hier is al op geantwoord.",
       "notEnoughStars": "Daar zijn nu nog niet genoeg sterren voor."
+    },
+    "manageTitle": "Sterren",
+    "balance": {
+      "line": "{earned} verdiend · {spent} uitgegeven"
+    },
+    "tabs": {
+      "label": "Sterren en beloningen",
+      "queue": "Wachtrij",
+      "catalogue": "Catalogus",
+      "balances": "Saldo"
     }
   },
   "timers": {

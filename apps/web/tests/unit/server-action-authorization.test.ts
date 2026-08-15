@@ -296,7 +296,9 @@ describe('every Server Action authorizes first', () => {
     // `addSubscriptionAction`, `refreshSubscriptionAction`,
     // `setSubscriptionEnabledAction` and `removeSubscriptionAction`, all four
     // behind `ics:manage`.
-    expect(findings.length).toBe(57);
+    // 57 → 58 in wave D2: `setRoutineActiveAction`, the switch on the parent's
+    // routine list, behind `routine:write`.
+    expect(findings.length).toBe(58);
   });
 
   it('reports no unauthorized action anywhere in src/', () => {

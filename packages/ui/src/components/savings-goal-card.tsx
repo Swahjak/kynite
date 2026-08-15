@@ -18,24 +18,21 @@ import { ProgressBar } from './progress-bar';
  * - **No currency.** The number is stars, the icon is a star, and nothing on
  *   this card converts to money.
  *
- * The gold fill is the design system's `--gold`, the same token the star pop
- * uses, so "progress towards a reward" and "a star you earned" read as the same
- * material rather than two unrelated highlights.
+ * The bar runs `--gold` → `--gold-bright` left to right, so the warm end
+ * arrives at the finish: it reads as getting *closer* rather than merely
+ * longer, which is the one bar in this product a child watches for weeks.
  *
- * M19: the filled-primary treatment this card hand-rolled is now the shared
- * `<Card variant="hero">` (`components/ui/card.tsx`) — this component was the
- * reference for it, so adopting the variant is a de-duplication rather than a
- * restyle. Radius steps 32px → 24px with it, which is what the design system
- * calls a hero card; the ambient glow and the gold bar are unchanged.
+ * The card is white on the cream page (`Beloningen.dc.html`) rather than a
+ * filled hero. On the store's left column it sits above the week card, and two
+ * saturated blocks stacked would make the shelf — the thing the screen is
+ * actually for — the third most colourful thing on it.
  *
  * The `<section>` around it is not decoration. This card is the goal region of
- * the store — the one thing on the page with an `h2` — and adopting `<Card>`
- * (a `div`) dropped the landmark the heading used to sit in, so a screen reader
- * navigating by region lost the goal entirely. `Card` takes no `asChild`, so
- * the landmark is restored by wrapping rather than by widening a shared
- * primitive for one caller. It is named by its own heading via
+ * the store — the one thing on the page with an `h2` — and `Card` is a `div`,
+ * so the landmark is restored by wrapping. It is named by its own heading via
  * `aria-labelledby`, because an unnamed `<section>` is not a landmark at all.
  */
+
 /**
  * The read subset of the app's `Goal` (`modules/rewards/domain/economy.ts`),
  * restated so the package does not import the rewards slice — a `Goal` is
@@ -69,49 +66,57 @@ export function SavingsGoalCard({
   return (
     <section aria-labelledby={headingId}>
       <Card
-        variant="hero"
         data-testid="savings-goal"
         data-reward-id={goal.rewardId}
         data-percent={percent}
-        className="group/goal isolate flex-row flex-wrap items-center gap-8 p-8 max-md:flex-col md:p-12"
+        className="group/goal relative isolate gap-0 overflow-hidden rounded-[26px] p-5.5"
       >
+        {/* The warm glow behind the goal's icon. Ambience, not information. */}
         <span
           aria-hidden
-          className="absolute -top-20 -right-20 size-96 rounded-full bg-foreground/5 blur-3xl transition-transform duration-700 ease-brand group-hover/goal:scale-110"
+          className="pointer-events-none absolute -top-15 -right-10 -z-10 size-42 rounded-full bg-gold/10 blur-lg transition-transform duration-700 ease-brand group-hover/goal:scale-110"
         />
 
-        <span
-          aria-hidden
-          className="z-10 flex size-32 shrink-0 items-center justify-center rounded-full bg-card/30 backdrop-blur-md md:size-40"
-        >
-          <Icon name={icon} size="2xl" filled className="scale-[2] text-gold" />
-        </span>
+        <div className="flex items-center gap-4">
+          <span
+            aria-hidden
+            className="flex size-16 shrink-0 items-center justify-center rounded-[20px] bg-gold/15 text-gold"
+          >
+            <Icon name={icon} size="2xl" filled />
+          </span>
 
-        <div className="z-10 flex w-full flex-1 flex-col gap-4">
-          <span className="label-overline text-primary-foreground">{copy.eyebrow}</span>
-          <h2 id={headingId} className="font-display text-display-md font-extrabold">
-            {goal.title}
-          </h2>
-
-          <div className="flex flex-col gap-2">
-            <div className="flex items-end justify-between gap-4 font-display text-h3 font-bold">
-              {/* Counts up to the reward, never down from a deficit. */}
-              <span data-testid="goal-remaining">{copy.remaining}</span>
-              <span data-testid="goal-progress" className="tabular-time">
-                {copy.progress}
-              </span>
-            </div>
-
-            <ProgressBar
-              data-testid="goal-bar"
-              value={goal.progressStars}
-              max={goal.costStars}
-              label={goal.title}
-              tone="gold-gradient"
-              size="lg"
-              className="bg-card/25"
-            />
+          <div className="min-w-0 flex-1">
+            <span className="label-overline block text-ink-muted">{copy.eyebrow}</span>
+            <h2
+              id={headingId}
+              className="font-display text-h1 leading-tight font-extrabold text-ink"
+            >
+              {goal.title}
+            </h2>
           </div>
+        </div>
+
+        <ProgressBar
+          data-testid="goal-bar"
+          value={goal.progressStars}
+          max={goal.costStars}
+          label={goal.title}
+          tone="gold-gradient"
+          size="lg"
+          className="mt-4.5 h-3.5"
+        />
+
+        <div className="mt-2.5 flex items-baseline justify-between gap-4">
+          <span data-testid="goal-progress" className="tnum text-body-sm text-ink-secondary">
+            {copy.progress}
+          </span>
+          {/* Counts up to the reward, never down from a deficit. */}
+          <span
+            data-testid="goal-remaining"
+            className="tnum font-display text-h2 font-extrabold text-gold-ink"
+          >
+            {copy.remaining}
+          </span>
         </div>
       </Card>
     </section>

@@ -13,10 +13,10 @@ import {
   type PendingCompletion,
 } from '@/components/realtime';
 import { useRouter } from '@/i18n/navigation';
-import { cn, Icon, ProgressBar, RoutineCard } from '@kynite/ui';
+import { Icon, ProgressBar, RoutineCard } from '@kynite/ui';
 import { completeStepAction } from '../actions';
 import type { BoardRoutine, BoardSection, RoutineBoard as RoutineBoardData } from '../page-data';
-import { SECTION_ICONS } from './tokens';
+import { ROUTINE_ICON_TILE, SECTION_ICONS, SECTION_TONE } from './tokens';
 
 /**
  * The child-facing hub board (M07's `(hub)/routines/[memberId]`).
@@ -228,8 +228,21 @@ export function RoutineBoard({ board }: { board: RoutineBoardData }) {
     });
   };
 
-  const copyFor = (routine: BoardRoutine) => ({
-    stepCount: t('stepCount', { count: routine.total }),
+  /**
+   * The line under a routine's title, which is a different sentence in each of
+   * the card's readings (`Routines.dc.html`): what is left of the one being
+   * done, how long a grace occurrence still has, and what an upcoming one is
+   * worth.
+   */
+  const subtitleFor = (routine: BoardRoutine, expanded: boolean) => {
+    if (expanded) return t('stepProgress', { done: routine.doneCount, total: routine.total });
+    if (routine.state === 'grace') return t('graceHint');
+    if (routine.oneOff) return t('oneOffAndStars', { stars: routine.starsPerCompletion });
+    return t('stepsAndStars', { count: routine.total, stars: routine.starsPerCompletion });
+  };
+
+  const copyFor = (routine: BoardRoutine, expanded: boolean) => ({
+    stepCount: subtitleFor(routine, expanded),
     inProgress: t('inProgress'),
     doneLine: t(`routineDone.${routine.doneKey}`, { name: board.member.displayName }),
     // Minutes are only meaningful close in; "starts in 705 min" is noise on a
@@ -244,6 +257,15 @@ export function RoutineBoard({ board }: { board: RoutineBoardData }) {
     actionLabel: (title: string) => t('completeStep', { title }),
     praise: (praiseKey: string) => t(`praise.${praiseKey}`),
     graduated: routine.graduated ? t('graduated') : null,
+    // Praise for having done nothing yet is not praise — the line appears with
+    // the first tick and goes away again when the routine is finished, where
+    // the done card's own line takes over.
+    praiseLine:
+      expanded && routine.doneCount > 0 && !routine.complete
+        ? t('praiseRemaining', { count: routine.total - routine.doneCount })
+        : null,
+    graceLabel: t('graceChip'),
+    tileClass: ROUTINE_ICON_TILE[routine.icon],
   });
 
   /**
@@ -272,69 +294,90 @@ export function RoutineBoard({ board }: { board: RoutineBoardData }) {
   const sections = board.sections.map(merge);
   const anythingToShow = sections.some((section) => section.routines.length > 0);
 
+  /**
+   * The sheet's two columns: the band a child is standing in front of on the
+   * left at 1.4fr, the rest of the day stacked on the right.
+   *
+   * Which band goes left is decided by the *content*, not by the clock — the
+   * band holding the expanded routine, or failing that the first band with
+   * anything in it. A fixed "morning is always left" would leave a wall at
+   * seven in the evening with an empty left half and the thing being done
+   * squeezed into the narrow column.
+   */
+  const leading =
+    sections.find((section) =>
+      section.routines.some((routine) => routine.id === board.activeRoutineId)
+    ) ??
+    sections.find((section) => section.routines.length > 0) ??
+    sections[0];
+
+  const trailing = sections.filter((section) => section !== leading);
+
+  const band = (section: BoardSection) => (
+    <section key={section.section} data-testid={`routine-section-${section.section}`}>
+      {/* The band header: the time of day, how far into it we are, and a rule
+          that runs the whole width between them. Nothing here is interactive —
+          a heading, a bar and a count — and on the hub it sits above 80px tap
+          targets, so it gives its clicks back to whatever is underneath it. */}
+      <div className="pointer-events-none mb-4 flex flex-wrap items-center gap-x-3.5 gap-y-2">
+        <Icon
+          name={SECTION_ICONS[section.section]}
+          size="lg"
+          filled
+          className={SECTION_TONE[section.section].icon}
+        />
+        <h2 className="font-display text-h2 font-extrabold text-ink">
+          {t(`sections.${section.section}`)}
+        </h2>
+
+        <ProgressBar
+          value={Math.round(section.ratio * 100)}
+          size="sm"
+          fillClassName={SECTION_TONE[section.section].fill}
+          className="min-w-24 flex-1"
+        />
+
+        {/* Neutral board voice: "3 of 7 done", never "you still have to…". */}
+        <span
+          data-testid={`section-progress-${section.section}`}
+          className="tnum font-display text-body font-bold text-ink-secondary"
+        >
+          {t('sectionProgress', { done: section.doneCount, total: section.total })}
+        </span>
+      </div>
+
+      {section.routines.length === 0 ? (
+        <p className="text-body text-ink-muted">{t('sectionEmpty')}</p>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {section.routines.map((routine) => {
+            const expanded = routine.id === board.activeRoutineId && !routine.complete;
+
+            return (
+              <RoutineCard
+                key={routine.id}
+                routine={routine}
+                expanded={expanded}
+                copy={copyFor(routine, expanded)}
+                onComplete={(stepId, origin) => complete(routine, stepId, origin)}
+              />
+            );
+          })}
+        </div>
+      )}
+    </section>
+  );
+
   return (
-    // `gap-6`, and the band below carries `mb-3` rather than `mb-4`: four time
-    // sections mean four of each, and at 1280×800 that difference is the
-    // difference between the evening routine being on the wall and being below
-    // a fold a kiosk cannot scroll (M19 review, F8).
-    <div data-testid="routine-board" className="flex flex-col gap-6">
-      {sections.map((section) => (
-        <section key={section.section} data-testid={`routine-section-${section.section}`}>
-          {/* The stitch band header: sticky, glass, and the progress rule runs
-              the full remaining width of the row rather than sitting as a stub
-              on the right (`chores_routines_…/code.html`,
-              `h-1 flex-1 mx-4`). Sticky so a long morning keeps its heading
-              while it scrolls under the glass shell header.
-
-              `pointer-events-none`: sticky *and* `z-10` means the band is
-              parked on top of the rows that scroll beneath it, and on the hub
-              those rows are 56px tap targets a child aims at. Every tap landing
-              in the band's strip was being eaten by a heading. Nothing in here
-              is interactive — a heading, a count and a bar — so the band gives
-              its clicks back to whatever is underneath it. */}
-          <div className="glass pointer-events-none sticky top-0 z-10 mb-3 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-2xl px-3 py-2">
-            <h2 className="flex items-center gap-2 font-display text-h2 font-bold text-foreground">
-              <Icon name={SECTION_ICONS[section.section]} size="lg" filled className="text-gold" />
-              {t(`sections.${section.section}`)}
-            </h2>
-
-            {/* Neutral board voice: "3 of 4 done", never "you still have to…". */}
-            <span
-              data-testid={`section-progress-${section.section}`}
-              className="text-body-sm text-ink-secondary"
-            >
-              {t('sectionProgress', { done: section.doneCount, total: section.total })}
-            </span>
-
-            <ProgressBar
-              value={Math.round(section.ratio * 100)}
-              size="xs"
-              tone="gold"
-              className="min-w-24 flex-1"
-            />
-          </div>
-
-          {section.routines.length === 0 ? (
-            <p className={cn('text-body text-ink-muted')}>{t('sectionEmpty')}</p>
-          ) : (
-            <div className="flex flex-col gap-4">
-              {section.routines.map((routine) => {
-                const expanded = routine.id === board.activeRoutineId && !routine.complete;
-
-                return (
-                  <RoutineCard
-                    key={routine.id}
-                    routine={routine}
-                    expanded={expanded}
-                    copy={copyFor(routine)}
-                    onComplete={(stepId, origin) => complete(routine, stepId, origin)}
-                  />
-                );
-              })}
-            </div>
-          )}
-        </section>
-      ))}
+    // The sheet's grid: the live band on the left at 1.4fr, the rest of the day
+    // stacked on the right. Below `lg` — a phone looking at the hub — the two
+    // columns become one, in the order the day happens.
+    <div
+      data-testid="routine-board"
+      className="grid items-start gap-x-10 gap-y-6 lg:grid-cols-[1.4fr_1fr]"
+    >
+      <div className="flex min-w-0 flex-col gap-6">{leading ? band(leading) : null}</div>
+      <div className="flex min-w-0 flex-col gap-6">{trailing.map(band)}</div>
 
       {anythingToShow ? null : (
         <p data-testid="routine-board-empty" className="text-body-lg text-ink-secondary">

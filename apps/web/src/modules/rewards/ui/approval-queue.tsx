@@ -1,19 +1,20 @@
 'use client';
 
 import { useActionState } from 'react';
-import { useTranslations } from 'next-intl';
-import { Badge, Button, Card, CardContent, cn, Icon, SectionHeading, StarCount } from '@kynite/ui';
+import { useFormatter, useTranslations } from 'next-intl';
+import { Button, Card, Icon, MemberFace, Overline, StarCount } from '@kynite/ui';
 import { idleState } from '../action-state';
 import { decideRedemptionAction, fulfillRedemptionAction } from '../actions';
 import type { RedemptionWithReward } from '../queries';
-import { rewardIconOf } from './tokens';
 
 /**
- * The parent's approval queue (§7 `redemption:approve`).
+ * The parent's approval queue (§7 `redemption:approve`) —
+ * `Beloningen.dc.html`, mobile beheer.
  *
  * A queue, not a feed: open requests are shown **oldest first**, because the
  * child who asked yesterday morning is the one still waiting. Every other list
- * in this app is newest-first; this one is deliberately not.
+ * in this app is newest-first; this one is deliberately not, and it says so on
+ * the screen ("oudste eerst").
  *
  * The two decisions are given equal visual weight. Denying is not styled as
  * destructive and approving is not styled as the "correct" answer — a parent
@@ -23,24 +24,47 @@ import { rewardIconOf } from './tokens';
  * (the child can ask again tomorrow), and a denial costs nothing at all —
  * `member_star_balance` never counts a denied row, so the child's stars are
  * exactly where they were.
+ *
+ * The price on the card is the price the child asked at, frozen in
+ * `redemption.costStars`. Re-pricing the catalogue never re-prices a request
+ * that is already waiting.
  */
+
+/** Face, name and colour for the child who asked — resolved server-side. */
+export type QueueMember = {
+  id: string;
+  displayName: string;
+  avatarUrl: string | null;
+  colorClass: string;
+  initials: string;
+};
+
+function useMemberLookup(members: QueueMember[]) {
+  return (memberId: string): QueueMember =>
+    members.find((entry) => entry.id === memberId) ?? {
+      id: memberId,
+      displayName: '',
+      avatarUrl: null,
+      colorClass: '',
+      initials: '',
+    };
+}
 
 function DecideButtons({ redemptionId }: { redemptionId: string }) {
   const t = useTranslations('rewards');
   const [state, formAction, pending] = useActionState(decideRedemptionAction, idleState);
 
   return (
-    <form action={formAction} className="flex shrink-0 flex-wrap items-center gap-2">
+    <form action={formAction} className="flex gap-2">
       <input type="hidden" name="redemptionId" value={redemptionId} />
       <Button
         type="submit"
         name="decision"
         value="approve"
-        size="hub"
+        className="min-h-11 flex-1 rounded-4xl"
         disabled={pending}
         data-testid="approve-redemption"
       >
-        <Icon name="check" size="md" inline="start" />
         {t('actions.approve')}
       </Button>
       <Button
@@ -48,14 +72,14 @@ function DecideButtons({ redemptionId }: { redemptionId: string }) {
         name="decision"
         value="deny"
         variant="outline"
-        size="hub"
+        className="min-h-11 flex-1 rounded-4xl border-2"
         disabled={pending}
         data-testid="deny-redemption"
       >
         {t('actions.deny')}
       </Button>
       {state.status === 'error' ? (
-        <span role="alert" className="text-sm text-ink-secondary">
+        <span role="alert" className="sr-only">
           {t(`errors.${state.error}`)}
         </span>
       ) : null}
@@ -72,8 +96,9 @@ function FulfillButton({ redemptionId }: { redemptionId: string }) {
       <input type="hidden" name="redemptionId" value={redemptionId} />
       <Button
         type="submit"
-        variant="outline"
-        size="hub"
+        variant="secondary"
+        size="sm"
+        className="min-h-11 rounded-4xl"
         disabled={pending}
         data-testid="fulfill-redemption"
       >
@@ -88,127 +113,129 @@ function FulfillButton({ redemptionId }: { redemptionId: string }) {
   );
 }
 
-function Row({
-  entry,
-  memberName,
-  children,
-}: {
-  entry: RedemptionWithReward;
-  memberName: string;
-  children?: React.ReactNode;
-}) {
-  const t = useTranslations('rewards');
-
-  return (
-    <li>
-      <Card
-        data-testid="redemption-row"
-        data-redemption-id={entry.id}
-        data-status={entry.status}
-        className="transition-shadow duration-200 ease-brand hover:shadow-md"
-      >
-        <CardContent className="flex flex-wrap items-center gap-4">
-          <span
-            aria-hidden
-            className={cn(
-              'flex size-12 shrink-0 items-center justify-center rounded-full',
-              // Only what is still waiting on a parent carries the brand tint;
-              // settled rows go quiet. A queue that shouts at every row is a
-              // queue nobody reads.
-              entry.status === 'requested'
-                ? 'bg-brand-container text-brand-container-ink'
-                : 'bg-surface-container text-ink-secondary'
-            )}
-          >
-            <Icon
-              name={rewardIconOf(entry.rewardIcon)}
-              size="lg"
-              filled={entry.status === 'requested'}
-            />
-          </span>
-
-          <div className="flex min-w-0 flex-1 flex-col gap-1">
-            <span className="font-display text-h3 font-bold">{entry.rewardTitle}</span>
-            <span className="flex flex-wrap items-center gap-2">
-              <Badge variant="secondary">{memberName}</Badge>
-              <StarCount
-                value={entry.costStars}
-                srLabel={t('starsCost', { count: entry.costStars })}
-                size="sm"
-              />
-              <Badge variant="outline">{t(`statuses.${entry.status}`)}</Badge>
-            </span>
-          </div>
-
-          {children}
-        </CardContent>
-      </Card>
-    </li>
-  );
-}
-
 export function ApprovalQueue({
   pending,
   outstanding,
-  history,
-  memberNames,
+  members,
+  now,
   canApprove,
 }: {
   pending: RedemptionWithReward[];
   outstanding: RedemptionWithReward[];
-  history: RedemptionWithReward[];
   /**
-   * `memberId → display name`, as a plain object rather than a lookup
-   * *function*: this is a `'use client'` boundary, and a function prop cannot
-   * cross it (React refuses to serialise one). The map is the serialisable
-   * shape of the same thing.
+   * The children who could be in this queue, as plain data rather than a lookup
+   * *function*: this is a `'use client'` boundary, and React refuses to
+   * serialise a function across it.
    */
-  memberNames: Record<string, string>;
+  members: QueueMember[];
+  /**
+   * The instant "2 dagen geleden" is measured from, taken once on the server.
+   * Without it next-intl falls back to the render clock, which differs between
+   * the server render and the hydration and logs a mismatch on every load.
+   */
+  now: Date;
   canApprove: boolean;
 }) {
   const t = useTranslations('rewards');
-  const nameOf = (memberId: string) => memberNames[memberId] ?? '';
+  const format = useFormatter();
+  const memberOf = useMemberLookup(members);
 
   return (
-    <div className="flex flex-col gap-8">
-      <section className="flex flex-col gap-4">
-        <SectionHeading icon="hourglass_top" iconTint="muted" title={t('queue.pendingTitle')} />
+    <div className="flex flex-col gap-6">
+      <section className="flex flex-col gap-2.5">
+        <Overline>{t('queue.pendingTitle')}</Overline>
+
         {pending.length === 0 ? (
-          <p data-testid="queue-empty" className="text-body-lg text-ink-secondary">
+          <p data-testid="queue-empty" className="text-body-sm text-ink-secondary">
             {t('queue.pendingEmpty')}
           </p>
         ) : (
-          <ul data-testid="approval-queue" className="flex flex-col gap-3">
-            {pending.map((entry) => (
-              <Row key={entry.id} entry={entry} memberName={nameOf(entry.memberId)}>
-                {canApprove ? <DecideButtons redemptionId={entry.id} /> : null}
-              </Row>
-            ))}
+          <ul data-testid="approval-queue" className="flex flex-col gap-2.5">
+            {pending.map((entry) => {
+              const member = memberOf(entry.memberId);
+
+              return (
+                <li key={entry.id}>
+                  <Card
+                    data-testid="redemption-row"
+                    data-redemption-id={entry.id}
+                    data-status={entry.status}
+                    className="gap-3 rounded-2xl p-3.5"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <MemberFace
+                        size="sm"
+                        name={member.displayName}
+                        avatarUrl={member.avatarUrl}
+                        initials={member.initials}
+                        surfaceClass={member.colorClass}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <span className="block truncate text-body-sm font-semibold">
+                          {entry.rewardTitle}
+                        </span>
+                        <span className="block truncate text-caption text-ink-secondary">
+                          {member.displayName} · {format.relativeTime(entry.requestedAt, now)}
+                        </span>
+                      </div>
+                      <StarCount
+                        value={entry.costStars}
+                        srLabel={t('starsCost', { count: entry.costStars })}
+                        size="sm"
+                      />
+                    </div>
+
+                    {canApprove ? <DecideButtons redemptionId={entry.id} /> : null}
+                  </Card>
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>
 
       {outstanding.length > 0 ? (
-        <section className="flex flex-col gap-4">
-          <SectionHeading icon="redeem" iconTint="muted" title={t('queue.outstandingTitle')} />
-          <p className="text-body-sm text-ink-secondary">{t('queue.outstandingHint')}</p>
-          <ul data-testid="outstanding-queue" className="flex flex-col gap-3">
-            {outstanding.map((entry) => (
-              <Row key={entry.id} entry={entry} memberName={nameOf(entry.memberId)}>
-                {canApprove ? <FulfillButton redemptionId={entry.id} /> : null}
-              </Row>
-            ))}
-          </ul>
-        </section>
-      ) : null}
+        <section className="flex flex-col gap-2.5">
+          <Overline>{t('queue.outstandingTitle')}</Overline>
+          <ul data-testid="outstanding-queue" className="flex flex-col gap-2.5">
+            {outstanding.map((entry) => {
+              const member = memberOf(entry.memberId);
 
-      {history.length > 0 ? (
-        <section className="flex flex-col gap-4">
-          <SectionHeading icon="check_circle" iconTint="muted" title={t('queue.historyTitle')} />
-          <ul data-testid="redemption-history" className="flex flex-col gap-3">
-            {history.map((entry) => (
-              <Row key={entry.id} entry={entry} memberName={nameOf(entry.memberId)} />
-            ))}
+              return (
+                <li
+                  key={entry.id}
+                  data-testid="redemption-row"
+                  data-redemption-id={entry.id}
+                  data-status={entry.status}
+                  className="flex items-center gap-2.5 rounded-2xl border border-line-subtle bg-card px-3.5 py-3"
+                >
+                  <MemberFace
+                    size="xs"
+                    name={member.displayName}
+                    avatarUrl={member.avatarUrl}
+                    initials={member.initials}
+                    surfaceClass={member.colorClass}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <span className="block truncate text-body-sm font-semibold">
+                      {entry.rewardTitle}
+                    </span>
+                    <span className="block truncate text-caption text-ink-secondary">
+                      {t('queue.approvedOn', {
+                        when: entry.decidedAt
+                          ? format.dateTime(entry.decidedAt, { day: 'numeric', month: 'short' })
+                          : format.relativeTime(entry.requestedAt, now),
+                      })}
+                    </span>
+                  </div>
+                  {canApprove ? (
+                    <FulfillButton redemptionId={entry.id} />
+                  ) : (
+                    <Icon name="event_available" size="sm" className="shrink-0 text-brand" />
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </section>
       ) : null}

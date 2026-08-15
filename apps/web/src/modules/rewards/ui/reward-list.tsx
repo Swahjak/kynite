@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { Badge, Card, CardContent, cn, Icon, StarCount } from '@kynite/ui';
+import { cn, Icon, IconMedallion, StarCount } from '@kynite/ui';
 import type { Member } from '@/modules/family';
 import type { RewardPreset } from '../domain/economy';
 import type { Reward } from '../schema';
@@ -9,13 +9,17 @@ import { SeedPresetsButton } from './seed-presets-button';
 import { CATEGORY_TILE, rewardIconOf } from './tokens';
 
 /**
- * The parent's reward catalogue.
+ * The parent's reward catalogue (`Beloningen.dc.html`, tab "Catalogus").
  *
- * Deliberately *not* a status board, for the same reason the routine roster is
+ * Deliberately *not* a status board, for the same reason the routine list is
  * not one: it shows what is on the shelf — what it costs, whose it is, what
- * kind of thing it is — and never who has how many stars. Balances belong to
- * each child's own chart, and no screen in this product puts two of them
- * together (research §Decisions 3).
+ * kind of thing it is — and never who has how many stars. Balances are the
+ * "Saldo" tab's business, and no child-facing surface can reach either
+ * (research §Decisions 3).
+ *
+ * One row per reward rather than a grid of tiles: the child's store is where a
+ * reward gets to look like an offer, and a parent scanning fourteen of them for
+ * the one whose price is wrong is reading a list.
  *
  * The empty state offers the presets rather than an empty form. A shelf a
  * parent has to invent from nothing is the setup ritual that Fair Play's
@@ -60,63 +64,52 @@ export async function RewardList({
   }
 
   return (
-    // The catalogue is a card grid, the same shape the child's shelf is
-    // (docs/rebuild-design-gaps.md §6): a parent editing the shelf should be
-    // looking at something recognisably the same object.
-    <ul className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+    <ul className="flex flex-col gap-2">
       {rewards.map((reward) => (
-        <li key={reward.id} className="flex">
-          <Card
-            data-testid="reward-row"
-            data-reward-id={reward.id}
-            className={cn(
-              'w-full transition-shadow duration-200 ease-brand hover:shadow-md',
-              // Dimming, not a badge-only signal: an inactive reward is off the
-              // shelf, and the tile says so the same quiet way the store does.
-              reward.active ? undefined : 'opacity-70 hover:opacity-100'
-            )}
-          >
-            <CardContent className="flex flex-wrap items-start gap-4">
-              <span
-                aria-hidden
-                className={cn(
-                  'flex size-12 shrink-0 items-center justify-center rounded-full',
-                  CATEGORY_TILE[reward.category]
-                )}
-              >
-                <Icon name={rewardIconOf(reward.icon)} size="lg" filled />
-              </span>
+        <li
+          key={reward.id}
+          data-testid="reward-row"
+          data-reward-id={reward.id}
+          className={cn(
+            'flex items-center gap-2.5 rounded-2xl border border-line-subtle bg-card px-3.5 py-3',
+            // Dimming, not a badge-only signal: an inactive reward is off the
+            // shelf, and the row says so the same quiet way the store does.
+            reward.active ? undefined : 'opacity-70'
+          )}
+        >
+          <IconMedallion
+            icon={rewardIconOf(reward.icon)}
+            tint="none"
+            shape="squircle"
+            size="md"
+            className={CATEGORY_TILE[reward.category]}
+          />
 
-              <div className="flex min-w-0 flex-1 flex-col gap-2">
-                <span className="font-display text-h3 font-bold">{reward.title}</span>
-                <span className="flex flex-wrap items-center gap-2">
-                  <StarCount
-                    value={reward.costStars}
-                    srLabel={t('starsCost', { count: reward.costStars })}
-                    size="sm"
-                  />
-                  <Badge variant="secondary">{t(`categories.${reward.category}`)}</Badge>
-                  {reward.availableToMemberIds.length === 0 ? (
-                    <Badge variant="outline">{t('availableToEveryone')}</Badge>
-                  ) : (
-                    reward.availableToMemberIds.map((memberId) => (
-                      <Badge key={memberId} variant="outline">
-                        {nameOf(memberId)}
-                      </Badge>
-                    ))
-                  )}
-                  {reward.active ? null : <Badge variant="ghost">{t('inactive')}</Badge>}
-                </span>
-              </div>
+          <div className="min-w-0 flex-1">
+            <span className="block truncate text-body-sm font-semibold">{reward.title}</span>
+            <span className="block truncate text-caption text-ink-secondary">
+              {t(`categories.${reward.category}`)} ·{' '}
+              {reward.availableToMemberIds.length === 0
+                ? t('availableToEveryone')
+                : reward.availableToMemberIds.map(nameOf).join(', ')}
+              {reward.active ? '' : ` · ${t('inactive')}`}
+            </span>
+          </div>
 
-              {canWrite ? (
-                <span className="flex shrink-0 flex-wrap items-center gap-2 max-sm:w-full">
-                  <RewardDialog members={assignableMembers} reward={reward} />
-                  <DeleteRewardButton rewardId={reward.id} title={reward.title} />
-                </span>
-              ) : null}
-            </CardContent>
-          </Card>
+          <StarCount
+            value={reward.costStars}
+            srLabel={t('starsCost', { count: reward.costStars })}
+            size="sm"
+          />
+
+          {canWrite ? (
+            <span className="flex shrink-0 items-center">
+              <RewardDialog members={assignableMembers} reward={reward} compact />
+              <DeleteRewardButton rewardId={reward.id} title={reward.title} compact />
+            </span>
+          ) : (
+            <Icon name="chevron_right" size="sm" className="shrink-0 text-ink-muted" />
+          )}
         </li>
       ))}
     </ul>

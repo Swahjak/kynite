@@ -3,14 +3,13 @@
 import { useOptimistic, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { fireConfettiBurst } from '@/components/celebration';
-import { cn, Icon, MemberFace, RewardCard, SavingsGoalCard, SectionHeading } from '@kynite/ui';
-import { Link } from '@/i18n/navigation';
+import { Icon, RewardCard } from '@kynite/ui';
 import { requestRedemptionAction } from '../actions';
 import type { StoreData, StoreTile } from '../page-data';
-import { CATEGORY_TILE, rewardIconOf } from './tokens';
+import { CATEGORY_TILE } from './tokens';
 
 /**
- * The child-facing reward store (M08's `(hub)/hub/store`).
+ * The child-facing shelf (M08's `(hub)/hub/store`).
  *
  * This component owns the client half of the request flow, and it is the same
  * shape as the completion flow the routine board runs (§4):
@@ -25,17 +24,13 @@ import { CATEGORY_TILE, rewardIconOf } from './tokens';
  * tap register" — which is a different question from "did I get the reward",
  * and only the first one is the app's to answer instantly.
  *
- * **Two horizons, one component.** `instant` (ages ~4–7) renders icon-first
- * tiles and nothing else: no goal card, no totals-over-time, no text a
- * pre-reader has to decode. `savings` (ages ~8–12) adds the featured goal with
- * its progress bar. The split is a per-child setting, not a guess from a
- * birthday, and it changes *what exists on the screen* rather than restyling
- * the same content — a four-year-old given a progress bar towards something a
- * week away is given a bar that does not appear to move.
+ * The stars do not move when a tile is asked for. The tile says somebody is
+ * looking at it and the balance in the header stays exactly where it was, which
+ * is the truth: the price is frozen at the moment of asking and only spent when
+ * a parent says yes.
  *
- * **One child at a time.** The chips switch whose shelf is shown; they carry a
- * name and a colour and nothing else. There is no arrangement of this screen
- * that puts two children's numbers side by side (research §Decisions 3).
+ * **One child at a time.** Whose shelf this is was decided by the page's chips;
+ * nothing here can render a second child's anything (research §Decisions 3).
  */
 export function RewardStore({ store }: { store: StoreData }) {
   const t = useTranslations('rewards');
@@ -66,125 +61,45 @@ export function RewardStore({ store }: { store: StoreData }) {
     });
   };
 
-  const savings = store.horizon === 'savings';
-
   return (
-    <div
-      data-testid="reward-store"
-      data-horizon={store.horizon}
-      className="mx-auto flex w-full max-w-6xl flex-col gap-8 md:gap-12"
-    >
-      <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-        {store.chips.length > 1 ? (
-          <nav
-            data-testid="store-chips"
-            aria-label={t('store.chooseMember')}
-            className="flex w-max flex-row items-center gap-2 rounded-4xl bg-surface-container-low p-2 shadow-sm"
-          >
-            {store.chips.map((chip) => {
-              const active = chip.id === store.member.id;
-              return (
-                <Link
-                  key={chip.id}
-                  href={{ pathname: '/hub/store', query: { member: chip.id } }}
-                  data-testid="store-chip"
-                  data-member-id={chip.id}
-                  data-active={active ? 'true' : 'false'}
-                  aria-current={active ? 'page' : undefined}
-                  className={cn(
-                    'flex h-14 min-w-12 items-center gap-3 rounded-4xl px-6 font-display text-body-lg font-medium transition-all duration-200 ease-brand active:scale-[0.98]',
-                    active
-                      ? 'bg-brand-container text-brand-container-ink shadow-md'
-                      : 'text-ink-secondary hover:bg-surface-container-high hover:text-foreground'
-                  )}
-                >
-                  {/* The face, rendered from strings the server resolved: this
-                      is a client module, and reaching into `@/modules/family`
-                      for the colour map here would ship `pg` to the browser. */}
-                  <MemberFace
-                    size="default"
-                    avatarUrl={chip.avatarUrl}
-                    initials={chip.initials}
-                    surfaceClass={chip.colorClass}
-                  />
-                  {chip.displayName}
-                </Link>
-              );
-            })}
-          </nav>
-        ) : null}
+    <div data-testid="reward-store" data-horizon={store.horizon} className="flex flex-col gap-4">
+      <h2 className="font-display text-h1 font-extrabold text-ink">{t('store.shelf')}</h2>
 
-        {/* The one number this screen is about, and it belongs to exactly one
-            child. `available`, not `earned`: this is what the shelf spends. */}
-        <div
-          data-testid="star-balance"
-          data-member-id={store.member.id}
-          className="flex h-18 w-max items-center gap-4 self-start rounded-4xl bg-gold/20 px-8 py-4 text-gold-ink shadow-sm"
-        >
-          <Icon name="star" size="2xl" filled className="scale-125" />
-          <span className="flex flex-col">
-            <span
-              data-testid="available-stars"
-              className="font-display text-display-md leading-none font-extrabold tabular-time"
-            >
-              {store.totals.available}
-            </span>
-            <span className="label-overline">{t('store.availableStars')}</span>
-          </span>
-        </div>
-      </div>
+      {store.tiles.length === 0 ? (
+        <p data-testid="store-empty" className="text-body-lg text-ink-secondary">
+          {t('store.empty')}
+        </p>
+      ) : (
+        <ul className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
+          {store.tiles.map((raw) => {
+            const tile = withOptimistic(raw);
+            return (
+              <RewardCard
+                key={tile.id}
+                tile={tile}
+                tileClass={CATEGORY_TILE[tile.category]}
+                copy={{
+                  cost: t('starsCost', { count: tile.costStars }),
+                  shortHint: t('store.shortBy', { count: tile.starsShort }),
+                  requestedLabel: t('store.asked'),
+                  actionLabel: t('store.askFor', { title: tile.title }),
+                  action: t('store.choose'),
+                  category: t(`categories.${tile.category}`),
+                }}
+                onRequest={(origin) => request(tile, origin)}
+              />
+            );
+          })}
+        </ul>
+      )}
 
-      {savings && store.goal ? (
-        <SavingsGoalCard
-          goal={store.goal}
-          icon={rewardIconOf(
-            store.tiles.find((tile) => tile.id === store.goal!.rewardId)?.icon ?? null
-          )}
-          copy={{
-            eyebrow: t('store.currentGoal'),
-            remaining: t('store.starsToGo', { count: store.goal.remainingStars }),
-            progress: t('store.goalProgress', {
-              have: store.goal.progressStars,
-              need: store.goal.costStars,
-            }),
-          }}
-        />
-      ) : null}
-
-      <section className="flex flex-col gap-6">
-        <SectionHeading
-          icon="redeem"
-          iconTint="brand-container"
-          iconFilled
-          title={t('store.shelf')}
-        />
-
-        {store.tiles.length === 0 ? (
-          <p data-testid="store-empty" className="text-body-lg text-ink-secondary">
-            {t('store.empty')}
-          </p>
-        ) : (
-          <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {store.tiles.map((raw) => {
-              const tile = withOptimistic(raw);
-              return (
-                <RewardCard
-                  key={tile.id}
-                  tile={tile}
-                  tileClass={CATEGORY_TILE[tile.category]}
-                  copy={{
-                    cost: t('starsCost', { count: tile.costStars }),
-                    shortHint: t('store.moreStars', { count: tile.starsShort }),
-                    requestedLabel: t('store.asked'),
-                    actionLabel: t('store.askFor', { title: tile.title }),
-                  }}
-                  onRequest={(origin) => request(tile, origin)}
-                />
-              );
-            })}
-          </ul>
-        )}
-      </section>
+      {/* What happens next, said once, in the board's neutral voice. It is the
+          screen's only sentence about the parent, and it promises nothing on
+          their behalf beyond "somebody will look". */}
+      <p className="flex items-center gap-2.5 rounded-2xl bg-surface-container px-4.5 py-3.5 text-body-sm text-ink-secondary">
+        <Icon name="info" size="sm" className="shrink-0 text-ink-muted" />
+        {t('store.askNote')}
+      </p>
     </div>
   );
 }

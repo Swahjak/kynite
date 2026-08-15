@@ -1,9 +1,11 @@
 import { getTranslations } from 'next-intl/server';
-import { EmptyState } from '@kynite/ui';
+import { Button, EmptyState, Icon, MemberFace, StarCount } from '@kynite/ui';
 import { ChildTabs } from '@/components/hub';
+import { Link } from '@/i18n/navigation';
 import { formatDateTime } from '@/i18n/formatting-locale';
 import { requireHubDevice } from '@/modules/devices';
-import { getHouseholdFormattingLocale } from '@/modules/family';
+import { MEMBER_COLOR_CLASSES, getHouseholdFormattingLocale, initialsOf } from '@/modules/family';
+import { getStarTotals } from '@/modules/rewards';
 import { RoutineBoard, loadMemberRoutines } from '@/modules/routines';
 
 /** Session-dependent: never prerendered, so `next build` needs no database. */
@@ -52,6 +54,12 @@ export default async function HubRoutinesPage({
     );
   }
 
+  // The header's star pill. Read here rather than folded into
+  // `loadMemberRoutines`, which would put the routines slice in an import cycle
+  // with the rewards one (`rewards/page-data.ts` already reads routines) for
+  // one integer that belongs to neither.
+  const totals = await getStarTotals(board.familyId, board.member.id);
+
   return (
     // Tighter than the 24px rhythm the rest of the app uses (M19 review, F8):
     // at 1280×800 the shell's chrome plus this page's own header and tabs left
@@ -61,24 +69,45 @@ export default async function HubRoutinesPage({
       data-testid="hub-routines"
       data-member-id={board.member.id}
     >
-      <header className="flex flex-wrap items-baseline justify-between gap-4">
-        <div>
-          <h1 className="font-display text-display-md font-extrabold">
-            {t('hub.title', { name: board.member.displayName })}
+      {/* The sheet's board header: the way back, the child's own face, their
+          name in the second person, the day in words, and the one number this
+          whole screen pays out in. No clock — the wall's clock lives on
+          Vandaag, and this screen's job is the next step, not the time. */}
+      <header className="flex flex-wrap items-center gap-5 border-b border-line-subtle pb-5">
+        <Button
+          variant="ghost"
+          size="icon-hub"
+          nativeButton={false}
+          aria-label={t('hub.back')}
+          render={<Link href="/hub" />}
+        >
+          <Icon name="chevron_left" size="lg" />
+        </Button>
+
+        <MemberFace
+          size="hub"
+          name={board.member.displayName}
+          avatarUrl={board.member.avatarUrl}
+          initials={initialsOf(board.member.displayName)}
+          surfaceClass={MEMBER_COLOR_CLASSES[board.member.color].surface}
+        />
+
+        <div className="min-w-0 flex-1">
+          <h1 className="truncate font-display text-display-md font-extrabold">
+            {t('hub.greeting', { name: board.member.displayName })}
           </h1>
           <p className="text-body-lg text-ink-secondary">
             {formatDateTime(board.now, formattingLocale, { dateStyle: 'full' })}
           </p>
         </div>
-        {/* M19: the Stitch board clock token (72px), not the 56px display-md
-            this carried before — the clock is the one thing on a hub screen
-            read from the far side of a room. */}
-        <span
-          data-testid="hub-routines-clock"
-          className="tabular-time text-display-hub font-extrabold text-brand-ink"
-        >
-          {formatDateTime(board.now, formattingLocale, { hour: '2-digit', minute: '2-digit' })}
-        </span>
+
+        <StarCount
+          data-testid="board-stars"
+          value={totals.available}
+          srLabel={t('hub.starBalance', { count: totals.available })}
+          size="lg"
+          className="h-14 shrink-0 px-6 text-h1"
+        />
       </header>
 
       {/* M19: their stars and their shelf are one tap from their steps. */}
