@@ -2,7 +2,18 @@
 
 import { useActionState, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Button } from '@/components/ui/button';
+import {
+  Button,
+  Field,
+  FieldDescription,
+  FieldLabel,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@kynite/ui';
 import {
   Dialog,
   DialogClose,
@@ -14,15 +25,6 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { DateField } from '@/components/ui/date-field';
-import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { idleState } from '../action-state';
 import { createMemberAction, updateMemberAction } from '../actions';
 import { REWARD_HORIZONS, type Member } from '../schema';

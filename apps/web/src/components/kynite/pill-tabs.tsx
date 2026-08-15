@@ -2,10 +2,7 @@
 
 import * as React from 'react';
 
-import { Icon } from '@/components/ui/icon';
-import type { IconName } from '@/components/ui/icon-codepoints';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { cn } from '@/lib/utils';
+import { cn, Icon, type IconName, Tabs, TabsContent, TabsList, TabsTrigger } from '@kynite/ui';
 
 /**
  * A row of standalone pills that switch between panels.

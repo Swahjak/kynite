@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 
-import { cn } from '@/lib/utils';
+import { cn } from '@kynite/ui';
 import { DateField } from './date-field';
 import { TimeField } from './time-field';
 import { joinDateTimeValue, splitDateTimeValue } from './date-time-parts';

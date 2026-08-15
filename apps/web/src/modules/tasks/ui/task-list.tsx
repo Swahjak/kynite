@@ -2,20 +2,20 @@
 
 import { useOptimistic, useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Icon } from '@/components/ui/icon';
-import { Input } from '@/components/ui/input';
-import { MemberFace } from '@/components/kynite';
 import {
+  Button,
+  Card,
+  cn,
+  Icon,
+  Input,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from '@kynite/ui';
+import { MemberFace } from '@/components/kynite';
 import { Link, useRouter } from '@/i18n/navigation';
-import { cn } from '@/lib/utils';
 import { createTaskAction, toggleTaskAction } from '../actions';
 import type { TodayTask } from '../page-data';
 

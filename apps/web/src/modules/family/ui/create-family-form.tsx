@@ -2,10 +2,18 @@
 
 import { useActionState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Field,
+  FieldDescription,
+  FieldLabel,
+  Input,
+} from '@kynite/ui';
 import { idleState } from '../action-state';
 import { createFamilyForSocialUserAction } from '../actions';
 

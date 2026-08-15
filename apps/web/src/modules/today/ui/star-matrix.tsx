@@ -2,8 +2,7 @@
 
 import { useCallback, useOptimistic, useState, useTransition, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
-import { Icon } from '@/components/ui/icon';
-import { cn } from '@/lib/utils';
+import { cn, Icon } from '@kynite/ui';
 import type { CompleteStepInput, CompletionState, UndoCompletionInput } from '@/modules/routines';
 import { useRouter } from '@/i18n/navigation';
 import { starMatrixRows, type StarMatrixStep } from '../domain/star-matrix';

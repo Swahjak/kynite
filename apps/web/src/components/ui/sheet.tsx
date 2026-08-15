@@ -4,8 +4,7 @@ import * as React from 'react';
 import { Dialog as SheetPrimitive } from '@base-ui/react/dialog';
 import { useTranslations } from 'next-intl';
 
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
+import { Button, cn } from '@kynite/ui';
 import { XIcon } from 'lucide-react';
 
 function Sheet({ ...props }: SheetPrimitive.Root.Props) {

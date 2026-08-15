@@ -2,10 +2,17 @@
 
 import { useActionState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Field, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Field,
+  FieldLabel,
+  Input,
+} from '@kynite/ui';
 import { Link } from '@/i18n/navigation';
 import { idleState } from '../action-state';
 import { signInAction } from '../actions';

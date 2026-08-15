@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { Popover } from '@base-ui/react/popover';
 
-import { cn } from '@/lib/utils';
+import { cn } from '../lib/utils';
 import { Icon } from './icon';
 import type { IconName } from './icon-codepoints';
 

@@ -3,7 +3,7 @@ import { extendTailwindMerge } from 'tailwind-merge';
 
 /**
  * This design system's font-size scale, exactly as declared by the
- * `--text-*` custom properties in `globals.css`.
+ * `--text-*` custom properties in `styles/tokens.css`.
  *
  * It has to be repeated here because `tailwind-merge` resolves conflicts from a
  * static class map, not from the stylesheet. Left unregistered, every one of
@@ -17,7 +17,7 @@ import { extendTailwindMerge } from 'tailwind-merge';
  *
  * Registering the scale is the fix at the root. A `text-*` size and a `text-*`
  * colour now belong to different groups, so both survive `cn()` — no call site
- * has to know about the hazard, and the next token added to `globals.css` only
+ * has to know about the hazard, and the next token added to `styles/tokens.css` only
  * has to be added here too (asserted by a unit test that reads the stylesheet).
  */
 export const FONT_SIZE_TOKENS = [

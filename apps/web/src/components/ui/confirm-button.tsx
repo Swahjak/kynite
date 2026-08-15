@@ -2,8 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
+import { Button, cn } from '@kynite/ui';
 
 /**
  * The M12 two-tap confirmation, extracted (M18).

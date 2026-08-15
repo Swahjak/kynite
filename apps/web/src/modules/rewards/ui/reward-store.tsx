@@ -3,9 +3,8 @@
 import { useOptimistic, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { fireConfettiBurst } from '@/components/celebration';
-import { Icon } from '@/components/ui/icon';
+import { cn, Icon } from '@kynite/ui';
 import { Link } from '@/i18n/navigation';
-import { cn } from '@/lib/utils';
 import { MemberFace, SectionHeading } from '@/components/kynite';
 import { requestRedemptionAction } from '../actions';
 import type { StoreData, StoreTile } from '../page-data';

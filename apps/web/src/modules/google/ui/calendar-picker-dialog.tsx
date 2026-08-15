@@ -4,8 +4,7 @@ import { useActionState, useCallback, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { usePathname, useRouter } from '@/i18n/navigation';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Button, Checkbox, useSubmitGuard } from '@kynite/ui';
 import {
   Dialog,
   DialogContent,
@@ -14,7 +13,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { useSubmitGuard } from '@/components/ui/use-submit-guard';
 import { idleState, type ActionState } from '../action-state';
 import { applyCalendarSelectionAction } from '../actions';
 import type { LinkedAccount } from '../queries';

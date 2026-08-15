@@ -1,7 +1,6 @@
 'use client';
 
-import { Card } from '@/components/ui/card';
-import { Icon } from '@/components/ui/icon';
+import { Card, Icon } from '@kynite/ui';
 import { ProgressBar } from '@/components/kynite';
 import type { Goal } from '../domain/economy';
 import { rewardIconOf } from './tokens';

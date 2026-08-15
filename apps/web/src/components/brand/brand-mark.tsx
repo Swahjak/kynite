@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import { getTranslations } from 'next-intl/server';
-import { cn } from '@/lib/utils';
+import { cn } from '@kynite/ui';
 
 /**
  * The Kynite mark (M18, restyled M20 for `docs/design/brand.md`).

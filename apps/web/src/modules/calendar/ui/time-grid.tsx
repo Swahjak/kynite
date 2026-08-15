@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState, useEffect } from 'react';
 import { useDateTimeFormat } from '@/components/formatting';
-import { cn } from '@/lib/utils';
+import { cn } from '@kynite/ui';
 import type { Member } from '@/modules/family';
 import { dayKeysOf } from '../domain/expand';
 import { minutesIntoDay, toDateKey, toWall } from '../domain/zone';

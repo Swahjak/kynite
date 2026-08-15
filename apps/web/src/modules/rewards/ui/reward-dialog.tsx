@@ -2,7 +2,20 @@
 
 import { useActionState, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Button } from '@/components/ui/button';
+import {
+  Button,
+  cn,
+  Field,
+  FieldDescription,
+  FieldGroupLabel,
+  FieldLabel,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@kynite/ui';
 import {
   Dialog,
   DialogClose,
@@ -13,17 +26,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Field, FieldDescription, FieldGroupLabel, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import type { Member } from '@/modules/family';
-import { cn } from '@/lib/utils';
 import { idleState } from '../action-state';
 import { createRewardAction, updateRewardAction } from '../actions';
 import { REWARD_CATEGORIES, type Reward } from '../schema';

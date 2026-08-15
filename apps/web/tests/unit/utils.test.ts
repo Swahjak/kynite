@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { cn, FONT_SIZE_TOKENS } from '@/lib/utils';
+import { cn, FONT_SIZE_TOKENS } from '@kynite/ui';
 
 describe('cn()', () => {
   it('joins class names', () => {
@@ -44,8 +44,11 @@ describe('cn() and the design system font-size scale', () => {
     expect(cn('text-ink-muted', 'text-brand-ink')).toBe('text-brand-ink');
   });
 
-  it('registers every --text-* token declared in globals.css', () => {
-    const css = readFileSync(new URL('../../src/app/globals.css', import.meta.url), 'utf8');
+  it('registers every --text-* token declared in the design tokens', () => {
+    const css = readFileSync(
+      new URL('../../../../packages/ui/src/styles/tokens.css', import.meta.url),
+      'utf8'
+    );
     // Size declarations only: the `--text-x--line-height` / `--font-weight` /
     // `--letter-spacing` companions are not utilities.
     // Tailwind's own scale is already in tailwind-merge's class map; only the

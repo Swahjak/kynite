@@ -1,4 +1,4 @@
-import type { IconName } from '@/components/ui/icon-codepoints';
+import type { IconName } from '@kynite/ui';
 import type { RewardCategory } from '../schema';
 
 /**

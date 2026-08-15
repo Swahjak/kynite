@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { Card } from '@/components/ui/card';
+import { Card } from '@kynite/ui';
 import type { KidProgress } from '../page-data';
 import { KidStatCard } from './kid-stat-card';
 

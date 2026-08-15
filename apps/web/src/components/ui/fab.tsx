@@ -2,10 +2,7 @@
 
 import type { ComponentProps } from 'react';
 import { Link } from '@/i18n/navigation';
-import { Icon } from '@/components/ui/icon';
-import type { IconName } from '@/components/ui/icon-codepoints';
-import { FAB_SLOT_ID, SlotPortal } from '@/components/ui/slot-portal';
-import { cn } from '@/lib/utils';
+import { cn, FAB_SLOT_ID, Icon, type IconName, SlotPortal } from '@kynite/ui';
 
 /**
  * The floating action button — `docs/design/components.md` § `Button/FAB`:

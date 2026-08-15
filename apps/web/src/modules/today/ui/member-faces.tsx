@@ -1,5 +1,5 @@
 import { MemberAvatar, type Member } from '@/modules/family';
-import { cn } from '@/lib/utils';
+import { cn } from '@kynite/ui';
 
 /**
  * The overlapping avatar stack the mockups put on every block that belongs to

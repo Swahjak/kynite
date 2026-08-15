@@ -16,7 +16,10 @@ import { readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { collectIconNames, MANIFEST } from './subset-icons.mjs';
 
-const CODEPOINT_MODULE = new URL('../src/components/ui/icon-codepoints.ts', import.meta.url);
+const CODEPOINT_MODULE = new URL(
+  '../../../packages/ui/src/components/icon-codepoints.ts',
+  import.meta.url
+);
 
 const used = await collectIconNames();
 
@@ -34,7 +37,7 @@ const stale = [...shipped].filter((name) => !used.includes(name));
 
 if (missing.length > 0) {
   console.error(
-    `Icons used in src/ but not in the subset font: ${missing.join(', ')}.\n` +
+    `Icons used in source but not in the subset font: ${missing.join(', ')}.\n` +
       'They would render as blank. Run `pnpm icons:subset` and commit the result.'
   );
   process.exit(1);
@@ -61,6 +64,6 @@ if (undeclared.length > 0) {
 }
 
 console.log(
-  `Icon subset covers all ${used.length} icons used in src/, ` +
+  `Icon subset covers all ${used.length} icons used in source, ` +
     `and icon-codepoints.ts declares all ${declared.length}.`
 );

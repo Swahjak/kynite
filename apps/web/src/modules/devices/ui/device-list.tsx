@@ -3,9 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { useDateTimeFormat } from '@/components/formatting';
-import { Button } from '@/components/ui/button';
-import { Icon } from '@/components/ui/icon';
-import { Input } from '@/components/ui/input';
+import { Button, Icon, Input } from '@kynite/ui';
 import { renameDeviceAction, revokeDeviceAction } from '../actions';
 import type { DevicesPageData } from '../page-data';
 

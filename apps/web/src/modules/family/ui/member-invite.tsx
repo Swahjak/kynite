@@ -3,8 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { useDateTimeFormat } from '@/components/formatting';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Badge, Button, Field, FieldDescription, FieldLabel, Input } from '@kynite/ui';
 import {
   Dialog,
   DialogContent,
@@ -14,8 +13,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
 import { createInviteIdle, type CreateInviteState } from '../action-state';
 import { createInviteAction, revokeInviteAction } from '../actions';
 import { inviteStateOf, type InviteState } from '../domain/invite';

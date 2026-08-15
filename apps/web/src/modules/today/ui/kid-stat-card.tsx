@@ -1,5 +1,5 @@
 import { ProgressBar, StarCount } from '@/components/kynite';
-import { cn } from '@/lib/utils';
+import { cn } from '@kynite/ui';
 import { MEMBER_COLOR_CLASSES, MemberAvatar } from '@/modules/family';
 import type { KidProgress } from '../page-data';
 

@@ -1,0 +1,304 @@
+/* ---------------------------------------------------------------------------
+ * @kynite/ui — utilities, celebration keyframes and base element styles.
+ *
+ * Split out of `tokens.css` so a consumer that only wants the *values* can
+ * take them without the rules. In practice both are imported together through
+ * `index.css`; the split is documentation, not a supported subset.
+ *
+ * Expects `@import 'tailwindcss'` first, and the tokens from `tokens.css`.
+ * ------------------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------------------
+ * Utilities
+ * ------------------------------------------------------------------------- */
+
+/* typography.md § "Tabular numerals": `.tnum { font-variant-numeric:
+ * tabular-nums; }` — applied to any numeral that needs a stable width in a row
+ * (dates, times, star counts, point totals). The design system's own class
+ * name, kept verbatim so doc snippets paste in. `tabular-time` below is the
+ * richer clock-face variant this app already uses. */
+@utility tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Fixed-width digits for `00:00` clocks, countdowns and star counts. */
+@utility tabular-time {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+/* Uppercase metadata label — "STREAK", "TODAY", "WEEKLY STARS". */
+@utility label-overline {
+  font-family: var(--font-display);
+  font-size: var(--text-overline);
+  line-height: var(--text-overline--line-height);
+  font-weight: var(--text-overline--font-weight);
+  letter-spacing: var(--text-overline--letter-spacing);
+  text-transform: uppercase;
+}
+
+/* Safe-area insets for the fixed chrome on a notched phone (the mockups'
+ * `pt-safe` / `pb-safe`). Without these the bottom tab bar sits under the home
+ * indicator on iOS. */
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Glassmorphic chrome. The mockups use this for exactly two things — the
+ * sticky top header and the mobile bottom bar — so it is a utility rather than
+ * a per-component class soup: `background: rgba(surface, .8); backdrop-filter:
+ * blur(12px)` (docs/design/stitch/.../code.html `.glass`, and DESIGN.md
+ * "Elevation & Depth → Glassmorphism").
+ *
+ * `color-mix` rather than a hard-coded rgba so the same utility works in both
+ * themes off `--surface`; the `@supports` fallback is opaque, because a blurred
+ * transparent bar with no blur is unreadable. */
+@utility glass {
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-glass);
+}
+
+@supports not (backdrop-filter: blur(12px)) {
+  .glass {
+    background: var(--surface);
+  }
+}
+
+/* Material Symbols Outlined — outlined (default) and filled variants. */
+@utility material-symbols-outlined {
+  font-family: var(--font-icon);
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  /* No `font-feature-settings: 'liga'`: icons render by codepoint, not by the
+     ligature feature, because the ligature form cannot be subset (see
+     scripts/subset-icons.mjs). The subset font ships no usable GSUB. */
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+}
+
+@utility icon-filled {
+  font-variation-settings:
+    'FILL' 1,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+}
+
+/* The only motion an expired timer makes (M09). A 2.4s cycle between full and
+ * 78% opacity: 0.42Hz, far below the 3Hz photosensitivity threshold, and a
+ * brightness change small enough to find from across a room without pulling
+ * the eye away from anything else. Never a flash, never a colour change.
+ * `modules/timers/domain/chime.ts` owns the number; `isNonStrobing()` holds it. */
+/* ---------------------------------------------------------------------------
+ * Celebration motion — `docs/design/motion.md`.
+ *
+ * The keyframes and the `.kynite-*` class names are copied verbatim from the
+ * design system so a doc snippet drops straight in. They live here rather than
+ * in a component because they are shared by the confetti provider, the reward
+ * modules, checkboxes and the streak bar.
+ *
+ * "Confetti fires the instant a step or reward is tapped — under 100ms, before
+ * the server responds. Once fired, it's never walked back." (rewards.md)
+ * ------------------------------------------------------------------------- */
+
+@keyframes kynite-pop {
+  0% {
+    transform: scale(1);
+  }
+  12% {
+    transform: scale(1.35);
+  }
+  28% {
+    transform: scale(0.92);
+  }
+  42% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes kynite-check-pop {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  15% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  30% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes kynite-confetti {
+  0% {
+    transform: translate(0, 0) rotate(0deg) scale(0);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg) scale(1);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--tx), var(--ty)) rotate(var(--tr)) scale(0.5);
+    opacity: 0;
+  }
+}
+
+@keyframes kynite-shimmer {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(320%);
+  }
+}
+
+@keyframes kynite-pop-big {
+  0% {
+    transform: scale(1);
+  }
+  10% {
+    transform: scale(1.6);
+  }
+  24% {
+    transform: scale(0.85);
+  }
+  38% {
+    transform: scale(1.15);
+  }
+  50% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/**
+ * Small/regular pop — star icon idle-celebrate.
+ *
+ * `motion.md`'s table gives every `kynite-anim-*` keyframe an `infinite`
+ * iteration count, but that is the specimen sheet describing the raw
+ * `@keyframes` for a looping demo tile, not a mandate that product UI loop
+ * forever. Every in-app consumer (`StarMedallion`'s `animate` prop,
+ * `Checkbox`'s check glyph, `step-row.tsx`'s done check) mounts this class
+ * once, on a state change, and wants a single pop-in — not a distracting
+ * loop for as long as the element stays on screen. A dev showcase wanting
+ * the doc's literal looping demo should give itself its own wrapper class
+ * (e.g. `animate-infinite`) rather than reusing this one.
+ */
+@utility kynite-anim-pop {
+  animation: kynite-pop var(--duration-pop) ease-in-out 1;
+}
+
+/** Checkbox check-mark pop-in — plays once per check, see `kynite-anim-pop` above. */
+@utility kynite-anim-check {
+  animation: kynite-check-pop var(--duration-pop) ease-in-out 1;
+}
+
+/** Big-celebration icon pop — reward claimed, milestone. Plays once. */
+@utility kynite-anim-pop-big {
+  animation: kynite-pop-big var(--duration-pop-big) ease-in-out 1;
+}
+
+/** Regular-size confetti burst piece. Needs `--tx`/`--ty`/`--tr` per instance. */
+@utility kynite-confetti-piece {
+  animation: kynite-confetti var(--duration-confetti) ease-out infinite;
+}
+
+/** Big-celebration confetti piece — same keyframe, shorter/faster duration. */
+@utility kynite-confetti-piece-big {
+  animation: kynite-confetti var(--duration-confetti-big) ease-out infinite;
+}
+
+/** Streak progress-bar shimmer sweep. */
+@utility kynite-shimmer-sweep {
+  animation: kynite-shimmer var(--duration-shimmer) linear infinite;
+}
+
+@keyframes timer-breath {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.78;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Base
+ * ------------------------------------------------------------------------- */
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    @apply font-sans;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    /* typography.md: `body { margin:0; -webkit-font-smoothing:antialiased; }` */
+    -webkit-font-smoothing: antialiased;
+    transition:
+      background-color var(--duration-normal) ease,
+      color var(--duration-normal) ease;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-display;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--line-focus);
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

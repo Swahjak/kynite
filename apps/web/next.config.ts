@@ -31,6 +31,12 @@ const nextConfig: NextConfig = {
    * keep working off `.next/` exactly as before.
    */
   output: 'standalone',
+  /**
+   * `@kynite/ui` exports TypeScript *source*, not a build artefact (see its
+   * package.json). Next therefore has to compile it as if it were part of the
+   * app — which is exactly what `transpilePackages` means.
+   */
+  transpilePackages: ['@kynite/ui'],
   reactStrictMode: true,
   typedRoutes: true,
   // Playwright drives the dev server over 127.0.0.1.

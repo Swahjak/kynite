@@ -1,4 +1,4 @@
-import { ICON_CODEPOINTS, type IconName } from '@/components/ui/icon-codepoints';
+import { ICON_CODEPOINTS, type IconName } from '@kynite/ui';
 
 /**
  * The shape of the "Sterren vandaag" matrix — steps down the left, one column

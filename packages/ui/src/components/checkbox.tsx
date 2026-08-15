@@ -3,8 +3,8 @@
 import * as React from 'react';
 import { Checkbox as CheckboxPrimitive } from '@base-ui/react/checkbox';
 
-import { cn } from '@/lib/utils';
-import { Icon } from '@/components/ui/icon';
+import { cn } from '../lib/utils';
+import { Icon } from './icon';
 
 /**
  * Selection control — checkbox (`components.md` § Selection controls).

@@ -3,8 +3,7 @@
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
-import { Icon } from '@/components/ui/icon';
-import { cn } from '@/lib/utils';
+import { cn, Icon } from '@kynite/ui';
 import { NavOverflowSheet } from './nav-overflow-sheet';
 import { RAIL_FOOTER_NAV, RAIL_NAV, isActiveHref, type NavItem, type NavLabels } from './nav-items';
 import { UserMenu, type UserMenuLabels, type UserMenuUser } from './user-menu';

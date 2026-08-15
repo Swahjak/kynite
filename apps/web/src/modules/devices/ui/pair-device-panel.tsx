@@ -3,9 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { useDateTimeFormat } from '@/components/formatting';
-import { Button } from '@/components/ui/button';
-import { Icon } from '@/components/ui/icon';
-import { Input } from '@/components/ui/input';
+import { Button, Icon, Input } from '@kynite/ui';
 import { PAIRING_CODE_LENGTH } from '@/lib/device-session';
 import { pairingCodeIdle, type PairingCodeState } from '../action-state';
 import { createPairingCodeAction } from '../actions';

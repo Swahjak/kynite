@@ -42,11 +42,19 @@ import { fileURLToPath } from 'node:url';
 import subsetFont from 'subset-font';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const SOURCE_DIR = join(root, 'src');
+/**
+ * The icon-rendering source. Two trees since phase 2: the app, and the
+ * `packages/ui` primitives the app renders through (`Icon` itself lives
+ * there, and so do the `<Icon name="…">` call sites inside Button, Checkbox
+ * and FieldPicker). Scanning only `apps/web/src` would silently drop every
+ * glyph a primitive names — the exact blank-box failure `icons:check` exists
+ * to prevent.
+ */
+const SOURCE_DIRS = [join(root, 'src'), join(root, '../../packages/ui/src')];
 const FULL_FONT = join(root, 'src/styles/fonts/material-symbols-outlined-full.ttf');
 const SUBSET_FONT = join(root, 'src/styles/fonts/material-symbols-outlined.woff2');
 const MANIFEST = join(root, 'src/styles/fonts/material-symbols.manifest.json');
-const CODEPOINT_MODULE = join(root, 'src/components/ui/icon-codepoints.ts');
+const CODEPOINT_MODULE = join(root, '../../packages/ui/src/components/icon-codepoints.ts');
 const CODEPOINTS = join(root, 'scripts/material-symbols.codepoints');
 
 /**
@@ -184,13 +192,15 @@ async function* walk(dir) {
 }
 
 /** Every icon name the source renders, sorted and deduplicated. */
-export async function collectIconNames(sourceDir = SOURCE_DIR) {
+export async function collectIconNames(sourceDirs = SOURCE_DIRS) {
   const names = new Set(EXTRA_ICONS);
 
-  for await (const file of walk(sourceDir)) {
-    const text = await readFile(file, 'utf8');
-    for (const match of text.matchAll(ICON_USAGE)) {
-      names.add(match[1] ?? match[2] ?? match[3]);
+  for (const sourceDir of sourceDirs) {
+    for await (const file of walk(sourceDir)) {
+      const text = await readFile(file, 'utf8');
+      for (const match of text.matchAll(ICON_USAGE)) {
+        names.add(match[1] ?? match[2] ?? match[3]);
+      }
     }
   }
 
@@ -279,8 +289,9 @@ function codepointModule(names, codepoints) {
  *
  * Material Symbols renders here by codepoint, not by ligature; see that script
  * for why. Every entry has a matching glyph in
- * src/styles/fonts/material-symbols-outlined.woff2, which \`pnpm icons:check\`
- * verifies against actual \`<Icon name="…">\` usage on every build.
+ * apps/web/src/styles/fonts/material-symbols-outlined.woff2, which
+ * \`pnpm icons:check\` verifies against actual \`<Icon name="…">\` usage on
+ * every build.
  */
 
 export const ICON_CODEPOINTS = {
@@ -295,4 +306,4 @@ if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import
   await main();
 }
 
-export { FULL_FONT, MANIFEST, SUBSET_FONT, stat };
+export { FULL_FONT, MANIFEST, SUBSET_FONT, SOURCE_DIRS, stat };

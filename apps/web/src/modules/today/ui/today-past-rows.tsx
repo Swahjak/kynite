@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, type ReactNode } from 'react';
-import { Icon } from '@/components/ui/icon';
+import { Icon } from '@kynite/ui';
 
 /**
  * The collapsed "already happened" band at the top of the day timeline.

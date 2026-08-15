@@ -1,7 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
+import { Badge, Card, CardContent, cn } from '@kynite/ui';
 import type { Member } from '../schema';
 import { DeleteMemberButton } from './delete-member-button';
 import { MemberAvatar } from './member-avatar';

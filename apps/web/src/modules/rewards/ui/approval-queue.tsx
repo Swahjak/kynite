@@ -2,12 +2,8 @@
 
 import { useActionState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Icon } from '@/components/ui/icon';
+import { Badge, Button, Card, CardContent, cn, Icon } from '@kynite/ui';
 import { SectionHeading, StarCount } from '@/components/kynite';
-import { cn } from '@/lib/utils';
 import { idleState } from '../action-state';
 import { decideRedemptionAction, fulfillRedemptionAction } from '../actions';
 import type { RedemptionWithReward } from '../queries';

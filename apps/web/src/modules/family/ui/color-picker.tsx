@@ -2,9 +2,7 @@
 
 import { useId, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Button } from '@/components/ui/button';
-import { FieldGroupLabel } from '@/components/ui/field';
-import { cn } from '@/lib/utils';
+import { Button, cn, FieldGroupLabel } from '@kynite/ui';
 import { MEMBER_COLORS, type MemberColor } from '../schema';
 import { MEMBER_COLOR_CLASSES } from './tokens';
 

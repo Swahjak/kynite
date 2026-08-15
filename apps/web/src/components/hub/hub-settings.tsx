@@ -2,8 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { Button } from '@/components/ui/button';
-import { Icon } from '@/components/ui/icon';
+import { Button, cn, Icon } from '@kynite/ui';
 import {
   Sheet,
   SheetContent,
@@ -12,7 +11,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { cn } from '@/lib/utils';
 import { HUB_THEME_MODES, type HubThemeMode, type ResolvedHubTheme } from './hub-theme';
 
 /** The route handler `unpair()` below calls — see its own doc comment. */

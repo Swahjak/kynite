@@ -1,6 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { Button } from '@/components/ui/button';
-import { Icon } from '@/components/ui/icon';
+import { Button, Icon } from '@kynite/ui';
 import { Link } from '@/i18n/navigation';
 import { canOwn, type Principal } from '@/modules/family';
 import { listReauthRequiredAccounts } from '../queries';

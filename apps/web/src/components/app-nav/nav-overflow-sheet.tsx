@@ -3,7 +3,7 @@
 import { useState, type ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
-import { Icon } from '@/components/ui/icon';
+import { Icon } from '@kynite/ui';
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { OVERFLOW_NAV, isActiveHref, type NavLabels } from './nav-items';
 

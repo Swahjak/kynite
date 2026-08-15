@@ -30,6 +30,11 @@ FROM base AS deps
 # definition and every member manifest the filter selects.
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/web/package.json ./apps/web/
+# `web` depends on `@kynite/ui` (workspace:*) since phase 2. The trailing `...`
+# on the filter already pulls a dependency's *install* in, but pnpm cannot
+# resolve a workspace link to a manifest that is not in the context — so the
+# package's own manifest has to be copied alongside the app's.
+COPY packages/ui/package.json ./packages/ui/
 RUN pnpm install --frozen-lockfile --filter web...
 
 # ---------------------------------------------------------------------------

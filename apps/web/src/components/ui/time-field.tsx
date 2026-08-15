@@ -5,9 +5,7 @@ import { useTranslations } from 'next-intl';
 
 import { useFormattingLocale } from '@/components/formatting';
 import type { FormattingLocale } from '@/i18n/formatting-locale';
-import { cn } from '@/lib/utils';
-import { FieldPicker } from './field-picker';
-import { Input } from './input';
+import { cn, FieldPicker, Input } from '@kynite/ui';
 import {
   QUARTER_HOUR_VALUES,
   formatTimeValue,

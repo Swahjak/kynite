@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { Button } from '@/components/ui/button';
+import { Button } from '@kynite/ui';
 import { Link } from '@/i18n/navigation';
 
 /**

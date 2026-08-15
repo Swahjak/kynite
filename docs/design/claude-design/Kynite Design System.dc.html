@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<template id="__bundler_thumbnail" data-bg-color="#fbf9f4">
+  <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <rect width="120" height="120" fill="#fbf9f4"/>
+    <circle cx="60" cy="60" r="34" fill="#5d5fef"/>
+    <text x="60" y="70" font-family="sans-serif" font-weight="800" font-size="30" fill="#ffffff" text-anchor="middle">K</text>
+  </svg>
+</template>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Poppins:wght@400;500;600;700&display=swap"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
+<style>
+  body{margin:0;-webkit-font-smoothing:antialiased;}
+  .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;vertical-align:middle;}
+  .tnum{font-variant-numeric:tabular-nums;}
+  a{color:#5d5fef;}
+  a:hover{color:#4547c9;}
+  @keyframes kynite-pop{0%{transform:scale(1);}12%{transform:scale(1.35);}28%{transform:scale(0.92);}42%{transform:scale(1);}100%{transform:scale(1);}}
+  @keyframes kynite-check-pop{0%{transform:scale(0.6);opacity:0;}15%{transform:scale(1.2);opacity:1;}30%{transform:scale(1);}100%{transform:scale(1);}}
+  @keyframes kynite-confetti{0%{transform:translate(0,0) rotate(0deg) scale(0);opacity:0;}8%{opacity:1;transform:translate(0,0) rotate(0deg) scale(1);}60%{opacity:1;}100%{transform:translate(var(--tx),var(--ty)) rotate(var(--tr)) scale(0.5);opacity:0;}}
+  @keyframes kynite-shimmer{0%{transform:translateX(-120%);}100%{transform:translateX(320%);}}
+  .kynite-anim-pop{animation:kynite-pop 2.4s ease-in-out infinite;}
+  .kynite-anim-check{animation:kynite-check-pop 2.4s ease-in-out infinite;}
+  .kynite-confetti-piece{animation:kynite-confetti 1.8s ease-out infinite;}
+  .kynite-shimmer-sweep{animation:kynite-shimmer 2.2s linear infinite;}
+  @keyframes kynite-pop-big{0%{transform:scale(1);}10%{transform:scale(1.6);}24%{transform:scale(0.85);}38%{transform:scale(1.15);}50%{transform:scale(1);}100%{transform:scale(1);}}
+  .kynite-anim-pop-big{animation:kynite-pop-big 2.6s ease-in-out infinite;}
+  .kynite-confetti-piece-big{animation:kynite-confetti 1.6s ease-out infinite;}
+  @keyframes kynite-fall{0%{transform:translateY(-16px) rotate(var(--rot,0deg));opacity:0;}12%{opacity:1;}85%{opacity:1;}100%{transform:translateY(130px) rotate(var(--rot,0deg));opacity:0;}}
+  .kynite-fall{animation-name:kynite-fall;animation-timing-function:linear;animation-iteration-count:infinite;}
+  @keyframes kynite-fly{0%{transform:translate(0,0) rotate(var(--rot,0deg));}25%{transform:translate(16px,-12px) rotate(calc(var(--rot,0deg) + 10deg));}50%{transform:translate(-6px,-20px) rotate(var(--rot,0deg));}75%{transform:translate(-18px,-4px) rotate(calc(var(--rot,0deg) - 10deg));}100%{transform:translate(0,0) rotate(var(--rot,0deg));}}
+  .kynite-fly{animation-name:kynite-fly;animation-timing-function:ease-in-out;animation-iteration-count:infinite;}
+  @keyframes kynite-drift{0%,100%{transform:translateY(0) rotate(var(--rot,0deg));}50%{transform:translateY(-8px) rotate(var(--rot,0deg));}}
+  .kynite-drift{animation-name:kynite-drift;animation-timing-function:ease-in-out;animation-iteration-count:infinite;}
+  @keyframes kynite-spin-slow{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+  .kynite-spin-slow{animation-name:kynite-spin-slow;animation-timing-function:linear;animation-iteration-count:infinite;}
+</style>
+</helmet>
+
+<div style="background:#fbf9f4;min-height:100vh;font-family:'Poppins',sans-serif;color:#191c1d;">
+
+<div style="max-width:1180px;margin:0 auto;padding:72px 32px 24px;">
+  <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:#5d5fef;margin-bottom:12px;">Design System</span>
+  <h1 style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:56px;line-height:1.04;letter-spacing:-0.03em;margin:0;color:#191c1d;">Kynite</h1>
+  <p style="font-family:'Poppins',sans-serif;font-weight:400;font-size:18px;line-height:28px;color:#434656;max-width:620px;margin:16px 0 0;">Functional Warmth — the component system for the family planner. Systematic enough for daily logistics, warm enough for the moments worth celebrating. Built on the shadcn/ui (New York) baseline.</p>
+</div>
+
+<div style="max-width:1180px;margin:0 auto;padding:0 32px 96px;display:flex;flex-direction:column;gap:64px;">
+
+<!-- BRAND MARK -->
+<section>
+  <h2 style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:24px;margin:0 0 20px;padding-bottom:14px;border-bottom:1px solid #e1e3e4;color:#191c1d;">Brand mark</h2>
+  <div style="display:flex;flex-wrap:wrap;gap:40px;align-items:flex-start;">
+    <div style="display:flex;flex-direction:column;gap:14px;align-items:center;">
+      <div style="width:120px;height:120px;border-radius:28px;position:relative;overflow:hidden;background:oklch(58% 0.14 245);box-shadow:0 8px 24px rgba(0,0,0,0.2);">
+        <span style="position:absolute;width:112px;height:112px;border-radius:9999px;left:-38px;top:-30px;background:oklch(58% 0.14 335 / 0.85);"></span>
+        <span style="position:absolute;width:112px;height:112px;border-radius:9999px;right:-41px;bottom:-38px;background:#5d5fef;opacity:0.85;"></span>
+        <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined" style="font-size:74px;color:#ffffff;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.25));font-variation-settings:'FILL' 1;">star</span></span>
+      </div>
+      <span style="display:inline-block;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Icon/App icon</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div style="background:#ffffff;border:1px solid #e1e3e4;border-radius:16px;padding:20px 28px;display:flex;align-items:center;gap:14px;">
+        <div style="width:44px;height:44px;border-radius:11px;position:relative;overflow:hidden;background:oklch(58% 0.14 245);flex-shrink:0;"><span style="position:absolute;width:42px;height:42px;border-radius:9999px;left:-14px;top:-11px;background:oklch(58% 0.14 335 / 0.85);"></span><span style="position:absolute;width:42px;height:42px;border-radius:9999px;right:-15px;bottom:-13px;background:#5d5fef;opacity:0.85;"></span><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined" style="font-size:27px;color:#ffffff;font-variation-settings:'FILL' 1;">star</span></span></div>
+        <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:28px;letter-spacing:-0.01em;color:#191c1d;">Kynite</span>
+      </div>
+      <div style="background:#191c1d;border-radius:16px;padding:18px 26px;display:flex;align-items:center;gap:12px;">
+        <div style="width:36px;height:36px;border-radius:9px;position:relative;overflow:hidden;background:oklch(58% 0.14 245);flex-shrink:0;"><span style="position:absolute;width:34px;height:34px;border-radius:9999px;left:-12px;top:-9px;background:oklch(58% 0.14 335 / 0.85);"></span><span style="position:absolute;width:34px;height:34px;border-radius:9999px;right:-13px;bottom:-11px;background:#5d5fef;opacity:0.85;"></span><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined" style="font-size:22px;color:#ffffff;font-variation-settings:'FILL' 1;">star</span></span></div>
+        <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:22px;letter-spacing:-0.01em;color:#ffffff;">Kynite</span>
+      </div>
+      <span style="display:inline-block;width:fit-content;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Lockup/Horizontal</span>
+    </div>
+  </div>
+</section>
+
+<!-- COLORS -->
+<section>
+  <h2 style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:24px;margin:0 0 20px;padding-bottom:14px;border-bottom:1px solid #e1e3e4;color:#191c1d;">Colors</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(136px,1fr));gap:16px;margin-bottom:28px;">
+    <div><div style="height:72px;border-radius:12px;background:#5d5fef;"></div><div style="margin-top:8px;font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;">Primary</div><div style="font-size:12px;color:#747688;">#5d5fef</div></div>
+    <div><div style="height:72px;border-radius:12px;background:#2e5bff;"></div><div style="margin-top:8px;font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;">Primary Container</div><div style="font-size:12px;color:#747688;">#2e5bff</div></div>
+    <div><div style="height:72px;border-radius:12px;background:#ef8d5d;"></div><div style="margin-top:8px;font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;">Secondary</div><div style="font-size:12px;color:#747688;">#ef8d5d</div></div>
+    <div><div style="height:72px;border-radius:12px;background:#fcecd5;"></div><div style="margin-top:8px;font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;">Secondary Container</div><div style="font-size:12px;color:#747688;">#fcecd5</div></div>
+    <div><div style="height:72px;border-radius:12px;background:#006056;"></div><div style="margin-top:8px;font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;">Tertiary</div><div style="font-size:12px;color:#747688;">#006056</div></div>
+    <div><div style="height:72px;border-radius:12px;background:#71f8e4;"></div><div style="margin-top:8px;font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;">Tertiary Fixed</div><div style="font-size:12px;color:#747688;">#71f8e4</div></div>
+    <div><div style="height:72px;border-radius:12px;background:#ba1a1a;"></div><div style="margin-top:8px;font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;">Error</div><div style="font-size:12px;color:#747688;">#ba1a1a</div></div>
+    <div><div style="height:72px;border-radius:12px;background:#ffdad6;"></div><div style="margin-top:8px;font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;">Error Container</div><div style="font-size:12px;color:#747688;">#ffdad6</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(136px,1fr));gap:16px;">
+    <div><div style="height:56px;border-radius:12px;background:#fbf9f4;border:1px solid #e1e3e4;"></div><div style="margin-top:8px;font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;">Surface</div><div style="font-size:12px;color:#747688;">#fbf9f4</div></div>
+    <div><div style="height:56px;border-radius:12px;background:#ffffff;border:1px solid #e1e3e4;"></div><div style="margin-top:8px;font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;">Surface Lowest</div><div style="font-size:12px;color:#747688;">#ffffff</div></div>
+    <div><div style="height:56px;border-radius:12px;background:#f5f3ee;"></div><div style="margin-top:8px;font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;">Surface Container</div><div style="font-size:12px;color:#747688;">#f5f3ee</div></div>
+    <div><div style="height:56px;border-radius:12px;background:#e7e8e9;"></div><div style="margin-top:8px;font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;">Surface Container High</div><div style="font-size:12px;color:#747688;">#e7e8e9</div></div>
+    <div><div style="height:56px;border-radius:12px;background:#191c1d;"></div><div style="margin-top:8px;font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;color:#f0f1f2;">On Surface</div><div style="font-size:12px;color:#747688;">#191c1d</div></div>
+    <div><div style="height:56px;border-radius:12px;background:#434656;"></div><div style="margin-top:8px;font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;">On Surface Variant</div><div style="font-size:12px;color:#747688;">#434656</div></div>
+    <div><div style="height:56px;border-radius:12px;background:#c4c5d9;"></div><div style="margin-top:8px;font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;">Outline Variant</div><div style="font-size:12px;color:#747688;">#c4c5d9</div></div>
+    <div><div style="height:56px;border-radius:12px;background:#2e3132;"></div><div style="margin-top:8px;font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;color:#f0f1f2;">Inverse Surface</div><div style="font-size:12px;color:#747688;">#2e3132</div></div>
+  </div>
+
+  <div style="margin-top:32px;">
+    <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12px;letter-spacing:0.05em;text-transform:uppercase;color:#434656;margin-bottom:14px;">Category palette</span>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;">
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:9999px;background:oklch(94% 0.025 245);border:1px solid oklch(85% 0.05 245);"><span style="width:8px;height:8px;border-radius:9999px;background:oklch(58% 0.14 245);"></span><span style="font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;color:oklch(32% 0.08 245);">School</span></div>
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:9999px;background:oklch(94% 0.025 155);border:1px solid oklch(85% 0.05 155);"><span style="width:8px;height:8px;border-radius:9999px;background:oklch(58% 0.14 155);"></span><span style="font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;color:oklch(32% 0.08 155);">Sports</span></div>
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:9999px;background:oklch(94% 0.025 20);border:1px solid oklch(85% 0.05 20);"><span style="width:8px;height:8px;border-radius:9999px;background:oklch(58% 0.14 20);"></span><span style="font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;color:oklch(32% 0.08 20);">Health</span></div>
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:9999px;background:oklch(94% 0.025 290);border:1px solid oklch(85% 0.05 290);"><span style="width:8px;height:8px;border-radius:9999px;background:oklch(58% 0.14 290);"></span><span style="font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;color:oklch(32% 0.08 290);">Chores</span></div>
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:9999px;background:oklch(94% 0.025 335);border:1px solid oklch(85% 0.05 335);"><span style="width:8px;height:8px;border-radius:9999px;background:oklch(58% 0.14 335);"></span><span style="font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;color:oklch(32% 0.08 335);">Family</span></div>
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:9999px;background:oklch(94% 0.025 200);border:1px solid oklch(85% 0.05 200);"><span style="width:8px;height:8px;border-radius:9999px;background:oklch(58% 0.14 200);"></span><span style="font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;color:oklch(32% 0.08 200);">Personal</span></div>
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:9999px;background:oklch(94% 0.025 110);border:1px solid oklch(85% 0.05 110);"><span style="width:8px;height:8px;border-radius:9999px;background:oklch(58% 0.14 110);"></span><span style="font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;color:oklch(32% 0.08 110);">Play</span></div>
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:9999px;background:oklch(94% 0.025 65);border:1px solid oklch(85% 0.05 65);"><span style="width:8px;height:8px;border-radius:9999px;background:oklch(58% 0.14 65);"></span><span style="font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;color:oklch(32% 0.08 65);">Travel</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- TYPOGRAPHY -->
+<section>
+  <h2 style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:24px;margin:0 0 20px;padding-bottom:14px;border-bottom:1px solid #e1e3e4;color:#191c1d;">Typography</h2>
+  <div style="display:flex;flex-direction:column;gap:20px;">
+    <div style="display:flex;align-items:baseline;gap:24px;flex-wrap:wrap;"><span style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:72px;line-height:80px;letter-spacing:-0.04em;">18:00</span><span style="font-family:'Poppins',sans-serif;font-size:13px;color:#747688;">display-hub · Baloo 2 800 · 72/80 · -0.04em</span></div>
+    <div style="display:flex;align-items:baseline;gap:24px;flex-wrap:wrap;"><span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:32px;line-height:40px;letter-spacing:-0.02em;">Today at home</span><span style="font-family:'Poppins',sans-serif;font-size:13px;color:#747688;">headline-lg · Baloo 2 700 · 32/40</span></div>
+    <div style="display:flex;align-items:baseline;gap:24px;flex-wrap:wrap;"><span style="font-family:'Baloo 2',sans-serif;font-weight:600;font-size:20px;line-height:28px;">Needs your attention</span><span style="font-family:'Poppins',sans-serif;font-size:13px;color:#747688;">headline-md · Baloo 2 600 · 20/28</span></div>
+    <div style="display:flex;align-items:baseline;gap:24px;flex-wrap:wrap;"><span style="font-family:'Poppins',sans-serif;font-weight:400;font-size:18px;line-height:28px;">Movie night pick — 12 stars</span><span style="font-family:'Poppins',sans-serif;font-size:13px;color:#747688;">body-lg · Poppins 400 · 18/28</span></div>
+    <div style="display:flex;align-items:baseline;gap:24px;flex-wrap:wrap;"><span style="font-family:'Poppins',sans-serif;font-weight:400;font-size:16px;line-height:24px;">Bring gym clothes</span><span style="font-family:'Poppins',sans-serif;font-size:13px;color:#747688;">body-md · Poppins 400 · 16/24</span></div>
+    <div style="display:flex;align-items:baseline;gap:24px;flex-wrap:wrap;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-weight:500;font-size:16px;line-height:24px;">08:45 · 12 pts</span><span style="font-family:'Poppins',sans-serif;font-size:13px;color:#747688;">tabular-num · Poppins 500 · tabular figures</span></div>
+    <div style="display:flex;align-items:baseline;gap:24px;flex-wrap:wrap;"><span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12px;line-height:16px;letter-spacing:0.05em;text-transform:uppercase;">Monday, Oct 23</span><span style="font-family:'Poppins',sans-serif;font-size:13px;color:#747688;">label-caps · Baloo 2 700 · uppercase</span></div>
+  </div>
+</section>
+
+<!-- BUTTONS -->
+<section>
+  <h2 style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:24px;margin:0 0 20px;padding-bottom:14px;border-bottom:1px solid #e1e3e4;color:#191c1d;">Buttons</h2>
+  <div style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:20px;">
+    <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start;"><button style="background:#5d5fef;color:#ffffff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;height:48px;padding:0 24px;border:none;border-radius:9999px;box-shadow:0 2px 8px rgba(93,95,239,0.28);cursor:pointer;">Primary</button><span style="display:inline-block;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Button/Primary</span></div>
+    <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start;"><button style="background:transparent;color:#5d5fef;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;height:48px;padding:0 24px;border:2px solid #5d5fef;border-radius:9999px;cursor:pointer;">Secondary</button><span style="display:inline-block;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Button/Secondary</span></div>
+    <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start;"><button style="background:transparent;color:#434656;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;height:48px;padding:0 24px;border:none;border-radius:9999px;cursor:pointer;">Ghost</button><span style="display:inline-block;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Button/Ghost</span></div>
+    <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start;"><button style="background:#ba1a1a;color:#ffffff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;height:48px;padding:0 24px;border:none;border-radius:9999px;cursor:pointer;">Destructive</button><span style="display:inline-block;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Button/Destructive</span></div>
+    <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start;"><button style="background:#e1e3e4;color:#747688;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;height:48px;padding:0 24px;border:none;border-radius:9999px;cursor:not-allowed;">Disabled</button><span style="display:inline-block;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Button/Disabled</span></div>
+    <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start;"><button style="width:48px;height:48px;border-radius:9999px;border:1px solid #c4c5d9;background:#ffffff;display:flex;align-items:center;justify-content:center;cursor:pointer;"><span class="material-symbols-outlined" style="font-size:20px;color:#434656;">edit</span></button><span style="display:inline-block;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Button/Icon</span></div>
+    <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start;"><button style="width:56px;height:56px;border-radius:9999px;background:#5d5fef;color:#ffffff;border:none;box-shadow:0 4px 14px rgba(93,95,239,0.35);display:flex;align-items:center;justify-content:center;cursor:pointer;"><span class="material-symbols-outlined" style="font-size:28px;">add</span></button><span style="display:inline-block;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Button/FAB</span></div>
+  </div>
+</section>
+
+<!-- INPUTS -->
+<section>
+  <h2 style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:24px;margin:0 0 20px;padding-bottom:14px;border-bottom:1px solid #e1e3e4;color:#191c1d;">Inputs</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;max-width:760px;">
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12px;letter-spacing:0.05em;text-transform:uppercase;color:#434656;">Event title</span>
+      <input type="text" value="Family Dinner" style="background:#f5f3ee;border:none;border-bottom:2px solid #c4c5d9;border-radius:8px 8px 0 0;padding:12px 14px;font-family:'Poppins',sans-serif;font-size:16px;color:#191c1d;outline:none;"/>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12px;letter-spacing:0.05em;text-transform:uppercase;color:#434656;">Focused</span>
+      <input type="text" value="Tandarts Lotte" style="background:#f5f3ee;border:none;border-bottom:2px solid #5d5fef;border-radius:8px 8px 0 0;padding:12px 14px;font-family:'Poppins',sans-serif;font-size:16px;color:#191c1d;outline:none;box-shadow:0 0 0 3px rgba(93,95,239,0.12);"/>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12px;letter-spacing:0.05em;text-transform:uppercase;color:#434656;">Error</span>
+      <input type="text" value="" placeholder="Verplicht veld" style="background:#f5f3ee;border:none;border-bottom:2px solid #ba1a1a;border-radius:8px 8px 0 0;padding:12px 14px;font-family:'Poppins',sans-serif;font-size:16px;color:#747688;outline:none;"/>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;">Disabled</span>
+      <input type="text" value="Ontbijt" disabled style="background:#e7e8e9;border:none;border-bottom:2px solid #c4c5d9;border-radius:8px 8px 0 0;padding:12px 14px;font-family:'Poppins',sans-serif;font-size:16px;color:#747688;outline:none;"/>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;background:#f5f3ee;border-radius:9999px;padding:0 16px;height:48px;">
+      <span class="material-symbols-outlined" style="font-size:20px;color:#747688;">search</span>
+      <input type="text" placeholder="Search family, tasks, events" style="flex:1;border:none;background:transparent;font-family:'Poppins',sans-serif;font-size:15px;color:#191c1d;outline:none;"/>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;background:#f5f3ee;border-radius:12px;padding:0 14px;height:48px;cursor:pointer;">
+      <span style="font-family:'Poppins',sans-serif;font-size:15px;color:#191c1d;">Recurring — Weekly</span>
+      <span class="material-symbols-outlined" style="font-size:20px;color:#747688;">expand_more</span>
+    </div>
+  </div>
+</section>
+
+<!-- CHIPS & BADGES -->
+<section>
+  <h2 style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:24px;margin:0 0 20px;padding-bottom:14px;border-bottom:1px solid #e1e3e4;color:#191c1d;">Chips &amp; badges</h2>
+  <div style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:20px;">
+    <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start;"><span style="background:rgba(186,26,26,0.1);color:#ba1a1a;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10px;letter-spacing:0.05em;padding:6px 12px;border-radius:9999px;">2 NEW</span><span style="display:inline-block;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Badge/Count</span></div>
+    <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start;"><span style="background:#5d5fef;color:#ffffff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10px;letter-spacing:0.05em;padding:5px 12px;border-radius:9999px;">NOW</span><span style="display:inline-block;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Badge/Status</span></div>
+    <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start;"><span style="display:inline-flex;align-items:center;gap:6px;background:rgba(239,141,93,0.16);color:#ef8d5d;font-family:'Poppins',sans-serif;font-weight:700;font-size:14px;padding:7px 14px;border-radius:9999px;"><span class="material-symbols-outlined" style="font-size:18px;font-variation-settings:'FILL' 1;">star</span>12</span><span style="display:inline-block;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Chip/Star count</span></div>
+    <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start;"><span style="display:inline-flex;align-items:center;gap:8px;background:oklch(94% 0.025 245);border:1px solid oklch(85% 0.05 245);color:oklch(32% 0.08 245);font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;padding:8px 16px;border-radius:9999px;">School</span><span style="display:inline-block;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Chip/Category</span></div>
+    <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start;"><span style="display:inline-flex;align-items:center;gap:8px;background:#e7e8e9;color:#434656;font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;padding:8px 10px 8px 16px;border-radius:9999px;">Removable<span class="material-symbols-outlined" style="font-size:16px;">close</span></span><span style="display:inline-block;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Chip/Removable</span></div>
+        <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start;"><span style="display:inline-flex;align-items:center;gap:8px;background:#e7e8e9;color:#434656;font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;padding:8px 16px;border-radius:9999px;">Default chip</span><span style="display:inline-block;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Chip/Default</span></div>
+        <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start;"><span style="display:inline-flex;align-items:center;gap:8px;background:#5d5fef;color:#ffffff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;padding:8px 16px;border-radius:9999px;">Selected</span><span style="display:inline-block;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Chip/Selected</span></div>
+  </div>
+</section>
+
+<!-- SELECTION CONTROLS -->
+<section>
+  <h2 style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:24px;margin:0 0 20px;padding-bottom:14px;border-bottom:1px solid #e1e3e4;color:#191c1d;">Selection controls</h2>
+  <div style="display:flex;flex-wrap:wrap;gap:24px;">
+    <div style="display:flex;flex-direction:column;gap:8px;"><div style="display:flex;align-items:center;gap:10px;"><span style="width:24px;height:24px;border-radius:6px;border:2px solid #c4c5d9;display:inline-block;"></span><span style="font-family:'Poppins',sans-serif;font-size:15px;">Unchecked</span></div><span style="display:inline-block;width:fit-content;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Checkbox/Off</span></div>
+    <div style="display:flex;flex-direction:column;gap:8px;"><div style="display:flex;align-items:center;gap:10px;"><span style="width:24px;height:24px;border-radius:6px;background:#006056;display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined" style="font-size:16px;color:#ffffff;">check</span></span><span style="font-family:'Poppins',sans-serif;font-size:15px;">Checked</span></div><span style="display:inline-block;width:fit-content;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Checkbox/On</span></div>
+    <div style="display:flex;flex-direction:column;gap:8px;"><div style="display:flex;align-items:center;gap:10px;"><span style="width:22px;height:22px;border-radius:9999px;border:2px solid #c4c5d9;display:inline-block;"></span><span style="font-family:'Poppins',sans-serif;font-size:15px;">Radio off</span></div><span style="display:inline-block;width:fit-content;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Radio/Off</span></div>
+    <div style="display:flex;flex-direction:column;gap:8px;"><div style="display:flex;align-items:center;gap:10px;"><span style="width:22px;height:22px;border-radius:9999px;border:6px solid #5d5fef;display:inline-block;"></span><span style="font-family:'Poppins',sans-serif;font-size:15px;">Radio on</span></div><span style="display:inline-block;width:fit-content;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Radio/On</span></div>
+    <div style="display:flex;flex-direction:column;gap:8px;"><div style="display:flex;align-items:center;gap:10px;"><span style="width:44px;height:26px;border-radius:9999px;background:#5d5fef;display:inline-flex;align-items:center;padding:3px;justify-content:flex-end;"><span style="width:20px;height:20px;border-radius:9999px;background:#ffffff;display:block;"></span></span><span style="font-family:'Poppins',sans-serif;font-size:15px;">Switch on</span></div><span style="display:inline-block;width:fit-content;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Switch/On</span></div>
+    <div style="display:flex;flex-direction:column;gap:8px;"><div style="display:flex;align-items:center;gap:10px;"><span style="width:44px;height:26px;border-radius:9999px;background:#c4c5d9;display:inline-flex;align-items:center;padding:3px;"><span style="width:20px;height:20px;border-radius:9999px;background:#ffffff;display:block;"></span></span><span style="font-family:'Poppins',sans-serif;font-size:15px;">Switch off</span></div><span style="display:inline-block;width:fit-content;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Switch/Off</span></div>
+        <div style="display:flex;flex-direction:column;gap:8px;"><div style="display:flex;align-items:center;gap:10px;"><span class="material-symbols-outlined" style="font-size:22px;color:#c4c5d9;">radio_button_unchecked</span><span style="font-family:'Poppins',sans-serif;font-size:14px;">Checkbox, unchecked</span></div><span style="display:inline-block;width:fit-content;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Toggle/Task row — open</span></div>
+        <div style="display:flex;flex-direction:column;gap:8px;"><div style="display:flex;align-items:center;gap:10px;"><span class="material-symbols-outlined" style="font-size:20px;color:oklch(55% 0.14 155);font-variation-settings:'FILL' 1;">check_circle</span><span style="font-family:'Poppins',sans-serif;font-size:14px;">Checkbox, checked</span></div><span style="display:inline-block;width:fit-content;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Toggle/Task row — done</span></div>
+  </div>
+</section>
+
+<!-- AVATARS -->
+<section>
+  <h2 style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:24px;margin:0 0 20px;padding-bottom:14px;border-bottom:1px solid #e1e3e4;color:#191c1d;">Avatars</h2>
+  <div style="display:flex;flex-direction:column;gap:24px;">
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="position:relative;display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;flex-shrink:0;background:oklch(94% 0.03 335);border-radius:9999px;"><img src="uploads/child1.svg" alt="Mila" style="width:100%;height:100%;border-radius:9999px;object-fit:cover;display:block;"/></span>
+        <span style="position:relative;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;flex-shrink:0;background:oklch(94% 0.03 245);border-radius:9999px;"><img src="uploads/child2.svg" alt="Daan" style="width:100%;height:100%;border-radius:9999px;object-fit:cover;display:block;"/></span>
+        <span style="position:relative;display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;flex-shrink:0;background:oklch(94% 0.03 290);border-radius:9999px;"><img src="uploads/parent2.svg" alt="Lotte" style="width:100%;height:100%;border-radius:9999px;object-fit:cover;display:block;"/></span>
+      </div>
+      <span style="display:inline-block;width:fit-content;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Avatar/Sizes (32 · 44 · 56)</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div style="display:flex;">
+        <span style="position:relative;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;flex-shrink:0;background:oklch(94% 0.03 335);border-radius:9999px;box-shadow:0 0 0 2px #ffffff;"><img src="uploads/child1.svg" alt="Mila" style="width:100%;height:100%;border-radius:9999px;object-fit:cover;display:block;"/></span>
+        <span style="position:relative;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;flex-shrink:0;margin-left:-7px;background:oklch(94% 0.03 245);border-radius:9999px;box-shadow:0 0 0 2px #ffffff;"><img src="uploads/child2.svg" alt="Daan" style="width:100%;height:100%;border-radius:9999px;object-fit:cover;display:block;"/></span>
+        <span style="position:relative;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;flex-shrink:0;margin-left:-7px;background:oklch(94% 0.03 290);border-radius:9999px;box-shadow:0 0 0 2px #ffffff;"><img src="uploads/parent2.svg" alt="Lotte" style="width:100%;height:100%;border-radius:9999px;object-fit:cover;display:block;"/></span>
+        <span style="position:relative;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;flex-shrink:0;margin-left:-7px;background:oklch(94% 0.03 65);border-radius:9999px;box-shadow:0 0 0 2px #ffffff;"><img src="uploads/parent1.svg" alt="Tom" style="width:100%;height:100%;border-radius:9999px;object-fit:cover;display:block;"/></span>
+      </div>
+      <span style="display:inline-block;width:fit-content;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Avatar/Stack</span>
+    </div>
+  </div>
+</section>
+
+<!-- CARDS -->
+<section>
+  <h2 style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:24px;margin:0 0 20px;padding-bottom:14px;border-bottom:1px solid #e1e3e4;color:#191c1d;">Cards</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;">
+
+    <div style="display:flex;flex-direction:column;gap:10px;">
+    <span style="display:inline-block;width:fit-content;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Card/Attention</span>
+    <div style="background:#f5f3ee;border-radius:24px;padding:20px;box-shadow:0 1px 2px rgba(0,0,0,0.04);position:relative;overflow:hidden;">
+      <div style="position:absolute;top:-40px;right:-40px;width:128px;height:128px;background:rgba(93,95,239,0.06);border-radius:9999px;filter:blur(20px);"></div>
+      <div style="display:flex;gap:12px;align-items:flex-start;position:relative;">
+        <span style="position:relative;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;flex-shrink:0;background:oklch(94% 0.03 335);border-radius:9999px;"><img src="uploads/child1.svg" alt="Mila" style="width:100%;height:100%;border-radius:9999px;object-fit:cover;display:block;"/></span>
+        <div style="display:flex;flex-direction:column;">
+          <span class="tnum" style="font-family:'Poppins',sans-serif;font-weight:500;font-size:16px;">Mila asked for a reward</span>
+          <span style="font-family:'Poppins',sans-serif;font-size:14px;color:#434656;">Movie night pick — <b style="color:#ef8d5d;">12 stars</b></span>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:16px;position:relative;">
+        <button style="flex:1;background:#5d5fef;color:#ffffff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;height:48px;border:none;border-radius:9999px;cursor:pointer;">Approve</button>
+        <button style="flex:1;background:transparent;color:#5d5fef;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;height:48px;border:1px solid rgba(93,95,239,0.2);border-radius:9999px;cursor:pointer;">Deny</button>
+      </div>
+    </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px;">
+    <span style="display:inline-block;width:fit-content;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Card/Stat</span>
+    <div style="background:#ffffff;border-radius:24px;padding:18px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;margin-bottom:16px;border-bottom:1px solid #e1e3e4;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span style="position:relative;display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;flex-shrink:0;background:oklch(94% 0.03 335);border-radius:9999px;"><img src="uploads/child1.svg" alt="Mila" style="width:100%;height:100%;border-radius:9999px;object-fit:cover;display:block;"/></span>
+          <div style="display:flex;flex-direction:column;"><span style="font-family:'Poppins',sans-serif;font-size:16px;">Mila</span><span style="font-family:'Poppins',sans-serif;font-size:12px;color:#434656;">3 of 4 tasks done</span></div>
+        </div>
+        <span style="display:inline-flex;align-items:center;gap:6px;background:rgba(239,141,93,0.16);color:#ef8d5d;font-family:'Poppins',sans-serif;font-weight:700;font-size:14px;padding:6px 12px;border-radius:9999px;"><span class="material-symbols-outlined" style="font-size:18px;font-variation-settings:'FILL' 1;">star</span>12</span>
+      </div>
+      <div style="width:100%;height:8px;border-radius:9999px;background:#e1e3e4;overflow:hidden;"><div style="width:75%;height:100%;background:#71f8e4;border-radius:9999px;"></div></div>
+    </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px;">
+    <span style="display:inline-block;width:fit-content;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Card/Toast</span>
+    <div style="background:#2e3132;border-radius:24px;padding:16px;display:flex;align-items:center;gap:12px;box-shadow:0 8px 24px rgba(0,0,0,0.18);">
+      <span style="width:32px;height:32px;border-radius:9999px;background:rgba(93,95,239,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:18px;color:#b8c3ff;">check</span></span>
+      <span style="font-family:'Poppins',sans-serif;font-size:14px;color:#f0f1f2;flex:1;">Bedtime routine updated on the family hub</span>
+      <span class="material-symbols-outlined" style="font-size:20px;color:#f0f1f2;opacity:0.7;">close</span>
+    </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px;">
+    <span style="display:inline-block;width:fit-content;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Card/Task row</span>
+    <div style="background:#ffffff;border-radius:24px;padding:20px;box-shadow:0 1px 2px rgba(0,0,0,0.04);display:flex;align-items:center;justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:10px;"><span class="material-symbols-outlined" style="font-size:20px;color:#c4c5d9;">radio_button_unchecked</span><span style="font-family:'Poppins',sans-serif;font-size:14px;">Boodschappen bestellen</span></div>
+      <span style="position:relative;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;flex-shrink:0;background:oklch(94% 0.03 290);border-radius:9999px;"><img src="uploads/parent2.svg" alt="Lotte" style="width:100%;height:100%;border-radius:9999px;object-fit:cover;display:block;"/></span>
+    </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px;">
+    <span style="display:inline-block;width:fit-content;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Card/Inverse</span>
+    <div style="background:#191c1d;border-radius:24px;padding:20px;">
+      <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:16px;margin-bottom:6px;color:#ffffff;">Inverse card</span>
+      <span style="font-family:'Poppins',sans-serif;font-size:14px;color:#c4c5d9;">Reserved for high-contrast highlights and celebration moments.</span>
+    </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- CALENDAR -->
+<section>
+  <h2 style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:24px;margin:0 0 8px;padding-bottom:14px;border-bottom:1px solid #e1e3e4;color:#191c1d;">Calendar</h2>
+  <p style="font-family:'Poppins',sans-serif;font-size:15px;color:#434656;margin:0 0 24px;max-width:640px;">The core of the family planner — a week strip, month grid, day agenda, and event list all sharing the same category color language.</p>
+
+  <div style="display:flex;flex-direction:column;gap:24px;">
+
+    <!-- Week strip -->
+    <div style="background:#ffffff;border-radius:24px;padding:20px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+      <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;margin-bottom:14px;">Week strip</span>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0;border-radius:16px;"><span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;color:#747688;">MON</span><span class="tnum" style="font-family:'Poppins',sans-serif;font-weight:500;font-size:15px;">19</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0;border-radius:16px;"><span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;color:#747688;">TUE</span><span class="tnum" style="font-family:'Poppins',sans-serif;font-weight:500;font-size:15px;">20</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0;border-radius:16px;"><span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;color:#747688;">WED</span><span class="tnum" style="font-family:'Poppins',sans-serif;font-weight:500;font-size:15px;">21</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0;border-radius:16px;position:relative;"><span style="width:5px;height:5px;border-radius:9999px;background:oklch(58% 0.14 245);position:absolute;bottom:4px;"></span><span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;color:#747688;">THU</span><span class="tnum" style="font-family:'Poppins',sans-serif;font-weight:500;font-size:15px;">22</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0;border-radius:16px;background:#5d5fef;"><span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;color:rgba(255,255,255,0.75);">FRI</span><span class="tnum" style="font-family:'Poppins',sans-serif;font-weight:700;font-size:15px;color:#ffffff;">23</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0;border-radius:16px;"><span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;color:#747688;">SAT</span><span class="tnum" style="font-family:'Poppins',sans-serif;font-weight:500;font-size:15px;">24</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0;border-radius:16px;position:relative;"><span style="width:5px;height:5px;border-radius:9999px;background:oklch(58% 0.14 155);position:absolute;bottom:4px;"></span><span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;color:#747688;">SUN</span><span class="tnum" style="font-family:'Poppins',sans-serif;font-weight:500;font-size:15px;">25</span></div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1.1fr 1fr;gap:24px;align-items:start;">
+
+      <!-- Month view / date picker -->
+      <div style="background:#ffffff;border-radius:24px;padding:20px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+        <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;margin-bottom:14px;">Month view / date picker</span>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <span class="material-symbols-outlined" style="font-size:20px;color:#747688;">chevron_left</span>
+          <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:16px;">October 2026</span>
+          <span class="material-symbols-outlined" style="font-size:20px;color:#747688;">chevron_right</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px;">
+          <span style="text-align:center;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;color:#747688;">M</span>
+          <span style="text-align:center;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;color:#747688;">T</span>
+          <span style="text-align:center;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;color:#747688;">W</span>
+          <span style="text-align:center;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;color:#747688;">T</span>
+          <span style="text-align:center;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;color:#747688;">F</span>
+          <span style="text-align:center;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;color:#747688;">S</span>
+          <span style="text-align:center;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;color:#747688;">S</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;">
+          <span></span><span></span><span></span>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-size:13px;">1</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-size:13px;">2</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;position:relative;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-size:13px;">3</span><span style="width:4px;height:4px;border-radius:9999px;background:oklch(58% 0.14 155);position:absolute;bottom:1px;"></span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-size:13px;">4</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-size:13px;">5</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-size:13px;">6</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;position:relative;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-size:13px;">7</span><span style="width:4px;height:4px;border-radius:9999px;background:oklch(58% 0.14 245);position:absolute;bottom:1px;"></span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-size:13px;">8</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-size:13px;">9</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-size:13px;">10</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-size:13px;">11</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-size:13px;">12</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;position:relative;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-size:13px;">13</span><span style="width:4px;height:4px;border-radius:9999px;background:oklch(58% 0.14 335);position:absolute;bottom:1px;"></span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-size:13px;">14</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-size:13px;">15</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-size:13px;">16</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-size:13px;">17</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-size:13px;">18</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;position:relative;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-size:13px;">19</span><span style="width:4px;height:4px;border-radius:9999px;background:oklch(58% 0.14 245);position:absolute;bottom:1px;"></span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-size:13px;">20</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-size:13px;">21</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-size:13px;">22</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;padding:6px 0;background:#5d5fef;border-radius:9999px;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:#ffffff;">23</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-size:13px;">24</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-size:13px;">25</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-size:13px;">26</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;position:relative;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-size:13px;">27</span><span style="width:4px;height:4px;border-radius:9999px;background:oklch(58% 0.14 65);position:absolute;bottom:1px;"></span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-size:13px;">28</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-size:13px;">29</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-size:13px;">30</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-size:13px;">31</span></div>
+        </div>
+      </div>
+
+      <!-- Day agenda -->
+      <div style="background:#ffffff;border-radius:24px;padding:20px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+        <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;margin-bottom:14px;">Day agenda</span>
+        <div style="display:flex;flex-direction:column;">
+          <div style="display:flex;gap:14px;opacity:0.55;">
+            <div style="display:flex;flex-direction:column;align-items:center;width:44px;flex-shrink:0;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-size:13px;color:#434656;">16:00</span><div style="width:1px;flex:1;background:#c4c5d9;min-height:22px;margin-top:4px;"></div></div>
+            <div style="display:flex;flex-direction:column;padding-bottom:14px;"><div style="display:flex;align-items:center;gap:8px;"><span style="width:8px;height:8px;border-radius:9999px;background:oklch(58% 0.14 155);"></span><span style="font-family:'Poppins',sans-serif;font-size:14px;">Football Practice</span></div><span style="font-family:'Poppins',sans-serif;font-size:12px;color:#434656;margin-left:16px;">Mila</span></div>
+          </div>
+          <div style="display:flex;gap:14px;position:relative;">
+            <div style="position:absolute;left:-20px;top:0;bottom:0;width:4px;background:#ef8d5d;border-radius:0 4px 4px 0;"></div>
+            <div style="display:flex;flex-direction:column;align-items:center;width:44px;flex-shrink:0;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:#5d5fef;">18:00</span><div style="width:1px;flex:1;background:#c4c5d9;min-height:22px;margin-top:4px;"></div></div>
+            <div style="display:flex;flex-direction:column;flex:1;background:rgba(93,95,239,0.06);border-radius:0 12px 12px 0;padding:8px 12px;margin-left:-8px;margin-bottom:8px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;"><div style="display:flex;align-items:center;gap:8px;"><span style="width:8px;height:8px;border-radius:9999px;background:#ef8d5d;"></span><span style="font-family:'Poppins',sans-serif;font-weight:700;font-size:14px;">Family Dinner</span></div><span style="background:#5d5fef;color:#ffffff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10px;padding:3px 10px;border-radius:9999px;">NOW</span></div>
+              <span style="font-family:'Poppins',sans-serif;font-size:12px;color:#434656;margin-left:16px;margin-top:2px;">Everyone</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:14px;">
+            <div style="display:flex;flex-direction:column;align-items:center;width:44px;flex-shrink:0;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-size:13px;color:#434656;">19:30</span></div>
+            <div style="display:flex;flex-direction:column;"><div style="display:flex;align-items:center;gap:8px;"><span style="width:8px;height:8px;border-radius:9999px;background:oklch(58% 0.14 245);"></span><span style="font-family:'Poppins',sans-serif;font-size:14px;">Bedtime Routine</span></div><span style="font-family:'Poppins',sans-serif;font-size:12px;color:#434656;margin-left:16px;">Kids</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Overlapping events -->
+    <div style="background:#ffffff;border-radius:24px;padding:20px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+      <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;margin-bottom:14px;">Overlapping events (fanned stack)</span>
+      <div style="position:relative;height:100px;max-width:340px;">
+        <div style="position:absolute;top:36px;left:0;right:0;height:56px;border-radius:16px;background:#ffffff;box-shadow:0 1px 3px rgba(0,0,0,0.1);z-index:1;overflow:hidden;"><div style="position:absolute;left:0;top:0;bottom:0;width:6px;background:oklch(58% 0.14 65);"></div></div>
+        <div style="position:absolute;top:24px;left:0;right:0;height:56px;border-radius:16px;background:#ffffff;box-shadow:0 1px 3px rgba(0,0,0,0.1);z-index:2;overflow:hidden;"><div style="position:absolute;left:0;top:0;bottom:0;width:6px;background:oklch(58% 0.14 290);"></div></div>
+        <div style="position:absolute;top:12px;left:0;right:0;height:56px;border-radius:16px;background:#ffffff;box-shadow:0 1px 3px rgba(0,0,0,0.1);z-index:3;overflow:hidden;"><div style="position:absolute;left:0;top:0;bottom:0;width:6px;background:oklch(58% 0.14 245);"></div></div>
+        <div style="position:absolute;top:0;left:0;right:0;height:56px;border-radius:16px;background:#ffffff;box-shadow:0 2px 10px rgba(0,0,0,0.1);z-index:4;overflow:hidden;display:flex;align-items:center;padding-left:14px;gap:10px;"><div style="position:absolute;left:0;top:0;bottom:0;width:6px;background:oklch(58% 0.14 335);"></div><span style="font-family:'Poppins',sans-serif;font-weight:600;font-size:14px;">Etentje · 4 personen</span></div>
+      </div>
+    </div>
+
+  <!-- Event list items -->
+    <div style="background:#ffffff;border-radius:24px;padding:8px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+      <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;margin:12px 16px 10px;">Event list item</span>
+      <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-top:1px solid #e1e3e4;">
+        <div style="width:4px;align-self:stretch;border-radius:9999px;background:oklch(58% 0.14 245);"></div>
+        <div style="display:flex;flex-direction:column;width:56px;flex-shrink:0;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-weight:600;font-size:14px;">09:00</span><span class="tnum" style="font-family:'Poppins',sans-serif;font-size:12px;color:#747688;">10:00</span></div>
+        <div style="display:flex;flex-direction:column;flex:1;min-width:0;"><span style="font-family:'Poppins',sans-serif;font-weight:600;font-size:15px;">Parent-teacher meeting</span><span style="font-family:'Poppins',sans-serif;font-size:12px;color:#434656;">Lindenschool · Room 4</span></div>
+        <div style="display:flex;"><span style="position:relative;display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;flex-shrink:0;background:oklch(94% 0.03 290);border-radius:9999px;"><img src="uploads/parent2.svg" alt="Lotte" style="width:100%;height:100%;border-radius:9999px;object-fit:cover;display:block;"/></span></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-top:1px solid #e1e3e4;">
+        <div style="width:4px;align-self:stretch;border-radius:9999px;background:oklch(58% 0.14 20);"></div>
+        <div style="display:flex;flex-direction:column;width:56px;flex-shrink:0;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-weight:600;font-size:14px;">14:30</span><span class="tnum" style="font-family:'Poppins',sans-serif;font-size:12px;color:#747688;">15:00</span></div>
+        <div style="display:flex;flex-direction:column;flex:1;min-width:0;"><span style="font-family:'Poppins',sans-serif;font-weight:600;font-size:15px;">Dentist — Daan</span><span style="font-family:'Poppins',sans-serif;font-size:12px;color:#434656;">Dr. Verhoeven</span></div>
+        <div style="display:flex;"><span style="position:relative;display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;flex-shrink:0;background:oklch(94% 0.03 245);border-radius:9999px;"><img src="uploads/child2.svg" alt="Daan" style="width:100%;height:100%;border-radius:9999px;object-fit:cover;display:block;"/></span></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- PAGE LAYOUT -->
+<section>
+  <h2 style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:24px;margin:0 0 8px;padding-bottom:14px;border-bottom:1px solid #e1e3e4;color:#191c1d;">Page layout</h2>
+  <p style="font-family:'Poppins',sans-serif;font-size:15px;color:#434656;margin:0 0 24px;max-width:640px;">Sidebar + header + footer shell for the tablet/desktop "Hub" context.</p>
+
+  <div style="display:flex;border-radius:24px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);border:1px solid #e1e3e4;height:560px;">
+
+    <div style="width:200px;flex-shrink:0;background:#ffffff;border-right:1px solid #e1e3e4;display:flex;flex-direction:column;padding:24px 16px;gap:4px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px;">
+        <span style="width:28px;height:28px;border-radius:9999px;background:#5d5fef;color:#ffffff;display:flex;align-items:center;justify-content:center;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:13px;">K</span>
+        <span style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:16px;letter-spacing:-0.02em;">Kynite</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;background:rgba(93,95,239,0.08);color:#5d5fef;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;"><span class="material-symbols-outlined" style="font-size:18px;">home</span>Home</div>
+      <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;color:#434656;font-family:'Poppins',sans-serif;font-size:13px;"><span class="material-symbols-outlined" style="font-size:18px;">calendar_today</span>Calendar</div>
+      <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;color:#434656;font-family:'Poppins',sans-serif;font-size:13px;"><span class="material-symbols-outlined" style="font-size:18px;">checklist</span>Routines</div>
+      <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;color:#434656;font-family:'Poppins',sans-serif;font-size:13px;"><span class="material-symbols-outlined" style="font-size:18px;">workspace_premium</span>Rewards</div>
+      <div style="margin-top:auto;display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;color:#434656;font-family:'Poppins',sans-serif;font-size:13px;"><span class="material-symbols-outlined" style="font-size:18px;">settings</span>Settings</div>
+    </div>
+
+    <div style="flex:1;display:flex;flex-direction:column;min-width:0;background:#fbf9f4;">
+      <div style="height:64px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid #e1e3e4;">
+        <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:17px;">Home</span>
+        <div style="display:flex;align-items:center;gap:14px;">
+          <span class="material-symbols-outlined" style="font-size:20px;color:#434656;">notifications</span>
+          <span style="position:relative;display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;flex-shrink:0;background:oklch(94% 0.03 290);border-radius:9999px;"><img src="uploads/parent2.svg" alt="Lotte" style="width:100%;height:100%;border-radius:9999px;object-fit:cover;display:block;"/></span>
+        </div>
+      </div>
+
+      <div style="flex:1;padding:20px 24px;display:grid;grid-template-columns:1.3fr 1fr;gap:16px;">
+        <div style="background:#ffffff;border-radius:18px;padding:16px;box-shadow:0 1px 2px rgba(0,0,0,0.04);display:flex;flex-direction:column;gap:12px;">
+          <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;">Today at home</span>
+          <div style="display:flex;gap:8px;"><span style="width:8px;height:8px;border-radius:9999px;background:#ef8d5d;margin-top:6px;"></span><div style="display:flex;flex-direction:column;"><span style="font-family:'Poppins',sans-serif;font-weight:600;font-size:14px;">18:00 · Family Dinner</span><span style="font-family:'Poppins',sans-serif;font-size:12px;color:#434656;">Everyone</span></div></div>
+          <div style="display:flex;gap:8px;"><span style="width:8px;height:8px;border-radius:9999px;background:oklch(58% 0.14 245);margin-top:6px;"></span><div style="display:flex;flex-direction:column;"><span style="font-family:'Poppins',sans-serif;font-weight:600;font-size:14px;">19:30 · Bedtime Routine</span><span style="font-family:'Poppins',sans-serif;font-size:12px;color:#434656;">Kids</span></div></div>
+        </div>
+        <div style="background:#f5f3ee;border-radius:18px;padding:16px;box-shadow:0 1px 2px rgba(0,0,0,0.04);display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;gap:10px;align-items:flex-start;">
+            <span style="position:relative;display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;flex-shrink:0;background:oklch(94% 0.03 335);border-radius:9999px;"><img src="uploads/child1.svg" alt="Mila" style="width:100%;height:100%;border-radius:9999px;object-fit:cover;display:block;"/></span>
+            <span style="font-family:'Poppins',sans-serif;font-size:13px;color:#434656;">Mila asked for a reward — <b style="color:#ef8d5d;">12 stars</b></span>
+          </div>
+          <button style="background:#5d5fef;color:#ffffff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12px;height:34px;border:none;border-radius:9999px;cursor:pointer;">Approve</button>
+        </div>
+      </div>
+
+      <div style="height:40px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-top:1px solid #e1e3e4;font-family:'Poppins',sans-serif;font-size:12px;color:#747688;">
+        <span>Synced 2 min ago</span>
+        <span>Kynite Family Hub</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REWARDS -->
+<section>
+  <h2 style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:24px;margin:0 0 8px;padding-bottom:14px;border-bottom:1px solid #e1e3e4;color:#191c1d;">Rewards</h2>
+  <p style="font-family:'Poppins',sans-serif;font-size:15px;color:#434656;margin:0 0 24px;max-width:680px;">Stars earned from routines, spent in the reward store. Claims go through a parent approval queue; the horizon — same-day treats vs. a savings goal — adapts to the child's age.</p>
+
+  <div style="display:flex;flex-direction:column;gap:20px;">
+
+    <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:20px;">
+      <!-- Star balance -->
+      <div style="background:#ffffff;border-radius:20px;padding:20px;box-shadow:0 1px 2px rgba(0,0,0,0.04);display:flex;align-items:center;gap:18px;">
+        <div style="position:relative;width:88px;height:88px;flex-shrink:0;border-radius:9999px;background:conic-gradient(#ef8d5d 0% 65%, #e1e3e4 65% 100%);display:flex;align-items:center;justify-content:center;">
+          <div style="width:68px;height:68px;border-radius:9999px;background:#ffffff;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+            <span class="tnum" style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:22px;">24</span>
+            <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:9px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;">stars</span>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <div style="display:flex;align-items:center;gap:8px;"><span style="position:relative;display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;flex-shrink:0;background:oklch(94% 0.03 335);border-radius:9999px;"><img src="uploads/child1.svg" alt="Mila" style="width:100%;height:100%;border-radius:9999px;object-fit:cover;display:block;"/></span><span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:16px;">Mila</span></div>
+          <button style="display:flex;align-items:center;gap:8px;background:#f5f3ee;color:#434656;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;border:none;border-radius:9999px;height:48px;padding:0 20px;width:fit-content;cursor:pointer;"><span class="material-symbols-outlined" style="font-size:18px;">add</span>Award bonus stars</button>
+        </div>
+      </div>
+
+      <!-- Savings goal -->
+      <div style="background:#ffffff;border-radius:20px;padding:20px;box-shadow:0 1px 2px rgba(0,0,0,0.04);display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div style="display:flex;flex-direction:column;">
+            <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;">Savings goal · ages 8–12</span>
+            <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:18px;">New bike</span>
+          </div>
+          <span class="material-symbols-outlined" style="font-size:32px;color:#ef8d5d;">pedal_bike</span>
+        </div>
+        <div style="width:100%;height:10px;border-radius:9999px;background:#e1e3e4;overflow:hidden;"><div style="width:62%;height:100%;background:#ef8d5d;border-radius:9999px;"></div></div>
+        <div style="display:flex;justify-content:space-between;"><span class="tnum" style="font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;color:#434656;">31 / 50 stars</span><span style="font-family:'Poppins',sans-serif;font-size:13px;color:#747688;">62%</span></div>
+      </div>
+    </div>
+
+    <!-- Weekly star chart -->
+    <div style="background:#ffffff;border-radius:20px;padding:20px;box-shadow:0 1px 2px rgba(0,0,0,0.04);overflow:hidden;">
+      <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:16px;margin-bottom:14px;">Weekly star chart</span>
+      <div style="display:grid;grid-template-columns:1.6fr repeat(7,1fr);gap:0;grid-auto-rows:56px;">
+        <div></div>
+        <div style="text-align:center;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;color:#747688;padding-bottom:8px;">MON</div>
+        <div style="text-align:center;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;color:#5d5fef;padding-bottom:8px;">TUE</div>
+        <div style="text-align:center;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;color:#747688;padding-bottom:8px;">WED</div>
+        <div style="text-align:center;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;color:#747688;padding-bottom:8px;">THU</div>
+        <div style="text-align:center;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;color:#747688;padding-bottom:8px;">FRI</div>
+        <div style="text-align:center;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;color:#747688;padding-bottom:8px;">SAT</div>
+        <div style="text-align:center;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;color:#747688;padding-bottom:8px;">SUN</div>
+
+        <div style="display:flex;align-items:center;gap:8px;padding:10px 8px 10px 0;border-top:1px solid #e1e3e4;"><span class="material-symbols-outlined" style="font-size:16px;color:oklch(58% 0.14 20);">brush</span><span style="font-family:'Poppins',sans-serif;font-size:13px;">Brush teeth</span></div>
+        <div style="display:flex;align-items:center;justify-content:center;border-top:1px solid #e1e3e4;"><span class="material-symbols-outlined" style="font-size:20px;color:#ef8d5d;font-variation-settings:'FILL' 1;">star</span></div>
+        <div style="display:flex;align-items:center;justify-content:center;border-top:1px solid #e1e3e4;background:rgba(93,95,239,0.04);"><span class="material-symbols-outlined" style="font-size:20px;color:#ef8d5d;font-variation-settings:'FILL' 1;">star</span></div>
+        <div style="display:flex;align-items:center;justify-content:center;border-top:1px solid #e1e3e4;"><span style="width:14px;height:14px;border-radius:9999px;border:2px solid #c4c5d9;"></span></div>
+        <div style="border-top:1px solid #e1e3e4;"></div><div style="border-top:1px solid #e1e3e4;"></div><div style="border-top:1px solid #e1e3e4;"></div><div style="border-top:1px solid #e1e3e4;"></div>
+
+        <div style="display:flex;align-items:center;gap:8px;padding:10px 8px 10px 0;border-top:1px solid #e1e3e4;"><span class="material-symbols-outlined" style="font-size:16px;color:oklch(58% 0.14 290);">bed</span><span style="font-family:'Poppins',sans-serif;font-size:13px;">Make bed</span></div>
+        <div style="display:flex;align-items:center;justify-content:center;border-top:1px solid #e1e3e4;"><span class="material-symbols-outlined" style="font-size:20px;color:#ef8d5d;font-variation-settings:'FILL' 1;">star</span></div>
+        <div style="display:flex;align-items:center;justify-content:center;border-top:1px solid #e1e3e4;background:rgba(93,95,239,0.04);"><span class="material-symbols-outlined" style="font-size:18px;color:#c4c5d9;">check_circle</span></div>
+        <div style="display:flex;align-items:center;justify-content:center;border-top:1px solid #e1e3e4;"><span style="width:14px;height:14px;border-radius:9999px;border:2px solid #c4c5d9;"></span></div>
+        <div style="border-top:1px solid #e1e3e4;"></div><div style="border-top:1px solid #e1e3e4;"></div><div style="border-top:1px solid #e1e3e4;"></div><div style="border-top:1px solid #e1e3e4;"></div>
+
+        <div style="display:flex;align-items:center;gap:8px;padding:10px 8px 10px 0;border-top:1px solid #e1e3e4;"><span class="material-symbols-outlined" style="font-size:16px;color:oklch(58% 0.14 335);">restaurant</span><span style="font-family:'Poppins',sans-serif;font-size:13px;">Clear table</span></div>
+        <div style="display:flex;align-items:center;justify-content:center;border-top:1px solid #e1e3e4;"><span class="material-symbols-outlined" style="font-size:16px;color:#c4c5d9;">close</span></div>
+        <div style="display:flex;align-items:center;justify-content:center;border-top:1px solid #e1e3e4;background:rgba(93,95,239,0.04);"><span class="material-symbols-outlined" style="font-size:20px;color:#ef8d5d;font-variation-settings:'FILL' 1;">star</span></div>
+        <div style="display:flex;align-items:center;justify-content:center;border-top:1px solid #e1e3e4;"><span style="width:14px;height:14px;border-radius:9999px;border:2px solid #c4c5d9;"></span></div>
+        <div style="border-top:1px solid #e1e3e4;"></div><div style="border-top:1px solid #e1e3e4;"></div><div style="border-top:1px solid #e1e3e4;"></div><div style="border-top:1px solid #e1e3e4;"></div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:14px;border-top:1px solid #e1e3e4;">
+        <span style="display:flex;align-items:center;gap:6px;font-family:'Poppins',sans-serif;font-size:13px;color:#747688;"><span class="material-symbols-outlined" style="font-size:16px;">info</span>Tap a cell to mark it complete</span>
+        <span style="font-family:'Poppins',sans-serif;font-size:13px;color:#434656;">Today's stars <b class="tnum" style="color:#191c1d;">2 / 5</b></span>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:20px;align-items:start;">
+
+      <!-- Reward store -->
+      <div style="background:#ffffff;border-radius:20px;padding:20px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+        <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:16px;margin-bottom:14px;">Reward store</span>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
+          <div style="border:1px solid #e1e3e4;border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px;align-items:flex-start;">
+            <span style="width:40px;height:40px;border-radius:12px;background:oklch(94% 0.025 335);display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined" style="font-size:20px;color:oklch(45% 0.14 335);">icecream</span></span>
+            <span style="font-family:'Poppins',sans-serif;font-weight:600;font-size:14px;">Ice cream trip</span>
+            <span style="display:inline-flex;align-items:center;gap:4px;color:#ef8d5d;font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;"><span class="material-symbols-outlined" style="font-size:16px;font-variation-settings:'FILL' 1;">star</span>10</span>
+            <button style="width:100%;background:#5d5fef;color:#ffffff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;height:48px;border:none;border-radius:9999px;cursor:pointer;">Claim</button>
+          </div>
+          <div style="border:1px solid #e1e3e4;border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px;align-items:flex-start;">
+            <span style="width:40px;height:40px;border-radius:12px;background:oklch(94% 0.025 245);display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined" style="font-size:20px;color:oklch(45% 0.14 245);">movie</span></span>
+            <span style="font-family:'Poppins',sans-serif;font-weight:600;font-size:14px;">Movie night pick</span>
+            <span style="display:inline-flex;align-items:center;gap:4px;color:#ef8d5d;font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;"><span class="material-symbols-outlined" style="font-size:16px;font-variation-settings:'FILL' 1;">star</span>12</span>
+            <button style="width:100%;background:#5d5fef;color:#ffffff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;height:48px;border:none;border-radius:9999px;cursor:pointer;">Claim</button>
+          </div>
+          <div style="border:1px solid #e1e3e4;border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px;align-items:flex-start;opacity:0.5;">
+            <span style="width:40px;height:40px;border-radius:12px;background:oklch(94% 0.025 110);display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined" style="font-size:20px;color:oklch(45% 0.14 110);">park</span></span>
+            <span style="font-family:'Poppins',sans-serif;font-weight:600;font-size:14px;">Zoo trip</span>
+            <span style="display:inline-flex;align-items:center;gap:4px;color:#ef8d5d;font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;"><span class="material-symbols-outlined" style="font-size:16px;font-variation-settings:'FILL' 1;">star</span>30</span>
+            <button style="width:100%;background:#e1e3e4;color:#747688;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;height:48px;border:none;border-radius:9999px;cursor:not-allowed;">Need 6 more</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Approval queue -->
+      <div style="background:#ffffff;border-radius:20px;padding:20px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+        <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:16px;margin-bottom:14px;">Approval queue</span>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div style="display:flex;gap:10px;align-items:flex-start;">
+            <span style="position:relative;display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;flex-shrink:0;background:oklch(94% 0.03 335);border-radius:9999px;"><img src="uploads/child1.svg" alt="Mila" style="width:100%;height:100%;border-radius:9999px;object-fit:cover;display:block;"/></span>
+            <div style="display:flex;flex-direction:column;flex:1;">
+              <span style="font-family:'Poppins',sans-serif;font-size:13px;">Mila wants <b>Movie night pick</b></span>
+              <span style="display:inline-flex;align-items:center;gap:4px;color:#ef8d5d;font-family:'Poppins',sans-serif;font-weight:700;font-size:12px;margin-top:2px;"><span class="material-symbols-outlined" style="font-size:14px;font-variation-settings:'FILL' 1;">star</span>12 stars</span>
+              <div style="display:flex;gap:8px;margin-top:8px;">
+                <button style="flex:1;background:#5d5fef;color:#ffffff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;height:48px;border:none;border-radius:9999px;cursor:pointer;">Approve</button>
+                <button style="flex:1;background:transparent;color:#5d5fef;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;height:48px;border:1px solid rgba(93,95,239,0.2);border-radius:9999px;cursor:pointer;">Deny</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+      <!-- Instant horizon -->
+      <div style="background:#f5f3ee;border-radius:20px;padding:18px;">
+        <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;margin-bottom:12px;">Ages 4–7 · Instant horizon</span>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          <span style="display:inline-flex;align-items:center;gap:6px;background:#ffffff;border-radius:9999px;padding:13px 18px;font-family:'Poppins',sans-serif;font-weight:600;font-size:14px;">Extra bedtime story <span style="color:#ef8d5d;">· 3</span></span>
+          <span style="display:inline-flex;align-items:center;gap:6px;background:#ffffff;border-radius:9999px;padding:13px 18px;font-family:'Poppins',sans-serif;font-weight:600;font-size:14px;">Pick dinner <span style="color:#ef8d5d;">· 5</span></span>
+          <span style="display:inline-flex;align-items:center;gap:6px;background:#ffffff;border-radius:9999px;padding:13px 18px;font-family:'Poppins',sans-serif;font-weight:600;font-size:14px;">Sticker <span style="color:#ef8d5d;">· 2</span></span>
+        </div>
+      </div>
+      <!-- Celebration -->
+      <div style="background:#191c1d;border-radius:20px;padding:18px;position:relative;overflow:hidden;">
+        <span style="position:absolute;left:80%;top:50%;width:9px;height:9px;border-radius:9999px;background:#ef8d5d;--tx:-60px;--ty:-40px;--tr:80deg;" class="kynite-confetti-piece-big"></span>
+        <span style="position:absolute;left:80%;top:50%;width:7px;height:7px;border-radius:2px;background:#71f8e4;--tx:60px;--ty:-44px;--tr:-60deg;animation-delay:0.15s;" class="kynite-confetti-piece-big"></span>
+        <span style="position:absolute;left:80%;top:50%;width:8px;height:8px;border-radius:9999px;background:#b8c3ff;--tx:-70px;--ty:24px;--tr:40deg;animation-delay:0.3s;" class="kynite-confetti-piece-big"></span>
+        <span style="position:absolute;left:80%;top:50%;width:7px;height:7px;border-radius:2px;background:#fecf6e;--tx:68px;--ty:28px;--tr:-30deg;animation-delay:0.45s;" class="kynite-confetti-piece-big"></span>
+        <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:#b8c3ff;margin-bottom:8px;">Celebration moment</span>
+        <p style="font-family:'Poppins',sans-serif;font-size:13px;color:#f0f1f2;margin:0 0 12px;max-width:320px;">Confetti fires the instant a step or reward is tapped — under 100ms, before the server responds. Once fired, it's never walked back.</p>
+        <button style="display:inline-flex;align-items:center;gap:8px;background:#5d5fef;color:#ffffff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;height:48px;padding:0 20px;border:none;border-radius:9999px;cursor:pointer;"><span class="material-symbols-outlined kynite-anim-pop-big" style="font-size:20px;">celebration</span>Claimed!</button>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- MOTION -->
+<section>
+  <h2 style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:24px;margin:0 0 8px;padding-bottom:14px;border-bottom:1px solid #e1e3e4;color:#191c1d;">Motion &amp; celebration</h2>
+  <p style="font-family:'Poppins',sans-serif;font-size:14px;color:#747688;margin:0 0 16px;">Light and bouncy-friendly, reserved for the moments worth marking.</p>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;">
+
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <span style="display:inline-block;width:fit-content;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Motion/Confetti burst</span>
+      <div style="background:#ffffff;border-radius:20px;padding:24px;box-shadow:0 1px 2px rgba(0,0,0,0.04);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;height:140px;position:relative;overflow:hidden;">
+        <span style="position:absolute;left:50%;top:50%;width:8px;height:8px;border-radius:9999px;background:#ef8d5d;--tx:-46px;--ty:-38px;--tr:80deg;" class="kynite-confetti-piece"></span>
+        <span style="position:absolute;left:50%;top:50%;width:6px;height:6px;border-radius:2px;background:#71f8e4;--tx:44px;--ty:-42px;--tr:-60deg;animation-delay:0.15s;" class="kynite-confetti-piece"></span>
+        <span style="position:absolute;left:50%;top:50%;width:7px;height:7px;border-radius:9999px;background:#b8c3ff;--tx:-52px;--ty:20px;--tr:40deg;animation-delay:0.3s;" class="kynite-confetti-piece"></span>
+        <span style="position:absolute;left:50%;top:50%;width:6px;height:6px;border-radius:2px;background:#ef8d5d;--tx:50px;--ty:24px;--tr:-30deg;animation-delay:0.45s;" class="kynite-confetti-piece"></span>
+        <span style="position:absolute;left:50%;top:50%;width:6px;height:6px;border-radius:9999px;background:#006056;--tx:0px;--ty:-58px;--tr:0deg;animation-delay:0.6s;" class="kynite-confetti-piece"></span>
+        <span class="material-symbols-outlined kynite-anim-pop" style="font-size:36px;color:#ef8d5d;font-variation-settings:'FILL' 1;">star</span>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <span style="display:inline-block;width:fit-content;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Motion/Confetti pop — big celebration</span>
+      <div style="background:#191c1d;border-radius:20px;padding:24px;box-shadow:0 1px 2px rgba(0,0,0,0.04);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;height:140px;position:relative;overflow:hidden;">
+        <span style="position:absolute;left:50%;top:50%;width:10px;height:10px;border-radius:9999px;background:#ef8d5d;--tx:-80px;--ty:-60px;--tr:120deg;" class="kynite-confetti-piece-big"></span>
+        <span style="position:absolute;left:50%;top:50%;width:8px;height:8px;border-radius:2px;background:#71f8e4;--tx:80px;--ty:-64px;--tr:-90deg;animation-delay:0.08s;" class="kynite-confetti-piece-big"></span>
+        <span style="position:absolute;left:50%;top:50%;width:9px;height:9px;border-radius:9999px;background:#b8c3ff;--tx:-92px;--ty:24px;--tr:60deg;animation-delay:0.16s;" class="kynite-confetti-piece-big"></span>
+        <span style="position:absolute;left:50%;top:50%;width:8px;height:8px;border-radius:2px;background:#ef8d5d;--tx:92px;--ty:30px;--tr:-45deg;animation-delay:0.24s;" class="kynite-confetti-piece-big"></span>
+        <span style="position:absolute;left:50%;top:50%;width:9px;height:9px;border-radius:9999px;background:#fecf6e;--tx:0px;--ty:-96px;--tr:0deg;animation-delay:0.32s;" class="kynite-confetti-piece-big"></span>
+        <span style="position:absolute;left:50%;top:50%;width:7px;height:7px;border-radius:2px;background:#b8c3ff;--tx:-40px;--ty:76px;--tr:75deg;animation-delay:0.4s;" class="kynite-confetti-piece-big"></span>
+        <span style="position:absolute;left:50%;top:50%;width:7px;height:7px;border-radius:9999px;background:#71f8e4;--tx:44px;--ty:80px;--tr:-70deg;animation-delay:0.48s;" class="kynite-confetti-piece-big"></span>
+        <span style="position:absolute;left:50%;top:50%;width:8px;height:8px;border-radius:2px;background:#fecf6e;--tx:-20px;--ty:-102px;--tr:20deg;animation-delay:0.56s;" class="kynite-confetti-piece-big"></span>
+        <span class="material-symbols-outlined kynite-anim-pop-big" style="font-size:44px;color:#fecf6e;font-variation-settings:'FILL' 1;">emoji_events</span>
+      </div>
+      <span style="font-family:'Poppins',sans-serif;font-size:12px;color:#747688;">Reserved for the big moments — reward approvals, streak milestones. Bigger burst, bigger icon pop.</span>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <span style="display:inline-block;width:fit-content;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Motion/Checkbox pop</span>
+      <div style="background:#ffffff;border-radius:20px;padding:24px;box-shadow:0 1px 2px rgba(0,0,0,0.04);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;height:140px;">
+        <span style="width:48px;height:48px;border-radius:12px;background:#006056;display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined kynite-anim-check" style="font-size:26px;color:#ffffff;">check</span></span>
+        <span style="font-family:'Poppins',sans-serif;font-size:13px;color:#747688;">Haptic-style pop on check</span>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <span style="display:inline-block;width:fit-content;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Motion/Streak shimmer</span>
+      <div style="background:#ffffff;border-radius:20px;padding:24px;box-shadow:0 1px 2px rgba(0,0,0,0.04);display:flex;flex-direction:column;justify-content:center;gap:14px;height:140px;">
+        <div style="display:flex;align-items:center;gap:8px;"><span class="material-symbols-outlined" style="font-size:20px;color:#ef8d5d;font-variation-settings:'FILL' 1;">local_fire_department</span><span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;">5-day streak</span></div>
+        <div style="width:100%;height:10px;border-radius:9999px;background:#e1e3e4;overflow:hidden;position:relative;">
+          <div style="width:80%;height:100%;background:#ef8d5d;border-radius:9999px;position:relative;overflow:hidden;">
+            <div class="kynite-shimmer-sweep" style="position:absolute;top:0;left:0;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.6),transparent);"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <span style="display:inline-block;width:fit-content;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Motion/Big tap target</span>
+      <div style="background:#ffffff;border-radius:20px;padding:24px;box-shadow:0 1px 2px rgba(0,0,0,0.04);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;height:140px;">
+        <button style="width:64px;height:64px;border-radius:9999px;background:#5d5fef;color:#ffffff;border:none;box-shadow:0 4px 14px rgba(93,95,239,0.35);display:flex;align-items:center;justify-content:center;cursor:pointer;"><span class="material-symbols-outlined" style="font-size:32px;">check</span></button>
+        <span style="font-family:'Poppins',sans-serif;font-size:13px;color:#747688;">64px on tablet vs. 48px minimum</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- SEASONAL THEMES -->
+<section>
+  <h2 style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:24px;margin:0 0 8px;padding-bottom:14px;border-bottom:1px solid #e1e3e4;color:#191c1d;">Feestdagen &amp; vakanties</h2>
+  <p style="font-family:'Poppins',sans-serif;font-size:14px;line-height:22px;color:#434656;max-width:680px;margin:0 0 24px;">Op de betreffende datum vervangt een thema-banner tijdelijk het "Nu"-blok bovenaan Vandaag. Het icoon-tegeltje volgt de opbouw van het merkicoon (gelaagde kleurcirkels), opgebouwd uit bestaande Kynite-kleuren, met een silhouet dat bij het thema past (boom, mijter, pompoen, kroon). Automatisch actief op basis van de kalenderdatum.</p>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;">
+
+    <!-- Verjaardag -->
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <span style="display:inline-block;width:fit-content;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Theme/Verjaardag — datum van kind</span>
+      <div style="background:oklch(96% 0.015 335);border-radius:20px;padding:16px 18px;position:relative;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+        <span style="position:absolute;left:74%;top:8%;width:16px;height:20px;--rot:-6deg;animation-duration:3.4s;animation-delay:0s;" class="kynite-drift">
+          <span style="position:absolute;top:0;left:0;width:100%;height:78%;background:oklch(60% 0.14 335);opacity:0.75;border-radius:50%;"></span>
+          <span style="position:absolute;bottom:0;left:50%;margin-left:-2px;width:0;height:0;border-left:2px solid transparent;border-right:2px solid transparent;border-top:4px solid oklch(60% 0.14 335);opacity:0.75;"></span>
+        </span>
+        <span style="position:absolute;left:88%;top:28%;width:12px;height:15px;--rot:10deg;animation-duration:3.9s;animation-delay:0.6s;" class="kynite-drift">
+          <span style="position:absolute;top:0;left:0;width:100%;height:78%;background:#5d5fef;opacity:0.6;border-radius:50%;"></span>
+          <span style="position:absolute;bottom:0;left:50%;margin-left:-2px;width:0;height:0;border-left:2px solid transparent;border-right:2px solid transparent;border-top:4px solid #5d5fef;opacity:0.6;"></span>
+        </span>
+        <span style="position:absolute;left:80%;top:50%;width:14px;height:18px;--rot:-8deg;animation-duration:3.6s;animation-delay:1.2s;" class="kynite-drift">
+          <span style="position:absolute;top:0;left:0;width:100%;height:78%;background:#ef8d5d;opacity:0.65;border-radius:50%;"></span>
+          <span style="position:absolute;bottom:0;left:50%;margin-left:-2px;width:0;height:0;border-left:2px solid transparent;border-right:2px solid transparent;border-top:4px solid #ef8d5d;opacity:0.65;"></span>
+        </span>
+        <span style="position:absolute;left:78%;top:70%;width:8px;height:8px;border-radius:9999px;background:#ef8d5d;--tx:-40px;--ty:-30px;--tr:70deg;" class="kynite-confetti-piece"></span>
+        <span style="position:absolute;left:66%;top:80%;width:6px;height:6px;border-radius:2px;background:#71f8e4;--tx:34px;--ty:-30px;--tr:-50deg;animation-delay:0.2s;" class="kynite-confetti-piece"></span>
+        <div style="display:flex;align-items:center;gap:14px;position:relative;">
+          <div style="width:44px;height:44px;border-radius:11px;position:relative;overflow:hidden;background:oklch(55% 0.14 335);flex-shrink:0;"><span style="position:absolute;width:42px;height:42px;border-radius:9999px;left:-14px;top:-11px;background:#5d5fef;opacity:0.85;"></span><span style="position:absolute;width:42px;height:42px;border-radius:9999px;right:-15px;bottom:-13px;background:#ef8d5d;opacity:0.85;"></span><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.3));"><span class="material-symbols-outlined" style="font-size:23px;color:#ffffff;font-variation-settings:'FILL' 1;">cake</span></span></div>
+          <div style="flex:1;min-width:0;">
+            <span style="display:inline-flex;align-items:center;background:oklch(38% 0.13 335);color:#ffffff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10px;letter-spacing:0.05em;padding:2px 9px;border-radius:9999px;">JARIG!</span>
+            <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:17px;margin-top:5px;">Mila is vandaag jarig!</div>
+            <div style="font-family:'Poppins',sans-serif;font-size:12px;color:#434656;margin-top:2px;">7 jaar · taart bij het ontbijt, cadeautjes na het avondeten</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Kerst -->
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <span style="display:inline-block;width:fit-content;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Theme/Kerst — 25 december</span>
+      <div style="background:oklch(96% 0.015 25);border-radius:20px;padding:16px 18px;position:relative;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+        <span style="position:absolute;left:76%;width:16px;height:16px;color:oklch(55% 0.14 155);--rot:0deg;animation-duration:5s;animation-delay:0s;" class="material-symbols-outlined kynite-fall">star</span>
+        <span style="position:absolute;left:90%;width:12px;height:12px;color:#ef8d5d;--rot:20deg;animation-duration:4.4s;animation-delay:1.5s;" class="material-symbols-outlined kynite-fall">star</span>
+        <span style="position:absolute;left:83%;width:14px;height:14px;color:oklch(55% 0.14 155);--rot:-15deg;animation-duration:5.6s;animation-delay:2.6s;" class="material-symbols-outlined kynite-fall">star</span>
+        <span style="position:absolute;left:68%;width:10px;height:10px;color:#ef8d5d;--rot:12deg;animation-duration:4.8s;animation-delay:0.7s;" class="material-symbols-outlined kynite-fall">star</span>
+        <div style="display:flex;align-items:center;gap:14px;position:relative;">
+          <div style="width:44px;height:44px;border-radius:11px;position:relative;overflow:hidden;background:oklch(42% 0.14 20);flex-shrink:0;"><span style="position:absolute;width:42px;height:42px;border-radius:9999px;left:-14px;top:-11px;background:oklch(55% 0.14 155);opacity:0.85;"></span><span style="position:absolute;width:42px;height:42px;border-radius:9999px;right:-15px;bottom:-13px;background:#5d5fef;opacity:0.75;"></span><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.3));"><span style="position:relative;width:20px;height:23px;display:inline-block;"><span style="position:absolute;left:50%;top:0;transform:translateX(-50%);width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:7px solid #ffffff;"></span><span style="position:absolute;left:50%;top:5px;transform:translateX(-50%);width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:8px solid #ffffff;"></span><span style="position:absolute;left:50%;top:11px;transform:translateX(-50%);width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-bottom:9px solid #ffffff;"></span><span style="position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:4px;height:4px;background:#ffffff;border-radius:1px;"></span></span></span></div>
+          <div style="flex:1;min-width:0;">
+            <span style="display:inline-flex;align-items:center;background:oklch(32% 0.13 20);color:#ffffff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10px;letter-spacing:0.05em;padding:2px 9px;border-radius:9999px;">KERST</span>
+            <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:17px;margin-top:5px;">De kerstboom mag aan!</div>
+            <div style="font-family:'Poppins',sans-serif;font-size:12px;color:#434656;margin-top:2px;">25 december · pyjama's aan, cadeautjes onder de boom</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sinterklaas -->
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <span style="display:inline-block;width:fit-content;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Theme/Sinterklaas — 5 december</span>
+      <div style="background:oklch(96% 0.015 30);border-radius:20px;padding:16px 18px;position:relative;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+        <span style="position:absolute;left:76%;top:10%;width:20px;height:20px;color:oklch(32% 0.1 20 / 0.55);--rot:-8deg;animation-duration:3.5s;animation-delay:0s;" class="material-symbols-outlined kynite-drift">redeem</span>
+        <span style="position:absolute;left:90%;top:32%;width:14px;height:14px;color:#ef8d5d99;--rot:14deg;animation-duration:4s;animation-delay:0.8s;" class="material-symbols-outlined kynite-drift">redeem</span>
+        <span style="position:absolute;left:80%;top:60%;width:16px;height:16px;color:oklch(32% 0.1 20 / 0.4);--rot:-12deg;animation-duration:4.3s;animation-delay:1.6s;" class="material-symbols-outlined kynite-drift">redeem</span>
+        <span style="position:absolute;left:66%;top:78%;width:12px;height:12px;color:#ef8d5d80;--rot:10deg;animation-duration:3.8s;animation-delay:2.4s;" class="material-symbols-outlined kynite-drift">redeem</span>
+        <div style="display:flex;align-items:center;gap:14px;position:relative;">
+          <div style="width:44px;height:44px;border-radius:11px;position:relative;overflow:hidden;background:oklch(42% 0.14 20);flex-shrink:0;"><span style="position:absolute;width:42px;height:42px;border-radius:9999px;left:-14px;top:-11px;background:oklch(32% 0.14 20);opacity:0.9;"></span><span style="position:absolute;width:42px;height:42px;border-radius:9999px;right:-15px;bottom:-13px;background:#ef8d5d;opacity:0.6;"></span><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.3));"><span style="position:relative;width:22px;height:24px;display:inline-block;"><span style="position:absolute;left:50%;top:2px;transform:translateX(-50%);width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:15px solid #ffffff;"></span><span style="position:absolute;left:50%;bottom:2px;transform:translateX(-50%);width:19px;height:4px;background:#ffffff;border-radius:2px;"></span><span style="position:absolute;left:50%;top:-3px;transform:translateX(-50%);width:2px;height:6px;background:#ffffff;"></span><span style="position:absolute;left:50%;top:-1px;transform:translate(-50%,0) rotate(90deg);width:2px;height:6px;background:#ffffff;"></span></span></span></div>
+          <div style="flex:1;min-width:0;">
+            <span style="display:inline-flex;align-items:center;background:oklch(32% 0.13 20);color:#ffffff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10px;letter-spacing:0.05em;padding:2px 9px;border-radius:9999px;">SINTERKLAAS</span>
+            <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:17px;margin-top:5px;">Zet je schoen maar vast klaar</div>
+            <div style="font-family:'Poppins',sans-serif;font-size:12px;color:#434656;margin-top:2px;">5 december · pakjesavond om 19:00</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Halloween -->
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <span style="display:inline-block;width:fit-content;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Theme/Halloween — 31 oktober</span>
+      <div style="background:#191c1d;border-radius:20px;padding:16px 18px;position:relative;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+        <span style="position:absolute;left:74%;top:16%;--rot:0deg;animation-duration:6s;animation-delay:0s;" class="kynite-fly"><span style="position:relative;width:22px;height:20px;display:inline-block;"><span style="position:absolute;left:2px;top:6px;width:18px;height:13px;background:rgba(239,141,93,0.7);border-radius:50%;"></span><span style="position:absolute;left:9px;top:6px;width:2px;height:13px;background:rgba(0,0,0,0.18);"></span><span style="position:absolute;left:13px;top:6px;width:2px;height:13px;background:rgba(0,0,0,0.18);"></span><span style="position:absolute;left:50%;top:1px;transform:translateX(-50%);width:3px;height:6px;background:rgba(74,124,63,0.6);border-radius:1px;"></span></span></span>
+        <span style="position:absolute;left:90%;top:36%;--rot:-20deg;animation-duration:5s;animation-delay:1.3s;" class="kynite-fly"><span style="position:relative;width:22px;height:20px;display:inline-block;"><span style="position:absolute;left:2px;top:6px;width:18px;height:13px;background:rgba(239,141,93,0.7);border-radius:50%;"></span><span style="position:absolute;left:9px;top:6px;width:2px;height:13px;background:rgba(0,0,0,0.18);"></span><span style="position:absolute;left:13px;top:6px;width:2px;height:13px;background:rgba(0,0,0,0.18);"></span><span style="position:absolute;left:50%;top:1px;transform:translateX(-50%);width:3px;height:6px;background:rgba(74,124,63,0.6);border-radius:1px;"></span></span></span>
+        <span style="position:absolute;left:80%;top:58%;--rot:14deg;animation-duration:7s;animation-delay:0.6s;" class="kynite-fly"><span style="position:relative;width:22px;height:20px;display:inline-block;"><span style="position:absolute;left:2px;top:6px;width:18px;height:13px;background:rgba(239,141,93,0.7);border-radius:50%;"></span><span style="position:absolute;left:9px;top:6px;width:2px;height:13px;background:rgba(0,0,0,0.18);"></span><span style="position:absolute;left:13px;top:6px;width:2px;height:13px;background:rgba(0,0,0,0.18);"></span><span style="position:absolute;left:50%;top:1px;transform:translateX(-50%);width:3px;height:6px;background:rgba(74,124,63,0.6);border-radius:1px;"></span></span></span>
+        <span style="position:absolute;left:64%;top:76%;--rot:-10deg;animation-duration:5.5s;animation-delay:2s;" class="kynite-fly"><span style="position:relative;width:22px;height:20px;display:inline-block;"><span style="position:absolute;left:2px;top:6px;width:18px;height:13px;background:rgba(239,141,93,0.7);border-radius:50%;"></span><span style="position:absolute;left:9px;top:6px;width:2px;height:13px;background:rgba(0,0,0,0.18);"></span><span style="position:absolute;left:13px;top:6px;width:2px;height:13px;background:rgba(0,0,0,0.18);"></span><span style="position:absolute;left:50%;top:1px;transform:translateX(-50%);width:3px;height:6px;background:rgba(74,124,63,0.6);border-radius:1px;"></span></span></span>
+        <div style="display:flex;align-items:center;gap:14px;position:relative;">
+          <div style="width:44px;height:44px;border-radius:11px;position:relative;overflow:hidden;background:#191c1d;flex-shrink:0;"><span style="position:absolute;width:42px;height:42px;border-radius:9999px;left:-14px;top:-11px;background:oklch(35% 0.14 290);opacity:0.8;"></span><span style="position:absolute;width:42px;height:42px;border-radius:9999px;right:-15px;bottom:-13px;background:oklch(45% 0.14 65);opacity:0.4;"></span><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.3));"><span style="position:relative;width:22px;height:20px;display:inline-block;"><span style="position:absolute;left:2px;top:6px;width:18px;height:13px;background:#ef8d5d;border-radius:50%;"></span><span style="position:absolute;left:9px;top:6px;width:2px;height:13px;background:rgba(0,0,0,0.18);"></span><span style="position:absolute;left:13px;top:6px;width:2px;height:13px;background:rgba(0,0,0,0.18);"></span><span style="position:absolute;left:50%;top:1px;transform:translateX(-50%);width:3px;height:6px;background:#4a7c3f;border-radius:1px;"></span></span></span></div>
+          <div style="flex:1;min-width:0;">
+            <span style="display:inline-flex;align-items:center;background:#ef8d5d;color:#191c1d;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10px;letter-spacing:0.05em;padding:2px 9px;border-radius:9999px;">HALLOWEEN</span>
+            <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:17px;margin-top:5px; color:#ffffff;">Verkleden en snoep verzamelen!</div>
+            <div style="font-family:'Poppins',sans-serif;font-size:12px;color:#c4c5d9;margin-top:2px;">31 oktober · om 18:30 verzamelen voor het buurtrondje</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pasen -->
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <span style="display:inline-block;width:fit-content;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Theme/Pasen — 5 april</span>
+      <div style="background:oklch(96% 0.02 340);border-radius:20px;padding:16px 18px;position:relative;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+        <span style="position:absolute;left:76%;top:10%;width:20px;height:20px;color:oklch(55% 0.12 110 / 0.55);--rot:-8deg;animation-duration:3.5s;animation-delay:0s;" class="material-symbols-outlined kynite-drift">egg</span>
+        <span style="position:absolute;left:90%;top:32%;width:14px;height:14px;color:oklch(55% 0.1 200 / 0.4);--rot:14deg;animation-duration:4s;animation-delay:0.8s;" class="material-symbols-outlined kynite-drift">egg</span>
+        <span style="position:absolute;left:80%;top:60%;width:16px;height:16px;color:oklch(55% 0.12 110 / 0.55);--rot:-12deg;animation-duration:4.3s;animation-delay:1.6s;" class="material-symbols-outlined kynite-drift">egg</span>
+        <span style="position:absolute;left:66%;top:78%;width:12px;height:12px;color:oklch(55% 0.1 200 / 0.4);--rot:10deg;animation-duration:3.8s;animation-delay:2.4s;" class="material-symbols-outlined kynite-drift">egg</span>
+        <div style="display:flex;align-items:center;gap:14px;position:relative;">
+          <div style="width:44px;height:44px;border-radius:11px;position:relative;overflow:hidden;background:oklch(58% 0.14 335);flex-shrink:0;"><span style="position:absolute;width:42px;height:42px;border-radius:9999px;left:-14px;top:-11px;background:oklch(55% 0.14 110);opacity:0.8;"></span><span style="position:absolute;width:42px;height:42px;border-radius:9999px;right:-15px;bottom:-13px;background:oklch(55% 0.14 200);opacity:0.75;"></span><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.3));"><span class="material-symbols-outlined" style="font-size:23px;color:#ffffff;">egg</span></span></div>
+          <div style="flex:1;min-width:0;">
+            <span style="display:inline-flex;align-items:center;background:oklch(42% 0.13 335);color:#ffffff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10px;letter-spacing:0.05em;padding:2px 9px;border-radius:9999px;">PASEN</span>
+            <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:17px;margin-top:5px;">Wie vindt de meeste eieren?</div>
+            <div style="font-family:'Poppins',sans-serif;font-size:12px;color:#434656;margin-top:2px;">5 april · eieren zoeken in de tuin om 10:00</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Koningsdag -->
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <span style="display:inline-block;width:fit-content;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Theme/Koningsdag — 27 april</span>
+      <div style="background:oklch(95% 0.03 45);border-radius:20px;padding:16px 18px;position:relative;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+        <span style="position:absolute;left:76%;top:10%;width:20px;height:20px;color:#ef8d5d99;--rot:-8deg;animation-duration:3.3s;animation-delay:0s;" class="material-symbols-outlined kynite-drift">flag</span>
+        <span style="position:absolute;left:90%;top:32%;width:14px;height:14px;color:oklch(42% 0.14 20 / 0.4);--rot:10deg;animation-duration:3.9s;animation-delay:0.9s;" class="material-symbols-outlined kynite-drift">flag</span>
+        <span style="position:absolute;left:80%;top:60%;width:16px;height:16px;color:#ef8d5d80;--rot:-12deg;animation-duration:4.2s;animation-delay:1.6s;" class="material-symbols-outlined kynite-drift">flag</span>
+        <span style="position:absolute;left:66%;top:78%;width:12px;height:12px;color:oklch(42% 0.14 20 / 0.3);--rot:14deg;animation-duration:3.7s;animation-delay:2.3s;" class="material-symbols-outlined kynite-drift">flag</span>
+        <div style="display:flex;align-items:center;gap:14px;position:relative;">
+          <div style="width:44px;height:44px;border-radius:11px;position:relative;overflow:hidden;background:oklch(48% 0.14 65);flex-shrink:0;"><span style="position:absolute;width:42px;height:42px;border-radius:9999px;left:-14px;top:-11px;background:#ef8d5d;opacity:0.85;"></span><span style="position:absolute;width:42px;height:42px;border-radius:9999px;right:-15px;bottom:-13px;background:oklch(42% 0.14 20);opacity:0.6;"></span><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.3));"><span style="display:inline-block;width:24px;height:17px;background:#ffffff;clip-path:polygon(0% 100%,0% 42%,20% 68%,35% 15%,50% 50%,65% 15%,80% 68%,100% 42%,100% 100%);"></span></span></div>
+          <div style="flex:1;min-width:0;">
+            <span style="display:inline-flex;align-items:center;background:oklch(38% 0.16 65);color:#ffffff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10px;letter-spacing:0.05em;padding:2px 9px;border-radius:9999px;">KONINGSDAG</span>
+            <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:17px;margin-top:5px;">Oranje aan en naar de vrijmarkt</div>
+            <div style="font-family:'Poppins',sans-serif;font-size:12px;color:#434656;margin-top:2px;">27 april · vrijmarkt in het park, 9:00–13:00</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Voorjaarsvakantie -->
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <span style="display:inline-block;width:fit-content;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Theme/Voorjaarsvakantie — 17–25 feb</span>
+      <div style="background:oklch(96% 0.02 150);border-radius:20px;padding:16px 18px;position:relative;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+        <span style="position:absolute;left:76%;top:10%;width:20px;height:20px;color:oklch(58% 0.1 335 / 0.55);--rot:-8deg;animation-duration:3.6s;animation-delay:0s;" class="material-symbols-outlined kynite-drift">local_florist</span>
+        <span style="position:absolute;left:90%;top:32%;width:14px;height:14px;color:oklch(55% 0.12 110 / 0.4);--rot:14deg;animation-duration:4.1s;animation-delay:0.8s;" class="material-symbols-outlined kynite-drift">local_florist</span>
+        <span style="position:absolute;left:80%;top:60%;width:16px;height:16px;color:oklch(58% 0.1 335 / 0.55);--rot:-14deg;animation-duration:4.5s;animation-delay:1.6s;" class="material-symbols-outlined kynite-drift">local_florist</span>
+        <span style="position:absolute;left:66%;top:78%;width:12px;height:12px;color:oklch(55% 0.12 110 / 0.4);--rot:10deg;animation-duration:3.9s;animation-delay:2.4s;" class="material-symbols-outlined kynite-drift">local_florist</span>
+        <div style="display:flex;align-items:center;gap:14px;position:relative;">
+          <div style="width:44px;height:44px;border-radius:11px;position:relative;overflow:hidden;background:oklch(50% 0.14 155);flex-shrink:0;"><span style="position:absolute;width:42px;height:42px;border-radius:9999px;left:-14px;top:-11px;background:oklch(58% 0.14 335);opacity:0.75;"></span><span style="position:absolute;width:42px;height:42px;border-radius:9999px;right:-15px;bottom:-13px;background:oklch(55% 0.14 110);opacity:0.7;"></span><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.3));"><span class="material-symbols-outlined" style="font-size:23px;color:#ffffff;">local_florist</span></span></div>
+          <div style="flex:1;min-width:0;">
+            <span style="display:inline-flex;align-items:center;background:oklch(36% 0.13 155);color:#ffffff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10px;letter-spacing:0.05em;padding:2px 9px;border-radius:9999px;">VOORJAARSVAKANTIE</span>
+            <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:17px;margin-top:5px;">Buiten spelen, de lente is er</div>
+            <div style="font-family:'Poppins',sans-serif;font-size:12px;color:#434656;margin-top:2px;">17 t/m 25 februari · een week zonder schooltas</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Meivakantie -->
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <span style="display:inline-block;width:fit-content;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Theme/Meivakantie — 27 apr–5 mei</span>
+      <div style="background:oklch(95% 0.03 140);border-radius:20px;padding:16px 18px;position:relative;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+        <span style="position:absolute;left:76%;top:10%;width:20px;height:20px;color:oklch(55% 0.12 155 / 0.5);--rot:-8deg;animation-duration:3.4s;animation-delay:0s;" class="material-symbols-outlined kynite-drift">park</span>
+        <span style="position:absolute;left:90%;top:32%;width:14px;height:14px;color:oklch(50% 0.14 65 / 0.4);--rot:14deg;animation-duration:3.9s;animation-delay:0.9s;" class="material-symbols-outlined kynite-drift">park</span>
+        <span style="position:absolute;left:80%;top:60%;width:16px;height:16px;color:oklch(55% 0.12 155 / 0.5);--rot:-12deg;animation-duration:4.3s;animation-delay:1.7s;" class="material-symbols-outlined kynite-drift">park</span>
+        <span style="position:absolute;left:66%;top:78%;width:12px;height:12px;color:oklch(50% 0.14 65 / 0.3);--rot:10deg;animation-duration:3.7s;animation-delay:2.5s;" class="material-symbols-outlined kynite-drift">park</span>
+        <div style="display:flex;align-items:center;gap:14px;position:relative;">
+          <div style="width:44px;height:44px;border-radius:11px;position:relative;overflow:hidden;background:oklch(50% 0.14 110);flex-shrink:0;"><span style="position:absolute;width:42px;height:42px;border-radius:9999px;left:-14px;top:-11px;background:oklch(55% 0.14 155);opacity:0.8;"></span><span style="position:absolute;width:42px;height:42px;border-radius:9999px;right:-15px;bottom:-13px;background:oklch(50% 0.14 65);opacity:0.7;"></span><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.3));"><span class="material-symbols-outlined" style="font-size:23px;color:#ffffff;">park</span></span></div>
+          <div style="flex:1;min-width:0;">
+            <span style="display:inline-flex;align-items:center;background:oklch(34% 0.12 110);color:#ffffff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10px;letter-spacing:0.05em;padding:2px 9px;border-radius:9999px;">MEIVAKANTIE</span>
+            <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:17px;margin-top:5px;">9 dagen vrij om te spelen</div>
+            <div style="font-family:'Poppins',sans-serif;font-size:12px;color:#434656;margin-top:2px;">27 april t/m 5 mei · samen met Koningsdag</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Zomervakantie -->
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <span style="display:inline-block;width:fit-content;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Theme/Zomervakantie — 12 jul–24 aug</span>
+      <div style="background:oklch(95% 0.03 95);border-radius:20px;padding:16px 18px;position:relative;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+        <span style="position:absolute;left:76%;top:10%;width:20px;height:20px;color:#ef8d5db3;--rot:0deg;animation-duration:6s;animation-delay:0s;" class="material-symbols-outlined kynite-spin-slow">wb_sunny</span>
+        <span style="position:absolute;left:90%;top:32%;width:14px;height:14px;color:oklch(50% 0.1 200 / 0.4);--rot:14deg;animation-duration:4s;animation-delay:0.8s;" class="material-symbols-outlined kynite-drift">beach_access</span>
+        <span style="position:absolute;left:80%;top:60%;width:16px;height:16px;color:#ef8d5d80;--rot:-10deg;animation-duration:4.4s;animation-delay:1.6s;" class="material-symbols-outlined kynite-drift">wb_sunny</span>
+        <span style="position:absolute;left:66%;top:78%;width:12px;height:12px;color:oklch(50% 0.1 200 / 0.3);--rot:10deg;animation-duration:3.8s;animation-delay:2.4s;" class="material-symbols-outlined kynite-drift">beach_access</span>
+        <div style="display:flex;align-items:center;gap:14px;position:relative;">
+          <div style="width:44px;height:44px;border-radius:11px;position:relative;overflow:hidden;background:oklch(48% 0.14 200);flex-shrink:0;"><span style="position:absolute;width:42px;height:42px;border-radius:9999px;left:-14px;top:-11px;background:#ef8d5d;opacity:0.85;"></span><span style="position:absolute;width:42px;height:42px;border-radius:9999px;right:-15px;bottom:-13px;background:oklch(55% 0.14 110);opacity:0.6;"></span><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.3));"><span class="material-symbols-outlined" style="font-size:23px;color:#ffffff;">beach_access</span></span></div>
+          <div style="flex:1;min-width:0;">
+            <span style="display:inline-flex;align-items:center;background:oklch(34% 0.1 200);color:#ffffff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10px;letter-spacing:0.05em;padding:2px 9px;border-radius:9999px;">ZOMERVAKANTIE</span>
+            <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:17px;margin-top:5px;">Zwemmen, kamperen en lekker niksen</div>
+            <div style="font-family:'Poppins',sans-serif;font-size:12px;color:#434656;margin-top:2px;">12 juli t/m 24 augustus · 6 weken vrij</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Herfstvakantie -->
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <span style="display:inline-block;width:fit-content;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Theme/Herfstvakantie — 19–27 okt</span>
+      <div style="background:oklch(95% 0.02 55);border-radius:20px;padding:16px 18px;position:relative;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+        <span style="position:absolute;left:76%;width:20px;height:20px;color:oklch(42% 0.13 20);--rot:-10deg;animation-duration:5.2s;animation-delay:0s;" class="material-symbols-outlined kynite-fall">eco</span>
+        <span style="position:absolute;left:90%;width:14px;height:14px;color:oklch(42% 0.13 65);--rot:16deg;animation-duration:4.6s;animation-delay:1.4s;" class="material-symbols-outlined kynite-fall">eco</span>
+        <span style="position:absolute;left:83%;width:16px;height:16px;color:oklch(42% 0.13 20);--rot:-14deg;animation-duration:5.8s;animation-delay:2.5s;" class="material-symbols-outlined kynite-fall">eco</span>
+        <span style="position:absolute;left:68%;width:12px;height:12px;color:oklch(42% 0.13 65);--rot:10deg;animation-duration:4.9s;animation-delay:0.6s;" class="material-symbols-outlined kynite-fall">eco</span>
+        <div style="display:flex;align-items:center;gap:14px;position:relative;">
+          <div style="width:44px;height:44px;border-radius:11px;position:relative;overflow:hidden;background:oklch(42% 0.14 65);flex-shrink:0;"><span style="position:absolute;width:42px;height:42px;border-radius:9999px;left:-14px;top:-11px;background:oklch(42% 0.14 20);opacity:0.85;"></span><span style="position:absolute;width:42px;height:42px;border-radius:9999px;right:-15px;bottom:-13px;background:oklch(38% 0.14 290);opacity:0.5;"></span><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.3));"><span class="material-symbols-outlined" style="font-size:23px;color:#ffffff;">eco</span></span></div>
+          <div style="flex:1;min-width:0;">
+            <span style="display:inline-flex;align-items:center;background:oklch(34% 0.13 65);color:#ffffff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10px;letter-spacing:0.05em;padding:2px 9px;border-radius:9999px;">HERFSTVAKANTIE</span>
+            <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:17px;margin-top:5px;">Een week uitslapen en buiten spelen</div>
+            <div style="font-family:'Poppins',sans-serif;font-size:12px;color:#434656;margin-top:2px;">19 t/m 27 oktober · geen schoolroutine deze week</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Kerstvakantie -->
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <span style="display:inline-block;width:fit-content;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Theme/Kerstvakantie — 21 dec–3 jan</span>
+      <div style="background:oklch(96% 0.015 240);border-radius:20px;padding:16px 18px;position:relative;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+        <span style="position:absolute;left:76%;width:20px;height:20px;color:oklch(55% 0.09 200);--rot:0deg;animation-duration:5s;animation-delay:0s;" class="material-symbols-outlined kynite-fall">ac_unit</span>
+        <span style="position:absolute;left:90%;width:14px;height:14px;color:oklch(45% 0.11 245);--rot:18deg;animation-duration:4.4s;animation-delay:1.5s;" class="material-symbols-outlined kynite-fall">ac_unit</span>
+        <span style="position:absolute;left:83%;width:16px;height:16px;color:oklch(55% 0.09 200);--rot:-12deg;animation-duration:5.6s;animation-delay:2.6s;" class="material-symbols-outlined kynite-fall">ac_unit</span>
+        <span style="position:absolute;left:68%;width:12px;height:12px;color:oklch(45% 0.11 245);--rot:14deg;animation-duration:4.8s;animation-delay:0.8s;" class="material-symbols-outlined kynite-fall">ac_unit</span>
+        <div style="display:flex;align-items:center;gap:14px;position:relative;">
+          <div style="width:44px;height:44px;border-radius:11px;position:relative;overflow:hidden;background:oklch(45% 0.14 245);flex-shrink:0;"><span style="position:absolute;width:42px;height:42px;border-radius:9999px;left:-14px;top:-11px;background:oklch(55% 0.14 200);opacity:0.85;"></span><span style="position:absolute;width:42px;height:42px;border-radius:9999px;right:-15px;bottom:-13px;background:#5d5fef;opacity:0.7;"></span><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.3));"><span class="material-symbols-outlined" style="font-size:23px;color:#ffffff;">ac_unit</span></span></div>
+          <div style="flex:1;min-width:0;">
+            <span style="display:inline-flex;align-items:center;background:oklch(32% 0.13 245);color:#ffffff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10px;letter-spacing:0.05em;padding:2px 9px;border-radius:9999px;">KERSTVAKANTIE</span>
+            <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:17px;margin-top:5px;">Twee weken lekker niksen</div>
+            <div style="font-family:'Poppins',sans-serif;font-size:12px;color:#434656;margin-top:2px;">21 december t/m 3 januari</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- NAVIGATION -->
+<section>
+  <h2 style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:24px;margin:0 0 20px;padding-bottom:14px;border-bottom:1px solid #e1e3e4;color:#191c1d;">Navigation</h2>
+  <div style="background:rgba(251,249,244,0.9);border-radius:24px;box-shadow:0 1px 2px rgba(0,0,0,0.04);border:1px solid #e1e3e4;max-width:520px;">
+    <div style="display:flex;justify-content:space-around;align-items:center;height:80px;padding:0 8px;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#5d5fef;"><span class="material-symbols-outlined">home</span><span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10px;">HOME</span></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#434656;"><span class="material-symbols-outlined">calendar_today</span><span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10px;">CALENDAR</span></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#434656;"><span class="material-symbols-outlined">checklist</span><span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10px;">ROUTINES</span></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#434656;"><span class="material-symbols-outlined">workspace_premium</span><span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10px;">REWARDS</span></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#434656;"><span class="material-symbols-outlined">settings</span><span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10px;">SETTINGS</span></div>
+    </div>
+  </div>
+</section>
+
+</div>
+</div>
+
+</x-dc>
+</body>
+</html>
+

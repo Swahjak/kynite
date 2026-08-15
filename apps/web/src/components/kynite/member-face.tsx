@@ -1,5 +1,4 @@
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { cn } from '@/lib/utils';
+import { Avatar, AvatarFallback, AvatarImage, cn } from '@kynite/ui';
 
 /**
  * A person's face — avatar image if they picked one, initials on their own

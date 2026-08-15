@@ -1,9 +1,7 @@
 import type { ReactNode } from 'react';
 import { getTranslations } from 'next-intl/server';
-import { Card } from '@/components/ui/card';
-import { Icon } from '@/components/ui/icon';
+import { Card, cn, Icon } from '@kynite/ui';
 import { formatDateTime } from '@/i18n/formatting-locale';
-import { cn } from '@/lib/utils';
 import { CATEGORY_CLASSES, combineDayEvents, type CalendarEvent } from '@/modules/calendar';
 import { MEMBER_COLOR_CLASSES, getHouseholdFormattingLocale, type Member } from '@/modules/family';
 import { TaskList, type TodayTasksData } from '@/modules/tasks';

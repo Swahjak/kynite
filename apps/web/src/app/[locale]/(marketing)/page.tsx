@@ -1,10 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import { BrandMark } from '@/components/brand/brand-mark';
-import { buttonVariants } from '@/components/ui/button';
-import { Icon } from '@/components/ui/icon';
-import type { IconName } from '@/components/ui/icon-codepoints';
+import { buttonVariants, cn, Icon, type IconName } from '@kynite/ui';
 import { Link, redirect } from '@/i18n/navigation';
-import { cn } from '@/lib/utils';
 import { getPrincipal } from '@/modules/family';
 
 /** Session-dependent: never prerendered, so `next build` needs no database. */

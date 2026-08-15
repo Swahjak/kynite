@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { useDateTimeFormat } from '@/components/formatting';
-import { cn } from '@/lib/utils';
+import { cn } from '@kynite/ui';
 import type { Member } from '@/modules/family';
 import { specialDaysOn } from '@/modules/holidays';
 import { dayKeysOf } from '../domain/expand';

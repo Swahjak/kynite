@@ -1,9 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Icon } from '@/components/ui/icon';
-import type { IconName } from '@/components/ui/icon-codepoints';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Icon, type IconName, Tabs, TabsList, TabsTrigger } from '@kynite/ui';
 // Type-only — see the note in `person-columns.tsx`.
 import type { Member } from '@/modules/family';
 import type { CalendarEvent } from '../queries';

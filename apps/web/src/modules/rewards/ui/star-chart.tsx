@@ -1,7 +1,6 @@
 import { getTranslations } from 'next-intl/server';
-import { Icon } from '@/components/ui/icon';
+import { cn, Icon } from '@kynite/ui';
 import { formatDateTime } from '@/i18n/formatting-locale';
-import { cn } from '@/lib/utils';
 import { StarMedallion } from '@/components/kynite';
 import { getHouseholdFormattingLocale } from '@/modules/family';
 import type { StarChartData } from '../page-data';

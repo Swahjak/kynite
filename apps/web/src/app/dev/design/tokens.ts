@@ -1,6 +1,6 @@
 /**
  * The token inventory rendered by `/dev/design`. Kept as data so the showcase
- * page cannot silently drift from `src/app/globals.css`.
+ * page cannot silently drift from `@kynite/ui`'s `styles/tokens.css`.
  */
 
 export type Swatch = { name: string; cssVar: string; className: string; note?: string };

@@ -2,8 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
-import { Button } from '@/components/ui/button';
-import { Icon } from '@/components/ui/icon';
+import { Button, Icon } from '@kynite/ui';
 import { cancelPairingCodeAction } from '../actions';
 import type { DevicesPageData } from '../page-data';
 

@@ -3,7 +3,7 @@
 import { useActionState } from 'react';
 import { useTranslations } from 'next-intl';
 import { ConfirmButton } from '@/components/ui/confirm-button';
-import { Icon } from '@/components/ui/icon';
+import { Icon } from '@kynite/ui';
 import { idleState } from '../action-state';
 import { deleteMemberAction } from '../actions';
 

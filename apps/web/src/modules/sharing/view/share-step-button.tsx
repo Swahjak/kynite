@@ -2,8 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
-import { Icon } from '@/components/ui/icon';
-import { cn } from '@/lib/utils';
+import { cn, Icon } from '@kynite/ui';
 
 /**
  * The one interactive control on the whole `(share)` surface: a contributor

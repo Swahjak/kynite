@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { Icon } from '@/components/ui/icon';
+import { Icon } from '@kynite/ui';
 
 /**
  * What a caregiver sees when a link no longer works — expired, revoked, or

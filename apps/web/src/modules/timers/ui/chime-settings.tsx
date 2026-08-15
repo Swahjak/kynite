@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { cn } from '@/lib/utils';
+import { cn } from '@kynite/ui';
 import { CHIME_INTENSITIES } from '../domain/chime';
 import { TIMER_TAP_TARGET_CLASS } from './tokens';
 import type { Chime } from './use-chime';

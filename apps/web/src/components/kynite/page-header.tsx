@@ -1,7 +1,6 @@
 import * as React from 'react';
 
-import type { IconName } from '@/components/ui/icon-codepoints';
-import { cn } from '@/lib/utils';
+import { cn, type IconName } from '@kynite/ui';
 import { IconMedallion } from './icon-medallion';
 
 /**

@@ -2,7 +2,7 @@
 
 import { useActionState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Button } from '@/components/ui/button';
+import { Button } from '@kynite/ui';
 import { useActionToast } from '@/components/ui/use-action-toast';
 import { idleState } from '../action-state';
 import { updateNotificationPreferencesAction } from '../actions';

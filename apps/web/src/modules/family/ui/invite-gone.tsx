@@ -1,6 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@kynite/ui';
 import { Link } from '@/i18n/navigation';
 import type { InviteState } from '../domain/invite';
 

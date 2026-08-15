@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { Card } from '@/components/ui/card';
+import { Card } from '@kynite/ui';
 import { MemberAvatar } from '@/modules/family';
 import {
   completeStepAction,

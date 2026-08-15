@@ -1,7 +1,6 @@
 'use client';
 
-import { Icon } from '@/components/ui/icon';
-import { cn } from '@/lib/utils';
+import { cn, Icon } from '@kynite/ui';
 import { StarCount } from '@/components/kynite';
 import type { StoreTile } from '../page-data';
 import { CATEGORY_TILE } from './tokens';

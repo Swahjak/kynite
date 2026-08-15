@@ -2,8 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
-import { Icon } from '@/components/ui/icon';
-import { cn } from '@/lib/utils';
+import { cn, Icon } from '@kynite/ui';
 import { NavOverflowSheet } from './nav-overflow-sheet';
 import { PRIMARY_NAV, isActiveHref, type NavLabels } from './nav-items';
 import { UserMenuSheetSection, type UserMenuLabels, type UserMenuUser } from './user-menu';

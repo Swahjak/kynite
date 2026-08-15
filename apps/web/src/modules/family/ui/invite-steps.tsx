@@ -3,11 +3,17 @@
 import Image from 'next/image';
 import { useActionState, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Icon } from '@/components/ui/icon';
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  cn,
+  Icon,
+} from '@kynite/ui';
 import { MemberFace } from '@/components/kynite';
-import { cn } from '@/lib/utils';
 import { MEMBER_COLORS, type MemberColor } from '../schema';
 import { idleState } from '../action-state';
 import { acceptInviteAction, chooseProfileAction } from '../actions';

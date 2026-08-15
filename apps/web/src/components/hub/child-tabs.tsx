@@ -1,10 +1,8 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Icon } from '@/components/ui/icon';
-import type { IconName } from '@/components/ui/icon-codepoints';
+import { cn, Icon, type IconName } from '@kynite/ui';
 import { Link, usePathname } from '@/i18n/navigation';
-import { cn } from '@/lib/utils';
 
 /**
  * One child's three screens, as a switcher (M19).

@@ -1,4 +1,4 @@
-import type { IconName } from '@/components/ui/icon-codepoints';
+import type { IconName } from '@kynite/ui';
 
 /**
  * The parent app's navigation, as data.

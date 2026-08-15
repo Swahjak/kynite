@@ -13,8 +13,7 @@ import {
   type PendingCompletion,
 } from '@/components/realtime';
 import { useRouter } from '@/i18n/navigation';
-import { Icon } from '@/components/ui/icon';
-import { cn } from '@/lib/utils';
+import { cn, Icon } from '@kynite/ui';
 import { ProgressBar } from '@/components/kynite';
 import { completeStepAction } from '../actions';
 import type { BoardRoutine, BoardSection, RoutineBoard as RoutineBoardData } from '../page-data';

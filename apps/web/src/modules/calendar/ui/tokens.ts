@@ -1,4 +1,4 @@
-import type { IconName } from '@/components/ui/icon-codepoints';
+import type { IconName } from '@kynite/ui';
 import { EVENT_TYPE_ICONS as TYPE_ICONS } from '../domain/event-type';
 import type { EventCategory, EventType } from '../schema';
 

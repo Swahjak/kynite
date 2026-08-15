@@ -3,9 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { useDateTimeFormat } from '@/components/formatting';
-import { Button } from '@/components/ui/button';
-import { Icon } from '@/components/ui/icon';
-import { Input } from '@/components/ui/input';
+import { Button, Icon, Input } from '@kynite/ui';
 import { createShareLinkIdle, type CreateShareLinkState } from '../action-state';
 import { createShareLinkAction } from '../actions';
 import { SHARE_SURFACE_CHOICES, type ShareSurface } from '../domain/scope';

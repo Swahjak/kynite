@@ -19,7 +19,15 @@ import {
  */
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
-const css = readFileSync(join(root, 'src/app/globals.css'), 'utf8');
+/**
+ * The design system, as shipped: the type scale lives in `tokens.css` and the
+ * `.tabular-time` utility in `utilities.css` (both in `@kynite/ui` since phase
+ * 2, both pulled in by one `@import` in the app). This test asserts across the
+ * pair, so it reads the pair.
+ */
+const css = ['tokens.css', 'utilities.css']
+  .map((file) => readFileSync(join(root, '../../packages/ui/src/styles', file), 'utf8'))
+  .join('\n');
 
 /** `--text-display-md: 2.25rem;` → 2.25 */
 function remOf(token: string): number {

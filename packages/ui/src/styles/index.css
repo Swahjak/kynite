@@ -1,0 +1,17 @@
+/* ---------------------------------------------------------------------------
+ * @kynite/ui — the stylesheet every consumer imports.
+ *
+ * Import it *after* `@import 'tailwindcss'` (and, in the app, after the
+ * shadcn/tw-animate-css preludes it layers on top of):
+ *
+ *   @import 'tailwindcss';
+ *   @import '@kynite/ui/styles.css';
+ *
+ * Consumers must also tell Tailwind to scan this package for classes, since it
+ * lives outside their own source root:
+ *
+ *   @source '<relative path to>/packages/ui/src';
+ * ------------------------------------------------------------------------- */
+
+@import './tokens.css';
+@import './utilities.css';

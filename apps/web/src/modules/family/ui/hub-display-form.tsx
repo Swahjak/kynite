@@ -2,16 +2,18 @@
 
 import { useActionState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Button } from '@/components/ui/button';
-import { useActionToast } from '@/components/ui/use-action-toast';
-import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
 import {
+  Button,
+  Field,
+  FieldDescription,
+  FieldLabel,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from '@kynite/ui';
+import { useActionToast } from '@/components/ui/use-action-toast';
 import { idleState } from '../action-state';
 import { setHubDisplayAction } from '../actions';
 import { HUB_VIEWS, type HubView } from '../schema';

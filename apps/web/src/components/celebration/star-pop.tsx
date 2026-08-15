@@ -1,8 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Icon } from '@/components/ui/icon';
-import { cn } from '@/lib/utils';
+import { cn, Icon } from '@kynite/ui';
 import { CELEBRATION_PRESETS, prefersReducedMotion, type CelebrationIntensity } from './presets';
 
 /**

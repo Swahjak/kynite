@@ -1,8 +1,7 @@
 import { getTranslations } from 'next-intl/server';
-import { Icon } from '@/components/ui/icon';
+import { cn, Icon } from '@kynite/ui';
 import { Link } from '@/i18n/navigation';
 import { formatDateTime } from '@/i18n/formatting-locale';
-import { cn } from '@/lib/utils';
 import { CATEGORY_CLASSES, addDays, toDateKey, toWall } from '@/modules/calendar';
 import { getHouseholdFormattingLocale } from '@/modules/family';
 import { CONFETTI_SLUGS, specialDaysOn, upcomingCountdown } from '@/modules/holidays';

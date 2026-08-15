@@ -8,6 +8,16 @@ Any time visual/UI decisions need to be made — color, type, spacing, radii, sh
 
 **[`design-system.html`](./design-system.html)** is the original, unmodified design system export (kept verbatim — do not edit it). It's a self-contained "bundled" page: open it in a browser and it unpacks its own payload (React + fonts + content) client-side. All the markdown docs in this directory were produced by decoding that payload and transcribing its exact inline styles — every hex value, font spec, radius, shadow, and motion timing quoted here was copied from that file, not invented.
 
+### Imported claude.ai design project
+
+[`claude-design/`](./claude-design/) is a snapshot of the claude.ai design project this system came from, imported verbatim in phase 2:
+
+- `Kynite Design System.dc.html` — the project's own specimen sheet, in fifteen sections (brand mark, colors, typography, buttons, inputs, chips & badges, selection controls, avatars, cards, calendar, page layout, rewards, motion & celebration, feestdagen & vakanties, navigation). It agrees with `design-system.html` and the markdown above; where it is more specific (per-specimen padding, exact shadow values), it is the finer-grained reference.
+- `DESIGN.md` — the prose philosophy ("Functional Warmth"). **Its frontmatter tokens are stale** (they name Hanken Grotesk and `#0040e0`, from the superseded stitch scaffold). Read the prose, ignore the frontmatter; the `.dc.html` and the docs in this directory win on any conflict.
+- `uploads/*.svg` — the four avataaars sample avatars, used as avatar/member fixtures in the `@kynite/ui` Storybook stories.
+
+The snapshot is reference material, not a build input: nothing imports from it.
+
 ## Brand summary
 
 - **Name**: Kynite — "Functional Warmth", the component system for the family planner. Systematic enough for daily logistics, warm enough for moments worth celebrating. Built on the shadcn/ui (New York) baseline.
@@ -38,8 +48,16 @@ The system is implemented in two layers. **Consume these — do not hand-roll a
 shape that is already here.** If a variant you need is missing, add it to the
 component rather than writing a one-off class string in a page.
 
-**Primitives** — `src/components/ui/*` (shadcn / Base UI, restyled onto these
-tokens):
+**Primitives** — `packages/ui` (`@kynite/ui`), the extracted design-system
+package (shadcn / Base UI, restyled onto these tokens). It also owns the token
+stylesheet itself (`packages/ui/src/styles/`), which the app's `globals.css`
+and Storybook both import, and it is browsable at
+`pnpm storybook` → <http://localhost:6006>.
+
+The `ui/*.tsx` paths in the table below are `packages/ui/src/components/*.tsx`,
+except for the handful still in `apps/web/src/components/ui/` because they read
+`next-intl` or the formatting locale — `Dialog`, `Sheet`, `Toast`, `Fab`,
+`ConfirmButton`, `Calendar` and the date/time fields:
 
 | Component | File | Doc section |
 | --- | --- | --- |

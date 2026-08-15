@@ -1,8 +1,6 @@
 import { getTranslations } from 'next-intl/server';
-import { Card } from '@/components/ui/card';
-import { Icon } from '@/components/ui/icon';
+import { Card, cn, Icon } from '@kynite/ui';
 import { formatDateTime } from '@/i18n/formatting-locale';
-import { cn } from '@/lib/utils';
 import { CATEGORY_CLASSES, dayKeysOf, type CalendarEvent } from '@/modules/calendar';
 import { MemberAvatar, getHouseholdFormattingLocale, type Member } from '@/modules/family';
 

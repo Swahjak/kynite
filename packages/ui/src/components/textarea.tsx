@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 
-import { cn } from '@/lib/utils';
+import { cn } from '../lib/utils';
 
 /**
  * Multi-line text, styled as the exact sibling of `input.tsx` (M18).

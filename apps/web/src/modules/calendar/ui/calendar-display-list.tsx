@@ -2,18 +2,20 @@
 
 import { useActionState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Button } from '@/components/ui/button';
-import { useActionToast } from '@/components/ui/use-action-toast';
-import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
-import { Icon } from '@/components/ui/icon';
 import {
+  Button,
+  cn,
+  Field,
+  FieldDescription,
+  FieldLabel,
+  Icon,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { cn } from '@/lib/utils';
+} from '@kynite/ui';
+import { useActionToast } from '@/components/ui/use-action-toast';
 import { idleState } from '../action-state';
 import { setCalendarDisplayAction } from '../actions';
 import { categoryForType } from '../domain/event-type';

@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { cn } from '@/lib/utils';
+import { cn } from '../lib/utils';
 
 /**
  * Card variants — `docs/design/components.md` § Cards.

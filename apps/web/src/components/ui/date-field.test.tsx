@@ -8,7 +8,7 @@ import type { FormattingLocale } from '@/i18n/formatting-locale';
 import messages from '../../../messages/nl.json';
 import { DateField } from './date-field';
 import { DateTimeField } from './date-time-field';
-import { Field, FieldLabel } from './field';
+import { Field, FieldLabel } from '@kynite/ui';
 import { TimeField } from './time-field';
 
 /**

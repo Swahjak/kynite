@@ -2,8 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { Button, cn } from '@kynite/ui';
 import { extendTimerAction, startTimerAction, stopTimerAction } from '../actions';
 import {
   EXTEND_PRESET_MINUTES,

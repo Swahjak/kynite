@@ -3,8 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Button } from '@/components/ui/button';
-import { Icon } from '@/components/ui/icon';
+import { Button, Icon } from '@kynite/ui';
 import { PAIRING_CODE_LENGTH, normalizePairingCode } from '@/lib/device-session';
 import { pairDeviceIdle, type PairDeviceState } from '../action-state';
 import { pairDeviceAction } from '../actions';

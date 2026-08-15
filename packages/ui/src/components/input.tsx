@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Input as InputPrimitive } from '@base-ui/react/input';
 import { cva, type VariantProps } from 'class-variance-authority';
 
-import { cn } from '@/lib/utils';
+import { cn } from '../lib/utils';
 
 /**
  * Text fields — `docs/design/components.md` § Inputs.

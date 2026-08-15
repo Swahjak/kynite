@@ -3,8 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { useDateTimeFormat } from '@/components/formatting';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Badge, Button } from '@kynite/ui';
 import { revokeShareLinkAction } from '../actions';
 import type { SharingPageData } from '../page-data';
 

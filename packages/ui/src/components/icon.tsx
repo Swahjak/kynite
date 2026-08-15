@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { cn } from '@/lib/utils';
+import { cn } from '../lib/utils';
 import { ICON_CODEPOINTS, type IconName } from './icon-codepoints';
 
 /** Icon sizes from docs/design/README.md "Icon Sizes". */

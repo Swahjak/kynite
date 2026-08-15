@@ -4,8 +4,7 @@ import * as React from 'react';
 import { Toast as ToastPrimitive } from '@base-ui/react/toast';
 import { useTranslations } from 'next-intl';
 
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
+import { Button, cn } from '@kynite/ui';
 import {
   XIcon,
   CircleCheckIcon,

@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { useDateTimeFormat } from '@/components/formatting';
 import { EmptyState } from '@/components/kynite';
-import { Card } from '@/components/ui/card';
+import { Card } from '@kynite/ui';
 // Type-only, deliberately — see the same note in `person-columns.tsx`:
 // `@/modules/family` re-exports `server-only` queries, and a value import here
 // would put the Postgres client in the browser bundle.

@@ -2,8 +2,7 @@
 
 import { useActionState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Button } from '@/components/ui/button';
-import { Icon } from '@/components/ui/icon';
+import { Button, Icon } from '@kynite/ui';
 import { idleState } from '../action-state';
 import { seedRewardPresetsAction } from '../actions';
 import type { RewardCategory } from '../schema';

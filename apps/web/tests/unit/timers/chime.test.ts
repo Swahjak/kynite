@@ -101,7 +101,7 @@ describe('nothing strobes', () => {
   it('keeps the pulse an opacity breath — no colour change, small amplitude', () => {
     // The keyframes are the actual artefact; asserting on the stylesheet is
     // what makes this test about the rendered thing rather than a constant.
-    const css = readFileSync(join(root, 'src/app/globals.css'), 'utf8');
+    const css = readFileSync(join(root, '../../packages/ui/src/styles/utilities.css'), 'utf8');
     const block = /@keyframes timer-breath\s*\{([\s\S]*?)\n\}/.exec(css);
 
     expect(block, 'the timer-breath keyframes must exist').not.toBeNull();

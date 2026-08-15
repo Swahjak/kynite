@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { Button } from '@/components/ui/button';
+import { Button } from '@kynite/ui';
 import { Link, usePathname } from '@/i18n/navigation';
 
 /**

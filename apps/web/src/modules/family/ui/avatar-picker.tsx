@@ -3,10 +3,7 @@
 import Image from 'next/image';
 import { useId, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Button } from '@/components/ui/button';
-import { FieldGroupLabel } from '@/components/ui/field';
-import { Icon } from '@/components/ui/icon';
-import { cn } from '@/lib/utils';
+import { Button, cn, FieldGroupLabel, Icon } from '@kynite/ui';
 import { CUSTOM_AVATAR_ACCEPT, isCustomAvatarUrl } from '../domain/avatar';
 import { readAvatarFile, type AvatarUploadError } from './avatar-upload';
 import { MEMBER_AVATARS, avatarUrlFor, avatarNameFrom, type MemberAvatar } from './tokens';

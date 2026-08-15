@@ -1,8 +1,6 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
-import { Icon } from '@/components/ui/icon';
-import { cn } from '@/lib/utils';
+import { Badge, cn, Icon } from '@kynite/ui';
 import { IconMedallion } from '@/components/kynite';
 import type { BoardRoutine } from '../page-data';
 import { StepRow } from './step-row';

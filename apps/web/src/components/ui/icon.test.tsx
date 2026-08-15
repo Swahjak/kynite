@@ -1,9 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { Button } from './button';
-import { Icon } from './icon';
-import { ICON_CODEPOINTS } from './icon-codepoints';
+import { Button, Icon, ICON_CODEPOINTS } from '@kynite/ui';
 
 describe('Icon', () => {
   it('renders the glyph codepoint, not the icon name', () => {

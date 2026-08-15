@@ -1,10 +1,8 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Icon } from '@/components/ui/icon';
+import { Avatar, AvatarFallback, AvatarImage, cn, Icon } from '@kynite/ui';
 import { Link } from '@/i18n/navigation';
-import { cn } from '@/lib/utils';
 import { ProgressBar } from '@/components/kynite';
 
 /**

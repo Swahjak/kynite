@@ -1,9 +1,6 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Icon } from '@/components/ui/icon';
-import { cn } from '@/lib/utils';
+import { Badge, Button, cn, Icon } from '@kynite/ui';
 import { IconMedallion, ProgressBar } from '@/components/kynite';
 import {
   formatCountdown,

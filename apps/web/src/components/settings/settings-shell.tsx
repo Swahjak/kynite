@@ -1,10 +1,7 @@
 import type { ReactNode } from 'react';
 import { PageHeader, SectionHeading } from '@/components/kynite';
-import { Card, CardContent } from '@/components/ui/card';
-import { Icon } from '@/components/ui/icon';
-import type { IconName } from '@/components/ui/icon-codepoints';
+import { Card, CardContent, cn, Icon, type IconName } from '@kynite/ui';
 import { Link } from '@/i18n/navigation';
-import { cn } from '@/lib/utils';
 
 /**
  * The settings/family list idiom, as five primitives (M19 phase 2).

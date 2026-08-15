@@ -5,8 +5,7 @@ import { DayPicker, type Matcher } from 'react-day-picker';
 import { enGB, enUS, nl } from 'react-day-picker/locale';
 
 import type { FormattingLocale } from '@/i18n/formatting-locale';
-import { cn } from '@/lib/utils';
-import { Icon } from './icon';
+import { cn, Icon } from '@kynite/ui';
 
 /**
  * The month grid of `docs/design/calendar.md` § "Month view / date picker",

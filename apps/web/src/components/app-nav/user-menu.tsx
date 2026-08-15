@@ -3,7 +3,7 @@
 import { useState, type ReactNode } from 'react';
 import { Menu } from '@base-ui/react/menu';
 import { clearUserCachesWithin } from '@/components/offline';
-import { cn } from '@/lib/utils';
+import { cn } from '@kynite/ui';
 
 /**
  * The signed-in member, at the bottom of the nav — and the sign-out behind it.
