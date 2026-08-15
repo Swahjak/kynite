@@ -59,7 +59,8 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - run: pnpm exec playwright install --with-deps chromium
+      # `@playwright/test` is a dependency of `apps/web`, not of the root.
+      - run: pnpm --filter web exec playwright install --with-deps chromium
 
       # The e2e run needs *a* valid secret, not a shared one: generate a
       # throwaway per job instead of committing a plaintext value.
@@ -82,4 +83,4 @@ jobs:
         if: failure()
         with:
           name: playwright-report
-          path: e2e/playwright-report
+          path: apps/web/e2e/playwright-report

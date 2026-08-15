@@ -8,6 +8,13 @@ Family Planner is a Next.js 16 application designed as a family organizational h
 
 ## Commands
 
+This is a pnpm workspace: the Next.js app lives in `apps/web` (all of `src/`,
+`tests/`, `e2e/`, `drizzle/`, `scripts/` and the app-level config), `packages/`
+is an empty scaffold for the future design-system package, and the root holds
+only workspace tooling (husky, commitlint, lint-staged, prettier, Dockerfile,
+`.github`, `docs`). Every command below still runs **from the repo root** —
+the root scripts proxy to `pnpm --filter web <script>`.
+
 ```bash
 # Development
 pnpm dev              # Start dev server with Turbopack (http://localhost:3000)
@@ -36,7 +43,7 @@ pnpm e2e:full         # Full cycle: setup → run → teardown
 
 ### E2E gotchas
 
-- `.env.local` leaks the machine's real `GOOGLE_CLIENT_ID` into Playwright's `webServer` (Playwright merges `process.env`; Next loads `.env.local` for absent vars) → tests hit real Google OAuth (`redirect_uri_mismatch`). Before running e2e: `mv .env.local .env.local.e2e-bak`; ALWAYS restore after. Do NOT set `GOOGLE_CLIENT_ID=''` — the env schema (`src/server/env.ts`) requires `min(1)` or absent; an empty string crashes the server.
+- `.env.local` leaks the machine's real `GOOGLE_CLIENT_ID` into Playwright's `webServer` (Playwright merges `process.env`; Next loads `.env.local` for absent vars) → tests hit real Google OAuth (`redirect_uri_mismatch`). Before running e2e: `mv apps/web/.env.local apps/web/.env.local.e2e-bak`; ALWAYS restore after. Do NOT set `GOOGLE_CLIENT_ID=''` — the env schema (`src/server/env.ts`) requires `min(1)` or absent; an empty string crashes the server.
 - Always run Playwright with `--workers=1` on this machine (shared CPU).
 - Tag tiers exist since `ee3b5df`: `--grep @smoke` (quick gate), `@visual`, `@heavy` — see `e2e/README.md`. The perf project needs `--no-deps` (its config `dependencies` replay app/hub/share).
 - After runs, verify ports 3100/3101 are free — Playwright sometimes leaves webServers alive.

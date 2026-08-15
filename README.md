@@ -36,15 +36,21 @@ pnpm dev                     # http://localhost:3000
 
 ## Structure
 
+A pnpm workspace: every command above runs from the repo root and proxies into
+`apps/web` (`pnpm --filter web …`). `packages/` is scaffolding for the design
+system extraction; it is empty today.
+
 ```
-src/
-  app/[locale]/     # route groups: (marketing) (auth) (app) (hub) (share)
-  modules/          # vertical feature slices — see src/modules/README.md
-  components/ui/    # shadcn / Base UI primitives
-  server/           # env.ts (zod), db/
-  i18n/ lib/
-messages/           # nl.json (default), en.json
-e2e/ tests/         # Playwright specs · Vitest unit tests + lint fixtures
+apps/web/           # the Next.js app — all source, tests and app tooling
+  src/
+    app/[locale]/   # route groups: (marketing) (auth) (app) (hub) (share)
+    modules/        # vertical feature slices — see src/modules/README.md
+    components/ui/  # shadcn / Base UI primitives
+    server/         # env.ts (zod), db/
+    i18n/ lib/
+  messages/         # nl.json (default), en.json
+  e2e/ tests/       # Playwright specs · Vitest unit tests + lint fixtures
+packages/           # (empty) future shared packages, e.g. the design system
 ```
 
 Cross-module deep imports (`@/modules/<slice>/<file>`) are lint-banned; import

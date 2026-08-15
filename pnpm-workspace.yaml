@@ -1,0 +1,5 @@
+packages:
+  - 'apps/*'
+  # Phase 2 will land the extracted design system here (`packages/ui`). The
+  # glob is already in place so adding it needs no workspace change.
+  - 'packages/*'
