@@ -437,6 +437,29 @@
       "openDay": "Alles van {date} bekijken"
     }
   },
+  "holidays": {
+    "badgeLabel": "Speciale dag",
+    "countdown": "{count, plural, one {Nog # nachtje slapen tot {day}} other {Nog # nachtjes slapen tot {day}}}",
+    "days": {
+      "newYear": "Nieuwjaarsdag",
+      "goodFriday": "Goede Vrijdag",
+      "easterSunday": "Eerste Paasdag",
+      "easterMonday": "Tweede Paasdag",
+      "kingsDay": "Koningsdag",
+      "liberationDay": "Bevrijdingsdag",
+      "mothersDay": "Moederdag",
+      "ascension": "Hemelvaartsdag",
+      "whitSunday": "Eerste Pinksterdag",
+      "whitMonday": "Tweede Pinksterdag",
+      "fathersDay": "Vaderdag",
+      "animalDay": "Dierendag",
+      "halloween": "Halloween",
+      "sinterklaas": "Pakjesavond",
+      "christmasDay": "Eerste Kerstdag",
+      "boxingDay": "Tweede Kerstdag",
+      "newYearsEve": "Oudjaarsavond"
+    }
+  },
   "today": {
     "title": "Vandaag",
     "hubGreeting": {

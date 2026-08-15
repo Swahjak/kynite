@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useDateTimeFormat } from '@/components/formatting';
 import { cn } from '@/lib/utils';
 import type { Member } from '@/modules/family';
+import { specialDaysOn } from '@/modules/holidays';
 import { dayKeysOf } from '../domain/expand';
 import { toDateKey, toWall } from '../domain/zone';
 import type { CalendarEvent } from '../queries';
@@ -51,6 +52,7 @@ export function MonthView({
   onOpenDay,
 }: MonthViewProps) {
   const t = useTranslations('calendar');
+  const tHolidays = useTranslations('holidays');
   const formatDateTime = useDateTimeFormat();
   const anchorMonth = toWall(anchor, timeZone).month;
   const todayKey = today ? toDateKey(toWall(today, timeZone)) : null;
@@ -92,6 +94,11 @@ export function MonthView({
           const dayEvents = byDay.get(key) ?? [];
           const outside = toWall(day, timeZone).month !== anchorMonth;
           const isToday = key === todayKey;
+          // The sparkle (M26). Computed rather than read off the day's events:
+          // a special day *is* one of them, but the emoji is a property of the
+          // date, and asking the date directly keeps the marker out of the row
+          // budget — a cell with three birthdays still shows the 🎄.
+          const special = specialDaysOn(key);
 
           return (
             <div
@@ -104,23 +111,42 @@ export function MonthView({
                 outside ? 'bg-surface-container-low/50' : 'hover:bg-surface-container-low/40'
               )}
             >
-              <div className="flex items-center justify-between">
-                {/* Date number: `class="tnum" font-size:13px`. The selected /
-                    today date is the documented pill — "`background:#5d5fef;
-                    border-radius:9999px;` with number `font-weight:700;
-                    color:#ffffff;`" — the pill *is* the indicator, so a today
-                    cell carries no dot of its own. */}
-                <span
-                  className={cn(
-                    'tnum text-body-sm',
-                    outside ? 'text-ink-muted' : 'text-ink',
-                    isToday
-                      ? 'flex size-7 items-center justify-center rounded-4xl bg-primary font-bold text-primary-foreground'
-                      : 'font-medium'
+              <div className="flex items-center justify-between gap-1">
+                <span className="flex min-w-0 items-center gap-1">
+                  {/* Date number: `class="tnum" font-size:13px`. The selected /
+                      today date is the documented pill — "`background:#5d5fef;
+                      border-radius:9999px;` with number `font-weight:700;
+                      color:#ffffff;`" — the pill *is* the indicator, so a today
+                      cell carries no dot of its own. */}
+                  <span
+                    className={cn(
+                      'tnum text-body-sm',
+                      outside ? 'text-ink-muted' : 'text-ink',
+                      isToday
+                        ? 'flex size-7 items-center justify-center rounded-4xl bg-primary font-bold text-primary-foreground'
+                        : 'font-medium'
+                    )}
+                  >
+                    {formatDateTime(day, { day: 'numeric' })}
+                  </span>
+
+                  {/* Beside the number, never instead of it: the date is what a
+                      month cell is *for*. One emoji even on the rare day that
+                      carries two (Pinksteren on Moederdag) — a cell this size
+                      has room for a cue, not for a list. */}
+                  {special[0] && (
+                    <span
+                      data-testid="month-special-day"
+                      data-slug={special[0].slug}
+                      role="img"
+                      aria-label={tHolidays(`days.${special[0].slug}`)}
+                      className={cn('text-body-sm leading-none', outside && 'opacity-50')}
+                    >
+                      {special[0].emoji}
+                    </span>
                   )}
-                >
-                  {formatDateTime(day, { day: 'numeric' })}
                 </span>
+
                 {dayEvents.length > MAX_ROWS_PER_CELL &&
                   (onOpenDay ? (
                     <button

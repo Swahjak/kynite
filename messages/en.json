@@ -437,6 +437,29 @@
       "openDay": "See everything on {date}"
     }
   },
+  "holidays": {
+    "badgeLabel": "Special day",
+    "countdown": "{count, plural, one {# more sleep until {day}} other {# more sleeps until {day}}}",
+    "days": {
+      "newYear": "New Year's Day",
+      "goodFriday": "Good Friday",
+      "easterSunday": "Easter Sunday",
+      "easterMonday": "Easter Monday",
+      "kingsDay": "King's Day",
+      "liberationDay": "Liberation Day",
+      "mothersDay": "Mother's Day",
+      "ascension": "Ascension Day",
+      "whitSunday": "Whit Sunday",
+      "whitMonday": "Whit Monday",
+      "fathersDay": "Father's Day",
+      "animalDay": "Animal Day",
+      "halloween": "Halloween",
+      "sinterklaas": "Sinterklaas Eve",
+      "christmasDay": "Christmas Day",
+      "boxingDay": "Boxing Day",
+      "newYearsEve": "New Year's Eve"
+    }
+  },
   "today": {
     "title": "Today",
     "hubGreeting": {

@@ -1,5 +1,6 @@
 import 'server-only';
 import { and, asc, desc, eq } from 'drizzle-orm';
+import { getTranslations } from 'next-intl/server';
 import { getDb } from '@/server/db';
 // Table objects come from the schema assembly point, not from the owning
 // slice's barrel. `@/modules/google` re-exports that slice's client components,
@@ -17,6 +18,7 @@ import {
   type Member,
 } from '@/modules/family';
 import { nearestCategory } from './domain/category';
+import { holidayEvents } from './domain/holidays';
 import { ensureHouseholdCalendar } from './household';
 import { fetchWindow, isCalendarView, viewWindow, type CalendarView } from './domain/window';
 import { fromWall, parseDateKey, startOfDay } from './domain/zone';
@@ -125,16 +127,17 @@ export async function loadCalendarPage(options: LoadOptions): Promise<CalendarPa
   const privateDetailFor =
     privateGrade === 'own' && principal.kind === 'member' ? principal.memberId : null;
 
-  const [members, events, writableCalendars] = await Promise.all([
+  const [members, stored, writableCalendars, holidayName] = await Promise.all([
     listMembers(principal.familyId),
     listEvents({ familyId: principal.familyId, window, privateDetail, privateDetailFor }),
     listWritableCalendars(principal.familyId),
+    getTranslations('holidays.days'),
   ]);
 
   return {
     familyId: principal.familyId,
     members,
-    events,
+    events: withHolidays(stored, window, holidayName),
     calendars: writableCalendars,
     timeZone,
     weekStartsOn,
@@ -143,6 +146,41 @@ export async function loadCalendarPage(options: LoadOptions): Promise<CalendarPa
     now,
     canWrite: can(principal, 'event:write', { familyId: principal.familyId }),
   };
+}
+
+/**
+ * Stored events plus the special days the window touches (M26).
+ *
+ * Injected here, at the one loader every calendar surface composes, rather than
+ * in each view: day, week, month and agenda, all four `(app)/today` tabs, the
+ * hub board and the offline mirror snapshot that shadows it all read this
+ * array, so one merge is the difference between the feature existing everywhere
+ * and existing seven times.
+ *
+ * It is deliberately *not* in `listEvents`. That function is the database read
+ * — the thing `docs/architecture.md` §3 describes as "rows, expanded" — and
+ * synthesising rows inside it would mean the share view
+ * (`modules/sharing/view/load.ts`), which filters by calendar scope, silently
+ * started serving events with a `calendarId` of null that no scope was ever
+ * written against. A caregiver's seven-day link showing Tweede Pinksterdag is a
+ * product decision, not a side effect; it is not made here.
+ *
+ * The merge re-sorts rather than concatenating: every consumer assumes this
+ * array is ascending by start (the same comparator `listEvents` finishes on),
+ * and an all-day special day appended after a timed evening event would break
+ * the agenda's ordering for that day.
+ */
+function withHolidays(
+  stored: CalendarEvent[],
+  window: { from: Date; to: Date },
+  name: (slug: string) => string
+): CalendarEvent[] {
+  const holidays = holidayEvents({ from: window.from, to: window.to, name });
+  if (holidays.length === 0) return stored;
+
+  return [...stored, ...holidays].sort(
+    (a, b) => a.startsAt.getTime() - b.startsAt.getTime() || a.title.localeCompare(b.title)
+  );
 }
 
 /**
