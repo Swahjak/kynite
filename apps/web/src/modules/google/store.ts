@@ -208,6 +208,52 @@ export const syncStore: SyncStore = {
   },
 };
 
+/**
+ * The standing half of the M18/M23 attribution repair (`discoverCalendars`
+ * calls this once a calendar's `owner_member_id` is known) — see the doc
+ * comment there for why a code-side repair is needed at all.
+ *
+ * `owner_member_id`'s update rule is deliberately one-directional
+ * (`upsertEvent` above, M18's `coalesce`): a parent's own attribution must
+ * survive every later sync pass, which also means an event that synced
+ * *before* its calendar had a resolved owner is stuck with a null one
+ * forever — nothing about an ordinary incremental pass ever revisits a row
+ * Google itself has not changed. `0013`/`0019` fixed this once, in SQL, for
+ * every row that was stuck at the time; this is the same statement, run
+ * every time discovery resolves (or re-resolves) a calendar's owner, so the
+ * fix does not silently stop working the next time a calendar spends any time
+ * with a null owner — a member deleted and re-created while their calendar
+ * keeps syncing, for instance (`calendar.owner_member_id` is `onDelete: 'set
+ * null'`).
+ *
+ * The predicate is the same invariant `upsertEvent`'s conflict branch reads:
+ * `owner_member_id IS NULL` *and* an empty `attendee_member_ids` together mean
+ * "nobody — sync or parent — has ever attributed this row", so this can never
+ * overwrite a parent's own choice. Soft-deleted rows are skipped; they are off
+ * every board already.
+ */
+export async function backfillCalendarAttribution(
+  calendarId: string,
+  ownerMemberId: string
+): Promise<void> {
+  await getDb()
+    .update(event)
+    .set({
+      ownerMemberId,
+      attendeeMemberIds: sql`ARRAY[${ownerMemberId}::uuid]`,
+      version: sql`${event.version} + 1`,
+      updatedAt: new Date(),
+    })
+    .where(
+      and(
+        eq(event.calendarId, calendarId),
+        isNull(event.deletedAt),
+        isNull(event.ownerMemberId),
+        sql`cardinality(${event.attendeeMemberIds}) = 0`
+      )
+    );
+}
+
 export const pushStore: PushStore = {
   /**
    * Claim the id *before* the insert (M04 carry-forward: the

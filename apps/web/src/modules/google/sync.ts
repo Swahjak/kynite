@@ -30,7 +30,13 @@ import type { CalendarSyncState, GoogleCalendarApi, GoogleCalendarResource } fro
 // evaluation time, and both bindings are hoisted declarations.
 import { removeCalendar } from './linking';
 import { calendar, googleAccount, type Calendar } from './schema';
-import { echoRegistry, publishEmitter, pushStore, syncStore } from './store';
+import {
+  backfillCalendarAttribution,
+  echoRegistry,
+  publishEmitter,
+  pushStore,
+  syncStore,
+} from './store';
 import { accessTokenProvider } from './tokens';
 
 /**
@@ -252,6 +258,17 @@ export async function discoverCalendars(
       .returning();
 
     saved.push(row);
+
+    // The standing half of the M23 repair: whenever this pass leaves the
+    // calendar with a resolved owner, sweep any of its events that synced
+    // before that was true and are still sitting in nobody's column. Safe to
+    // run on every pass, not only the first — `backfillCalendarAttribution`'s
+    // predicate only ever touches a row nothing has attributed yet, so a
+    // calendar whose owner was already correct simply matches nothing. See
+    // that function's doc comment for why a one-off migration is not enough.
+    if (row.ownerMemberId) {
+      await backfillCalendarAttribution(row.id, row.ownerMemberId);
+    }
   }
 
   return saved;
