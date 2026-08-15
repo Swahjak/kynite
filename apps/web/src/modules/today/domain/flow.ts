@@ -193,3 +193,29 @@ export function minutesRemaining(block: TimeBlock, now: Date): number {
 export function minutesUntil(block: TimeBlock, now: Date): number {
   return Math.max(0, Math.ceil((block.startsAt.getTime() - now.getTime()) / 60_000));
 }
+
+/**
+ * How the STRAKS countdown should read, in the same three registers the
+ * routines board already draws for its own upcoming chip
+ * (`modules/routines/ui/routine-board.tsx`'s `countdownFor`): a duration close
+ * in, and a clock time once a duration stops being a number anyone converts.
+ *
+ * Close in, a duration is what a family can act on: "over 40 min", "over 4
+ * uur". Past six hours the block belongs to a *later part of today* rather
+ * than to soon, so the reading switches to the clock time itself ("om
+ * 19:30") — "over 396 min" is not a sentence a person reaches for about
+ * something 6.5 hours away.
+ *
+ * Returns a discriminated reading rather than a formatted string: this module
+ * stays framework-free (no `next-intl`), so the caller picks the message key
+ * and, for `clock`, supplies the already-formatted time.
+ */
+export type StartsInReading =
+  { kind: 'minutes'; minutes: number } | { kind: 'hours'; hours: number } | { kind: 'clock' };
+
+export function startsInReading(block: TimeBlock, now: Date): StartsInReading {
+  const minutes = minutesUntil(block, now);
+  if (minutes <= 90) return { kind: 'minutes', minutes };
+  if (minutes <= 360) return { kind: 'hours', hours: Math.round(minutes / 60) };
+  return { kind: 'clock' };
+}

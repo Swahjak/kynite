@@ -6,6 +6,7 @@ import {
   flowOf,
   minutesRemaining,
   minutesUntil,
+  startsInReading,
   upcomingBlocks,
   type DayReference,
 } from '@/modules/today/domain/flow';
@@ -261,5 +262,40 @@ describe('minutesRemaining / minutesUntil', () => {
   it('never goes negative', () => {
     expect(minutesRemaining(breakfast, NOW_0900)).toBe(0);
     expect(minutesUntil(breakfast, NOW_0900)).toBe(0);
+  });
+});
+
+describe('startsInReading', () => {
+  // Same thresholds as the routines board's own upcoming chip
+  // (`countdownFor` in `modules/routines/ui/routine-board.tsx`): a duration
+  // close in, and a clock time once "over 6 uur" stops being a number anyone
+  // converts.
+  it('reads as minutes at and under the 90-minute mark', () => {
+    expect(startsInReading(dinner, at('2026-08-07T14:30:00.000Z'))).toEqual({
+      kind: 'minutes',
+      minutes: 90,
+    });
+    expect(startsInReading(dinner, at('2026-08-07T15:50:00.000Z'))).toEqual({
+      kind: 'minutes',
+      minutes: 10,
+    });
+  });
+
+  it('reads as rounded hours between 90 minutes and 6 hours out', () => {
+    // dinner starts 18:00Z16:00 — 91 minutes out from 14:29Z.
+    expect(startsInReading(dinner, at('2026-08-07T14:29:00.000Z'))).toEqual({
+      kind: 'hours',
+      hours: 2,
+    });
+    // Exactly 6 hours (360 minutes) still reads as hours, not the clock.
+    expect(startsInReading(dinner, at('2026-08-07T10:00:00.000Z'))).toEqual({
+      kind: 'hours',
+      hours: 6,
+    });
+  });
+
+  it('falls back to the clock time past the six-hour mark — never "over 396 min"', () => {
+    // 396 minutes (6.6 hours) out — the reported bug.
+    expect(startsInReading(dinner, at('2026-08-07T09:24:00.000Z'))).toEqual({ kind: 'clock' });
   });
 });

@@ -626,6 +626,8 @@
     "nowStrip": {
       "remaining": "nog {minutes} min",
       "startsIn": "over {minutes} min",
+      "startsInHours": "over {hours, plural, one {# uur} other {# uur}}",
+      "startsAt": "om {time}",
       "clear": "Niets meer gepland — de rest van de dag is van jullie.",
       "past": "Deze dag is voorbij."
     },
@@ -676,7 +678,7 @@
     "title": "Routines",
     "subtitle": "Vaste volgordes voor de dag, elk van één persoon.",
     "empty": "Nog geen routines. Maak de eerste aan om de dag vorm te geven.",
-    "graduated": "Gaat nu vanzelf",
+    "graduated": "Afgestudeerd",
     "starsPerStep": "{count, plural, =0 {Geen sterren} one {# ster per stap} other {# sterren per stap}}",
     "stepTimer": "{seconds}s",
     "actions": {
@@ -687,8 +689,8 @@
       "addStep": "Stap toevoegen",
       "remove": "Verwijderen",
       "removeNamed": "{title} verwijderen",
-      "graduate": "Gaat nu vanzelf",
-      "graduateNamed": "{title} gaat nu vanzelf",
+      "graduate": "Laten afstuderen",
+      "graduateNamed": "{title} laten afstuderen",
       "resumeStars": "Weer sterren",
       "resumeStarsNamed": "Weer sterren voor {title}",
       "removeConfirm": "Deze routine verwijderen?",
@@ -702,21 +704,21 @@
     },
     "form": {
       "title": "Naam",
-      "owner": "Van wie",
+      "owner": "Voor wie",
       "ownerHint": "Bepaalt op wiens hub-scherm de routine staat en waar herinneringen heen gaan.",
       "icon": "Pictogram",
       "scheduleKind": "Wanneer",
       "scheduleKinds": {
-        "recurring": "Elke week",
-        "once": "Eén keer"
+        "recurring": "Herhalend",
+        "once": "Eenmalig klusje"
       },
       "days": "Dagen",
       "daysHint": "De routine verschijnt op de dagen die je hier kiest.",
       "daysRequired": "Kies minstens één dag.",
       "onceDate": "Datum",
       "onceDateHint": "De routine staat alleen op deze dag op het bord.",
-      "timeOfDay": "Tijd",
-      "graceDays": "Extra dagen",
+      "timeOfDay": "Starttijd",
+      "graceDays": "Gratie",
       "graceDaysHint": "Dagen erna waarop een stap nog steeds meetelt.",
       "starsPerCompletion": "Sterren per stap",
       "rewardEnabled": "Sterren",
@@ -730,11 +732,13 @@
       "moveDown": "Stap {number} later zetten",
       "removeStep": "Stap {number} verwijderen",
       "titleAndIcon": "Titel & icoon",
-      "stepsHint": "zet ze in de goede volgorde",
+      "stepsHint": "sleep om te herordenen",
       "reward": "Beloning",
       "fewerStars": "Minder sterren",
       "moreStars": "Meer sterren",
-      "stepTimerShort": "sec"
+      "stepTimerShort": "sec",
+      "graceDaysUnit": "{count, plural, one {dag} other {dagen}}",
+      "stepMenu": "Meer voor stap {number}"
     },
     "weekdays": {
       "MO": "ma",
@@ -760,7 +764,8 @@
       "once": "Eén keer op {date}",
       "noTime": "Geen vaste tijd",
       "grace": "{days, plural, one {# extra dag} other {# extra dagen}}",
-      "onceShort": "eenmalig — {date}"
+      "onceShort": "eenmalig — {date}",
+      "none": "Geen schema — staat nergens op het bord"
     },
     "sections": {
       "morning": "Ochtend",
@@ -772,8 +777,8 @@
     "boardEmpty": "Vandaag staat er niets op de lijst.",
     "stepCount": "{count, plural, =0 {Geen stappen} one {# stap} other {# stappen}}",
     "inProgress": "NU",
-    "startsIn": "Begint over {minutes} min",
-    "startsInHours": "Begint over {hours} u",
+    "startsIn": "over {minutes} min",
+    "startsInHours": "over {hours, plural, one {# uur} other {# uur}}",
     "starsEarned": "{count, plural, =0 {Geen sterren} one {# ster verdiend} other {# sterren verdiend}}",
     "completeStep": "{title} afvinken",
     "praise": {
@@ -819,7 +824,9 @@
     "oneOffAndStars": "eenmalig klusje · {stars, plural, one {+# ster} other {+# sterren}}",
     "graceHint": "van gisteren — mag nog tot vanavond",
     "graceChip": "Nog te doen",
-    "praiseRemaining": "{count, plural, one {Goed bezig! Nog één stapje.} other {Goed bezig! Nog # stapjes.}}"
+    "praiseRemaining": "{count, plural, one {Goed bezig! Nog één stapje.} other {Goed bezig! Nog # stapjes.}}",
+    "graduatedHint": "dat kun jij al zelf!",
+    "startsAt": "om {time}"
   },
   "rewards": {
     "title": "Beloningen",
@@ -840,8 +847,8 @@
       "seedPresets": "Voorstellen toevoegen",
       "approve": "Goedkeuren",
       "deny": "Nu even niet",
-      "fulfill": "Gegeven",
-      "awardStars": "Ster geven",
+      "fulfill": "Afgerond",
+      "awardStars": "Sterren geven",
       "award": "Geven",
       "removeConfirm": "Deze beloning van de plank halen?",
       "removeConfirmYes": "Ja, weghalen",
@@ -875,9 +882,9 @@
     },
     "reasons": {
       "routine": "Routine afgerond",
-      "bonus": "Extra ster",
+      "bonus": "Bonus",
       "manual": "Ster van een ouder",
-      "surprise": "Verrassingsster"
+      "surprise": "Verrassing"
     },
     "icons": {
       "redeem": "Cadeau",
@@ -910,11 +917,12 @@
       "outstandingTitle": "Uitstaand",
       "outstandingHint": "Goedgekeurd, nog niet gegeven.",
       "historyTitle": "Eerder",
-      "approvedOn": "goedgekeurd {when}"
+      "approvedOn": "goedgekeurd {when}",
+      "onCalendar": "staat op de kalender"
     },
     "award": {
-      "title": "Een ster geven",
-      "description": "Onverwachte sterren werken het best. Zeg er vooral bij waarvoor.",
+      "title": "Sterren geven",
+      "description": "Voor iets moois buiten de routines om.",
       "member": "Voor wie",
       "amount": "Hoeveel",
       "reason": "Waarvoor",

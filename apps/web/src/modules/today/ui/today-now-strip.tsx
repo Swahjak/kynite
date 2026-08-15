@@ -20,8 +20,11 @@ import { NowStripMeter } from './now-strip-meter';
  * Five states, one per `FlowMode` (`domain/flow.ts`):
  *
  * - **live** — the NU badge, the countdown, the bar filling.
- * - **next** — a STRAKS badge and a starts-in count. No bar: an empty track
- *   reads as progress lost rather than progress not yet made.
+ * - **next** — a STRAKS badge and a starts-in count, in the same duration →
+ *   clock-time reading the routines board uses (`startsInReading` in
+ *   `../domain/flow`): minutes close in, hours a bit further out, and past six
+ *   hours the clock time itself rather than "over 396 min". No bar: an empty
+ *   track reads as progress lost rather than progress not yet made.
  * - **preview** — a *future* day being browsed. Its first block, stated with a
  *   clock time rather than counted down, because "over 9 uur" is not what a
  *   parent is asking when they tap tomorrow.
@@ -152,6 +155,7 @@ export async function TodayNowStrip({ event, mode, members, now, timeZone }: Tod
             allDay={event.allDay}
             state={live ? 'live' : 'next'}
             initialNow={now}
+            startsAtLabel={at(event.startsAt)}
             people={people}
             faces={faces}
           />

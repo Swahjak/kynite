@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { ProgressBar } from '@kynite/ui';
 import { useRouter } from '@/i18n/navigation';
-import { elapsedRatio, minutesRemaining, minutesUntil } from '../domain/flow';
+import { elapsedRatio, minutesRemaining, startsInReading } from '../domain/flow';
 
 /**
  * The part of the NU strip a clock changes.
@@ -38,6 +38,14 @@ export type NowStripMeterProps = {
   state: 'live' | 'next';
   /** The server's `now`, so the first client render matches the HTML. */
   initialNow: Date;
+  /**
+   * `startsAt` formatted as `HH:mm` in the household's locale and zone —
+   * already resolved by the server half, the same way `people` is. Used only
+   * once the countdown crosses into the "om 19:30" reading (`startsInReading`
+   * in `../domain/flow`); `startsAt` itself never changes tick to tick, so
+   * there is nothing this component needs to reformat client-side.
+   */
+  startsAtLabel: string;
   /** "Mila & Daan" — already resolved by the server half. */
   people: string;
   /**
@@ -57,6 +65,7 @@ export function NowStripMeter({
   allDay,
   state,
   initialNow,
+  startsAtLabel,
   people,
   faces,
 }: NowStripMeterProps) {
@@ -81,9 +90,14 @@ export function NowStripMeter({
 
   const block = { startsAt, endsAt, allDay };
   const live = state === 'live';
+  const reading = startsInReading(block, now);
   const detail = live
     ? t('nowStrip.remaining', { minutes: minutesRemaining(block, now) })
-    : t('nowStrip.startsIn', { minutes: minutesUntil(block, now) });
+    : reading.kind === 'minutes'
+      ? t('nowStrip.startsIn', { minutes: reading.minutes })
+      : reading.kind === 'hours'
+        ? t('nowStrip.startsInHours', { hours: reading.hours })
+        : t('nowStrip.startsAt', { time: startsAtLabel });
 
   // Two grid children, not one wrapper: the bar spans the whole strip while the
   // countdown sits in the text column beside the glyph tile (see the grid in

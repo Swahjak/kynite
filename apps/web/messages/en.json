@@ -626,6 +626,8 @@
     "nowStrip": {
       "remaining": "{minutes} min left",
       "startsIn": "in {minutes} min",
+      "startsInHours": "in {hours, plural, one {# hour} other {# hours}}",
+      "startsAt": "at {time}",
       "clear": "Nothing else planned — the rest of the day is yours.",
       "past": "This day is over."
     },
@@ -676,7 +678,7 @@
     "title": "Routines",
     "subtitle": "Fixed sequences for the day, each owned by one person.",
     "empty": "No routines yet. Create the first one to give the day its shape.",
-    "graduated": "Runs on its own now",
+    "graduated": "Graduated",
     "starsPerStep": "{count, plural, =0 {No stars} one {# star per step} other {# stars per step}}",
     "stepTimer": "{seconds}s",
     "actions": {
@@ -687,8 +689,8 @@
       "addStep": "Add step",
       "remove": "Remove",
       "removeNamed": "Remove {title}",
-      "graduate": "Runs on its own now",
-      "graduateNamed": "{title} runs on its own now",
+      "graduate": "Let it graduate",
+      "graduateNamed": "Let {title} graduate",
       "resumeStars": "Award stars again",
       "resumeStarsNamed": "Award stars for {title} again",
       "removeConfirm": "Delete this routine?",
@@ -702,21 +704,21 @@
     },
     "form": {
       "title": "Name",
-      "owner": "Whose routine",
+      "owner": "Who it is for",
       "ownerHint": "Decides whose hub screen it appears on and where reminders go.",
       "icon": "Icon",
       "scheduleKind": "When",
       "scheduleKinds": {
-        "recurring": "Every week",
-        "once": "One time"
+        "recurring": "Recurring",
+        "once": "One-off chore"
       },
       "days": "Days",
       "daysHint": "The routine appears on the days you pick here.",
       "daysRequired": "Pick at least one day.",
       "onceDate": "Date",
       "onceDateHint": "The routine is on the board on this day only.",
-      "timeOfDay": "Time",
-      "graceDays": "Extra days",
+      "timeOfDay": "Start time",
+      "graceDays": "Grace",
       "graceDaysHint": "Days afterwards on which a step still counts.",
       "starsPerCompletion": "Stars per step",
       "rewardEnabled": "Stars",
@@ -730,11 +732,13 @@
       "moveDown": "Move step {number} later",
       "removeStep": "Remove step {number}",
       "titleAndIcon": "Title & icon",
-      "stepsHint": "put them in the right order",
+      "stepsHint": "drag to reorder",
       "reward": "Reward",
       "fewerStars": "Fewer stars",
       "moreStars": "More stars",
-      "stepTimerShort": "sec"
+      "stepTimerShort": "sec",
+      "graceDaysUnit": "{count, plural, one {day} other {days}}",
+      "stepMenu": "More for step {number}"
     },
     "weekdays": {
       "MO": "Mon",
@@ -760,7 +764,8 @@
       "once": "One time on {date}",
       "noTime": "No fixed time",
       "grace": "{days, plural, one {# extra day} other {# extra days}}",
-      "onceShort": "one time — {date}"
+      "onceShort": "one time — {date}",
+      "none": "No schedule — not on any board"
     },
     "sections": {
       "morning": "Morning",
@@ -772,8 +777,8 @@
     "boardEmpty": "Nothing on the list today.",
     "stepCount": "{count, plural, =0 {No steps} one {# step} other {# steps}}",
     "inProgress": "NOW",
-    "startsIn": "Starts in {minutes} min",
-    "startsInHours": "Starts in {hours} h",
+    "startsIn": "in {minutes} min",
+    "startsInHours": "in {hours, plural, one {# hour} other {# hours}}",
     "starsEarned": "{count, plural, =0 {No stars} one {# star earned} other {# stars earned}}",
     "completeStep": "Mark {title} as done",
     "praise": {
@@ -819,7 +824,9 @@
     "oneOffAndStars": "one-off chore · {stars, plural, one {+# star} other {+# stars}}",
     "graceHint": "from yesterday — still fine until tonight",
     "graceChip": "Still to do",
-    "praiseRemaining": "{count, plural, one {Nicely done! One more step.} other {Nicely done! # more steps.}}"
+    "praiseRemaining": "{count, plural, one {Nicely done! One more step.} other {Nicely done! # more steps.}}",
+    "graduatedHint": "you can do this on your own!",
+    "startsAt": "at {time}"
   },
   "rewards": {
     "title": "Rewards",
@@ -840,8 +847,8 @@
       "seedPresets": "Add suggestions",
       "approve": "Approve",
       "deny": "Not right now",
-      "fulfill": "Handed over",
-      "awardStars": "Give a star",
+      "fulfill": "Done",
+      "awardStars": "Give stars",
       "award": "Give",
       "removeConfirm": "Take this reward off the shelf?",
       "removeConfirmYes": "Yes, take it off",
@@ -875,9 +882,9 @@
     },
     "reasons": {
       "routine": "Routine finished",
-      "bonus": "Extra star",
+      "bonus": "Bonus",
       "manual": "Star from a grown-up",
-      "surprise": "Surprise star"
+      "surprise": "Surprise"
     },
     "icons": {
       "redeem": "Gift",
@@ -910,11 +917,12 @@
       "outstandingTitle": "Outstanding",
       "outstandingHint": "Approved, not handed over yet.",
       "historyTitle": "Earlier",
-      "approvedOn": "approved {when}"
+      "approvedOn": "approved {when}",
+      "onCalendar": "on the calendar"
     },
     "award": {
-      "title": "Give a star",
-      "description": "Unexpected stars work best. Say what it is for.",
+      "title": "Give stars",
+      "description": "For something good outside the routines.",
       "member": "Who it is for",
       "amount": "How many",
       "reason": "What for",
