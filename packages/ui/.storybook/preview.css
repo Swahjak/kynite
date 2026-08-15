@@ -1,0 +1,56 @@
+/* ---------------------------------------------------------------------------
+ * Storybook preview stylesheet.
+ *
+ * The job of this file is to reproduce, outside Next, exactly what
+ * `apps/web/src/app/globals.css` sets up inside it — so a specimen in a story
+ * and the same component on a page are the same pixels.
+ *
+ * It differs from the app's version in one respect only: the app gets its font
+ * *families* from `next/font` (which self-hosts them and injects
+ * `--font-baloo-2` / `--font-poppins` / `--font-material-symbols`), and there
+ * is no `next/font` here. So the three variables are declared at the bottom
+ * against self-hosted `@fontsource` families and the app's own icon subset.
+ * Everything above that line is the same imports in the same order.
+ * ------------------------------------------------------------------------- */
+
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+/* Brand fonts, self-hosted out of node_modules — never a Google CDN request,
+ * matching the app (`apps/web/src/lib/fonts.ts`). Baloo 2 is the variable font
+ * (wght 400–800); Poppins ships as statics, so the four documented weights are
+ * listed one by one. */
+@import '@fontsource-variable/baloo-2';
+@import '@fontsource/poppins/400.css';
+@import '@fontsource/poppins/500.css';
+@import '@fontsource/poppins/600.css';
+@import '@fontsource/poppins/700.css';
+
+/* The design system itself — the same single token source the app imports. */
+@import '../src/styles/index.css';
+
+/* Tailwind scans the importing file's project by default, which here is
+ * `.storybook/`. The components are in `../src`, the specimens in `../stories`
+ * (see the note in `main.ts` for why they are not the same directory). */
+@source '../src';
+@source '../stories';
+
+/* Material Symbols Outlined, from the subset `apps/web/scripts/subset-icons.mjs`
+ * generates, served at `/fonts` by the `staticDirs` entry in `main.ts`. Same
+ * file the app ships, so a story cannot show a glyph the product does not have.
+ * `display: block` rather than `swap`: a fallback-rendered icon is the literal
+ * ligature text, which is worse than a moment of nothing. */
+@font-face {
+  font-family: 'Material Symbols Outlined';
+  src: url('/fonts/material-symbols-outlined.woff2') format('woff2');
+  font-weight: 100 700;
+  font-style: normal;
+  font-display: block;
+}
+
+/* The three variables `next/font` injects on `<html>` in the app. */
+:root {
+  --font-baloo-2: 'Baloo 2 Variable';
+  --font-poppins: 'Poppins';
+  --font-material-symbols: 'Material Symbols Outlined';
+}

@@ -64,13 +64,14 @@ pnpm db:studio        # Open Drizzle Studio GUI
 - **Auth**: better-auth with email/password
 - **i18n**: next-intl with nl (default) and en locales
 - **Testing**: Vitest for unit tests, Playwright for E2E
-- **Path alias**: `@/*` maps to `./src/*`
+- **Path alias**: `@/*` maps to `./src/*` (within `apps/web`)
+- **Workspace**: pnpm monorepo — `apps/web` (the Next app) + `packages/ui` (`@kynite/ui`, the design system + Storybook)
 
 ### Key Directories
 
 - `src/app/[locale]/` - Localized App Router pages (nl/en)
-- `src/components/` - React components (ui/ for shadcn, calendar/ for main feature)
-- `src/lib/` - Shared utilities (utils.ts has the `cn()` helper)
+- `src/components/` - App-level React components (the locale-coupled `ui/*` primitives, calendar/ for main feature)
+- `src/lib/` - Shared utilities
 - `src/hooks/` - Custom React hooks
 - `src/i18n/` - Internationalization config (routing.ts, request.ts, navigation.ts)
 - `src/server/` - Server-side code (auth.ts, db/, schema.ts)
@@ -80,9 +81,37 @@ pnpm db:studio        # Open Drizzle Studio GUI
   - `fixtures/` - Playwright fixtures for auth and page setup
   - `utils/` - Test data factory, DB seeder, test scenarios
 
+### Design system — `packages/ui` (`@kynite/ui`)
+
+The primitives and the token layer live in the workspace package, not in the app:
+
+- **Components**: `packages/ui/src/components/*` — import them as `import { Button, Icon } from '@kynite/ui'`. One entry point; there are no subpath imports.
+- **Tokens**: `packages/ui/src/styles/{tokens,utilities}.css`, the *only* copy. `apps/web/src/app/globals.css` is a five-line consumer of them, and so is Storybook's preview. Change a colour, a type step or a radius there, nowhere else.
+- **`cn()`**: `import { cn } from '@kynite/ui'` (it moved out of `@/lib/utils`).
+- **The package boundary is a lint rule.** `@kynite/ui` may not import `next-intl`, `next/*`, `server-only`, or anything from the app. Labels arrive as props; a component that needs a link takes Base UI's `render` prop and lets the app pass `next/link`. `packages/ui/eslint.config.mjs` has the rule and the reasoning.
+- Still in `apps/web/src/components/ui/`: `Dialog`, `Sheet`, `Toast`, `Fab`, `ConfirmButton`, `Calendar` and the date/time fields — they read `next-intl` or the formatting locale. Moving them means giving them a label-props API first.
+- Tailwind scans the package through `@source '../../../../packages/ui/src'` in `globals.css`. A new class only used inside the package still compiles because of that line.
+
+### Storybook, and its MCP server
+
+```bash
+pnpm storybook          # dev server on http://localhost:6006
+pnpm storybook:build    # static build (gate)
+```
+
+Storybook lives in `packages/ui` and renders the real components against the real tokens and fonts, so a specimen there is what the app renders.
+
+**When the dev server is running, use the Storybook MCP tools** (`.mcp.json` → `storybook`, `http://localhost:6006/mcp`) rather than reading component source to answer UI questions:
+
+- `list-all-documentation` / `get-documentation` — what the design system already provides, and a component's real props. Check this *before* hand-rolling any UI; it is faster and more accurate than grepping `packages/ui`.
+- `get-storybook-story-instructions` — call it before writing or editing any `*.stories.tsx`.
+- `get-changed-stories` / `get-stories-by-component` → `preview-stories` — after changing a component, a style or a token, get the preview URLs and put them in your reply so the change can be looked at.
+
+The tools are only reachable while `pnpm storybook` is running; without it, fall back to reading the stories in `packages/ui/stories/`.
+
 ### Styling Conventions
 
-Uses shadcn/ui component library with CSS variables for theming (see globals.css). Use the `cn()` helper from `@/lib/utils` for conditional class merging.
+Uses shadcn/ui component library with CSS variables for theming (see `packages/ui/src/styles/tokens.css`). Use the `cn()` helper from `@kynite/ui` for conditional class merging.
 
 **Design source of truth**: `docs/design/README.md` — the Kynite design system (Baloo 2 / Poppins, indigo `#5d5fef` / orange `#ef8d5d` / cream `#fbf9f4`). It supersedes all older design references. Consult it before making any color, typography, spacing, or component-styling decision.
 

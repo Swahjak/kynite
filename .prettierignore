@@ -9,3 +9,4 @@ docs
 CLAUDE.md
 .next-e2e-google/
 **/e2e/.auth/
+storybook-static

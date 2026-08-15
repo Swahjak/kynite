@@ -55,3 +55,6 @@ next-env.d.ts
 # Subsetting *source* for Material Symbols (3.8 MB). Not committed: the
 # subset in src/styles/fonts is what ships. See scripts/subset-icons.mjs.
 **/src/styles/fonts/material-symbols-outlined-full.ttf
+
+# storybook
+storybook-static/
