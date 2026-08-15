@@ -15,7 +15,7 @@ import { getDb } from '@/server/db';
 import { event } from '@/server/db/schema';
 import { createGoogleCalendarApi } from './api';
 import { loadMemberDirectory } from './directory';
-import { initialSyncEnabled } from './domain/calendar-list';
+import { initialSyncEnabled, type NewCalendarDefault } from './domain/calendar-list';
 import { syncCalendar, type SyncResult } from './domain/sync-engine';
 import { pushEvent, type PushResult, type PushableEvent } from './domain/push-engine';
 import type { CalendarSyncState, GoogleCalendarApi, GoogleCalendarResource } from './domain/types';
@@ -106,16 +106,14 @@ export async function listSyncableCalendars(): Promise<Calendar[]> {
 /**
  * Calendar discovery (§5): the account's calendar list, upserted.
  *
- * **What a new calendar arrives switched on (M18).** Until now every
- * discovered calendar took the column default, `true`, so linking a work
- * account put fifteen calendars — every colleague's shared diary, every room,
- * every subscribed holiday feed — onto the family's wall board in one tap, and
- * the parent's first experience of the feature was turning most of it off.
- * A new row now takes its initial state from Google's own answer to the same
- * question: `primary` (the account's own calendar, always wanted) or
- * `selected` (the flag Google sets for the calendars a person actually has
- * ticked in their own Calendar UI). Anything else lands off, visible in
- * settings, one tap from on.
+ * **What a new calendar arrives switched on.** Until M18 every discovered
+ * calendar took the column default, `true`, so linking a work account put
+ * fifteen calendars — every colleague's shared diary, every room, every
+ * subscribed holiday feed — onto the family's wall board in one tap, and the
+ * parent's first experience of the feature was turning most of it off. A new
+ * row now takes `newCalendarDefault` (see `initialSyncEnabled`): the primary
+ * calendar on a first link, nothing at all on a relink, and the picker that
+ * opens after linking is where the household says what else it wants.
  *
  * `summary`/`color`/`writable`/`timeZone` are refreshed on every pass;
  * `syncEnabled` and `visibility` are never overwritten once the row exists,
@@ -123,7 +121,12 @@ export async function listSyncableCalendars(): Promise<Calendar[]> {
  * which is why the flag below is in `values` and deliberately *not* in the
  * conflict `set`.
  */
-export async function discoverCalendars(googleAccountId: string): Promise<Calendar[]> {
+export async function discoverCalendars(
+  googleAccountId: string,
+  opts: { newCalendarDefault?: NewCalendarDefault } = {}
+): Promise<Calendar[]> {
+  const newCalendarDefault = opts.newCalendarDefault ?? 'primary-only';
+
   const [account] = await getDb()
     .select()
     .from(googleAccount)
@@ -170,7 +173,7 @@ export async function discoverCalendars(googleAccountId: string): Promise<Calend
        */
       ownerMemberId:
         resource.primary === true || resource.accessRole === 'owner' ? account.ownerMemberId : null,
-      syncEnabled: initialSyncEnabled(resource),
+      syncEnabled: initialSyncEnabled(resource, newCalendarDefault),
     };
 
     const [row] = await db

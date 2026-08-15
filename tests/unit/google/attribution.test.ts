@@ -212,14 +212,23 @@ describe('attributeEvent', () => {
 });
 
 describe('initialSyncEnabled', () => {
-  it('switches on the primary calendar and anything Google says is selected', () => {
+  it('switches on the primary calendar and nothing else on a first link', () => {
     expect(initialSyncEnabled({ id: 'a', primary: true })).toBe(true);
-    expect(initialSyncEnabled({ id: 'b', selected: true })).toBe(true);
+    expect(initialSyncEnabled({ id: 'a', primary: true }, 'primary-only')).toBe(true);
   });
 
-  it('leaves everything else off — a work account is not fifteen wall calendars', () => {
+  it('ignores Google’s `selected` flag — a ticked holiday feed is not a family calendar', () => {
+    expect(initialSyncEnabled({ id: 'b', selected: true })).toBe(false);
     expect(initialSyncEnabled({ id: 'c' })).toBe(false);
     expect(initialSyncEnabled({ id: 'd', selected: false })).toBe(false);
     expect(initialSyncEnabled({ id: 'e', primary: false, selected: false })).toBe(false);
+  });
+
+  it('switches on nothing at all on a relink, primary included', () => {
+    // A calendar missing from our database on a relink is one the parent
+    // *removed* (`removeCalendar` deletes the row), so re-discovering it must
+    // not resurrect it — the picker offers it back, ticked off.
+    expect(initialSyncEnabled({ id: 'a', primary: true }, 'none')).toBe(false);
+    expect(initialSyncEnabled({ id: 'b', selected: true }, 'none')).toBe(false);
   });
 });

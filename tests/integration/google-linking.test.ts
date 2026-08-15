@@ -42,7 +42,7 @@ describe.skipIf(!databaseUrl)('google linking (integration)', () => {
     const plainAccessToken = 'ya29.a0AfExamplePlaintextAccessToken';
     const plainRefreshToken = '1//0gExamplePlaintextRefreshToken';
 
-    const account = await linking.linkGoogleAccount({
+    const { account, relinked } = await linking.linkGoogleAccount({
       familyId: household.familyId,
       memberId: household.parentId,
       identity: { googleUserId: `google-${randomUUID()}`, email: 'parent@example.test' },
@@ -54,6 +54,10 @@ describe.skipIf(!databaseUrl)('google linking (integration)', () => {
         idToken: null,
       },
     });
+
+    // A brand-new identity is a first link, not a repair — the flag that
+    // decides whether discovery may switch the primary calendar on.
+    expect(relinked).toBe(false);
 
     // The raw row, straight from the database — not the value `linking`
     // returned in memory, which could theoretically differ from what was
@@ -78,7 +82,7 @@ describe.skipIf(!databaseUrl)('google linking (integration)', () => {
     const googleUserId = `google-${randomUUID()}`;
     const identity = { googleUserId, email: 'reauth@example.test' };
 
-    await linking.linkGoogleAccount({
+    const first = await linking.linkGoogleAccount({
       familyId: household.familyId,
       memberId: household.parentId,
       identity,
@@ -91,7 +95,7 @@ describe.skipIf(!databaseUrl)('google linking (integration)', () => {
       },
     });
 
-    const relinked = await linking.linkGoogleAccount({
+    const second = await linking.linkGoogleAccount({
       familyId: household.familyId,
       memberId: household.parentId,
       identity,
@@ -107,9 +111,15 @@ describe.skipIf(!databaseUrl)('google linking (integration)', () => {
     const [row] = await db
       .select()
       .from(schema.googleAccount)
-      .where(eq(schema.googleAccount.id, relinked.id));
+      .where(eq(schema.googleAccount.id, second.account.id));
 
     expect(row.accessToken!.startsWith('v1:')).toBe(true);
     expect(row.accessToken).not.toContain('second-plaintext-token');
+
+    // The same identity twice is an update, and it says so: the callback reads
+    // this to keep a reconnect from re-enabling calendars the parent removed.
+    expect(first.relinked).toBe(false);
+    expect(second.relinked).toBe(true);
+    expect(second.account.id).toBe(first.account.id);
   });
 });

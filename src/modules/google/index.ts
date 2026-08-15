@@ -121,7 +121,13 @@ export {
   type LinkedCalendar,
 } from './queries';
 
-export { bootstrapAccount, linkGoogleAccount, unlinkGoogleAccount } from './linking';
+export {
+  bootstrapAccount,
+  linkGoogleAccount,
+  unlinkGoogleAccount,
+  type LinkResult,
+} from './linking';
+export type { NewCalendarDefault } from './domain/calendar-list';
 export { renewExpiringChannels, stopChannel, watchCalendar } from './channels';
 export {
   apiForAccount,
@@ -151,6 +157,7 @@ export {
 } from './jobs';
 
 export {
+  applyCalendarSelectionAction,
   removeCalendarAction,
   setCalendarSyncAction,
   syncNowAction,

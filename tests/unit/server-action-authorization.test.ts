@@ -289,7 +289,10 @@ describe('every Server Action authorizes first', () => {
     // `createFamilyForSocialUserAction`, the two halves of Google sign-in.
     // 49 → 52 in M24: the tasks slice's `createTaskAction`, `toggleTaskAction`
     // and `deleteTaskAction`.
-    expect(findings.length).toBe(52);
+    // 52 → 53: the Google slice's `applyCalendarSelectionAction`, the one
+    // submit behind the "which calendars sync?" picker that opens right after
+    // an account is linked.
+    expect(findings.length).toBe(53);
   });
 
   it('reports no unauthorized action anywhere in src/', () => {

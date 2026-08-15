@@ -66,7 +66,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }
 
     const identity = await fetchIdentity(tokens.accessToken);
-    const account = await linkGoogleAccount({
+    const { account, relinked } = await linkGoogleAccount({
       familyId: state.familyId,
       memberId: state.memberId,
       identity,
@@ -75,7 +75,16 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     // Discovery is synchronous so the settings page already lists the
     // calendars; the initial per-calendar sync is queued, not awaited.
-    await bootstrapAccount(account.id);
+    //
+    // A relink switches *nothing* on. `removeCalendar` hard-deletes the row, so
+    // a calendar a parent took out of Kynite looks brand new to the next
+    // discovery pass — defaulting it on would resurrect, on every reconnect,
+    // exactly the calendars the household said it did not want. A first link
+    // gets the account's own calendar and nothing else; the picker on the
+    // settings page (`?linked=`) is where the rest is chosen.
+    await bootstrapAccount(account.id, {
+      newCalendarDefault: relinked ? 'none' : 'primary-only',
+    });
 
     const linked = encodeURIComponent(account.email || '1');
 

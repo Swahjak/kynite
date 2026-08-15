@@ -24,6 +24,7 @@ import {
   unlinkGoogleAccountAction,
 } from '../actions';
 import type { LinkedAccount, LinkedCalendar } from '../queries';
+import { CalendarPickerDialog } from './calendar-picker-dialog';
 
 /**
  * The Google settings surface (M05, extended in M18).
@@ -59,9 +60,18 @@ export function GoogleAccountsPanel({
 }: GoogleAccountsPanelProps) {
   const t = useTranslations('google');
   const configured = missingConfig.length === 0;
+  // `?linked=` says an OAuth round trip just landed. The account it names is
+  // the one whose calendars are still unanswered, so that is the one the picker
+  // opens on — and if it names an account we cannot find (a stale link, a
+  // household switched in another tab) the status line below stands in for it.
+  const justLinked = linkedEmail
+    ? accounts.find((account) => account.email === linkedEmail)
+    : undefined;
 
   return (
     <div className="flex flex-col gap-4">
+      {justLinked ? <CalendarPickerDialog key={justLinked.id} account={justLinked} /> : null}
+
       {error ? (
         <p
           role="alert"
@@ -71,7 +81,7 @@ export function GoogleAccountsPanel({
         </p>
       ) : null}
 
-      {linkedEmail ? (
+      {linkedEmail && !justLinked ? (
         <p role="status" className="rounded-xl bg-brand-container/20 px-4 py-3 text-body-sm">
           {t('linkedNotice', { email: linkedEmail })}
         </p>

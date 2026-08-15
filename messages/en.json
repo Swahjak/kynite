@@ -287,6 +287,12 @@
       "removeConfirm": "Yes, remove it",
       "removeCancel": "Cancel"
     },
+    "picker": {
+      "title": "Choose which calendars sync",
+      "description": "Only the calendars you tick from {email} appear in Kynite. You can change this later.",
+      "confirm": "Done",
+      "cancel": "Later"
+    },
     "errors": {
       "forbidden": "You are not allowed to do that.",
       "invalidInput": "Please check the details you entered.",

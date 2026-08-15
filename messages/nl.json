@@ -287,6 +287,12 @@
       "removeConfirm": "Ja, uit Kynite halen",
       "removeCancel": "Annuleren"
     },
+    "picker": {
+      "title": "Kies welke agenda's synchroniseren",
+      "description": "Alleen de aangevinkte agenda's van {email} komen in Kynite te staan. Je kunt dit later altijd aanpassen.",
+      "confirm": "Klaar",
+      "cancel": "Later"
+    },
     "errors": {
       "forbidden": "Dat mag je niet doen.",
       "invalidInput": "Controleer de ingevulde gegevens.",

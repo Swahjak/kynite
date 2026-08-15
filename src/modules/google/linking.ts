@@ -5,6 +5,7 @@ import { stopChannel, watchCalendar } from './channels';
 import { enqueueCalendarSync } from './jobs';
 import type { GoogleIdentity, TokenResponse } from './oauth';
 import { findAccountByGoogleUserId } from './queries';
+import type { NewCalendarDefault } from './domain/calendar-list';
 import { calendar, googleAccount, type Calendar, type GoogleAccount } from './schema';
 import { discoverCalendars } from './sync';
 import { encryptForStorage } from './tokens';
@@ -18,6 +19,17 @@ import { encryptForStorage } from './tokens';
  * (and their sync tokens) that hang off it.
  */
 
+/**
+ * The result of a link, with the one fact the caller cannot re-derive: whether
+ * this identity was *already* linked to this family.
+ *
+ * It decides what discovery does with calendars it has never seen (see
+ * `NewCalendarDefault`): a first link may switch the primary calendar on, a
+ * relink may switch nothing on, because on a relink "not in our database" means
+ * "the parent removed it" rather than "new to us".
+ */
+export type LinkResult = { account: GoogleAccount; relinked: boolean };
+
 export async function linkGoogleAccount({
   familyId,
   memberId,
@@ -28,7 +40,7 @@ export async function linkGoogleAccount({
   memberId: string;
   identity: GoogleIdentity;
   tokens: TokenResponse;
-}): Promise<GoogleAccount> {
+}): Promise<LinkResult> {
   const db = getDb();
 
   // M04 carry-forward: scoped by family, because `google_user_id` is unique
@@ -51,7 +63,7 @@ export async function linkGoogleAccount({
       .set(secrets)
       .where(eq(googleAccount.id, existing.id))
       .returning();
-    return updated;
+    return { account: updated, relinked: true };
   }
 
   const [created] = await db
@@ -64,16 +76,25 @@ export async function linkGoogleAccount({
     })
     .returning();
 
-  return created;
+  return { account: created, relinked: false };
 }
 
 /**
  * Discover the account's calendars, then register a push channel and queue an
  * initial sync for each one that is enabled. Best effort per calendar: one
  * calendar that refuses a `watch` must not abort the link.
+ *
+ * `newCalendarDefault` is passed straight through to discovery, and the loop
+ * below is why it matters at all: whatever discovery switches on is what starts
+ * syncing here, without anybody confirming anything. A parent who closes the
+ * picker without touching it is left with exactly the primary calendar on a
+ * first link, and with precisely their previous choice on a relink.
  */
-export async function bootstrapAccount(accountId: string): Promise<{ calendars: number }> {
-  const calendars = await discoverCalendars(accountId);
+export async function bootstrapAccount(
+  accountId: string,
+  opts: { newCalendarDefault?: NewCalendarDefault } = {}
+): Promise<{ calendars: number }> {
+  const calendars = await discoverCalendars(accountId, opts);
 
   for (const row of calendars) {
     if (!row.syncEnabled) continue;

@@ -75,28 +75,58 @@ export async function setCalendarSyncAction(
 
   if (!row) return failure('calendarNotFound');
 
-  /**
-   * M18: switching a calendar off *empties* it.
-   *
-   * `syncEnabled` used to govern only the ingest side — the poll skipped the
-   * calendar and its channel stopped — while every event it had already
-   * imported stayed on the board forever. A parent who muted a colleague's
-   * shared diary in settings watched it keep rendering on the wall and
-   * reasonably concluded the switch did nothing. It reads as an on/off for the
-   * calendar, so it has to be one.
-   *
-   * The delete and the cursor clear are one transaction, and the ordering
-   * matters: a process that died between them would leave a calendar with no
-   * events but a live `syncToken`, so the next incremental pass would ask
-   * Google only for what had *changed* and would restore nothing. Clearing the
-   * token in the same commit makes the next enable a full initial sync by
-   * construction (`sync-engine.ts`: `mode = calendar.syncToken ? … : 'initial'`).
-   *
-   * Nothing is published per deleted row. Emitting N `event.deleted` events for
-   * a fifteen-hundred-event work calendar would flood every open stream in the
-   * household to say one thing; `settings.updated` says that one thing once,
-   * and every hub already treats it as "re-read yourself" (M16).
-   */
+  await applyCalendarSync(calendarId, enabled);
+
+  await publish({
+    familyId: principal.familyId,
+    type: 'settings.updated',
+    entity: { id: principal.familyId },
+    actor: { memberId: principal.memberId, source: 'mobile' },
+    patch: { calendarId, syncEnabled: enabled },
+  });
+
+  const locale = await getLocale();
+  revalidatePath(`/${locale}/settings/google`);
+  revalidatePath(`/${locale}/calendar`);
+  revalidatePath(`/${locale}/today`);
+  revalidatePath(`/${locale}/hub`);
+  return idleState;
+}
+
+/**
+ * One calendar's sync switch, flipped — the database half plus the two Google
+ * calls that follow from it. Shared by `setCalendarSyncAction` (one calendar,
+ * one tap) and `applyCalendarSelectionAction` (a whole account, confirmed in
+ * the picker), so the two can never drift into treating "off" differently.
+ *
+ * Authorization lives in the callers: this function takes an id that has
+ * already been proven to belong to the caller's family (and, for a non-owner,
+ * to their own linked account).
+ *
+ * `syncEnabled` used to govern only the ingest side — the poll skipped the
+ * calendar and its channel stopped — while every event it had already imported
+ * stayed on the board forever. A parent who muted a colleague's shared diary in
+ * settings watched it keep rendering on the wall and reasonably concluded the
+ * switch did nothing. It reads as an on/off for the calendar, so it has to be
+ * one.
+ *
+ * The delete and the cursor clear are one transaction, and the ordering
+ * matters: a process that died between them would leave a calendar with no
+ * events but a live `syncToken`, so the next incremental pass would ask Google
+ * only for what had *changed* and would restore nothing. Clearing the token in
+ * the same commit makes the next enable a full initial sync by construction
+ * (`sync-engine.ts`: `mode = calendar.syncToken ? … : 'initial'`).
+ *
+ * Nothing is published per deleted row. Emitting N `event.deleted` events for a
+ * fifteen-hundred-event work calendar would flood every open stream in the
+ * household to say one thing; `settings.updated` says that one thing once, and
+ * every hub already treats it as "re-read yourself" (M16) — which is why the
+ * publish stays with the callers, one per parent action rather than one per
+ * calendar.
+ */
+async function applyCalendarSync(calendarId: string, enabled: boolean): Promise<void> {
+  const db = getDb();
+
   const [updated] = await db.transaction(async (tx) => {
     const [row] = await tx
       .update(calendar)
@@ -144,14 +174,81 @@ export async function setCalendarSyncAction(
   } else {
     await stopChannel(updated).catch(() => {});
   }
+}
 
-  await publish({
-    familyId: principal.familyId,
-    type: 'settings.updated',
-    entity: { id: principal.familyId },
-    actor: { memberId: principal.memberId, source: 'mobile' },
-    patch: { calendarId, syncEnabled: enabled },
-  });
+/**
+ * The picker's one submit: *this* is the set of calendars that syncs.
+ *
+ * Linking a Google account no longer guesses. Discovery switches on the
+ * account's own calendar and nothing else (`initialSyncEnabled`), the settings
+ * page opens the picker on `?linked=`, and this action applies whatever the
+ * parent ticked — additions and removals in one confirmation, rather than a row
+ * of toggles each costing a round trip and a full-page revalidation.
+ *
+ * Only rows whose state actually *changes* are touched. Re-applying "on" to an
+ * already-syncing calendar would clear its cursor and re-run a full initial
+ * sync for no reason; re-applying "off" would be a delete of nothing. A parent
+ * who ticks one extra calendar and confirms should cost exactly one calendar's
+ * worth of work.
+ *
+ * Same `google:link` chokepoint and `ownershipFilter` narrowing as its
+ * neighbours, and the account id is not trusted: the calendars are read through
+ * a join on `google_account` scoped to the caller's family, so an id belonging
+ * to another household simply selects nothing.
+ */
+export async function applyCalendarSelectionAction(
+  _previous: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const principal = await getPrincipal();
+  if (!principal || principal.kind !== 'member') return failure('forbidden');
+
+  const authorized = await assertCan('google:link', {
+    ownerMemberId: principal.memberId,
+  }).catch(() => null);
+  if (!authorized) return failure('forbidden');
+
+  const accountId = read(formData, 'accountId');
+  if (!uuid.safeParse(accountId).success) return failure('invalidInput');
+
+  // One comma-separated hidden field rather than N checkbox inputs: an
+  // *unticked* checkbox submits nothing at all, so a form of checkboxes cannot
+  // distinguish "switch this one off" from "this one was not on the screen" —
+  // and that distinction is the entire point of the picker.
+  const selected = new Set(
+    read(formData, 'calendarIds')
+      .split(',')
+      .map((value) => value.trim())
+      .filter((value) => uuid.safeParse(value).success)
+  );
+
+  const rows = await getDb()
+    .select()
+    .from(calendar)
+    .innerJoin(googleAccount, eq(calendar.googleAccountId, googleAccount.id))
+    .where(
+      and(
+        eq(calendar.googleAccountId, accountId),
+        eq(calendar.familyId, principal.familyId),
+        ownershipFilter(principal)
+      )
+    )
+    .then((entries) => entries.map((entry) => entry.calendar));
+
+  if (rows.length === 0) return failure('accountNotFound');
+
+  const changed = rows.filter((row) => row.syncEnabled !== selected.has(row.id));
+  for (const row of changed) await applyCalendarSync(row.id, selected.has(row.id));
+
+  if (changed.length > 0) {
+    await publish({
+      familyId: principal.familyId,
+      type: 'settings.updated',
+      entity: { id: principal.familyId },
+      actor: { memberId: principal.memberId, source: 'mobile' },
+      patch: { accountId, calendarIds: changed.map((row) => row.id) },
+    });
+  }
 
   const locale = await getLocale();
   revalidatePath(`/${locale}/settings/google`);
