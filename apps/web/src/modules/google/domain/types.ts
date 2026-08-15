@@ -211,6 +211,16 @@ export type CalendarSyncState = {
    * account, where the fallback would be the wrong person entirely.
    */
   ownerMemberId?: string | null;
+  /**
+   * The member who linked the Google account this calendar hangs off
+   * (`google_account.owner_member_id`) — attribution's last fallback, behind a
+   * matched organizer and the calendar's own member. It exists for the
+   * calendar that is *personally* somebody's without being theirs at Google: a
+   * shift roster the employer shares read-only ("ESS Shifts") has no owning
+   * member because its `accessRole` is not `owner`, yet every event on it is
+   * one person's working day — the person whose account it came in on.
+   */
+  accountOwnerMemberId?: string | null;
 };
 
 /**

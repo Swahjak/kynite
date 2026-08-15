@@ -5,7 +5,7 @@ import {
   NO_ATTRIBUTION,
   STATUS_ONLY_EVENT_TYPES,
 } from '@/modules/google/domain/mapping';
-import { initialSyncEnabled, isOwnedCalendar } from '@/modules/google/domain/calendar-list';
+import { initialSyncEnabled, isStorableCalendar } from '@/modules/google/domain/calendar-list';
 import type { MemberDirectory } from '@/modules/google/domain/types';
 import { googleEvent } from './support/fixtures';
 
@@ -187,49 +187,82 @@ describe('attributeEvent', () => {
   });
 
   describe('calendars with no owning member', () => {
-    it('never falls back to the account owner — a subscription is nobody’s event', () => {
-      // "Nederlandse feestdagen" is on the account, not on the parent's day.
-      expect(
-        attributeEvent(googleEvent({ summary: 'Koningsdag' }), subscription, directory)
-      ).toEqual(NO_ATTRIBUTION);
+    it('falls back to the account owner when nobody else matches', () => {
+      // The ESS Shifts case: a shift roster the employer shares read-only.
+      // The calendar is not `accessRole: 'owner'`, so discovery gives it no
+      // owning member — but every event on it is still one person's day, and
+      // that person is whoever linked the account it hangs off.
+      const attributed = attributeEvent(
+        googleEvent({ summary: 'Late dienst' }),
+        { ownerMemberId: null, accountOwnerMemberId: PARENT },
+        directory
+      );
+
+      expect(attributed).toEqual({
+        ownerMemberId: PARENT,
+        attendeeMemberIds: [PARENT],
+      });
     });
 
-    it('still attributes a real match on a colleague’s shared calendar', () => {
+    it('still lets a matched organizer own the row, over the account owner', () => {
       const attributed = attributeEvent(
         googleEvent({
           organizer: { email: 'other@example.test' },
           attendees: [{ email: 'other@example.test' }],
         }),
-        subscription,
+        { ownerMemberId: null, accountOwnerMemberId: PARENT },
         directory
       );
 
       expect(attributed.ownerMemberId).toBe(OTHER_PARENT);
-      // …and the account owner is *not* dragged in alongside them.
+      // The account owner is a fallback, not a participant of somebody
+      // else's matched event.
       expect(attributed.attendeeMemberIds).toEqual([OTHER_PARENT]);
+    });
+
+    it('attributes nothing when there is no account owner either', () => {
+      // A member deletion nulls both columns; nobody is still nobody.
+      expect(
+        attributeEvent(googleEvent({ summary: 'Koningsdag' }), subscription, directory)
+      ).toEqual(NO_ATTRIBUTION);
     });
   });
 });
 
-describe('isOwnedCalendar', () => {
+describe('isStorableCalendar', () => {
   it('accepts the calendars the account holder created — primary and secondary alike', () => {
-    expect(isOwnedCalendar({ id: 'primary', primary: true, accessRole: 'owner' })).toBe(true);
-    expect(isOwnedCalendar({ id: 'werk', accessRole: 'owner' })).toBe(true);
+    expect(isStorableCalendar({ id: 'primary', primary: true, accessRole: 'owner' })).toBe(true);
+    expect(isStorableCalendar({ id: 'werk', accessRole: 'owner' })).toBe(true);
   });
 
-  it('rejects everything that belongs to somebody else', () => {
-    // A colleague's diary shared with write access, a shared team calendar…
-    expect(isOwnedCalendar({ id: 'jeroen@toppy.nl', accessRole: 'writer' })).toBe(false);
-    // …a subscribed holiday feed, a birthdays calendar…
-    expect(isOwnedCalendar({ id: 'holidays', accessRole: 'reader', selected: true })).toBe(false);
-    // …a meeting room, and a resource we can only see the busy blocks of.
-    expect(isOwnedCalendar({ id: 'room-3', accessRole: 'freeBusyReader' })).toBe(false);
+  it('accepts shared and subscribed calendars whose events we can read', () => {
+    // The ESS Shifts case: an employer's shift roster shared read-only is
+    // indistinguishable from any other `reader` calendar, so the machine
+    // stores it and the parent decides in the picker. None of these start
+    // synced — that is `initialSyncEnabled`'s job, and it is primary-only.
+    expect(isStorableCalendar({ id: 'ess-shifts@company.example', accessRole: 'reader' })).toBe(
+      true
+    );
+    expect(isStorableCalendar({ id: 'jeroen@toppy.nl', accessRole: 'writer' })).toBe(true);
+    expect(isStorableCalendar({ id: 'holidays', accessRole: 'reader', selected: true })).toBe(true);
+  });
+
+  it('rejects what has no readable events to offer', () => {
+    // Busy blocks only — there is nothing to sync.
+    expect(isStorableCalendar({ id: 'room-3', accessRole: 'freeBusyReader' })).toBe(false);
+    // A meeting room, even when its events are readable: rooms are not diaries.
+    expect(
+      isStorableCalendar({
+        id: 'boardroom@resource.calendar.google.com',
+        accessRole: 'reader',
+      })
+    ).toBe(false);
     // Google omitting the role is not a licence to store the calendar.
-    expect(isOwnedCalendar({ id: 'unknown' })).toBe(false);
+    expect(isStorableCalendar({ id: 'unknown' })).toBe(false);
   });
 
   it('rejects a deleted calendar even when it was ours', () => {
-    expect(isOwnedCalendar({ id: 'werk', accessRole: 'owner', deleted: true })).toBe(false);
+    expect(isStorableCalendar({ id: 'werk', accessRole: 'owner', deleted: true })).toBe(false);
   });
 });
 

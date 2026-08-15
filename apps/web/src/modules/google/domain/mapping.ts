@@ -146,10 +146,14 @@ function personEmail(person: GoogleEventPerson | undefined): string | null {
  *   *Which* calendars have a member is decided upstream, once, and written to
  *   `calendar.owner_member_id` by discovery (M23): the account holder's own
  *   calendars — `primary` plus anything they created themselves — and nothing
- *   else. A Google account also carries subscriptions ("Nederlandse
- *   feestdagen") and colleagues' shared diaries; those have no owner member,
- *   attribute from matched organizer/attendees only, and land unattributed
- *   when nobody matches — which is the honest answer.
+ *   else.
+ * - **The account's owner is the last fallback.** A calendar with no owning
+ *   member still arrived on *somebody's* Google account, and when neither the
+ *   organizer nor the calendar answers "whose event is this", that somebody
+ *   is the answer. This is what puts a read-only shift roster ("ESS Shifts")
+ *   in its person's column instead of the shared "Iedereen" block. A matched
+ *   organizer still wins, so a colleague's diary attributes to the colleague
+ *   when we know them — the fallback only catches events nobody claims.
  *
  *   Reading a column rather than `isPrimary` is the M23 fix: a second parent's
  *   own *secondary* calendar ("Werk") is not `primary`, so the old rule put
@@ -160,10 +164,11 @@ function personEmail(person: GoogleEventPerson | undefined): string | null {
  */
 export function attributeEvent(
   resource: GoogleEventResource,
-  calendar: Pick<CalendarSyncState, 'ownerMemberId'>,
+  calendar: Pick<CalendarSyncState, 'ownerMemberId' | 'accountOwnerMemberId'>,
   directory: MemberDirectory
 ): EventAttribution {
   const calendarOwnerId = calendar.ownerMemberId ?? null;
+  const accountOwnerId = calendar.accountOwnerMemberId ?? null;
 
   const attendeeIds = new Set<string>();
   for (const attendee of resource.attendees ?? []) {
@@ -181,7 +186,7 @@ export function attributeEvent(
   // A resolved owner is a participant of their own event even when Google's
   // attendee list omits them — which it routinely does for an event somebody
   // created on their own calendar without inviting anybody.
-  const ownerMemberId = organizerId ?? calendarOwnerId;
+  const ownerMemberId = organizerId ?? calendarOwnerId ?? accountOwnerId;
   if (ownerMemberId) attendeeIds.add(ownerMemberId);
 
   return { ownerMemberId, attendeeMemberIds: [...attendeeIds] };

@@ -9,25 +9,42 @@ import type { GoogleCalendarResource } from './types';
  * inside a database loop.
  */
 
+/** Google's resource calendars — meeting rooms, equipment — carry this domain. */
+const RESOURCE_CALENDAR_SUFFIX = '@resource.calendar.google.com';
+
 /**
  * Whether a calendar list entry may exist in Kynite **at all**.
  *
- * Kynite is a family planner, so the only calendars it will hold are the ones
- * the Google account holder owns: `accessRole: 'owner'` is precisely the set a
- * person created themselves — their primary calendar (which Google always
- * grades `owner`) plus every secondary one, "Werk", "Sport", "Schoolagenda
- * Mila". Everything else in a calendar list belongs to somebody else: a
- * colleague's diary and a shared team calendar (`writer`), a meeting room, a
- * subscribed holiday feed, a birthdays calendar (`reader`/`freeBusyReader`).
- * Other people's diaries must be impossible to pull onto a family's wall, not
- * merely switched off by default — so `discoverCalendars` never stores one, and
- * prunes any row that stops qualifying.
+ * This used to be owner-only (`accessRole: 'owner'`): the calendars a person
+ * created themselves, with everything shared or subscribed refused outright as
+ * "somebody else's diary". That boundary turned out to solve a problem the
+ * sync default already solves — `initialSyncEnabled` is primary-only, so
+ * nothing but the primary ever turns on by itself — while creating a real one:
+ * a calendar that is *personally* somebody's without being theirs at Google.
+ * An employer's shift roster ("ESS Shifts") arrives `reader`, exactly like a
+ * holiday feed, and no signal Google sends can tell the two apart. That
+ * judgment is human, so the picker is where it lives: store everything with
+ * readable events, all of it off by default, and let a parent tick what
+ * belongs on the wall.
  *
- * A resource Google marks `deleted` is not stored either, for the ordinary
- * reason: it no longer exists.
+ * What still never gets stored:
+ * - `freeBusyReader` (or no role at all) — busy blocks only, no events to sync.
+ * - meeting rooms and equipment (`@resource.calendar.google.com`) — resources,
+ *   not diaries, whatever their access role says.
+ * - anything Google marks `deleted` — it no longer exists.
+ *
+ * `discoverCalendars` prunes a stored row that stops qualifying — which now
+ * means "gone from Google's list" (unsubscribed, access revoked, deleted)
+ * rather than "not owned".
  */
-export function isOwnedCalendar(resource: GoogleCalendarResource): boolean {
-  return resource.deleted !== true && resource.accessRole === 'owner';
+export function isStorableCalendar(resource: GoogleCalendarResource): boolean {
+  return (
+    resource.deleted !== true &&
+    (resource.accessRole === 'owner' ||
+      resource.accessRole === 'writer' ||
+      resource.accessRole === 'reader') &&
+    !resource.id.endsWith(RESOURCE_CALENDAR_SUFFIX)
+  );
 }
 
 /**
@@ -62,10 +79,11 @@ export type NewCalendarDefault = 'primary-only' | 'none';
  * the moment the account is linked (`calendar-picker-dialog.tsx`) or in
  * settings afterwards.
  *
- * This is a *default*, and the only one left to set: which calendars may exist
- * at all is decided before this function is reached, by `discoverCalendars`,
- * which stores only calendars the account holder owns. Everything this decides
- * about is therefore already one of the household's own calendars.
+ * This is a *default*, and since the storage rule widened it is the only
+ * boundary that keeps a fresh link quiet: `discoverCalendars` now stores
+ * shared and subscribed calendars too (`isStorableCalendar`), so everything
+ * except the primary — the holiday feed included — arrives OFF and waits for
+ * the picker.
  *
  * This governs *insertion only*. A calendar a parent has already decided about
  * is never re-decided by a discovery pass — see `discoverCalendars`, where this

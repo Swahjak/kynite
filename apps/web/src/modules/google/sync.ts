@@ -17,7 +17,7 @@ import { createGoogleCalendarApi } from './api';
 import { loadMemberDirectory } from './directory';
 import {
   initialSyncEnabled,
-  isOwnedCalendar,
+  isStorableCalendar,
   type NewCalendarDefault,
 } from './domain/calendar-list';
 import { syncCalendar, type SyncResult } from './domain/sync-engine';
@@ -69,7 +69,10 @@ export function isGoogleBacked(row: Calendar): row is GoogleBackedCalendar {
   return row.googleAccountId !== null && row.googleCalendarId !== null;
 }
 
-function syncState(row: GoogleBackedCalendar): CalendarSyncState {
+function syncState(
+  row: GoogleBackedCalendar,
+  accountOwnerMemberId: string | null = null
+): CalendarSyncState {
   return {
     id: row.id,
     familyId: row.familyId,
@@ -77,7 +80,22 @@ function syncState(row: GoogleBackedCalendar): CalendarSyncState {
     syncToken: row.syncToken,
     timeZone: row.timeZone,
     ownerMemberId: row.ownerMemberId,
+    accountOwnerMemberId,
   };
+}
+
+/**
+ * Attribution's last fallback (`CalendarSyncState.accountOwnerMemberId`): the
+ * member who linked the account. Only the sync path resolves it — the push
+ * path maps its own echo without attributing, so it passes nothing.
+ */
+async function loadAccountOwner(googleAccountId: string): Promise<string | null> {
+  const [account] = await getDb()
+    .select({ ownerMemberId: googleAccount.ownerMemberId })
+    .from(googleAccount)
+    .where(eq(googleAccount.id, googleAccountId))
+    .limit(1);
+  return account?.ownerMemberId ?? null;
 }
 
 async function loadCalendar(calendarId: string): Promise<Calendar | null> {
@@ -95,9 +113,10 @@ export async function syncCalendarById(calendarId: string): Promise<SyncResult |
   // to resolve here is the other half of attribution — which addresses this
   // household owns.
   const directory = await loadMemberDirectory(row.familyId);
+  const accountOwnerMemberId = await loadAccountOwner(row.googleAccountId);
 
   return syncCalendar({
-    calendar: syncState(row),
+    calendar: syncState(row, accountOwnerMemberId),
     api: apiForAccount(row.googleAccountId),
     store: syncStore,
     emit: publishEmitter,
@@ -120,31 +139,27 @@ export async function listSyncableCalendars(): Promise<Calendar[]> {
 }
 
 /**
- * Calendar discovery (§5): the calendars the account holder *owns*, upserted.
+ * Calendar discovery (§5): every storable calendar on the account, upserted.
  *
- * **Owner-only is a product boundary, not a default.** Kynite is a family
- * planner: the calendars that belong on a household's wall are the ones the
- * people in that household keep. Google's calendar list is much wider than
- * that — a work account reports every colleague's shared diary, every meeting
- * room, every subscribed feed — and none of those are the family's to hold. So
- * a resource whose `accessRole` is not `owner` is not merely switched off here;
- * it is never stored, which is what makes it impossible to pick, to enable and
- * to sync. `accessRole: 'owner'` is exactly the set of calendars the account
- * holder created themselves (their primary included, which Google always grades
- * `owner`), and exactly not the ones they subscribed to (`reader`) or were
- * granted access on (`reader`/`writer`).
+ * **Storable, not owner-only.** This pass used to refuse anything the account
+ * holder did not own at Google, as a privacy boundary. That refusal solved a
+ * problem `initialSyncEnabled` already solves — nothing but the primary ever
+ * turns on by itself — and it made an employer's read-only shift roster
+ * ("ESS Shifts") impossible to have at all. So the boundary moved to the
+ * picker: `isStorableCalendar` keeps everything with readable events, all of
+ * it off by default, and a parent decides what belongs on the wall. See that
+ * function for what still never gets stored.
  *
- * Two consequences worth naming rather than discovering later: every row this
- * function writes now has `writable: true` and an `ownerMemberId` equal to the
- * account's owner. Both columns stay — `writable` still describes rows written
- * before this rule and is what the UI's read-only marker reads, and
+ * `writable` and `ownerMemberId` are both live distinctions again: a `reader`
+ * row is stored read-only with no owning member, and attribution falls back to
+ * the account's owner per event (`CalendarSyncState.accountOwnerMemberId`).
  * `ownerMemberId` is nulled by a member deletion (`onDelete: 'set null'`), so
- * neither is safely re-derivable from "the row exists".
+ * it is not re-derivable from "the row exists"; rediscovery restores it.
  *
- * **Pruning.** The same pass removes any google-backed row of this account that
- * the list no longer grades `owner` — access revoked, a subscription that
- * predates this rule, or a calendar Google no longer returns at all (deleted,
- * or unsubscribed at Google). Removal goes through `removeCalendar`, so it is
+ * **Pruning.** The same pass removes any google-backed row of this account
+ * that no longer qualifies — absent from Google's list (unsubscribed, access
+ * revoked, deleted at Google) or no longer storable. Removal goes through
+ * `removeCalendar`, so it is
  * the same operation as a parent's "remove" in settings: the push channel is
  * stopped and the row goes with its events. Nothing is pruned when the list
  * itself fails — the pagination loop below throws before this point, so a bad
@@ -191,13 +206,13 @@ export async function discoverCalendars(
   const db = getDb();
   const saved: Calendar[] = [];
 
-  // The household's own calendars, and nothing else — see the note above.
-  const owned = resources.filter(isOwnedCalendar);
-  const ownedIds = new Set(owned.map((resource) => resource.id));
+  // Everything with readable events — see the note above.
+  const storable = resources.filter(isStorableCalendar);
+  const storableIds = new Set(storable.map((resource) => resource.id));
 
-  // Prune first: a row this account holds that Google no longer grades `owner`
-  // — including one absent from the list entirely — is removed exactly the way
-  // settings removes one. The household's own native calendar cannot be
+  // Prune first: a row this account holds that Google's list no longer
+  // qualifies — including one absent from it entirely — is removed exactly the
+  // way settings removes one. The household's own native calendar cannot be
   // selected here (it has no `google_account_id`) and `removeCalendar` refuses
   // it anyway.
   const stored = await db
@@ -206,11 +221,11 @@ export async function discoverCalendars(
     .where(eq(calendar.googleAccountId, googleAccountId));
 
   for (const row of stored) {
-    if (row.googleCalendarId !== null && ownedIds.has(row.googleCalendarId)) continue;
+    if (row.googleCalendarId !== null && storableIds.has(row.googleCalendarId)) continue;
     await removeCalendar(row);
   }
 
-  for (const resource of owned) {
+  for (const resource of storable) {
     const values = {
       familyId: account.familyId,
       googleAccountId,
@@ -218,20 +233,17 @@ export async function discoverCalendars(
       summary: resource.summaryOverride ?? resource.summary ?? resource.id,
       color: resource.backgroundColor ?? null,
       timeZone: resource.timeZone ?? null,
-      // Constant `true` for anything reaching this loop, since an owner may
-      // always write their own calendar. Still derived rather than hard-coded:
-      // the column is what the read-only marker in the settings list and the
-      // picker read, and it is the one place the answer would have to change if
-      // the filter above ever widened again.
+      // What the read-only marker in the settings list and the picker read —
+      // a live distinction again now that `reader` calendars are stored.
       writable: resource.accessRole === 'owner' || resource.accessRole === 'writer',
       // Google's own answer to "is this the account holder's calendar" — the
       // input to attribution's owner fallback (M18, `attributeEvent`). Refreshed
       // on every pass like the other Google-owned facts, because it is one.
       isPrimary: resource.primary === true,
       /**
-       * "Is this the account holder's own calendar" (M23) — which, since the
-       * owner-only filter above, is every row this loop writes. It is still
-       * written explicitly rather than assumed: a member deletion nulls this
+       * "Is this the account holder's own calendar" (M23). Null for a shared
+       * or subscribed row — those attribute per event, falling back to the
+       * account's owner (`attributeEvent`). A member deletion nulls this
        * column (`onDelete: 'set null'`), so "the row exists" does not imply it
        * is set, and a rediscovery pass is how it comes back.
        */
