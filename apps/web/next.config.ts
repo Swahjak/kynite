@@ -39,6 +39,24 @@ const nextConfig: NextConfig = {
   transpilePackages: ['@kynite/ui'],
   reactStrictMode: true,
   typedRoutes: true,
+  /**
+   * TypeScript 7 dropped the JavaScript compiler API (it returns in 7.1), so
+   * the `typescript` *package* here is the official `@typescript/typescript6`
+   * compat shim — typescript-eslint and the two AST tests need that API. The
+   * native TS7 compiler is installed alongside as `typescript-native`, and it
+   * is what plain `tsc` (so `pnpm typecheck`) runs.
+   *
+   * By default `next build` type-checks by shelling out to the `tsc` binary
+   * declared by the `typescript` package itself — but the compat shim only
+   * declares `tsc6`, so that lookup fails with "typescript is not installed".
+   * Opting out puts `next build` back on the compiler API, which the shim does
+   * provide. The build is still fully type-checked; only this step runs on the
+   * TS6 checker rather than the native one. Revisit when TS 7.1 restores the
+   * API and typescript-eslint supports it — then `typescript` can just be 7.
+   */
+  experimental: {
+    useTypeScriptCli: false,
+  },
   // Playwright drives the dev server over 127.0.0.1.
   allowedDevOrigins: ['127.0.0.1'],
   // `web-push` is a CommonJS package with native-ish crypto usage; bundling it

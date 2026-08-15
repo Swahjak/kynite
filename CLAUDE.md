@@ -174,14 +174,37 @@ Do NOT include Co-Authored-By or similar Claude references in commit messages. U
 # Notes
 
 - Nextjs 16+ uses proxy.ts instead of middleware.ts
-- **TypeScript is pinned to 6.0.3, not the latest 7.x — do not bump it.** Two
-  things break on TS 7: (1) `typescript-eslint` (latest 8.67.0) declares peer
-  `typescript >=4.8.4 <6.1.0`, so the whole lint gate falls outside its
-  supported range; (2) TS 7 is the native port and its npm package no longer
-  exports the JS compiler API, which `tests/unit/server-action-authorization.test.ts`
-  and `tests/unit/share-tree-no-server-actions.test.ts` use to walk the AST
-  (`ts.createSourceFile`, `ts.forEachChild`, `ts.isCallExpression`, …). Revisit
-  once typescript-eslint ships a TS 7 line and TS 7 exposes a public AST API.
+- **TypeScript runs side-by-side: native 7 for `tsc`, the 6 API for everything
+  that reads an AST.** TS 7 is the Go port and its npm package no longer exports
+  the JS compiler API (it returns in 7.1), so the two consumers are split by
+  package name in `apps/web` and `packages/ui`:
+  - `typescript` → `npm:@typescript/typescript6@6.0.2`, Microsoft's official
+    compat shim (a straight re-export of `typescript@6.0.3`). Anything that
+    resolves the *name* `typescript` gets the JS API: `typescript-eslint`
+    (which hard-throws on TS 7 — it parses with `ts.createSourceFile`), and
+    `tests/unit/server-action-authorization.test.ts` /
+    `tests/unit/share-tree-no-server-actions.test.ts`, which walk the AST. Those
+    tests keep their plain `import ts from 'typescript'` — do not "fix" it.
+    This package ships `tsc6`, not `tsc`.
+  - `typescript-native` → `npm:typescript@7.0.2`, which owns the `tsc` binary.
+    So plain `tsc` — i.e. `pnpm typecheck` — is the native compiler. Measured
+    ~5x faster than TS 6 on this repo (≈29s → ≈6s across the three projects).
+
+  Two consequences worth knowing:
+  - `next build` type-checks through `experimental.useTypeScriptCli: false`
+    (set in `apps/web/next.config.ts`, see the comment there). Next's default
+    CLI checker shells out to the `tsc` binary declared *by the `typescript`
+    package*, and the compat shim only declares `tsc6`, so the default fails
+    with a misleading "typescript is not installed". The build is still fully
+    type-checked, just on the TS 6 checker. Do not "fix" this with
+    `typescript.ignoreBuildErrors`, which would skip type checking entirely.
+  - Keep `typecheck`/`lint` serialised (`--workspace-concurrency=1`). TS 7 is
+    internally parallel and already runs at 300–430% CPU, so widening the
+    workspace concurrency contends rather than helps.
+
+  Revisit when TS 7.1 restores the public API *and* typescript-eslint supports
+  it (tracking: typescript-eslint#10940) — then `typescript` can simply be 7 and
+  both the alias and the Next flag go away.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
