@@ -510,6 +510,30 @@ ignores echoes of its own `clientId`.
 - Tokens encrypted at rest (app-level AES-GCM with a key from env), refreshed
   lazily with a single-flight lock per account.
 
+### Calendar discovery
+
+- **Owner-only, as a product boundary.** A discovery pass stores exactly the
+  calendars the Google account holder *owns* (`accessRole: 'owner'`: their
+  primary plus every secondary calendar they created). Everything else in the
+  calendar list belongs to someone else — a colleague's diary, a shared team
+  calendar, a meeting room, a subscribed holiday feed — and is never stored,
+  which is what makes it unpickable, unenableable and unsyncable. This is a
+  family planner; other people's diaries must be impossible to pull in, not
+  merely off by default. Because the row cannot exist, the filter *is* the
+  guard: the sync actions do not re-check it (Google's `accessRole` is not a
+  column, and `calendar.owner_member_id` is nulled by a member deletion, so a
+  check against it would refuse legitimate calendars).
+- **The same pass prunes.** Any google-backed row of that account which the
+  list no longer grades `owner` — access revoked, a row from before this rule,
+  or a calendar Google stopped returning at all — is removed exactly the way
+  settings' "remove calendar" does it: channel stopped first, row deleted, its
+  events cascading with it. A failed list call throws before the prune, so a
+  bad network trip is never read as "the household owns nothing".
+- **What arrives switched on**: the primary calendar on a first link, nothing
+  on a relink (a re-discovered calendar missing from our database is one the
+  parent removed). The picker shown right after linking is where the household
+  chooses among its own calendars.
+
 ### Incremental sync
 
 Per `calendar` row:

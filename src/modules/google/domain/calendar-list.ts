@@ -10,6 +10,27 @@ import type { GoogleCalendarResource } from './types';
  */
 
 /**
+ * Whether a calendar list entry may exist in Kynite **at all**.
+ *
+ * Kynite is a family planner, so the only calendars it will hold are the ones
+ * the Google account holder owns: `accessRole: 'owner'` is precisely the set a
+ * person created themselves — their primary calendar (which Google always
+ * grades `owner`) plus every secondary one, "Werk", "Sport", "Schoolagenda
+ * Mila". Everything else in a calendar list belongs to somebody else: a
+ * colleague's diary and a shared team calendar (`writer`), a meeting room, a
+ * subscribed holiday feed, a birthdays calendar (`reader`/`freeBusyReader`).
+ * Other people's diaries must be impossible to pull onto a family's wall, not
+ * merely switched off by default — so `discoverCalendars` never stores one, and
+ * prunes any row that stops qualifying.
+ *
+ * A resource Google marks `deleted` is not stored either, for the ordinary
+ * reason: it no longer exists.
+ */
+export function isOwnedCalendar(resource: GoogleCalendarResource): boolean {
+  return resource.deleted !== true && resource.accessRole === 'owner';
+}
+
+/**
  * What a discovery pass does with calendars it has never seen before.
  *
  * - `primary-only` — a **first** link: only the account's own calendar comes
@@ -40,6 +61,11 @@ export type NewCalendarDefault = 'primary-only' | 'none';
  * household actually wants is chosen deliberately, in the picker that opens
  * the moment the account is linked (`calendar-picker-dialog.tsx`) or in
  * settings afterwards.
+ *
+ * This is a *default*, and the only one left to set: which calendars may exist
+ * at all is decided before this function is reached, by `discoverCalendars`,
+ * which stores only calendars the account holder owns. Everything this decides
+ * about is therefore already one of the household's own calendars.
  *
  * This governs *insertion only*. A calendar a parent has already decided about
  * is never re-decided by a discovery pass — see `discoverCalendars`, where this

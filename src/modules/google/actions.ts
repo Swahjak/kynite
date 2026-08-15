@@ -103,6 +103,16 @@ export async function setCalendarSyncAction(
  * already been proven to belong to the caller's family (and, for a non-owner,
  * to their own linked account).
  *
+ * "May this calendar sync at all?" is deliberately *not* re-asked here. Only
+ * calendars the Google account holder owns are ever stored (`discoverCalendars`
+ * drops every other `accessRole` and prunes rows that stop qualifying), so the
+ * discovery filter is the guard, and a row reaching this point has already
+ * passed it. Re-checking would need Google's `accessRole` persisted, and the
+ * closest column we do have — `ownerMemberId` — is nulled when the member is
+ * deleted (`onDelete: 'set null'`), so a check against it would refuse to
+ * enable perfectly legitimate calendars. A guard that lies is worse than the
+ * one upstream that does not.
+ *
  * `syncEnabled` used to govern only the ingest side — the poll skipped the
  * calendar and its channel stopped — while every event it had already imported
  * stayed on the board forever. A parent who muted a colleague's shared diary in

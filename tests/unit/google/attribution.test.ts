@@ -5,7 +5,7 @@ import {
   NO_ATTRIBUTION,
   STATUS_ONLY_EVENT_TYPES,
 } from '@/modules/google/domain/mapping';
-import { initialSyncEnabled } from '@/modules/google/domain/calendar-list';
+import { initialSyncEnabled, isOwnedCalendar } from '@/modules/google/domain/calendar-list';
 import type { MemberDirectory } from '@/modules/google/domain/types';
 import { googleEvent } from './support/fixtures';
 
@@ -208,6 +208,28 @@ describe('attributeEvent', () => {
       // …and the account owner is *not* dragged in alongside them.
       expect(attributed.attendeeMemberIds).toEqual([OTHER_PARENT]);
     });
+  });
+});
+
+describe('isOwnedCalendar', () => {
+  it('accepts the calendars the account holder created — primary and secondary alike', () => {
+    expect(isOwnedCalendar({ id: 'primary', primary: true, accessRole: 'owner' })).toBe(true);
+    expect(isOwnedCalendar({ id: 'werk', accessRole: 'owner' })).toBe(true);
+  });
+
+  it('rejects everything that belongs to somebody else', () => {
+    // A colleague's diary shared with write access, a shared team calendar…
+    expect(isOwnedCalendar({ id: 'jeroen@toppy.nl', accessRole: 'writer' })).toBe(false);
+    // …a subscribed holiday feed, a birthdays calendar…
+    expect(isOwnedCalendar({ id: 'holidays', accessRole: 'reader', selected: true })).toBe(false);
+    // …a meeting room, and a resource we can only see the busy blocks of.
+    expect(isOwnedCalendar({ id: 'room-3', accessRole: 'freeBusyReader' })).toBe(false);
+    // Google omitting the role is not a licence to store the calendar.
+    expect(isOwnedCalendar({ id: 'unknown' })).toBe(false);
+  });
+
+  it('rejects a deleted calendar even when it was ours', () => {
+    expect(isOwnedCalendar({ id: 'werk', accessRole: 'owner', deleted: true })).toBe(false);
   });
 });
 

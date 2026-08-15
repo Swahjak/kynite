@@ -15,10 +15,20 @@ import { getDb } from '@/server/db';
 import { event } from '@/server/db/schema';
 import { createGoogleCalendarApi } from './api';
 import { loadMemberDirectory } from './directory';
-import { initialSyncEnabled, type NewCalendarDefault } from './domain/calendar-list';
+import {
+  initialSyncEnabled,
+  isOwnedCalendar,
+  type NewCalendarDefault,
+} from './domain/calendar-list';
 import { syncCalendar, type SyncResult } from './domain/sync-engine';
 import { pushEvent, type PushResult, type PushableEvent } from './domain/push-engine';
 import type { CalendarSyncState, GoogleCalendarApi, GoogleCalendarResource } from './domain/types';
+// Discovery's prune (below) removes a calendar the same way settings does, so
+// it calls the same function rather than a second copy of it. That makes
+// `sync ↔ linking` a cycle on paper — `linking` imports `discoverCalendars`
+// from here — but only a function-level one: neither module reads the other at
+// evaluation time, and both bindings are hoisted declarations.
+import { removeCalendar } from './linking';
 import { calendar, googleAccount, type Calendar } from './schema';
 import { echoRegistry, publishEmitter, pushStore, syncStore } from './store';
 import { accessTokenProvider } from './tokens';
@@ -104,16 +114,43 @@ export async function listSyncableCalendars(): Promise<Calendar[]> {
 }
 
 /**
- * Calendar discovery (§5): the account's calendar list, upserted.
+ * Calendar discovery (§5): the calendars the account holder *owns*, upserted.
+ *
+ * **Owner-only is a product boundary, not a default.** Kynite is a family
+ * planner: the calendars that belong on a household's wall are the ones the
+ * people in that household keep. Google's calendar list is much wider than
+ * that — a work account reports every colleague's shared diary, every meeting
+ * room, every subscribed feed — and none of those are the family's to hold. So
+ * a resource whose `accessRole` is not `owner` is not merely switched off here;
+ * it is never stored, which is what makes it impossible to pick, to enable and
+ * to sync. `accessRole: 'owner'` is exactly the set of calendars the account
+ * holder created themselves (their primary included, which Google always grades
+ * `owner`), and exactly not the ones they subscribed to (`reader`) or were
+ * granted access on (`reader`/`writer`).
+ *
+ * Two consequences worth naming rather than discovering later: every row this
+ * function writes now has `writable: true` and an `ownerMemberId` equal to the
+ * account's owner. Both columns stay — `writable` still describes rows written
+ * before this rule and is what the UI's read-only marker reads, and
+ * `ownerMemberId` is nulled by a member deletion (`onDelete: 'set null'`), so
+ * neither is safely re-derivable from "the row exists".
+ *
+ * **Pruning.** The same pass removes any google-backed row of this account that
+ * the list no longer grades `owner` — access revoked, a subscription that
+ * predates this rule, or a calendar Google no longer returns at all (deleted,
+ * or unsubscribed at Google). Removal goes through `removeCalendar`, so it is
+ * the same operation as a parent's "remove" in settings: the push channel is
+ * stopped and the row goes with its events. Nothing is pruned when the list
+ * itself fails — the pagination loop below throws before this point, so a bad
+ * network trip can never be read as "the household owns nothing".
  *
  * **What a new calendar arrives switched on.** Until M18 every discovered
  * calendar took the column default, `true`, so linking a work account put
- * fifteen calendars — every colleague's shared diary, every room, every
- * subscribed holiday feed — onto the family's wall board in one tap, and the
- * parent's first experience of the feature was turning most of it off. A new
- * row now takes `newCalendarDefault` (see `initialSyncEnabled`): the primary
- * calendar on a first link, nothing at all on a relink, and the picker that
- * opens after linking is where the household says what else it wants.
+ * fifteen calendars onto the family's wall board in one tap, and the parent's
+ * first experience of the feature was turning most of it off. A new row now
+ * takes `newCalendarDefault` (see `initialSyncEnabled`): the primary calendar on
+ * a first link, nothing at all on a relink, and the picker that opens after
+ * linking is where the household says which of its *own* calendars it wants.
  *
  * `summary`/`color`/`writable`/`timeZone` are refreshed on every pass;
  * `syncEnabled` and `visibility` are never overwritten once the row exists,
@@ -148,9 +185,26 @@ export async function discoverCalendars(
   const db = getDb();
   const saved: Calendar[] = [];
 
-  for (const resource of resources) {
-    if (resource.deleted) continue;
+  // The household's own calendars, and nothing else — see the note above.
+  const owned = resources.filter(isOwnedCalendar);
+  const ownedIds = new Set(owned.map((resource) => resource.id));
 
+  // Prune first: a row this account holds that Google no longer grades `owner`
+  // — including one absent from the list entirely — is removed exactly the way
+  // settings removes one. The household's own native calendar cannot be
+  // selected here (it has no `google_account_id`) and `removeCalendar` refuses
+  // it anyway.
+  const stored = await db
+    .select()
+    .from(calendar)
+    .where(eq(calendar.googleAccountId, googleAccountId));
+
+  for (const row of stored) {
+    if (row.googleCalendarId !== null && ownedIds.has(row.googleCalendarId)) continue;
+    await removeCalendar(row);
+  }
+
+  for (const resource of owned) {
     const values = {
       familyId: account.familyId,
       googleAccountId,
@@ -158,18 +212,22 @@ export async function discoverCalendars(
       summary: resource.summaryOverride ?? resource.summary ?? resource.id,
       color: resource.backgroundColor ?? null,
       timeZone: resource.timeZone ?? null,
+      // Constant `true` for anything reaching this loop, since an owner may
+      // always write their own calendar. Still derived rather than hard-coded:
+      // the column is what the read-only marker in the settings list and the
+      // picker read, and it is the one place the answer would have to change if
+      // the filter above ever widened again.
       writable: resource.accessRole === 'owner' || resource.accessRole === 'writer',
       // Google's own answer to "is this the account holder's calendar" — the
       // input to attribution's owner fallback (M18, `attributeEvent`). Refreshed
       // on every pass like the other Google-owned facts, because it is one.
       isPrimary: resource.primary === true,
       /**
-       * "Is this the account holder's own calendar" (M23) — `primary`, or any
-       * calendar they *own*. `accessRole: 'owner'` is exactly the calendars a
-       * person created themselves ("Werk", "Sport"), and exactly not the ones
-       * they subscribed to (a holiday feed: `reader`) or were given access on
-       * (a colleague's diary: `reader`/`writer`). Refreshed on every pass like
-       * the other Google-owned facts, because access can be revoked.
+       * "Is this the account holder's own calendar" (M23) — which, since the
+       * owner-only filter above, is every row this loop writes. It is still
+       * written explicitly rather than assumed: a member deletion nulls this
+       * column (`onDelete: 'set null'`), so "the row exists" does not imply it
+       * is set, and a rediscovery pass is how it comes back.
        */
       ownerMemberId:
         resource.primary === true || resource.accessRole === 'owner' ? account.ownerMemberId : null,

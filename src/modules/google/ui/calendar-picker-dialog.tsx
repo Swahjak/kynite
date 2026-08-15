@@ -31,6 +31,11 @@ import type { LinkedAccount } from '../queries';
  * else is chosen — once, in one confirmation, instead of a row of toggles each
  * costing a round trip.
  *
+ * The list can only ever offer calendars the account holder *owns*: a
+ * colleague's diary, a meeting room and a subscribed feed are dropped by
+ * discovery and have no row to tick (`discoverCalendars`). This is a family
+ * planner, so "everything else" means the rest of *their own* calendars.
+ *
  * Dismissing it is a valid answer. The defaults are already applied server-side
  * by the time the settings page renders, so a parent who closes the dialog is
  * left with a working, primary-only sync rather than nothing.
