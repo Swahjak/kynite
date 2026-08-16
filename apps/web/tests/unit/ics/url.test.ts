@@ -4,6 +4,7 @@ import {
   hostnameAsAddress,
   isBlockedAddress,
   looksLikeCalendar,
+  redactFeedUrl,
 } from '@/modules/ics/domain/url';
 
 /**
@@ -163,6 +164,49 @@ describe('isBlockedAddress', () => {
       expect(isBlockedAddress(address)).toBe(false);
     }
   );
+});
+
+describe('redactFeedUrl', () => {
+  // Every token here is fake; a real one grants read access to a school agenda.
+  const SOCIAL_SCHOOLS =
+    'https://api.socialschools.eu/api/v1/icalfeed/?schoolId=42&roleTypeId=3' +
+    '&userId=00000000-0000-4000-8000-000000000000&hash=faketoken0000abcd';
+
+  it('keeps the host and drops the path and the query', () => {
+    const redacted = redactFeedUrl(SOCIAL_SCHOOLS);
+
+    expect(redacted).toContain('api.socialschools.eu');
+    expect(redacted).not.toContain('faketoken0000abcd');
+    expect(redacted).not.toContain('hash=');
+    expect(redacted).not.toContain('00000000-0000-4000-8000-000000000000');
+    expect(redacted).not.toContain('icalfeed');
+  });
+
+  it('keeps a short tail so two feeds from one school stay distinguishable', () => {
+    const a = redactFeedUrl(SOCIAL_SCHOOLS);
+    const b = redactFeedUrl(SOCIAL_SCHOOLS.replace('faketoken0000abcd', 'faketoken0000wxyz'));
+
+    expect(a).not.toBe(b);
+    expect(a).toBe('api.socialschools.eu/…abcd');
+  });
+
+  it('redacts a token that lives in the path rather than the query', () => {
+    expect(redactFeedUrl('https://school.example/ical/9f3b7c2d1e5a')).toBe('school.example/…1e5a');
+  });
+
+  it('says nothing but the host when there is nothing after it', () => {
+    expect(redactFeedUrl('https://school.example/')).toBe('school.example');
+    expect(redactFeedUrl('https://school.example')).toBe('school.example');
+  });
+
+  it('never returns the input for an unparseable value', () => {
+    expect(redactFeedUrl('not a url with a secret=abc')).toBe('…');
+    expect(redactFeedUrl('')).toBe('…');
+  });
+
+  it('drops credentials rather than echoing them', () => {
+    expect(redactFeedUrl('https://user:hunter2@school.example/a.ics')).not.toContain('hunter2');
+  });
 });
 
 describe('looksLikeCalendar', () => {

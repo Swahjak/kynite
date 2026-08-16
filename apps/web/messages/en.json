@@ -332,14 +332,19 @@
     "lastFailed": "failed {when}",
     "add": {
       "title": "Add a calendar",
-      "description": "On the school or club website, look for “subscribe to calendar” or “ICS” and paste that link below. Kynite only reads this calendar; you cannot change anything in it.",
+      "description": "Pick your school’s app below, or paste a calendar link (ICS/webcal) yourself. Kynite only reads this calendar; you cannot change anything in it.",
       "url": "Calendar link (ICS or webcal)",
       "urlPlaceholder": "https://school.example/calendar.ics",
       "name": "Name (optional)",
       "namePlaceholder": "Mila's school calendar",
       "color": "Colour",
       "action": "Add calendar",
-      "pending": "Fetching…"
+      "pending": "Fetching…",
+      "added": "The calendar is in. New events arrive automatically, every hour.",
+      "warnings": {
+        "emptyFeed": "The calendar loaded, but it contains no events at all right now. Check that you copied the right link — or the school has not imported its year calendar yet.",
+        "presetAlreadyAdded": "Your household already follows this school app through another link. Holidays and study days may now appear twice on the board; remove one of the two if they do."
+      }
     },
     "status": {
       "active": "Active",
@@ -377,7 +382,49 @@
       "httpError": "The calendar's server returned an error. Check the link.",
       "tooLarge": "This calendar is too large to fetch.",
       "notCalendar": "There is no calendar at this link. Look for the link ending in .ics.",
-      "parseFailed": "The calendar could not be read."
+      "parseFailed": "The calendar could not be read.",
+      "presetHost": "This link does not belong to the school app you picked. Check that you tapped the right app, or choose “other calendar”.",
+      "presetIncomplete": "This link looks half-copied — the last part is missing. Copy the whole link from the app, including the part you cannot see."
+    },
+    "presets": {
+      "title": "Where does the calendar come from?",
+      "help": "The vendor’s own instructions",
+      "voBadge": "secondary school",
+      "socialSchools": {
+        "label": "Social Schools",
+        "step1": "Open Social Schools in a browser at app.socialschools.eu. The iPhone app cannot do this: it adds the calendar straight to Apple Calendar and never shows you the link.",
+        "step2": "Go to the Agenda tab and click Abonneren (Subscribe), top right.",
+        "step3": "Click the link in the dialog to copy it, then paste it below.",
+        "note": "No school holidays in it? Then the school has not imported its year calendar yet — worth asking them about."
+      },
+      "parro": {
+        "label": "Parro",
+        "step1": "Open Parro at talk.parro.com or in the app and go to Instellingen (Settings).",
+        "step2": "Choose Agenda koppelen (Link calendar), then Aan de slag (Get started).",
+        "step3": "Click the link to copy it, then paste it below.",
+        "note": "Kynite refreshes this calendar every hour. Parro says Google Calendar sometimes takes up to a week."
+      },
+      "magister": {
+        "label": "Magister",
+        "step1": "Log in to Magister in a browser — the app cannot do this — and open the menu under your name.",
+        "step2": "Go to Instellingen › Agenda delen and generate a link.",
+        "step3": "Copy the link and paste it below.",
+        "note": "Lessons only, and only this week plus the two after it. Regenerating the link kills the old one, so you have to replace it here too."
+      },
+      "somtoday": {
+        "label": "Somtoday",
+        "step1": "Have your child open Somtoday, tap the menu and go to Instellingen (Settings).",
+        "step2": "Choose Agenda and walk through “Aan de slag”.",
+        "step3": "Copy the long link and paste it below.",
+        "note": "If the option is not there, the school has switched it off. Timetable appointments only — no homework or tests."
+      },
+      "zermelo": {
+        "label": "Zermelo",
+        "step1": "Your child has to log in to the Zermelo WebApp themselves: a parent account cannot generate the link.",
+        "step2": "Menu top left › Instellingen › iCal-link genereren.",
+        "step3": "Copy the link and paste it below.",
+        "note": "This week and next week only, and only lessons your child is enrolled in."
+      }
     }
   },
   "calendar": {

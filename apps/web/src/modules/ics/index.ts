@@ -30,9 +30,22 @@ export {
   hostnameAsAddress,
   isBlockedAddress,
   looksLikeCalendar,
+  redactFeedUrl,
   type UrlCheck,
   type UrlRejection,
 } from './domain/url';
+
+export {
+  FEED_PRESETS,
+  addWarnings,
+  checkPresetUrl,
+  findPreset,
+  type AddWarning,
+  type FeedPreset,
+  type FeedPresetLevel,
+  type PresetUrlCheck,
+  type PresetUrlRejection,
+} from './domain/presets';
 
 export {
   UNTITLED,
@@ -94,6 +107,12 @@ export {
   setSubscriptionEnabledAction,
 } from './actions';
 
-export { actionFailure, idleState, type ActionState } from './action-state';
+export {
+  actionFailure,
+  addedState,
+  idleState,
+  type ActionState,
+  type AddSubscriptionState,
+} from './action-state';
 
 export { IcsSubscriptionsPanel } from './ui/ics-subscriptions-panel';

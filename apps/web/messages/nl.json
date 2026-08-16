@@ -332,14 +332,19 @@
     "lastFailed": "mislukt {when}",
     "add": {
       "title": "Agenda toevoegen",
-      "description": "Zoek op de site van de school of club naar “agenda abonneren” of “ICS” en plak die link hieronder. Kynite leest deze agenda alleen; je kunt er niets in wijzigen.",
+      "description": "Kies hieronder de app van de school, of plak zelf een agenda-link (ICS/webcal). Kynite leest deze agenda alleen; je kunt er niets in wijzigen.",
       "url": "Agenda-link (ICS of webcal)",
       "urlPlaceholder": "https://school.nl/agenda.ics",
       "name": "Naam (optioneel)",
       "namePlaceholder": "Schoolagenda Mila",
       "color": "Kleur",
       "action": "Agenda toevoegen",
-      "pending": "Even ophalen…"
+      "pending": "Even ophalen…",
+      "added": "De agenda staat erbij. Nieuwe afspraken komen er elk uur vanzelf bij.",
+      "warnings": {
+        "emptyFeed": "De agenda is opgehaald, maar er staat op dit moment geen enkele afspraak in. Controleer of je de juiste link hebt — of de school heeft de jaarkalender nog niet ingelezen.",
+        "presetAlreadyAdded": "Jullie volgen deze school-app al met een andere link. De vakanties en studiedagen kunnen nu dubbel op het bord staan; haal in dat geval één van de twee weg."
+      }
     },
     "status": {
       "active": "Actief",
@@ -377,7 +382,49 @@
       "httpError": "De server van de agenda gaf een fout terug. Controleer de link.",
       "tooLarge": "Deze agenda is te groot om op te halen.",
       "notCalendar": "Op deze link staat geen agenda. Zoek de link die eindigt op .ics.",
-      "parseFailed": "De agenda kon niet gelezen worden."
+      "parseFailed": "De agenda kon niet gelezen worden.",
+      "presetHost": "Deze link hoort niet bij de gekozen school-app. Controleer of je de juiste app hebt aangeklikt, of kies “andere agenda”.",
+      "presetIncomplete": "Deze link lijkt maar half gekopieerd — het laatste stuk ontbreekt. Kopieer de hele link uit de app, ook wat je niet ziet staan."
+    },
+    "presets": {
+      "title": "Waar komt de agenda vandaan?",
+      "help": "Uitleg van de leverancier",
+      "voBadge": "voortgezet onderwijs",
+      "socialSchools": {
+        "label": "Social Schools",
+        "step1": "Open Social Schools in de browser op app.socialschools.eu. In de iPhone-app lukt dit niet: die zet de agenda meteen in Apple Agenda en laat de link nooit zien.",
+        "step2": "Ga naar het tabblad Agenda en klik rechtsboven op Abonneren.",
+        "step3": "Klik in het venster op de link om hem te kopiëren en plak hem hieronder.",
+        "note": "Staan de schoolvakanties er niet in? Dan heeft de school de jaarkalender nog niet ingelezen — daar kun je op school naar vragen."
+      },
+      "parro": {
+        "label": "Parro",
+        "step1": "Open Parro op talk.parro.com of in de app en ga naar Instellingen.",
+        "step2": "Kies Agenda koppelen en daarna Aan de slag.",
+        "step3": "Klik op de link om hem te kopiëren en plak hem hieronder.",
+        "note": "Kynite haalt deze agenda elk uur op. Bij Google Agenda duurt dat volgens Parro zelf soms een week."
+      },
+      "magister": {
+        "label": "Magister",
+        "step1": "Log in op Magister in de browser — in de app kan dit niet — en open het menu bij je naam.",
+        "step2": "Ga naar Instellingen › Agenda delen en maak een link aan.",
+        "step3": "Kopieer de link en plak hem hieronder.",
+        "note": "Alleen lesroosters, en alleen deze week en de twee weken erna. Maak je de link opnieuw aan, dan werkt de oude niet meer en moet je hem hier ook vervangen."
+      },
+      "somtoday": {
+        "label": "Somtoday",
+        "step1": "Laat je kind Somtoday openen, op het menu tikken en naar Instellingen gaan.",
+        "step2": "Kies Agenda en doorloop “Aan de slag”.",
+        "step3": "Kopieer de lange link en plak hem hieronder.",
+        "note": "Zie je deze optie niet, dan heeft de school hem uitgezet. Alleen roosterafspraken; huiswerk en toetsen komen er niet in."
+      },
+      "zermelo": {
+        "label": "Zermelo",
+        "step1": "Je kind moet zelf inloggen in de Zermelo WebApp: met een ouderaccount kun je de link niet maken.",
+        "step2": "Menu linksboven › Instellingen › iCal-link genereren.",
+        "step3": "Kopieer de link en plak hem hieronder.",
+        "note": "Alleen deze week en de week erna, en alleen lessen waarvoor je kind is ingedeeld."
+      }
     }
   },
   "calendar": {

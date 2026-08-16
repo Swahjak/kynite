@@ -24,7 +24,7 @@ import {
   Input,
   useSubmitGuard,
 } from '@kynite/ui';
-import { idleState, type ActionState } from '../action-state';
+import { idleState, type ActionState, type AddSubscriptionState } from '../action-state';
 import {
   addSubscriptionAction,
   refreshSubscriptionAction,
@@ -32,6 +32,7 @@ import {
   setSubscriptionEnabledAction,
 } from '../actions';
 import { FEED_COLORS, type FeedColor } from '../domain/color';
+import { FEED_PRESETS, findPreset, type FeedPreset } from '../domain/presets';
 import type { SubscriptionView } from '../queries';
 
 /**
@@ -93,15 +94,91 @@ export function IcsSubscriptionsPanel({ subscriptions, canManage }: IcsSubscript
   );
 }
 
+/**
+ * The guided half: pick the platform, read where its link is hiding, paste.
+ *
+ * The picker is the feature. Every URL below is vendor-documented and every one
+ * of them is behind a click path a parent will not find — Social Schools only
+ * reveals it in the **web** app, Zermelo refuses to make one for a parent
+ * account, Somtoday's school can switch it off. So the steps are not decoration
+ * around the field; they are the reason the field can be filled in at all.
+ *
+ * Deliberately not a wizard. The picker sits above the same three controls that
+ * were already here, so "I already have the link" stays one paste and one
+ * button, and choosing a platform only *adds* instructions and a shape check.
+ */
+function PresetPicker({ value, onChange }: { value: string; onChange: (next: string) => void }) {
+  const t = useTranslations('ics');
+  const labelId = useId();
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <FieldGroupLabel id={labelId}>{t('presets.title')}</FieldGroupLabel>
+      <div role="group" aria-labelledby={labelId} className="flex flex-wrap gap-2">
+        {FEED_PRESETS.map((preset) => (
+          <Button
+            key={preset.key}
+            type="button"
+            size="sm"
+            variant="outline"
+            aria-pressed={value === preset.key}
+            onClick={() => onChange(value === preset.key ? '' : preset.key)}
+            data-testid={`preset-${preset.key}`}
+            className={cn(value === preset.key && 'border-ring ring-3 ring-ring/50')}
+          >
+            {t(`presets.${preset.key}.label` as 'presets.parro.label')}
+            {preset.level === 'vo' ? (
+              <Badge variant="outline" className="ml-1.5">
+                {t('presets.voBadge')}
+              </Badge>
+            ) : null}
+          </Button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function PresetInstructions({ preset }: { preset: FeedPreset }) {
+  const t = useTranslations('ics');
+  const key = preset.key as 'parro';
+
+  return (
+    <div
+      className="flex flex-col gap-2 rounded-xl bg-surface-container px-4 py-3"
+      data-testid="preset-instructions"
+    >
+      <ol className="flex list-decimal flex-col gap-1 pl-4 text-body-sm text-ink-secondary">
+        <li>{t(`presets.${key}.step1`)}</li>
+        <li>{t(`presets.${key}.step2`)}</li>
+        <li>{t(`presets.${key}.step3`)}</li>
+      </ol>
+      <p className="text-caption text-ink-muted">{t(`presets.${key}.note`)}</p>
+      {preset.helpUrl ? (
+        <a
+          href={preset.helpUrl}
+          target="_blank"
+          rel="noreferrer noopener"
+          className="text-caption text-brand underline underline-offset-2 self-start"
+        >
+          {t('presets.help')}
+        </a>
+      ) : null}
+    </div>
+  );
+}
+
 function AddSubscriptionCard() {
   const t = useTranslations('ics');
-  const [state, action, pending] = useActionState<ActionState, FormData>(
+  const [state, action, pending] = useActionState<AddSubscriptionState, FormData>(
     addSubscriptionAction,
     idleState
   );
   const { locked, lock } = useSubmitGuard(pending);
   const [color, setColor] = useState<FeedColor>('blue');
+  const [presetId, setPresetId] = useState('');
   const colorLabelId = useId();
+  const preset = findPreset(presetId);
 
   return (
     <Card>
@@ -111,6 +188,10 @@ function AddSubscriptionCard() {
       </CardHeader>
       <CardContent>
         <form action={action} onSubmit={lock} className="flex flex-col gap-4">
+          <input type="hidden" name="presetId" value={presetId} />
+          <PresetPicker value={presetId} onChange={setPresetId} />
+          {preset ? <PresetInstructions preset={preset} /> : null}
+
           <Field>
             <FieldLabel>{t('add.url')}</FieldLabel>
             {/* `type="url"` would refuse `webcal://` in some browsers before the
@@ -166,6 +247,27 @@ function AddSubscriptionCard() {
             </p>
           ) : null}
 
+          {/* Added, and worth a sentence anyway. An empty feed answers 200 with
+              a valid calendar containing nothing, so silence here would be a
+              green tick over an agenda that will never show a single day. */}
+          {state.status === 'added' && state.warnings.length > 0 ? (
+            <div
+              role="status"
+              className="flex flex-col gap-1 rounded-xl bg-warning/10 px-4 py-3 text-body-sm text-ink"
+              data-testid="subscription-warning"
+            >
+              {state.warnings.map((warning) => (
+                <p key={warning}>{t(`add.warnings.${warning}` as 'add.warnings.emptyFeed')}</p>
+              ))}
+            </div>
+          ) : null}
+
+          {state.status === 'added' && state.warnings.length === 0 ? (
+            <p role="status" className="text-body-sm text-ink-secondary">
+              {t('add.added')}
+            </p>
+          ) : null}
+
           <Button type="submit" size="hub" disabled={locked} className="self-start">
             {pending ? t('add.pending') : t('add.action')}
           </Button>
@@ -184,6 +286,7 @@ function SubscriptionCard({
 }) {
   const t = useTranslations('ics');
   const format = useFormatter();
+  const preset = findPreset(subscription.presetId);
 
   return (
     <Card className="flex flex-col gap-4 p-4 sm:p-5" data-testid="subscription-card">
@@ -198,12 +301,22 @@ function SubscriptionCard({
             />
             {subscription.name}
           </span>
-          <span className="text-caption break-all text-ink-muted">{subscription.url}</span>
+          {/* The masked link (`redactFeedUrl`), never the whole one: the token
+              in it opens the school's agenda without a login, and this card is
+              rendered on a wall tablet in the hall. */}
+          <span className="text-caption break-all text-ink-muted" data-testid="subscription-url">
+            {subscription.urlLabel}
+          </span>
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant={subscription.enabled ? 'secondary' : 'outline'}>
               {subscription.enabled ? t('status.active') : t('status.paused')}
             </Badge>
             <Badge variant="outline">{t('readOnly')}</Badge>
+            {preset ? (
+              <Badge variant="outline" data-testid="subscription-preset">
+                {t(`presets.${preset.key}.label` as 'presets.parro.label')}
+              </Badge>
+            ) : null}
           </div>
           <span className="text-caption text-ink-muted" data-testid="subscription-last-sync">
             {subscription.lastSyncedAt
@@ -236,6 +349,11 @@ function SubscriptionCard({
             : ''}
         </p>
       ) : null}
+
+      {/* A broken feed usually means the school rotated the link, and the fix is
+          the same click path that produced it. Showing it here saves a parent
+          from having to remember where they found it a year ago. */}
+      {subscription.lastError && preset ? <PresetInstructions preset={preset} /> : null}
     </Card>
   );
 }

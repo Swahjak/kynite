@@ -53,6 +53,22 @@ export const icsSubscription = pgTable(
      */
     url: text('url').notNull(),
     /**
+     * Which guided preset this feed was added through (`domain/presets.ts`), or
+     * null for a link a parent found themselves.
+     *
+     * Stored rather than derived, and text rather than an enum, for the same
+     * reason: it is a record of *what the parent was told*, not a property of
+     * the URL. Deriving it from the host would fail for Parro (whose URL format
+     * the vendor never documents) and would silently change meaning the day a
+     * platform moves domain. What it buys: the settings row can re-show that
+     * platform's click path when the feed breaks, and the add flow can warn
+     * that this household already follows this platform — which is the only
+     * cheap defence against the duplicate-UID problem described in
+     * `domain/presets.ts`. An unknown value is simply ignored by `findPreset`,
+     * so retiring a preset never orphans a row.
+     */
+    presetId: text('preset_id'),
+    /**
      * Conditional-GET tokens from the last successful fetch. A school feed is
      * regenerated nightly and served with both; sending them back turns the
      * hourly refresh into a 304 for most families most of the time.

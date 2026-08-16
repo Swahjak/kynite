@@ -1,0 +1,1 @@
+ALTER TABLE "ics_subscription" ADD COLUMN "preset_id" text;

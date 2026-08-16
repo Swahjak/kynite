@@ -192,6 +192,41 @@ function isBlockedIpv4(address: string): boolean {
 }
 
 /**
+ * A feed URL, made safe to show and safe to store in a log line.
+ *
+ * **A subscription URL is a bearer credential.** Social Schools' link carries
+ * `userId` + `hash` and grants read access to a school's agenda with no login;
+ * Magister, Somtoday and Zermelo hand out a secret URL by the same logic, and
+ * Magister's own documentation calls rotating it the way to revoke access. A
+ * URL like that is a password that happens to be shaped like a link, so it gets
+ * treated like one: never logged, never in an error message, and never rendered
+ * whole where a photograph of a wall tablet — or a screenshot in a support
+ * thread — would carry it away.
+ *
+ * What survives is the host, which is the only part that answers "which
+ * platform is this", plus the last four characters, which is enough to tell two
+ * feeds from the same school apart and far too little to replay one. Both the
+ * path and the query go, because either can hold the token depending on the
+ * publisher.
+ *
+ * Unparseable input returns the ellipsis alone rather than an echo: a string
+ * that failed to parse is exactly the string nobody has vetted.
+ */
+export function redactFeedUrl(input: string): string {
+  let url: URL;
+  try {
+    url = new URL(input.trim());
+  } catch {
+    return '…';
+  }
+
+  const tail = `${url.pathname}${url.search}`.replace(/\/+$/, '');
+  if (tail === '') return url.hostname;
+
+  return `${url.hostname}/…${tail.slice(-4)}`;
+}
+
+/**
  * Does this response body look like a calendar at all?
  *
  * Content type is checked *leniently* on purpose: schools serve their feed as

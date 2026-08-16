@@ -58,6 +58,35 @@ describe('fetchFeed', () => {
     expect(result).toMatchObject({ ok: true, notModified: true, body: null });
   });
 
+  it('degrades to a full fetch for a publisher that sends no validators', async () => {
+    // Social Schools' feed answers 200 `text/calendar` with `Cache-Control:
+    // max-age=60` and **neither an ETag nor a Last-Modified**. The conditional
+    // GET must therefore be an optimisation, never a precondition: with nothing
+    // stored, no `If-*` header may be sent (a bare `If-None-Match: ` would make
+    // some servers 400), and nothing false may be stored for the next round.
+    const fetchImpl = vi.fn(async (_url: unknown, init: RequestInit) => {
+      const headers = init.headers as Record<string, string>;
+      expect(headers).not.toHaveProperty('if-none-match');
+      expect(headers).not.toHaveProperty('if-modified-since');
+      return ok(CALENDAR, { 'cache-control': 'public,max-age=60' });
+    });
+
+    const result = await fetchFeed('https://school.example/icalfeed/', {
+      etag: null,
+      lastModified: null,
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+      resolveHost: publicDns,
+    });
+
+    expect(result).toMatchObject({
+      ok: true,
+      notModified: false,
+      body: CALENDAR,
+      etag: null,
+      lastModified: null,
+    });
+  });
+
   it('refuses a hostname that resolves into a private range', async () => {
     const fetchImpl = vi.fn(async () => ok());
 

@@ -10,8 +10,15 @@ import { getDb } from '@/server/db';
 // Tables from the schema assembly point, not a slice barrel: a barrel
 // re-exports client components, which must not enter a server mutation module.
 import { calendar } from '@/server/db/schema';
-import { actionFailure as failure, idleState, type ActionState } from './action-state';
+import {
+  actionFailure as failure,
+  addedState,
+  idleState,
+  type ActionState,
+  type AddSubscriptionState,
+} from './action-state';
 import { FEED_COLORS, feedColorHex } from './domain/color';
+import { addWarnings, checkPresetUrl, findPreset } from './domain/presets';
 import { checkFeedUrl } from './domain/url';
 import { parseIcs } from './domain/parse';
 import { fetchFeed } from './fetch';
@@ -65,6 +72,13 @@ const addSchema = z.object({
   url: z.string().trim().min(1).max(2048),
   name: z.string().trim().max(120),
   color: z.enum(FEED_COLORS),
+  /**
+   * Which guided preset the parent came through, or '' for a link they found
+   * themselves. Not an enum: an id that has since been retired must be treated
+   * as "no preset" rather than as invalid input, which is what `findPreset`
+   * already does.
+   */
+  presetId: z.string().trim().max(64),
 });
 
 /**
@@ -79,11 +93,22 @@ const addSchema = z.object({
  * `BEGIN:VCALENDAR` has come back. The events from that very fetch are then
  * stored directly (`ingestFeed`), so subscribing costs the publisher exactly
  * one request rather than two.
+ *
+ * **A green tick is not the same as a working feed**, which is why this returns
+ * `added` with warnings rather than `idle`. A feed that answers 200 with an
+ * empty VCALENDAR is a real and common failure (see `domain/presets.ts`), and
+ * the moment a parent still has the school's page open is the only moment they
+ * can do anything about it.
+ *
+ * **The URL never leaves this function whole.** It goes into the row and into
+ * `fetchFeed`; it is not logged, and nothing derived from it reaches the client
+ * except `redactFeedUrl`'s host-plus-tail (`queries.ts`). A Social Schools link
+ * is a bearer credential for a school's agenda.
  */
 export async function addSubscriptionAction(
-  _previous: ActionState,
+  _previous: AddSubscriptionState,
   formData: FormData
-): Promise<ActionState> {
+): Promise<AddSubscriptionState> {
   const principal = await assertCan('ics:manage').catch(() => null);
   if (!principal) return failure('forbidden');
 
@@ -91,11 +116,21 @@ export async function addSubscriptionAction(
     url: read(formData, 'url'),
     name: read(formData, 'name'),
     color: read(formData, 'color') || 'blue',
+    presetId: read(formData, 'presetId'),
   });
   if (!parsed.success) return failure('invalidInput');
 
   const checked = checkFeedUrl(parsed.data.url);
   if (!checked.ok) return failure(checked.error);
+
+  // The preset check runs on the *normalised* URL, so `webcal://` has already
+  // become `https://` — a parent pastes what the school app gives them, and
+  // that is very often the webcal form.
+  const preset = findPreset(parsed.data.presetId);
+  if (preset) {
+    const shape = checkPresetUrl(preset, checked.url);
+    if (!shape.ok) return failure(shape.error);
+  }
 
   const url = checked.url.toString();
   const db = getDb();
@@ -106,6 +141,24 @@ export async function addSubscriptionAction(
     .where(and(eq(icsSubscription.familyId, principal.familyId), eq(icsSubscription.url, url)))
     .limit(1);
   if (existing) return failure('duplicate');
+
+  // Two parents each subscribing to *their own* Social Schools link import the
+  // same Zomervakantie under two different UIDs, because the UID embeds the
+  // subscriber. Nothing downstream can tell those apart, and deduplicating on
+  // (title, start) would hide genuinely distinct events — so this is a warning
+  // at the one moment a parent can choose to use the other link instead.
+  const alreadyOnThisPlatform = preset
+    ? await db
+        .select({ id: icsSubscription.id })
+        .from(icsSubscription)
+        .where(
+          and(
+            eq(icsSubscription.familyId, principal.familyId),
+            eq(icsSubscription.presetId, preset.key)
+          )
+        )
+        .limit(1)
+    : [];
 
   const result = await fetchFeed(url);
   if (!result.ok) return failure(result.error);
@@ -134,18 +187,27 @@ export async function addSubscriptionAction(
         // per-view work.
         writable: false,
         syncEnabled: true,
+        // What the preset knows and a URL cannot: a Social Schools feed is a
+        // school agenda. Events keep `event_type` null and inherit this (M23),
+        // and the calendars list on `/settings` stays the place to change it.
+        ...(preset ? { defaultType: preset.defaultType } : {}),
       })
       .returning();
 
     const [subscription] = await tx
       .insert(icsSubscription)
-      .values({ familyId: principal.familyId, calendarId: row.id, url })
+      .values({
+        familyId: principal.familyId,
+        calendarId: row.id,
+        url,
+        presetId: preset?.key ?? null,
+      })
       .returning();
 
     return { calendarId: row.id, subscriptionId: subscription.id };
   });
 
-  await ingestFeed({
+  const { imported } = await ingestFeed({
     subscriptionId: created.subscriptionId,
     familyId: principal.familyId,
     calendarId: created.calendarId,
@@ -164,7 +226,12 @@ export async function addSubscriptionAction(
   }).catch(() => {});
 
   await revalidateFeeds();
-  return idleState;
+  return addedState(
+    addWarnings({
+      eventCount: imported,
+      presetAlreadySubscribed: alreadyOnThisPlatform.length > 0,
+    })
+  );
 }
 
 /** "Vernieuw nu": one feed, fetched on the spot rather than at the next hour. */

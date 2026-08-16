@@ -4,6 +4,7 @@ import { getDb } from '@/server/db';
 // Tables from the schema assembly point — the same note as `./refresh.ts`.
 import { calendar, event } from '@/server/db/schema';
 import { feedColorOf, type FeedColor } from './domain/color';
+import { redactFeedUrl } from './domain/url';
 import { icsSubscription } from './schema';
 
 /** Reads for the feed-subscription slice (docs/architecture.md §2 rule 3). */
@@ -13,7 +14,20 @@ export type SubscriptionView = {
   id: string;
   calendarId: string;
   name: string;
-  url: string;
+  /**
+   * The feed URL **masked** — host plus a four-character tail, never the token.
+   *
+   * A subscription URL is a bearer credential: Social Schools' `hash` +
+   * `userId` open a school's agenda with no login, and Magister's own docs
+   * treat rotating the link as the way to revoke access. This view is an RSC
+   * payload rendered on a wall tablet, so the whole URL has no business in it —
+   * what the row has to answer is "which feed is this", and the host plus a
+   * tail answers that. A parent who needs the link again gets it where they got
+   * it the first time: from the school's own app.
+   */
+  urlLabel: string;
+  /** The guided preset it was added through (`domain/presets.ts`), if any. */
+  presetId: string | null;
   /** A palette entry, resolved from the calendar's stored hex. */
   color: FeedColor;
   enabled: boolean;
@@ -43,7 +57,8 @@ export async function listSubscriptions(familyId: string): Promise<SubscriptionV
     id: subscription.id,
     calendarId: row.id,
     name: row.summary,
-    url: subscription.url,
+    urlLabel: redactFeedUrl(subscription.url),
+    presetId: subscription.presetId,
     color: feedColorOf(row.color),
     enabled: row.syncEnabled,
     lastSyncedAt: subscription.lastSyncedAt?.getTime() ?? null,
