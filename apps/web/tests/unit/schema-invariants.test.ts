@@ -119,6 +119,10 @@ describe('schema-wide invariants', () => {
         'timer',
         'user',
         'verification',
+        // The hub's weather cache: one row per household, written only by the
+        // background refresh. A blob rather than columns because nothing ever
+        // queries *into* a reading — see its own note.
+        'weather_snapshot',
       ].sort()
     );
   });

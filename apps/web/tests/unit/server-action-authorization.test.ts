@@ -298,7 +298,11 @@ describe('every Server Action authorizes first', () => {
     // behind `ics:manage`.
     // 57 → 58 in wave D2: `setRoutineActiveAction`, the switch on the parent's
     // routine list, behind `routine:write`.
-    expect(findings.length).toBe(58);
+    // 58 → 59: the weather slice's `setWeatherLocationAction`, the household's
+    // latitude/longitude for the hub's weather, behind `display:manage` — the
+    // same capability as `setHubDisplayAction`, because it configures what the
+    // wall shows rather than who the household is.
+    expect(findings.length).toBe(59);
   });
 
   it('reports no unauthorized action anywhere in src/', () => {

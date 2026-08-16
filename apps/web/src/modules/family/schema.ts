@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm';
 import {
   date,
+  doublePrecision,
   index,
   integer,
   pgEnum,
@@ -75,6 +76,24 @@ export const family = pgTable('family', {
    * preference of its own.
    */
   hubDefaultView: hubView('hub_default_view').notNull().default('day'),
+  /**
+   * Where the hub's weather is for (`modules/weather`).
+   *
+   * Household-level, next to `timezone` and `weekStartsOn`, because it is the
+   * same kind of fact: one answer per home, read by every surface, and nothing
+   * a device stores for itself. Coordinates rather than a city name — the
+   * provider takes latitude/longitude, so a name here would only be a geocode
+   * waiting to go wrong.
+   *
+   * **Null by default, and deliberately no fallback city.** A household with
+   * no location has weather switched off, the same posture as an install with
+   * no Google credentials: showing an unasked-for city's weather on a kitchen
+   * wall is worse than showing nothing. `weatherLocationLabel` is the family's
+   * own word for the spot ("Thuis", "Oma") and is never derived.
+   */
+  weatherLatitude: doublePrecision('weather_latitude'),
+  weatherLongitude: doublePrecision('weather_longitude'),
+  weatherLocationLabel: text('weather_location_label'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });

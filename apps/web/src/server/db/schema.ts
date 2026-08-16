@@ -21,3 +21,4 @@ export * from '@/modules/notifications/schema';
 export * from '@/modules/tasks/schema';
 export * from '@/modules/timers/schema';
 export * from '@/modules/realtime/schema';
+export * from '@/modules/weather/schema';

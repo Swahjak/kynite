@@ -2,6 +2,7 @@ import 'server-only';
 import { registerGoogleJobs } from '@/modules/google';
 import { registerIcsJobs } from '@/modules/ics';
 import { registerNotificationJobs } from '@/modules/notifications';
+import { registerWeatherJobs } from '@/modules/weather';
 import { jobsEnabled, startBoss, stopBoss } from './boss';
 import { registerMaintenanceJobs } from './maintenance';
 
@@ -23,6 +24,7 @@ export async function startJobs(): Promise<void> {
     await registerGoogleJobs(boss);
     await registerIcsJobs(boss);
     await registerNotificationJobs(boss);
+    await registerWeatherJobs(boss);
     await registerMaintenanceJobs(boss);
   })();
 
