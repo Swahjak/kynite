@@ -51,6 +51,35 @@ const meta: Meta = {
 export default meta;
 type Story = StoryObj;
 
+/**
+ * The phone's "Dagoverzicht" row: eyebrow left, the past-disclosure toggle
+ * right, on one line ("Vandaag.dc.html":377–380).
+ *
+ * A specimen, not the component — the real one is app code
+ * (`modules/today/ui/today-past-rows.tsx`), because the summary string is
+ * built from the household's timezone and `next-intl`. What has to hold here
+ * is the *anatomy*: the eyebrow never shrinks, the toggle does, and the
+ * summary truncates instead of pushing the chevron off the card. The summary
+ * names the last thing that happened, so it is as long as an event title —
+ * which is exactly why it needs an ellipsis and not a wider column.
+ */
+function DagoverzichtRow({ summary }: { summary: string }) {
+  return (
+    <div className="flex min-w-0 items-center justify-between gap-3 pb-2.5">
+      <div className="shrink-0">
+        <Overline>Dagoverzicht</Overline>
+      </div>
+      <button
+        type="button"
+        className="flex min-w-0 items-center gap-1.5 rounded-lg text-ink-muted transition-colors duration-200 hover:text-ink"
+      >
+        <Icon name="expand_more" size="sm" className="shrink-0 transition-transform" />
+        <span className="truncate text-caption">{summary}</span>
+      </button>
+    </div>
+  );
+}
+
 export const Wandtablet: Story = {
   name: 'Wandtablet — hub',
   render: () => (
@@ -89,6 +118,29 @@ export const WandtabletSterren: Story = {
   ),
 };
 
+export const DagoverzichtKop: Story = {
+  name: 'Mobiel — kop Dagoverzicht',
+  render: () => (
+    <DesignSheet
+      title="Dagoverzicht — kop"
+      intro="De kop van het dagoverzicht op mobiel, met een korte en een lange samenvatting. De eyebrow houdt zijn volle breedte; de samenvatting kort af met een ellips zodat de chevron nooit van de kaart geduwd wordt."
+    >
+      <div>
+        <DeviceCaption icon="home">Kolombreedte 390 − 2 × 20 px padding</DeviceCaption>
+        <div className="w-[350px] rounded-2xl bg-surface p-4">
+          <DagoverzichtRow summary="1 afgerond" />
+          <DagoverzichtRow summary="1 afgerond — Ontbijt (07:30)" />
+          <DagoverzichtRow summary="4 afgerond — Zwemles Noor bij De Kuil (17:15)" />
+        </div>
+        <ScreenNote width={350}>
+          De samenvatting staat op 12px Poppins in dezelfde gedempte inkt als de eyebrow, niet op
+          14px: hij is een bijschrift bij de kop, geen tweede kop ernaast.
+        </ScreenNote>
+      </div>
+    </DesignSheet>
+  ),
+};
+
 export const Mobiel: Story = {
   render: () => (
     <DesignSheet
@@ -120,11 +172,8 @@ export const Mobiel: Story = {
           <div className="flex-1 overflow-y-auto px-5 pb-6">
             <NowBlock compact />
 
-            <div className="mt-5 mb-2.5 flex items-center justify-between">
-              <Overline>Dagoverzicht</Overline>
-              <span className="flex items-center gap-1 text-caption text-ink-muted">
-                <Icon name="expand_more" size="xs" />1 afgerond
-              </span>
+            <div className="mt-5">
+              <DagoverzichtRow summary="1 afgerond — Ontbijt (07:30)" />
             </div>
 
             {/* One card with hairlines, not nine floating cards. The phone

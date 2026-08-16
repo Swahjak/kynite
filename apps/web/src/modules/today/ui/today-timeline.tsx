@@ -161,8 +161,8 @@ export async function TodayTimeline({
 
   /**
    * The phone's heading is an *eyebrow*, not a card title
-   * ("Vandaag.dc.html":374–377): uppercase Baloo at 12px in the muted ink,
-   * sharing its row with "1 afgerond ⌄". The wall keeps the real 19px card
+   * ("Vandaag.dc.html":377–380): uppercase Baloo at 12px in the muted ink,
+   * sharing its row with "⌄ 1 afgerond". The wall keeps the real 19px card
    * heading, because there the list genuinely is one card among three.
    */
   const eyebrow = <h2 className="label-overline text-ink-muted">{t('timeline.title')}</h2>;

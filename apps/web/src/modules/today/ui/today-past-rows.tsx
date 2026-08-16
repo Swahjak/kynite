@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, type ReactNode } from 'react';
-import { Icon } from '@kynite/ui';
+import { cn, Icon } from '@kynite/ui';
 
 /**
  * The collapsed "already happened" band at the top of the day timeline.
@@ -21,10 +21,17 @@ import { Icon } from '@kynite/ui';
  * which `<details>` cannot express without duplicating the layout.
  *
  * On the phone the toggle is not a line of its own: the design puts the
- * section's eyebrow on the left of one row and "1 afgerond ⌄" on the right of
- * it ("Vandaag.dc.html":374–377). `header` is that left half — passed in rather
+ * section's eyebrow on the left of one row and "⌄ 1 afgerond" on the right of
+ * it ("Vandaag.dc.html":377–380). `header` is that left half — passed in rather
  * than assumed, because the wall's list keeps the toggle inline under a real
  * card heading and has no header to share the row with.
+ *
+ * Sharing the row is what dictates the widths: the eyebrow keeps its full
+ * width and the *toggle* is the part that gives, so the summary — which ends
+ * in an event title and is therefore arbitrarily long — truncates rather than
+ * crowding "DAGOVERZICHT" or pushing the chevron to the card's edge. Hence
+ * `min-w-0` on both flex parents (without it a flex item refuses to shrink
+ * below its content) and `shrink-0` on the chevron.
  */
 
 export function TodayPastRows({
@@ -45,8 +52,10 @@ export function TodayPastRows({
 
   return (
     <div className="flex flex-col">
-      <div className={header ? 'flex items-center justify-between gap-3 pb-2' : 'contents'}>
-        {header}
+      <div
+        className={header ? 'flex min-w-0 items-center justify-between gap-3 pb-2.5' : 'contents'}
+      >
+        {header ? <div className="shrink-0">{header}</div> : null}
         <button
           type="button"
           data-testid="today-past-toggle"
@@ -55,25 +64,16 @@ export function TodayPastRows({
           onClick={() => setOpen((previous) => !previous)}
           className={
             header
-              ? 'flex shrink-0 items-center gap-1.5 rounded-lg text-ink-muted transition-colors duration-200 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring'
+              ? 'flex min-w-0 items-center gap-1.5 rounded-lg text-ink-muted transition-colors duration-200 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring'
               : 'flex items-center gap-2 self-start rounded-lg py-1 pb-3.5 pl-14 text-ink-muted transition-colors duration-200 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring'
           }
         >
-          {header ? null : (
-            <Icon
-              name="expand_more"
-              size="sm"
-              className={open ? 'rotate-180 transition-transform' : 'transition-transform'}
-            />
-          )}
-          <span className="text-body-sm">{summary}</span>
-          {header ? (
-            <Icon
-              name="expand_more"
-              size="sm"
-              className={open ? 'rotate-180 transition-transform' : 'transition-transform'}
-            />
-          ) : null}
+          <Icon
+            name="expand_more"
+            size="sm"
+            className={cn('shrink-0 transition-transform', open && 'rotate-180')}
+          />
+          <span className={header ? 'truncate text-caption' : 'text-body-sm'}>{summary}</span>
         </button>
       </div>
 
