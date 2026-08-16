@@ -73,13 +73,20 @@ export async function TodayNowStrip({ event, mode, members, now, timeZone }: Tod
   }
 
   const palette = CATEGORY_CLASSES[event.category];
+  // `null` is the *withheld* audience of a busy-only block, not an empty one —
+  // see `participantsOf`. The strip then says nothing about whose hour this is:
+  // no faces, no names, and not "Iedereen" either, which would still narrow a
+  // redacted hour to "the household's, rather than one person's". The title is
+  // already redacted below; this is the other half of the same fact.
   const ids = participantsOf(event);
   // A household event belongs to everybody by construction, and so does one
   // that names nobody at all — "Iedereen" is a different fact from a list of
   // names, not a longer one.
-  const everyone = event.householdWide || ids.length === 0 || ids.length >= members.length;
-  const people = everyone ? tCalendar('everyone') : joinNames(namesOf(members, ids));
-  const faceIds = everyone ? members.map((member) => member.id) : ids;
+  const everyone =
+    ids !== null && (event.householdWide || ids.length === 0 || ids.length >= members.length);
+  const people =
+    ids === null ? '' : everyone ? tCalendar('everyone') : joinNames(namesOf(members, ids));
+  const faceIds = ids === null ? null : everyone ? members.map((member) => member.id) : ids;
 
   const live = mode === 'live';
   const counted = live || mode === 'next';

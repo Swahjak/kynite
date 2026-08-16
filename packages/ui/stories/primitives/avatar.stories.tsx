@@ -12,8 +12,9 @@ import { Icon } from '../../src/components/icon';
 import { MEMBERS, Section, Specimen, SpecimenGrid } from '../specimen';
 
 /**
- * `Avatars` — the three sheet sizes (32 / 44 / 56) plus the two in-list ones
- * (24 / 28), the stack, the fallback and the status badge.
+ * `Avatars` — the three sheet sizes (32 / 44 / 56), the two in-list ones
+ * (24 / 28) and the 16px grid-block one, the stack, the fallback and the
+ * status badge.
  *
  * The faces are the four avataaars fixtures from the design project
  * (`docs/design/claude-design/uploads/`), served out of the package's static
@@ -25,7 +26,7 @@ const meta = {
   component: Avatar,
   parameters: { layout: 'centered' },
   argTypes: {
-    size: { control: 'inline-radio', options: ['xs', 'sm', 'default', 'lg', 'hub'] },
+    size: { control: 'inline-radio', options: ['2xs', 'xs', 'sm', 'default', 'lg', 'hub'] },
     ring: { control: 'boolean' },
   },
 } satisfies Meta<typeof Avatar>;
@@ -39,7 +40,7 @@ function Face({
   ring,
 }: {
   member: (typeof MEMBERS)[number];
-  size?: 'xs' | 'sm' | 'default' | 'lg' | 'hub';
+  size?: '2xs' | 'xs' | 'sm' | 'default' | 'lg' | 'hub';
   ring?: boolean;
 }) {
   return (
@@ -60,7 +61,8 @@ export const Sizes: Story = {
   render: () => (
     <Section title="Avatars — sizes">
       <SpecimenGrid>
-        <Specimen name="Avatar/Sizes" note="xs 24 · sm 28 · default 32 · lg 44 · hub 56">
+        <Specimen name="Avatar/Sizes" note="2xs 16 · xs 24 · sm 28 · default 32 · lg 44 · hub 56">
+          <Face member={MEMBERS[3]} size="2xs" />
           <Face member={MEMBERS[0]} size="xs" />
           <Face member={MEMBERS[1]} size="sm" />
           <Face member={MEMBERS[2]} size="default" />

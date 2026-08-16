@@ -266,6 +266,7 @@ export function MemberDayGrid({
                 <div className="relative" style={{ height: bodyHeight }}>
                   <TimedChips
                     events={sharedTimed}
+                    members={members}
                     timeZone={timeZone}
                     dayKey={dayKey}
                     drag={drag}
@@ -329,6 +330,7 @@ export function MemberDayGrid({
                     ) : (
                       <TimedChips
                         events={memberEvents}
+                        members={members}
                         timeZone={timeZone}
                         dayKey={dayKey}
                         drag={drag}
@@ -373,12 +375,22 @@ export function MemberDayGrid({
  */
 function TimedChips({
   events,
+  members,
   timeZone,
   dayKey,
   drag,
   onSelect,
 }: {
   events: CalendarEvent[];
+  /**
+   * The roster each block's faces resolve against.
+   *
+   * A column already names one member, so this is not that answer repeated —
+   * it is who *else* is on the block, and an event nobody is named on gets the
+   * "Iedereen" glyph instead. `Kalender.dc.html`:108 draws exactly that: a
+   * two-face stack on a block sitting inside one person's column.
+   */
+  members: Member[];
   timeZone: string;
   dayKey: string;
   drag: ReturnType<typeof useDragReschedule>;
@@ -394,6 +406,8 @@ function TimedChips({
         key={positioned.event.key}
         event={positioned.event}
         variant="block"
+        showOwner
+        members={members}
         onSelect={onSelect}
         onPointerDown={drag.onPointerDown}
         suppressClick={drag.shouldIgnoreClick}

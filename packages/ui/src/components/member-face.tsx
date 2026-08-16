@@ -45,7 +45,7 @@ export function MemberFace({
   surfaceClass?: string;
   /** e.g. `MEMBER_COLOR_CLASSES[color].ring`. Required when `ringed`. */
   ringClass?: string;
-  size?: 'xs' | 'sm' | 'default' | 'lg' | 'hub';
+  size?: '2xs' | 'xs' | 'sm' | 'default' | 'lg' | 'hub';
   ringed?: boolean;
   className?: string;
 }) {

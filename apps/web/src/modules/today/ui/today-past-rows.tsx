@@ -32,6 +32,12 @@ import { cn, Icon } from '@kynite/ui';
  * crowding "DAGOVERZICHT" or pushing the chevron to the card's edge. Hence
  * `min-w-0` on both flex parents (without it a flex item refuses to shrink
  * below its content) and `shrink-0` on the chevron.
+ *
+ * The chevron's size follows the branch, because the two branches are two
+ * different reading distances. On the phone the sheet sets it at 16px
+ * ("Vandaag.dc.html":378) next to 12px caption text — that is `xs+`. The wall's
+ * list has no header to share a row with, sits under a real card heading in
+ * `text-body-sm`, and is read from across a room, so it keeps `sm` (18).
  */
 
 export function TodayPastRows({
@@ -70,7 +76,7 @@ export function TodayPastRows({
         >
           <Icon
             name="expand_more"
-            size="sm"
+            size={header ? 'xs+' : 'sm'}
             className={cn('shrink-0 transition-transform', open && 'rotate-180')}
           />
           <span className={header ? 'truncate text-caption' : 'text-body-sm'}>{summary}</span>

@@ -64,10 +64,18 @@ export function CombinedDayList({
       { timeZone, dayKey }
     ).map(({ event, memberIds }) => ({
       event,
-      people: memberIds
-        .map((id) => byId.get(id))
-        .filter((member): member is Member => member !== undefined)
-        .map((member) => member.displayName),
+      // `memberIds === null` is `combineDayEvents` withholding the audience of
+      // a busy-only row, not reporting an empty one — resolving it to names
+      // would print the owner `queries.ts` passes through for routing directly
+      // under the word "Bezet", and resolving it to `[]` would print
+      // "Iedereen", which is a disclosure of its own.
+      people:
+        memberIds === null
+          ? null
+          : memberIds
+              .map((id) => byId.get(id))
+              .filter((member): member is Member => member !== undefined)
+              .map((member) => member.displayName),
     }));
   }, [members, events, timeZone, dayKey]);
 

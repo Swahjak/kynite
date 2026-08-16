@@ -4,6 +4,8 @@ import * as React from 'react';
 import { Button } from '../../src/components/button';
 import { CategoryDot } from '../../src/components/category-chip';
 import { Icon } from '../../src/components/icon';
+import type { IconName } from '../../src/components/icon-codepoints';
+import { FaceStack } from '../../src/components/face-stack';
 import { MemberFace } from '../../src/components/member-face';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../src/components/tabs';
 import { cn } from '../../src/lib/utils';
@@ -93,6 +95,21 @@ type Block = {
   to: string;
   surface: string;
   border: string;
+  /**
+   * The event-type glyph. `Kalender.dc.html`:108–115 draws one on every block,
+   * day and week alike, at 14px in the category's own icon step — the half of
+   * "what kind of thing is this" that the hue cannot carry on its own, since
+   * eleven types share eight hues.
+   */
+  icon?: IconName;
+  /**
+   * Whose it is, trailing. 16px faces (`Avatar`'s `2xs`), because a block is as
+   * tall as its event is long and a half-hour appointment has 29px to spend.
+   * `everyone` swaps the stack for the group glyph — a different fact, not a
+   * longer list of names.
+   */
+  faces?: readonly Member[];
+  everyone?: boolean;
   meta?: string;
   done?: boolean;
   busy?: boolean;
@@ -116,6 +133,8 @@ const DAY_COLUMNS: readonly { key: string; member: Member | null; blocks: readon
       {
         id: 'ontbijt',
         title: 'Ontbijt',
+        icon: 'restaurant',
+        everyone: true,
         from: '07:30',
         to: '08:15',
         meta: '07:30',
@@ -125,6 +144,8 @@ const DAY_COLUMNS: readonly { key: string; member: Member | null; blocks: readon
       {
         id: 'etentje',
         title: 'Etentje bij oma',
+        icon: 'celebration',
+        everyone: true,
         from: '18:00',
         to: '19:30',
         meta: '18:00 – 19:30',
@@ -139,6 +160,7 @@ const DAY_COLUMNS: readonly { key: string; member: Member | null; blocks: readon
       {
         id: 'bezet',
         title: 'Bezet',
+        icon: 'lock',
         from: '11:00',
         to: '12:30',
         meta: '11:00 – 12:30',
@@ -149,6 +171,8 @@ const DAY_COLUMNS: readonly { key: string; member: Member | null; blocks: readon
       {
         id: 'werklunch',
         title: 'Werklunch',
+        icon: 'work',
+        faces: [TOM],
         from: '12:30',
         to: '13:30',
         meta: '12:30 – 13:30',
@@ -160,7 +184,16 @@ const DAY_COLUMNS: readonly { key: string; member: Member | null; blocks: readon
     key: 'lotte',
     member: LOTTE,
     blocks: [
-      { id: 'tandarts', title: 'Tandarts', from: '10:00', to: '10:45', meta: '10:00', ...RED },
+      {
+        id: 'tandarts',
+        title: 'Tandarts',
+        from: '10:00',
+        to: '10:45',
+        meta: '10:00',
+        icon: 'medical_services',
+        faces: [LOTTE],
+        ...RED,
+      },
     ],
   },
   {
@@ -170,6 +203,8 @@ const DAY_COLUMNS: readonly { key: string; member: Member | null; blocks: readon
       {
         id: 'ochtend',
         title: 'Ochtendroutine',
+        icon: 'wb_twilight',
+        faces: [MILA],
         from: '08:15',
         to: '09:15',
         meta: '08:15 – 09:15',
@@ -178,6 +213,8 @@ const DAY_COLUMNS: readonly { key: string; member: Member | null; blocks: readon
       {
         id: 'schoolreis',
         title: 'Schoolreis',
+        icon: 'school',
+        faces: [MILA, DAAN],
         from: '09:15',
         to: '11:30',
         meta: '09:15 – 11:30',
@@ -186,12 +223,23 @@ const DAY_COLUMNS: readonly { key: string; member: Member | null; blocks: readon
       {
         id: 'voetbal',
         title: 'Voetbaltraining',
+        icon: 'sports_soccer',
+        faces: [MILA],
         from: '15:30',
         to: '16:30',
         meta: '15:30 – 16:30',
         ...GREEN,
       },
-      { id: 'bedtime', title: 'Bedtime', from: '19:30', to: '20:15', meta: '19:30', ...TEAL },
+      {
+        id: 'bedtime',
+        title: 'Bedtime',
+        from: '19:30',
+        to: '20:15',
+        meta: '19:30',
+        icon: 'bedtime',
+        faces: [MILA],
+        ...TEAL,
+      },
     ],
   },
   {
@@ -201,6 +249,8 @@ const DAY_COLUMNS: readonly { key: string; member: Member | null; blocks: readon
       {
         id: 'ochtend-d',
         title: 'Ochtendroutine',
+        icon: 'wb_twilight',
+        faces: [DAAN],
         from: '08:15',
         to: '09:15',
         meta: '08:15 – 09:15',
@@ -209,55 +259,193 @@ const DAY_COLUMNS: readonly { key: string; member: Member | null; blocks: readon
       {
         id: 'schoolreis-d',
         title: 'Schoolreis',
+        icon: 'school',
+        faces: [MILA, DAAN],
         from: '09:15',
         to: '11:30',
         meta: '09:15 – 11:30',
         ...BLUE,
       },
-      { id: 'bedtime-d', title: 'Bedtime', from: '19:30', to: '20:15', meta: '19:30', ...TEAL },
+      {
+        id: 'bedtime-d',
+        title: 'Bedtime',
+        from: '19:30',
+        to: '20:15',
+        meta: '19:30',
+        icon: 'bedtime',
+        faces: [DAAN],
+        ...TEAL,
+      },
     ],
   },
 ];
 
 const WEEK_COLUMNS: readonly (readonly Block[])[] = [
   [
-    { id: 'ma-school', title: 'School', from: '09:00', to: '10:00', ...BLUE },
-    { id: 'ma-zwemles', title: 'Zwemles', from: '15:30', to: '16:30', ...GREEN },
+    {
+      id: 'ma-school',
+      title: 'School',
+      from: '09:00',
+      to: '10:00',
+      icon: 'school',
+      faces: [MILA, DAAN],
+      ...BLUE,
+    },
+    {
+      id: 'ma-zwemles',
+      title: 'Zwemles',
+      from: '15:30',
+      to: '16:30',
+      icon: 'sports_soccer',
+      faces: [DAAN],
+      ...GREEN,
+    },
   ],
   [
-    { id: 'di-school', title: 'School', from: '09:00', to: '10:00', ...BLUE },
-    { id: 'di-thuis', title: 'Lotte thuis', from: '13:30', to: '15:00', ...PURPLE },
+    {
+      id: 'di-school',
+      title: 'School',
+      from: '09:00',
+      to: '10:00',
+      icon: 'school',
+      faces: [MILA, DAAN],
+      ...BLUE,
+    },
+    {
+      id: 'di-thuis',
+      title: 'Lotte thuis',
+      from: '13:30',
+      to: '15:00',
+      icon: 'work',
+      faces: [LOTTE],
+      ...PURPLE,
+    },
   ],
   [
-    { id: 'wo-school', title: 'School', from: '09:00', to: '10:00', ...BLUE },
-    { id: 'wo-huisarts', title: 'Huisarts', from: '14:30', to: '15:30', ...RED },
+    {
+      id: 'wo-school',
+      title: 'School',
+      from: '09:00',
+      to: '10:00',
+      icon: 'school',
+      faces: [MILA, DAAN],
+      ...BLUE,
+    },
+    {
+      id: 'wo-huisarts',
+      title: 'Huisarts',
+      from: '14:30',
+      to: '15:30',
+      icon: 'medical_services',
+      faces: [MILA],
+      ...RED,
+    },
   ],
   [
-    { id: 'do-school', title: 'School', from: '09:00', to: '10:00', ...BLUE },
-    { id: 'do-ouderavond', title: 'Ouderavond', from: '18:00', to: '19:00', ...PINK },
+    {
+      id: 'do-school',
+      title: 'School',
+      from: '09:00',
+      to: '10:00',
+      icon: 'school',
+      faces: [MILA, DAAN],
+      ...BLUE,
+    },
+    {
+      id: 'do-ouderavond',
+      title: 'Ouderavond',
+      from: '18:00',
+      to: '19:00',
+      icon: 'celebration',
+      faces: [TOM, LOTTE],
+      ...PINK,
+    },
   ],
   [
-    { id: 'vr-ochtend', title: 'Ochtendroutine', from: '08:15', to: '09:15', ...TEAL },
+    {
+      id: 'vr-ochtend',
+      title: 'Ochtendroutine',
+      from: '08:15',
+      to: '09:15',
+      icon: 'wb_twilight',
+      everyone: true,
+      ...TEAL,
+    },
     {
       id: 'vr-schoolreis',
       title: 'Schoolreis',
+      icon: 'school',
+      faces: [MILA, DAAN],
       from: '09:15',
       to: '11:30',
       meta: '09:15',
       ...BLUE,
     },
-    { id: 'vr-werklunch', title: 'Werklunch', from: '12:30', to: '13:30', ...YELLOW },
-    { id: 'vr-voetbal', title: 'Voetbal', from: '15:30', to: '16:30', ...GREEN },
-    { id: 'vr-etentje', title: 'Etentje', from: '18:00', to: '19:30', ...PINK },
+    {
+      id: 'vr-werklunch',
+      title: 'Werklunch',
+      from: '12:30',
+      to: '13:30',
+      icon: 'work',
+      faces: [TOM],
+      ...YELLOW,
+    },
+    {
+      id: 'vr-voetbal',
+      title: 'Voetbal',
+      from: '15:30',
+      to: '16:30',
+      icon: 'sports_soccer',
+      faces: [MILA],
+      ...GREEN,
+    },
+    {
+      id: 'vr-etentje',
+      title: 'Etentje',
+      from: '18:00',
+      to: '19:30',
+      icon: 'celebration',
+      everyone: true,
+      ...PINK,
+    },
   ],
-  [{ id: 'za-wedstrijd', title: 'Voetbalwedstrijd', from: '10:00', to: '11:30', ...GREEN }],
-  [{ id: 'zo-familiedag', title: 'Familiedag', from: '12:00', to: '14:00', ...PINK }],
+  [
+    {
+      id: 'za-wedstrijd',
+      title: 'Voetbalwedstrijd',
+      from: '10:00',
+      to: '11:30',
+      icon: 'sports_soccer',
+      faces: [DAAN],
+      ...GREEN,
+    },
+  ],
+  [
+    {
+      id: 'zo-familiedag',
+      title: 'Familiedag',
+      from: '12:00',
+      to: '14:00',
+      icon: 'celebration',
+      everyone: true,
+      ...PINK,
+    },
+  ],
 ];
 
 const MOBILE_DAY: readonly Block[] = [
-  { id: 'ontbijt', title: 'Ontbijt', from: '07:30', to: '08:15', done: true, ...TEAL },
+  {
+    id: 'ontbijt',
+    icon: 'restaurant',
+    title: 'Ontbijt',
+    from: '07:30',
+    to: '08:15',
+    done: true,
+    ...TEAL,
+  },
   {
     id: 'ochtend',
+    icon: 'wb_twilight',
     title: 'Ochtendroutine',
     from: '08:15',
     to: '09:15',
@@ -266,6 +454,7 @@ const MOBILE_DAY: readonly Block[] = [
   },
   {
     id: 'schoolreis',
+    icon: 'school',
     title: 'Schoolreis',
     from: '09:15',
     to: '11:30',
@@ -275,6 +464,7 @@ const MOBILE_DAY: readonly Block[] = [
   },
   {
     id: 'tandarts',
+    icon: 'medical_services',
     title: 'Tandarts',
     from: '10:00',
     to: '10:45',
@@ -284,6 +474,7 @@ const MOBILE_DAY: readonly Block[] = [
   },
   {
     id: 'werklunch',
+    icon: 'work',
     title: 'Werklunch',
     from: '12:30',
     to: '13:30',
@@ -292,6 +483,7 @@ const MOBILE_DAY: readonly Block[] = [
   },
   {
     id: 'voetbal',
+    icon: 'sports_soccer',
     title: 'Voetbaltraining',
     from: '15:30',
     to: '16:30',
@@ -300,6 +492,7 @@ const MOBILE_DAY: readonly Block[] = [
   },
   {
     id: 'etentje',
+    icon: 'celebration',
     title: 'Etentje bij oma',
     from: '18:00',
     to: '19:30',
@@ -360,16 +553,42 @@ function EventBlock({ block, dense }: { block: Block; dense?: boolean }) {
         backgroundImage: block.busy ? HATCH : undefined,
       }}
     >
-      <span
-        className={cn(
-          'block truncate font-semibold',
-          dense ? 'text-caption' : 'text-body-sm',
-          block.done && 'line-through',
-          block.busy && 'text-ink-secondary'
-        )}
-      >
-        {block.title}
-      </span>
+      <div className="flex min-w-0 items-center gap-1">
+        {block.icon ? (
+          <Icon
+            name={block.busy ? 'lock' : block.icon}
+            size="xs"
+            className={cn('shrink-0', block.busy && 'text-ink-secondary')}
+          />
+        ) : null}
+        <span
+          className={cn(
+            'min-w-0 flex-1 truncate font-semibold',
+            dense ? 'text-caption' : 'text-body-sm',
+            block.done && 'line-through',
+            block.busy && 'text-ink-secondary'
+          )}
+        >
+          {block.title}
+        </span>
+        {/* Never on a hatched block: identity is exactly as much of a detail as
+            the title on a calendar the viewer may only read as free/busy. */}
+        {!block.busy && block.everyone ? (
+          <Icon name="group" size="xs" label="Iedereen" className="shrink-0 text-ink-muted" />
+        ) : null}
+        {!block.busy && !block.everyone && block.faces?.length ? (
+          <FaceStack
+            size="2xs"
+            className="shrink-0"
+            faces={block.faces.map((face) => ({
+              id: face.id,
+              name: face.name,
+              avatarUrl: face.avatar,
+              surfaceClass: face.surface,
+            }))}
+          />
+        ) : null}
+      </div>
       {block.meta ? (
         <span className="tabular-time block truncate text-caption text-ink-secondary">
           {block.meta}

@@ -3,9 +3,25 @@ import * as React from 'react';
 import { cn } from '../lib/utils';
 import { ICON_CODEPOINTS, type IconName } from './icon-codepoints';
 
-/** Icon sizes from docs/design/README.md "Icon Sizes". */
+/**
+ * Icon sizes from docs/design/README.md "Icon Sizes".
+ *
+ * `xs+` is 16px, between `xs` (14) and `sm` (18). The design sheets ask for a
+ * 16px glyph in 44 places — the fourth most common glyph size in
+ * `docs/design/claude-design/` after 18, 20 and 22 — and with no step for it
+ * the same icon drifted: the Dagoverzicht disclosure chevron
+ * (`Vandaag.dc.html`:378, `font-size:16px`) shipped at `sm` in the app and at
+ * `xs` in its Storybook specimen.
+ *
+ * It is **not** called `2xs`, even though `Avatar`/`MemberFace` use that name
+ * for their own 16px step. There, 16 is one notch *below* `xs` (24); here it
+ * is one notch *above* `xs` (14). Reusing the name would make `2xs` mean
+ * "smaller than xs" on one ramp and "larger than xs" on the other — the `+`
+ * says which direction this step goes and can only ever be read one way.
+ */
 const ICON_SIZES = {
   xs: 14,
+  'xs+': 16,
   sm: 18,
   md: 24,
   lg: 28,

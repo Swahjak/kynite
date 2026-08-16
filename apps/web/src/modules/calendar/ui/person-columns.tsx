@@ -81,8 +81,15 @@ export function PersonColumns({
    * column cannot otherwise show — and an empty result falls through to
    * "Iedereen" only for a household event, since a row in Mila's column that
    * names nobody else is simply hers alone.
+   *
+   * `null` for a redacted row (§7 `calendar:view_private` → `busy-only`), which
+   * the row draws as *no* sub-label. It is the column's own member who leaked
+   * here rather than an attendee: this list leads with `columnMember`, so a
+   * "Bezet" block routed into Mila's column by the `ownerMemberId` that
+   * survives redaction printed "Mila" underneath it.
    */
-  const withFor = (event: CalendarEvent, columnMember: Member): string[] => {
+  const withFor = (event: CalendarEvent, columnMember: Member): string[] | null => {
+    if (event.busyOnly) return null;
     if (event.householdWide) return [];
 
     const others = new Set<string>(event.attendeeMemberIds);

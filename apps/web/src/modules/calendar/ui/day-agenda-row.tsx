@@ -50,8 +50,13 @@ export type DayAgendaRowProps = {
   /**
    * Who the event is for, already resolved to display names — the sub-label.
    * Empty renders "Iedereen", which is what an event nobody claimed *is*.
+   *
+   * `null` is the **withheld** audience of a busy-only row, which is a third
+   * state rather than an empty list: the row then carries no sub-label at all.
+   * A caller may also simply omit it, because the row asks `event.busyOnly`
+   * itself — see the gate below.
    */
-  people?: string[];
+  people?: string[] | null;
   /** It is happening now: tinted surface, indigo time, NOW badge. */
   current?: boolean;
   /** It has already finished. */
@@ -80,9 +85,29 @@ export function DayAgendaRow({
   // see `domain/event-title.ts`.
   const title = titleOf(event, { untitled: t('untitled'), busy: t('busy') });
 
-  // An event nobody is named on is the household's — which is what the board
-  // has always meant by putting it in the "Iedereen" block.
-  const who = people && people.length > 0 ? people.join(' · ') : t('everyone');
+  /**
+   * An event nobody is named on is the household's — which is what the board
+   * has always meant by putting it in the "Iedereen" block.
+   *
+   * **Except when the row is redacted** (§7 `calendar:view_private` →
+   * `busy-only`), and then there is no sub-label at all. `queries.ts` blanks
+   * the title, the location and `attendeeMemberIds` but passes `ownerMemberId`
+   * through — it is the block's only surviving routing signal — so both feeders
+   * were resolving that owner into a name and printing it directly under the
+   * word "Bezet". They now pass `null`; this asks `event.busyOnly` as well,
+   * because that is the fact, and a feeder that forgets (the shared-events lane
+   * passes no `people` at all, and fell through to "Iedereen") must not be able
+   * to reintroduce it.
+   *
+   * "Iedereen" is withheld along with the names, not instead of them: whether a
+   * hidden hour is the household's or one person's is itself a fact about it.
+   */
+  const who =
+    event.busyOnly || people === null
+      ? null
+      : people && people.length > 0
+        ? people.join(' · ')
+        : t('everyone');
   const interactive = onSelect !== undefined && event.editable;
 
   return (
@@ -185,16 +210,22 @@ export function DayAgendaRow({
 
         {/* The sub-label is *who*, aligned under the title rather than under
             the dot — the spec's `margin-left:16px`. No location, no calendar
-            name, no recurrence glyph: this board answers what and for whom. */}
-        <span
-          className={cn(
-            'ml-4 truncate text-ink-secondary',
-            hub ? 'text-body' : 'text-caption',
-            past && 'text-ink-muted'
-          )}
-        >
-          {who}
-        </span>
+            name, no recurrence glyph: this board answers what and for whom.
+
+            Absent entirely on a redacted row rather than rendered empty: an
+            empty line would still reserve the space and read as a name that
+            failed to load. */}
+        {who !== null && (
+          <span
+            className={cn(
+              'ml-4 truncate text-ink-secondary',
+              hub ? 'text-body' : 'text-caption',
+              past && 'text-ink-muted'
+            )}
+          >
+            {who}
+          </span>
+        )}
       </div>
     </div>
   );

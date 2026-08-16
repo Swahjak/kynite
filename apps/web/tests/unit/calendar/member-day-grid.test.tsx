@@ -299,3 +299,42 @@ describe('MemberDayGrid', () => {
     expect(daan.querySelector('[data-slot="member-day-empty"]')).not.toBeNull();
   });
 });
+
+/**
+ * The wide day view is this grid, and until now it was the one board that told
+ * a parent *when* something is and nothing else: it rendered its blocks without
+ * a roster, so `EventChip` had nobody to resolve a face against and the day
+ * read as coloured rectangles. `/today`'s timeline has always drawn the type
+ * glyph and the faces for the same event.
+ *
+ * A column already names one member, so the face is not the column's answer
+ * being repeated — it is who *else* is on the block, which is exactly what the
+ * design sheet draws (`Kalender.dc.html`:108, a two-face stack on a block
+ * inside a member column).
+ */
+describe('MemberDayGrid — a block says what kind of thing it is, and whose', () => {
+  // Three, deliberately: on a two-person family an event naming both is an
+  // event naming *everybody*, which the chip collapses to "Iedereen" — a real
+  // rule, but not the one under test here.
+  const members = [member('m1', 'Mila', 0), member('m2', 'Daan', 1), member('m3', 'Tom', 2)];
+
+  it('draws the event-type glyph on a member block', () => {
+    const { container } = renderGrid(members, [event({ ownerMemberId: 'm1', eventType: 'sport' })]);
+
+    const chip = container.querySelector('[data-slot="member-column"] [data-slot="event-chip"]')!;
+    expect(chip.querySelector('[data-icon-name="sports_soccer"]')).not.toBeNull();
+  });
+
+  it('draws the faces of everyone on a block shared by two members', () => {
+    const { container } = renderGrid(members, [
+      event({ ownerMemberId: 'm1', attendeeMemberIds: ['m2'] }),
+    ]);
+
+    const chip = container.querySelector(
+      '[data-slot="member-column"][data-member-id="m1"] [data-slot="event-chip"]'
+    )!;
+    const faces = chip.querySelector('[data-slot="member-faces"]');
+    expect(faces).not.toBeNull();
+    expect(faces!.getAttribute('aria-label')).toBe('Mila & Daan');
+  });
+});

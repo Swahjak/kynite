@@ -62,7 +62,40 @@ describe('combineDayEvents', () => {
     // Both rows survive — a family event belongs to the day even when it
     // belongs to no one — but neither claims a face it cannot draw.
     expect(rows.map((row) => row.event.key)).toEqual(['ghost', 'nobody']);
-    expect(rows.every((row) => row.memberIds.length === 0)).toBe(true);
+    // `[]`, not `null`: neither row is redacted, they simply name nobody this
+    // family can resolve. `null` is the separate "withheld" state a busy-only
+    // row gets, and the difference is what stops a redacted hour reading as
+    // "Iedereen" — see the case below.
+    expect(rows.every((row) => row.memberIds?.length === 0)).toBe(true);
+  });
+
+  /**
+   * §7 `calendar:view_private` → `busy-only`. `queries.ts` keeps
+   * `ownerMemberId` on a redacted row because it is the only routing signal
+   * left — so this is where the *name* derived from it has to stop, once,
+   * rather than at each of the three surfaces that draw a row.
+   *
+   * `null`, never `[]`: every consumer renders an empty list as "Iedereen" plus
+   * the whole household's faces, and "this hidden hour is the household's" is
+   * itself a disclosure — it narrows the alternative to "and that one is one
+   * person's". The nullable type is also what makes a *fourth* consumer say
+   * what it draws instead of falling through to the everyone branch.
+   */
+  it('withholds the audience of a busy-only row while keeping its placement', () => {
+    const rows = combineDayEvents(
+      [
+        event({ key: 'private', ownerMemberId: 'mila', busyOnly: true }),
+        event({ key: 'private-household', householdWide: true, busyOnly: true }),
+      ],
+      ['sanne', 'mila', 'daan'],
+      { timeZone: TZ, dayKey: DAY }
+    );
+
+    expect(rows.map((row) => row.memberIds)).toEqual([null, null]);
+    // Placement is untouched: the block still belongs on Mila's day, which is
+    // what `ownerMemberId` survives redaction for. Ids, never names.
+    expect(rows[0].placementMemberIds).toEqual(['mila']);
+    expect(rows[1].placementMemberIds).toEqual(['sanne', 'mila', 'daan']);
   });
 
   it('puts all-day events first and the rest in time order', () => {

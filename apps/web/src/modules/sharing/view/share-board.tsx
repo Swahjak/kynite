@@ -67,7 +67,7 @@ export async function ShareBoard({ token, view }: { token: string; view: ShareVi
         <section className="flex flex-col gap-6">
           <h2 className="text-overline text-ink-muted uppercase">{t('scheduleTitle')}</h2>
           {view.days.map((day) => (
-            <DayRow
+            <ShareDayRow
               key={day.dateKey}
               day={day}
               members={view.members}
@@ -142,7 +142,15 @@ async function RoutineCard({
   );
 }
 
-async function DayRow({
+/**
+ * One day of the caregiver's week.
+ *
+ * Exported (rather than kept private to this file) so the redaction rule below
+ * can be asserted on rendered HTML in a unit test — `ShareBoard` itself is a
+ * server component whose children are server components, which no client
+ * renderer will walk.
+ */
+export async function ShareDayRow({
   day,
   members,
   timeZone,
@@ -202,7 +210,13 @@ async function DayRow({
                 {!item.busyOnly && item.location ? (
                   <span className="text-ink-secondary text-body-sm">{item.location}</span>
                 ) : null}
-                {item.memberIds.length > 0 ? (
+                {/* Who it is for, and nothing at all when that was withheld —
+                    `null` from `toShareEvent`, plus the same `busyOnly` gate
+                    the location above carries, so a redacted event stays
+                    anonymous even if ids ever reach here another way. No
+                    "iedereen" fallback either: saying a hidden hour is the
+                    whole household's is itself a fact about the household. */}
+                {!item.busyOnly && item.memberIds && item.memberIds.length > 0 ? (
                   <span className="text-ink-secondary text-body-sm">
                     {item.memberIds
                       .map((id) => members.find((entry) => entry.id === id)?.displayName)

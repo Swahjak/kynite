@@ -66,8 +66,24 @@ export type ShareEvent = {
   endsAt: number;
   allDay: boolean;
   location: string | null;
-  /** Members this event belongs to, restricted to the ones in scope. */
-  memberIds: string[];
+  /**
+   * Members this event belongs to, restricted to the ones in scope — and
+   * `null` when that audience is **withheld**, which is every busy-only event.
+   *
+   * Nullable rather than emptied because the two are different facts and the
+   * board renders them differently: `[]` is "this belongs to nobody in
+   * particular", a household event the caregiver may legitimately be told
+   * about, and printing that about a redacted hour still narrows what the
+   * hidden hour is. Typed so the absence survives the next person editing the
+   * board, the same way `combineDayEvents` and `participantsOf` are.
+   *
+   * `queries.ts` blanks a redacted row's title, location and attendees but
+   * passes `ownerMemberId` through — it is the row's only surviving routing
+   * signal — so the owner *does* reach `toShareEvent`, and this is where the
+   * name derived from it stops. It matters more here than on the in-household
+   * surfaces: a share link is read by someone outside the household.
+   */
+  memberIds: string[] | null;
   /** True when a private calendar was rendered free/busy (§7). */
   busyOnly: boolean;
 };
@@ -244,7 +260,10 @@ function toShareEvent(item: CalendarEvent, memberIds: Set<string>): ShareEvent {
     endsAt: item.endsAt.getTime(),
     allDay: item.allDay,
     location: item.location,
-    memberIds: [...subjects].filter((id) => memberIds.has(id)),
+    // Withheld, not filtered: a redacted event ships no audience at all, so
+    // the RSC payload the caregiver's browser receives carries no member id
+    // for it either — not just the rendered HTML.
+    memberIds: item.busyOnly ? null : [...subjects].filter((id) => memberIds.has(id)),
     busyOnly: item.busyOnly,
   };
 }

@@ -57,6 +57,18 @@ export type CombinableEvent = {
    * them.
    */
   householdWide?: boolean;
+  /**
+   * Rendered free/busy: the viewer's principal has `calendar:view_private` =
+   * `busy-only` (§7), so it may learn that the hour is occupied and nothing
+   * else — least of all whose it is.
+   *
+   * `queries.ts` blanks the title, the location and `attendeeMemberIds` on such
+   * a row but deliberately passes `ownerMemberId` through, because it is the
+   * only routing signal left and blanking it would dump every private event
+   * into the shared lane. Which makes every *name* derived from it here a leak,
+   * and makes this flag the thing that stops the derivation.
+   */
+  busyOnly?: boolean;
 };
 
 export type CombineDayOptions = {
@@ -262,12 +274,30 @@ export function splitByMember<E extends CombinableEvent>(
 export type CombinedDayRow<E extends CombinableEvent> = {
   event: E;
   /**
-   * Owner plus attendees — or the whole family, for a household event —
-   * restricted to members of this family and ordered by
-   * the family's own order — never by the order they happened to be attached
-   * to the event, so the same two children always stack the same way.
+   * Whom the row may **name**: owner plus attendees — or the whole family, for
+   * a household event — restricted to members of this family and ordered by the
+   * family's own order, never by the order they happened to be attached to the
+   * event, so the same two children always stack the same way.
+   *
+   * **`null` means withheld**, and is what a busy-only event gets. It is a
+   * third state on purpose, distinct from `[]`: an empty list means "nobody in
+   * particular", which every consumer renders as "Iedereen" and faces for the
+   * whole household — a perfectly good answer for an unattributed event and a
+   * disclosure for a redacted one, since "this hidden hour is the household's"
+   * narrows the alternative to "…and this one is not". `null` is not a longer
+   * list; it is a different fact, and its type forces a consumer to say what it
+   * draws for it rather than falling through to the everyone branch.
    */
-  memberIds: string[];
+  memberIds: string[] | null;
+  /**
+   * The same set, unredacted — for **placement and filtering only**.
+   *
+   * A redacted block still has to appear on the right person's day (that is
+   * what `ownerMemberId` survives redaction for), and the day list's member
+   * filter is that placement. Nothing rendered as identity may read this: it is
+   * the ids, never the names.
+   */
+  placementMemberIds: string[];
 };
 
 /**
@@ -293,11 +323,24 @@ export function combineDayEvents<E extends CombinableEvent>(
   onDay.sort(compareForDay);
 
   return onDay.map((event) => {
-    if (event.householdWide) return { event, memberIds: [...memberOrder] };
+    const placementMemberIds = (() => {
+      if (event.householdWide) return [...memberOrder];
 
-    const participants = new Set<string>(event.attendeeMemberIds);
-    if (event.ownerMemberId) participants.add(event.ownerMemberId);
+      const participants = new Set<string>(event.attendeeMemberIds);
+      if (event.ownerMemberId) participants.add(event.ownerMemberId);
 
-    return { event, memberIds: memberOrder.filter((id) => participants.has(id)) };
+      return memberOrder.filter((id) => participants.has(id));
+    })();
+
+    // The privacy gate, resolved here rather than at each row that draws a
+    // face: a fourth consumer of this function gets a `null` it has to handle,
+    // where a fourth consumer of a plain `string[]` would silently name people
+    // beside the word "Bezet" — which is exactly how the three surfaces this
+    // was found on came to do it.
+    return {
+      event,
+      memberIds: event.busyOnly ? null : placementMemberIds,
+      placementMemberIds,
+    };
   });
 }

@@ -18,6 +18,12 @@ import { MemberFace } from './member-face';
  * ordering is the family's own `sortOrder` and the hue comes from
  * `MEMBER_COLOR_CLASSES`, neither of which the design system knows about. See
  * `modules/today/ui/member-faces.tsx` for the wrapper that does both.
+ *
+ * `2xs` is the time-grid block's stack (see `Avatar`'s note on the size). At
+ * 16px the 2px ring and the 8px overlap of the larger sizes eat half the face,
+ * so both step down with it. The sheet draws the overlap at 5px of 16
+ * (`Kalender.dc.html`:108); `-space-x-1.5` is 6px, the nearest step on the
+ * spacing scale — the 1px is not worth a literal outside the scale.
  */
 
 export type StackedFace = {
@@ -35,7 +41,7 @@ export function FaceStack({
   className,
 }: {
   faces: readonly StackedFace[];
-  size?: 'xs' | 'sm' | 'default';
+  size?: '2xs' | 'xs' | 'sm' | 'default';
   /** Accessible name of the group. Defaults to the names, comma-separated. */
   label?: string;
   className?: string;
@@ -51,7 +57,7 @@ export function FaceStack({
     <div
       data-slot="member-faces"
       role="img"
-      className={cn('flex -space-x-2', className)}
+      className={cn('flex', size === '2xs' ? '-space-x-1.5' : '-space-x-2', className)}
       aria-label={label ?? faces.map((face) => face.name).join(', ')}
     >
       {faces.map((face) => (
@@ -61,7 +67,7 @@ export function FaceStack({
           avatarUrl={face.avatarUrl}
           surfaceClass={face.surfaceClass}
           size={size}
-          className="ring-2 ring-card"
+          className={size === '2xs' ? 'ring-1 ring-card' : 'ring-2 ring-card'}
         />
       ))}
     </div>

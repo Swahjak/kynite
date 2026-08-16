@@ -36,7 +36,10 @@ export const Sizes: Story = {
   render: () => (
     <Section title="Icon — sizes">
       <SpecimenGrid>
-        <Specimen name="xs 14 · sm 18 · md 24 · lg 28 · xl 32 · 2xl 40">
+        <Specimen
+          name="xs 14 · xs+ 16 · sm 18 · md 24 · lg 28 · xl 32 · 2xl 40"
+          note="`xs+` is the sheets' 16px glyph. It is *above* `xs` here, which is why it is not called `2xs` — on the Avatar ramp that name means a step below `xs`."
+        >
           {(Object.keys(ICON_SIZES) as (keyof typeof ICON_SIZES)[]).map((size) => (
             <Icon key={size} name="calendar_month" size={size} />
           ))}

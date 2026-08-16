@@ -73,7 +73,7 @@ function DagoverzichtRow({ summary }: { summary: string }) {
         type="button"
         className="flex min-w-0 items-center gap-1.5 rounded-lg text-ink-muted transition-colors duration-200 hover:text-ink"
       >
-        <Icon name="expand_more" size="sm" className="shrink-0 transition-transform" />
+        <Icon name="expand_more" size="xs+" className="shrink-0 transition-transform" />
         <span className="truncate text-caption">{summary}</span>
       </button>
     </div>

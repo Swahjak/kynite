@@ -12,6 +12,14 @@ import { cn } from '../lib/utils';
  * `sm` (28px) are the in-list sizes the calendar and event rows use
  * ("Small avatar-in-list usage (event list item): `28px`").
  *
+ * `2xs` (16px) is one step below all of those and exists for exactly one
+ * surface: a **time-grid block**. `docs/design/claude-design/Kalender.dc.html`
+ * draws every day/week block's face at `width:16px;height:16px` (:108, :181),
+ * because a block is as tall as its event is long — a half-hour appointment is
+ * 29px — and the 24px of `xs` does not fit inside one with its padding. It is
+ * deliberately too small to carry initials legibly at a distance, which is why
+ * nothing but a grid block should reach for it.
+ *
  * `ring` adds the 56px specimen's focus halo: `box-shadow:0 0 0 3px
  * rgba(93,95,239,0.15)`.
  */
@@ -21,7 +29,7 @@ function Avatar({
   ring = false,
   ...props
 }: AvatarPrimitive.Root.Props & {
-  size?: 'default' | 'xs' | 'sm' | 'lg' | 'hub';
+  size?: 'default' | '2xs' | 'xs' | 'sm' | 'lg' | 'hub';
   ring?: boolean;
 }) {
   return (
@@ -29,7 +37,7 @@ function Avatar({
       data-slot="avatar"
       data-size={size}
       className={cn(
-        'group/avatar relative flex size-8 shrink-0 rounded-full select-none after:absolute after:inset-0 after:rounded-full after:border after:border-border after:mix-blend-darken data-[size=hub]:size-14 data-[size=lg]:size-11 data-[size=sm]:size-7 data-[size=xs]:size-6 dark:after:mix-blend-lighten',
+        'group/avatar relative flex size-8 shrink-0 rounded-full select-none after:absolute after:inset-0 after:rounded-full after:border after:border-border after:mix-blend-darken data-[size=hub]:size-14 data-[size=lg]:size-11 data-[size=sm]:size-7 data-[size=xs]:size-6 data-[size=2xs]:size-4 dark:after:mix-blend-lighten',
         ring && 'shadow-[0_0_0_3px_rgb(93_95_239_/_0.15)]',
         className
       )}
@@ -53,7 +61,7 @@ function AvatarFallback({ className, ...props }: AvatarPrimitive.Fallback.Props)
     <AvatarPrimitive.Fallback
       data-slot="avatar-fallback"
       className={cn(
-        'flex size-full items-center justify-center rounded-full bg-muted font-display text-sm font-bold text-foreground group-data-[size=hub]/avatar:text-h3 group-data-[size=lg]/avatar:text-body group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs',
+        'flex size-full items-center justify-center rounded-full bg-muted font-display text-sm font-bold text-foreground group-data-[size=hub]/avatar:text-h3 group-data-[size=lg]/avatar:text-body group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs group-data-[size=2xs]/avatar:text-[0.5rem] group-data-[size=2xs]/avatar:leading-none',
         className
       )}
       {...props}

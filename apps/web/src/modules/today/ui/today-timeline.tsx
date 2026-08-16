@@ -119,10 +119,25 @@ export async function TodayTimeline({
    */
   const render = ({ event, memberIds }: (typeof rows)[number]): ReactNode => {
     const palette = CATEGORY_CLASSES[event.category];
+    /**
+     * `memberIds === null` is `combineDayEvents` saying the row's audience is
+     * **withheld** (§7 `calendar:view_private` → `busy-only`), not that it is
+     * empty. So the row draws no faces and carries no label — not even
+     * "Iedereen", because whether a hidden hour is the household's or one
+     * person's is itself part of what free/busy withholds. The lock glyph and
+     * "Bezet" below are the whole of what this row is allowed to say.
+     */
     const everyone =
-      event.householdWide || memberIds.length === 0 || memberIds.length >= members.length;
-    const people = everyone ? tCalendar('everyone') : joinNames(namesOf(members, memberIds));
-    const faceIds = everyone ? members.map((member) => member.id) : memberIds;
+      memberIds !== null &&
+      (event.householdWide || memberIds.length === 0 || memberIds.length >= members.length);
+    const people =
+      memberIds === null
+        ? undefined
+        : everyone
+          ? tCalendar('everyone')
+          : joinNames(namesOf(members, memberIds));
+    const faceIds =
+      memberIds === null ? null : everyone ? members.map((member) => member.id) : memberIds;
     const live = isToday && event.key === nowEventKey;
     const done = isPast(event);
     const phone = density === 'card';
@@ -145,12 +160,14 @@ export async function TodayTimeline({
         endTime={event.allDay ? undefined : at(event.endsAt)}
         title={titleOf(event, { untitled: tCalendar('untitled'), busy: tCalendar('busy') })}
         faces={
-          <MemberFaces
-            members={members}
-            memberIds={faceIds}
-            size={phone ? 'xs' : 'sm'}
-            label={people}
-          />
+          faceIds === null ? undefined : (
+            <MemberFaces
+              members={members}
+              memberIds={faceIds}
+              size={phone ? 'xs' : 'sm'}
+              label={people}
+            />
+          )
         }
         statusLabel={live ? t('now.eyebrowLive') : undefined}
       />
@@ -203,10 +220,14 @@ export async function TodayTimeline({
    * with. Filtering to Mila and losing the family dinner would be a lie of
    * omission — the row is on her day too.
    */
-  const memberIdsFor = ({ event, memberIds }: (typeof rows)[number]) =>
-    event.householdWide || memberIds.length === 0
+  // `placementMemberIds`, not `memberIds`: the filter is *placement*, and a
+  // redacted row keeps the placement it has always had (`ownerMemberId` is
+  // exactly what survives redaction for). Ids only — nothing here is rendered,
+  // so nothing here names anybody.
+  const memberIdsFor = ({ event, placementMemberIds }: (typeof rows)[number]) =>
+    event.householdWide || placementMemberIds.length === 0
       ? members.map((member) => member.id)
-      : [...memberIds];
+      : [...placementMemberIds];
 
   // One bordered list rather than nine floating tiles: the rows carry their own
   // hairlines now, so a border each drew the same line twice and cost the

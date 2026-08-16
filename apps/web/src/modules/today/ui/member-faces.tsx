@@ -18,7 +18,13 @@ export function MemberFaces({
   label,
 }: {
   members: Member[];
-  memberIds: readonly string[];
+  /**
+   * `null` is the withheld audience of a busy-only event (see `participantsOf`)
+   * and renders nothing at all — not the household, not a placeholder. Accepted
+   * here rather than only at the call sites so that a caller passing the result
+   * of `participantsOf` straight through cannot draw a face it was told not to.
+   */
+  memberIds: readonly string[] | null;
   size?: 'xs' | 'sm' | 'default';
   className?: string;
   /**
@@ -28,6 +34,8 @@ export function MemberFaces({
    */
   label?: string;
 }) {
+  if (memberIds === null) return null;
+
   const ids = new Set(memberIds);
   const faces: StackedFace[] = members
     .filter((member) => ids.has(member.id))
@@ -66,11 +74,28 @@ export function joinNames(names: readonly string[]): string {
   return names.join(', ');
 }
 
-/** Owner plus attendees, de-duplicated — who a block is "for". */
+/**
+ * Owner plus attendees, de-duplicated — who a block is "for".
+ *
+ * **`null` when the block is busy-only** (§7 `calendar:view_private` →
+ * `busy-only`): the viewer may learn the hour is occupied and nothing else.
+ * `queries.ts` blanks the title, the location and `attendeeMemberIds` on such a
+ * row but passes `ownerMemberId` through — it is the block's only surviving
+ * routing signal — so the owner *does* arrive here, and this is where the name
+ * derived from it stops.
+ *
+ * `null` rather than `[]` because the two are different facts and every caller
+ * of this renders them differently: `[]` is "nobody in particular", which reads
+ * as "Iedereen" and draws the whole household's faces, and saying *that* about
+ * a redacted hour still narrows what the hidden hour is.
+ */
 export function participantsOf(event: {
   ownerMemberId: string | null;
   attendeeMemberIds: string[];
-}): string[] {
+  busyOnly?: boolean;
+}): string[] | null {
+  if (event.busyOnly) return null;
+
   const ids = new Set<string>(event.attendeeMemberIds);
   if (event.ownerMemberId) ids.add(event.ownerMemberId);
   return [...ids];
