@@ -361,6 +361,130 @@
   animation: kynite-spin-slow var(--duration-spin-slow) linear infinite;
 }
 
+/* ---------------------------------------------------------------------------
+ * Weather scenery — the weather card's moving layer.
+ *
+ * "Kynite Design System" § "Weer-widget · kaartthema per weertype": *"De hele
+ * kaart draagt het weer: een verloop als lucht, en rechts een bewegende laag —
+ * draaiende zonnestralen, overdrijvende wolken, vallende druppels, een korte
+ * bliksem."* Five keyframes, copied verbatim from that sheet.
+ *
+ * Every piece leaves `animation-duration` and `animation-delay` unset so the
+ * component can stagger its own instances — two clouds on identical timing
+ * read as wallpaper, not as sky. The defaults below are the sheet's own first
+ * value for each.
+ *
+ * The sheet's *icon*-level keyframes (`kynite-w-sun`, `-drift`, `-bob`,
+ * `-flash`, `-sway`, `-twinkle`) are deliberately absent: they animate the
+ * twelve Material Symbols weather glyphs, which nothing renders — see the
+ * note on the type ramp in `tokens.css`. So are `kynite-cloud-a`/`-b`,
+ * `-sun-glow`, `-drop` and `-flake`, which belong to the thumbnail widget
+ * variants the Vandaag sheet does not place.
+ * ------------------------------------------------------------------------- */
+
+@keyframes kynite-rays {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes kynite-breathe {
+  0%,
+  100% {
+    opacity: 0.92;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes kynite-drop-lg {
+  0% {
+    transform: translateY(-14px) scaleY(0.7);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(96px) scaleY(1);
+    opacity: 0;
+  }
+}
+
+@keyframes kynite-cloud-wide {
+  0% {
+    transform: translateX(-70px);
+  }
+  100% {
+    transform: translateX(210px);
+  }
+}
+
+@keyframes kynite-bolt {
+  0%,
+  72%,
+  100% {
+    opacity: 0;
+  }
+  76% {
+    opacity: 1;
+  }
+  82% {
+    opacity: 0.2;
+  }
+  88% {
+    opacity: 1;
+  }
+  94% {
+    opacity: 0;
+  }
+}
+
+/** The sun's ray disc, one slow turn. */
+@utility kynite-rays {
+  animation: kynite-rays var(--duration-rays) linear infinite;
+}
+
+/** The sun's, moon's and halo's slow opacity pulse. */
+@utility kynite-breathe {
+  animation: kynite-breathe var(--duration-breathe) ease-in-out infinite;
+}
+
+/** A raindrop falling the height of the card. */
+@utility kynite-drop-lg {
+  animation: kynite-drop-lg var(--duration-drop-lg) linear infinite;
+}
+
+/** A cloud crossing the scene stage left to right. */
+@utility kynite-cloud-wide {
+  animation: kynite-cloud-wide var(--duration-cloud-wide) linear infinite;
+}
+
+/** The storm's short double flash. */
+@utility kynite-bolt {
+  animation: kynite-bolt var(--duration-bolt) ease-in-out infinite;
+}
+
+/* The sheet's own guard, verbatim. The global reset at the foot of this file
+   already neutralises every animation on the page; this is kept because it is
+   what the design *specifies* ("Animatie 1,6–16s · uit bij
+   prefers-reduced-motion"), and because `animation: none` stops the scenery
+   dead rather than running it once at 0.01ms — a difference that matters for
+   `kynite-bolt`, whose first frame is `opacity: 0`. */
+@media (prefers-reduced-motion: reduce) {
+  .kynite-rays,
+  .kynite-breathe,
+  .kynite-drop-lg,
+  .kynite-cloud-wide,
+  .kynite-bolt {
+    animation: none;
+  }
+}
+
 @keyframes timer-breath {
   0%,
   100% {

@@ -223,4 +223,5 @@ export {
   type ThemeBannerProps,
   type ThemeBannerTile,
 } from './components/theme-banner';
+export { WeatherCard, type WeatherCardProps, type WeatherScene } from './components/weather-card';
 export { WeekBars, type WeekBar } from './components/week-bars';

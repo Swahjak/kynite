@@ -42,6 +42,41 @@
   .kynite-drift{animation-name:kynite-drift;animation-timing-function:ease-in-out;animation-iteration-count:infinite;}
   @keyframes kynite-spin-slow{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
   .kynite-spin-slow{animation-name:kynite-spin-slow;animation-timing-function:linear;animation-iteration-count:infinite;}
+  @keyframes kynite-w-sun{0%{transform:rotate(0deg) scale(1);}50%{transform:rotate(180deg) scale(1.06);}100%{transform:rotate(360deg) scale(1);}}
+  @keyframes kynite-w-drift{0%,100%{transform:translateX(-2.5px);}50%{transform:translateX(2.5px);}}
+  @keyframes kynite-w-bob{0%,100%{transform:translateY(-1.5px);}50%{transform:translateY(1.5px);}}
+  @keyframes kynite-w-flash{0%,64%,100%{opacity:1;transform:scale(1);}70%{opacity:0.35;}76%{opacity:1;transform:scale(1.12);}84%{opacity:0.5;}90%{opacity:1;transform:scale(1);}}
+  @keyframes kynite-w-sway{0%,100%{transform:rotate(-5deg);}50%{transform:rotate(5deg);}}
+  @keyframes kynite-w-twinkle{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.62;transform:scale(0.94);}}
+  .kynite-w-sun{animation:kynite-w-sun 16s linear infinite;}
+  .kynite-w-drift{animation:kynite-w-drift 4.5s ease-in-out infinite;}
+  .kynite-w-bob{animation:kynite-w-bob 1.6s ease-in-out infinite;}
+  .kynite-w-flash{animation:kynite-w-flash 3.2s ease-in-out infinite;}
+  .kynite-w-sway{animation:kynite-w-sway 3.4s ease-in-out infinite;}
+  .kynite-w-twinkle{animation:kynite-w-twinkle 3.6s ease-in-out infinite;}
+  @media (prefers-reduced-motion: reduce){.kynite-w-sun,.kynite-w-drift,.kynite-w-bob,.kynite-w-flash,.kynite-w-sway,.kynite-w-twinkle{animation:none;}}
+  @keyframes kynite-cloud-a{0%{transform:translateX(-58px);}100%{transform:translateX(96px);}}
+  @keyframes kynite-cloud-b{0%{transform:translateX(-44px);}100%{transform:translateX(104px);}}
+  @keyframes kynite-sun-glow{0%,100%{transform:scale(1);opacity:0.95;}50%{transform:scale(1.08);opacity:1;}}
+  @keyframes kynite-drop{0%{transform:translateY(-8px);opacity:0;}18%{opacity:1;}100%{transform:translateY(34px);opacity:0;}}
+  @keyframes kynite-flake{0%{transform:translate(0,-8px) rotate(0deg);opacity:0;}18%{opacity:1;}100%{transform:translate(6px,34px) rotate(180deg);opacity:0;}}
+  @keyframes kynite-bolt{0%,72%,100%{opacity:0;}76%{opacity:1;}82%{opacity:0.2;}88%{opacity:1;}94%{opacity:0;}}
+  .kynite-cloud-a{animation:kynite-cloud-a 19s linear infinite;}
+  .kynite-cloud-b{animation:kynite-cloud-b 27s linear infinite;}
+  .kynite-sun-glow{animation:kynite-sun-glow 4.5s ease-in-out infinite;}
+  .kynite-drop{animation:kynite-drop 1.15s linear infinite;}
+  .kynite-flake{animation:kynite-flake 3.4s linear infinite;}
+  .kynite-bolt{animation:kynite-bolt 3.6s ease-in-out infinite;}
+  @media (prefers-reduced-motion: reduce){.kynite-cloud-a,.kynite-cloud-b,.kynite-sun-glow,.kynite-drop,.kynite-flake,.kynite-bolt{animation:none;}}
+  @keyframes kynite-rays{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+  @keyframes kynite-breathe{0%,100%{opacity:0.92;}50%{opacity:1;}}
+  @keyframes kynite-drop-lg{0%{transform:translateY(-14px) scaleY(0.7);opacity:0;}15%{opacity:1;}100%{transform:translateY(96px) scaleY(1);opacity:0;}}
+  @keyframes kynite-cloud-wide{0%{transform:translateX(-70px);}100%{transform:translateX(210px);}}
+  .kynite-rays{animation:kynite-rays 46s linear infinite;}
+  .kynite-breathe{animation:kynite-breathe 4.5s ease-in-out infinite;}
+  .kynite-drop-lg{animation:kynite-drop-lg 1.25s linear infinite;}
+  .kynite-cloud-wide{animation:kynite-cloud-wide 34s linear infinite;}
+  @media (prefers-reduced-motion: reduce){.kynite-rays,.kynite-breathe,.kynite-drop-lg,.kynite-cloud-wide{animation:none;}}
 </style>
 </helmet>
 
@@ -279,12 +314,15 @@
   <h2 style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:24px;margin:0 0 20px;padding-bottom:14px;border-bottom:1px solid #e1e3e4;color:#191c1d;">Avatars</h2>
   <div style="display:flex;flex-direction:column;gap:24px;">
     <div style="display:flex;flex-direction:column;gap:10px;">
-      <div style="display:flex;align-items:center;gap:12px;">
+      <div style="display:flex;align-items:flex-end;gap:12px;">
+        <span style="position:relative;display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;flex-shrink:0;background:oklch(94% 0.03 65);border-radius:9999px;"><img src="uploads/parent1.svg" alt="Tom" style="width:100%;height:100%;border-radius:9999px;object-fit:cover;display:block;"/></span>
+        <span style="position:relative;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;flex-shrink:0;background:oklch(94% 0.03 290);border-radius:9999px;"><img src="uploads/parent2.svg" alt="Lotte" style="width:100%;height:100%;border-radius:9999px;object-fit:cover;display:block;"/></span>
         <span style="position:relative;display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;flex-shrink:0;background:oklch(94% 0.03 335);border-radius:9999px;"><img src="uploads/child1.svg" alt="Mila" style="width:100%;height:100%;border-radius:9999px;object-fit:cover;display:block;"/></span>
         <span style="position:relative;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;flex-shrink:0;background:oklch(94% 0.03 245);border-radius:9999px;"><img src="uploads/child2.svg" alt="Daan" style="width:100%;height:100%;border-radius:9999px;object-fit:cover;display:block;"/></span>
         <span style="position:relative;display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;flex-shrink:0;background:oklch(94% 0.03 290);border-radius:9999px;"><img src="uploads/parent2.svg" alt="Lotte" style="width:100%;height:100%;border-radius:9999px;object-fit:cover;display:block;"/></span>
       </div>
-      <span style="display:inline-block;width:fit-content;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Avatar/Sizes (32 · 44 · 56)</span>
+      <span style="display:inline-block;width:fit-content;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Avatar/Sizes (16 · 24 · 32 · 44 · 56)</span>
+      <span style="font-family:'Poppins',sans-serif;font-size:13px;color:#747688;max-width:620px;">16 alleen inline in tekst en in dichte lijsten, zonder witte rand. 24 voor chips, meta-regels en compacte rijen. 32 en groter zijn de aanraakbare varianten.</span>
     </div>
     <div style="display:flex;flex-direction:column;gap:10px;">
       <div style="display:flex;">
@@ -956,6 +994,293 @@
           <span class="tnum" style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:20px;min-width:18px;text-align:center;">3</span>
           <span style="width:34px;height:34px;border-radius:9999px;background:#5d5fef;display:flex;align-items:center;justify-content:center;color:#ffffff;"><span class="material-symbols-outlined" style="font-size:19px;">add</span></span>
         </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- WEATHER -->
+<section>
+  <h2 style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:24px;margin:0 0 8px;padding-bottom:14px;border-bottom:1px solid #e1e3e4;color:#191c1d;">Weer</h2>
+  <p style="font-family:'Poppins',sans-serif;font-size:15px;color:#434656;margin:0 0 24px;max-width:680px;">Weer staat op de Vandaag-pagina als samenvatting van nu, met een doorklik naar zeven dagen. Elk weertype heeft een eigen hue: de gevulde Material Symbol staat in oklch(50% c h) op een tegel in oklch(94% c h) van dezelfde hue. Dagtypes met zon blijven warm, neerslag en nacht koel. Bij elk type hoort één rustige lus-animatie, die uitvalt bij prefers-reduced-motion.</p>
+
+  <div style="display:flex;flex-direction:column;gap:24px;">
+
+    <!-- Weather card themes -->
+    <div>
+      <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;margin-bottom:6px;">Weer-widget · kaartthema per weertype</span>
+      <p style="font-family:'Poppins',sans-serif;font-size:14px;color:#434656;margin:0 0 16px;max-width:680px;">De hele kaart draagt het weer: een verloop als lucht, en rechts een bewegende laag — draaiende zonnestralen, overdrijvende wolken, vallende druppels, een korte bliksem. De tekst blijft links op een rustig deel van het verloop staan. Alles stopt bij prefers-reduced-motion.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:20px;">
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;">Zonnig</span>
+        <div style="position:relative;overflow:hidden;background:linear-gradient(115deg,#fffdf5 0%,#fff2cf 60%,#ffe6a8 100%);border:1px solid #f3e2b4;border-radius:20px;padding:18px 20px;cursor:pointer;">
+                <span style="position:absolute;right:0;top:0;bottom:0;width:210px;overflow:hidden;pointer-events:none;"><span style="position:absolute;right:-34px;top:-42px;width:176px;height:176px;pointer-events:none;"><span class="kynite-rays" style="position:absolute;inset:0;border-radius:9999px;background:repeating-conic-gradient(from 0deg,rgba(247,183,51,0.34) 0 5deg, transparent 5deg 30deg);-webkit-mask:radial-gradient(circle, transparent 30%, #000 34%, #000 66%, transparent 74%);mask:radial-gradient(circle, transparent 30%, #000 34%, #000 66%, transparent 74%);"></span><span class="kynite-breathe" style="position:absolute;left:52px;top:52px;width:72px;height:72px;border-radius:9999px;background:radial-gradient(circle at 36% 32%,#ffe895,#f5a623);box-shadow:0 0 30px rgba(245,166,35,0.40);"></span></span></span>
+                <div style="position:relative;display:flex;align-items:flex-start;gap:16px;">
+                  <div style="flex:1;min-width:0;">
+                    <div style="display:flex;align-items:baseline;gap:10px;">
+                      <span class="tnum" style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:44px;line-height:1;letter-spacing:-0.02em;color:#191c1d;">26°</span>
+                      <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:16px;color:#434656;">Zonnig</span>
+                    </div>
+                    <span class="tnum" style="display:block;font-size:13px;color:#5f6274;margin-top:4px;">Utrecht · 26° / 15°</span>
+                  </div>
+                </div>
+                <div style="position:relative;display:flex;gap:20px;margin-top:16px;padding-top:14px;border-top:1px solid rgba(25,28,29,0.09);">
+                  <span style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#434656;"><span class="material-symbols-outlined" style="font-size:17px;color:#5f6274;">water_drop</span>20%</span>
+                  <span style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#434656;"><span class="material-symbols-outlined" style="font-size:17px;color:#5f6274;">air</span>12 km/u</span>
+                  <span style="flex:1;"></span>
+                  <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;color:#5d5fef;">7 dagen</span>
+                </div>
+              </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;">Half bewolkt</span>
+        <div style="position:relative;overflow:hidden;background:linear-gradient(115deg,#fffdf6 0%,#fff1d6 45%,#e8f1fd 100%);border:1px solid #efe4cd;border-radius:20px;padding:18px 20px;cursor:pointer;">
+                <span style="position:absolute;right:0;top:0;bottom:0;width:210px;overflow:hidden;pointer-events:none;"><span style="position:absolute;right:-26px;top:-34px;width:150px;height:150px;pointer-events:none;"><span class="kynite-rays" style="position:absolute;inset:0;border-radius:9999px;background:repeating-conic-gradient(from 0deg,rgba(247,183,51,0.34) 0 5deg, transparent 5deg 30deg);-webkit-mask:radial-gradient(circle, transparent 30%, #000 34%, #000 66%, transparent 74%);mask:radial-gradient(circle, transparent 30%, #000 34%, #000 66%, transparent 74%);"></span><span class="kynite-breathe" style="position:absolute;left:46px;top:46px;width:58px;height:58px;border-radius:9999px;background:radial-gradient(circle at 36% 32%,#ffe895,#f5a623);box-shadow:0 0 30px rgba(245,166,35,0.40);"></span></span><span class="kynite-cloud-wide" style="position:absolute;left:0;top:44px;width:52px;height:18px;border-radius:9999px;background:rgba(255,255,255,0.9);box-shadow:15px -8px 0 -3px rgba(255,255,255,0.9), -13px -4px 0 -5px rgba(255,255,255,0.81);animation-duration:34s;animation-delay:-0s;"></span><span class="kynite-cloud-wide" style="position:absolute;left:0;top:78px;width:37px;height:13px;border-radius:9999px;background:rgba(255,255,255,0.6);box-shadow:11px -6px 0 -2px rgba(255,255,255,0.6), -9px -3px 0 -4px rgba(255,255,255,0.54);animation-duration:46s;animation-delay:-18s;"></span></span>
+                <div style="position:relative;display:flex;align-items:flex-start;gap:16px;">
+                  <div style="flex:1;min-width:0;">
+                    <div style="display:flex;align-items:baseline;gap:10px;">
+                      <span class="tnum" style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:44px;line-height:1;letter-spacing:-0.02em;color:#191c1d;">21°</span>
+                      <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:16px;color:#434656;">Half bewolkt</span>
+                    </div>
+                    <span class="tnum" style="display:block;font-size:13px;color:#5f6274;margin-top:4px;">Utrecht · 23° / 14°</span>
+                  </div>
+                </div>
+                <div style="position:relative;display:flex;gap:20px;margin-top:16px;padding-top:14px;border-top:1px solid rgba(25,28,29,0.09);">
+                  <span style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#434656;"><span class="material-symbols-outlined" style="font-size:17px;color:#5f6274;">water_drop</span>20%</span>
+                  <span style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#434656;"><span class="material-symbols-outlined" style="font-size:17px;color:#5f6274;">air</span>12 km/u</span>
+                  <span style="flex:1;"></span>
+                  <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;color:#5d5fef;">7 dagen</span>
+                </div>
+              </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;">Regen</span>
+        <div style="position:relative;overflow:hidden;background:linear-gradient(115deg,#f7fafd 0%,#e0eaf6 55%,#cbdcee 100%);border:1px solid #cfdcea;border-radius:20px;padding:18px 20px;cursor:pointer;">
+                <span style="position:absolute;right:0;top:0;bottom:0;width:210px;overflow:hidden;pointer-events:none;"><span class="kynite-cloud-wide" style="position:absolute;left:0;top:20px;width:65px;height:23px;border-radius:9999px;background:rgba(255,255,255,0.97);box-shadow:19px -10px 0 -4px rgba(255,255,255,0.97), -16px -5px 0 -6px rgba(255,255,255,0.873);animation-duration:40s;animation-delay:-0s;"></span><span class="kynite-cloud-wide" style="position:absolute;left:0;top:52px;width:44px;height:15px;border-radius:9999px;background:rgba(255,255,255,0.75);box-shadow:13px -7px 0 -3px rgba(255,255,255,0.75), -11px -3px 0 -4px rgba(255,255,255,0.675);animation-duration:52s;animation-delay:-22s;"></span><span class="kynite-drop-lg" style="position:absolute;left:54px;top:46px;width:3px;height:13px;border-radius:9999px;background:rgba(86,128,187,0.55);animation-delay:-0s;"></span><span class="kynite-drop-lg" style="position:absolute;left:82px;top:52px;width:3px;height:13px;border-radius:9999px;background:rgba(86,128,187,0.55);animation-delay:-0.4s;"></span><span class="kynite-drop-lg" style="position:absolute;left:110px;top:44px;width:3px;height:13px;border-radius:9999px;background:rgba(86,128,187,0.55);animation-delay:-0.8s;"></span><span class="kynite-drop-lg" style="position:absolute;left:138px;top:50px;width:3px;height:13px;border-radius:9999px;background:rgba(86,128,187,0.55);animation-delay:-0.25s;"></span><span class="kynite-drop-lg" style="position:absolute;left:166px;top:46px;width:3px;height:13px;border-radius:9999px;background:rgba(86,128,187,0.55);animation-delay:-0.65s;"></span></span>
+                <div style="position:relative;display:flex;align-items:flex-start;gap:16px;">
+                  <div style="flex:1;min-width:0;">
+                    <div style="display:flex;align-items:baseline;gap:10px;">
+                      <span class="tnum" style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:44px;line-height:1;letter-spacing:-0.02em;color:#191c1d;">17°</span>
+                      <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:16px;color:#434656;">Regen</span>
+                    </div>
+                    <span class="tnum" style="display:block;font-size:13px;color:#5f6274;margin-top:4px;">Utrecht · 19° / 13°</span>
+                  </div>
+                </div>
+                <div style="position:relative;display:flex;gap:20px;margin-top:16px;padding-top:14px;border-top:1px solid rgba(25,28,29,0.09);">
+                  <span style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#434656;"><span class="material-symbols-outlined" style="font-size:17px;color:#5f6274;">water_drop</span>20%</span>
+                  <span style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#434656;"><span class="material-symbols-outlined" style="font-size:17px;color:#5f6274;">air</span>12 km/u</span>
+                  <span style="flex:1;"></span>
+                  <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;color:#5d5fef;">7 dagen</span>
+                </div>
+              </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;">Onweer</span>
+        <div style="position:relative;overflow:hidden;background:linear-gradient(115deg,#f5f6f9 0%,#dfe3ef 55%,#c9cee1 100%);border:1px solid #cfd4e2;border-radius:20px;padding:18px 20px;cursor:pointer;">
+                <span style="position:absolute;right:0;top:0;bottom:0;width:210px;overflow:hidden;pointer-events:none;"><span class="kynite-cloud-wide" style="position:absolute;left:0;top:20px;width:65px;height:23px;border-radius:9999px;background:rgba(255,255,255,0.97);box-shadow:19px -10px 0 -4px rgba(255,255,255,0.97), -16px -5px 0 -6px rgba(255,255,255,0.873);animation-duration:40s;animation-delay:-0s;"></span><span class="kynite-drop-lg" style="position:absolute;left:70px;top:48px;width:3px;height:13px;border-radius:9999px;background:rgba(86,128,187,0.55);animation-delay:-0s;"></span><span class="kynite-drop-lg" style="position:absolute;left:130px;top:52px;width:3px;height:13px;border-radius:9999px;background:rgba(86,128,187,0.55);animation-delay:-0.5s;"></span><span class="kynite-bolt" style="position:absolute;left:100px;top:46px;width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:22px solid #ffce53;"></span></span>
+                <div style="position:relative;display:flex;align-items:flex-start;gap:16px;">
+                  <div style="flex:1;min-width:0;">
+                    <div style="display:flex;align-items:baseline;gap:10px;">
+                      <span class="tnum" style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:44px;line-height:1;letter-spacing:-0.02em;color:#191c1d;">24°</span>
+                      <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:16px;color:#434656;">Onweer mogelijk</span>
+                    </div>
+                    <span class="tnum" style="display:block;font-size:13px;color:#5f6274;margin-top:4px;">Utrecht · 24° / 17°</span>
+                  </div>
+                </div>
+                <div style="position:relative;display:flex;gap:20px;margin-top:16px;padding-top:14px;border-top:1px solid rgba(25,28,29,0.09);">
+                  <span style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#434656;"><span class="material-symbols-outlined" style="font-size:17px;color:#5f6274;">water_drop</span>20%</span>
+                  <span style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#434656;"><span class="material-symbols-outlined" style="font-size:17px;color:#5f6274;">air</span>12 km/u</span>
+                  <span style="flex:1;"></span>
+                  <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;color:#5d5fef;">7 dagen</span>
+                </div>
+              </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;">Nacht</span>
+        <div style="position:relative;overflow:hidden;background:linear-gradient(115deg,#39406e 0%,#4d578f 55%,#7885b8 100%);border:1px solid #4d578f;border-radius:20px;padding:18px 20px;cursor:pointer;">
+                <span style="position:absolute;right:0;top:0;bottom:0;width:210px;overflow:hidden;pointer-events:none;"><span style="position:absolute;right:-18px;top:-30px;width:130px;height:130px;pointer-events:none;"><span class="kynite-breathe" style="position:absolute;inset:18%;border-radius:9999px;background:radial-gradient(circle,rgba(190,205,255,0.30) 40%,rgba(190,205,255,0.10) 70%,transparent 78%);"></span><span class="kynite-breathe" style="position:absolute;left:42px;top:42px;width:46px;height:46px;border-radius:9999px;background:radial-gradient(circle at 36% 32%,#ffe895,#c9d4ff);box-shadow:0 0 30px rgba(160,175,255,0.5);"></span></span><span class="kynite-cloud-wide" style="position:absolute;left:0;top:60px;width:47px;height:16px;border-radius:9999px;background:rgba(255,255,255,0.35);box-shadow:14px -7px 0 -3px rgba(255,255,255,0.35), -12px -4px 0 -4px rgba(255,255,255,0.315);animation-duration:46s;animation-delay:-10s;"></span></span>
+                <div style="position:relative;display:flex;align-items:flex-start;gap:16px;">
+                  <div style="flex:1;min-width:0;">
+                    <div style="display:flex;align-items:baseline;gap:10px;">
+                      <span class="tnum" style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:44px;line-height:1;letter-spacing:-0.02em;color:#ffffff;">13°</span>
+                      <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:16px;color:rgba(255,255,255,0.86);">Helder</span>
+                    </div>
+                    <span class="tnum" style="display:block;font-size:13px;color:rgba(255,255,255,0.72);margin-top:4px;">Utrecht · 13° / 9°</span>
+                  </div>
+                </div>
+                <div style="position:relative;display:flex;gap:20px;margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.22);">
+                  <span style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:rgba(255,255,255,0.86);"><span class="material-symbols-outlined" style="font-size:17px;color:rgba(255,255,255,0.72);">water_drop</span>20%</span>
+                  <span style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:rgba(255,255,255,0.86);"><span class="material-symbols-outlined" style="font-size:17px;color:rgba(255,255,255,0.72);">air</span>12 km/u</span>
+                  <span style="flex:1;"></span>
+                  <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;color:#c9d4ff;">7 dagen</span>
+                </div>
+              </div>
+      </div>
+      </div>
+    </div>
+
+    <!-- Weather icons -->
+    <div style="background:#ffffff;border-radius:20px;padding:20px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+      <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;margin-bottom:16px;">Weertypes · gevulde icoon op eigen kleurtegel, met eigen lus-animatie</span>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:20px;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;">
+          <span style="width:64px;height:64px;border-radius:20px;background:oklch(94% 0.09 75);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined kynite-w-sun" style="font-size:36px;color:oklch(50% 0.14 75);font-variation-settings:'FILL' 1;">sunny</span></span>
+          <span style="font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;">Zonnig</span>
+          <span style="font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#747688;line-height:1.5;">sunny<br/>w-sun · draait langzaam</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;">
+          <span style="width:64px;height:64px;border-radius:20px;background:oklch(94% 0.07 85);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined kynite-w-drift" style="font-size:36px;color:oklch(56% 0.13 80);font-variation-settings:'FILL' 1;">partly_cloudy_day</span></span>
+          <span style="font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;">Half bewolkt</span>
+          <span style="font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#747688;line-height:1.5;">partly_cloudy_day<br/>w-drift · drijft zijwaarts</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;">
+          <span style="width:64px;height:64px;border-radius:20px;background:oklch(94% 0.035 250);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined kynite-w-drift" style="font-size:36px;color:oklch(50% 0.08 250);font-variation-settings:'FILL' 1;">cloud</span></span>
+          <span style="font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;">Bewolkt</span>
+          <span style="font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#747688;line-height:1.5;">cloud<br/>w-drift · drijft zijwaarts</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;">
+          <span style="width:64px;height:64px;border-radius:20px;background:oklch(94% 0.05 230);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined kynite-w-bob" style="font-size:36px;color:oklch(50% 0.12 230);font-variation-settings:'FILL' 1;">rainy</span></span>
+          <span style="font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;">Regen</span>
+          <span style="font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#747688;line-height:1.5;">rainy<br/>w-bob · wipt op en neer</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;">
+          <span style="width:64px;height:64px;border-radius:20px;background:oklch(94% 0.04 220);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined kynite-w-bob" style="font-size:36px;color:oklch(50% 0.1 220);font-variation-settings:'FILL' 1;">rainy_light</span></span>
+          <span style="font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;">Motregen</span>
+          <span style="font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#747688;line-height:1.5;">rainy_light<br/>w-bob · wipt op en neer</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;">
+          <span style="width:64px;height:64px;border-radius:20px;background:oklch(94% 0.08 60);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined kynite-w-flash" style="font-size:36px;color:oklch(50% 0.14 60);font-variation-settings:'FILL' 1;">thunderstorm</span></span>
+          <span style="font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;">Onweer</span>
+          <span style="font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#747688;line-height:1.5;">thunderstorm<br/>w-flash · flitst</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;">
+          <span style="width:64px;height:64px;border-radius:20px;background:oklch(94% 0.04 210);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined kynite-w-bob" style="font-size:36px;color:oklch(50% 0.09 210);font-variation-settings:'FILL' 1;">weather_snowy</span></span>
+          <span style="font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;">Sneeuw</span>
+          <span style="font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#747688;line-height:1.5;">weather_snowy<br/>w-bob · wipt op en neer</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;">
+          <span style="width:64px;height:64px;border-radius:20px;background:oklch(94% 0.05 200);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined kynite-w-bob" style="font-size:36px;color:oklch(50% 0.11 200);font-variation-settings:'FILL' 1;">weather_hail</span></span>
+          <span style="font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;">Hagel</span>
+          <span style="font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#747688;line-height:1.5;">weather_hail<br/>w-bob · wipt op en neer</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;">
+          <span style="width:64px;height:64px;border-radius:20px;background:oklch(94% 0.02 290);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined kynite-w-drift" style="font-size:36px;color:oklch(50% 0.05 290);font-variation-settings:'FILL' 1;">foggy</span></span>
+          <span style="font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;">Mist</span>
+          <span style="font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#747688;line-height:1.5;">foggy<br/>w-drift · drijft zijwaarts</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;">
+          <span style="width:64px;height:64px;border-radius:20px;background:oklch(94% 0.05 155);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined kynite-w-sway" style="font-size:36px;color:oklch(50% 0.11 155);font-variation-settings:'FILL' 1;">air</span></span>
+          <span style="font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;">Wind</span>
+          <span style="font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#747688;line-height:1.5;">air<br/>w-sway · wiegt heen en weer</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;">
+          <span style="width:64px;height:64px;border-radius:20px;background:oklch(94% 0.05 300);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined kynite-w-twinkle" style="font-size:36px;color:oklch(50% 0.12 300);font-variation-settings:'FILL' 1;">clear_night</span></span>
+          <span style="font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;">Helder · nacht</span>
+          <span style="font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#747688;line-height:1.5;">clear_night<br/>w-twinkle · fonkelt</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;">
+          <span style="width:64px;height:64px;border-radius:20px;background:oklch(94% 0.04 300);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined kynite-w-twinkle" style="font-size:36px;color:oklch(50% 0.1 300);font-variation-settings:'FILL' 1;">partly_cloudy_night</span></span>
+          <span style="font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;">Bewolkt · nacht</span>
+          <span style="font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#747688;line-height:1.5;">partly_cloudy_night<br/>w-twinkle · fonkelt</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid #e1e3e4;">
+        <span style="font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Tegel oklch(94% c h) · icoon oklch(50% c h)</span>
+        <span style="font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Eén hue per weertype</span>
+        <span style="font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5d5fef;background:rgba(93,95,239,0.08);padding:3px 8px;border-radius:6px;">Animatie 1,6–16s · uit bij prefers-reduced-motion</span>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:20px;align-items:start;">
+      <!-- Widget tablet -->
+      <div>
+        <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;margin-bottom:10px;">Weer-widget · hub (klikbaar)</span>
+        <div style="background:#fff;border:1px solid #e6e3dc;border-radius:20px;padding:18px 20px;">
+          <div style="display:flex;align-items:center;gap:16px;">
+            <span style="position:relative;display:block;width:88px;height:88px;border-radius:18px;overflow:hidden;flex-shrink:0;background:linear-gradient(160deg,#bfe3ff 0%,#e6f3ff 52%,#fff2d8 100%);"><span class="kynite-sun-glow" style="position:absolute;left:15px;top:11px;width:30px;height:30px;border-radius:9999px;background:radial-gradient(circle at 35% 32%,#ffe488,#f5a623);box-shadow:0 0 16px rgba(245,166,35,0.5);"></span><span class="kynite-cloud-a" style="position:absolute;left:0;top:32px;width:38px;height:14px;border-radius:9999px;background:rgba(255,255,255,0.96);box-shadow:11px -6px 0 -2px rgba(255,255,255,0.96), -9px -3px 0 -4px rgba(255,255,255,0.92);"></span><span class="kynite-cloud-b" style="position:absolute;left:0;top:56px;width:28px;height:10px;border-radius:9999px;background:rgba(255,255,255,0.62);"></span></span>
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:baseline;gap:8px;">
+                <span style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:34px;line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;">21°</span>
+                <span style="font-family:'Poppins',sans-serif;font-size:14px;color:#434656;">Half bewolkt</span>
+              </div>
+              <span style="display:block;font-family:'Poppins',sans-serif;font-size:13px;color:#747688;margin-top:3px;font-variant-numeric:tabular-nums;">Utrecht · 23° / 14°</span>
+            </div>
+            <span class="material-symbols-outlined" style="font-size:22px;color:#747688;flex-shrink:0;">chevron_right</span>
+          </div>
+          <div style="display:flex;gap:20px;margin-top:14px;padding-top:14px;border-top:1px solid #f0f1f2;">
+            <span style="display:inline-flex;align-items:center;gap:6px;font-family:'Poppins',sans-serif;font-size:13px;color:#434656;"><span class="material-symbols-outlined" style="font-size:17px;color:#747688;">water_drop</span>20%</span>
+            <span style="display:inline-flex;align-items:center;gap:6px;font-family:'Poppins',sans-serif;font-size:13px;color:#434656;"><span class="material-symbols-outlined" style="font-size:17px;color:#747688;">air</span>12 km/u</span>
+            <span style="flex:1;"></span>
+            <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;color:#5d5fef;">7 dagen</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Widget compact -->
+      <div>
+        <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;margin-bottom:10px;">Weer-widget · compact (mobiel)</span>
+        <div style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #eceae4;border-radius:16px;padding:12px 14px;">
+          <span style="position:relative;display:block;width:48px;height:48px;border-radius:9.8px;overflow:hidden;flex-shrink:0;background:linear-gradient(160deg,#bfe3ff 0%,#e6f3ff 52%,#fff2d8 100%);"><span class="kynite-sun-glow" style="position:absolute;left:8.2px;top:6px;width:16.4px;height:16.4px;border-radius:9999px;background:radial-gradient(circle at 35% 32%,#ffe488,#f5a623);box-shadow:0 0 8.7px rgba(245,166,35,0.5);"></span><span class="kynite-cloud-a" style="position:absolute;left:0;top:17.5px;width:20.7px;height:7.6px;border-radius:9999px;background:rgba(255,255,255,0.96);box-shadow:6px -3.3px 0 -1.1px rgba(255,255,255,0.96), -4.9px -1.6px 0 -2.2px rgba(255,255,255,0.92);"></span></span>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:baseline;gap:7px;"><span style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:20px;line-height:1;font-variant-numeric:tabular-nums;">21°</span><span style="font-family:'Poppins',sans-serif;font-size:13px;color:#434656;">Half bewolkt</span></div>
+            <span style="display:block;font-family:'Poppins',sans-serif;font-size:11px;color:#747688;margin-top:2px;font-variant-numeric:tabular-nums;">23° / 14° · 20% kans op regen</span>
+          </div>
+          <span class="material-symbols-outlined" style="font-size:20px;color:#747688;flex-shrink:0;">chevron_right</span>
+        </div>
+        <span style="display:block;font-family:'Poppins',sans-serif;font-size:13px;color:#747688;margin-top:10px;">Doorklik opent een modal op de hub en een bottom sheet op mobiel.</span>
+      </div>
+    </div>
+
+    <!-- Forecast -->
+    <div style="background:#ffffff;border-radius:20px;padding:20px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+      <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;margin-bottom:8px;">7-daagse verwachting · rijen</span>
+      <div style="display:flex;align-items:center;gap:14px;padding:12px 4px;min-height:56px;box-sizing:border-box;border-top:1px solid #e1e3e4;">
+        <span style="width:96px;flex-shrink:0;font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;">Vandaag</span>
+        <span class="material-symbols-outlined kynite-w-drift" style="font-size:26px;color:oklch(56% 0.13 80);flex-shrink:0;">partly_cloudy_day</span>
+        <span style="flex:1;min-width:0;font-family:'Poppins',sans-serif;font-size:14px;color:#434656;">Half bewolkt</span>
+        <span style="display:inline-flex;align-items:center;gap:5px;width:74px;flex-shrink:0;font-family:'Poppins',sans-serif;font-size:13px;color:#747688;font-variant-numeric:tabular-nums;"><span class="material-symbols-outlined" style="font-size:16px;">water_drop</span>20%</span>
+        <span style="width:78px;flex-shrink:0;text-align:right;font-family:'Poppins',sans-serif;font-size:15px;font-variant-numeric:tabular-nums;"><b style="font-weight:700;">23°</b> <span style="color:#747688;">14°</span></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:12px 4px;min-height:56px;box-sizing:border-box;border-top:1px solid #e1e3e4;">
+        <span style="width:96px;flex-shrink:0;font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;">Zaterdag</span>
+        <span class="material-symbols-outlined" style="font-size:26px;color:oklch(50% 0.14 75);flex-shrink:0;" class="kynite-w-sun">sunny</span>
+        <span style="flex:1;min-width:0;font-family:'Poppins',sans-serif;font-size:14px;color:#434656;">Zonnig</span>
+        <span style="display:inline-flex;align-items:center;gap:5px;width:74px;flex-shrink:0;font-family:'Poppins',sans-serif;font-size:13px;color:#747688;font-variant-numeric:tabular-nums;"><span class="material-symbols-outlined" style="font-size:16px;">water_drop</span>5%</span>
+        <span style="width:78px;flex-shrink:0;text-align:right;font-family:'Poppins',sans-serif;font-size:15px;font-variant-numeric:tabular-nums;"><b style="font-weight:700;">26°</b> <span style="color:#747688;">15°</span></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:12px 4px;min-height:56px;box-sizing:border-box;border-top:1px solid #e1e3e4;">
+        <span style="width:96px;flex-shrink:0;font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;">Zondag</span>
+        <span class="material-symbols-outlined" style="font-size:26px;color:oklch(50% 0.12 230);flex-shrink:0;" class="kynite-w-bob">rainy</span>
+        <span style="flex:1;min-width:0;font-family:'Poppins',sans-serif;font-size:14px;color:#434656;">Buien in de middag</span>
+        <span style="display:inline-flex;align-items:center;gap:5px;width:74px;flex-shrink:0;font-family:'Poppins',sans-serif;font-size:13px;color:#747688;font-variant-numeric:tabular-nums;"><span class="material-symbols-outlined" style="font-size:16px;">water_drop</span>70%</span>
+        <span style="width:78px;flex-shrink:0;text-align:right;font-family:'Poppins',sans-serif;font-size:15px;font-variant-numeric:tabular-nums;"><b style="font-weight:700;">21°</b> <span style="color:#747688;">16°</span></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:12px 4px;min-height:56px;box-sizing:border-box;border-top:1px solid #e1e3e4;">
+        <span style="width:96px;flex-shrink:0;font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;">Donderdag</span>
+        <span class="material-symbols-outlined" style="font-size:26px;color:oklch(50% 0.14 60);flex-shrink:0;" class="kynite-w-flash">thunderstorm</span>
+        <span style="flex:1;min-width:0;font-family:'Poppins',sans-serif;font-size:14px;color:#434656;">Onweer mogelijk</span>
+        <span style="display:inline-flex;align-items:center;gap:5px;width:74px;flex-shrink:0;font-family:'Poppins',sans-serif;font-size:13px;color:#747688;font-variant-numeric:tabular-nums;"><span class="material-symbols-outlined" style="font-size:16px;">water_drop</span>60%</span>
+        <span style="width:78px;flex-shrink:0;text-align:right;font-family:'Poppins',sans-serif;font-size:15px;font-variant-numeric:tabular-nums;"><b style="font-weight:700;">24°</b> <span style="color:#747688;">17°</span></span>
+      </div>
+    </div>
+
+    <!-- Modal header -->
+    <div>
+      <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;margin-bottom:10px;">Forecast-modal · kop</span>
+      <div style="max-width:620px;background:#fbf9f4;border-radius:24px;box-shadow:0 12px 40px rgba(0,0,0,0.18);overflow:hidden;">
+        <div style="display:flex;align-items:flex-start;gap:16px;padding:24px 26px 20px;background:#fff;border-bottom:1px solid #eceae4;">
+          <span style="position:relative;display:block;width:104px;height:104px;border-radius:21.3px;overflow:hidden;flex-shrink:0;background:linear-gradient(160deg,#bfe3ff 0%,#e6f3ff 52%,#fff2d8 100%);"><span class="kynite-sun-glow" style="position:absolute;left:17.7px;top:13px;width:35.5px;height:35.5px;border-radius:9999px;background:radial-gradient(circle at 35% 32%,#ffe488,#f5a623);box-shadow:0 0 18.9px rgba(245,166,35,0.5);"></span><span class="kynite-cloud-a" style="position:absolute;left:0;top:37.8px;width:44.9px;height:16.5px;border-radius:9999px;background:rgba(255,255,255,0.96);box-shadow:13px -7.1px 0 -2.4px rgba(255,255,255,0.96), -10.6px -3.5px 0 -4.7px rgba(255,255,255,0.92);"></span><span class="kynite-cloud-b" style="position:absolute;left:0;top:66.2px;width:33.1px;height:11.8px;border-radius:9999px;background:rgba(255,255,255,0.62);"></span></span>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:baseline;gap:10px;">
+              <span style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:44px;line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;">21°</span>
+              <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:19px;">Half bewolkt</span>
+            </div>
+            <span style="display:block;font-family:'Poppins',sans-serif;font-size:14px;color:#434656;margin-top:4px;">Utrecht · voelt als 20° · zonsondergang 21:12</span>
+          </div>
+          <div style="width:40px;height:40px;border-radius:9999px;background:#f0f1f2;color:#434656;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:22px;">close</span></div>
+        </div>
+        <div style="padding:16px 26px 22px;font-family:'Poppins',sans-serif;font-size:13px;color:#747688;">Onder de kop volgen de zeven forecast-rijen.</div>
       </div>
     </div>
 

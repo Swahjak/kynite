@@ -22,6 +22,7 @@ import {
   loadTodayProgress,
   type DayReference,
 } from '@/modules/today';
+import { WeatherWidget, getFamilyWeather } from '@/modules/weather';
 import { redirect } from '@/i18n/navigation';
 
 /** Session-dependent: never prerendered, so `next build` needs no database. */
@@ -114,9 +115,12 @@ export default async function TodayPage({
    * Neither has an honest form under yesterday's date, so a browsed day gets
    * `null` and the panels say so rather than showing today's numbers.
    */
-  const [progress, tasks] = await Promise.all([
+  const [progress, tasks, weather] = await Promise.all([
     isToday ? loadTodayProgress({ now: data.now }) : null,
     isToday ? loadTodayTasks({ now: data.now }) : null,
+    // Weather is *now*, not a property of the day being browsed, so it follows
+    // the same today-only rule. One indexed row read, never a network call.
+    isToday ? getFamilyWeather(data.familyId, { now: data.now }) : null,
   ]);
 
   const nowEventKey = flow.live ? (flow.hero?.key ?? null) : null;
@@ -146,6 +150,12 @@ export default async function TodayPage({
         now={reference.now}
         timeZone={data.timeZone}
       />
+
+      {/* Where the Vandaag sheet puts it on a phone (`Vandaag.dc.html`:384):
+          between the NU block and "Dagoverzicht", as the compact themed card.
+          Renders nothing on a browsed day, and nothing when the household has
+          set no location or nothing usable is cached — see `WeatherWidget`. */}
+      {weather ? <WeatherWidget view={weather} density="phone" /> : null}
 
       <TodayTabs
         dag={

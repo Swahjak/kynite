@@ -2,16 +2,15 @@
  * Public surface of the weather slice (docs/architecture.md §2).
  * Cross-module imports go through this file only.
  *
- * **This slice is the data layer and nothing else.** There is no `ui/`
- * directory and no component: the hub's weather widget has not been designed
- * yet, and shipping a placeholder would be a design decision made by the
- * wrong person. What is here is everything the widget will need —
- * `getFamilyWeather(familyId)` for the read, a presentation-agnostic domain
- * model, a cache that is refreshed by a background job, and a settings action
- * for the location.
+ * A data layer — `getFamilyWeather(familyId)` for the read, a
+ * presentation-agnostic domain model, a cache refreshed by a background job
+ * and a settings action for the location — plus the one surface that draws it,
+ * `WeatherWidget`.
  *
  * The read never touches the network and never throws (see `queries.ts`), which
- * is what keeps a wall display with no connectivity rendering.
+ * is what keeps a wall display with no connectivity rendering. The widget
+ * renders **nothing** for three of the four view states, deliberately; the
+ * reasoning is on the component.
  */
 
 export { weatherSnapshot, type WeatherSnapshotRow } from './schema';
@@ -38,6 +37,18 @@ export {
   type WeatherView,
   type WmoWeatherCode,
 } from './domain/snapshot';
+
+export {
+  WEATHER_VISUALS,
+  WEATHER_VISUAL_SCENES,
+  WMO_WEATHER_VISUALS,
+  weatherSceneFor,
+  weatherVisualFor,
+  type WeatherCardScene,
+  type WeatherVisual,
+} from './domain/visual';
+
+export { WeatherWidget, type WeatherWidgetProps } from './ui/weather-widget';
 
 export {
   OPEN_METEO_CURRENT_FIELDS,

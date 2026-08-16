@@ -645,6 +645,22 @@
       "metaNoAge": "cake at breakfast, presents after dinner"
     }
   },
+  "weather": {
+    "condition": {
+      "sunny": "Sunny",
+      "partly-cloudy": "Partly cloudy",
+      "cloudy": "Cloudy",
+      "rain": "Rain",
+      "drizzle": "Drizzle",
+      "thunder": "Thunderstorm",
+      "snow": "Snow",
+      "hail": "Hail",
+      "fog": "Fog",
+      "wind": "Wind",
+      "clear-night": "Clear",
+      "partly-cloudy-night": "Partly cloudy"
+    }
+  },
   "today": {
     "title": "Today",
     "hubGreeting": {

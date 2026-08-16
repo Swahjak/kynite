@@ -58,6 +58,19 @@ export type TodayHubDagProps = {
   /** The day's theme row, already resolved by the page. */
   banner?: ReactNode;
   /**
+   * The weather card (`modules/weather`'s `WeatherWidget`), resolved by the
+   * page. The Vandaag sheet opens its third column with it
+   * ("Vandaag.dc.html":145) and that column is this one — the August
+   * recomposition merged the sheet's second and third columns, and the card
+   * still sits above the quick-action grid.
+   *
+   * `null` on a browsed day, and the widget itself renders `null` whenever the
+   * household has configured no location or nothing usable is cached, so the
+   * column simply starts one card lower. That is deliberate: neither design
+   * export draws an empty or unavailable weather state.
+   */
+  weather?: ReactNode;
+  /**
    * The per-child entry points (`ChildLauncher`), rendered *inside* this tab's
    * scroller rather than under the whole board — the design gives the tab panel
    * the entire frame below the pills ("Vandaag.dc.html":72–75), and a band
@@ -95,6 +108,7 @@ export async function TodayHubDag({
   tasks,
   kids,
   banner,
+  weather,
   launcher,
   timersHref,
   newEventAction,
@@ -155,6 +169,11 @@ export async function TodayHubDag({
         </div>
 
         <div className="flex flex-col gap-4">
+          {/* Bare, like `banner`: on a household with no location configured
+              the widget resolves to nothing, and a wrapper would leave the
+              column's flex gap behind as a hole above the grid. */}
+          {weather}
+
           {/* The August sheet's 2×2 grid. On the wall it resolves to the two
               actions a device principal may actually perform — see
               `TodayQuickActions` for why the other two are absent here. */}

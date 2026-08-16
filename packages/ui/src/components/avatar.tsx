@@ -22,6 +22,15 @@ import { cn } from '../lib/utils';
  *
  * `ring` adds the 56px specimen's focus halo: `box-shadow:0 0 0 3px
  * rgba(93,95,239,0.15)`.
+ *
+ * **The ramp has six steps; the design sheet documents five.** "Kynite Design
+ * System" § Avatars now names `16 · 24 · 32 · 44 · 56` and jumps straight from
+ * 24 to 32. `sm` (28px) stays anyway: it is the size the docs' own "Small
+ * avatar-in-list usage (event list item): `28px`" gives, and it is what the
+ * calendar and event rows render. The sheet's ramp is a swatch strip rather
+ * than a closed set, and collapsing 28 into 24 or 32 would move rows the
+ * design never asked to move. Recorded here so the gap reads as known rather
+ * than as drift.
  */
 function Avatar({
   className,

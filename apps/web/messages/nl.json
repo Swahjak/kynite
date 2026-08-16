@@ -645,6 +645,22 @@
       "metaNoAge": "taart bij het ontbijt, cadeautjes na het eten"
     }
   },
+  "weather": {
+    "condition": {
+      "sunny": "Zonnig",
+      "partly-cloudy": "Half bewolkt",
+      "cloudy": "Bewolkt",
+      "rain": "Regen",
+      "drizzle": "Motregen",
+      "thunder": "Onweer",
+      "snow": "Sneeuw",
+      "hail": "Hagel",
+      "fog": "Mist",
+      "wind": "Wind",
+      "clear-night": "Helder",
+      "partly-cloudy-night": "Half bewolkt"
+    }
+  },
   "today": {
     "title": "Vandaag",
     "hubGreeting": {

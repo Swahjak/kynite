@@ -259,6 +259,109 @@
   --cat-teal-deep: oklch(42% 0.14 200);
   --cat-teal-strong: oklch(34% 0.13 200);
 
+  /* -- Weather ------------------------------------------------------------
+     "Kynite Design System" § "Weer-widget · kaartthema per weertype" and
+     § "Weertypes". Two independent groups, and they are independent on
+     purpose:
+
+     1. **Scene palettes** (`--weather-<scene>-*`) — the whole card carries the
+        weather, so each of the five scenes the sheet draws is a three-stop sky
+        gradient plus its border. The gradient *angle and stop positions* are
+        geometry and live in `weather-card.tsx`; only the colours are here.
+     2. **The twelve-type hue ramp** (`--weather-type-<key>-*`) — one hue per
+        weather type, built the way the `--cat-*` palette is
+        (`oklch(94% c h)` tile / `oklch(50% c h)` glyph). The sheet's rule chip
+        says exactly that: "Tegel oklch(94% c h) · icoon oklch(50% c h) ·
+        Eén hue per weertype". Two types are drawn at 56% rather than 50% in
+        the sheet itself (`partly-cloudy`, and the same hue's warm neighbour);
+        the sheet is copied rather than regularised.
+
+     NOTE: the ramp has **no consumer yet**. It colours the 64px type tile and
+     the forecast-row glyph, both of which are Material Symbols the app's icon
+     subset does not carry — adding the twelve takes the font from 63.8 KB to
+     77.0 KB against a hard 64 KB budget (`scripts/subset-icons.mjs`). The card
+     the Vandaag sheet actually places carries no glyph at all, so the ramp is
+     recorded here, as the sheet states it, and rendered by nothing until that
+     budget question is answered. */
+  --weather-sunny-from: #fffdf5;
+  --weather-sunny-via: #fff2cf;
+  --weather-sunny-to: #ffe6a8;
+  --weather-sunny-border: #f3e2b4;
+
+  --weather-partly-cloudy-from: #fffdf6;
+  --weather-partly-cloudy-via: #fff1d6;
+  --weather-partly-cloudy-to: #e8f1fd;
+  --weather-partly-cloudy-border: #efe4cd;
+
+  --weather-rain-from: #f7fafd;
+  --weather-rain-via: #e0eaf6;
+  --weather-rain-to: #cbdcee;
+  --weather-rain-border: #cfdcea;
+
+  --weather-storm-from: #f5f6f9;
+  --weather-storm-via: #dfe3ef;
+  --weather-storm-to: #c9cee1;
+  --weather-storm-border: #cfd4e2;
+
+  --weather-night-from: #39406e;
+  --weather-night-via: #4d578f;
+  --weather-night-to: #7885b8;
+  --weather-night-border: #4d578f;
+
+  /* The moving layer's own colours. Clouds are plain white at a per-layer
+     alpha, so they need no token; these are the four that are not. */
+  --weather-ray: rgb(247 183 51 / 0.34);
+  --weather-sun-core: #ffe895;
+  --weather-sun-edge: #f5a623;
+  --weather-sun-glow: rgb(245 166 35 / 0.4);
+  --weather-drop: rgb(86 128 187 / 0.55);
+  --weather-bolt: #ffce53;
+  --weather-moon-edge: #c9d4ff;
+  --weather-moon-glow: rgb(160 175 255 / 0.5);
+  --weather-halo: rgb(190 205 255 / 0.3);
+
+  /* Card ink. Four values per surface rather than the page's `--ink*`, because
+     the card's ground is a sky rather than a surface: on the four day scenes
+     the sheet uses the page ink (`#191c1d` / `#434656`) but a *meta* tone of
+     `#5f6274` that is not `--ink-muted` (`#67697d`), and on Nacht all four are
+     white at descending alpha. */
+  --weather-ink: var(--ink);
+  --weather-ink-secondary: var(--ink-secondary);
+  --weather-ink-meta: #5f6274;
+  --weather-rule: rgb(25 28 29 / 0.09);
+
+  --weather-night-ink: #ffffff;
+  --weather-night-ink-secondary: rgb(255 255 255 / 0.86);
+  --weather-night-ink-meta: rgb(255 255 255 / 0.72);
+  --weather-night-rule: rgb(255 255 255 / 0.22);
+
+  /* The twelve-type ramp. Hue per type, exactly as the "Weertypes" grid
+     states it. */
+  --weather-type-sunny-tile: oklch(94% 0.09 75);
+  --weather-type-sunny-icon: oklch(50% 0.14 75);
+  --weather-type-partly-cloudy-tile: oklch(94% 0.07 85);
+  --weather-type-partly-cloudy-icon: oklch(56% 0.13 80);
+  --weather-type-cloudy-tile: oklch(94% 0.035 250);
+  --weather-type-cloudy-icon: oklch(50% 0.08 250);
+  --weather-type-rain-tile: oklch(94% 0.05 230);
+  --weather-type-rain-icon: oklch(50% 0.12 230);
+  --weather-type-drizzle-tile: oklch(94% 0.04 220);
+  --weather-type-drizzle-icon: oklch(50% 0.1 220);
+  --weather-type-thunder-tile: oklch(94% 0.08 60);
+  --weather-type-thunder-icon: oklch(50% 0.14 60);
+  --weather-type-snow-tile: oklch(94% 0.04 210);
+  --weather-type-snow-icon: oklch(50% 0.09 210);
+  --weather-type-hail-tile: oklch(94% 0.05 200);
+  --weather-type-hail-icon: oklch(50% 0.11 200);
+  --weather-type-fog-tile: oklch(94% 0.02 290);
+  --weather-type-fog-icon: oklch(50% 0.05 290);
+  --weather-type-wind-tile: oklch(94% 0.05 155);
+  --weather-type-wind-icon: oklch(50% 0.11 155);
+  --weather-type-clear-night-tile: oklch(94% 0.05 300);
+  --weather-type-clear-night-icon: oklch(50% 0.12 300);
+  --weather-type-partly-cloudy-night-tile: oklch(94% 0.04 300);
+  --weather-type-partly-cloudy-night-icon: oklch(50% 0.1 300);
+
   /* -- shadcn / Base UI semantic aliases ---------------------------------- */
   --foreground: var(--ink);
   --card: var(--surface);
@@ -415,6 +518,75 @@
   --cat-teal-solid: oklch(66% 0.14 200);
   --cat-teal-icon: oklch(72% 0.11 200);
   --cat-teal-fill: oklch(22% 0.04 200);
+
+  /* -- Weather, dark ------------------------------------------------------
+     Derived, like the `--cat-*` block above — the design sheet draws the
+     weather card once, on cream, and says nothing about a dark room.
+
+     The rule applied: **the sky keeps its hue and loses its light.** Each of
+     the four day scenes is the same gradient walked down to the Nacht theme's
+     lightness range, so a rainy afternoon still reads blue-grey and a sunny
+     one still reads warm, against a `#191c1d` board rather than glowing off
+     it. Nacht itself is unchanged: it is already a night sky, and darkening
+     the one scene that is *supposed* to be dark would flatten it into the
+     background.
+
+     The moving layer keeps its colours. A cloud is white and a bolt is yellow
+     in any room, and both sit on a ground that is still light enough (L≈45%
+     at the gradient's far stop) to carry them. Only the card ink flips: every
+     scene now uses the Nacht ink, because all five grounds are dark. */
+  --weather-sunny-from: #3a3520;
+  --weather-sunny-via: #55492a;
+  --weather-sunny-to: #7a6839;
+  --weather-sunny-border: #6b5c33;
+
+  --weather-partly-cloudy-from: #363424;
+  --weather-partly-cloudy-via: #504730;
+  --weather-partly-cloudy-to: #46557a;
+  --weather-partly-cloudy-border: #574d38;
+
+  --weather-rain-from: #232b34;
+  --weather-rain-via: #313e4e;
+  --weather-rain-to: #47596e;
+  --weather-rain-border: #3d4d5f;
+
+  --weather-storm-from: #24262e;
+  --weather-storm-via: #333747;
+  --weather-storm-to: #474d63;
+  --weather-storm-border: #3d4256;
+
+  --weather-ink: var(--weather-night-ink);
+  --weather-ink-secondary: var(--weather-night-ink-secondary);
+  --weather-ink-meta: var(--weather-night-ink-meta);
+  --weather-rule: var(--weather-night-rule);
+
+  /* The type ramp flips the way `--cat-*` does: the tile drops to L 26% and
+     the glyph rises above it, each step keeping its position relative to its
+     neighbours rather than its absolute lightness. */
+  --weather-type-sunny-tile: oklch(26% 0.06 75);
+  --weather-type-sunny-icon: oklch(78% 0.13 75);
+  --weather-type-partly-cloudy-tile: oklch(26% 0.05 85);
+  --weather-type-partly-cloudy-icon: oklch(80% 0.12 80);
+  --weather-type-cloudy-tile: oklch(26% 0.03 250);
+  --weather-type-cloudy-icon: oklch(78% 0.07 250);
+  --weather-type-rain-tile: oklch(26% 0.04 230);
+  --weather-type-rain-icon: oklch(78% 0.11 230);
+  --weather-type-drizzle-tile: oklch(26% 0.03 220);
+  --weather-type-drizzle-icon: oklch(78% 0.09 220);
+  --weather-type-thunder-tile: oklch(26% 0.05 60);
+  --weather-type-thunder-icon: oklch(78% 0.13 60);
+  --weather-type-snow-tile: oklch(26% 0.03 210);
+  --weather-type-snow-icon: oklch(78% 0.08 210);
+  --weather-type-hail-tile: oklch(26% 0.04 200);
+  --weather-type-hail-icon: oklch(78% 0.1 200);
+  --weather-type-fog-tile: oklch(26% 0.02 290);
+  --weather-type-fog-icon: oklch(78% 0.05 290);
+  --weather-type-wind-tile: oklch(26% 0.04 155);
+  --weather-type-wind-icon: oklch(78% 0.1 155);
+  --weather-type-clear-night-tile: oklch(26% 0.04 300);
+  --weather-type-clear-night-icon: oklch(78% 0.11 300);
+  --weather-type-partly-cloudy-night-tile: oklch(26% 0.03 300);
+  --weather-type-partly-cloudy-night-icon: oklch(78% 0.09 300);
 
   --foreground: var(--ink);
   --card: var(--surface);
@@ -573,6 +745,17 @@
   --duration-fly: 6s;
   --duration-spin-slow: 6s;
 
+  /* The weather card's scenery (§ "Weer-widget"). Same arrangement as the
+     banner's: the sheet gives each individual cloud and drop its own duration
+     and delay, so these are the defaults a piece inherits when it does not
+     stagger itself. Slow on purpose — a sky that hurried would be the most
+     distracting thing on a wall display. */
+  --duration-rays: 46s;
+  --duration-breathe: 4.5s;
+  --duration-drop-lg: 1.25s;
+  --duration-cloud-wide: 34s;
+  --duration-bolt: 3.6s;
+
   /* Tap targets. motion.md § "Tap-target sizing rule": minimum 48px for any
      interactive target, 64px on tablet for primary/high-frequency actions,
      with the 56px FAB as the intermediate step. */
@@ -707,6 +890,40 @@
   --color-cat-pink-strong: var(--cat-pink-strong);
   --color-cat-teal-deep: var(--cat-teal-deep);
   --color-cat-teal-strong: var(--cat-teal-strong);
+
+  /* Weather. The scene gradients are consumed as raw `var()` inside
+     `weather-card.tsx` (a three-stop `linear-gradient` is not a colour
+     utility), so only the values a class can name are aliased here: the card
+     ink, the rule, and the twelve-type ramp. */
+  --color-weather-ink: var(--weather-ink);
+  --color-weather-ink-secondary: var(--weather-ink-secondary);
+  --color-weather-ink-meta: var(--weather-ink-meta);
+  --color-weather-rule: var(--weather-rule);
+
+  --color-weather-type-sunny-tile: var(--weather-type-sunny-tile);
+  --color-weather-type-sunny-icon: var(--weather-type-sunny-icon);
+  --color-weather-type-partly-cloudy-tile: var(--weather-type-partly-cloudy-tile);
+  --color-weather-type-partly-cloudy-icon: var(--weather-type-partly-cloudy-icon);
+  --color-weather-type-cloudy-tile: var(--weather-type-cloudy-tile);
+  --color-weather-type-cloudy-icon: var(--weather-type-cloudy-icon);
+  --color-weather-type-rain-tile: var(--weather-type-rain-tile);
+  --color-weather-type-rain-icon: var(--weather-type-rain-icon);
+  --color-weather-type-drizzle-tile: var(--weather-type-drizzle-tile);
+  --color-weather-type-drizzle-icon: var(--weather-type-drizzle-icon);
+  --color-weather-type-thunder-tile: var(--weather-type-thunder-tile);
+  --color-weather-type-thunder-icon: var(--weather-type-thunder-icon);
+  --color-weather-type-snow-tile: var(--weather-type-snow-tile);
+  --color-weather-type-snow-icon: var(--weather-type-snow-icon);
+  --color-weather-type-hail-tile: var(--weather-type-hail-tile);
+  --color-weather-type-hail-icon: var(--weather-type-hail-icon);
+  --color-weather-type-fog-tile: var(--weather-type-fog-tile);
+  --color-weather-type-fog-icon: var(--weather-type-fog-icon);
+  --color-weather-type-wind-tile: var(--weather-type-wind-tile);
+  --color-weather-type-wind-icon: var(--weather-type-wind-icon);
+  --color-weather-type-clear-night-tile: var(--weather-type-clear-night-tile);
+  --color-weather-type-clear-night-icon: var(--weather-type-clear-night-icon);
+  --color-weather-type-partly-cloudy-night-tile: var(--weather-type-partly-cloudy-night-tile);
+  --color-weather-type-partly-cloudy-night-icon: var(--weather-type-partly-cloudy-night-icon);
 
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);

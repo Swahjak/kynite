@@ -29,6 +29,7 @@ import {
   type TodayTab,
 } from '@/modules/today';
 import { AmbientTimers, loadTimerBoard } from '@/modules/timers';
+import { WeatherWidget, getFamilyWeather } from '@/modules/weather';
 
 /** Session-dependent: never prerendered, so `next build` needs no database. */
 export const dynamic = 'force-dynamic';
@@ -184,9 +185,14 @@ export default async function HubPage({
    * follows. A browsed day gets `null` and the panels say so rather than
    * showing today's numbers under yesterday's date.
    */
-  const [progress, tasks] = await Promise.all([
+  const [progress, tasks, weather] = await Promise.all([
     isToday ? loadTodayProgress({ now: data.now }) : null,
     isToday ? loadTodayTasks({ now: data.now }) : null,
+    // Weather is *now*, not a property of the browsed day, so it follows the
+    // same today-only rule as the two reads above. One indexed row read and
+    // never a network call, which is what lets a wall display that re-renders
+    // on every SSE event carry it.
+    isToday ? getFamilyWeather(data.familyId, { now: data.now }) : null,
   ]);
 
   const nowEventKey = flow.live ? (flow.hero?.key ?? null) : null;
@@ -289,6 +295,10 @@ export default async function HubPage({
               // M26: one full-width row above the columns on a day that means
               // something, and nothing at all on the other 348.
               banner={theme ? <TodayThemeBanner theme={theme} /> : null}
+              // The head of the sheet's third column ("Vandaag.dc.html":145),
+              // which the August recomposition folded into this one. Nothing
+              // at all when the household set no location — see the widget.
+              weather={weather ? <WeatherWidget view={weather} /> : null}
               // The per-child entry points, inside the tab's own scroller. They
               // used to sit under the board as a third band of the page, which
               // took the bottom third of an 834px wall away from the columns
