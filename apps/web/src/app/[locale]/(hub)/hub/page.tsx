@@ -14,8 +14,8 @@ import { MEMBER_COLOR_CLASSES, greetingSlotFor, hourIn, initialsOf } from '@/mod
 import { loadFamilyRoutineTotals } from '@/modules/routines';
 import { loadTodayTasks } from '@/modules/tasks';
 import {
+  TodayHeader,
   TodayHubDag,
-  TodayHubHeader,
   TodayLive,
   TodayTabPersonen,
   TodayTabRoutines,
@@ -256,7 +256,12 @@ export default async function HubPage({
           events: data.events,
         }}
       >
-        <TodayHubHeader
+        <TodayHeader
+          // The same component `(app)/today` draws, at the wall's scale. No
+          // `viewer`: a device principal has no member to greet or to draw a
+          // face for, so the personal chrome is simply a prop this page does
+          // not pass (§7, and `TodayHeader`'s own note on the fork).
+          surface="hub"
           greeting={t(`hubGreeting.${slot}`)}
           anchor={data.anchor}
           now={data.now}

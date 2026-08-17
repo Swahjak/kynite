@@ -223,8 +223,9 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
 
         // M26: the clock is no longer live *here* and must not be pinned here.
         //
-        // Every hub baseline browses `FUTURE_ANCHOR`, and `TodayHubHeader`
-        // renders `today-clock` as a plain server-formatted date ("10 mrt")
+        // Every hub baseline browses `FUTURE_ANCHOR`, and `TodayHeader`
+        // (`surface="hub"`) renders `today-clock` as a plain
+        // server-formatted date ("10 mrt")
         // rather than `TodayClock` whenever the board is not showing today —
         // deterministic by construction. Pinning it anyway was actively
         // harmful: `pinLiveText` rewrites the node before React hydrates, so
