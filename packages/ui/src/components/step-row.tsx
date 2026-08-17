@@ -111,7 +111,7 @@ export function StepRow({
           aria-pressed={done}
           onClick={tap}
           className={cn(
-            'flex min-h-20 w-full items-center gap-3.5 rounded-[18px] border-2 px-4.5 py-4 text-left transition-all duration-200 ease-brand',
+            'flex min-h-20 w-full items-center gap-3.5 rounded-md border-2 px-4.5 py-4 text-left transition-all duration-200 ease-brand',
             'focus-visible:ring-3 focus-visible:ring-ring/50',
             done
               ? 'border-cat-green-border bg-cat-green-surface'

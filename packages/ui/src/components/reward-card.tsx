@@ -89,7 +89,7 @@ export function RewardCard({ tile, tileClass, copy, onRequest }: RewardCardProps
       data-reward-id={tile.id}
       data-state={tile.state}
       className={cn(
-        'flex min-h-[230px] flex-col gap-2.5 rounded-[22px] border p-4.5',
+        'flex min-h-[230px] flex-col gap-2.5 rounded-xl border p-4.5',
         requested
           ? 'border-2 border-primary bg-accent'
           : affordable
@@ -102,7 +102,7 @@ export function RewardCard({ tile, tileClass, copy, onRequest }: RewardCardProps
       <span
         aria-hidden
         className={cn(
-          'flex size-14 shrink-0 items-center justify-center rounded-[18px]',
+          'flex size-14 shrink-0 items-center justify-center rounded-md',
           requested
             ? 'bg-accent text-brand'
             : affordable

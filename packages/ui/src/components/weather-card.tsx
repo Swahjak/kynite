@@ -105,10 +105,10 @@ export function WeatherCard({
       data-scene={scene}
       data-density={density}
       className={cn(
-        'relative overflow-hidden border',
-        // Raw px: the sheet gives this card 20/16px radius and 18·20 / 12·14
-        // padding as literals, and neither lands on `--radius-*`.
-        phone ? 'rounded-[16px] px-3.5 py-3' : 'rounded-[20px] px-5 py-[18px]',
+        // A card is a card at every density: 16px (§ Shapes). Only the padding
+        // is a raw literal from the sheet (18·20 / 12·14).
+        'relative overflow-hidden rounded-xl border',
+        phone ? 'px-3.5 py-3' : 'px-5 py-[18px]',
         className
       )}
       style={{

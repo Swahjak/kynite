@@ -55,6 +55,9 @@ function Piece({
       className={cn(
         'absolute',
         big ? 'kynite-confetti-piece-big' : 'kynite-confetti-piece',
+        // Not a product surface: this is a ~6px scrap of paper, so it is exempt
+        // from the four-step radius scale (§ Shapes) — 2px is the paper's own
+        // nick, not a container corner.
         piece.shape === 'round' ? 'rounded-full' : 'rounded-[2px]'
       )}
       style={{

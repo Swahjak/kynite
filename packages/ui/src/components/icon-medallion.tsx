@@ -33,8 +33,12 @@ const medallionVariants = cva('inline-flex shrink-0 items-center justify-center'
     },
     shape: {
       circle: 'rounded-full',
-      /** The doc's rounded-square badge. */
-      squircle: 'rounded-2xl',
+      /**
+       * The doc's rounded-square badge. An icon tile, not a card — so it is
+       * `DEFAULT`/8px per § Shapes, at every size, and stated explicitly so a
+       * later token change cannot silently promote it to a container radius.
+       */
+      squircle: 'rounded-md',
     },
     size: {
       sm: 'size-8',

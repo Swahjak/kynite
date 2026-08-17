@@ -112,7 +112,7 @@ export function RoutineCard({ routine, expanded, copy, onComplete }: RoutineCard
     return (
       <article
         {...shared}
-        className="flex items-center gap-4 rounded-[20px] bg-surface-container-low px-5 py-4"
+        className="flex items-center gap-4 rounded-xl bg-surface-container-low px-5 py-4"
       >
         <Icon name="check_circle" filled size="lg" className="shrink-0 text-cat-green-fg" />
         <h3 className="min-w-0 flex-1 font-display text-h3 font-bold text-ink-secondary">
@@ -140,7 +140,7 @@ export function RoutineCard({ routine, expanded, copy, onComplete }: RoutineCard
     return (
       <article
         {...shared}
-        className="flex items-center gap-4 rounded-[20px] border border-line-subtle bg-surface-container-lowest px-5 py-4"
+        className="flex items-center gap-4 rounded-xl border border-line-subtle bg-surface-container-lowest px-5 py-4"
       >
         <IconMedallion
           icon={routine.icon}
@@ -191,7 +191,7 @@ export function RoutineCard({ routine, expanded, copy, onComplete }: RoutineCard
   return (
     <article
       {...shared}
-      className="relative isolate overflow-hidden rounded-[28px] border border-line-subtle bg-surface-container-lowest py-6 pr-6 pl-7 shadow-sm"
+      className="relative isolate overflow-hidden rounded-xl border border-line-subtle bg-surface-container-lowest py-6 pr-6 pl-7 shadow-sm"
     >
       {/* The rail. Six pixels of indigo down the whole left edge is the board's
           only "this one, now" marker that needs no reading at all. */}

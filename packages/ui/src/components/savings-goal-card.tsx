@@ -69,7 +69,7 @@ export function SavingsGoalCard({
         data-testid="savings-goal"
         data-reward-id={goal.rewardId}
         data-percent={percent}
-        className="group/goal relative isolate gap-0 overflow-hidden rounded-[26px] p-5.5"
+        className="group/goal relative isolate gap-0 overflow-hidden rounded-xl p-5.5"
       >
         {/* The warm glow behind the goal's icon. Ambience, not information. */}
         <span
@@ -80,7 +80,7 @@ export function SavingsGoalCard({
         <div className="flex items-center gap-4">
           <span
             aria-hidden
-            className="flex size-16 shrink-0 items-center justify-center rounded-[20px] bg-gold/15 text-gold"
+            className="flex size-16 shrink-0 items-center justify-center rounded-md bg-gold/15 text-gold"
           >
             <Icon name={icon} size="2xl" filled />
           </span>

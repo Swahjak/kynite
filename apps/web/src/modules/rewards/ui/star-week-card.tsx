@@ -46,7 +46,7 @@ export async function StarWeekCard({
   }));
 
   return (
-    <Card data-testid="week-chart" className="gap-4 rounded-[26px] p-5.5">
+    <Card data-testid="week-chart" className="gap-4 rounded-xl p-5.5">
       <SectionHeading
         title={t('chart.thisWeek')}
         size="card"

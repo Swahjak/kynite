@@ -399,10 +399,10 @@
   --sidebar-border: var(--line-subtle); /* `border-right:1px solid #e1e3e4` */
   --sidebar-ring: var(--line-focus);
 
-  /* Buttons are pills (`border-radius:9999px`, components.md § Buttons); this
-     is the *container* radius — select rows and nav items at 10–12px. The rest
-     of the scale is explicit in `@theme inline` below. */
-  --radius: 0.75rem;
+  /* The container default: a card, panel, sheet or modal is 16px. Buttons and
+     other pills are `--radius-4xl`; rows and anything nested inside a card step
+     down to 8px. The rest of the scale is explicit in `@theme inline` below. */
+  --radius: 1rem;
 
   /* -- Motion durations --------------------------------------------------- */
   --duration-fast: 150ms;
@@ -940,21 +940,33 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  /* Radius. Explicit values, not multipliers of `--radius`. Every step is a
-     radius the design system actually names:
-       6px  checkbox `border-radius:6px` (components.md § Selection controls)
-       8px  text field `border-radius:8px 8px 0 0` (§ Inputs)
-       10px nav item / 12px select row (layout.md, components.md § Inputs)
-       16px lockup card, nested shell card 18px (brand.md, layout.md)
-       24px every card, the shell frame and sheets (components.md § Cards)
-       9999px every button, chip, badge and avatar. */
-  --radius-sm: 0.375rem; /* 6px  — checkboxes, tiny tags */
-  --radius-md: 0.5rem; /* 8px  — text fields */
-  --radius-lg: 0.75rem; /* 12px — select rows, nav items (= --radius) */
-  --radius-xl: 1rem; /* 16px — nested/inner cards, the lockup card */
-  --radius-2xl: 1.5rem; /* 24px — cards, sheets, dialogs, the shell frame */
-  --radius-3xl: 2rem; /* 32px — full-bleed panels */
-  --radius-4xl: 9999px; /* pill — buttons, chips, badges, avatars, the FAB */
+  /* Radius. The design system allows exactly FOUR radii (§ Shapes):
+       4px    fields — inputs, tags, code labels, small colour tiles
+       8px    rows and nesting — buttons, event rows, list items, icon tiles,
+              checkboxes, and any card sitting inside another card
+       16px   containers — all cards, panels, sheets, modals
+       9999px identity and state — chips, avatars, filter toggles, progress
+              bars, the FAB
+     The distinction is structural, not decorative: rectangular surfaces are
+     containers (16 outer, 8 nested, 4 for fields inside them); pills are
+     identity. A button is always one step tighter than the card it sits in,
+     and a surface that feels like it wants a bigger radius is a sheet — which
+     is still 16.
+
+     THIS SCALE IS DELIBERATELY DEGENERATE. Eight Tailwind class names survive
+     (`rounded-sm` … `rounded-4xl`) because renaming them would churn ~250 call
+     sites for nothing, but they collapse onto the four allowed values: `lg`
+     resolves to the same 8px as `md`, and `2xl`/`3xl` to the same 16px as
+     `xl`. That is not an oversight to be "fixed" by spreading them back out —
+     any new intermediate value is a spec violation. Pick a class by ROLE
+     (field / row / container / pill), not by how big the old number was. */
+  --radius-sm: 0.25rem; /* 4px  — fields: inputs, tags, small colour tiles */
+  --radius-md: 0.5rem; /* 8px  — rows, buttons, icon tiles, nested cards */
+  --radius-lg: 0.5rem; /* 8px  — = md; the row/nested step, second name */
+  --radius-xl: 1rem; /* 16px — containers: cards, panels, sheets, modals */
+  --radius-2xl: 1rem; /* 16px — = xl; no card is ever bigger than a card */
+  --radius-3xl: 1rem; /* 16px — = xl; full-bleed panels are still containers */
+  --radius-4xl: 9999px; /* pill — chips, avatars, toggles, progress bars, FAB */
 }
 
 /* ---------------------------------------------------------------------------

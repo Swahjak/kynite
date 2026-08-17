@@ -62,7 +62,7 @@ export function AwardStarsDialog({ members }: { members: QueueMember[] }) {
         side="bottom"
         showCloseButton={false}
         overlayClassName="bg-scrim/35"
-        className="max-h-[90dvh] gap-0 overflow-y-auto rounded-t-[28px] px-5 pt-2.5 pb-7"
+        className="max-h-[90dvh] gap-0 overflow-y-auto rounded-t-xl px-5 pt-2.5 pb-7"
       >
         {open ? <AwardForm members={members} onSaved={() => setOpen(false)} /> : null}
       </SheetContent>
