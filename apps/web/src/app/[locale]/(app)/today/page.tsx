@@ -143,6 +143,13 @@ export default async function TodayPage({
         viewer={viewer}
       />
 
+      {/* Where the refreshed Vandaag sheet puts it on a phone: first under the
+          header, above the NU block, as the compact themed card. The weather is
+          what decides the coat, and it decides it before the schedule does.
+          Renders nothing on a browsed day, and nothing when the household has
+          set no location or nothing usable is cached — see `WeatherWidget`. */}
+      {weather ? <WeatherWidget view={weather} density="phone" /> : null}
+
       <TodayNowStrip
         event={flow.hero}
         mode={flow.mode}
@@ -150,12 +157,6 @@ export default async function TodayPage({
         now={reference.now}
         timeZone={data.timeZone}
       />
-
-      {/* Where the Vandaag sheet puts it on a phone (`Vandaag.dc.html`:384):
-          between the NU block and "Dagoverzicht", as the compact themed card.
-          Renders nothing on a browsed day, and nothing when the household has
-          set no location or nothing usable is cached — see `WeatherWidget`. */}
-      {weather ? <WeatherWidget view={weather} density="phone" /> : null}
 
       <TodayTabs
         dag={
