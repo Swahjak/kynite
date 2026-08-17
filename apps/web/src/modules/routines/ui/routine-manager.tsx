@@ -135,7 +135,10 @@ export async function RoutineManager({
             </span>
           </div>
 
-          <ul className="flex flex-col gap-2">
+          {/* One card, hairline dividers — not a stack of separately bordered
+              cards. A list is a single surface; its rows are divided, not
+              boxed. */}
+          <ul className="divide-y divide-line-subtle overflow-hidden rounded-2xl border border-line-subtle bg-card">
             {group.routines.map((routine) => (
               <li
                 key={routine.id}
@@ -145,8 +148,7 @@ export async function RoutineManager({
                 // An inactive routine recedes by one opacity and keeps every
                 // word legible. It is paused, not broken.
                 className={
-                  'flex items-center gap-3 rounded-2xl border border-line-subtle bg-card px-3.5 py-3' +
-                  (routine.active ? '' : ' opacity-70')
+                  'flex items-center gap-3 px-3.5 py-3' + (routine.active ? '' : ' opacity-70')
                 }
               >
                 <GripHandle />

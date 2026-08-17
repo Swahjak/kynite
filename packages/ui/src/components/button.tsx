@@ -23,9 +23,15 @@ const buttonVariants = cva(
         /** `Button/Primary` — `box-shadow:0 2px 8px rgba(93,95,239,0.28)`. */
         default: 'bg-primary text-primary-foreground shadow-brand hover:bg-brand-hover',
         gold: 'bg-gold text-gold-foreground hover:bg-gold-hover',
-        /** `Button/Secondary` — `border:2px solid #5d5fef`, transparent fill. */
+        /**
+         * `Button/Secondary` — "Secondary buttons use a 1px border and no
+         * fill." It was drawn at 2px from an earlier sheet; 2px is now the
+         * emphasis width, reserved for the input rule, the avatar ring and a
+         * selected state, and a button that is not selected is not one of
+         * those. The base class already carries the hairline `border`.
+         */
         'brand-outline':
-          'border-2 border-primary bg-transparent text-brand-ink hover:bg-accent aria-expanded:bg-accent',
+          'border-primary bg-transparent text-brand-ink hover:bg-accent aria-expanded:bg-accent',
         /** `Button/Icon` — `border:1px solid #c4c5d9;background:#ffffff`. */
         outline:
           'border-border bg-card text-ink-secondary hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50',

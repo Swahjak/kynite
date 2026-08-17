@@ -155,7 +155,7 @@ export function TaskList({
                     aria-label={t(done ? 'tasks.undo' : 'tasks.complete', { title: item.title })}
                     disabled={!canComplete}
                     onClick={() => toggle(item, !done)}
-                    className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none"
+                    className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg text-left focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none disabled:pointer-events-none"
                   >
                     <Icon
                       name={done ? 'check_circle' : 'radio_button_unchecked'}

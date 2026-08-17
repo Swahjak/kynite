@@ -76,9 +76,11 @@ export function ShareLinkList({
             data-testid="share-link-row"
             data-state={link.state}
             className={
+              // The list sits inside `SettingsSection`'s card, so a row is a
+              // tonal fill rather than a card of its own.
               link.state === 'active'
-                ? 'flex flex-col gap-2 rounded-xl border border-border bg-card p-4 shadow-sm'
-                : 'flex flex-col gap-2 rounded-xl border border-border bg-surface-container p-4 opacity-60'
+                ? 'flex flex-col gap-2 rounded-xl bg-surface-container p-4'
+                : 'flex flex-col gap-2 rounded-xl bg-surface-container p-4 opacity-60'
             }
           >
             <div className="flex flex-wrap items-baseline justify-between gap-2">

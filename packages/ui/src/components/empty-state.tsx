@@ -27,7 +27,9 @@ const emptyStateVariants = cva('flex flex-col items-center text-center', {
       hub: 'min-h-full justify-center gap-3 p-8',
     },
     framed: {
-      true: 'rounded-2xl border-2 border-dashed border-line-subtle',
+      // Hairline. The dashed frame marks a region, which is not one of the
+      // three jobs the 2px emphasis width is reserved for.
+      true: 'rounded-2xl border border-dashed border-line-subtle',
       false: '',
     },
   },

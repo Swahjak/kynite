@@ -117,6 +117,36 @@
   --line-subtle: #e1e3e4; /* Border — dividers, progress track */
   --line-focus: #5d5fef; /* colors.md: "Focused input border: #5d5fef" */
 
+  /* -- Line widths --------------------------------------------------------
+     The three widths the design system allows, and the whole of the scale:
+
+       hairline  1px  every border that separates a surface from what is
+                      behind it, and the secondary button's outline
+                      ("Cards that sit directly on the background get a 1px
+                      soft border"; "Secondary buttons use a 1px border").
+       emphasis  2px  exactly three jobs, each named by the spec: the input's
+                      bottom rule ("a 2px bottom border that expands on
+                      focus"), the avatar's surface ring ("overlap by a third
+                      with a 2px surface ring"), and the Wie filter's selected
+                      state ("a 2px indigo ring").
+       focus     3px  the focus ring, and nothing else.
+
+     NOTHING CONSUMES THESE, and that is a Tailwind limitation rather than an
+     oversight — see `tests/unit/border-width-scale.test.ts`, which pins the
+     numbers instead. Tailwind 4 has no theme namespace for border or ring
+     widths the way it has `--color-*`, `--radius-*` and `--text-*`:
+     `border-2` and `ring-3` are generated from a built-in numeric scale, so
+     an `@theme` entry here cannot reach them. An `@utility border-hairline`
+     could cover the *border* widths, but the ring is box-shadow machinery
+     (`--tw-ring-shadow` and friends) that a hand-written utility would have
+     to reimplement, and half a token layer is worse than an honest one. So
+     the widths stay literal classes at the call sites; these declarations are
+     where the scale is *stated*, and the test is what keeps the call sites on
+     it. Revisit if Tailwind adds the namespace. */
+  --border-width-hairline: 1px;
+  --border-width-emphasis: 2px;
+  --ring-width-focus: 3px;
+
   /* -- Status ------------------------------------------------------------ */
   --success: #006056; /* colors.md "Tertiary" — 7.48:1 on white */
   --warning: #9a4f14; /* = --gold-ink; the docs have no separate warning tone */

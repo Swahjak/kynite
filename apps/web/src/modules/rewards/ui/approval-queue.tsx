@@ -72,7 +72,7 @@ function DecideButtons({ redemptionId }: { redemptionId: string }) {
         name="decision"
         value="deny"
         variant="outline"
-        className="min-h-11 flex-1 rounded-4xl border-2"
+        className="min-h-11 flex-1 rounded-4xl"
         disabled={pending}
         data-testid="deny-redemption"
       >
@@ -197,7 +197,12 @@ export function ApprovalQueue({
       {outstanding.length > 0 ? (
         <section className="flex flex-col gap-2.5">
           <Overline>{t('queue.outstandingTitle')}</Overline>
-          <ul data-testid="outstanding-queue" className="flex flex-col gap-2.5">
+          {/* One card, hairline dividers — never a stack of separately
+              bordered row-cards. */}
+          <ul
+            data-testid="outstanding-queue"
+            className="divide-y divide-line-subtle overflow-hidden rounded-2xl border border-line-subtle bg-card"
+          >
             {outstanding.map((entry) => {
               const member = memberOf(entry.memberId);
 
@@ -207,7 +212,7 @@ export function ApprovalQueue({
                   data-testid="redemption-row"
                   data-redemption-id={entry.id}
                   data-status={entry.status}
-                  className="flex items-center gap-2.5 rounded-2xl border border-line-subtle bg-card px-3.5 py-3"
+                  className="flex items-center gap-2.5 px-3.5 py-3"
                 >
                   <MemberFace
                     size="xs"

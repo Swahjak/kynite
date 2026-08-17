@@ -429,10 +429,13 @@ export function EventChip({
         // reasons that have nothing to do with the device (seven days is
         // seven days), so the space it has to work with is the chip's own
         // rendered width, not a breakpoint.
-        // 3px, not 4: `Kalender.dc.html` draws every grid block's rail at
-        // `border-left:3px solid oklch(58% 0.14 H)`. The 4px figure in
-        // `calendar.md` is the *list* item's bar, which this component no
-        // longer draws — the phone's list is the `card` variant above.
+        // The rail is 4px, the width `calendar.md` § "Event list item" states
+        // and the width every other rail in this codebase is drawn at
+        // (`member-day-grid`'s day rule, `StepRow`'s live accent). It read 3px
+        // for a while because `Kalender.dc.html` draws the grid block at
+        // `border-left:3px` — a single mockup export against a documented
+        // scale, and the only 3px border anywhere in the product. One pixel is
+        // not worth a fourth border width.
         // `rounded-md` (8px) and no shadow: the sheet draws every grid block
         // at `border-radius:8px` with nothing under it ("Kalender.dc.html":106
         // and following). The 12px of `rounded-lg` plus a resting shadow made
@@ -440,7 +443,7 @@ export function EventChip({
         // hour it occupies. `py-1` for the same reason — the sheet fits a
         // title *and* a time inside 44px, which 6px of vertical padding does
         // not (gap 25).
-        'group/chip @container/chip relative flex min-w-0 flex-col justify-start gap-0.5 overflow-hidden rounded-md border-l-3 px-2 py-1 text-left',
+        'group/chip @container/chip relative flex min-w-0 flex-col justify-start gap-0.5 overflow-hidden rounded-md border-l-4 px-2 py-1 text-left',
         palette.surface,
         palette.rule,
         past && 'opacity-55',

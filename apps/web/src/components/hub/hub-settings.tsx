@@ -149,7 +149,8 @@ export function HubSettings({
             // the same rule the pairing screen already follows for a wrong
             // code — a fact about what tapping this does, not an alarm.
             <div
-              className="flex flex-col gap-3 rounded-xl border border-border bg-muted p-4"
+              // Nested in the sheet panel: the tonal fill is the separation.
+              className="flex flex-col gap-3 rounded-xl bg-muted p-4"
               data-testid="hub-unpair-confirm"
             >
               <p className="text-body-sm text-foreground">{t('unpair.confirmBody')}</p>

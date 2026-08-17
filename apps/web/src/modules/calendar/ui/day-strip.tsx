@@ -71,7 +71,7 @@ export function DayStrip({
             aria-current={selected ? 'date' : undefined}
             onClick={onSelectDay ? () => onSelectDay(key) : undefined}
             disabled={!onSelectDay}
-            className="flex flex-1 flex-col items-center rounded-xl py-0.5 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none disabled:cursor-default"
+            className="flex flex-1 flex-col items-center rounded-xl py-0.5 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none disabled:cursor-default"
           >
             {/* `dot={true}` is exactly the mark this strip drew by hand: brand
                 on the filled day, `--line` otherwise. A day with nothing on it

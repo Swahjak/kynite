@@ -341,7 +341,7 @@ export function CalendarShell({
                     name: member.displayName,
                   })}
                   onClick={() => toggleMember(member.id)}
-                  className="rounded-full transition-opacity focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
+                  className="rounded-full transition-opacity focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
                 >
                   <MemberFace
                     size="default"

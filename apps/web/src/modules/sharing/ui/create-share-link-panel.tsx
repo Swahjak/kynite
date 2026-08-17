@@ -208,7 +208,7 @@ export function CreateShareLinkPanel({
           <span className="text-body-sm text-ink-secondary">{t('created.onceWarning')}</span>
 
           <code
-            className="break-all rounded-lg border border-border bg-background p-3 text-body-sm"
+            className="break-all rounded-lg bg-background p-3 text-body-sm"
             data-testid="share-url"
           >
             {state.url}

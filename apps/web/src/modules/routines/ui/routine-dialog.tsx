@@ -570,7 +570,7 @@ function RoutineForm({
                 <li
                   key={step.key}
                   data-testid="step-editor-row"
-                  className="flex items-center gap-2 rounded-xl border border-line-subtle bg-card px-2.5 py-2"
+                  className="flex items-center gap-2 rounded-xl bg-surface-container px-2.5 py-2"
                 >
                   <input type="hidden" name="stepId" value={step.id} />
                   {/* The timer posts from the row, never from the menu. The
@@ -660,7 +660,7 @@ function RoutineForm({
             <Button
               type="button"
               variant="ghost"
-              className="mt-2 min-h-12 w-full rounded-xl border-2 border-line-subtle border-dashed text-brand-ink"
+              className="mt-2 min-h-12 w-full rounded-xl border border-line-subtle border-dashed text-brand-ink"
               onClick={() =>
                 setSteps((current) => [
                   ...current,
@@ -682,7 +682,7 @@ function RoutineForm({
           {/* ── Beloning ──────────────────────────────────────────────────── */}
           <div>
             <Overline className="mb-2">{t('form.reward')}</Overline>
-            <div className="flex items-center gap-3 rounded-2xl border border-line-subtle bg-card p-3.5">
+            <div className="flex items-center gap-3 rounded-2xl bg-surface-container p-3.5">
               <Icon name="star" filled size="md" className="text-gold" />
               <span className="flex-1 text-body-sm font-semibold">
                 {t('form.starsPerCompletion')}

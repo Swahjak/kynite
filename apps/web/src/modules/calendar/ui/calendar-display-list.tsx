@@ -118,12 +118,12 @@ function CalendarDisplayRow({
   return (
     <form
       action={formAction}
-      // `Card variant="outlined"`'s shape, written out because the element has
-      // to stay a `<form>` (the card primitive is a `div` and this row submits
-      // its own action). The settings list is a stack of frames on an
-      // already-light ground — the one case `components.md` § Cards still
-      // wants an outline for — at the 24px card radius.
-      className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm"
+      // A nested card: this list is rendered inside `SettingsSection`'s own
+      // `Card`, and a card inside a card takes a tonal fill rather than a
+      // border ("nested cards do not [get a border]"). Written out rather than
+      // using the `Card` primitive because the element has to stay a `<form>`
+      // — the primitive is a `div` and this row submits its own action.
+      className="flex flex-col gap-3 rounded-2xl bg-surface-container p-4"
       data-testid="calendar-display-row"
       data-calendar-id={calendar.id}
     >

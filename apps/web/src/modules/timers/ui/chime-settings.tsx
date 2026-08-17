@@ -46,7 +46,10 @@ export function ChimeSettings({ chime }: { chime: Chime }) {
               'transition-colors duration-200 ease-brand focus-visible:ring-3 focus-visible:ring-ring/50',
               setting.intensity === intensity
                 ? 'bg-primary text-primary-foreground shadow-brand'
-                : 'border-2 border-primary bg-transparent text-brand-ink hover:bg-accent'
+                : // The secondary-button shape: a 1px border and no fill. The
+                  // selected state is the filled one above, so nothing here is
+                  // carrying the 2px emphasis width.
+                  'border border-primary bg-transparent text-brand-ink hover:bg-accent'
             )}
           >
             {t(`chime.${intensity}`)}

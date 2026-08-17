@@ -60,7 +60,7 @@ export function SignInForm({
           <p
             role="alert"
             data-testid="oauth-error"
-            className="border-destructive/20 bg-destructive/10 text-body-sm text-destructive rounded-lg border px-3 py-2"
+            className="bg-destructive/10 text-body-sm text-destructive rounded-lg px-3 py-2"
           >
             {t(`errors.${oauthError}`)}
           </p>

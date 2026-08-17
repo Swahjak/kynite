@@ -88,7 +88,8 @@ export function DeviceList({
           data-testid="device-row"
           data-device-id={entry.id}
           data-revoked={entry.revokedAt !== null}
-          className="flex min-h-12 flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-4 shadow-sm transition-colors duration-200 ease-brand data-[revoked=true]:bg-surface-container data-[revoked=true]:opacity-60 data-[revoked=true]:shadow-none"
+          // Inside `SettingsSection`'s card: tonal fill, no border of its own.
+          className="flex min-h-12 flex-wrap items-center justify-between gap-3 rounded-xl bg-surface-container p-4 transition-colors duration-200 ease-brand data-[revoked=true]:opacity-60"
         >
           <div className="flex min-w-0 flex-col gap-0.5">
             {renamingId === entry.id ? (

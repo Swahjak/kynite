@@ -101,7 +101,7 @@ export function MobileMonthView({
                 data-selected={selected || undefined}
                 aria-current={selected ? 'date' : undefined}
                 onClick={() => setSelectedKey(key)}
-                className="flex h-13 flex-col items-center pt-1 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
+                className="flex h-13 flex-col items-center pt-1 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
               >
                 {/* The shared circle at `md` (32px), two pixels up from the
                     30px this cell drew by hand — seven still fit at 390px with

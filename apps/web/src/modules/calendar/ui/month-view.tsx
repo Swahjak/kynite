@@ -178,7 +178,7 @@ export function MonthView({
                       date: formatDateTime(day, { day: 'numeric', month: 'long' }),
                     })}
                     onClick={() => onOpenDay(key)}
-                    className="self-start rounded-sm pl-3 text-left text-caption text-ink-muted transition-colors hover:text-ink focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
+                    className="self-start rounded-sm pl-3 text-left text-caption text-ink-muted transition-colors hover:text-ink focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
                   >
                     {t('month.more', { count: dayEvents.length - MAX_ROWS_PER_CELL })}
                   </button>

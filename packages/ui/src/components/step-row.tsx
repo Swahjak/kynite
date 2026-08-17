@@ -111,11 +111,15 @@ export function StepRow({
           aria-pressed={done}
           onClick={tap}
           className={cn(
-            'flex min-h-20 w-full items-center gap-3.5 rounded-md border-2 px-4.5 py-4 text-left transition-all duration-200 ease-brand',
+            // No border: the tile only ever renders inside `RoutineCard`'s
+            // expanded grid, and a card nested in a card separates itself with
+            // a tonal fill rather than an outline of its own. The done state
+            // was already a fill; the todo state now is one too.
+            'flex min-h-20 w-full items-center gap-3.5 rounded-md px-4.5 py-4 text-left transition-all duration-200 ease-brand',
             'focus-visible:ring-3 focus-visible:ring-ring/50',
             done
-              ? 'border-cat-green-border bg-cat-green-surface'
-              : 'border-line bg-background hover:bg-surface-container active:scale-[0.99]'
+              ? 'bg-cat-green-surface'
+              : 'bg-surface-container hover:bg-surface-container-high active:scale-[0.99]'
           )}
         >
           {/* A done step is a green check; one still to do is an empty ring.

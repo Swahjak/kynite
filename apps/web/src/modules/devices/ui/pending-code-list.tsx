@@ -48,13 +48,18 @@ export function PendingCodeList({
   return (
     <section className="flex flex-col gap-3">
       <h2 className="label-overline px-1 text-ink-muted">{t('pending.title')}</h2>
-      <ul className="flex flex-col gap-2" data-testid="pending-code-list">
+      {/* One card, hairline dividers — never a stack of separately bordered
+          row-cards. */}
+      <ul
+        className="divide-y divide-line-subtle overflow-hidden rounded-xl border border-border bg-card shadow-sm"
+        data-testid="pending-code-list"
+      >
         {pending.map((entry) => (
           <li
             key={entry.id}
             data-testid="pending-code-row"
             data-pairing-code-id={entry.id}
-            className="flex min-h-12 flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-4 shadow-sm"
+            className="flex min-h-12 flex-wrap items-center justify-between gap-3 p-4"
           >
             <div className="flex flex-col gap-0.5">
               <span className="font-display text-body font-semibold text-ink">

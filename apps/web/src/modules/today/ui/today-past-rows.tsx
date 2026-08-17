@@ -70,8 +70,8 @@ export function TodayPastRows({
           onClick={() => setOpen((previous) => !previous)}
           className={
             header
-              ? 'flex min-w-0 items-center gap-1.5 rounded-lg text-ink-muted transition-colors duration-200 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring'
-              : 'flex items-center gap-2 self-start rounded-lg py-1 pb-3.5 pl-14 text-ink-muted transition-colors duration-200 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring'
+              ? 'flex min-w-0 items-center gap-1.5 rounded-lg text-ink-muted transition-colors duration-200 hover:text-ink focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none'
+              : 'flex items-center gap-2 self-start rounded-lg py-1 pb-3.5 pl-14 text-ink-muted transition-colors duration-200 hover:text-ink focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none'
           }
         >
           <Icon

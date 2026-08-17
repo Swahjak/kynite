@@ -48,7 +48,9 @@ export function RoutineGraduationList({ routines }: { routines: GraduationRoutin
           data-graduated={routine.graduated ? 'true' : 'false'}
         >
           <MediaRow
-            variant="outlined"
+            // The list lives inside `SettingsSection`'s card, so the row gets a
+            // tonal fill rather than a border of its own.
+            variant="tinted"
             title={routine.title}
             meta={<span className="text-caption text-ink-secondary">{routine.ownerName}</span>}
             actions={

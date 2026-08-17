@@ -86,8 +86,11 @@ export function ShareStepButton({
         // M19 phase 2: the 48px hub target and the design system's radius,
         // shared with the read-only twin in `share-board.tsx` so the two shapes
         // differ only in whether they can be pressed.
-        'flex min-h-hub-target w-full items-center gap-3 rounded-xl border border-border px-4 py-3 text-left text-body transition-all duration-200 ease-brand active:scale-[0.99]',
-        isDone ? 'bg-surface-container text-ink-muted' : 'bg-card shadow-sm hover:bg-surface-hover'
+        // Nested inside the routine card: tonal fill, no border of its own.
+        'flex min-h-hub-target w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-body transition-all duration-200 ease-brand active:scale-[0.99]',
+        isDone
+          ? 'bg-surface-container text-ink-muted'
+          : 'bg-surface-container-low hover:bg-surface-hover'
       )}
     >
       <span

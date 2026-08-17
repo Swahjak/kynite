@@ -134,7 +134,7 @@ function AwardForm({ members, onSaved }: { members: QueueMember[]; onSaved: () =
       {/* A white card with the control centred in it (`Beloningen.dc.html`
           r344-348) — the number is the thing being decided, so it sits in the
           middle of its own surface rather than left-aligned against a label. */}
-      <div className="mb-4.5 rounded-2xl border border-line-subtle bg-card p-3.5">
+      <div className="mb-4.5 rounded-2xl bg-surface-container p-3.5">
         {/* The stepper stops at one and has no subtract mode: there is no
             screen in Kynite that takes a star back. */}
         <StarStepper
@@ -169,7 +169,7 @@ function AwardForm({ members, onSaved }: { members: QueueMember[]; onSaved: () =
                 'flex-1 cursor-pointer rounded-4xl py-2 text-center font-display text-body-sm font-bold transition-colors',
                 selected
                   ? 'border-2 border-primary bg-accent text-ink'
-                  : 'border border-line-subtle bg-card text-ink-secondary'
+                  : 'bg-surface-container text-ink-secondary'
               )}
             >
               <input

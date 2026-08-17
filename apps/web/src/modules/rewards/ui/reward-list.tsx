@@ -76,14 +76,16 @@ export async function RewardList({
         </div>
       ) : null}
 
-      <ul className="flex flex-col gap-2">
+      {/* One card, hairline dividers — never a stack of separately bordered
+          row-cards. */}
+      <ul className="divide-y divide-line-subtle overflow-hidden rounded-2xl border border-line-subtle bg-card">
         {rewards.map((reward) => (
           <li
             key={reward.id}
             data-testid="reward-row"
             data-reward-id={reward.id}
             className={cn(
-              'flex items-center gap-2.5 rounded-2xl border border-line-subtle bg-card px-3.5 py-3',
+              'flex items-center gap-2.5 px-3.5 py-3',
               // Dimming, not a badge-only signal: an inactive reward is off the
               // shelf, and the row says so the same quiet way the store does.
               reward.active ? undefined : 'opacity-70'

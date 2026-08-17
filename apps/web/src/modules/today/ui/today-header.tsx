@@ -103,7 +103,7 @@ export async function TodayHeader({
       });
 
   const chevron =
-    'flex size-8 items-center justify-center rounded-4xl text-ink-muted transition-colors duration-200 ease-brand hover:bg-surface-container hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring';
+    'flex size-8 items-center justify-center rounded-4xl text-ink-muted transition-colors duration-200 ease-brand hover:bg-surface-container hover:text-ink focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none';
 
   return (
     // One row, and it stays one row at 390px. It used to be
@@ -201,7 +201,7 @@ export async function TodayHeader({
             <Link
               href={href}
               data-testid="today-day-reset"
-              className="rounded-4xl px-2 font-display text-body-sm font-bold hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+              className="rounded-4xl px-2 font-display text-body-sm font-bold hover:text-primary focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
             >
               {label}
             </Link>

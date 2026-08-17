@@ -123,7 +123,8 @@ async function RoutineCard({
               // as "this is yours, but not now", and it is not theirs.
               <div
                 data-testid="share-step-readonly"
-                className="border-line-subtle bg-surface-container-low text-body flex min-h-hub-target items-center gap-3 rounded-xl border px-4 py-3"
+                // Nested inside the routine card above: tonal fill, no border.
+                className="bg-surface-container-low text-body flex min-h-hub-target items-center gap-3 rounded-xl px-4 py-3"
               >
                 <span
                   aria-hidden
@@ -182,13 +183,15 @@ export async function ShareDayRow({
       {day.events.length === 0 ? (
         <p className="text-ink-muted text-body-sm">{t('dayEmpty')}</p>
       ) : (
-        <ul className="flex flex-col gap-2">
+        // The event-row rule: rows sit inside one card with hairline dividers,
+        // never as separate bordered cards.
+        <ul className="border-border bg-card shadow-sm divide-y divide-line-subtle overflow-hidden rounded-xl border">
           {day.events.map((item) => (
             <li
               key={item.key}
               data-testid="share-event"
               data-busy-only={item.busyOnly ? 'true' : 'false'}
-              className="border-border bg-card shadow-sm flex items-baseline gap-3 rounded-xl border px-4 py-3"
+              className="flex items-baseline gap-3 px-4 py-3"
             >
               <span className="tabular-time text-ink-secondary w-16 shrink-0 text-body-sm">
                 {item.allDay
