@@ -7,29 +7,38 @@ import { Link } from '@/i18n/navigation';
 import { useTodayTab } from './use-today-tab';
 
 /**
- * The board's quick-action grid — the four things somebody walking past the
- * screen actually does, as buttons rather than as a route they have to find.
+ * The wall board's quick-action grid — the four things somebody walking past
+ * the screen actually does, as buttons rather than as a route they have to find.
  *
  * One filled and the rest outlined: starting a timer is the one that happens
  * mid-task, with wet hands, from two steps away. The others are deliberate acts
  * and can afford to be quieter. All of them are 56px tall, because this is a
  * wall device and a thumb aiming from an arm's length away needs the target.
  *
+ * ## Why the wall only, when `TodayTabDag` is one component
+ *
+ * The grid is an answer to something only the wall has: no FAB, no task
+ * quick-add (`task:write` is denied there), no address bar, and a metre of air
+ * between the thumb and the glass. On the phone every one of the four tiles
+ * already has a home — "Nieuw event" is `NewEventFab`, "Taak erbij" and "Timer"
+ * are `TaskList`'s own pills, "Ster geven" is a tab — so a grid there would be
+ * a third copy of the same four buttons on a 390px screen. That is the same
+ * argument that turns the list's pills off on the wall (`showQuickActions`),
+ * pointed the other way; `TodayTabDag` draws exactly one of the two per surface
+ * and never both.
+ *
  * ## Why the grid is often shorter than the design sheet's
  *
- * The sheet draws four tiles on the wall tablet. Three of them are exactly what
+ * The sheet draws four tiles on the wall tablet. Two of them are exactly what
  * the §7 matrix denies a *device* principal: `event:write` and `task:write` are
- * `deny` (the hub deliberately offers no event FAB and no task quick-add), and
- * only `completion:write` is `allow`. So each tile is gated on the permission
- * the action would need, and the wall ends up with the two it may perform —
- * the same rule the rest of the hub follows: offer no write rather than one
- * that would be refused on submit.
- *
- * The parent app, where a signed-in adult is the principal, gets all four.
+ * `deny`, and only `completion:write` is `allow`. So each tile is gated on the
+ * permission the action would need, and the wall ends up with the two it may
+ * perform — the same rule the rest of the hub follows: offer no write rather
+ * than one that would be refused on submit.
  */
 
 export type TodayQuickActionsProps = {
-  /** `/timers` in the parent app, `/hub/timers` on the wall. */
+  /** The surface's own timers route — `/hub/timers` wherever this grid draws. */
   timersHref: string;
   /**
    * "Taak erbij", already resolved by the caller. Same reason as

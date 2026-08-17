@@ -18,8 +18,10 @@ import {
   TodayTabRoutines,
   TodayTabSterren,
   TodayTabs,
+  TodayThemeBanner,
   flowOf,
   loadTodayProgress,
+  resolveTodayTheme,
   type DayReference,
 } from '@/modules/today';
 import { WeatherWidget, getFamilyWeather } from '@/modules/weather';
@@ -125,6 +127,17 @@ export default async function TodayPage({
 
   const nowEventKey = flow.live ? (flow.hero?.key ?? null) : null;
 
+  /**
+   * The day's theme (M26), resolved *here* rather than inside the banner — the
+   * same call `(hub)/hub` makes, for the same reason. The page is the only
+   * place that can act on the answer: on a themed day the banner takes the NU
+   * block's place ("Vandaag met thema's":404 wraps the NU card in
+   * `<sc-if geenThema>`), and on this surface the NU block is a band of the
+   * page rather than of the day panel. Null on the ordinary majority of the
+   * year, which is when the strip below is drawn.
+   */
+  const theme = resolveTodayTheme({ dayKey, isToday, people: data.members });
+
   return (
     <main
       className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col gap-5 p-4 sm:p-6"
@@ -150,13 +163,19 @@ export default async function TodayPage({
           set no location or nothing usable is cached — see `WeatherWidget`. */}
       {weather ? <WeatherWidget view={weather} density="phone" /> : null}
 
-      <TodayNowStrip
-        event={flow.hero}
-        mode={flow.mode}
-        members={data.members}
-        now={reference.now}
-        timeZone={data.timeZone}
-      />
+      {/* Stands down for the banner, exactly as it does inside the wall's first
+          column: the day's headline is one statement, and two full-width
+          statements about the same moment one above the other is the
+          composition neither surface can be read at a glance any more. */}
+      {theme ? null : (
+        <TodayNowStrip
+          event={flow.hero}
+          mode={flow.mode}
+          members={data.members}
+          now={reference.now}
+          timeZone={data.timeZone}
+        />
+      )}
 
       <TodayTabs
         dag={
@@ -169,6 +188,10 @@ export default async function TodayPage({
             isToday={isToday}
             nowEventKey={nowEventKey}
             tasks={tasks}
+            // M26: the same row the wall draws, from the same resolver. It used
+            // to reach only the hub, which is why a phone was quiet through the
+            // whole zomervakantie.
+            banner={theme ? <TodayThemeBanner theme={theme} /> : null}
           />
         }
         personen={

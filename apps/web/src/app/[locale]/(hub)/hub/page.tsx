@@ -15,8 +15,8 @@ import { loadFamilyRoutineTotals } from '@/modules/routines';
 import { loadTodayTasks } from '@/modules/tasks';
 import {
   TodayHeader,
-  TodayHubDag,
   TodayLive,
+  TodayTabDag,
   TodayTabPersonen,
   TodayTabRoutines,
   TodayTabSterren,
@@ -277,11 +277,14 @@ export default async function HubPage({
           defaultTab={defaultTab}
           fill
           dag={
-            /* The wall's two columns: what is happening now and the day as a
-               list, then how the routines and the task list stand.
-               The NU strip lives *inside* the first column here rather than
-               above the tabs — see `TodayHubDag`. */
-            <TodayHubDag
+            /* The same panel `(app)/today` draws, at the wall's scale. The NU
+               strip lives *inside* the first column here rather than above the
+               tabs, and the second column carries the routines and the
+               quick-action grid — all of that is `surface`, which varies
+               presentation only. What a device principal may *do* with it
+               arrives below as data and as already-resolved nodes. */
+            <TodayTabDag
+              surface="hub"
               members={data.members}
               events={data.events}
               timeZone={data.timeZone}

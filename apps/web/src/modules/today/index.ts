@@ -53,7 +53,6 @@ export { KidStatCard, type KidStatCardProps } from './ui/kid-stat-card';
 export { MemberFaces, joinNames, namesOf, participantsOf } from './ui/member-faces';
 export { TodayClock, type TodayClockProps } from './ui/today-clock';
 export { TodayHeader, type TodayHeaderProps } from './ui/today-header';
-export { TodayHubDag, type TodayHubDagProps } from './ui/today-hub-dag';
 export { TodayLive } from './ui/today-live';
 export { TodayThemeBanner, type TodayThemeBannerProps } from './ui/today-theme-banner';
 export { TodayTimeline, type TodayTimelineProps } from './ui/today-timeline';

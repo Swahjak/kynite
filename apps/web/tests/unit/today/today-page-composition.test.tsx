@@ -7,8 +7,9 @@ import { describe, expect, it, vi } from 'vitest';
  * The weather card used to sit *between* the NU strip and the tabs. The design
  * moved it to the top of the phone screen: on a phone the first thing the day
  * answers is "what is it doing outside", because that is what decides the coat
- * before it decides the schedule. The hub's own placement (`TodayHubDag`'s
- * `weather` slot) is a separate composition and is deliberately untouched.
+ * before it decides the schedule. The wall's own placement (`TodayTabDag`'s
+ * `weather` slot, which only `surface="hub"` fills) is a separate composition
+ * and is deliberately untouched.
  *
  * The assertion is on *document order*, not on source order, so it survives a
  * refactor that moves the JSX around as long as what lands in the tree is
@@ -51,6 +52,10 @@ vi.mock('@/modules/tasks', () => ({
 }));
 
 vi.mock('@/modules/today', () => ({
+  // An ordinary day, so the NU strip is drawn and the band order below is the
+  // one this file is about. The themed day is `today-page-theme.test.tsx`.
+  resolveTodayTheme: () => null,
+  TodayThemeBanner: () => <div data-testid="today-theme-banner" />,
   TodayHeader: () => <div data-testid="today-header" />,
   TodayLive: () => null,
   TodayNowStrip: () => <div data-testid="today-now" />,
