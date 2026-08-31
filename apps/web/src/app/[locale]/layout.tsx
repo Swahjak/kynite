@@ -18,6 +18,10 @@ export const metadata: Metadata = {
   // this with its own (§6: two installable surfaces, one service worker).
   manifest: '/manifest.webmanifest',
   applicationName: 'Kynite',
+  // Personal-use deployment, not a public product — every page is
+  // `noindex, nofollow`. The HTTP-header half (`X-Robots-Tag`, belt-and-braces
+  // for a crawler that never parses the body) lives in `src/proxy.ts`.
+  robots: { index: false, follow: false, nocache: true },
   appleWebApp: { capable: true, statusBarStyle: 'default', title: 'Kynite' },
   // iOS ignores the manifest's icons and reads this instead. The SVG is the
   // brand mark itself (`docs/design/assets/logo-icon.svg`); the 96px PNG is the

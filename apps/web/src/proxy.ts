@@ -74,6 +74,18 @@ const SHARE_HEADERS: Record<string, string> = {
 const SAFE_METHODS = new Set(['GET', 'HEAD']);
 
 /**
+ * Personal-use deployment, not a public product: every response — not just
+ * `(share)`/`invite` — gets `X-Robots-Tag: noindex, nofollow`. Header rather
+ * than only the `<meta>` in `[locale]/layout.tsx`, same reasoning as
+ * `SHARE_HEADERS` above — a crawler that never parses the body still reads
+ * this.
+ */
+function noIndex(response: NextResponse): NextResponse {
+  response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+  return response;
+}
+
+/**
  * Optimistic guard: a missing session cookie is turned away here so the tree
  * behind it is never even rendered. Cookie *presence* is not proof of a
  * session — `(app)/layout.tsx` and `requireHubDevice()` re-check against the
@@ -110,12 +122,12 @@ export default function proxy(request: NextRequest): NextResponse {
    */
   if (section === SHARE_SECTION) {
     if (!SAFE_METHODS.has(request.method)) {
-      return new NextResponse(null, { status: 405, headers: { Allow: 'GET, HEAD' } });
+      return noIndex(new NextResponse(null, { status: 405, headers: { Allow: 'GET, HEAD' } }));
     }
 
     const response = intl(request);
     for (const [key, value] of Object.entries(SHARE_HEADERS)) response.headers.set(key, value);
-    return response;
+    return noIndex(response);
   }
 
   /**
@@ -126,7 +138,7 @@ export default function proxy(request: NextRequest): NextResponse {
   if (section === INVITE_SECTION) {
     const response = intl(request);
     for (const [key, value] of Object.entries(SHARE_HEADERS)) response.headers.set(key, value);
-    return response;
+    return noIndex(response);
   }
 
   if (section && PROTECTED_SECTIONS.has(section) && !getSessionCookie(request)) {
@@ -147,7 +159,7 @@ export default function proxy(request: NextRequest): NextResponse {
     if (callbackUrl && callbackUrl !== `/${locale}/sign-in`) {
       url.searchParams.set(CALLBACK_URL_PARAM, callbackUrl);
     }
-    return NextResponse.redirect(url);
+    return noIndex(NextResponse.redirect(url));
   }
 
   if (
@@ -162,10 +174,10 @@ export default function proxy(request: NextRequest): NextResponse {
     const url = request.nextUrl.clone();
     url.pathname = `/${locale}/hub/pair`;
     url.search = '';
-    return NextResponse.redirect(url);
+    return noIndex(NextResponse.redirect(url));
   }
 
-  return intl(request);
+  return noIndex(intl(request));
 }
 
 export const config = {

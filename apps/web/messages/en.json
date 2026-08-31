@@ -123,6 +123,105 @@
       "title": "Start today with a calmer house",
       "body": "Create your family, invite the other parent, and put the tablet on the wall.",
       "button": "Create family"
+    },
+    "footer": {
+      "privacy": "Privacy policy",
+      "terms": "Terms of service"
+    }
+  },
+  "legal": {
+    "back": "Back to Kynite",
+    "updated": "Last updated: {date}",
+    "privacy": {
+      "title": "Privacy policy",
+      "intro": "Kynite is a family organizer built and operated by Peep van Puijenbroek (\"we\", \"us\"). This page explains what personal data Kynite collects, why, and how you can control it.",
+      "sections": [
+        {
+          "heading": "Who is responsible for your data",
+          "body": "Kynite is operated by Peep van Puijenbroek, individually. Questions about your data or this policy can be sent to {email}."
+        },
+        {
+          "heading": "Data we collect",
+          "body": "We collect only what Kynite needs to run your family's calendar and routines:",
+          "items": [
+            "Account data: your name and email address, and a securely hashed password if you sign up with a password.",
+            "Google account data, only if you choose to connect Google: your Google email address and profile name, and the calendar events in the calendars you link.",
+            "Family data you enter yourself: family member names, avatars, colors, routines, rewards and stars.",
+            "Push notification data: if you enable notifications, the browser push subscription endpoint your device gives us.",
+            "Basic technical data: sign-in timestamps and session identifiers needed to keep you signed in securely."
+          ]
+        },
+        {
+          "heading": "Why we use Google's APIs",
+          "body": "When you connect Google, Kynite requests access to your Google Calendar (to read and write events you choose to sync) and your basic profile (to identify the connected account). Kynite's use and transfer of information received from Google APIs adheres to the Google API Services User Data Policy, including the Limited Use requirements. Google data is used only to show and manage your family's calendar inside Kynite — never for advertising, and never sold or shared with third parties."
+        },
+        {
+          "heading": "How we store and protect your data",
+          "body": "Your Google access tokens are encrypted at rest. Passwords are stored as salted hashes, never in plain text. Data is kept in a private database that only the Kynite service can reach."
+        },
+        {
+          "heading": "How long we keep your data",
+          "body": "We keep your account and family data for as long as your account exists. If you disconnect Google, your stored Google tokens are deleted immediately and Kynite stops accessing your calendar. To delete your account and all associated data, contact us at {email}."
+        },
+        {
+          "heading": "Who we share data with",
+          "body": "We do not sell your data. We share it only with the other members of your own family (whatever your family setup shows them) and with Google, solely to sync the calendar events you choose to connect."
+        },
+        {
+          "heading": "Children's data",
+          "body": "A child can be added as a family member with just a name, color and avatar — children do not need their own account, email address or password to use Kynite."
+        },
+        {
+          "heading": "Your rights",
+          "body": "You can ask to see, correct, export or delete the personal data we hold about you at any time by contacting {email}."
+        },
+        {
+          "heading": "Changes to this policy",
+          "body": "If this policy changes materially, we will update the date at the top of this page."
+        }
+      ]
+    },
+    "terms": {
+      "title": "Terms of service",
+      "intro": "These terms govern your use of Kynite, a family organizer operated by Peep van Puijenbroek (\"we\", \"us\"). By creating an account, you agree to these terms.",
+      "sections": [
+        {
+          "heading": "The service",
+          "body": "Kynite lets a household share a calendar, routines and rewards across phones and a wall-mounted display. Some features, such as calendar sync, require connecting a Google account."
+        },
+        {
+          "heading": "Your account",
+          "body": "One adult creates the family and can invite other members. You are responsible for keeping your login credentials confidential and for what happens under your account."
+        },
+        {
+          "heading": "Acceptable use",
+          "body": "Kynite is for organizing your own household. Do not use it to store or share unlawful content, or attempt to disrupt or gain unauthorized access to the service."
+        },
+        {
+          "heading": "Google account connection",
+          "body": "Connecting Google is optional. You can disconnect it at any time in settings, which stops Kynite from accessing your calendar and deletes the stored access tokens."
+        },
+        {
+          "heading": "Availability",
+          "body": "Kynite is provided \"as is\", without warranty of uninterrupted availability. We aim to keep the service reliable but cannot guarantee it will always be error-free."
+        },
+        {
+          "heading": "Liability",
+          "body": "To the extent permitted by law, we are not liable for indirect or consequential damages arising from your use of Kynite, including missed events due to a sync failure."
+        },
+        {
+          "heading": "Ending your account",
+          "body": "You may stop using Kynite and request account deletion at any time by contacting {email}. We may suspend or terminate accounts that violate these terms."
+        },
+        {
+          "heading": "Changes to these terms",
+          "body": "If we change these terms materially, we will update the date at the top of this page."
+        },
+        {
+          "heading": "Governing law",
+          "body": "These terms are governed by the laws of the Netherlands."
+        }
+      ]
     }
   },
   "family": {

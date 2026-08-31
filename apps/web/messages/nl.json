@@ -123,6 +123,105 @@
       "title": "Begin vandaag met een rustiger huis",
       "body": "Maak je gezin aan, nodig de andere ouder uit en hang de tablet aan de muur.",
       "button": "Gezin aanmaken"
+    },
+    "footer": {
+      "privacy": "Privacybeleid",
+      "terms": "Gebruiksvoorwaarden"
+    }
+  },
+  "legal": {
+    "back": "Terug naar Kynite",
+    "updated": "Laatst bijgewerkt: {date}",
+    "privacy": {
+      "title": "Privacybeleid",
+      "intro": "Kynite is een gezinsorganizer, gebouwd en beheerd door Peep van Puijenbroek (\"we\", \"wij\"). Deze pagina legt uit welke persoonsgegevens Kynite verzamelt, waarom, en hoe je dit kunt beheren.",
+      "sections": [
+        {
+          "heading": "Wie verantwoordelijk is voor je gegevens",
+          "body": "Kynite wordt beheerd door Peep van Puijenbroek, als individu. Vragen over je gegevens of dit beleid kun je sturen naar {email}."
+        },
+        {
+          "heading": "Gegevens die we verzamelen",
+          "body": "We verzamelen alleen wat Kynite nodig heeft om de agenda en routines van je gezin te laten werken:",
+          "items": [
+            "Accountgegevens: je naam en e-mailadres, en een veilig gehasht wachtwoord als je je aanmeldt met een wachtwoord.",
+            "Google-accountgegevens, alleen als je ervoor kiest Google te koppelen: je Google-e-mailadres en profielnaam, en de agenda-items in de agenda's die je koppelt.",
+            "Gezinsgegevens die je zelf invoert: namen, avatars, kleuren, routines, beloningen en sterren van gezinsleden.",
+            "Pushmeldingsgegevens: als je meldingen inschakelt, het push-abonnement-endpoint dat je apparaat ons geeft.",
+            "Basale technische gegevens: inlogtijdstippen en sessie-identifiers die nodig zijn om je veilig ingelogd te houden."
+          ]
+        },
+        {
+          "heading": "Waarom we Google's API's gebruiken",
+          "body": "Als je Google koppelt, vraagt Kynite toegang tot je Google Agenda (om agenda-items te lezen en te schrijven die je zelf kiest te synchroniseren) en je basisprofiel (om het gekoppelde account te identificeren). Het gebruik en de doorgifte van informatie uit Google API's door Kynite voldoet aan het Google API Services User Data Policy, inclusief de Limited Use-vereisten. Google-gegevens worden alleen gebruikt om de agenda van je gezin te tonen en beheren binnen Kynite — nooit voor advertenties, en nooit verkocht of gedeeld met derden."
+        },
+        {
+          "heading": "Hoe we je gegevens opslaan en beschermen",
+          "body": "Je Google-toegangstokens worden versleuteld opgeslagen. Wachtwoorden worden opgeslagen als gesalte hashes, nooit in platte tekst. Gegevens staan in een private database die alleen de Kynite-dienst kan bereiken."
+        },
+        {
+          "heading": "Hoe lang we je gegevens bewaren",
+          "body": "We bewaren je account- en gezinsgegevens zolang je account bestaat. Als je Google ontkoppelt, worden je opgeslagen Google-tokens direct verwijderd en stopt Kynite met toegang tot je agenda. Wil je je account en alle bijbehorende gegevens laten verwijderen, neem dan contact op via {email}."
+        },
+        {
+          "heading": "Met wie we gegevens delen",
+          "body": "We verkopen je gegevens niet. We delen ze alleen met de andere leden van je eigen gezin (voor zover je gezinsopstelling dat toont) en met Google, uitsluitend om de agenda-items te synchroniseren die je zelf koppelt."
+        },
+        {
+          "heading": "Gegevens van kinderen",
+          "body": "Een kind kan als gezinslid worden toegevoegd met alleen een naam, kleur en avatar — kinderen hebben geen eigen account, e-mailadres of wachtwoord nodig om Kynite te gebruiken."
+        },
+        {
+          "heading": "Jouw rechten",
+          "body": "Je kunt op elk moment vragen om inzage, correctie, export of verwijdering van de persoonsgegevens die we over je hebben door contact op te nemen via {email}."
+        },
+        {
+          "heading": "Wijzigingen in dit beleid",
+          "body": "Als dit beleid inhoudelijk verandert, werken we de datum bovenaan deze pagina bij."
+        }
+      ]
+    },
+    "terms": {
+      "title": "Gebruiksvoorwaarden",
+      "intro": "Deze voorwaarden gelden voor je gebruik van Kynite, een gezinsorganizer beheerd door Peep van Puijenbroek (\"we\", \"wij\"). Door een account aan te maken ga je akkoord met deze voorwaarden.",
+      "sections": [
+        {
+          "heading": "De dienst",
+          "body": "Kynite laat een huishouden een agenda, routines en beloningen delen op telefoons en een wandscherm. Sommige functies, zoals agendasynchronisatie, vereisen het koppelen van een Google-account."
+        },
+        {
+          "heading": "Je account",
+          "body": "Eén volwassene maakt het gezin aan en kan andere leden uitnodigen. Je bent zelf verantwoordelijk voor het geheimhouden van je inloggegevens en voor wat er onder je account gebeurt."
+        },
+        {
+          "heading": "Toegestaan gebruik",
+          "body": "Kynite is bedoeld om je eigen huishouden te organiseren. Gebruik het niet om onrechtmatige content op te slaan of te delen, of om te proberen de dienst te verstoren of zonder toestemming toegang te krijgen."
+        },
+        {
+          "heading": "Google-accountkoppeling",
+          "body": "Google koppelen is optioneel. Je kunt dit op elk moment ontkoppelen in de instellingen, waarna Kynite geen toegang meer heeft tot je agenda en de opgeslagen toegangstokens worden verwijderd."
+        },
+        {
+          "heading": "Beschikbaarheid",
+          "body": "Kynite wordt geleverd \"zoals het is\", zonder garantie op ononderbroken beschikbaarheid. We streven naar een betrouwbare dienst, maar kunnen niet garanderen dat deze altijd foutloos is."
+        },
+        {
+          "heading": "Aansprakelijkheid",
+          "body": "Voor zover wettelijk toegestaan zijn we niet aansprakelijk voor indirecte of gevolgschade door je gebruik van Kynite, inclusief gemiste afspraken door een synchronisatiefout."
+        },
+        {
+          "heading": "Je account beëindigen",
+          "body": "Je kunt op elk moment stoppen met Kynite en verwijdering van je account aanvragen door contact op te nemen via {email}. We kunnen accounts die deze voorwaarden schenden opschorten of beëindigen."
+        },
+        {
+          "heading": "Wijzigingen in deze voorwaarden",
+          "body": "Als we deze voorwaarden inhoudelijk wijzigen, werken we de datum bovenaan deze pagina bij."
+        },
+        {
+          "heading": "Toepasselijk recht",
+          "body": "Op deze voorwaarden is Nederlands recht van toepassing."
+        }
+      ]
     }
   },
   "family": {

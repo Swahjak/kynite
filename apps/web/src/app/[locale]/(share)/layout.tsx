@@ -17,13 +17,15 @@ import type { Metadata } from 'next';
  *  3. **No navigation.** There is nowhere else in the app this visitor may go.
  *     A nav bar on a share page is an invitation to a sign-in wall.
  *
- * `robots: noindex, nofollow` is the metadata half of the criterion; the HTTP
- * half (`X-Robots-Tag` and `Referrer-Policy: no-referrer`) is set in
+ * `robots: noindex, nofollow` is now set app-wide in `[locale]/layout.tsx`
+ * (personal-use deployment); this layout still needs `referrer: no-referrer`
+ * of its own — the token is in the path, so a leaked `Referer` is a leaked
+ * bearer credential specifically for this tree. The HTTP half of both
+ * (`X-Robots-Tag` and `Referrer-Policy: no-referrer`) is set in
  * `src/proxy.ts`, because a `<meta>` tag does not reach a crawler that only
  * looks at headers and does nothing at all about a leaked `Referer`.
  */
 export const metadata: Metadata = {
-  robots: { index: false, follow: false, nocache: true },
   referrer: 'no-referrer',
 };
 

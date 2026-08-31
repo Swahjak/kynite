@@ -185,6 +185,14 @@ export default async function MarketingHomePage({
         <div className="text-ink-muted text-body-sm mx-auto flex w-full max-w-6xl flex-col items-center gap-2 px-6 text-center">
           <BrandMark variant="icon" className="h-7" />
           <p>{tCommon('tagline')}</p>
+          <nav className="mt-2 flex items-center gap-4">
+            <Link href="/privacy" className="hover:text-ink-secondary">
+              {t('footer.privacy')}
+            </Link>
+            <Link href="/terms" className="hover:text-ink-secondary">
+              {t('footer.terms')}
+            </Link>
+          </nav>
         </div>
       </footer>
     </div>
