@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { OfflineIndicator } from '@/components/offline';
 import { DeviceSessionWatcher } from './device-session-watcher';
+import { FullyLauncherButton } from './fully-launcher-button';
 import { HubRail } from './hub-rail';
 import { HubSettings } from './hub-settings';
 import { IdleReturn } from './idle-return';
@@ -142,6 +143,7 @@ export function KioskShell({
             footer={
               <>
                 <OfflineIndicator />
+                <FullyLauncherButton />
                 <HubSettings
                   deviceName={device.name}
                   mode={mode}

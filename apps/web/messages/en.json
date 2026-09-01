@@ -1284,6 +1284,9 @@
       "open": "Screen settings",
       "title": "Screen settings",
       "deviceName": "Screen: {name}",
+      "launcher": {
+        "open": "Apps"
+      },
       "theme": {
         "title": "Appearance",
         "auto": "Automatic",

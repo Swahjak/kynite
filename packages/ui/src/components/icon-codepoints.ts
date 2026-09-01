@@ -12,6 +12,7 @@ export const ICON_CODEPOINTS = {
   ac_unit: '\ueb3b',
   add: '\ue145',
   add_task: '\uf23a',
+  apps: '\ue5c3',
   arrow_downward: '\ue5db',
   arrow_forward: '\ue5c8',
   arrow_upward: '\ue5d8',

@@ -3,6 +3,7 @@
     "ac_unit",
     "add",
     "add_task",
+    "apps",
     "arrow_downward",
     "arrow_forward",
     "arrow_upward",
@@ -75,5 +76,5 @@
     "work",
     "workspace_premium"
   ],
-  "bytes": 65288
+  "bytes": 65752
 }

@@ -64,10 +64,14 @@ const CODEPOINTS = join(root, 'scripts/material-symbols.codepoints');
  * M19 made it the only one — `components/app-nav/` no longer ships lucide — so
  * the budget absorbs what the second library used to carry, and the 16 glyphs
  * the stitch shell needs took the subset to 49.3 KB with no headroom left for
- * a phase-2 page. 64 KB is still an order of magnitude under the ~26 KB of
+ * a phase-2 page. 64 KB was still an order of magnitude under the ~26 KB of
  * lucide ESM this replaced plus the old 50 KB subset.
+ *
+ * Bumped to 66 KB for the wall-hub launcher button's `apps` glyph (opens
+ * Fully Kiosk Browser's Universal Launcher) — the 64 KB ceiling had 216 bytes
+ * of headroom left and that one glyph didn't fit under it.
  */
-export const BUDGET_BYTES = 64 * 1024;
+export const BUDGET_BYTES = 66 * 1024;
 
 /**
  * Icons named somewhere a static scan cannot see them as `<Icon name="…">`.

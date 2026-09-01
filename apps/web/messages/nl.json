@@ -1284,6 +1284,9 @@
       "open": "Scherminstellingen",
       "title": "Scherminstellingen",
       "deviceName": "Scherm: {name}",
+      "launcher": {
+        "open": "Apps"
+      },
       "theme": {
         "title": "Weergave",
         "auto": "Automatisch",
