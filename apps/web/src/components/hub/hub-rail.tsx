@@ -21,9 +21,11 @@ import { Link, usePathname } from '@/i18n/navigation';
  * child on the board (`ChildLauncher`), because "whose routines" is a question
  * a nav rail cannot answer and a face can.
  *
- * What it still is not: a browser. No back button, no sign-out, no settings
- * (that lives in the shell's settings corner, one tap away and out of the
- * room's eyeline), which `e2e/tests/hub/kiosk-audit.spec.ts` asserts by name.
+ * What it still is not: a browser. No back button, no sign-out. Settings
+ * *does* live here now (M20 pulled it down from the header strip it used to
+ * share with the device name — F8 below), pinned to the rail's own foot by
+ * the `footer` slot: one tap away, and still out of the room's eyeline
+ * because it is the same discreet icon it always was, just moved.
  *
  * ## D1: the design's rail, not the design's destinations
  *
@@ -43,7 +45,11 @@ import { Link, usePathname } from '@/i18n/navigation';
  * rather than through a nav rail that cannot name whose.
  *
  * The face at the foot of the sheet's rail is out for the same reason: there
- * is nobody signed in at a kiosk by construction.
+ * is nobody signed in at a kiosk by construction — what sits at the foot
+ * instead (M20) is the settings trigger and the offline indicator, handed in
+ * through `footer` rather than owned here, because both are composed in
+ * `KioskShell` from state (`mode`, `theme`, `chimeSettings`) the rail has no
+ * reason to know about.
  */
 
 type RailItem = {
@@ -63,7 +69,7 @@ function isActive(pathname: string, href: string): boolean {
   return href === '/hub' ? pathname === '/hub' : pathname.startsWith(href);
 }
 
-export function HubRail() {
+export function HubRail({ footer }: { footer?: React.ReactNode }) {
   const t = useTranslations('hub.nav');
   const pathname = usePathname();
 
@@ -116,6 +122,13 @@ export function HubRail() {
           </Link>
         );
       })}
+
+      {footer ? (
+        // Pinned to the rail's foot, same width/centering as the tiles above
+        // it — the D1 comment's "one tap away, out of the room's eyeline"
+        // face just moved down here instead of disappearing.
+        <div className="mt-auto flex w-full flex-col items-center gap-1.5">{footer}</div>
+      ) : null}
     </nav>
   );
 }

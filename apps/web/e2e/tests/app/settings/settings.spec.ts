@@ -243,7 +243,12 @@ test.describe('hub display preferences', () => {
     // default above.
     await expect(hub.getByTestId('pill-tab-dag')).toHaveAttribute('aria-selected', 'true');
     await expect(hub.getByTestId('today-tab-dag')).toBeVisible();
-    await expect(hub.getByTestId('hub-device-name')).toContainText(device.deviceName);
+    // M20: the device name no longer sits in the chrome — the settings sheet
+    // still carries it, and this is still the same device session (no
+    // re-pair happened, just a reload).
+    await hub.getByTestId('hub-settings-trigger').click();
+    await expect(hub.getByTestId('hub-settings')).toContainText(device.deviceName);
+    await hub.keyboard.press('Escape');
 
     await kiosk.close();
   });

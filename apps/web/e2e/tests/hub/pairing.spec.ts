@@ -52,7 +52,12 @@ test.describe('device pairing', () => {
 
     await hub.waitForURL(/\/nl\/hub$/);
     await expect(hub.getByTestId('hub-board')).toBeVisible();
-    await expect(hub.getByTestId('hub-device-name')).toContainText('Keuken');
+    // M20: the device name no longer sits in the chrome — it still shows up
+    // in the settings sheet (`hub-settings`), which is the confirmation that
+    // this tablet redeemed the right code.
+    await hub.getByTestId('hub-settings-trigger').click();
+    await expect(hub.getByTestId('hub-settings')).toContainText('Keuken');
+    await hub.keyboard.press('Escape');
 
     // The credential is httpOnly, so the page cannot read it — which is the
     // point, and is asserted rather than assumed.

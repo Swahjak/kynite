@@ -2,7 +2,6 @@
 
 import { useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useTranslations } from 'next-intl';
 import { OfflineIndicator } from '@/components/offline';
 import { DeviceSessionWatcher } from './device-session-watcher';
 import { HubRail } from './hub-rail';
@@ -19,13 +18,18 @@ import { useHubTheme } from './use-hub-theme';
  * gave it; the M06 review flagged that it "reuses the app shell", light-theme
  * only. This is the replacement, and it is deliberately almost nothing:
  *
- *  - **fullscreen, no chrome.** `h-dvh overflow-hidden` and a single fixed
- *    header strip. There is no sign-out and no back button — a wall tablet in
- *    `display: fullscreen` (public/hub.webmanifest) has no browser UI to fall
- *    back on, so anything not drawn here does not exist. M19 adds the one
- *    exception that sentence always implied: three destinations in a left rail
- *    (`HubRail`), because "not reachable by URL" was making the store, the
- *    timers and every child's routines unreachable *at all*.
+ *  - **fullscreen, no chrome.** `h-dvh overflow-hidden`. There is no sign-out
+ *    and no back button — a wall tablet in `display: fullscreen`
+ *    (public/hub.webmanifest) has no browser UI to fall back on, so anything
+ *    not drawn here does not exist. M19 adds the one exception that sentence
+ *    always implied: three destinations in a left rail (`HubRail`), because
+ *    "not reachable by URL" was making the store, the timers and every
+ *    child's routines unreachable *at all*. A paired hub has no header strip
+ *    either (M20) — the rail carries the brand, the offline indicator and
+ *    settings now sit in the rail's own footer, and the device name was
+ *    dropped outright (nobody standing at the wall needs to be told which
+ *    wall they are standing at). The header survives only for the pair
+ *    screen, which has no rail to carry the brand for it.
  *  - **it comes home by itself.** `IdleReturn` — a hub left on one child's
  *    screen returns to the board rather than showing the household one
  *    person's steps all evening.
@@ -79,7 +83,6 @@ export function KioskShell({
    */
   device: { id: string; name: string } | null;
 }) {
-  const t = useTranslations('devices.hubSettings');
   // `?theme=light|dark` pins the board, the same trick `/dev/design` uses and
   // for the same reason: a screenshot of a surface that decides its own colours
   // from the wall clock is not a regression test. Rendering only — it is not
@@ -130,31 +133,15 @@ export function KioskShell({
       {device ? <IdleReturn /> : null}
 
       <div className="flex min-h-0 flex-1">
-        {/* The rail is the paired hub's only navigation. A tablet that has not
-          been paired has exactly one screen and nowhere to go. */}
-        {device ? <HubRail /> : null}
-
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-          {/* M19 review (F8): the rail, this strip and the child tabs together
-              added ~104px of chrome to an 800px-tall wall, which pushed the
-              routines and timers screens into an internal scroll — the one
-              thing a kiosk must not do, because there is no scrollbar and no
-              hint that anything is below the fold. The strip's own padding is
-              the cheapest of that back: it holds a 48px control and a name, and
-              16px above it was decoration. */}
-          <header className="flex shrink-0 items-center justify-between gap-4 px-6 py-2">
-            <div className="flex items-center gap-4">
-              {brand}
-              {device ? (
-                <span className="text-body-lg text-ink-secondary" data-testid="hub-device-name">
-                  {t('deviceName', { name: device.name })}
-                </span>
-              ) : null}
-            </div>
-
-            <div className="flex items-center gap-2">
-              <OfflineIndicator />
-              {device ? (
+        {/* The rail is the paired hub's only navigation, and — since M20 — its
+          settings corner too (`footer`). A tablet that has not been paired has
+          exactly one screen, nowhere to go and nothing of its own to
+          configure yet, so it gets neither. */}
+        {device ? (
+          <HubRail
+            footer={
+              <>
+                <OfflineIndicator />
                 <HubSettings
                   deviceName={device.name}
                   mode={mode}
@@ -162,9 +149,24 @@ export function KioskShell({
                   onModeChange={setMode}
                   chimeSettings={chimeSettings}
                 />
-              ) : null}
-            </div>
-          </header>
+              </>
+            }
+          />
+        ) : null}
+
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+          {device ? null : (
+            // M20 review (F8 again): the header used to carry the device name,
+            // the offline indicator and settings for every paired hub — all
+            // three now live in the rail (name: gone outright, the rail's
+            // brand tile already says what this screen is; indicator and
+            // settings: its footer). A paired hub renders no header at all,
+            // reclaiming the ~40px strip whole. The one surface that still
+            // needs it is the pair screen: it has no rail (nothing to
+            // navigate to before pairing) and nothing else on the page says
+            // what app this is, so the brand mark keeps a home here.
+            <header className="flex shrink-0 items-center gap-4 px-6 py-2">{brand}</header>
+          )}
 
           <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
         </div>
