@@ -26,6 +26,7 @@ export {
   DeviceSessionWatcher,
 } from './device-session-watcher';
 
+export { AmbientClock, type AmbientClockProps } from './ambient-clock';
 export { ChildLauncher, type HubChild } from './child-launcher';
 export { ChildTabs } from './child-tabs';
 export { HubRail } from './hub-rail';
