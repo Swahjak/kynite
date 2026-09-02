@@ -49,11 +49,25 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
   const state = verifyOAuthState(params.get('state'), nonce);
   const code = params.get('code');
-  if (!state || !code) return fail('invalidState');
+  if (!state || !code) {
+    console.warn('[google] oauth callback rejected', {
+      reason: !code
+        ? 'missing_code'
+        : !params.get('state')
+          ? 'missing_state_param'
+          : !nonce
+            ? 'missing_nonce_cookie'
+            : 'state_verification_failed',
+      hadStateParam: Boolean(params.get('state')),
+      hadNonceCookie: Boolean(nonce),
+    });
+    return fail('invalidState');
+  }
 
   const principal = await getPrincipal();
   if (!principal || principal.kind !== 'member') return redirectTo(`/${locale}/sign-in`);
   if (principal.familyId !== state.familyId || principal.memberId !== state.memberId) {
+    console.warn('[google] oauth callback rejected', { reason: 'principal_mismatch' });
     return fail('invalidState');
   }
 
