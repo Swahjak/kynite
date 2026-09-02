@@ -157,6 +157,17 @@ describe('service worker strategy', () => {
       expect(isNeverCached('/api/webhooks/google-calendar')).toBe(true);
     });
 
+    it('leaves the Google OAuth link flow alone', () => {
+      // Redirects and `Set-Cookie` (the nonce cookie, §5) must never be
+      // answered from Cache Storage.
+      expect(isNeverCached('/api/google/oauth/start')).toBe(true);
+      expect(isNeverCached('/api/google/oauth/callback')).toBe(true);
+      expect(strategyFor({ url: '/api/google/oauth/callback', destination: '' })).toBe(
+        'network-only'
+      );
+      expect(isDataRequest('/api/google/oauth/callback')).toBe(false);
+    });
+
     it('leaves the share completion endpoint alone — B-1', () => {
       expect(isNeverCached('/api/share/completions')).toBe(true);
       expect(strategyFor({ url: '/api/share/completions', destination: '' })).toBe('network-only');

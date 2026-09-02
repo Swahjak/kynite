@@ -71,6 +71,26 @@ export const WEBHOOK_PATH = '/api/webhooks/google-calendar';
  */
 export const OAUTH_NONCE_COOKIE = 'kynite_google_oauth';
 
+/**
+ * The nonce cookie holds a *set*, not a single value — a duplicated
+ * `/api/google/oauth/start` request (double-tapped button, retried fetch) or
+ * two flows started for two members in the same browser must not clobber
+ * each other's nonce. Bounded to the newest few so the cookie cannot grow
+ * without limit; the 15-minute `maxAge` already bounds how long a stale
+ * nonce can matter.
+ */
+export const OAUTH_NONCE_MAX = 4;
+
+/** `.`-delimited: every nonce is base64url, so it never contains `.`. */
+export function encodeOAuthNonces(nonces: string[]): string {
+  return nonces.slice(-OAUTH_NONCE_MAX).join('.');
+}
+
+export function decodeOAuthNonces(value: string | null | undefined): string[] {
+  if (!value) return [];
+  return value.split('.').filter(Boolean);
+}
+
 export type GoogleConfig = {
   clientId: string;
   clientSecret: string;

@@ -102,13 +102,21 @@ export function createOAuthState(
   return { state: `${encoded}.${sign(encoded)}`, nonce };
 }
 
-/** Returns the state only when the signature, the TTL and the nonce all hold. */
+/**
+ * Returns the state only when the signature, the TTL and the nonce all hold.
+ *
+ * `cookieNonces` is the *set* currently held in the nonce cookie (start.ts
+ * appends rather than overwrites, keeping the newest few — see
+ * `OAUTH_NONCE_COOKIE`), so two flows started in quick succession — a
+ * double-tapped "link Google" button, or a duplicated request — each keep
+ * their own nonce alive and both verify. Membership, not equality.
+ */
 export function verifyOAuthState(
   state: string | null,
-  cookieNonce: string | null,
+  cookieNonces: string[],
   now: number = Date.now()
 ): OAuthState | null {
-  if (!state || !cookieNonce) return null;
+  if (!state || cookieNonces.length === 0) return null;
 
   const [encoded, signature] = state.split('.');
   if (!encoded || !signature) return null;
@@ -126,7 +134,7 @@ export function verifyOAuthState(
 
   if (!parsed.familyId || !parsed.memberId || !parsed.nonce) return null;
   if (!parsed.expiresAt || parsed.expiresAt < now) return null;
-  if (parsed.nonce !== cookieNonce) return null;
+  if (!cookieNonces.includes(parsed.nonce)) return null;
 
   return parsed;
 }

@@ -6,6 +6,8 @@ import {
   OAUTH_NONCE_COOKIE,
   authorizationUrl,
   createOAuthState,
+  decodeOAuthNonces,
+  encodeOAuthNonces,
   isGoogleConfigured,
   isOAuthReturnTo,
 } from '@/modules/google';
@@ -72,7 +74,13 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   const { state, nonce } = createOAuthState(principal.familyId, principal.memberId, { returnTo });
 
   const store = await cookies();
-  store.set(OAUTH_NONCE_COOKIE, nonce, {
+  // A *set* of nonces, not one value: a duplicated start request or a second
+  // flow started before the first completes must not overwrite the nonce the
+  // other one needs — that race is what produced `state_verification_failed`
+  // immediately followed by `missing_nonce_cookie` in production. Keep only
+  // the newest few; the 15-minute maxAge already bounds the risk.
+  const existing = decodeOAuthNonces(store.get(OAUTH_NONCE_COOKIE)?.value);
+  store.set(OAUTH_NONCE_COOKIE, encodeOAuthNonces([...existing, nonce]), {
     httpOnly: true,
     sameSite: 'lax',
     secure: request.nextUrl.protocol === 'https:',

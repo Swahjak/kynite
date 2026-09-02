@@ -142,6 +142,9 @@ export function isNeverCached(url: URL | string): boolean {
     path.startsWith('/api/auth') ||
     path.startsWith('/api/push') ||
     path.startsWith('/api/webhooks') ||
+    // The Google OAuth link/relink flow: redirects and `Set-Cookie` (the
+    // nonce cookie, §5), never a candidate for Cache Storage.
+    path.startsWith('/api/google/oauth') ||
     // The contributor write a share link posts to (§7). Caching it would be
     // harmless in itself — it is a POST, never matched by a GET-keyed cache —
     // but it belongs on this list on the same principle as the rest: nothing

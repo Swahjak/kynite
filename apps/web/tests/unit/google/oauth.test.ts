@@ -61,7 +61,7 @@ describe('authorizationUrl', () => {
 describe('signed OAuth state', () => {
   it('round-trips family and member', () => {
     const { state, nonce } = createOAuthState(FAMILY, MEMBER);
-    expect(verifyOAuthState(state, nonce)).toMatchObject({ familyId: FAMILY, memberId: MEMBER });
+    expect(verifyOAuthState(state, [nonce])).toMatchObject({ familyId: FAMILY, memberId: MEMBER });
   });
 
   it('rejects a tampered payload', () => {
@@ -71,33 +71,54 @@ describe('signed OAuth state', () => {
       JSON.stringify({ familyId: 'other', memberId: MEMBER, nonce, expiresAt: Date.now() + 1000 })
     ).toString('base64url');
 
-    expect(verifyOAuthState(`${forged}.${signature}`, nonce)).toBeNull();
+    expect(verifyOAuthState(`${forged}.${signature}`, [nonce])).toBeNull();
     expect(payload).not.toBe(forged);
   });
 
   it('rejects a state whose nonce cookie does not match (cross-site injection)', () => {
     const { state } = createOAuthState(FAMILY, MEMBER);
-    expect(verifyOAuthState(state, 'someone-elses-nonce')).toBeNull();
-    expect(verifyOAuthState(state, null)).toBeNull();
+    expect(verifyOAuthState(state, ['someone-elses-nonce'])).toBeNull();
+    expect(verifyOAuthState(state, [])).toBeNull();
   });
 
   it('expires', () => {
     const now = Date.now();
     const { state, nonce } = createOAuthState(FAMILY, MEMBER, { now });
-    expect(verifyOAuthState(state, nonce, now + 16 * 60 * 1000)).toBeNull();
+    expect(verifyOAuthState(state, [nonce], now + 16 * 60 * 1000)).toBeNull();
   });
 
   it('round-trips the return target, and omits it when unset (M14)', () => {
     const plain = createOAuthState(FAMILY, MEMBER);
-    expect(verifyOAuthState(plain.state, plain.nonce)?.returnTo).toBeUndefined();
+    expect(verifyOAuthState(plain.state, [plain.nonce])?.returnTo).toBeUndefined();
 
     const onboarding = createOAuthState(FAMILY, MEMBER, { returnTo: 'onboarding' });
-    expect(verifyOAuthState(onboarding.state, onboarding.nonce)?.returnTo).toBe('onboarding');
+    expect(verifyOAuthState(onboarding.state, [onboarding.nonce])?.returnTo).toBe('onboarding');
   });
 
   it('rejects garbage', () => {
-    expect(verifyOAuthState('nonsense', 'nonce')).toBeNull();
-    expect(verifyOAuthState(null, 'nonce')).toBeNull();
+    expect(verifyOAuthState('nonsense', ['nonce'])).toBeNull();
+    expect(verifyOAuthState(null, ['nonce'])).toBeNull();
+  });
+
+  it('verifies either of two interleaved flows against the shared nonce set', () => {
+    // Reproduces the production race: two starts (a duplicated request, or a
+    // second flow begun before the first completes) each mint a nonce, and
+    // the cookie ends up holding both. Either callback must still verify —
+    // membership, not equality with a single spent value.
+    const first = createOAuthState(FAMILY, MEMBER);
+    const second = createOAuthState(FAMILY, MEMBER);
+    const cookieNonces = [first.nonce, second.nonce];
+
+    expect(verifyOAuthState(first.state, cookieNonces)).toMatchObject({
+      familyId: FAMILY,
+      memberId: MEMBER,
+      nonce: first.nonce,
+    });
+    expect(verifyOAuthState(second.state, cookieNonces)).toMatchObject({
+      familyId: FAMILY,
+      memberId: MEMBER,
+      nonce: second.nonce,
+    });
   });
 });
 

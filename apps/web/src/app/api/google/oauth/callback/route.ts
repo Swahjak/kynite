@@ -5,6 +5,8 @@ import { getPrincipal } from '@/modules/family';
 import {
   OAUTH_NONCE_COOKIE,
   bootstrapAccount,
+  decodeOAuthNonces,
+  encodeOAuthNonces,
   exchangeCode,
   fetchIdentity,
   isGoogleConfigured,
@@ -39,15 +41,19 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     redirectTo(settings(`?error=${encodeURIComponent(reason)}`));
 
   const store = await cookies();
-  const nonce = store.get(OAUTH_NONCE_COOKIE)?.value ?? null;
-  // Single-use: whatever happens below, this nonce is spent.
-  store.delete(OAUTH_NONCE_COOKIE);
+  // A *set* of nonces (see `start/route.ts`), so a concurrent second flow's
+  // nonce survives this one's callback. Single-use per nonce, not per
+  // cookie: on success only the matched nonce is removed below; on failure
+  // the cookie is left untouched entirely — a failed attempt must not spend
+  // a nonce a genuine concurrent attempt still needs, and the 15-minute TTL
+  // already bounds how long a stale nonce can matter.
+  const nonces = decodeOAuthNonces(store.get(OAUTH_NONCE_COOKIE)?.value);
 
   const params = request.nextUrl.searchParams;
   if (params.get('error')) return fail('consentDenied');
   if (!isGoogleConfigured()) return fail('notConfigured');
 
-  const state = verifyOAuthState(params.get('state'), nonce);
+  const state = verifyOAuthState(params.get('state'), nonces);
   const code = params.get('code');
   if (!state || !code) {
     console.warn('[google] oauth callback rejected', {
@@ -55,13 +61,28 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         ? 'missing_code'
         : !params.get('state')
           ? 'missing_state_param'
-          : !nonce
+          : nonces.length === 0
             ? 'missing_nonce_cookie'
             : 'state_verification_failed',
       hadStateParam: Boolean(params.get('state')),
-      hadNonceCookie: Boolean(nonce),
+      nonceCount: nonces.length,
     });
     return fail('invalidState');
+  }
+
+  // Spend only the nonce this callback consumed; rewrite (or clear) the
+  // cookie so a concurrent second flow keeps its own nonce alive.
+  const remaining = nonces.filter((candidate) => candidate !== state.nonce);
+  if (remaining.length === 0) {
+    store.delete(OAUTH_NONCE_COOKIE);
+  } else {
+    store.set(OAUTH_NONCE_COOKIE, encodeOAuthNonces(remaining), {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: request.nextUrl.protocol === 'https:',
+      path: '/',
+      maxAge: 15 * 60,
+    });
   }
 
   const principal = await getPrincipal();
