@@ -1287,6 +1287,7 @@
       "launcher": {
         "open": "Apps"
       },
+      "googleHome": "Google Home",
       "theme": {
         "title": "Weergave",
         "auto": "Automatisch",

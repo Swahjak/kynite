@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { OfflineIndicator } from '@/components/offline';
 import { DeviceSessionWatcher } from './device-session-watcher';
-import { FullyLauncherButton } from './fully-launcher-button';
+import { FullyLauncherButton, GoogleHomeButton } from './fully-buttons';
 import { HubRail } from './hub-rail';
 import { HubSettings } from './hub-settings';
 import { IdleReturn } from './idle-return';
@@ -143,6 +143,7 @@ export function KioskShell({
             footer={
               <>
                 <OfflineIndicator />
+                <GoogleHomeButton />
                 <FullyLauncherButton />
                 <HubSettings
                   deviceName={device.name}
