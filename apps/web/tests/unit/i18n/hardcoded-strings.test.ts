@@ -71,6 +71,9 @@ const EXCLUDED_FILES = new Set([
   // between the client and `/api/events`, not copy.
   'src/components/realtime/echo.ts',
   'src/components/realtime/outbox.ts',
+  // MCP tool `description` fields: protocol metadata read by an MCP client
+  // (Claude Desktop etc.), not user-facing UI copy a family member sees.
+  'src/app/api/mcp/route.ts',
 ]);
 
 /** JSX attributes whose string value is copy a person reads. */

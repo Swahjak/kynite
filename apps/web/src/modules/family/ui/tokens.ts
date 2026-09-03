@@ -11,47 +11,55 @@ import type { MemberColor } from '../schema';
  */
 export const MEMBER_COLOR_CLASSES: Record<
   MemberColor,
-  { dot: string; surface: string; ring: string }
+  { dot: string; surface: string; ring: string; border: string }
 > = {
   blue: {
     dot: 'bg-cat-blue-solid',
     surface: 'bg-cat-blue-surface text-cat-blue-fg',
     ring: 'ring-cat-blue-solid',
+    border: 'border-cat-blue-solid',
   },
   purple: {
     dot: 'bg-cat-purple-solid',
     surface: 'bg-cat-purple-surface text-cat-purple-fg',
     ring: 'ring-cat-purple-solid',
+    border: 'border-cat-purple-solid',
   },
   orange: {
     dot: 'bg-cat-orange-solid',
     surface: 'bg-cat-orange-surface text-cat-orange-fg',
     ring: 'ring-cat-orange-solid',
+    border: 'border-cat-orange-solid',
   },
   green: {
     dot: 'bg-cat-green-solid',
     surface: 'bg-cat-green-surface text-cat-green-fg',
     ring: 'ring-cat-green-solid',
+    border: 'border-cat-green-solid',
   },
   red: {
     dot: 'bg-cat-red-solid',
     surface: 'bg-cat-red-surface text-cat-red-fg',
     ring: 'ring-cat-red-solid',
+    border: 'border-cat-red-solid',
   },
   yellow: {
     dot: 'bg-cat-yellow-solid',
     surface: 'bg-cat-yellow-surface text-cat-yellow-fg',
     ring: 'ring-cat-yellow-solid',
+    border: 'border-cat-yellow-solid',
   },
   pink: {
     dot: 'bg-cat-pink-solid',
     surface: 'bg-cat-pink-surface text-cat-pink-fg',
     ring: 'ring-cat-pink-solid',
+    border: 'border-cat-pink-solid',
   },
   teal: {
     dot: 'bg-cat-teal-solid',
     surface: 'bg-cat-teal-surface text-cat-teal-fg',
     ring: 'ring-cat-teal-solid',
+    border: 'border-cat-teal-solid',
   },
 };
 

@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Poppins:wght@400;500;600;700&display=swap"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
+<style>
+  body{margin:0;-webkit-font-smoothing:antialiased;}
+  .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;vertical-align:middle;}
+  .tnum{font-variant-numeric:tabular-nums;}
+  a{color:#5d5fef;}
+  a:hover{color:#4547c9;}
+  .noscroll::-webkit-scrollbar{width:0;height:0;}
+  .noscroll{scrollbar-width:none;}
+  @keyframes kyn-pop{0%{transform:scale(0.9);}60%{transform:scale(1.06);}100%{transform:scale(1);}}
+  @keyframes kyn-shimmer{0%{background-position:-120px 0;}100%{background-position:220px 0;}}
+  @keyframes kyn-spark{0%,100%{transform:translateY(0) scale(1);opacity:0.85;}50%{transform:translateY(-3px) scale(1.12);opacity:1;}}
+  .kyn-pop{animation:kyn-pop 260ms ease-out;}
+  .kyn-shimmer{background-image:linear-gradient(100deg,rgba(255,255,255,0) 0%,rgba(255,255,255,0.65) 45%,rgba(255,255,255,0) 90%);background-repeat:no-repeat;background-size:120px 100%;animation:kyn-shimmer 2.4s linear infinite;}
+  .kyn-spark{animation:kyn-spark 2.2s ease-in-out infinite;}
+  @media (prefers-reduced-motion: reduce){.kyn-pop,.kyn-shimmer,.kyn-spark{animation:none;}}
+</style>
+</helmet>
+
+<div style="background:#eceae4;min-height:100vh;font-family:'Poppins',sans-serif;color:#191c1d;padding:36px 40px 80px;">
+
+  <div style="margin-bottom:28px;">
+    <h1 style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:34px;line-height:1.1;letter-spacing:-0.02em;margin:0 0 6px;">Taken &amp; routines</h1>
+    <p style="margin:0;font-size:14px;color:#434656;max-width:780px;">Wandtablet 1280 × 800. Eén kolom per gezinslid, links de taken die nog een eigenaar zoeken. Routines volgen het dagdeel, taken staan er altijd onder. Onder: dezelfde board met Fien op 100%.</p>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:44px;">
+  <sc-for list="{{ frames }}" as="f" hint-placeholder-count="2">
+    <div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;"><span class="material-symbols-outlined" style="font-size:18px;">tablet_mac</span>{{ f.label }}</div>
+
+      <div style="width:1280px;height:800px;background:#fbf9f4;border-radius:16px;border:1px solid #dcdad4;box-shadow:0 18px 40px rgba(0,0,0,0.10);overflow:hidden;display:flex;">
+
+        <div style="width:76px;flex-shrink:0;background:#f5f3ee;border-right:1px solid #e6e3dc;display:flex;flex-direction:column;align-items:center;padding:18px 0;gap:6px;">
+          <span style="width:36px;height:36px;border-radius:8px;background:#5d5fef;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:16px;margin-bottom:14px;">K</span>
+          <span style="width:52px;height:52px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#747688;"><span class="material-symbols-outlined" style="font-size:22px;">home</span><span style="font-size:9px;font-family:'Baloo 2',sans-serif;font-weight:700;">Vandaag</span></span>
+          <span style="width:52px;height:52px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#747688;"><span class="material-symbols-outlined" style="font-size:22px;">calendar_month</span><span style="font-size:9px;font-family:'Baloo 2',sans-serif;font-weight:700;">Kalender</span></span>
+          <span style="width:52px;height:52px;border-radius:8px;background:rgba(93,95,239,0.10);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#5d5fef;"><span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 1;">checklist</span><span style="font-size:9px;font-family:'Baloo 2',sans-serif;font-weight:700;">Taken</span></span>
+          <span style="width:52px;height:52px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#747688;"><span class="material-symbols-outlined" style="font-size:22px;">star</span><span style="font-size:9px;font-family:'Baloo 2',sans-serif;font-weight:700;">Sterren</span></span>
+          <span style="flex:1;"></span>
+          <span style="width:36px;height:36px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 65);"><img src="uploads/parent1.svg" alt="Peep" style="width:100%;height:100%;object-fit:cover;display:block;"/></span>
+        </div>
+
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;">
+
+          <div style="display:flex;align-items:center;gap:22px;padding:18px 24px 16px;border-bottom:1px solid #eceae4;flex-shrink:0;">
+            <div style="min-width:0;">
+              <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:30px;line-height:1.1;letter-spacing:-0.02em;">Taken &amp; routines</span>
+              <span style="display:block;font-size:15px;color:#434656;margin-top:1px;">donderdag 3 september</span>
+            </div>
+            <span style="flex:1;"></span>
+            <div style="display:flex;gap:8px;">
+              <button onClick="{{ f.setOchtend }}" style="{{ f.ochtendStyle }}"><span class="material-symbols-outlined" style="font-size:24px;">wb_twilight</span>Ochtend</button>
+              <button onClick="{{ f.setMiddag }}" style="{{ f.middagStyle }}"><span class="material-symbols-outlined" style="font-size:24px;">wb_sunny</span>Middag</button>
+              <button onClick="{{ f.setAvond }}" style="{{ f.avondStyle }}"><span class="material-symbols-outlined" style="font-size:24px;">bedtime</span>Avond</button>
+            </div>
+            <span class="tnum" style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:34px;letter-spacing:-0.02em;">{{ f.klok }}</span>
+          </div>
+
+          <div class="noscroll" style="flex:1;min-height:0;display:flex;gap:10px;padding:16px 24px 20px;">
+
+            <sc-for list="{{ f.cols }}" as="col" hint-placeholder-count="5">
+            <div style="{{ col.colStyle }}">
+
+              <sc-if value="{{ col.isPool }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:14px 14px 12px;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="width:34px;height:34px;border-radius:9999px;background:rgba(93,95,239,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:20px;color:#5d5fef;">waving_hand</span></span>
+                  <span style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:19px;line-height:1.15;">Voor het<br/>oppakken</span>
+                </div>
+                <span style="display:block;font-size:12px;color:#5f6274;margin-top:8px;">Iedereen mag deze pakken. Extra sterren.</span>
+              </div>
+              </sc-if>
+
+              <sc-if value="{{ col.isMember }}" hint-placeholder-val="{{ true }}">
+              <div style="{{ col.headStyle }}">
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <span style="{{ col.ringStyle }}"></span>
+                  <div style="flex:1;min-width:0;">
+                    <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:21px;line-height:1.1;">{{ col.name }}</span>
+                    <span style="display:block;font-size:12px;color:#5f6274;">{{ col.sub }}</span>
+                  </div>
+                  <sc-if value="{{ col.celebrate }}" hint-placeholder-val="{{ false }}">
+                  <span class="kyn-spark" style="display:inline-flex;align-items:center;gap:4px;background:rgba(239,141,93,0.18);color:#b8600f;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:12px;padding:5px 9px;border-radius:9999px;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:16px;font-variation-settings:'FILL' 1;">celebration</span>Klaar</span>
+                  </sc-if>
+                </div>
+
+                <div style="display:flex;align-items:center;gap:8px;margin-top:12px;">
+                  <span class="tnum" style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;color:#434656;">{{ col.countLabel }}</span>
+                  <span style="flex:1;"></span>
+                  <sc-if value="{{ col.showStarTotal }}" hint-placeholder-val="{{ true }}">
+                  <span class="tnum" style="display:inline-flex;align-items:center;gap:4px;color:#ef8d5d;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;"><span class="material-symbols-outlined" style="font-size:16px;font-variation-settings:'FILL' 1;">star</span>{{ col.starTotal }}</span>
+                  </sc-if>
+                </div>
+
+                <sc-if value="{{ col.barMode }}" hint-placeholder-val="{{ true }}">
+                <div style="width:100%;height:8px;border-radius:9999px;background:#e4e2db;overflow:hidden;margin-top:8px;"><div style="{{ col.barStyle }}"><span class="kyn-shimmer" style="{{ col.shimmerStyle }}"></span></div></div>
+                </sc-if>
+                <sc-if value="{{ col.dotsMode }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;gap:5px;margin-top:9px;">
+                  <sc-for list="{{ col.dots }}" as="d" hint-placeholder-count="5">
+                  <span style="{{ d.style }}"></span>
+                  </sc-for>
+                </div>
+                </sc-if>
+
+                <sc-if value="{{ col.celebrate }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;align-items:center;gap:6px;margin-top:9px;padding:7px 9px;border-radius:8px;background:linear-gradient(120deg,rgba(239,141,93,0.16),rgba(255,235,190,0.5));">
+                  <span class="material-symbols-outlined kyn-spark" style="font-size:19px;color:#ef8d5d;font-variation-settings:'FILL' 1;">emoji_events</span>
+                  <span class="tnum" style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;color:#7a4310;">Alles gedaan · +{{ col.celebrateStars }} sterren</span>
+                </div>
+                </sc-if>
+              </div>
+              </sc-if>
+
+              <div class="noscroll" style="flex:1;min-height:0;overflow-y:auto;padding:0 8px 10px;">
+
+                <sc-if value="{{ col.hasRoutines }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex;align-items:center;gap:6px;padding:12px 6px 6px;">
+                  <span class="material-symbols-outlined" style="font-size:17px;color:#747688;">{{ col.dpIcon }}</span>
+                  <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;">{{ col.dpLabel }}</span>
+                </div>
+                </sc-if>
+
+                <sc-for list="{{ col.routines }}" as="t" hint-placeholder-count="4">
+                <div onClick="{{ t.toggle }}" style="{{ t.rowStyle }}">
+                  <span style="{{ t.tileStyle }}"><span class="material-symbols-outlined" style="{{ t.iconStyle }}">{{ t.icon }}</span></span>
+                  <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;">
+                    <span style="{{ t.titleStyle }}">{{ t.title }}</span>
+                    <sc-if value="{{ t.hasStar }}" hint-placeholder-val="{{ false }}">
+                    <span class="tnum" style="display:inline-flex;align-items:center;gap:2px;color:#ef8d5d;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12px;"><span class="material-symbols-outlined" style="font-size:14px;font-variation-settings:'FILL' 1;">star</span>{{ t.stars }}</span>
+                    </sc-if>
+                  </div>
+                  <span style="{{ t.circleStyle }}"><sc-if value="{{ t.done }}" hint-placeholder-val="{{ false }}"><span class="material-symbols-outlined kyn-pop" style="font-size:30px;color:#ffffff;font-variation-settings:'FILL' 1,'wght' 600;">check</span></sc-if></span>
+                </div>
+                </sc-for>
+
+                <sc-if value="{{ col.hasChores }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex;align-items:center;gap:6px;padding:14px 6px 6px;">
+                  <span class="material-symbols-outlined" style="font-size:17px;color:#747688;">task_alt</span>
+                  <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;">Taken</span>
+                </div>
+                </sc-if>
+
+                <sc-for list="{{ col.chores }}" as="t" hint-placeholder-count="2">
+                <div onClick="{{ t.toggle }}" style="{{ t.rowStyle }}">
+                  <span style="{{ t.tileStyle }}"><span class="material-symbols-outlined" style="{{ t.iconStyle }}">{{ t.icon }}</span></span>
+                  <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;">
+                    <span style="{{ t.titleStyle }}">{{ t.title }}</span>
+                    <sc-if value="{{ t.hasStar }}" hint-placeholder-val="{{ true }}">
+                    <span class="tnum" style="display:inline-flex;align-items:center;gap:2px;color:#ef8d5d;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12px;"><span class="material-symbols-outlined" style="font-size:14px;font-variation-settings:'FILL' 1;">star</span>{{ t.stars }}</span>
+                    </sc-if>
+                  </div>
+                  <span style="{{ t.circleStyle }}"><sc-if value="{{ t.done }}" hint-placeholder-val="{{ false }}"><span class="material-symbols-outlined kyn-pop" style="font-size:30px;color:#ffffff;font-variation-settings:'FILL' 1,'wght' 600;">check</span></sc-if></span>
+                </div>
+                </sc-for>
+
+              </div>
+            </div>
+            </sc-for>
+
+          </div>
+        </div>
+      </div>
+      <p style="width:1280px;margin:14px 0 0;font-size:13px;color:#434656;line-height:1.6;">{{ f.caption }}</p>
+    </div>
+  </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;showStars&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Board&quot;},&quot;showPool&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Board&quot;},&quot;progressStyle&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;balk&quot;,&quot;stippen&quot;],&quot;default&quot;:&quot;balk&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Board&quot;}}">
+class Component extends DCLogic {
+  state = {
+    doneA: { 'fien-ochtend-0': true, 'fien-ochtend-1': true, 'joep-ochtend-0': true, 'peep-ochtend-0': true, 'pool-0': true },
+    doneB: { 'fien-ochtend-0': true, 'fien-ochtend-1': true, 'fien-ochtend-2': true, 'fien-ochtend-3': true, 'fien-ochtend-4': true, 'fien-chore-0': true, 'joep-ochtend-0': true, 'peep-ochtend-0': true, 'pool-0': true },
+    dpA: 'ochtend', dpB: 'ochtend'
+  };
+
+  toggle(frame, id) {
+    const k = frame === 'a' ? 'doneA' : 'doneB';
+    this.setState(s => ({ [k]: Object.assign({}, s[k], { [id]: !s[k][id] }) }));
+  }
+
+  data() {
+    return {
+      pool: [
+        { title: 'Vaatwasser uitruimen', icon: 'countertops', stars: 3 },
+        { title: 'Tafel dekken', icon: 'restaurant', stars: 2 },
+        { title: 'Planten water geven', icon: 'potted_plant', stars: 1 },
+        { title: 'Post ophalen', icon: 'mail', stars: 1 }
+      ],
+      members: [
+        {
+          key: 'fien', name: 'Fien', sub: '5 jaar', hue: 335, avatar: 'uploads/child1.svg',
+          routines: {
+            ochtend: [
+              { title: 'Wakker worden', icon: 'wb_sunny' },
+              { title: 'Tanden poetsen', icon: 'dentistry', stars: 1 },
+              { title: 'Aankleden', icon: 'checkroom' },
+              { title: 'Ontbijt eten', icon: 'restaurant' },
+              { title: 'Tas inpakken', icon: 'backpack', stars: 1 }
+            ],
+            middag: [
+              { title: 'Handen wassen', icon: 'wash' },
+              { title: 'Fruit eten', icon: 'nutrition' },
+              { title: 'Huiswerk lezen', icon: 'menu_book', stars: 1 }
+            ],
+            avond: [
+              { title: 'Pyjama aan', icon: 'bedtime' },
+              { title: 'Tanden poetsen', icon: 'dentistry', stars: 1 },
+              { title: 'Voorlezen', icon: 'auto_stories' }
+            ]
+          },
+          chores: [{ title: 'Speelgoed opruimen', icon: 'toys', stars: 2 }]
+        },
+        {
+          key: 'joep', name: 'Joep', sub: '3 jaar', hue: 245, avatar: 'uploads/child2.svg',
+          routines: {
+            ochtend: [
+              { title: 'Aankleden', icon: 'checkroom' },
+              { title: 'Tanden poetsen', icon: 'dentistry', stars: 1 },
+              { title: 'Ontbijt eten', icon: 'restaurant' }
+            ],
+            middag: [
+              { title: 'Plas doen', icon: 'wc' },
+              { title: 'Middagslaapje', icon: 'crib' }
+            ],
+            avond: [
+              { title: 'Pyjama aan', icon: 'bedtime' },
+              { title: 'Tanden poetsen', icon: 'dentistry', stars: 1 }
+            ]
+          },
+          chores: [{ title: 'Knuffels in bed', icon: 'bedroom_baby', stars: 1 }]
+        },
+        {
+          key: 'peep', name: 'Peep', sub: 'papa', hue: 65, avatar: 'uploads/parent1.svg',
+          routines: {
+            ochtend: [
+              { title: 'Hond uitlaten', icon: 'pets' },
+              { title: 'Lunch inpakken', icon: 'lunch_dining' }
+            ],
+            middag: [{ title: 'Kinderen ophalen', icon: 'directions_car' }],
+            avond: [{ title: 'Afwas doen', icon: 'sink' }]
+          },
+          chores: [{ title: 'Vuilnis buiten zetten', icon: 'delete' }]
+        },
+        {
+          key: 'veerle', name: 'Veerle', sub: 'mama', hue: 290, avatar: 'uploads/parent2.svg',
+          routines: {
+            ochtend: [
+              { title: 'Was ophangen', icon: 'local_laundry_service' },
+              { title: 'Fietsen klaarzetten', icon: 'pedal_bike' }
+            ],
+            middag: [{ title: 'Boodschappen bestellen', icon: 'shopping_cart' }],
+            avond: [{ title: 'Keuken opruimen', icon: 'countertops' }]
+          },
+          chores: [{ title: 'Rugzakken checken', icon: 'backpack' }]
+        }
+      ]
+    };
+  }
+
+  row(t, id, frame, doneMap, accent) {
+    const done = !!doneMap[id];
+    return {
+      title: t.title, icon: t.icon, stars: t.stars, done,
+      hasStar: !!t.stars && this.props.showStars !== false,
+      toggle: () => this.toggle(frame, id),
+      rowStyle: 'display:flex;align-items:center;gap:6px;padding:8px 6px;min-height:64px;box-sizing:border-box;border-radius:8px;cursor:pointer;margin-bottom:2px;'
+        + (done ? 'background:rgba(25,28,29,0.035);' : 'background:transparent;'),
+      tileStyle: 'width:30px;height:30px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:'
+        + (done ? '#eceae4;' : 'oklch(95% 0.03 ' + accent + ');') + (done ? 'opacity:0.7;' : ''),
+      iconStyle: 'font-size:20px;color:' + (done ? '#747688;' : 'oklch(45% 0.1 ' + accent + ');'),
+      titleStyle: 'min-width:0;font-size:16px;font-weight:600;line-height:1.25;text-wrap:pretty;overflow-wrap:anywhere;'
+        + (done ? 'color:#8a8c98;text-decoration:line-through;' : 'color:#191c1d;'),
+      circleStyle: 'width:46px;height:46px;border-radius:9999px;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-sizing:border-box;'
+        + (done ? 'background:oklch(55% 0.14 155);border:none;' : 'background:#ffffff;border:3px solid #dcdad4;')
+    };
+  }
+
+  buildFrame(frame) {
+    const d = this.data();
+    const dp = frame === 'a' ? this.state.dpA : this.state.dpB;
+    const doneMap = frame === 'a' ? this.state.doneA : this.state.doneB;
+    const dpMeta = { ochtend: { label: 'Ochtend', icon: 'wb_twilight' }, middag: { label: 'Middag', icon: 'wb_sunny' }, avond: { label: 'Avond', icon: 'bedtime' } }[dp];
+    const progressStyle = this.props.progressStyle || 'balk';
+    const showPool = this.props.showPool !== false;
+
+    const cols = [];
+    if (showPool) {
+      cols.push({
+        isPool: true, isMember: false, hasRoutines: false, hasChores: false, routines: [], chores: [],
+        colStyle: 'flex:0 0 240px;display:flex;flex-direction:column;min-height:0;background:#ffffff;border:2px dashed rgba(93,95,239,0.35);border-radius:16px;overflow:hidden;',
+        celebrate: false, barMode: false, dotsMode: false, dots: [],
+        chores2: null
+      });
+      cols[0].chores = d.pool.map((t, i) => this.row(t, 'pool-' + i, frame, doneMap, 280));
+      cols[0].hasChores = false;
+    }
+
+    d.members.forEach(m => {
+      const routines = (m.routines[dp] || []).map((t, i) => this.row(t, m.key + '-' + dp + '-' + i, frame, doneMap, m.hue));
+      const chores = m.chores.map((t, i) => this.row(t, m.key + '-chore-' + i, frame, doneMap, m.hue));
+      const all = routines.concat(chores);
+      const doneCount = all.filter(r => r.done).length;
+      const pct = all.length ? Math.round((doneCount / all.length) * 100) : 0;
+      const celebrate = all.length > 0 && doneCount === all.length;
+      const starTotal = all.filter(r => r.done && r.stars).reduce((s, r) => s + r.stars, 0);
+      cols.push({
+        isPool: false, isMember: true, name: m.name, sub: m.sub, avatar: m.avatar,
+        colStyle: 'flex:1 1 0;min-width:0;display:flex;flex-direction:column;min-height:0;border-radius:16px;overflow:hidden;border:1px solid #e6e3dc;'
+          + (celebrate ? 'background:linear-gradient(180deg,#fffaf1,#ffffff 46%);' : 'background:#ffffff;'),
+        headStyle: 'flex-shrink:0;padding:14px 14px 13px;border-bottom:3px solid ' + (celebrate ? '#ef8d5d;' : 'oklch(58% 0.14 ' + m.hue + ');'),
+        ringStyle: 'width:40px;height:40px;border-radius:9999px;flex-shrink:0;box-sizing:border-box;background-color:oklch(94% 0.03 ' + m.hue + ');background-image:url(' + m.avatar + ');background-size:cover;background-position:center;box-shadow:0 0 0 3px ' + (celebrate ? '#ef8d5d' : 'oklch(58% 0.14 ' + m.hue + ')') + ';',
+        countLabel: doneCount + ' van ' + all.length + ' klaar',
+        starTotal, showStarTotal: this.props.showStars !== false && starTotal > 0,
+        celebrate, celebrateStars: starTotal,
+        barMode: progressStyle === 'balk', dotsMode: progressStyle === 'stippen',
+        barStyle: 'position:relative;overflow:hidden;height:100%;border-radius:9999px;width:' + pct + '%;background:' + (celebrate ? '#ef8d5d;' : 'oklch(58% 0.14 ' + m.hue + ');'),
+        shimmerStyle: celebrate ? 'position:absolute;inset:0;display:block;' : 'display:none;',
+        shimmerClass: celebrate ? 'kyn-shimmer' : '',
+        dots: all.map(r => ({ style: 'width:14px;height:14px;border-radius:9999px;flex-shrink:0;background:' + (r.done ? (celebrate ? '#ef8d5d' : 'oklch(58% 0.14 ' + m.hue + ')') : '#e4e2db') + ';' })),
+        dpLabel: dpMeta.label, dpIcon: dpMeta.icon,
+        hasRoutines: routines.length > 0, hasChores: chores.length > 0,
+        routines, chores
+      });
+    });
+
+    const tab = (on) => 'display:flex;align-items:center;gap:7px;min-height:48px;padding:0 16px;border-radius:9999px;cursor:pointer;font-family:\'Baloo 2\',sans-serif;font-weight:700;font-size:16px;'
+      + (on ? 'background:#5d5fef;color:#ffffff;border:none;' : 'background:#ffffff;color:#434656;border:1px solid #e1e3e4;');
+
+    return {
+      cols,
+      klok: frame === 'a' ? '07:41' : '08:06',
+      label: frame === 'a' ? 'Standaard — ochtend' : 'Fien is klaar — 100%',
+      caption: frame === 'a'
+        ? 'Elke rij is één tik: de cirkel rechts vult zich groen. De kolomkop laat met een dunne streep en een balk zien wie hoever is, zonder dat je vinkjes hoeft te tellen.'
+        : 'Bij 100% blijft de board rustig: alleen de streep en de ring worden oranje, de balk glanst en er komt een klein sterrenkaartje onder de laatste taak.',
+      ochtendStyle: tab(dp === 'ochtend'), middagStyle: tab(dp === 'middag'), avondStyle: tab(dp === 'avond'),
+      setOchtend: () => this.setState(frame === 'a' ? { dpA: 'ochtend' } : { dpB: 'ochtend' }),
+      setMiddag: () => this.setState(frame === 'a' ? { dpA: 'middag' } : { dpB: 'middag' }),
+      setAvond: () => this.setState(frame === 'a' ? { dpA: 'avond' } : { dpB: 'avond' })
+    };
+  }
+
+  renderVals() {
+    return { frames: [this.buildFrame('a'), this.buildFrame('b')] };
+  }
+}
+</script>
+</body>
+</html>

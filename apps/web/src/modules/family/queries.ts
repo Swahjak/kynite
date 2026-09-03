@@ -26,14 +26,24 @@ export const getFamily = cache(async (familyId: string): Promise<Family | null> 
   return row ?? null;
 });
 
-/** Members in board order — `sortOrder` drives every per-person column in the UI. */
-export async function listMembers(familyId: string): Promise<Member[]> {
+/**
+ * Members in board order — `sortOrder` drives every per-person column in the
+ * UI. `React.cache`d per request for the same reason as `getFamily` above:
+ * `/hub/routines` resolves this composition twice in one render
+ * (`loadHubBoardComposition` → `loadCalendarPage`, and `loadRoutinesBoardData`
+ * independently) and would otherwise run the same query twice per page load.
+ * Safe under the same condition as `getFamily` — nothing in this request path
+ * mutates member rows and re-reads them in the same pass; a changed roster is
+ * only ever seen on the *next* request, after the Server Action's
+ * `revalidatePath`.
+ */
+export const listMembers = cache(async (familyId: string): Promise<Member[]> => {
   return getDb()
     .select()
     .from(member)
     .where(eq(member.familyId, familyId))
     .orderBy(asc(member.sortOrder), asc(member.createdAt));
-}
+});
 
 export async function getMember(familyId: string, memberId: string): Promise<Member | null> {
   const rows = await getDb().select().from(member).where(eq(member.id, memberId)).limit(1);

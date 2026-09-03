@@ -31,11 +31,13 @@ import { loadTodayProgress, type TodayProgressData } from './page-data';
  * over it — free. `children`, `progress`, `tasks` and `weather` each cost a
  * further DB read (`loadFamilyRoutineTotals`, `loadTodayProgress`,
  * `loadTodayTasks`, `getFamilyWeather`), so they are opt-in per field rather
- * than an all-or-nothing "full" mode: `/hub/kalender` needs none of the four,
- * `/hub/routines` needs `progress` today and will start passing `children`
- * and `tasks` too the moment M-R2 turns it from a check-in into the board a
- * child ticks steps on — a boolean this loader already understands, not a
- * second loader to keep in sync.
+ * than an all-or-nothing "full" mode: `/hub/kalender` needs none of the four.
+ * `/hub/routines` (M-R2's "Taken & routines" board) needs none of them
+ * either — it calls this loader with no `include` for its calendar snapshot
+ * and header, and gets its member/routine/task data from the separate
+ * `loadRoutinesBoardData` (`page-data-board.ts`), which resolves its own
+ * principal and members rather than going through this composition's opt-in
+ * fields.
  */
 export type HubBoardCompositionInclude = {
   children?: boolean;

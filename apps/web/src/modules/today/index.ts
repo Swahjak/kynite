@@ -51,6 +51,14 @@ export {
   type HubBoardComposition,
   type HubBoardCompositionInclude,
 } from './page-data-hub';
+export {
+  loadRoutinesBoardData,
+  type BoardColumn,
+  type BoardRoutineRow,
+  type BoardRow,
+  type BoardTaskRow,
+  type RoutinesBoardData,
+} from './page-data-board';
 
 export { StarMatrix, type StarMatrixColumn, type StarMatrixProps } from './ui/star-matrix';
 
@@ -66,6 +74,7 @@ export { TodayNowStrip, type TodayNowStripProps } from './ui/today-now-strip';
 export { TodayTabDag, type TodayTabDagProps } from './ui/today-tab-dag';
 export { TodayTabPersonen, type TodayTabPersonenProps } from './ui/today-tab-personen';
 export { TodayTabRoutines, type TodayTabRoutinesProps } from './ui/today-tab-routines';
+export { RoutinesBoard, type RoutinesBoardProps } from './ui/routines-board';
 export { TodayTabSterren, type TodayTabSterrenProps } from './ui/today-tab-sterren';
 export { TodayTabs, type TodayTabsProps } from './ui/today-tabs';
 export {

@@ -2,22 +2,28 @@ import { getTranslations } from 'next-intl/server';
 import { EmptyState } from '@kynite/ui';
 import { HubBoard } from '@/modules/calendar';
 import { requireHubDevice } from '@/modules/devices';
-import { TodayHeader, TodayLive, TodayTabRoutines, loadHubBoardComposition } from '@/modules/today';
+import {
+  RoutinesBoard,
+  TodayHeader,
+  TodayLive,
+  loadHubBoardComposition,
+  loadRoutinesBoardData,
+} from '@/modules/today';
 
 /** Session-dependent: never prerendered, so `next build` needs no database. */
 export const dynamic = 'force-dynamic';
 
 /**
- * "Taken & routines" — the household's check-in, one row per child (M-R1).
+ * "Taken & routines" — the family-wide board (M-R2): one pool column for
+ * tasks nobody has picked up yet, one column per member, routines banded by
+ * the selected daypart and tasks always underneath.
  *
- * A placeholder in the sense that M-R2 gives this rail destination its own
- * board (per-child routine control, not just a check-in) — but the rail item
- * has to point somewhere real today rather than at a route that 404s, so this
- * mounts the same `TodayTabRoutines` panel `/hub` used to carry as one of its
- * four tabs, on the shared `loadHubBoardComposition` read. A child who wants
- * to *tick off* a step still goes to their own face on the board
- * (`/hub/routines/[memberId]`, unchanged) — this route is the overview, not a
- * second way to complete a step.
+ * M-R1's `TodayTabRoutines` (a per-child check-in, read-only from here) is
+ * gone from this route — this is the control surface itself, per M-R2. A
+ * child who wants to tick off a *routine* step still has their own face on
+ * the board too (`/hub/routines/[memberId]`, unchanged, and still the
+ * larger single-child experience with praise and confetti); this route ticks
+ * the same underlying completion, just for the whole household at once.
  */
 export default async function HubRoutinesOverviewPage({
   params,
@@ -30,16 +36,7 @@ export default async function HubRoutinesOverviewPage({
   const { date, now } = await searchParams;
   await requireHubDevice(locale, '/hub/routines', { date, now });
 
-  // `TodayTabRoutines` needs the kids' progress read; it draws no children
-  // launcher, task list or weather widget, so the other three opt-in reads
-  // stay off. M-R2's routine board will need `children` and `tasks` too the
-  // moment this route stops being a check-in and starts letting a child tick
-  // a step off from here — add them to `include` then.
-  const composition = await loadHubBoardComposition({
-    date,
-    now,
-    include: { progress: true },
-  });
+  const composition = await loadHubBoardComposition({ date, now });
   const t = await getTranslations('today');
   const tCalendar = await getTranslations('calendar');
 
@@ -57,7 +54,13 @@ export default async function HubRoutinesOverviewPage({
     );
   }
 
-  const { data, dayKey, isToday, progress, slot } = composition;
+  const { data, dayKey, isToday, slot } = composition;
+
+  // Board data — routines and tasks — is a today-only concept, exactly like
+  // `TodayTabRoutines`'s old `kids` read: a browsed day has no completions of
+  // its own to show, so the panel says so rather than rendering an empty
+  // board that looks like nobody has anything to do.
+  const board = isToday ? await loadRoutinesBoardData({ now: data.now }) : null;
 
   return (
     <main
@@ -92,7 +95,11 @@ export default async function HubRoutinesOverviewPage({
           href="/hub/routines"
         />
 
-        <TodayTabRoutines kids={progress?.kids ?? null} />
+        {board ? (
+          <RoutinesBoard board={board} dayKey={dayKey} />
+        ) : (
+          <p className="text-body-sm text-ink-secondary">{t('routines.otherDay')}</p>
+        )}
       </HubBoard>
     </main>
   );
