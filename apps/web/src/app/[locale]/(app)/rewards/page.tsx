@@ -45,7 +45,7 @@ export default async function RewardsPage({ params }: { params: Promise<{ locale
     id: member.id,
     displayName: member.displayName,
     avatarUrl: member.avatarUrl,
-    colorClass: MEMBER_COLOR_CLASSES[member.color].surface,
+    colorClass: MEMBER_COLOR_CLASSES[member.color].track,
     initials: initialsOf(member.displayName),
   });
 

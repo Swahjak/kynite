@@ -255,7 +255,7 @@ export async function TodayHeader({
       id: member.id,
       name: member.displayName,
       avatarUrl: member.avatarUrl,
-      surfaceClass: MEMBER_COLOR_CLASSES[member.color].surface,
+      surfaceClass: MEMBER_COLOR_CLASSES[member.color].track,
     }));
 
     return (

@@ -12,7 +12,7 @@ import { splitByMember } from '../domain/day-board';
 import { minutesIntoDay, toDateKey, toWall } from '../domain/zone';
 import type { CalendarEvent } from '../queries';
 import { EventChip } from './event-chip';
-import { CATEGORY_CLASSES, GRID_END_HOUR, GRID_START_HOUR, HOUR_HEIGHT } from './tokens';
+import { GRID_END_HOUR, GRID_START_HOUR, HOUR_HEIGHT, MEMBER_COLOR_CLASSES } from './tokens';
 import { layout } from './time-grid';
 import { useDragReschedule } from './use-drag-reschedule';
 
@@ -149,7 +149,7 @@ export function MemberDayGrid({
               const owned = allDayByMember.get(member.id) ?? [];
               if (owned.length === 0) return null;
 
-              const palette = CATEGORY_CLASSES[member.color];
+              const palette = MEMBER_COLOR_CLASSES[member.color];
 
               return (
                 <div
@@ -167,7 +167,7 @@ export function MemberDayGrid({
                     size="sm"
                     avatarUrl={member.avatarUrl}
                     name={member.displayName}
-                    surfaceClass={palette.surface}
+                    surfaceClass={palette.track}
                     className="shrink-0"
                   />
                   <span className="sr-only">{member.displayName}</span>
@@ -281,7 +281,7 @@ export function MemberDayGrid({
               const memberAllDay = allDayByMember.get(member.id) ?? [];
               // `member_color` and `event_category` are the same eight
               // design-system keys, so one palette table serves both.
-              const palette = CATEGORY_CLASSES[member.color];
+              const palette = MEMBER_COLOR_CLASSES[member.color];
 
               return (
                 <div
@@ -298,7 +298,7 @@ export function MemberDayGrid({
                       size="sm"
                       avatarUrl={member.avatarUrl}
                       name={member.displayName}
-                      surfaceClass={palette.surface}
+                      surfaceClass={palette.track}
                       ringClass={palette.ring}
                       ringed
                     />

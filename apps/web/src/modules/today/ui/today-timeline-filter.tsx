@@ -34,7 +34,7 @@ export type TimelineFace = {
   id: string;
   name: string;
   avatarUrl: string | null;
-  /** `MEMBER_COLOR_CLASSES[color].surface`, resolved by the server component. */
+  /** `MEMBER_COLOR_CLASSES[color].track`, resolved by the server component. */
   surfaceClass: string;
 };
 

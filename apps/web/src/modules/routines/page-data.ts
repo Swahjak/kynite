@@ -84,7 +84,7 @@ export function ownerOptionsOf(members: Member[]): OwnerOption[] {
       displayName: member.displayName,
       avatarUrl: member.avatarUrl,
       initials: initialsOf(member.displayName),
-      colorClass: MEMBER_COLOR_CLASSES[member.color].surface,
+      colorClass: MEMBER_COLOR_CLASSES[member.color].track,
     }));
 }
 

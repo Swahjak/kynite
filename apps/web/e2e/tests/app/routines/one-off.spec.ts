@@ -27,7 +27,7 @@ test('a parent schedules a one-off chore, the child taps it, and it leaves the b
 }) => {
   const [mila] = await withDb((client) =>
     seedMembers(client, family.familyId, [
-      { displayName: 'Mila', role: 'child', color: 'purple', sortOrder: 1 },
+      { displayName: 'Mila', role: 'child', color: 'orchid', sortOrder: 1 },
     ])
   );
 

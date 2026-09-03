@@ -80,7 +80,7 @@ describe.skipIf(!databaseUrl)('family schema (integration)', () => {
         userId,
         displayName: 'Sarah',
         role: 'owner',
-        color: 'purple',
+        color: 'orchid',
         rewardHorizon: 'savings',
         sortOrder: 0,
       })
@@ -98,7 +98,7 @@ describe.skipIf(!databaseUrl)('family schema (integration)', () => {
           familyId,
           displayName: 'Bram',
           role: 'child',
-          color: 'orange',
+          color: 'terracotta',
           rewardHorizon: 'instant',
           birthDate: '2019-04-02',
           sortOrder: 1,
@@ -107,7 +107,7 @@ describe.skipIf(!databaseUrl)('family schema (integration)', () => {
           familyId,
           displayName: 'Fenna',
           role: 'child',
-          color: 'teal',
+          color: 'petrol',
           rewardHorizon: 'savings',
           sortOrder: 2,
         },
@@ -196,7 +196,7 @@ describe.skipIf(!databaseUrl)('family schema (integration)', () => {
       familyId: doomed.id,
       displayName: 'Ghost',
       role: 'child',
-      color: 'red',
+      color: 'terracotta',
       rewardHorizon: 'instant',
     });
 

@@ -153,8 +153,10 @@ export async function TodayTabDag({
 
   const hub = surface === 'hub';
 
+  // `.track` (baan) — feeds `TaskList`'s per-row `MemberFace` avatar disc, not
+  // an icon tile; see `member-avatar.tsx`'s comment on the wassing/baan split.
   const memberSurface = Object.fromEntries(
-    members.map((member) => [member.id, MEMBER_COLOR_CLASSES[member.color].surface])
+    members.map((member) => [member.id, MEMBER_COLOR_CLASSES[member.color].track])
   );
 
   return (

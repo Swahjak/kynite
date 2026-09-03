@@ -27,7 +27,7 @@ export function KidStatCard({ kid, ...rest }: KidStatCardProps) {
       memberId={kid.memberId}
       name={kid.displayName}
       avatarUrl={kid.avatarUrl}
-      avatarSurfaceClass={MEMBER_COLOR_CLASSES[kid.color].surface}
+      avatarSurfaceClass={MEMBER_COLOR_CLASSES[kid.color].track}
       barClass={MEMBER_COLOR_CLASSES[kid.color].dot}
       starsToday={kid.starsToday}
       percent={Math.round(kid.ratio * 100)}

@@ -23,19 +23,27 @@ export const memberRole = pgEnum('member_role', ['owner', 'adult', 'child', 'car
 export const rewardHorizon = pgEnum('reward_horizon', ['instant', 'savings']);
 
 /**
- * The eight category colors of the design system (src/app/globals.css).
- * A member owns their color everywhere, so it is constrained at the database
- * level rather than left as free text.
+ * The six member colors of the design system (M-K,
+ * `docs/design/claude-design/Ledenkleuren.dc.html`, tokenised as
+ * `--member-<slot>-*` in `packages/ui/src/styles/tokens.css`). A member owns
+ * their color everywhere, so it is constrained at the database level rather
+ * than left as free text.
+ *
+ * **Not the eight `--cat-*` category hues** — a member's colour identifies a
+ * *person*, a category's identifies a *kind of event*, and M-K deliberately
+ * gave members their own six-slot palette rather than continuing to borrow
+ * category hues. This enum used to be exactly the eight category names
+ * (`blue`/`purple`/`orange`/`green`/`red`/`yellow`/`pink`/`teal`); migration
+ * `0032` merges the two hues each new slot absorbs and renames the rest onto
+ * the new names — see that migration for the exact mapping.
  */
 export const memberColor = pgEnum('member_color', [
+  'raspberry',
   'blue',
-  'purple',
-  'orange',
-  'green',
-  'red',
-  'yellow',
-  'pink',
-  'teal',
+  'petrol',
+  'orchid',
+  'mustard',
+  'terracotta',
 ]);
 
 /**

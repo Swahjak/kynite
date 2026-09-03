@@ -334,7 +334,7 @@ test.describe('kiosk layout audit', { tag: '@heavy' }, () => {
   test('routine and store surfaces meet the same floors', async ({ page, family }) => {
     const [mila] = await withDb((client) =>
       seedMembers(client, family.familyId, [
-        { displayName: 'Mila', role: 'child', color: 'orange', sortOrder: 1 },
+        { displayName: 'Mila', role: 'child', color: 'terracotta', sortOrder: 1 },
       ])
     );
 

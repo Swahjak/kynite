@@ -253,7 +253,7 @@ describe.skipIf(!databaseUrl)('device session capability (integration)', () => {
         form({
           displayName: 'Nieuw kind',
           role: 'child',
-          color: 'green',
+          color: 'petrol',
           rewardHorizon: 'instant',
         })
       );

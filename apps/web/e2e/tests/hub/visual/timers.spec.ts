@@ -48,7 +48,7 @@ test.describe('timer visuals — tablet', { tag: '@visual' }, () => {
           id: ID('0001'),
           displayName: 'Mila',
           role: 'child',
-          color: 'purple',
+          color: 'orchid',
           sortOrder: 1,
         },
       ]);

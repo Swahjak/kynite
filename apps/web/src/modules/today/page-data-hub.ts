@@ -109,7 +109,9 @@ export async function loadHubBoardComposition(options: {
               displayName: member.displayName,
               avatarUrl: member.avatarUrl,
               initials: initialsOf(member.displayName),
-              colorClass: MEMBER_COLOR_CLASSES[member.color].surface,
+              // `.track` (baan) — this feeds an `AvatarFallback` disc, not an
+              // icon tile; see `member-avatar.tsx`'s comment.
+              colorClass: MEMBER_COLOR_CLASSES[member.color].track,
               doneCount: progress.done,
               total: progress.total,
             };

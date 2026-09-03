@@ -50,7 +50,7 @@ test.describe('caregiver share links', () => {
     const { child, eventTitle } = await withDb(async (client) => {
       const owner = await ownerMemberOf(client, family.familyId);
       const [seededChild] = await seedMembers(client, family.familyId, [
-        { displayName: 'Bram', role: 'child', color: 'orange', sortOrder: 1 },
+        { displayName: 'Bram', role: 'child', color: 'terracotta', sortOrder: 1 },
       ]);
 
       const start = new Date();
@@ -97,7 +97,7 @@ test.describe('caregiver share links', () => {
   }) => {
     const child = await withDb(async (client) => {
       const [seeded] = await seedMembers(client, family.familyId, [
-        { displayName: 'Bram', role: 'child', color: 'orange', sortOrder: 1 },
+        { displayName: 'Bram', role: 'child', color: 'terracotta', sortOrder: 1 },
       ]);
 
       await seedRoutines(client, family.familyId, [
@@ -168,8 +168,8 @@ test.describe('caregiver share links', () => {
   }) => {
     const { inScope, outOfScope, outOfScopeRoutine } = await withDb(async (client) => {
       const [first, second] = await seedMembers(client, family.familyId, [
-        { displayName: 'Bram', role: 'child', color: 'orange', sortOrder: 1 },
-        { displayName: 'Fenna', role: 'child', color: 'teal', sortOrder: 2 },
+        { displayName: 'Bram', role: 'child', color: 'terracotta', sortOrder: 1 },
+        { displayName: 'Fenna', role: 'child', color: 'petrol', sortOrder: 2 },
       ]);
 
       const schedule = {
@@ -245,7 +245,7 @@ test.describe('caregiver share links', () => {
   }) => {
     const { child, routine } = await withDb(async (client) => {
       const [seeded] = await seedMembers(client, family.familyId, [
-        { displayName: 'Bram', role: 'child', color: 'orange', sortOrder: 1 },
+        { displayName: 'Bram', role: 'child', color: 'terracotta', sortOrder: 1 },
       ]);
 
       const [seededRoutine] = await seedRoutines(client, family.familyId, [
@@ -306,7 +306,7 @@ test.describe('caregiver share links', () => {
   }) => {
     const { child, routine } = await withDb(async (client) => {
       const [seeded] = await seedMembers(client, family.familyId, [
-        { displayName: 'Bram', role: 'child', color: 'orange', sortOrder: 1 },
+        { displayName: 'Bram', role: 'child', color: 'terracotta', sortOrder: 1 },
       ]);
 
       const [seededRoutine] = await seedRoutines(client, family.familyId, [

@@ -36,7 +36,7 @@ async function seedChildWithRoutines(familyId: string) {
   return withDb(async (client) => {
     const owner = await ownerMemberOf(client, familyId);
     const [mila] = await seedMembers(client, familyId, [
-      { displayName: 'Mila', role: 'child', color: 'purple', sortOrder: 1 },
+      { displayName: 'Mila', role: 'child', color: 'orchid', sortOrder: 1 },
     ]);
 
     const [morning, homework, missed] = await seedRoutines(client, familyId, [
@@ -91,7 +91,7 @@ test.describe('routine builder', () => {
   test('a parent creates a routine with ordered steps and a schedule', async ({ page, family }) => {
     await withDb(async (client) => {
       await seedMembers(client, family.familyId, [
-        { displayName: 'Mila', role: 'child', color: 'purple', sortOrder: 1 },
+        { displayName: 'Mila', role: 'child', color: 'orchid', sortOrder: 1 },
       ]);
     });
 
@@ -319,7 +319,7 @@ test.describe('the hub routine screen', () => {
 
     const daan = await withDb(async (client) => {
       const [seeded] = await seedMembers(client, family.familyId, [
-        { displayName: 'Daan', role: 'child', color: 'orange', sortOrder: 2 },
+        { displayName: 'Daan', role: 'child', color: 'terracotta', sortOrder: 2 },
       ]);
       await seedRoutines(client, family.familyId, [
         {

@@ -164,8 +164,8 @@ describe('EventChip — what an event is called', () => {
  */
 describe('EventChip — what a time-grid block says about an event', () => {
   const members: Member[] = [
-    { id: 'm1', displayName: 'Mila', color: 'purple', avatarUrl: null } as unknown as Member,
-    { id: 'm2', displayName: 'Daan', color: 'green', avatarUrl: null } as unknown as Member,
+    { id: 'm1', displayName: 'Mila', color: 'orchid', avatarUrl: null } as unknown as Member,
+    { id: 'm2', displayName: 'Daan', color: 'petrol', avatarUrl: null } as unknown as Member,
     { id: 'm3', displayName: 'Tom', color: 'blue', avatarUrl: null } as unknown as Member,
   ];
 
@@ -244,8 +244,8 @@ describe('EventChip — what a time-grid block says about an event', () => {
  */
 describe('EventChip — a busy-only event never names anyone', () => {
   const members: Member[] = [
-    { id: 'm1', displayName: 'Mila', color: 'purple', avatarUrl: null } as unknown as Member,
-    { id: 'm2', displayName: 'Daan', color: 'green', avatarUrl: null } as unknown as Member,
+    { id: 'm1', displayName: 'Mila', color: 'orchid', avatarUrl: null } as unknown as Member,
+    { id: 'm2', displayName: 'Daan', color: 'petrol', avatarUrl: null } as unknown as Member,
     { id: 'm3', displayName: 'Tom', color: 'blue', avatarUrl: null } as unknown as Member,
   ];
 
@@ -341,8 +341,8 @@ describe('EventChip — a busy-only event never names anyone', () => {
  */
 describe('EventChip — the all-day band’s "whose" cue', () => {
   const members: Member[] = [
-    { id: 'm1', displayName: 'Mila', color: 'purple', avatarUrl: null } as unknown as Member,
-    { id: 'm2', displayName: 'Daan', color: 'green', avatarUrl: null } as unknown as Member,
+    { id: 'm1', displayName: 'Mila', color: 'orchid', avatarUrl: null } as unknown as Member,
+    { id: 'm2', displayName: 'Daan', color: 'petrol', avatarUrl: null } as unknown as Member,
     { id: 'm3', displayName: 'Tom', color: 'blue', avatarUrl: null } as unknown as Member,
   ];
 
@@ -391,7 +391,7 @@ describe('EventChip — the all-day band’s "whose" cue', () => {
  */
 describe('EventChip — the recurrence cue', () => {
   const members: Member[] = [
-    { id: 'm1', displayName: 'Mila', color: 'purple', avatarUrl: null } as unknown as Member,
+    { id: 'm1', displayName: 'Mila', color: 'orchid', avatarUrl: null } as unknown as Member,
   ];
 
   const renderChip = (

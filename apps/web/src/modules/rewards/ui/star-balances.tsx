@@ -46,7 +46,7 @@ export async function StarBalances({
                   name={member.displayName}
                   avatarUrl={member.avatarUrl}
                   initials={initialsOf(member.displayName)}
-                  surfaceClass={MEMBER_COLOR_CLASSES[member.color].surface}
+                  surfaceClass={MEMBER_COLOR_CLASSES[member.color].track}
                 />
                 <span className="min-w-0 truncate font-display text-body-sm font-bold">
                   {member.displayName}

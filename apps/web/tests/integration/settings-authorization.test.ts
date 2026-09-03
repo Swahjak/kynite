@@ -224,7 +224,7 @@ describe.skipIf(!databaseUrl)('settings authorization (integration)', () => {
           memberId: household.childId,
           displayName: 'Bram',
           role: 'adult',
-          color: 'orange',
+          color: 'terracotta',
           rewardHorizon: 'instant',
         })
       );

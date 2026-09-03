@@ -225,6 +225,13 @@
       "when": 1788459137251,
       "tag": "0031_flimsy_firebird",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1788462709653,
+      "tag": "0032_hot_magma",
+      "breakpoints": true
     }
   ]
 }

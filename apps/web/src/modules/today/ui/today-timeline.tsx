@@ -289,7 +289,7 @@ export async function TodayTimeline({
             id: member.id,
             name: member.displayName,
             avatarUrl: member.avatarUrl,
-            surfaceClass: MEMBER_COLOR_CLASSES[member.color].surface,
+            surfaceClass: MEMBER_COLOR_CLASSES[member.color].track,
           }))}
           rows={rest.map((row) => ({
             id: row.event.key,

@@ -60,7 +60,7 @@ export type TaskListProps = {
   canComplete: boolean;
   /** The heading and the accessible name of the list. */
   title: string;
-  /** `MEMBER_COLOR_CLASSES[color].surface` per member id, resolved server-side. */
+  /** `MEMBER_COLOR_CLASSES[color].track` per member id, resolved server-side. */
   memberSurface: Record<string, string>;
 };
 

@@ -6,19 +6,23 @@ import { MEMBERS, Section, Specimen, SpecimenGrid } from '../specimen';
 
 /**
  * `MemberFace` — a person's face: their avatar if they picked one, their
- * initials on their own colour otherwise (`Avatars` § the eight-hue ring).
+ * initials on their own colour otherwise (M-K's six-slot member palette,
+ * `docs/design/claude-design/Ledenkleuren.dc.html`).
  *
  * This is the presentational half of the pattern. It takes already-resolved
  * strings — `initials`, `surfaceClass`, `ringClass` — rather than a
  * `MemberColor`, which is what lets it render from any surface, including ones
  * that cannot reach the family slice. The app's `MemberAvatar` is the
  * domain-aware wrapper that resolves a member row onto it; every avatar in the
- * product goes through one of the two.
+ * product goes through one of the two. The ring colour is always the `lijn`
+ * step and the disc's ground is `baan` (`MEMBER_COLOR_CLASSES[color].track`
+ * in the app) — `wassing` is reserved for icon tiles, not avatars.
  *
- * `ringed` is the identity marker the mockups use: a 2px ring in the member's
- * own colour, `ring-offset-2` against the card. It is opt-in rather than the
- * default because the shell's header avatar and the hub's person columns
- * already carry their own ring treatment, and two rings is none.
+ * `ringed` is the identity marker the mockups use: 2px at the `xs` (24px)
+ * avatar size, 3px from `default` (32px) up, `ring-offset-2` against the
+ * card. It is opt-in rather than the default because the shell's header
+ * avatar and the hub's person columns already carry their own ring
+ * treatment, and two rings is none.
  *
  * `FaceStack` is the overlapping group: faces, not names, because on a card
  * sized for a glance from the other side of a kitchen the face is the fastest
@@ -26,17 +30,17 @@ import { MEMBERS, Section, Specimen, SpecimenGrid } from '../specimen';
  * reader gets "Mila, Daan" once rather than every name twice.
  */
 const RINGS = [
-  'ring-cat-pink-solid',
-  'ring-cat-blue-solid',
-  'ring-cat-purple-solid',
-  'ring-cat-yellow-solid',
+  'ring-member-raspberry-lijn',
+  'ring-member-blue-lijn',
+  'ring-member-orchid-lijn',
+  'ring-member-mustard-lijn',
 ] as const;
 
 const SURFACES = [
-  'bg-cat-pink-surface text-cat-pink-fg',
-  'bg-cat-blue-surface text-cat-blue-fg',
-  'bg-cat-purple-surface text-cat-purple-fg',
-  'bg-cat-yellow-surface text-cat-yellow-fg',
+  'bg-member-raspberry-baan',
+  'bg-member-blue-baan',
+  'bg-member-orchid-baan',
+  'bg-member-mustard-baan',
 ] as const;
 
 const meta = {

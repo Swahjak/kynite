@@ -51,8 +51,8 @@ async function seedHousehold(familyId: string): Promise<Fixture> {
   return withDb(async (client) => {
     const owner = await ownerMemberOf(client, familyId);
     const [child, sibling] = await seedMembers(client, familyId, [
-      { displayName: 'Bram', role: 'child', color: 'orange', sortOrder: 1 },
-      { displayName: 'Fenna', role: 'child', color: 'teal', sortOrder: 2 },
+      { displayName: 'Bram', role: 'child', color: 'terracotta', sortOrder: 1 },
+      { displayName: 'Fenna', role: 'child', color: 'petrol', sortOrder: 2 },
     ]);
 
     const routines = await seedRoutines(client, familyId, [

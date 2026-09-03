@@ -127,7 +127,7 @@ export async function RoutineManager({
               name={group.member.displayName}
               avatarUrl={group.member.avatarUrl}
               initials={initialsOf(group.member.displayName)}
-              surfaceClass={MEMBER_COLOR_CLASSES[group.member.color].surface}
+              surfaceClass={MEMBER_COLOR_CLASSES[group.member.color].track}
             />
             <h3 className="font-display text-body font-bold">{group.member.displayName}</h3>
             <span className="text-caption text-ink-muted">

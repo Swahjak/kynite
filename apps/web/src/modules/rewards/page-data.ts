@@ -226,7 +226,7 @@ export async function loadStore(options: StoreOptions = {}): Promise<StoreData |
       id: entry.id,
       displayName: entry.displayName,
       avatarUrl: entry.avatarUrl,
-      colorClass: MEMBER_COLOR_CLASSES[entry.color].surface,
+      colorClass: MEMBER_COLOR_CLASSES[entry.color].track,
       initials: initialsOf(entry.displayName),
     })),
     horizon: member.rewardHorizon,

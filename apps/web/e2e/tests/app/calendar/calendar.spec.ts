@@ -335,8 +335,8 @@ test.describe('the today tabs', () => {
   }) => {
     await withDb(async (client) => {
       await seedMembers(client, family.familyId, [
-        { displayName: 'Mila', role: 'child', color: 'purple', sortOrder: 1 },
-        { displayName: 'Daan', role: 'child', color: 'orange', sortOrder: 2 },
+        { displayName: 'Mila', role: 'child', color: 'orchid', sortOrder: 1 },
+        { displayName: 'Daan', role: 'child', color: 'terracotta', sortOrder: 2 },
       ]);
     });
 
@@ -376,9 +376,9 @@ test.describe('the today tabs', () => {
       // member and the row collapses to "Iedereen" rather than naming names
       // (the same `everyone` rule `today-tab-dag.tsx` and the strip share).
       const [mila, daan] = await seedMembers(client, family.familyId, [
-        { displayName: 'Mila', role: 'child', color: 'purple', sortOrder: 1 },
-        { displayName: 'Daan', role: 'child', color: 'orange', sortOrder: 2 },
-        { displayName: 'Lars', role: 'child', color: 'green', sortOrder: 3 },
+        { displayName: 'Mila', role: 'child', color: 'orchid', sortOrder: 1 },
+        { displayName: 'Daan', role: 'child', color: 'terracotta', sortOrder: 2 },
+        { displayName: 'Lars', role: 'child', color: 'petrol', sortOrder: 3 },
       ]);
 
       await seedEvents(client, family.familyId, [

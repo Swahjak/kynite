@@ -62,9 +62,15 @@ export async function seedHousehold(db: TestDb, label: string): Promise<Househol
   const [parent, child, sibling] = await db
     .insert(schema.member)
     .values([
-      { familyId: family.id, displayName: 'Sarah', role: 'owner', color: 'purple', sortOrder: 0 },
-      { familyId: family.id, displayName: 'Bram', role: 'child', color: 'orange', sortOrder: 1 },
-      { familyId: family.id, displayName: 'Fenna', role: 'child', color: 'teal', sortOrder: 2 },
+      { familyId: family.id, displayName: 'Sarah', role: 'owner', color: 'orchid', sortOrder: 0 },
+      {
+        familyId: family.id,
+        displayName: 'Bram',
+        role: 'child',
+        color: 'terracotta',
+        sortOrder: 1,
+      },
+      { familyId: family.id, displayName: 'Fenna', role: 'child', color: 'petrol', sortOrder: 2 },
     ])
     .returning();
 

@@ -42,7 +42,7 @@ async function seedBoard(familyId: string) {
   return withDb(async (client) => {
     await ownerMemberOf(client, familyId);
     const [child] = await seedMembers(client, familyId, [
-      { displayName: 'Mila', role: 'child', color: 'purple', sortOrder: 1 },
+      { displayName: 'Mila', role: 'child', color: 'orchid', sortOrder: 1 },
     ]);
 
     const [routine] = await seedRoutines(client, familyId, [

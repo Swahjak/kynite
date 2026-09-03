@@ -72,7 +72,7 @@ test.describe('celebration visuals — hub tablet', { tag: '@visual' }, () => {
           id: memberId,
           displayName: 'Mila',
           role: 'child',
-          color: 'purple',
+          color: 'orchid',
           sortOrder: 1,
         },
       ]);

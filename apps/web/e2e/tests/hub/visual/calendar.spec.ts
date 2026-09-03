@@ -52,8 +52,8 @@ async function seedFixedWeek(familyId: string) {
   await withDb(async (client) => {
     const owner = await ownerMemberOf(client, familyId);
     const [mila, daan] = await seedMembers(client, familyId, [
-      { displayName: 'Mila', role: 'child', color: 'purple', sortOrder: 1 },
-      { displayName: 'Daan', role: 'child', color: 'orange', sortOrder: 2 },
+      { displayName: 'Mila', role: 'child', color: 'orchid', sortOrder: 1 },
+      { displayName: 'Daan', role: 'child', color: 'terracotta', sortOrder: 2 },
     ]);
 
     const privateCalendar = await seedCalendar(client, familyId, owner.id, {
@@ -133,8 +133,8 @@ async function seedBoardDay(familyId: string) {
   await withDb(async (client) => {
     const owner = await ownerMemberOf(client, familyId);
     const [mila, daan] = await seedMembers(client, familyId, [
-      { displayName: 'Mila', role: 'child', color: 'purple', sortOrder: 1 },
-      { displayName: 'Daan', role: 'child', color: 'orange', sortOrder: 2 },
+      { displayName: 'Mila', role: 'child', color: 'orchid', sortOrder: 1 },
+      { displayName: 'Daan', role: 'child', color: 'terracotta', sortOrder: 2 },
     ]);
 
     await seedEvents(client, familyId, [

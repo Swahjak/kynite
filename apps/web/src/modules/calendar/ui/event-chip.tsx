@@ -6,11 +6,13 @@ import { CategoryDot, cn, FaceStack, Icon, MemberFace, type StackedFace } from '
 // Type-only: `@/modules/family` is `server-only` (it re-exports its query
 // module), so a value import here would pull the database driver into this
 // client component's bundle. `person-columns.tsx` establishes the same
-// pattern for the same reason.
+// pattern for the same reason. `MEMBER_COLOR_CLASSES` comes from this slice's
+// own `./tokens` instead — see that file's doc comment for why it is a
+// same-slice duplicate rather than a cross-slice import.
 import type { Member } from '@/modules/family';
 import { titleOf } from '../domain/event-title';
 import type { CalendarEvent } from '../queries';
-import { CATEGORY_CLASSES, EVENT_TYPE_ICONS } from './tokens';
+import { CATEGORY_CLASSES, EVENT_TYPE_ICONS, MEMBER_COLOR_CLASSES } from './tokens';
 
 /**
  * Free/busy is a **texture, not a colour** (`Kalender.dc.html`; the argument is
@@ -281,16 +283,20 @@ export function EventChip({
         : participants.map((member) => member.displayName).join(' & ');
 
   /**
-   * `CATEGORY_CLASSES`, not `MEMBER_COLOR_CLASSES`: the two tables are keyed by
-   * the same hue names and this is a *client* component, so reaching for the
-   * family slice's copy would pull `server-only` (and the database driver) into
-   * the bundle. Same reason the owner face above resolves its surface here.
+   * `MEMBER_COLOR_CLASSES[color].track` (baan) — the avatar disc's ground,
+   * same rule `member-avatar.tsx` states. Until M-K this reached for
+   * `CATEGORY_CLASSES` instead, because the two tables happened to be keyed
+   * by the same hue names; M-K gave members their own six-slot palette
+   * (`docs/design/claude-design/Ledenkleuren.dc.html`), so the two enums no
+   * longer overlap and that shortcut stopped type-checking. `./tokens`'s
+   * import comment above explains why `MEMBER_COLOR_CLASSES` is reachable
+   * here without pulling `@/modules/family`'s `server-only` barrel in.
    */
   const faces: StackedFace[] = participants.map((member) => ({
     id: member.id,
     name: member.displayName,
     avatarUrl: member.avatarUrl,
-    surfaceClass: CATEGORY_CLASSES[member.color].surface,
+    surfaceClass: MEMBER_COLOR_CLASSES[member.color].track,
   }));
 
   /**
@@ -405,7 +411,7 @@ export function EventChip({
           <MemberFace
             name={ownerMember.displayName}
             avatarUrl={ownerMember.avatarUrl}
-            surfaceClass={CATEGORY_CLASSES[ownerMember.color].surface}
+            surfaceClass={MEMBER_COLOR_CLASSES[ownerMember.color].track}
             size={hub ? 'default' : 'xs'}
             className="shrink-0"
           />

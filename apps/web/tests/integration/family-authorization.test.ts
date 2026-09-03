@@ -58,7 +58,7 @@ function form(fields: Record<string, string>): FormData {
 const childInput = {
   displayName: 'Nieuw kind',
   role: 'child',
-  color: 'green',
+  color: 'petrol',
   rewardHorizon: 'instant',
 };
 

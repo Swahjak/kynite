@@ -43,7 +43,7 @@ export function MemberFaces({
       id: member.id,
       name: member.displayName,
       avatarUrl: member.avatarUrl,
-      surfaceClass: MEMBER_COLOR_CLASSES[member.color].surface,
+      surfaceClass: MEMBER_COLOR_CLASSES[member.color].track,
     }));
 
   return <FaceStack faces={faces} size={size} className={className} label={label} />;

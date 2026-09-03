@@ -53,10 +53,18 @@ export function Section({ title, children }: { title: string; children: ReactNod
   );
 }
 
-/** The four avataaars fixtures, served from `.storybook/static/avatars`. */
+/**
+ * The four avataaars fixtures, served from `.storybook/static/avatars`.
+ *
+ * Hues are the M-K member palette (`docs/design/claude-design/
+ * Ledenkleuren.dc.html`, `--member-*` in `packages/ui/src/styles/tokens.css`):
+ * raspberry 335 · blue 245 · orchid 312 · terracotta 30 — not the `--cat-*`
+ * category angles (290/65) this fixture borrowed before members had their own
+ * six-slot palette.
+ */
 export const MEMBERS = [
   { name: 'Mila', src: '/avatars/child1.svg', hue: 335 },
   { name: 'Daan', src: '/avatars/child2.svg', hue: 245 },
-  { name: 'Lotte', src: '/avatars/parent1.svg', hue: 290 },
-  { name: 'Tom', src: '/avatars/parent2.svg', hue: 65 },
+  { name: 'Lotte', src: '/avatars/parent1.svg', hue: 312 },
+  { name: 'Tom', src: '/avatars/parent2.svg', hue: 30 },
 ] as const;

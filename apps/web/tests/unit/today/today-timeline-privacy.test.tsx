@@ -54,6 +54,7 @@ vi.mock('@/modules/family', () => ({
     {
       get: () => ({
         surface: 'bg-test-surface',
+        track: 'bg-test-track',
         text: 'text-test',
         icon: 'text-test-icon',
         solid: 'bg-test-solid',

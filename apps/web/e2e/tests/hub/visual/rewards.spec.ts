@@ -68,7 +68,7 @@ async function seedShelf(familyId: string, scope: string, horizon: 'instant' | '
         id: ID(scope, '0001'),
         displayName: 'Mila',
         role: 'child',
-        color: 'purple',
+        color: 'orchid',
         sortOrder: 1,
         rewardHorizon: horizon,
       },

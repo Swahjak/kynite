@@ -31,7 +31,7 @@ async function seedShelf(
       {
         displayName: 'Mila',
         role: 'child',
-        color: 'purple',
+        color: 'orchid',
         sortOrder: 1,
         rewardHorizon: options.horizon ?? 'instant',
       },
@@ -253,7 +253,7 @@ test.describe('the parent catalogue', () => {
     await withDb(async (client) => {
       await ownerMemberOf(client, family.familyId);
       await seedMembers(client, family.familyId, [
-        { displayName: 'Mila', role: 'child', color: 'purple', sortOrder: 1 },
+        { displayName: 'Mila', role: 'child', color: 'orchid', sortOrder: 1 },
       ]);
     });
 

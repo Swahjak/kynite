@@ -89,7 +89,7 @@ export default async function HubRoutinesPage({
           name={board.member.displayName}
           avatarUrl={board.member.avatarUrl}
           initials={initialsOf(board.member.displayName)}
-          surfaceClass={MEMBER_COLOR_CLASSES[board.member.color].surface}
+          surfaceClass={MEMBER_COLOR_CLASSES[board.member.color].track}
         />
 
         <div className="min-w-0 flex-1">

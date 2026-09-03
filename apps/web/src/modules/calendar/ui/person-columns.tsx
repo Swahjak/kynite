@@ -14,8 +14,8 @@ import { splitByMember } from '../domain/day-board';
 import { toDateKey, toWall } from '../domain/zone';
 import type { CalendarEvent } from '../queries';
 import { DayAgendaRow } from './day-agenda-row';
+import { MEMBER_COLOR_CLASSES } from './tokens';
 import { isCurrent, useNowTick } from './use-now-tick';
-import { CATEGORY_CLASSES } from './tokens';
 
 /**
  * The per-person column board: one column per member, in `member.sortOrder`,
@@ -160,9 +160,15 @@ export function PersonColumns({
       >
         {members.map((member) => {
           const memberEvents = byMember.get(member.id) ?? [];
-          // `member_color` and `event_category` are the same eight design-system
-          // keys, so one palette table serves both.
-          const palette = CATEGORY_CLASSES[member.color];
+          // M-K: members and event categories used to share one eight-key
+          // palette (`member_color` and `event_category` were the same
+          // enum values); the member palette is now its own six-slot table
+          // (`docs/design/claude-design/Ledenkleuren.dc.html`), so the column
+          // header reaches for `MEMBER_COLOR_CLASSES` directly. The sheet's
+          // "Kalenderkolom" spec: a 3px underline under the header, the
+          // avatar's disc in `track` (baan) with a ring, the member dot in
+          // `dot` (lijn) — never the column's own background.
+          const palette = MEMBER_COLOR_CLASSES[member.color];
 
           return (
             <Card
@@ -180,12 +186,19 @@ export function PersonColumns({
               {/* `Card/Stat`'s header rule: "Header row separated by
                   `border-bottom:1px solid #e1e3e4`" — the `#e1e3e4` divider
                   tone (`--line-subtle`), not the darker `#c4c5d9` outline. */}
-              <header className="flex items-center gap-2 border-b border-line-subtle px-2 pt-1 pb-2">
+              <header
+                className={cn(
+                  'flex items-center gap-2 border-b-[3px] px-2 pt-1 pb-2',
+                  palette.border
+                )}
+              >
                 <MemberFace
                   size={hub ? 'hub' : 'default'}
                   avatarUrl={member.avatarUrl}
                   name={member.displayName}
-                  surfaceClass={palette.surface}
+                  surfaceClass={palette.track}
+                  ringClass={palette.ring}
+                  ringed
                 />
                 <div className="min-w-0 flex-1">
                   <div
@@ -201,7 +214,7 @@ export function PersonColumns({
                   </div>
                 </div>
                 {/* The member's own color, present on every surface they own. */}
-                <CategoryDot size="md" className={cn('size-3', palette.solid)} />
+                <CategoryDot size="md" className={cn('size-3', palette.dot)} />
               </header>
 
               <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">

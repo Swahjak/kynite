@@ -38,8 +38,8 @@ export async function seedHousehold(familyId: string, occurrenceDate: string) {
     const owner = await ownerMemberOf(client, familyId);
 
     const children = await seedMembers(client, familyId, [
-      { displayName: 'Mila', role: 'child', color: 'purple', sortOrder: 1 },
-      { displayName: 'Daan', role: 'child', color: 'orange', sortOrder: 2 },
+      { displayName: 'Mila', role: 'child', color: 'orchid', sortOrder: 1 },
+      { displayName: 'Daan', role: 'child', color: 'terracotta', sortOrder: 2 },
     ]);
 
     const [routine] = await seedRoutines(client, familyId, [

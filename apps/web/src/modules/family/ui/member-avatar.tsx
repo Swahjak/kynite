@@ -30,7 +30,9 @@ export function MemberAvatar({
     <MemberFace
       name={displayName}
       avatarUrl={avatarUrl}
-      surfaceClass={MEMBER_COLOR_CLASSES[color].surface}
+      // `.track` (baan), not `.surface` (wassing): the sheet's avatar spec is
+      // "disc bg = baan". `.surface`/wassing is reserved for icon-tile fills.
+      surfaceClass={MEMBER_COLOR_CLASSES[color].track}
       ringClass={MEMBER_COLOR_CLASSES[color].ring}
       size={size}
       ringed={ringed}

@@ -1,4 +1,5 @@
 import type { IconName } from '@kynite/ui';
+import type { MemberColor } from '@/modules/family';
 import { EVENT_TYPE_ICONS as TYPE_ICONS } from '../domain/event-type';
 import type { EventCategory, EventType } from '../schema';
 
@@ -148,6 +149,101 @@ export const CATEGORY_CLASSES: Record<
     ring: 'ring-cat-teal-solid',
     deep: 'bg-cat-teal-deep',
     strong: 'bg-cat-teal-strong',
+  },
+};
+
+/**
+ * Member colour → design-system classes, restated for this slice's client
+ * components.
+ *
+ * The canonical table is `modules/family/ui/tokens.ts`'s `MEMBER_COLOR_CLASSES`
+ * (M-K, `docs/design/claude-design/Ledenkleuren.dc.html`) — see that file's
+ * doc comment for what each of the eight keys carries. This is a duplicate
+ * rather than an import for the same reason `CATEGORY_CLASSES` above lives
+ * here rather than in `modules/calendar/schema.ts`: the module-boundary
+ * ESLint rule bans a cross-slice deep import (`@/modules/family/ui/tokens`),
+ * and the family slice's only *allowed* cross-slice import, its barrel,
+ * re-exports `queries.ts` — `server-only` and the Postgres driver — which a
+ * client bundle cannot carry (`event-chip.tsx`, `person-columns.tsx`,
+ * `member-day-grid.tsx` and `calendar-shell.tsx` all import this instead of
+ * reaching cross-slice). `type MemberColor` above is safe as a type-only
+ * import; only the runtime object needs restating.
+ *
+ * If a `--member-*` step or a slot's hue changes in `packages/ui/src/styles/
+ * tokens.css`, both this table and the family slice's copy change with it.
+ */
+export const MEMBER_COLOR_CLASSES: Record<
+  MemberColor,
+  {
+    dot: string;
+    surface: string;
+    ring: string;
+    border: string;
+    line: string;
+    track: string;
+    fill: string;
+    ink: string;
+  }
+> = {
+  raspberry: {
+    dot: 'bg-member-raspberry-lijn',
+    surface: 'bg-member-raspberry-wassing',
+    ring: 'ring-member-raspberry-lijn',
+    border: 'border-member-raspberry-lijn',
+    line: 'bg-member-raspberry-lijn',
+    track: 'bg-member-raspberry-baan',
+    fill: 'bg-member-raspberry-lijn',
+    ink: 'text-member-raspberry-inkt',
+  },
+  blue: {
+    dot: 'bg-member-blue-lijn',
+    surface: 'bg-member-blue-wassing',
+    ring: 'ring-member-blue-lijn',
+    border: 'border-member-blue-lijn',
+    line: 'bg-member-blue-lijn',
+    track: 'bg-member-blue-baan',
+    fill: 'bg-member-blue-lijn',
+    ink: 'text-member-blue-inkt',
+  },
+  petrol: {
+    dot: 'bg-member-petrol-lijn',
+    surface: 'bg-member-petrol-wassing',
+    ring: 'ring-member-petrol-lijn',
+    border: 'border-member-petrol-lijn',
+    line: 'bg-member-petrol-lijn',
+    track: 'bg-member-petrol-baan',
+    fill: 'bg-member-petrol-lijn',
+    ink: 'text-member-petrol-inkt',
+  },
+  orchid: {
+    dot: 'bg-member-orchid-lijn',
+    surface: 'bg-member-orchid-wassing',
+    ring: 'ring-member-orchid-lijn',
+    border: 'border-member-orchid-lijn',
+    line: 'bg-member-orchid-lijn',
+    track: 'bg-member-orchid-baan',
+    fill: 'bg-member-orchid-lijn',
+    ink: 'text-member-orchid-inkt',
+  },
+  mustard: {
+    dot: 'bg-member-mustard-lijn',
+    surface: 'bg-member-mustard-wassing',
+    ring: 'ring-member-mustard-lijn',
+    border: 'border-member-mustard-lijn',
+    line: 'bg-member-mustard-lijn',
+    track: 'bg-member-mustard-baan',
+    fill: 'bg-member-mustard-lijn',
+    ink: 'text-member-mustard-inkt',
+  },
+  terracotta: {
+    dot: 'bg-member-terracotta-lijn',
+    surface: 'bg-member-terracotta-wassing',
+    ring: 'ring-member-terracotta-lijn',
+    border: 'border-member-terracotta-lijn',
+    line: 'bg-member-terracotta-lijn',
+    track: 'bg-member-terracotta-baan',
+    fill: 'bg-member-terracotta-lijn',
+    ink: 'text-member-terracotta-inkt',
   },
 };
 

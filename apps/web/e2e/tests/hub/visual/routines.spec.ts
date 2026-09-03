@@ -53,7 +53,7 @@ async function seedBoard(familyId: string, scope: string) {
       `00000000-0000-4000-8000-000000${scope}%`,
     ]);
     const [mila] = await seedMembers(client, familyId, [
-      { id: ID(scope, '00001'), displayName: 'Mila', role: 'child', color: 'purple', sortOrder: 1 },
+      { id: ID(scope, '00001'), displayName: 'Mila', role: 'child', color: 'orchid', sortOrder: 1 },
     ]);
 
     const [morning, vitamins, homework, bedtime] = await seedRoutines(client, familyId, [

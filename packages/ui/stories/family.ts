@@ -40,17 +40,26 @@ export type Member = {
 
 /**
  * The classes are spelled out rather than built from a hue name: Tailwind
- * scans source text, so `bg-cat-${hue}-surface` would never be generated.
+ * scans source text, so `bg-member-${slot}-lijn` would never be generated.
  * `MEMBER_COLOR_CLASSES` in the app is written out for the same reason.
+ *
+ * M-K gave members their own six-slot palette (`docs/design/claude-design/
+ * Ledenkleuren.dc.html`, `--member-*` in `packages/ui/src/styles/
+ * tokens.css`), separate from the `--cat-*` category hues these fixtures
+ * borrowed before that palette existed. `surface` here is `wassing`
+ * (icon-tile ground); most call sites in the app actually want the avatar's
+ * disc in `baan` (`track` in `MEMBER_COLOR_CLASSES`) — these fixtures keep
+ * one field for simplicity, since a Storybook specimen is not auditing which
+ * carrier a real screen uses.
  */
 export const TOM: Member = {
   id: 'tom',
   name: 'Tom',
   avatar: '/avatars/parent1.svg',
   role: 'parent',
-  surface: 'bg-cat-yellow-surface text-cat-yellow-fg',
-  solid: 'bg-cat-yellow-solid',
-  bar: 'bg-cat-yellow-solid',
+  surface: 'bg-member-mustard-wassing',
+  solid: 'bg-member-mustard-lijn',
+  bar: 'bg-member-mustard-lijn',
 };
 
 export const LOTTE: Member = {
@@ -58,9 +67,9 @@ export const LOTTE: Member = {
   name: 'Lotte',
   avatar: '/avatars/parent2.svg',
   role: 'parent',
-  surface: 'bg-cat-purple-surface text-cat-purple-fg',
-  solid: 'bg-cat-purple-solid',
-  bar: 'bg-cat-purple-solid',
+  surface: 'bg-member-orchid-wassing',
+  solid: 'bg-member-orchid-lijn',
+  bar: 'bg-member-orchid-lijn',
 };
 
 export const MILA: Member = {
@@ -68,9 +77,9 @@ export const MILA: Member = {
   name: 'Mila',
   avatar: '/avatars/child1.svg',
   role: 'child',
-  surface: 'bg-cat-pink-surface text-cat-pink-fg',
-  solid: 'bg-cat-pink-solid',
-  bar: 'bg-cat-pink-solid',
+  surface: 'bg-member-raspberry-wassing',
+  solid: 'bg-member-raspberry-lijn',
+  bar: 'bg-member-raspberry-lijn',
 };
 
 export const DAAN: Member = {
@@ -78,9 +87,9 @@ export const DAAN: Member = {
   name: 'Daan',
   avatar: '/avatars/child2.svg',
   role: 'child',
-  surface: 'bg-cat-blue-surface text-cat-blue-fg',
-  solid: 'bg-cat-blue-solid',
-  bar: 'bg-cat-blue-solid',
+  surface: 'bg-member-blue-wassing',
+  solid: 'bg-member-blue-lijn',
+  bar: 'bg-member-blue-lijn',
 };
 
 export const FAMILY: readonly Member[] = [TOM, LOTTE, MILA, DAAN];

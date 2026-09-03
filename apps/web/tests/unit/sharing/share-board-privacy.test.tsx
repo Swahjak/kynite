@@ -37,7 +37,7 @@ const TZ = 'Europe/Amsterdam';
 
 const members: ShareMember[] = [
   { id: 'm1', displayName: 'Mila', avatarUrl: null, color: 'blue' },
-  { id: 'm2', displayName: 'Daan', avatarUrl: null, color: 'green' },
+  { id: 'm2', displayName: 'Daan', avatarUrl: null, color: 'petrol' },
 ];
 
 // Initials are `displayName.trim().slice(0, 2).toUpperCase()` (`MemberFace`).

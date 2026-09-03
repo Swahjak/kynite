@@ -289,6 +289,85 @@
   --cat-teal-deep: oklch(42% 0.14 200);
   --cat-teal-strong: oklch(34% 0.13 200);
 
+  /* -- Member palette — `docs/design/claude-design/Ledenkleuren.dc.html`,
+     milestone M-K. A SEPARATE tokenset from `--cat-*` above: a member's colour
+     identifies a *person*, a category's colour identifies a *kind of event*,
+     and the two must never be forced onto the same hue table (a household of
+     six members and eight categories would otherwise fight over slots).
+
+     Six hues, every one at the same lightness/chroma the agenda rail on
+     Vandaag already draws at — `oklch(58% 0.14 H)` — so no member reads
+     "louder" than another. The angles keep clear of every anchor hue the
+     sheet forbids: indigo ~275 (system: nav/NU/selection), ~52 (reward
+     orange: stars/streaks/done), 155 (the done checkmark's green).
+
+     A four-step ramp per hue, named for what each step carries rather than
+     for its lightness — the sheet's own vocabulary, because "the 90% one" is
+     not a rule an engineer six months from now can apply to a component the
+     sheet never drew:
+
+       wassing  95% 0.025 H   icon tile / soft row fill
+       baan     90% 0.05  H   empty progress track / avatar disc background
+       lijn     58% 0.14  H   stripe · ring · dot · bar fill — the one carrier
+                              that reads as "this person" at a glance
+       inkt     38% 0.09  H   icon or digit colour ONLY, never running text
+                              (`inkt` on `wassing` is ~4:1+; on the cream page
+                              background it is closer to AA-large territory,
+                              which is exactly why the rule confines it to a
+                              short glyph rather than a sentence)
+
+     `docs/design/README.md`'s hue list, restated here for the slot names:
+       raspberry 335 · blue 245 · petrol 196 · orchid 312 · mustard 90 ·
+       terracotta 30
+     (`raspberry`/`orchid`/`mustard` rather than the sheet's Dutch
+     framboos/orchidee/mosterd — every other token name in this file is
+     English, and `modules/family/schema.ts`'s existing `member_color` enum
+     is English too; keeping the language matched avoids a token layer that
+     switches languages mid-file.)
+
+     Petrol is only 3.6:1 on the cream background — legible as a *graphic*
+     (a ring, a rail, a fill — everything this ramp is for) but never safe as
+     running text, same floor as `inkt` above, just tighter for this one hue.
+
+     DARK THEME: like `--cat-*`, the sheet draws no dark room, so the dark
+     values below are derived by the same method that block uses — each step
+     keeps its *position relative to its neighbours* rather than its absolute
+     lightness. `wassing` drops to the `--cat-*-fill` dark depth (a wash
+     rather than a chip), `baan` sits one step up from it as a dark "track"
+     that still reads as a distinct disc behind a light avatar fallback glyph,
+     `lijn` brightens to stay a legible rail/ring on a dark card (mirrors
+     `--cat-*-solid` dark), and `inkt` rises to the `--cat-*-icon` dark depth
+     so a digit or glyph drawn in it still clears a dark `wassing` tile. */
+  --member-raspberry-wassing: oklch(95% 0.025 335);
+  --member-raspberry-baan: oklch(90% 0.05 335);
+  --member-raspberry-lijn: oklch(58% 0.14 335);
+  --member-raspberry-inkt: oklch(38% 0.09 335);
+
+  --member-blue-wassing: oklch(95% 0.025 245);
+  --member-blue-baan: oklch(90% 0.05 245);
+  --member-blue-lijn: oklch(58% 0.14 245);
+  --member-blue-inkt: oklch(38% 0.09 245);
+
+  --member-petrol-wassing: oklch(95% 0.025 196);
+  --member-petrol-baan: oklch(90% 0.05 196);
+  --member-petrol-lijn: oklch(58% 0.14 196);
+  --member-petrol-inkt: oklch(38% 0.09 196);
+
+  --member-orchid-wassing: oklch(95% 0.025 312);
+  --member-orchid-baan: oklch(90% 0.05 312);
+  --member-orchid-lijn: oklch(58% 0.14 312);
+  --member-orchid-inkt: oklch(38% 0.09 312);
+
+  --member-mustard-wassing: oklch(95% 0.025 90);
+  --member-mustard-baan: oklch(90% 0.05 90);
+  --member-mustard-lijn: oklch(58% 0.14 90);
+  --member-mustard-inkt: oklch(38% 0.09 90);
+
+  --member-terracotta-wassing: oklch(95% 0.025 30);
+  --member-terracotta-baan: oklch(90% 0.05 30);
+  --member-terracotta-lijn: oklch(58% 0.14 30);
+  --member-terracotta-inkt: oklch(38% 0.09 30);
+
   /* -- Weather ------------------------------------------------------------
      "Kynite Design System" § "Weer-widget · kaartthema per weertype" and
      § "Weertypes". Two independent groups, and they are independent on
@@ -548,6 +627,38 @@
   --cat-teal-solid: oklch(66% 0.14 200);
   --cat-teal-icon: oklch(72% 0.11 200);
   --cat-teal-fill: oklch(22% 0.04 200);
+
+  /* -- Member palette, dark — see the light block's header for the method:
+     each step keeps its position relative to its neighbours. */
+  --member-raspberry-wassing: oklch(22% 0.04 335);
+  --member-raspberry-baan: oklch(30% 0.06 335);
+  --member-raspberry-lijn: oklch(66% 0.14 335);
+  --member-raspberry-inkt: oklch(78% 0.11 335);
+
+  --member-blue-wassing: oklch(22% 0.04 245);
+  --member-blue-baan: oklch(30% 0.06 245);
+  --member-blue-lijn: oklch(66% 0.14 245);
+  --member-blue-inkt: oklch(78% 0.11 245);
+
+  --member-petrol-wassing: oklch(22% 0.04 196);
+  --member-petrol-baan: oklch(30% 0.06 196);
+  --member-petrol-lijn: oklch(66% 0.14 196);
+  --member-petrol-inkt: oklch(78% 0.11 196);
+
+  --member-orchid-wassing: oklch(22% 0.04 312);
+  --member-orchid-baan: oklch(30% 0.06 312);
+  --member-orchid-lijn: oklch(66% 0.14 312);
+  --member-orchid-inkt: oklch(78% 0.11 312);
+
+  --member-mustard-wassing: oklch(22% 0.04 90);
+  --member-mustard-baan: oklch(30% 0.06 90);
+  --member-mustard-lijn: oklch(66% 0.14 90);
+  --member-mustard-inkt: oklch(78% 0.11 90);
+
+  --member-terracotta-wassing: oklch(22% 0.04 30);
+  --member-terracotta-baan: oklch(30% 0.06 30);
+  --member-terracotta-lijn: oklch(66% 0.14 30);
+  --member-terracotta-inkt: oklch(78% 0.11 30);
 
   /* -- Weather, dark ------------------------------------------------------
      Derived, like the `--cat-*` block above — the design sheet draws the
@@ -914,6 +1025,33 @@
   --color-cat-teal-solid: var(--cat-teal-solid);
   --color-cat-teal-icon: var(--cat-teal-icon);
   --color-cat-teal-fill: var(--cat-teal-fill);
+
+  /* Member palette — separate colour namespace from `--color-cat-*` above,
+     see the `--member-*` declarations in `:root`/`.dark` for the ramp. */
+  --color-member-raspberry-wassing: var(--member-raspberry-wassing);
+  --color-member-raspberry-baan: var(--member-raspberry-baan);
+  --color-member-raspberry-lijn: var(--member-raspberry-lijn);
+  --color-member-raspberry-inkt: var(--member-raspberry-inkt);
+  --color-member-blue-wassing: var(--member-blue-wassing);
+  --color-member-blue-baan: var(--member-blue-baan);
+  --color-member-blue-lijn: var(--member-blue-lijn);
+  --color-member-blue-inkt: var(--member-blue-inkt);
+  --color-member-petrol-wassing: var(--member-petrol-wassing);
+  --color-member-petrol-baan: var(--member-petrol-baan);
+  --color-member-petrol-lijn: var(--member-petrol-lijn);
+  --color-member-petrol-inkt: var(--member-petrol-inkt);
+  --color-member-orchid-wassing: var(--member-orchid-wassing);
+  --color-member-orchid-baan: var(--member-orchid-baan);
+  --color-member-orchid-lijn: var(--member-orchid-lijn);
+  --color-member-orchid-inkt: var(--member-orchid-inkt);
+  --color-member-mustard-wassing: var(--member-mustard-wassing);
+  --color-member-mustard-baan: var(--member-mustard-baan);
+  --color-member-mustard-lijn: var(--member-mustard-lijn);
+  --color-member-mustard-inkt: var(--member-mustard-inkt);
+  --color-member-terracotta-wassing: var(--member-terracotta-wassing);
+  --color-member-terracotta-baan: var(--member-terracotta-baan);
+  --color-member-terracotta-lijn: var(--member-terracotta-lijn);
+  --color-member-terracotta-inkt: var(--member-terracotta-inkt);
 
   --color-surface-night: var(--surface-night);
 

@@ -258,14 +258,12 @@
       "rewardHorizon": "Beloningen",
       "rewardHorizonHint": "Jonge kinderen hebben een directe beloning nodig; vanaf ongeveer 8 jaar kunnen ze sparen.",
       "colors": {
+        "raspberry": "Framboos",
         "blue": "Blauw",
-        "purple": "Paars",
-        "orange": "Oranje",
-        "green": "Groen",
-        "red": "Rood",
-        "yellow": "Geel",
-        "pink": "Roze",
-        "teal": "Turquoise"
+        "petrol": "Petrol",
+        "orchid": "Orchidee",
+        "mustard": "Mosterd",
+        "terracotta": "Terracotta"
       },
       "avatars": {
         "fox": "Vos",

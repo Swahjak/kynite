@@ -17,7 +17,7 @@ import { MemberDayGrid } from './member-day-grid';
 import { MobileMonthView } from './mobile-month-view';
 import { MonthView } from './month-view';
 import { TimeGrid } from './time-grid';
-import { CATEGORY_CLASSES } from './tokens';
+import { MEMBER_COLOR_CLASSES } from './tokens';
 import { useIsWide } from './use-is-wide';
 
 /**
@@ -328,7 +328,7 @@ export function CalendarShell({
           >
             {members.map((member) => {
               const included = !excluded.has(member.id);
-              const palette = CATEGORY_CLASSES[member.color];
+              const palette = MEMBER_COLOR_CLASSES[member.color];
 
               return (
                 <button
@@ -347,7 +347,7 @@ export function CalendarShell({
                     size="default"
                     name={member.displayName}
                     avatarUrl={member.avatarUrl}
-                    surfaceClass={palette.surface}
+                    surfaceClass={palette.track}
                     // Indigo, not the member's own hue: the ring is the
                     // *filter's* state ("Kalender.dc.html":70–73 draws every
                     // included face with `box-shadow 0 0 0 2px #5d5fef`), and a

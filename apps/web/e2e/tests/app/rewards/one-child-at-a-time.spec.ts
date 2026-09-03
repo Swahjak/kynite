@@ -39,8 +39,8 @@ async function seedTwoChildren(familyId: string) {
     await ownerMemberOf(client, familyId);
 
     const [mila, daan] = await seedMembers(client, familyId, [
-      { displayName: 'Mila', role: 'child', color: 'purple', sortOrder: 1 },
-      { displayName: 'Daan', role: 'child', color: 'orange', sortOrder: 2 },
+      { displayName: 'Mila', role: 'child', color: 'orchid', sortOrder: 1 },
+      { displayName: 'Daan', role: 'child', color: 'terracotta', sortOrder: 2 },
     ]);
 
     await seedStars(client, familyId, mila.id, [{ amount: MILA_STARS }]);

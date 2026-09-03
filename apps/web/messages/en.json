@@ -258,14 +258,12 @@
       "rewardHorizon": "Rewards",
       "rewardHorizonHint": "Young children need an instant reward; from about age 8 they can save up.",
       "colors": {
+        "raspberry": "Raspberry",
         "blue": "Blue",
-        "purple": "Purple",
-        "orange": "Orange",
-        "green": "Green",
-        "red": "Red",
-        "yellow": "Yellow",
-        "pink": "Pink",
-        "teal": "Teal"
+        "petrol": "Petrol",
+        "orchid": "Orchid",
+        "mustard": "Mustard",
+        "terracotta": "Terracotta"
       },
       "avatars": {
         "fox": "Fox",

@@ -49,11 +49,26 @@ export function MemberFace({
   ringed?: boolean;
   className?: string;
 }) {
+  // M-K (`Ledenkleuren.dc.html`): the member ring is 2px at the 24px avatar
+  // and 3px at 36/48. This ramp has no 24/36/48 steps of its own — `xs` (24px)
+  // is the nearest match for the thin ring, everything `default` (32px) and up
+  // gets the 3px ring, and the two sizes below `xs` (`2xs`/`sm`) stay thin too:
+  // a 16–28px disc cannot carry a 3px ring without swallowing the face inside it.
+  const ringWidth = size === 'default' || size === 'lg' || size === 'hub' ? 3 : 2;
+
   return (
     <Avatar
       size={size}
       title={name}
-      className={cn(ringed && ['ring-2 ring-offset-2 ring-offset-card', ringClass], className)}
+      className={cn(
+        ringed && [
+          ringWidth === 3
+            ? 'ring-3 ring-offset-2 ring-offset-card'
+            : 'ring-2 ring-offset-2 ring-offset-card',
+          ringClass,
+        ],
+        className
+      )}
     >
       {avatarUrl ? <AvatarImage src={avatarUrl} alt="" /> : null}
       <AvatarFallback className={surfaceClass}>

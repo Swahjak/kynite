@@ -64,7 +64,7 @@ export function InviteAcceptStep({
         <div className="flex items-center gap-3">
           <MemberFace
             name={displayName}
-            surfaceClass={MEMBER_COLOR_CLASSES[color].surface}
+            surfaceClass={MEMBER_COLOR_CLASSES[color].track}
             size="lg"
           />
           <span className="font-display text-h3 font-semibold text-ink">{displayName}</span>

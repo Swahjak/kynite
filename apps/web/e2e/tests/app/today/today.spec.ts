@@ -48,7 +48,7 @@ test.describe('the sterren tab', () => {
   test('ticking a star cell completes the step for that child', async ({ page, family }) => {
     const routine = await withDb(async (client) => {
       const [mila] = await seedMembers(client, family.familyId, [
-        { displayName: 'Mila', role: 'child', color: 'purple', sortOrder: 1 },
+        { displayName: 'Mila', role: 'child', color: 'orchid', sortOrder: 1 },
       ]);
       // Daily at 00:01 so today's occurrence is always already due when the
       // spec runs, the same pattern `routines.spec.ts` uses.

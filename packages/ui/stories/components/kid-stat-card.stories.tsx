@@ -20,11 +20,13 @@ import { MEMBERS, Section, Specimen } from '../specimen';
  * There is no streak and no level here, deliberately. Both are a product cut,
  * and this block is built from the facts this system actually keeps.
  */
+// M-K: the member palette (`docs/design/claude-design/Ledenkleuren.dc.html`)
+// rather than the `--cat-*` category hues this fixture used to borrow.
 const HUES = [
-  { bar: 'bg-cat-pink-solid', surface: 'bg-cat-pink-surface text-cat-pink-fg' },
-  { bar: 'bg-cat-blue-solid', surface: 'bg-cat-blue-surface text-cat-blue-fg' },
-  { bar: 'bg-cat-purple-solid', surface: 'bg-cat-purple-surface text-cat-purple-fg' },
-  { bar: 'bg-cat-yellow-solid', surface: 'bg-cat-yellow-surface text-cat-yellow-fg' },
+  { bar: 'bg-member-raspberry-lijn', surface: 'bg-member-raspberry-wassing' },
+  { bar: 'bg-member-blue-lijn', surface: 'bg-member-blue-wassing' },
+  { bar: 'bg-member-orchid-lijn', surface: 'bg-member-orchid-wassing' },
+  { bar: 'bg-member-mustard-lijn', surface: 'bg-member-mustard-wassing' },
 ];
 
 const PROGRESS = [
