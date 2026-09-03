@@ -85,18 +85,7 @@ export default async function HubRoutinesOverviewPage({
           events: data.events,
         }}
       >
-        <TodayHeader
-          surface="hub"
-          greeting={t(`hubGreeting.${slot}`)}
-          anchor={data.anchor}
-          now={data.now}
-          timeZone={data.timeZone}
-          dayKey={dayKey}
-          isToday={isToday}
-          members={data.members}
-          href="/hub/routines"
-        />
-
+        {/* RoutinesBoard renders its own header (title, date, daypart pills, clock), so TodayHeader only renders for the browsed-day fallback. */}
         {board ? (
           <RoutinesBoard
             board={board}
@@ -105,7 +94,20 @@ export default async function HubRoutinesOverviewPage({
             toggleTaskAction={toggleTaskAction}
           />
         ) : (
-          <p className="text-body-sm text-ink-secondary">{t('routines.otherDay')}</p>
+          <>
+            <TodayHeader
+              surface="hub"
+              greeting={t(`hubGreeting.${slot}`)}
+              anchor={data.anchor}
+              now={data.now}
+              timeZone={data.timeZone}
+              dayKey={dayKey}
+              isToday={isToday}
+              members={data.members}
+              href="/hub/routines"
+            />
+            <p className="text-body-sm text-ink-secondary">{t('routines.otherDay')}</p>
+          </>
         )}
       </HubBoard>
     </main>
