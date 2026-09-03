@@ -1,4 +1,4 @@
-import { boolean, index, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { boolean, index, pgTable, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
 
 /**
  * better-auth owned tables (docs/architecture.md §7): `user`, `session`,
@@ -67,8 +67,21 @@ export const account = pgTable(
     password: text('password'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
+    // better-auth 1.7: the identity namespace an `accountId` is scoped to.
+    // Replaces the old bare-`accountId` uniqueness with `(issuer,
+    // accountId)`, so an id issued by one provider can never collide with one
+    // issued by another. There is no config knob for this (see the comment
+    // above `account.encryptOAuthTokens` in `src/server/auth.ts` — 1.7.2 has
+    // no `identityStrategy` option despite the upgrade guide's prose);
+    // resolution is unconditional in better-auth's source. Existing rows are
+    // backfilled by the drizzle migration that adds this column — see its
+    // header for the exact mapping.
+    issuer: text('issuer').notNull(),
   },
-  (table) => [index('account_user_id_idx').on(table.userId)]
+  (table) => [
+    index('account_user_id_idx').on(table.userId),
+    uniqueIndex('account_issuer_account_id_uidx').on(table.issuer, table.accountId),
+  ]
 );
 
 export const verification = pgTable(
