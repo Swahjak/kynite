@@ -1,0 +1,19 @@
+diff --git a/dist/authorize-BmTe2VYG.mjs b/dist/authorize-BmTe2VYG.mjs
+index 42c943dd45aa3d297a14edcc056a14e7ddd54680..512019356d25efa09fb05730855b79fe27da1382 100644
+--- a/dist/authorize-BmTe2VYG.mjs
++++ b/dist/authorize-BmTe2VYG.mjs
+@@ -5395,7 +5395,13 @@ function findRegisteredRedirectUri(registered, requested) {
+ 		if (!req) return false;
+ 		try {
+ 			const reg = new URL(url);
+-			return isLoopbackIP(reg.hostname) && reg.hostname === req.hostname && reg.pathname === req.pathname && reg.protocol === req.protocol && reg.search === req.search;
++			if (isLoopbackIP(reg.hostname) && reg.hostname === req.hostname && reg.pathname === req.pathname && reg.protocol === req.protocol && reg.search === req.search) return true;
++			/* Deliberate deviation from RFC 8252 §8.3: also allow port variance for the
++			* "localhost" DNS name, not just loopback IPs. MCP clients (e.g. Claude Code)
++			* register CIMD metadata like http://localhost/callback but request a random
++			* ephemeral port (http://localhost:PORT/callback) at authorize time. Remove
++			* once upstream (@better-auth/oauth-provider) supports this. */
++			return reg.hostname === "localhost" && req.hostname === "localhost" && reg.protocol === req.protocol && reg.pathname === req.pathname && reg.search === req.search;
+ 		} catch {
+ 			return false;
+ 		}
