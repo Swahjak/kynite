@@ -49,6 +49,12 @@ const PUBLIC_ACTIONS = [
   // creates it, so `assertCan` has nothing to check — its authorization is the
   // better-auth session cookie it reads first, and it refuses without one.
   'src/modules/family/actions.ts::createFamilyForSocialUserAction',
+  // M-C. Approving/denying an OAuth/MCP consent request is the account
+  // holder's own decision about their own grant — there is no family
+  // `Resource` to grade `assertCan` against, only the better-auth session
+  // cookie (`getPrincipal()`), which is the whole of the authorization here.
+  // Same class as `signInAction`/`signOutAction` above.
+  'src/modules/oauth-consent/actions.ts::oauthConsentAction',
 ];
 
 const AUTHORIZATION_CALLS = new Set(['can', 'assertCan', 'decide']);
@@ -302,7 +308,9 @@ describe('every Server Action authorizes first', () => {
     // latitude/longitude for the hub's weather, behind `display:manage` — the
     // same capability as `setHubDisplayAction`, because it configures what the
     // wall shows rather than who the household is.
-    expect(findings.length).toBe(59);
+    // 59 → 60 in M-C: `oauth-consent`'s `oauthConsentAction`, the MCP/OAuth
+    // consent screen's approve/deny — `@public-action`, same class as sign-in.
+    expect(findings.length).toBe(60);
   });
 
   it('reports no unauthorized action anywhere in src/', () => {

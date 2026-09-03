@@ -1569,5 +1569,25 @@
       "atMaximum": "Deze timer is al zo lang als hij kan zijn.",
       "quickStartLabel": "Timer van {minutes} min"
     }
+  },
+  "oauth": {
+    "pageTitle": "Toegang goedkeuren",
+    "pageSubtitle": "{client} vraagt toegang tot je Kynite-account.",
+    "unknownClient": "Onbekende app",
+    "scopesHeading": "Deze app kan:",
+    "scopes": {
+      "openid": "Je basisidentiteit bevestigen",
+      "profile": "Je naam en profielfoto bekijken",
+      "email": "Je e-mailadres bekijken",
+      "offline_access": "Toegang behouden als je niet actief bent",
+      "kynite:calendar.read": "Je agenda bekijken",
+      "kynite:calendar.write": "Gebeurtenissen in je agenda aanmaken en wijzigen",
+      "kynite:tasks.read": "Je taken bekijken",
+      "kynite:tasks.write": "Taken aanmaken en wijzigen"
+    },
+    "unknownScope": "Onbekende toegang ({scope})",
+    "approve": "Toestaan",
+    "deny": "Weigeren",
+    "footer": "Je kunt deze toegang later intrekken."
   }
 }

@@ -76,6 +76,20 @@ const NOT_FAMILY_SCOPED: Record<string, string> = {
   // Attributing a failure to the family whose code was *nearly* guessed would
   // make the table an oracle for which codes are close.
   device_pairing_attempt: 'pre-authentication counter; no family is known yet',
+  // M-C: `@better-auth/oauth-provider` (via `mcp()`) + the `jwt()` plugin's key
+  // store. Same class as `account`/`session`/`verification` above — these are
+  // auth-identity tables the plugins own outright, scoped to a `user` (or to
+  // no principal at all, for `oauthClientAssertion`/`jwks`), never to a
+  // household. `oauth_client.user_id` is nullable for exactly this reason: a
+  // discovery-created (CIMD) or client-credentials client may have no user.
+  oauth_client: 'auth-provider identity, hangs off user (nullable) — pre-household',
+  oauth_resource: 'AS-wide protected-resource policy, not per-family',
+  oauth_client_resource: 'join table, scoped through oauth_client/oauth_resource',
+  oauth_refresh_token: 'auth token, hangs off user — pre-household',
+  oauth_access_token: 'auth token, hangs off user (nullable) — pre-household',
+  oauth_consent: 'auth token store, hangs off user — pre-household',
+  oauth_client_assertion: 'single-use replay guard, keyed by digest id, no principal at all',
+  jwks: 'signing-key store, not a principal-scoped table at all',
 };
 
 describe('schema-wide invariants', () => {
@@ -102,10 +116,21 @@ describe('schema-wide invariants', () => {
         // live on an ordinary `calendar` row, which is why this table holds
         // only what a feed has and a calendar does not.
         'ics_subscription',
+        // M-C: `@better-auth/oauth-provider`/`mcp()`/`cimd()` + `jwt()`'s key
+        // store — hand-mirrored in `server/db/auth-schema.ts` (the better-auth
+        // CLI cannot generate against this repo's `@/` path aliases).
+        'jwks',
         'member',
         'member_invite',
         // M16: which notifications one member wants. Absent row = everything on.
         'notification_preference',
+        'oauth_access_token',
+        'oauth_client',
+        'oauth_client_assertion',
+        'oauth_client_resource',
+        'oauth_consent',
+        'oauth_refresh_token',
+        'oauth_resource',
         'push_subscription',
         'redemption',
         'reminder_dispatch',

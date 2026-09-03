@@ -211,6 +211,13 @@
       "when": 1788438718143,
       "tag": "0029_material_professor_monster",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1788441080110,
+      "tag": "0030_greedy_reavers",
+      "breakpoints": true
     }
   ]
 }

@@ -19,6 +19,10 @@ const PROTECTED_SECTIONS = new Set([
   'rewards',
   'family',
   'settings',
+  // M-C: `(app)/oauth/consent` — the MCP/OAuth-provider consent screen. The
+  // layout guard is authoritative (same split as every other section here);
+  // this is the same cheap early bounce.
+  'oauth',
 ]);
 
 function isLocale(segment: string | undefined): segment is (typeof routing.locales)[number] {
@@ -182,6 +186,12 @@ export default function proxy(request: NextRequest): NextResponse {
 
 export const config = {
   // Skip API routes, Next internals, the internal /dev tooling routes (which
-  // are not localised) and anything with a file extension.
-  matcher: '/((?!api|dev|_next|_vercel|.*\\..*).*)',
+  // are not localised) and anything with a file extension. `.well-known` (the
+  // M-C OAuth-provider discovery documents: RFC 8414/9728 authorization-server
+  // and protected-resource metadata) is already unreachable here because
+  // `.*\..*` matches any path containing a literal dot — `.well-known` is one
+  // — but it is named explicitly too: those endpoints MUST stay public and
+  // unlocalised, and that must not depend on a side effect of the extension
+  // exclusion.
+  matcher: '/((?!api|dev|_next|_vercel|\\.well-known|.*\\..*).*)',
 };

@@ -1569,5 +1569,25 @@
       "atMaximum": "This timer is as long as it goes.",
       "quickStartLabel": "{minutes} min timer"
     }
+  },
+  "oauth": {
+    "pageTitle": "Approve access",
+    "pageSubtitle": "{client} is requesting access to your Kynite account.",
+    "unknownClient": "Unknown app",
+    "scopesHeading": "This app can:",
+    "scopes": {
+      "openid": "Confirm your basic identity",
+      "profile": "View your name and profile picture",
+      "email": "View your email address",
+      "offline_access": "Keep access while you are not active",
+      "kynite:calendar.read": "View your calendar",
+      "kynite:calendar.write": "Create and change events on your calendar",
+      "kynite:tasks.read": "View your tasks",
+      "kynite:tasks.write": "Create and change tasks"
+    },
+    "unknownScope": "Unknown access ({scope})",
+    "approve": "Allow",
+    "deny": "Deny",
+    "footer": "You can revoke this access later."
   }
 }

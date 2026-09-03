@@ -1,10 +1,36 @@
+import { cimd } from '@better-auth/cimd';
+import { fetchClientMetadataResource } from '@better-auth/cimd/node';
+import { mcp } from '@better-auth/mcp';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { nextCookies } from 'better-auth/next-js';
+import { jwt } from 'better-auth/plugins';
 import { eq } from 'drizzle-orm';
 import { getDb } from '@/server/db';
 import * as schema from '@/server/db/schema';
 import { env } from '@/server/env';
+
+/**
+ * M-C (docs/architecture.md — MCP-server build): the four capability scopes
+ * an MCP client can request against `/api/mcp` (M-D, not built here). There is
+ * no scope-metadata registration surface in `@better-auth/oauth-provider` 1.7.2
+ * (`OAuthOptions.scopes` is `Scope[]`, i.e. bare identifier strings — checked
+ * against the installed `.d.mts`, not the docs site) — a scope is just a
+ * string the client can request and the consent page displays. Enforcing what
+ * each one actually authorizes (read vs. write, calendar vs. tasks) happens at
+ * the resource server, not here: M-D's `/api/mcp` route wires
+ * `requireMcpAuth`'s `requiredScopes` per tool.
+ */
+const MCP_SCOPES = [
+  'openid',
+  'profile',
+  'email',
+  'offline_access',
+  'kynite:calendar.read',
+  'kynite:calendar.write',
+  'kynite:tasks.read',
+  'kynite:tasks.write',
+] as const;
 
 /**
  * better-auth (docs/architecture.md §7).
@@ -285,9 +311,55 @@ function createAuth() {
         },
       },
     },
-    // Must stay last: it flushes better-auth's Set-Cookie headers into the
-    // Next.js cookie store so Server Actions can sign users in.
-    plugins: [nextCookies()],
+    plugins: [
+      // Signs OAuth access/id tokens and serves `/jwks` — required for the
+      // oauth-provider stack below (`disableJwtPlugin` defaults to `false`,
+      // and it auto-detects this plugin rather than needing a flag).
+      jwt(),
+      /**
+       * `mcp()` *is* the OAuth 2.1 authorization server (`@better-auth/oauth-provider`
+       * under the hood — it cannot be combined with a separate `oauthProvider()`
+       * plugin). It binds every issued token to the MCP `resource` and serves the
+       * RFC 9728 protected-resource metadata M-D's `/api/mcp` will sit behind.
+       *
+       * `loginPage`/`consentPage` are bare paths, not locale-prefixed: with
+       * `routing.localePrefix: 'always'` (`src/i18n/routing.ts`), `proxy.ts`'s
+       * final fallthrough (`intl(request)`) redirects an unprefixed path to the
+       * visitor's locale the same way every other unauthenticated redirect in
+       * this app does — see `/sign-in` used the same way in
+       * `(app)/layout.tsx` and the family actions below.
+       *
+       * `resource` must be an absolute HTTPS URL (HTTP is accepted only on
+       * loopback, which is what local dev's `BETTER_AUTH_URL` is); M-D owns the
+       * actual route.
+       *
+       * Dynamic Client Registration (`allowDynamicClientRegistration`) is left
+       * unset/off — client onboarding goes through `cimd()` below instead.
+       */
+      mcp({
+        loginPage: '/sign-in',
+        consentPage: '/oauth/consent',
+        resource: `${env.BETTER_AUTH_URL}/api/mcp`,
+        scopes: [...MCP_SCOPES],
+      }),
+      /**
+       * Client ID Metadata Document discovery (MCP 2026-07-28 pins CIMD
+       * draft-00 via `metadataProfile`): a client identifies itself with an
+       * HTTPS URL as `client_id`, and this plugin fetches + validates the
+       * document there instead of a registration round-trip. `node/` transport
+       * is the package's own resolve-once, redirect-refusing fetcher — the
+       * guarantees the plugin requires cannot be met by wrapping plain `fetch`
+       * (see its own doc comment), so this is the correct default rather than
+       * a hand-rolled one.
+       */
+      cimd({
+        fetchClientMetadataResource,
+        metadataProfile: 'mcp-2026-07-28',
+      }),
+      // Must stay last: it flushes better-auth's Set-Cookie headers into the
+      // Next.js cookie store so Server Actions can sign users in.
+      nextCookies(),
+    ],
   });
 }
 
