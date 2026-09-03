@@ -62,6 +62,8 @@
     "self_improvement",
     "settings",
     "share",
+    "shower",
+    "smart_display",
     "space_dashboard",
     "sports_esports",
     "sports_soccer",
@@ -70,11 +72,12 @@
     "task_alt",
     "timer",
     "toys",
+    "tv",
     "view_column",
     "wb_sunny",
     "wb_twilight",
     "work",
     "workspace_premium"
   ],
-  "bytes": 65752
+  "bytes": 67532
 }

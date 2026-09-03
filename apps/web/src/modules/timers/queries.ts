@@ -3,7 +3,7 @@ import { and, desc, eq, gte, isNull, lt, sql } from 'drizzle-orm';
 import { getDb } from '@/server/db';
 // The schema assembly point, not a slice barrel: `queries.ts` is not a
 // `schema.ts`, so the cross-slice deep import exemption does not apply to it.
-import { member } from '@/server/db/schema';
+import { member, routine } from '@/server/db/schema';
 import { timer, type Timer } from './schema';
 
 /**
@@ -18,6 +18,14 @@ import { timer, type Timer } from './schema';
 export type TimerWithMember = Timer & {
   memberName: string | null;
   memberColor: string | null;
+  /**
+   * The parent routine's own icon, joined in for `page-data.ts`'s
+   * `timerIconOf` fallback — a routine-originated timer with no `icon` of its
+   * own surfaces this instead of the plain default. Null for an ad hoc timer
+   * (`routineId` is null) and for a routine that has since been deleted
+   * (`onDelete: 'set null'` on `timer.routineId`).
+   */
+  routineIcon: string | null;
 };
 
 /**
@@ -45,9 +53,11 @@ export async function listRunningTimers(
       timer,
       memberName: member.displayName,
       memberColor: member.color,
+      routineIcon: routine.icon,
     })
     .from(timer)
     .leftJoin(member, eq(member.id, timer.memberId))
+    .leftJoin(routine, eq(routine.id, timer.routineId))
     .where(
       and(
         eq(timer.familyId, familyId),
@@ -64,6 +74,7 @@ export async function listRunningTimers(
     ...row.timer,
     memberName: row.memberName ?? null,
     memberColor: row.memberColor ?? null,
+    routineIcon: row.routineIcon ?? null,
   }));
 }
 
@@ -74,9 +85,11 @@ export async function listRecentTimers(familyId: string, limit = 10): Promise<Ti
       timer,
       memberName: member.displayName,
       memberColor: member.color,
+      routineIcon: routine.icon,
     })
     .from(timer)
     .leftJoin(member, eq(member.id, timer.memberId))
+    .leftJoin(routine, eq(routine.id, timer.routineId))
     .where(eq(timer.familyId, familyId))
     .orderBy(desc(timer.startedAt))
     .limit(limit);
@@ -85,6 +98,7 @@ export async function listRecentTimers(familyId: string, limit = 10): Promise<Ti
     ...row.timer,
     memberName: row.memberName ?? null,
     memberColor: row.memberColor ?? null,
+    routineIcon: row.routineIcon ?? null,
   }));
 }
 

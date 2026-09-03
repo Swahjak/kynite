@@ -53,6 +53,26 @@ export const timer = pgTable(
     /** Set when someone stopped it — the only human-writable state. */
     stoppedAt: timestamp('stopped_at', { withTimezone: true }),
     /**
+     * Set while the countdown is frozen. Unlike `stoppedAt` this is not
+     * terminal — `resumeTimerAction` clears it again. While it is set, every
+     * reader's "now" is pinned to this instant (`domain/countdown.ts`), so the
+     * remaining time does not move.
+     */
+    pausedAt: timestamp('paused_at', { withTimezone: true }),
+    /**
+     * Total seconds spent paused so far, folded in every time a pause ends.
+     * `startedAt` never moves (M09's rule), so this is what keeps the
+     * countdown's *elapsed* time from including time nobody was waiting on it:
+     * `elapsed = (pausedAt ?? now) - startedAt - pausedSeconds`.
+     */
+    pausedSeconds: integer('paused_seconds').notNull().default(0),
+    /**
+     * What the tile wears. Null for most ad hoc timers, which fall back to a
+     * plain hourglass; a routine-originated timer instead falls back to its
+     * parent routine's icon (`page-data.ts`'s `toView`) before that default.
+     */
+    icon: text('icon'),
+    /**
      * How far ahead the transition warning appears ("Schoenen aan over 5
      * minuten" — FR7, research §"visual schedules, transitions"). Null = no
      * warning; the countdown alone speaks.
@@ -78,6 +98,7 @@ export const timer = pgTable(
       'timer_warning_lead_seconds_non_negative',
       sql`${table.warningLeadSeconds} is null or ${table.warningLeadSeconds} >= 0`
     ),
+    check('timer_paused_seconds_non_negative', sql`${table.pausedSeconds} >= 0`),
     uniqueIndex('timer_client_id_unique').on(table.clientId),
     /**
      * One running timer per routine step. Partial on purpose: yesterday's

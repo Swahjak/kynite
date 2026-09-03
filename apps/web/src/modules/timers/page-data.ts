@@ -22,11 +22,20 @@ export type TimerView = {
   /** Epoch milliseconds — a Date would arrive at the client as a string. */
   startedAt: number;
   stoppedAt: number | null;
+  /** Epoch milliseconds, set while frozen — see `domain/countdown.ts`. */
+  pausedAt: number | null;
+  /** Seconds already folded in from earlier pauses. */
+  pausedSeconds: number;
   warningLeadSeconds: number | null;
   memberId: string | null;
   memberName: string | null;
   memberColor: string | null;
+  routineId: string | null;
   routineStepId: string | null;
+  /** This timer's own icon, or null to fall back to the routine's / the default. */
+  icon: string | null;
+  /** The parent routine's icon — the fallback `ui/tokens.ts`'s `timerIconOf` reads. */
+  routineIcon: string | null;
 };
 
 export type TimerBoardData = {
@@ -71,11 +80,16 @@ function toView(row: TimerWithMember): TimerView {
     durationSeconds: row.durationSeconds,
     startedAt: row.startedAt.getTime(),
     stoppedAt: row.stoppedAt ? row.stoppedAt.getTime() : null,
+    pausedAt: row.pausedAt ? row.pausedAt.getTime() : null,
+    pausedSeconds: row.pausedSeconds,
     warningLeadSeconds: row.warningLeadSeconds,
     memberId: row.memberId,
     memberName: row.memberName,
     memberColor: row.memberColor,
+    routineId: row.routineId,
     routineStepId: row.routineStepId,
+    icon: row.icon,
+    routineIcon: row.routineIcon,
   };
 }
 

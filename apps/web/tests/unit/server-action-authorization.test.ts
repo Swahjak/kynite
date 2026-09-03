@@ -310,7 +310,10 @@ describe('every Server Action authorizes first', () => {
     // wall shows rather than who the household is.
     // 59 → 60 in M-C: `oauth-consent`'s `oauthConsentAction`, the MCP/OAuth
     // consent screen's approve/deny — `@public-action`, same class as sign-in.
-    expect(findings.length).toBe(60);
+    // 60 → 62 in M-T1: the timers slice's `pauseTimerAction` and
+    // `resumeTimerAction`, the same `timer:control` capability as
+    // start/stop/extend.
+    expect(findings.length).toBe(62);
   });
 
   it('reports no unauthorized action anywhere in src/', () => {

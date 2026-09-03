@@ -169,6 +169,12 @@ const EXTRA_ICONS = [
   'more_horiz',
   'share',
   'tablet_mac',
+  // modules/today/ui/today-fab.tsx — the FAB's `icon: 'add_task'` menu entry,
+  // named as a string prop rather than a literal `<Icon name="…">`, which is
+  // all the scanner sees. Carried here (not by the today builder's own
+  // change) because a bare regen without this entry silently drops it from
+  // the shipped subset.
+  'add_task',
   // D1 — the theme banner's school-holiday silhouettes and weather
   // (`modules/today/ui/today-theme-banner.tsx`), named through the `LOOK`
   // table rather than a literal `name="…"`, which is all the scanner sees.
@@ -177,6 +183,16 @@ const EXTRA_ICONS = [
   // budget is hard, so a reserve glyph loses to a rendered one.
   'eco',
   'ac_unit',
+  // modules/timers/ui/tokens.ts — TIMER_ICONS (M-T1). Named through
+  // `timerIconOf(view.icon)` / rendered by the M-T2 picker, same blind spot
+  // as `ROUTINE_ICONS` above: the scanner sees `<Icon name="…">` and nothing
+  // else, and that picker does not exist yet. `sports_esports`, `menu_book`,
+  // `bedtime`, `restaurant`, `timer` and `hourglass_top` are already reached
+  // by a literal `<Icon name="…">` elsewhere (rewards, the day list, the
+  // running-timers heading) or by an earlier `EXTRA_ICONS` entry above.
+  'tv',
+  'smart_display',
+  'shower',
 ];
 
 const ICON_USAGE = /<Icon\b[^>]*?\bname=(?:"([a-z0-9_]+)"|\{'([a-z0-9_]+)'\}|'([a-z0-9_]+)')/g;

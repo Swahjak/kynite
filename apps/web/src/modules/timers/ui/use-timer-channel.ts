@@ -31,8 +31,23 @@ export const TIMER_POLL_INTERVAL_MS = 2000;
 
 export const TIMER_CHANNEL_ENDPOINT = '/api/timers';
 
-/** The event types that change what is on the timer board. */
-const TIMER_EVENT_TYPES = ['timer.started', 'timer.stopped', 'timer.extended'] as const;
+/**
+ * The event types that change what is on the timer board.
+ *
+ * `timer.paused`/`timer.resumed` (M-T1) trigger the same reaction as every
+ * other verb here: re-fetch `/api/timers` for the current state. Pause/resume
+ * carries no payload the board can apply optimistically (unlike `extended`'s
+ * `durationSeconds`), so there was never a reason to special-case it — a hint
+ * that something changed is all any of these events are (`docs/architecture.md`
+ * §4).
+ */
+const TIMER_EVENT_TYPES = [
+  'timer.started',
+  'timer.stopped',
+  'timer.extended',
+  'timer.paused',
+  'timer.resumed',
+] as const;
 
 export type TimerChannel = {
   timers: TimerView[];

@@ -19,6 +19,7 @@ export {
   OVERRUN_VISIBLE_SECONDS,
   WARNING_LEAD_PRESETS,
   clockOffsetMs,
+  elapsedMs,
   endsAtMs,
   formatCountdown,
   isOnBoard,
@@ -63,15 +64,21 @@ export {
   idleState,
   type ActionState,
   type ExtendTimerState,
+  type PauseTimerState,
+  type ResumeTimerState,
   type StartTimerState,
   type StopTimerState,
 } from './action-state';
 
 export {
   extendTimerAction,
+  pauseTimerAction,
+  resumeTimerAction,
   startTimerAction,
   stopTimerAction,
   type ExtendTimerInput,
+  type PauseTimerInput,
+  type ResumeTimerInput,
   type StartTimerInput,
   type StopTimerInput,
 } from './actions';
@@ -102,6 +109,11 @@ export { useServerNow } from './ui/use-server-now';
 export {
   COUNTDOWN_DIGIT_CLASS,
   COUNTDOWN_DIGIT_CLASS_COMPACT,
+  DEFAULT_TIMER_ICON,
   OVERRUN_PULSE_STYLE,
+  TIMER_ICONS,
   TIMER_TAP_TARGET_CLASS,
+  isTimerIcon,
+  timerIconOf,
+  type TimerIcon,
 } from './ui/tokens';

@@ -16,22 +16,37 @@
  *    which it is reliable for even when its absolute value is nonsense.
  */
 
-/** A timer as the clock functions need it — timestamps in any transport shape. */
+/**
+ * A timer as the clock functions need it — timestamps in any transport shape.
+ *
+ * `pausedAt`/`pausedSeconds` are optional so every function here stays
+ * callable with the pre-pause shape (old fixtures, `today/domain/flow.ts`'s
+ * unrelated use of the same names never applies): an object that omits them
+ * behaves exactly as it did before pausing existed — `pausedAt` reads as "not
+ * paused", `pausedSeconds` as `0`.
+ */
 export type TimerClock = {
   startedAt: Date | string | number;
   durationSeconds: number;
   stoppedAt: Date | string | number | null;
+  /** Set while the countdown is frozen — see `elapsedMs`. */
+  pausedAt?: Date | string | number | null;
+  /** Seconds already folded in from earlier pauses. */
+  pausedSeconds?: number;
 };
 
 /**
- * `running` — counting down. `overrun` — the duration has passed and nobody
- * has stopped it. `stopped` — someone ended it.
+ * `running` — counting down. `paused` — frozen by a person, not by the clock.
+ * `overrun` — the duration has passed and nobody has stopped it. `stopped` —
+ * someone ended it.
  *
  * `overrun` is a plain fact, not a failure: the board says the time is up and
  * keeps the row exactly as calm as it was a second earlier (research
- * §Decisions 1 — nothing on a child-facing surface marks anything).
+ * §Decisions 1 — nothing on a child-facing surface marks anything). `paused`
+ * is the same idea applied to a countdown that has not run out: nothing about
+ * it reads as urgent or wrong.
  */
-export type TimerPhase = 'running' | 'overrun' | 'stopped';
+export type TimerPhase = 'running' | 'paused' | 'overrun' | 'stopped';
 
 export const MAX_DURATION_SECONDS = 4 * 60 * 60;
 
@@ -69,14 +84,48 @@ export function toMillis(value: Date | string | number): number {
   return new Date(value).getTime();
 }
 
-/** The instant the countdown reaches zero. */
+/**
+ * The instant the clock is read *as of*, for every function below: `pausedAt`
+ * while paused (frozen, regardless of how much later it is actually asked),
+ * `nowMs` otherwise. This one function is the entire pause feature — every
+ * other derivation in this file goes through it instead of `nowMs` directly.
+ */
+function effectiveNowMs(timer: TimerClock, nowMs: number): number {
+  return timer.pausedAt != null ? toMillis(timer.pausedAt) : nowMs;
+}
+
+/**
+ * The instant the countdown reaches zero, folding in every pause so far.
+ *
+ * A pause does not shorten a timer — it pushes the end out by exactly as long
+ * as nobody was watching it, which is what `pausedSeconds` (committed at
+ * `resumeTimerAction`) is for. A pause still in progress does not appear here
+ * (its duration is not committed yet); `remainingMs` freezes correctly anyway
+ * because it reads *through* `effectiveNowMs`, not by subtracting live time
+ * from this value.
+ */
 export function endsAtMs(timer: TimerClock): number {
-  return toMillis(timer.startedAt) + timer.durationSeconds * 1000;
+  return (
+    toMillis(timer.startedAt) + timer.durationSeconds * 1000 + (timer.pausedSeconds ?? 0) * 1000
+  );
+}
+
+/**
+ * Milliseconds elapsed *of the countdown itself* — pause time excluded, and
+ * frozen at the instant a pause started. `effective elapsed = (pausedAt ??
+ * now) - startedAt - pausedSeconds`, spelled out as a derivation rather than
+ * that one line so the two things it depends on (which instant, which
+ * offset) are named.
+ */
+export function elapsedMs(timer: TimerClock, nowMs: number): number {
+  return (
+    effectiveNowMs(timer, nowMs) - toMillis(timer.startedAt) - (timer.pausedSeconds ?? 0) * 1000
+  );
 }
 
 /** Signed milliseconds until zero — negative once the timer has run over. */
 export function remainingMs(timer: TimerClock, nowMs: number): number {
-  return endsAtMs(timer) - nowMs;
+  return timer.durationSeconds * 1000 - elapsedMs(timer, nowMs);
 }
 
 /**
@@ -99,24 +148,27 @@ export function overrunSeconds(timer: TimerClock, nowMs: number): number {
 
 export function phaseOf(timer: TimerClock, nowMs: number): TimerPhase {
   if (timer.stoppedAt !== null && timer.stoppedAt !== undefined) return 'stopped';
+  if (timer.pausedAt !== null && timer.pausedAt !== undefined) return 'paused';
   return remainingMs(timer, nowMs) > 0 ? 'running' : 'overrun';
 }
 
 /**
- * Is this timer still worth a place on the board? A stopped timer never is; an
+ * Is this timer still worth a place on the board? A stopped timer never is; a
+ * paused one always is — pausing is a person choosing to keep it in view,
+ * never a way to leave it running unattended past the overrun window; an
  * overrun one is, until it has been ignored for `OVERRUN_VISIBLE_SECONDS`.
  */
 export function isOnBoard(timer: TimerClock, nowMs: number): boolean {
   const phase = phaseOf(timer, nowMs);
   if (phase === 'stopped') return false;
-  if (phase === 'running') return true;
+  if (phase === 'running' || phase === 'paused') return true;
   return overrunSeconds(timer, nowMs) < OVERRUN_VISIBLE_SECONDS;
 }
 
 /** Elapsed fraction, clamped to 0..1 — what the progress ring draws. */
 export function progressRatio(timer: TimerClock, nowMs: number): number {
   if (timer.durationSeconds <= 0) return 1;
-  const elapsed = (nowMs - toMillis(timer.startedAt)) / (timer.durationSeconds * 1000);
+  const elapsed = elapsedMs(timer, nowMs) / (timer.durationSeconds * 1000);
   return Math.min(1, Math.max(0, elapsed));
 }
 

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { getLocale } from 'next-intl/server';
-import { and, desc, eq, isNull, sql } from 'drizzle-orm';
+import { and, desc, eq, isNotNull, isNull, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { getDb } from '@/server/db';
 // Table objects come from the schema assembly point, not from a slice barrel
@@ -13,9 +13,13 @@ import { assertCan, can, getMember, type Principal } from '@/modules/family';
 import { publish } from '@/modules/realtime';
 import {
   extendFailure,
+  pauseFailure,
+  resumeFailure,
   startFailure,
   stopFailure,
   type ExtendTimerState,
+  type PauseTimerState,
+  type ResumeTimerState,
   type StartTimerState,
   type StopTimerState,
 } from './action-state';
@@ -24,6 +28,7 @@ import {
   EXTEND_PRESET_MINUTES,
   MAX_DURATION_SECONDS,
 } from './domain/countdown';
+import { isTimerIcon } from './ui/tokens';
 
 /**
  * Mutations for the timers slice (M09).
@@ -80,6 +85,16 @@ const startSchema = z.object({
   /** `null` = no transition warning at all; omitted = the studied 5 minutes. */
   warningLeadSeconds: z.number().int().min(0).max(MAX_DURATION_SECONDS).nullable().optional(),
   clientId: trimmed.min(8).max(200).optional(),
+  /**
+   * The closed `TIMER_ICONS` set (M-T1), same discipline as
+   * `modules/routines/actions.ts` validating `icon` against `ROUTINE_ICONS`:
+   * a client posts a name, not a codepoint, and an unrecognised one is a
+   * malformed request rather than something to silently default — a default
+   * swallowed here would let a stale client silently disagree with the
+   * server about which icons exist. Omitted = fall back to the parent
+   * routine's icon, or the plain default (`ui/tokens.ts`'s `timerIconOf`).
+   */
+  icon: z.string().refine(isTimerIcon).optional(),
 });
 
 export type StartTimerInput = z.infer<typeof startSchema>;
@@ -191,6 +206,7 @@ export async function startTimerAction(input: StartTimerInput): Promise<StartTim
         warningLeadSeconds,
         startedByMemberId: principal.kind === 'member' ? principal.memberId : null,
         clientId: clientId ?? null,
+        icon: parsed.data.icon ?? null,
       })
       // No conflict *target*: this absorbs both unique indexes at once — the
       // clientId replay and the one-running-timer-per-step guard.
@@ -259,7 +275,13 @@ export async function startTimerAction(input: StartTimerInput): Promise<StartTim
         type: 'timer.started',
         entity: { id: inserted.id },
         actor: { ...actorOf(principal), source: 'mobile' },
-        patch: { label, durationSeconds, memberId, routineStepId: routineStepId ?? null },
+        patch: {
+          label,
+          durationSeconds,
+          memberId,
+          routineStepId: routineStepId ?? null,
+          icon: parsed.data.icon ?? null,
+        },
       },
       tx
     );
@@ -440,6 +462,128 @@ export async function extendTimerAction(input: ExtendTimerInput): Promise<Extend
     );
 
     return { status: 'extended', durationSeconds: extended.durationSeconds };
+  });
+
+  await revalidateTimers();
+  return outcome;
+}
+
+const pauseSchema = z.object({ timerId: z.uuid() });
+
+export type PauseTimerInput = z.infer<typeof pauseSchema>;
+
+/**
+ * Freeze a running timer (M-T1).
+ *
+ * Same idempotent-guard shape as `stopTimerAction`: the update's own
+ * predicate — not running, not already paused, this family — is the whole
+ * refusal story, so a second pause tap (a retry, two devices) is a no-op
+ * rather than a second freeze. `pausedAt` is stamped from the server's clock,
+ * same as `startedAt` always has been: a client's own idea of "now" never
+ * enters what gets written.
+ */
+export async function pauseTimerAction(input: PauseTimerInput): Promise<PauseTimerState> {
+  const principal = await assertCan('timer:control').catch(() => null);
+  if (!principal) return pauseFailure('forbidden');
+
+  const parsed = pauseSchema.safeParse(input);
+  if (!parsed.success) return pauseFailure('invalidInput');
+
+  const { timerId } = parsed.data;
+
+  const outcome = await getDb().transaction(async (tx): Promise<PauseTimerState> => {
+    const paused = await tx
+      .update(timer)
+      .set({ pausedAt: new Date(), updatedAt: new Date() })
+      .where(
+        and(
+          eq(timer.id, timerId),
+          eq(timer.familyId, principal.familyId),
+          // Not already stopped, and not already paused — both are why this
+          // tap has nothing to do.
+          isNull(timer.stoppedAt),
+          isNull(timer.pausedAt)
+        )
+      )
+      .returning({ id: timer.id, memberId: timer.memberId });
+
+    if (paused.length === 0) return pauseFailure('timerNotFound');
+
+    await publish(
+      {
+        familyId: principal.familyId,
+        type: 'timer.paused',
+        entity: { id: timerId },
+        actor: { ...actorOf(principal), source: 'mobile' },
+        patch: { memberId: paused[0].memberId },
+      },
+      tx
+    );
+
+    return { status: 'paused' };
+  });
+
+  await revalidateTimers();
+  return outcome;
+}
+
+const resumeSchema = z.object({ timerId: z.uuid() });
+
+export type ResumeTimerInput = z.infer<typeof resumeSchema>;
+
+/**
+ * Unfreeze a paused timer (M-T1).
+ *
+ * The one arithmetic step this action owns: fold the just-finished pause into
+ * `pausedSeconds` before clearing `pausedAt`, computed in SQL from the
+ * server's own clock (`now() - paused_at`) rather than round-tripped through
+ * the request — the same reason `extendTimerAction` computes its `least()`
+ * cap in SQL instead of trusting a client-supplied number. `startedAt` never
+ * moves; this is the only other value a person can change on a timer besides
+ * `stoppedAt` and `pausedAt` itself.
+ */
+export async function resumeTimerAction(input: ResumeTimerInput): Promise<ResumeTimerState> {
+  const principal = await assertCan('timer:control').catch(() => null);
+  if (!principal) return resumeFailure('forbidden');
+
+  const parsed = resumeSchema.safeParse(input);
+  if (!parsed.success) return resumeFailure('invalidInput');
+
+  const { timerId } = parsed.data;
+
+  const outcome = await getDb().transaction(async (tx): Promise<ResumeTimerState> => {
+    const resumed = await tx
+      .update(timer)
+      .set({
+        pausedSeconds: sql`${timer.pausedSeconds} + floor(extract(epoch from (now() - ${timer.pausedAt})))::integer`,
+        pausedAt: null,
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(timer.id, timerId),
+          eq(timer.familyId, principal.familyId),
+          isNull(timer.stoppedAt),
+          // Nothing to resume unless it is actually paused.
+          isNotNull(timer.pausedAt)
+        )
+      )
+      .returning({ id: timer.id, memberId: timer.memberId, pausedSeconds: timer.pausedSeconds });
+
+    if (resumed.length === 0) return resumeFailure('timerNotFound');
+
+    await publish(
+      {
+        familyId: principal.familyId,
+        type: 'timer.resumed',
+        entity: { id: timerId },
+        actor: { ...actorOf(principal), source: 'mobile' },
+        patch: { memberId: resumed[0].memberId, pausedSeconds: resumed[0].pausedSeconds },
+      },
+      tx
+    );
+
+    return { status: 'resumed' };
   });
 
   await revalidateTimers();

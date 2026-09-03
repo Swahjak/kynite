@@ -62,6 +62,10 @@ const OWNERS: Record<RealtimeEventType, string> = {
   'timer.stopped': 'timers',
   // M18 (PRD FR7): `extendTimerAction` moves `durationSeconds` and says so.
   'timer.extended': 'timers',
+  // M-T1: `pauseTimerAction`/`resumeTimerAction` freeze and unfreeze the
+  // countdown.
+  'timer.paused': 'timers',
+  'timer.resumed': 'timers',
   'device.revoked': 'devices',
   // M16. The household's own settings are the family slice's writes; the
   // calendar slice publishes it too when a calendar's colour or visibility

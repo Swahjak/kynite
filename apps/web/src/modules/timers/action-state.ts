@@ -27,6 +27,23 @@ export type StopTimerState = { status: 'stopped' } | { status: 'error'; error: s
 export const stopFailure = (error: string): StopTimerState => ({ status: 'error', error });
 
 /**
+ * What pausing/resuming a timer gets back (M-T1). Same idempotent-guard shape
+ * as `StopTimerState`: "already paused" / "not paused" / stopped / another
+ * family's id are all reported as the one generic `timerNotFound`, the same
+ * way a second `stopTimerAction` on an already-stopped timer is — the
+ * predicate that makes the mutation atomic is also what makes the failure
+ * reasons indistinguishable from outside the transaction, and none of them is
+ * a case worth a bespoke message.
+ */
+export type PauseTimerState = { status: 'paused' } | { status: 'error'; error: string };
+
+export const pauseFailure = (error: string): PauseTimerState => ({ status: 'error', error });
+
+export type ResumeTimerState = { status: 'resumed' } | { status: 'error'; error: string };
+
+export const resumeFailure = (error: string): ResumeTimerState => ({ status: 'error', error });
+
+/**
  * What extending a timer gets back (M18). The new total duration rides along
  * so a caller can reconcile without a refetch — every countdown in this slice
  * is derived from `startedAt + durationSeconds`, and this is the only value

@@ -22,6 +22,14 @@ export const REALTIME_EVENT_TYPES = [
   // "already-sounded" bookkeeping and could ring a second time for one timer.
   // `entity.id` is the timer; the patch carries the new `durationSeconds`.
   'timer.extended',
+  // M-T1. Pause/resume, the same shape of thing as `timer.extended`: a fourth
+  // and fifth verb rather than reusing `timer.started`/`timer.stopped`, so a
+  // consumer that treated a pause as a stop would drop the countdown off the
+  // board instead of freezing it, and one that treated a resume as a start
+  // would re-arm chime bookkeeping that never needed resetting.
+  // `entity.id` is the timer, same as every other verb here.
+  'timer.paused',
+  'timer.resumed',
   // M12. Not a data change: it tells a wall tablet that its own credential is
   // gone, so it can drop to the pair screen without waiting for somebody to
   // touch it (§7 "revocation drops the hub to a pair screen on the next
