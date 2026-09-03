@@ -262,6 +262,10 @@ test.describe('kiosk layout audit', { tag: '@heavy' }, () => {
     { name: 'routines overview', path: () => '/nl/hub/routines' },
     { name: 'store', path: () => '/nl/hub/store' },
     { name: 'timers', path: () => '/nl/hub/timers' },
+    // M-T2: the fullscreen watch screen. No timer is seeded for this suite,
+    // so it renders its own empty state — still worth auditing, since that
+    // dead end is what most visits to a cold hub will actually see.
+    { name: 'fullscreen timer', path: () => '/nl/hub/timer' },
     { name: 'pair screen', path: () => '/nl/hub/pair', unpaired: true },
   ]) {
     test(`typesets nothing below ${MIN_TEXT_PX}px on the ${surface.name}`, async ({

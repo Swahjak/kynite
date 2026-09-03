@@ -844,6 +844,39 @@
       "newEvent": "Nieuw event",
       "giveStar": "Ster geven",
       "quickActions": "Snelle acties"
+    },
+    "board": {
+      "title": "Taken & routines",
+      "daypart": {
+        "label": "Dagdeel kiezen",
+        "morning": "Ochtend",
+        "afternoon": "Middag",
+        "evening": "Avond"
+      },
+      "pool": {
+        "title": "Voor het oppakken",
+        "subtitle": "Iedereen mag deze pakken. Extra sterren.",
+        "empty": "Nog niets om op te pakken."
+      },
+      "role": {
+        "owner": "Beheerder",
+        "adult": "Volwassene",
+        "child": "Kind",
+        "caregiver": "Oppas"
+      },
+      "celebrateBadge": "Klaar",
+      "countLabel": "{done} van {total} klaar",
+      "starTotalLabel": "{count, plural, one {# ster} other {# sterren}}",
+      "progressLabel": "Voortgang van {name}",
+      "celebrateCard": "Alles gedaan · +{count} sterren",
+      "section": {
+        "tasks": "Taken"
+      },
+      "columnEmpty": "Hier staat nu niets.",
+      "row": {
+        "complete": "{title} afvinken",
+        "undo": "{title} weer openzetten"
+      }
     }
   },
   "routines": {
@@ -1174,7 +1207,9 @@
       "stop": "Stoppen",
       "stopNamed": "Timer {label} stoppen",
       "extend": "+{minutes} min",
-      "extendNamed": "Timer {label} {minutes} minuten langer laten lopen"
+      "extendNamed": "Timer {label} {minutes} minuten langer laten lopen",
+      "pauseNamed": "Timer {label} pauzeren",
+      "resumeNamed": "Timer {label} hervatten"
     },
     "adHoc": {
       "title": "Losse timer",
@@ -1183,6 +1218,17 @@
       "member": "Voor wie",
       "everyone": "Het hele gezin",
       "duration": "Tijdsduur"
+    },
+    "icons": {
+      "timer": "Timer",
+      "tv": "Tv",
+      "smart_display": "Scherm",
+      "sports_esports": "Spel",
+      "menu_book": "Boek",
+      "bedtime": "Bedtijd",
+      "restaurant": "Eten",
+      "shower": "Bad",
+      "hourglass_top": "Zandloper"
     },
     "fromSteps": {
       "title": "Uit een routinestap",
@@ -1549,7 +1595,15 @@
       "vandaag": "Vandaag",
       "kalender": "Kalender",
       "routines": "Taken",
-      "sterren": "Sterren"
+      "sterren": "Sterren",
+      "timer": "Timer",
+      "timerCount": "{count} timers"
+    },
+    "timer": {
+      "emptyTitle": "Er loopt geen timer",
+      "emptyBody": "Een nieuwe timer is te vinden op het timerscherm.",
+      "backToBoard": "Terug naar het bord",
+      "startOne": "Timer starten"
     },
     "children": {
       "title": "De dag van iedereen",
@@ -1570,7 +1624,9 @@
       "start": "{minutes} min",
       "startNamed": "Timer van {minutes} minuten",
       "atMaximum": "Deze timer is al zo lang als hij kan zijn.",
-      "quickStartLabel": "Timer van {minutes} min"
+      "quickStartLabel": "Timer van {minutes} min",
+      "pickIcon": "Plaatje",
+      "startAction": "Timer starten"
     }
   },
   "oauth": {

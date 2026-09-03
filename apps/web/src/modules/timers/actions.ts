@@ -74,6 +74,8 @@ async function revalidateTimers(): Promise<void> {
   revalidatePath(`/${locale}/timers`);
   revalidatePath(`/${locale}/hub`);
   revalidatePath(`/${locale}/hub/timers`);
+  // M-T2: the fullscreen watch screen.
+  revalidatePath(`/${locale}/hub/timer`);
 }
 
 const startSchema = z.object({

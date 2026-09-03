@@ -674,6 +674,19 @@
        overline    ← label-caps   12/16  Baloo 2 700  0.05em uppercase
      `display-xl`/`display-lg`/`display-md` stay as the wall-hub steps above
      `h1`; `display-md` is pinned at 36px by tests/unit/timers/legibility.test.ts. */
+  /* M-T2: one step above `display-xl`, added for the fullscreen hub timer
+     (`(hub)/hub/timer`). Its hero countdown sits inside a progress ring that
+     fills most of a 1280×800 kiosk viewport — `display-xl` (80px) read as a
+     small number inside that much ring; this is the Nest-Hub-reference "one
+     huge number on a screen" size the wall actually wants there. Nothing else
+     uses it yet, and the kiosk `[data-surface='hub']` scale below
+     deliberately does not touch it — it is already a wall-hub size, and a
+     second multiplier on top would overflow the ring on a 1280px-wide panel. */
+  --text-display-3xl: 7.5rem;
+  --text-display-3xl--line-height: 1;
+  --text-display-3xl--font-weight: 800;
+  --text-display-3xl--letter-spacing: -0.04em;
+
   --text-display-hub: 4.5rem;
   --text-display-hub--line-height: 1.111;
   --text-display-hub--font-weight: 800;

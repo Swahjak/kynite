@@ -34,3 +34,4 @@ export { HUB_IDLE_TIMEOUT_MS, IdleReturn } from './idle-return';
 export { HubSettings } from './hub-settings';
 export { SettingsWatcher } from './settings-watcher';
 export { KioskShell } from './kiosk-shell';
+export { TimerActivityContext } from './timer-activity-context';

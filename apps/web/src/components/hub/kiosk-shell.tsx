@@ -62,10 +62,21 @@ export function KioskShell({
   device,
   chimeSettings,
   brand,
+  railTimerTile,
 }: {
   children: React.ReactNode;
   /** The timers slice's chime control — see `HubSettings`. */
   chimeSettings?: React.ReactNode;
+  /**
+   * `HubRail`'s conditional fifth tile (M-T2) — a live, self-mounted element
+   * built and handed down by `(hub)/layout.tsx` the same way
+   * `chimeSettings`/`brand` are, and for the same reason: it is
+   * `modules/timers` code (`RailTimerTile`), and neither this shell nor
+   * `HubRail` may import that slice's barrel from a client component. `null`
+   * when the device has no board at all; `HubRail` renders nothing for it
+   * either way once the tile's own live channel says no timer is running.
+   */
+  railTimerTile?: React.ReactNode;
   /**
    * The Kynite mark (M18), passed in as a node rather than imported: this is a
    * client component and `BrandMark` is an async server one, so the layout
@@ -131,7 +142,10 @@ export function KioskShell({
         to follow without being touched. Not on the pair screen — it has no
         family to have settings yet. */}
       {device ? <SettingsWatcher /> : null}
-      {/* M19. Not on the pair screen: there is no board to return to yet. */}
+      {/* M19. Not on the pair screen: there is no board to return to yet. Its
+          M-T2 "don't bounce off `/hub/timer`" exemption reads
+          `TimerActivityContext`, provided above this shell in
+          `(hub)/layout.tsx` — nothing to thread down here for it. */}
       {device ? <IdleReturn /> : null}
       {/* The FAB slot (`components/ui/fab.tsx`) — this shell had none before
           the wall grew a speed dial of its own (`(hub)/hub/page.tsx`'s
@@ -146,6 +160,7 @@ export function KioskShell({
           configure yet, so it gets neither. */}
         {device ? (
           <HubRail
+            timerTile={railTimerTile}
             footer={
               <>
                 <OfflineIndicator />

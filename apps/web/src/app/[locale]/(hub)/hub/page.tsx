@@ -11,7 +11,7 @@ import {
   TodayThemeBanner,
   loadHubBoardComposition,
 } from '@/modules/today';
-import { AmbientTimers, loadTimerBoard } from '@/modules/timers';
+import { AmbientTimers, TimerStartFabAction, loadTimerBoard } from '@/modules/timers';
 import { WeatherWidget } from '@/modules/weather';
 
 /** Session-dependent: never prerendered, so `next build` needs no database. */
@@ -199,11 +199,15 @@ export default async function HubPage({
           switching a tab — the star matrix is a route, not a panel of this
           page, since M-R1. No `newEventAction`: unlike `(app)/today`'s
           `TodayFab`, this one never resolves an "add event" action at all,
-          rather than building one that would be refused on submit. */}
+          rather than building one that would be refused on submit.
+          "Timer starten" opens `TimerStartFabAction`'s modal (M-T2) rather
+          than navigating to `timersHref` — that prop stays only as the
+          fallback `TodayFab` never actually reaches on this surface. */}
       <TodayFab
         timersHref="/hub/timers"
         canGiveStars={progress?.canComplete ?? false}
         starsHref="/hub/store"
+        timerAction={<TimerStartFabAction />}
       />
     </main>
   );

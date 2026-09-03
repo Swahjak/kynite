@@ -844,6 +844,39 @@
       "newEvent": "New event",
       "giveStar": "Give a star",
       "quickActions": "Quick actions"
+    },
+    "board": {
+      "title": "Tasks & routines",
+      "daypart": {
+        "label": "Choose part of day",
+        "morning": "Morning",
+        "afternoon": "Afternoon",
+        "evening": "Evening"
+      },
+      "pool": {
+        "title": "Up for grabs",
+        "subtitle": "Anyone can pick these up. Extra stars.",
+        "empty": "Nothing to pick up yet."
+      },
+      "role": {
+        "owner": "Owner",
+        "adult": "Adult",
+        "child": "Child",
+        "caregiver": "Caregiver"
+      },
+      "celebrateBadge": "Done",
+      "countLabel": "{done} of {total} done",
+      "starTotalLabel": "{count, plural, one {# star} other {# stars}}",
+      "progressLabel": "{name}'s progress",
+      "celebrateCard": "All done · +{count} stars",
+      "section": {
+        "tasks": "Tasks"
+      },
+      "columnEmpty": "Nothing here right now.",
+      "row": {
+        "complete": "Tick off {title}",
+        "undo": "Reopen {title}"
+      }
     }
   },
   "routines": {
@@ -1174,7 +1207,9 @@
       "stop": "Stop",
       "stopNamed": "Stop timer {label}",
       "extend": "+{minutes} min",
-      "extendNamed": "Let timer {label} run {minutes} minutes longer"
+      "extendNamed": "Let timer {label} run {minutes} minutes longer",
+      "pauseNamed": "Pause timer {label}",
+      "resumeNamed": "Resume timer {label}"
     },
     "adHoc": {
       "title": "One-off timer",
@@ -1183,6 +1218,17 @@
       "member": "For whom",
       "everyone": "The whole family",
       "duration": "Length"
+    },
+    "icons": {
+      "timer": "Timer",
+      "tv": "TV",
+      "smart_display": "Screen",
+      "sports_esports": "Game",
+      "menu_book": "Book",
+      "bedtime": "Bedtime",
+      "restaurant": "Meal",
+      "shower": "Bath",
+      "hourglass_top": "Hourglass"
     },
     "fromSteps": {
       "title": "From a routine step",
@@ -1549,7 +1595,15 @@
       "vandaag": "Today",
       "kalender": "Calendar",
       "routines": "Tasks",
-      "sterren": "Stars"
+      "sterren": "Stars",
+      "timer": "Timer",
+      "timerCount": "{count} timers"
+    },
+    "timer": {
+      "emptyTitle": "No timer running",
+      "emptyBody": "Start one from the timers screen.",
+      "backToBoard": "Back to the board",
+      "startOne": "Start a timer"
     },
     "children": {
       "title": "Everyone's day",
@@ -1570,7 +1624,9 @@
       "start": "{minutes} min",
       "startNamed": "Timer of {minutes} minutes",
       "atMaximum": "This timer is as long as it goes.",
-      "quickStartLabel": "{minutes} min timer"
+      "quickStartLabel": "{minutes} min timer",
+      "pickIcon": "Picture",
+      "startAction": "Start timer"
     }
   },
   "oauth": {

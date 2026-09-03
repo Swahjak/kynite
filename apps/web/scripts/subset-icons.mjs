@@ -70,8 +70,17 @@ const CODEPOINTS = join(root, 'scripts/material-symbols.codepoints');
  * Bumped to 66 KB for the wall-hub launcher button's `apps` glyph (opens
  * Fully Kiosk Browser's Universal Launcher) — the 64 KB ceiling had 216 bytes
  * of headroom left and that one glyph didn't fit under it.
+ *
+ * Bumped to 68 KB for M-T2's `pause`/`play_arrow` (the fullscreen hub timer's
+ * pause/resume control) — the 66 KB ceiling had under a kilobyte of headroom
+ * and the pair together needed ~0.9 KB more than that.
+ *
+ * Bumped to 72 KB when M-T2 and M-R2 (the family-wide "Taken & routines"
+ * board's `waving_hand`/`emoji_events`) landed in the same window — each
+ * bump above was sized for its own glyphs alone, and the two together came
+ * in over the 68 KB step.
  */
-export const BUDGET_BYTES = 66 * 1024;
+export const BUDGET_BYTES = 72 * 1024;
 
 /**
  * Icons named somewhere a static scan cannot see them as `<Icon name="…">`.
@@ -184,15 +193,32 @@ const EXTRA_ICONS = [
   'eco',
   'ac_unit',
   // modules/timers/ui/tokens.ts — TIMER_ICONS (M-T1). Named through
-  // `timerIconOf(view.icon)` / rendered by the M-T2 picker, same blind spot
-  // as `ROUTINE_ICONS` above: the scanner sees `<Icon name="…">` and nothing
-  // else, and that picker does not exist yet. `sports_esports`, `menu_book`,
-  // `bedtime`, `restaurant`, `timer` and `hourglass_top` are already reached
-  // by a literal `<Icon name="…">` elsewhere (rewards, the day list, the
-  // running-timers heading) or by an earlier `EXTRA_ICONS` entry above.
+  // `timerIconOf(view.icon)` / rendered by the M-T2 icon picker
+  // (`timer-start-fab-action.tsx`), same blind spot as `ROUTINE_ICONS`
+  // above: the scanner sees `<Icon name="…">` and nothing else.
+  // `sports_esports`, `menu_book`, `bedtime`, `restaurant`, `timer` and
+  // `hourglass_top` are already reached by a literal `<Icon name="…">`
+  // elsewhere (rewards, the day list, the running-timers heading) or by an
+  // earlier `EXTRA_ICONS` entry above.
   'tv',
   'smart_display',
   'shower',
+  // modules/today/ui/routines-board.tsx — the family-wide "Taken & routines"
+  // board (M-R2). Almost every glyph it draws was already reachable (the
+  // daypart pills reuse `wb_twilight`/`wb_sunny`/`bedtime`, the routine tiles
+  // reuse `ROUTINE_ICON_TILE`'s closed set, the done circle reuses `check`,
+  // the "Klaar" badge reuses `celebration`): these two are the only glyphs
+  // the board needed that nothing else in the product had already asked for
+  // — the pool column's badge, and the 100% celebration card's trophy.
+  'waving_hand',
+  'emoji_events',
+  // modules/timers/ui/hub-timer-screen.tsx — the M-T2 fullscreen watch
+  // screen's pause/resume glyph, named through
+  // `phase === 'paused' ? 'play_arrow' : 'pause'` rather than a literal
+  // `name="…"`, which is all the scanner sees. `close` (the stop control on
+  // the same screen) needs no entry — it is a plain `<Icon name="close">`.
+  'pause',
+  'play_arrow',
 ];
 
 const ICON_USAGE = /<Icon\b[^>]*?\bname=(?:"([a-z0-9_]+)"|\{'([a-z0-9_]+)'\}|'([a-z0-9_]+)')/g;

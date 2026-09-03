@@ -14,7 +14,12 @@ import { defaultFormattingLocale } from '@/i18n/formatting-locale';
 import { routing } from '@/i18n/routing';
 import { getFamily, getPrincipal } from '@/modules/family';
 import { getDevice } from '@/modules/devices';
-import { ChimeSettingsPanel } from '@/modules/timers';
+import {
+  ChimeSettingsPanel,
+  RailTimerTile,
+  TimerActivityProvider,
+  loadTimerBoard,
+} from '@/modules/timers';
 
 /**
  * The kiosk layout (M12) — the `(hub)` tree's own shell, no longer the app's.
@@ -89,6 +94,23 @@ export default async function HubLayout({
   // default rather than a lookup with no family to key it by.
   const family = principal?.kind === 'device' ? await getFamily(principal.familyId) : null;
   const timeZone = family?.timezone ?? 'Europe/Amsterdam';
+
+  // M-T2: `HubRail`'s timer tile and `IdleReturn`'s "don't bounce off
+  // `/hub/timer`" exemption both need to know what is running, and both live
+  // under this one shell — so it is read once here, the same seam
+  // `chimeSettings`/`brand` already use, rather than each of the two reading
+  // it again on their own. `loadTimerBoard()` takes no `now`: unlike a page,
+  // a layout is never handed `searchParams` (only a page's own props carry
+  // those in Next 16), and this data is chrome — a rail tile and an idle
+  // timer, neither of them the pinned-instant countdown a visual-suite
+  // screenshot asserts against — so there is nothing here for `?now=` to pin.
+  // `RailTimerTile` reads the pin itself, client-side (its own doc comment),
+  // rather than the layout faking one it was never handed. `loadTimerBoard`
+  // is `React.cache()`d (`page-data.ts`) so the page under this layout that
+  // reads it again for the board itself (`hub/timer/page.tsx`,
+  // `hub/timers/page.tsx`) shares this same request-scoped result instead of
+  // re-querying.
+  const timers = principal?.kind === 'device' ? await loadTimerBoard() : null;
   // The household's date/time convention (`src/i18n/formatting-locale.ts`) —
   // see `FormattingLocaleProvider`'s doc comment for why this is a second,
   // next-intl-independent context rather than a `NextIntlClientProvider`
@@ -116,17 +138,27 @@ export default async function HubLayout({
           layout — see `(app)/layout.tsx` for why. */}
           <ServiceWorkerRegistrar />
           <HubReloadController />
-          {/* The chime control is rendered here, not inside the shell: the shell is
-          a client component and `@/modules/timers` carries `server-only`
-          queries (see `chime-settings-panel.tsx`). A server component may
-          import the barrel, so the slice's own boundary stays intact. */}
-          <KioskShell
-            device={paired ? { id: paired.id, name: paired.name } : null}
-            chimeSettings={<ChimeSettingsPanel />}
-            brand={<BrandMark variant="icon" className="h-7" />}
-          >
-            {children}
-          </KioskShell>
+          {/* The chime control, the rail's timer tile and the "don't bounce off
+          `/hub/timer`" exemption are all built here rather than inside the
+          shell: the shell (and `HubRail`/`IdleReturn` below it) are client
+          components, and `@/modules/timers` carries `server-only` queries
+          (see `chime-settings-panel.tsx`, and `RailTimerTile`/
+          `TimerActivityProvider`'s own doc comments for the M-T2 additions).
+          A server component may import the barrel, so the slice's own
+          boundary stays intact. `TimerActivityProvider` wraps the whole shell
+          rather than being threaded through it as a prop — `IdleReturn` sits
+          several client layers below `KioskShell`, and its
+          `TimerActivityContext` crosses that for free (`idle-return.tsx`). */}
+          <TimerActivityProvider initial={timers}>
+            <KioskShell
+              device={paired ? { id: paired.id, name: paired.name } : null}
+              chimeSettings={<ChimeSettingsPanel />}
+              brand={<BrandMark variant="icon" className="h-7" />}
+              railTimerTile={timers ? <RailTimerTile initial={timers} /> : null}
+            >
+              {children}
+            </KioskShell>
+          </TimerActivityProvider>
         </RealtimeProvider>
       </FormattingLocaleProvider>
     </NextIntlClientProvider>

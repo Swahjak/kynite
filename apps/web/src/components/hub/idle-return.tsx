@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { usePathname, useRouter } from '@/i18n/navigation';
+import { TimerActivityContext } from './timer-activity-context';
 
 /**
  * Idle return-to-board (M19, the `(hub)` half of "thin kiosk shells").
@@ -27,6 +28,18 @@ import { usePathname, useRouter } from '@/i18n/navigation';
  * suite freezes a screen for a screenshot (`page-data.ts`), and a screen that
  * navigated away mid-capture would be a flake in the one place the product
  * cannot afford one.
+ *
+ * **`/hub/timer` is exempt too, but only while something is actually
+ * running** (M-T2). A family sent to the fullscreen countdown by starting a
+ * timer should not be bounced back to the board mid-watch, but a countdown
+ * that has since been stopped is exactly the "child walked off" case this
+ * component exists for, and the fullscreen screen already draws its own
+ * empty state for that. `TimerActivityContext` (`timer-activity-context.tsx`)
+ * is where the "is one running" half comes from — a plain boolean context
+ * rather than this file reading the timers slice's own live channel, because
+ * that channel is `modules/timers` code and this component may not import a
+ * slice barrel (see that context's own doc comment for the full reason). The
+ * pathname half stays local, same as `?date=`/`?time=`/`?now=` above.
  */
 
 /**
@@ -53,8 +66,10 @@ export function IdleReturn({ timeoutMs = HUB_IDLE_TIMEOUT_MS }: { timeoutMs?: nu
   const router = useRouter();
   const pathname = usePathname();
   const search = useSearchParams();
+  const hasRunningTimer = useContext(TimerActivityContext);
   const pinned = ['date', 'time', 'now'].some((key) => search.get(key) !== null);
-  const armed = pathname !== '/hub' && !pinned;
+  const watchingTimer = pathname === '/hub/timer' && hasRunningTimer;
+  const armed = pathname !== '/hub' && !pinned && !watchingTimer;
 
   useEffect(() => {
     if (!armed) return;

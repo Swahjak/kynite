@@ -85,7 +85,23 @@ function isActive(pathname: string, href: string): boolean {
   return href === '/hub' ? pathname === '/hub' : pathname.startsWith(href);
 }
 
-export function HubRail({ footer }: { footer?: React.ReactNode }) {
+export function HubRail({
+  footer,
+  timerTile,
+}: {
+  footer?: React.ReactNode;
+  /**
+   * The conditional fifth tile (M-T2) — a running timer is one tap away from
+   * anywhere on the wall, the way the shelf and today's steps already are.
+   * Rendered as a prop, not built here: it is `modules/timers` code
+   * (`RailTimerTile`), built once by `(hub)/layout.tsx` and threaded through
+   * `KioskShell` — see that component's own doc comment for why this rail
+   * may not import the slice itself. `undefined`/`null` (no board yet) and
+   * "the tile's own live channel says nothing is running" both draw nothing;
+   * from here the two are indistinguishable and neither needs to be.
+   */
+  timerTile?: React.ReactNode;
+}) {
   const t = useTranslations('hub.nav');
   const pathname = usePathname();
 
@@ -138,6 +154,8 @@ export function HubRail({ footer }: { footer?: React.ReactNode }) {
           </Link>
         );
       })}
+
+      {timerTile}
 
       {footer ? (
         // Pinned to the rail's foot, same width/centering as the tiles above

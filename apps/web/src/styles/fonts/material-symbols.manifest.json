@@ -22,12 +22,14 @@
     "chevron_left",
     "chevron_right",
     "child_care",
+    "close",
     "cookie",
     "dark_mode",
     "dashboard",
     "delete",
     "diversity_3",
     "eco",
+    "emoji_events",
     "event",
     "event_available",
     "expand_more",
@@ -50,8 +52,10 @@
     "notifications",
     "palette",
     "park",
+    "pause",
     "person",
     "pets",
+    "play_arrow",
     "pool",
     "radio_button_unchecked",
     "redeem",
@@ -74,10 +78,11 @@
     "toys",
     "tv",
     "view_column",
+    "waving_hand",
     "wb_sunny",
     "wb_twilight",
     "work",
     "workspace_premium"
   ],
-  "bytes": 67532
+  "bytes": 72636
 }

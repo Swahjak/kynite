@@ -63,6 +63,19 @@ export type TodayFabProps = {
    * the same page and the action switches `useTodayTab` as it always has.
    */
   starsHref?: string;
+  /**
+   * M-T2, hub only: "Timer starten" opens a modal (duration + icon, then a
+   * start) instead of navigating to `timersHref`. Built the same way as
+   * `newEventAction`/`taskAction` — a finished element from the slice that
+   * owns it (`TimerStartFabAction`, `@/modules/timers`), because this client
+   * component may not import that slice's barrel itself. `(app)/today` never
+   * passes this, so its timer action keeps navigating to `timersHref`
+   * exactly as it always has.
+   */
+  timerAction?: ReactElement<{
+    className?: string;
+    children?: unknown;
+  }> | null;
 };
 
 export function TodayFab({
@@ -71,6 +84,7 @@ export function TodayFab({
   newEventAction,
   taskAction,
   starsHref,
+  timerAction,
 }: TodayFabProps) {
   const t = useTranslations('today');
   const { setTab } = useTodayTab();
@@ -99,7 +113,7 @@ export function TodayFab({
     id: 'timer',
     icon: 'timer',
     label: t('tasks.startTimer'),
-    render: <Link href={timersHref} />,
+    render: timerAction ?? <Link href={timersHref} />,
   });
 
   if (canGiveStars) {

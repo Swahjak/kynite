@@ -95,8 +95,19 @@ export {
 export { AmbientTimers } from './ui/ambient-timers';
 export { ChimeSettings } from './ui/chime-settings';
 export { ChimeSettingsPanel } from './ui/chime-settings-panel';
+export { HubTimerEmptyState } from './ui/hub-timer-empty-state';
+export { HubTimerScreen } from './ui/hub-timer-screen';
+export { RailTimerTile } from './ui/rail-timer-tile';
+export { TimerActivityProvider } from './ui/timer-activity-provider';
 export { TimerBoard, type TimerQuickStart } from './ui/timer-board';
 export { TimerControls } from './ui/timer-controls';
+export {
+  TimerRing,
+  ringDashOffset,
+  type TimerRingProps,
+  type TimerRingSize,
+} from './ui/timer-ring';
+export { TimerStartFabAction, type TimerStartFabActionProps } from './ui/timer-start-fab-action';
 export { TimerTile, type TimerTileCopy, type TimerTileProps } from './ui/timer-tile';
 export {
   TIMER_CHANNEL_ENDPOINT,

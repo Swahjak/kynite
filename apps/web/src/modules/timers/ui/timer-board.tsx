@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button, cn } from '@kynite/ui';
+import { useRouter } from '@/i18n/navigation';
 import { extendTimerAction, startTimerAction, stopTimerAction } from '../actions';
 import {
   EXTEND_PRESET_MINUTES,
@@ -83,6 +84,7 @@ export function TimerBoard({
   atMaximumLabel?: string;
 }) {
   const t = useTranslations('timers');
+  const router = useRouter();
   const { timers, offsetMs } = useTimerChannel(board);
   const now = useServerNow(board.serverNow, offsetMs);
   const chime = useChime();
@@ -171,11 +173,17 @@ export function TimerBoard({
 
     startTransition(async () => {
       try {
-        await startTimerAction({
+        const result = await startTimerAction({
           label,
           durationSeconds: seconds,
           clientId: crypto.randomUUID(),
         });
+        // M-T2: a quick-started timer is watched, not read about — the board
+        // itself stays for the family that came here on purpose. Only this
+        // surface navigates; `TimerControls` (`(app)/timers`, the Controller)
+        // is a parent-facing phone surface with no `/hub/timer` to send
+        // anyone to.
+        if (result.status !== 'error') router.push('/hub/timer');
       } finally {
         setStarting((previous) => {
           const next = new Set(previous);

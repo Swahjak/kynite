@@ -1,4 +1,5 @@
 import 'server-only';
+import { cache } from 'react';
 import { can, getPrincipal, listMembers, type Member } from '@/modules/family';
 import { listRoutines } from '@/modules/routines';
 import { isOnBoard, phaseOf, type TimerPhase } from './domain/countdown';
@@ -99,14 +100,22 @@ function toView(row: TimerWithMember): TimerView {
  * Timers that ran over long ago are dropped here rather than in the component,
  * so the ambient board, the timers screen and the polling endpoint cannot
  * disagree about what is still on the wall.
+ *
+ * `React.cache()`d the same way `getFamily` is (`modules/family/queries.ts`):
+ * `(hub)/layout.tsx` reads this to seed the rail tile and `IdleReturn`'s "is
+ * something running" context, and the page under it (`hub/timer/page.tsx`,
+ * `hub/timers/page.tsx`) reads it again for the board itself — same request,
+ * same principal, same instant. Memoizing on the primitive `now` rather than
+ * the whole `options` object is deliberate: two separately-constructed `{}`
+ * literals are two different cache keys to `cache()`, so the unpinned common
+ * case (layout's bare call and a page's `{ now: undefined }`) would still miss
+ * if the object itself were the key.
  */
-export async function loadTimerBoard(
-  options: TimerBoardOptions = {}
-): Promise<TimerBoardData | null> {
+async function loadTimerBoardFor(now: string | undefined): Promise<TimerBoardData | null> {
   const principal = await getPrincipal();
   if (!principal) return null;
 
-  const { serverNow, frozen } = resolveNow(options);
+  const { serverNow, frozen } = resolveNow({ now });
   // The window `listRunningTimers` applies is relative to the *board's* clock,
   // not the process's: `?now=` pins what the board renders as now, and a
   // snapshot pinned to another day must still see the timers that belong to
@@ -119,6 +128,14 @@ export async function loadTimerBoard(
     timers: running.filter((row) => isOnBoard(row, serverNow)).map(toView),
     frozen,
   };
+}
+
+const cachedLoadTimerBoard = cache(loadTimerBoardFor);
+
+export async function loadTimerBoard(
+  options: TimerBoardOptions = {}
+): Promise<TimerBoardData | null> {
+  return cachedLoadTimerBoard(options.now);
 }
 
 /** A routine step that prescribes a timer — one tap starts it from the Controller. */
