@@ -1,11 +1,11 @@
 import { cimd } from '@better-auth/cimd';
-import { fetchClientMetadataResource } from '@better-auth/cimd/node';
 import { mcp } from '@better-auth/mcp';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { nextCookies } from 'better-auth/next-js';
 import { jwt } from 'better-auth/plugins';
 import { eq } from 'drizzle-orm';
+import { fetchClientMetadataResource } from '@/server/cimd-transport';
 import { getDb } from '@/server/db';
 import * as schema from '@/server/db/schema';
 import { env } from '@/server/env';
@@ -346,11 +346,12 @@ function createAuth() {
        * Client ID Metadata Document discovery (MCP 2026-07-28 pins CIMD
        * draft-00 via `metadataProfile`): a client identifies itself with an
        * HTTPS URL as `client_id`, and this plugin fetches + validates the
-       * document there instead of a registration round-trip. `node/` transport
-       * is the package's own resolve-once, redirect-refusing fetcher — the
-       * guarantees the plugin requires cannot be met by wrapping plain `fetch`
-       * (see its own doc comment), so this is the correct default rather than
-       * a hand-rolled one.
+       * document there instead of a registration round-trip. The transport
+       * (`@/server/cimd-transport`) is our own 1:1 port of the package's own
+       * resolve-once, redirect-refusing fetcher (`@better-auth/cimd/node`) —
+       * the guarantees the plugin requires cannot be met by wrapping plain
+       * `fetch` — with one upstream Node 24 DNS-callback bug fixed. See that
+       * file's doc comment for the bug and the removal condition.
        */
       cimd({
         fetchClientMetadataResource,
