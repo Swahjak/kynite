@@ -69,6 +69,24 @@ export async function oauthConsentAction(accept: boolean, oauthQuery: string): P
    * `request` and `headers` straight from what's passed in, so a fresh
    * `Headers` copy shared between both fields keeps `ctx.headers` and
    * `ctx.request.headers` consistent.
+   *
+   * Passing a real `Request` has a side effect one layer up, though:
+   * `dispatchAuthEndpoint` (`better-auth/dist/api/dispatch.mjs`) decides
+   * whether to hand back the endpoint's plain return value or wrap it in an
+   * HTTP `Response` via `shouldReturnResponse = input.asResponse ??
+   * isRequestLike(input.request)` — and `isRequestLike` (`better-auth/dist/
+   * utils/url.mjs`) is `true` for any `instanceof Request`. Without an
+   * explicit `asResponse: false`, our own `request` flips that default and
+   * `oauth2Consent` returns a `Response` built by `toResponse()`
+   * (`better-call/dist/to-response.mjs`) instead of the `{redirect, url}`
+   * object — and a `Response` built with `new Response(...)` (never fetched)
+   * always reports `.url === ''` per the Fetch spec, which is exactly the
+   * `Invalid URL, input: ''` crash. `asResponse: false` keeps the plain
+   * object shape regardless of `request` being present. The nested
+   * `/oauth2/authorize` continuation the accept path runs through
+   * (`runOAuth2Authorize` in the oauth-provider dist) already forces its own
+   * `asResponse: false`, so that hop was never affected — only this
+   * top-level call was.
    */
   const requestHeaders = new Headers(await headers());
   const consentUrl = new URL('/api/auth/oauth2/consent', env.BETTER_AUTH_URL);
@@ -77,7 +95,12 @@ export async function oauthConsentAction(accept: boolean, oauthQuery: string): P
     body: { accept, oauth_query: oauthQuery },
     headers: requestHeaders,
     request: new Request(consentUrl, { method: 'POST', headers: requestHeaders }),
+    asResponse: false,
   });
+
+  if (!result.url) {
+    throw new Error('OAuth consent did not return a redirect URL.');
+  }
 
   externalRedirect(asExternalUrl(result.url));
   // `redirect()` throws — unreachable, but the signature must stay total.
