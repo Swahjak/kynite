@@ -14,9 +14,8 @@ import {
 } from '@kynite/ui';
 import { useDateTimeFormat } from '@/components/formatting';
 import { useRouter } from '@/i18n/navigation';
-import { MEMBER_COLOR_CLASSES } from '@/modules/family';
-import { ROUTINE_ICON_TILE, completeStepAction } from '@/modules/routines';
-import { toggleTaskAction } from '@/modules/tasks';
+import type { CompleteStepInput, CompletionState } from '@/modules/routines';
+import type { ActionState, ToggleTaskInput } from '@/modules/tasks';
 import { columnProgress, daypartFromHour, type TimeSection } from '../domain/routines-board';
 import type { BoardColumn, BoardRow, RoutinesBoardData } from '../page-data-board';
 import { TodayClock } from './today-clock';
@@ -48,6 +47,19 @@ import { TodayClock } from './today-clock';
  * correcting a shared household board a few steps away from the router does
  * not need that guarantee, and `<TodayLive />` (mounted once, by the page)
  * already keeps every device's board current over SSE.
+ *
+ * This component runs in the browser, so it may import neither the routines
+ * slice's nor the tasks slice's nor the family slice's value exports — every
+ * slice barrel re-exports `server-only` reads alongside its client-safe
+ * pieces (`@/modules/routines`'s and `@/modules/tasks`'s own module doc), and
+ * a value import drags that into the client bundle even when only one named
+ * export is used. `completeStepAction` and `toggleTaskAction` therefore
+ * arrive as props, passed by reference from the server route
+ * (`(hub)/hub/routines/page.tsx`) exactly as `TodayTabSterren` hands
+ * `completeStepAction` / `undoCompletionAction` to `StarMatrix`; member
+ * colour classes and routine icon tiles arrive pre-resolved on `board` itself
+ * (`colorClasses` on `BoardColumn`, `accentClass` on every row) rather than
+ * being looked up here from `MEMBER_COLOR_CLASSES` / `ROUTINE_ICON_TILE`.
  */
 
 const DAYPART_ICON: Record<TimeSection, IconName> = {
@@ -57,14 +69,13 @@ const DAYPART_ICON: Record<TimeSection, IconName> = {
 };
 
 /**
- * The tile a task row's icon sits on. Tasks carry no icon of their own
- * (`modules/tasks/schema.ts`'s header: "a task has no steps, no stars, no
- * schedule" — deliberately lighter than a routine), so every task row wears
- * one fixed tile rather than the per-icon colouring `ROUTINE_ICON_TILE` gives
- * a routine step. Reusing that table's own `task_alt` entry keeps the pair
- * (icon, tile) a token this file does not invent.
+ * Tasks carry no icon of their own (`modules/tasks/schema.ts`'s header: "a
+ * task has no steps, no stars, no schedule" — deliberately lighter than a
+ * routine), so every task row wears one fixed icon. Its tile colour is
+ * `accentClass` on the row itself (`BoardTaskRow`), resolved server-side —
+ * see the module note above on why this file cannot look it up from
+ * `ROUTINE_ICON_TILE` directly.
  */
-const TASK_TILE_CLASS = ROUTINE_ICON_TILE.task_alt;
 const TASK_ROW_ICON: IconName = 'task_alt';
 
 type OptimisticRow = { id: string; done: boolean };
@@ -77,9 +88,18 @@ export type RoutinesBoardProps = {
   board: RoutinesBoardData;
   /** Household-local `YYYY-MM-DD` — feeds `TodayClock`'s midnight refresh. */
   dayKey: string;
+  /** `completeStepAction` from the routines slice, passed by reference. */
+  completeStepAction: (input: CompleteStepInput) => Promise<CompletionState>;
+  /** `toggleTaskAction` from the tasks slice, likewise. */
+  toggleTaskAction: (input: ToggleTaskInput) => Promise<ActionState>;
 };
 
-export function RoutinesBoard({ board, dayKey }: RoutinesBoardProps) {
+export function RoutinesBoard({
+  board,
+  dayKey,
+  completeStepAction,
+  toggleTaskAction,
+}: RoutinesBoardProps) {
   const t = useTranslations('today');
   const formatDateTime = useDateTimeFormat();
   const router = useRouter();
@@ -225,13 +245,7 @@ function PoolColumn({
           <p className="px-2 py-2 text-body-sm text-ink-muted">{t('board.pool.empty')}</p>
         ) : (
           pool.map((row) => (
-            <BoardRowView
-              key={row.id}
-              row={row}
-              accentClass={TASK_TILE_CLASS}
-              canComplete={canComplete}
-              onToggle={onToggle}
-            />
+            <BoardRowView key={row.id} row={row} canComplete={canComplete} onToggle={onToggle} />
           ))
         )}
       </div>
@@ -260,7 +274,7 @@ function MemberColumn({
   const tasks = column.tasks.map(resolveRow);
   const progress = useMemo(() => columnProgress([...routines, ...tasks]), [routines, tasks]);
 
-  const colors = MEMBER_COLOR_CLASSES[column.color];
+  const colors = column.colorClasses;
   const celebrate = progress.celebrate;
   const starTotal = [...routines, ...tasks]
     .filter((row) => row.done && row.kind === 'routine')
@@ -356,7 +370,6 @@ function MemberColumn({
           <BoardRowView
             key={row.id}
             row={row}
-            accentClass={row.kind === 'routine' ? ROUTINE_ICON_TILE[row.icon] : TASK_TILE_CLASS}
             canComplete={canCompleteRoutines}
             onToggle={onToggle}
           />
@@ -372,13 +385,7 @@ function MemberColumn({
         ) : null}
 
         {tasks.map((row) => (
-          <BoardRowView
-            key={row.id}
-            row={row}
-            accentClass={TASK_TILE_CLASS}
-            canComplete={canCompleteTasks}
-            onToggle={onToggle}
-          />
+          <BoardRowView key={row.id} row={row} canComplete={canCompleteTasks} onToggle={onToggle} />
         ))}
 
         {routines.length === 0 && tasks.length === 0 ? (
@@ -391,12 +398,10 @@ function MemberColumn({
 
 function BoardRowView({
   row,
-  accentClass,
   canComplete,
   onToggle,
 }: {
   row: BoardRow;
-  accentClass: string;
   canComplete: boolean;
   onToggle: (row: BoardRow) => void;
 }) {
@@ -427,7 +432,7 @@ function BoardRowView({
       <span
         className={cn(
           'flex size-[30px] shrink-0 items-center justify-center rounded-lg',
-          done ? 'bg-surface-container text-ink-muted opacity-70' : accentClass
+          done ? 'bg-surface-container text-ink-muted opacity-70' : row.accentClass
         )}
       >
         <Icon name={icon} size="sm" />
@@ -456,7 +461,7 @@ function BoardRowView({
         aria-hidden
         className={cn(
           'flex size-[46px] shrink-0 items-center justify-center rounded-full',
-          done ? 'bg-success' : 'border-[3px] border-line-subtle bg-surface-container-lowest'
+          done ? 'bg-success' : 'border-2 border-line-subtle bg-surface-container-lowest'
         )}
       >
         {done ? (

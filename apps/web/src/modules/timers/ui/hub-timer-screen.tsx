@@ -120,7 +120,11 @@ export function HubTimerScreen({ board }: { board: TimerBoardData }) {
             'flex size-16 shrink-0 items-center justify-center rounded-full bg-primary-foreground/10 transition-colors duration-200 ease-brand hover:bg-primary-foreground/20 focus-visible:ring-3 focus-visible:ring-ring/50'
           )}
         >
-          <Icon name="close" size="xl" />
+          {/* Not `close` (FR11/FR13: no failure iconography on a child-facing
+              surface) — `check_circle` is the same "I'm done" glyph
+              `task-list.tsx` uses for a completed task; the aria-label still
+              names the real action for anyone using a screen reader. */}
+          <Icon name="check_circle" size="xl" />
         </button>
       </div>
 

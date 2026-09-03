@@ -207,7 +207,10 @@ function TimerStartForm({ onOpenChange }: { onOpenChange: (open: boolean) => voi
         </div>
 
         {error ? (
-          <p role="alert" className="text-sm text-destructive">
+          // No alarm styling on a surface a child sees (FR11/FR13): same
+          // neutral `ink-secondary` treatment `pair-code-form.tsx` uses for
+          // its own inline `ActionState` error, not `text-destructive`.
+          <p role="alert" className="text-sm text-ink-secondary">
             {t(`errors.${error}`)}
           </p>
         ) : null}

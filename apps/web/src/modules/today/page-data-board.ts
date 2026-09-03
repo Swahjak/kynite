@@ -1,7 +1,15 @@
 import 'server-only';
 import { startOfDay } from '@/modules/calendar';
-import { can, getFamily, getPrincipal, listMembers, type Member } from '@/modules/family';
 import {
+  MEMBER_COLOR_CLASSES,
+  can,
+  getFamily,
+  getPrincipal,
+  listMembers,
+  type Member,
+} from '@/modules/family';
+import {
+  ROUTINE_ICON_TILE,
   completionSeed,
   listCompletionsOn,
   listRoutines,
@@ -35,6 +43,14 @@ export type BoardTaskRow = {
   id: string;
   title: string;
   done: boolean;
+  /**
+   * The tile a task row's icon sits on — `ROUTINE_ICON_TILE.task_alt`,
+   * resolved here rather than in the client board. `RoutinesBoard` runs in
+   * the browser and may not import the routines slice's value exports (its
+   * barrel carries `server-only` reads alongside them); see the note on
+   * `RoutinesBoard` itself.
+   */
+  accentClass: string;
 };
 
 export type BoardRoutineRow = {
@@ -43,6 +59,8 @@ export type BoardRoutineRow = {
   id: string;
   title: string;
   icon: RoutineIcon;
+  /** `ROUTINE_ICON_TILE[icon]` — resolved here for the same reason as above. */
+  accentClass: string;
   /** Stars this step pays, per the routine's own economy — 0 once graduated. */
   stars: number;
   done: boolean;
@@ -60,7 +78,12 @@ export type BoardColumn = {
   memberId: string;
   displayName: string;
   avatarUrl: string | null;
-  color: Member['color'];
+  /**
+   * `MEMBER_COLOR_CLASSES[member.color]`, resolved here — the client board
+   * may not import the family slice's value exports any more than the
+   * routines slice's, for the same `server-only`-barrel reason.
+   */
+  colorClasses: { dot: string; surface: string; ring: string; border: string };
   role: Member['role'];
   /** Routine steps due today (plus any open grace day), banded by daypart. */
   sections: Record<TimeSection, BoardRoutineRow[]>;
@@ -142,6 +165,7 @@ export async function loadRoutinesBoardData(
         id: step.id,
         title: step.title,
         icon,
+        accentClass: ROUTINE_ICON_TILE[icon],
         stars,
         done: done.has(`${row.ownerMemberId}:${step.id}:${occurrence.occurrenceDate}`),
         routineId: row.id,
@@ -162,6 +186,7 @@ export async function loadRoutinesBoardData(
     id: row.id,
     title: row.title,
     done: row.completedAt !== null,
+    accentClass: ROUTINE_ICON_TILE.task_alt,
   });
 
   const { pool, byMember } = partitionTasksByAssignee(tasks);
@@ -174,7 +199,7 @@ export async function loadRoutinesBoardData(
       memberId: member.id,
       displayName: member.displayName,
       avatarUrl: member.avatarUrl,
-      color: member.color,
+      colorClasses: MEMBER_COLOR_CLASSES[member.color],
       role: member.role,
       sections: sectionsByMember.get(member.id) ?? EMPTY_SECTIONS(),
       tasks: (byMember.get(member.id) ?? []).map(boardTaskRow),

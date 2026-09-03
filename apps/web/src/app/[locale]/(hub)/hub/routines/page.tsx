@@ -2,6 +2,8 @@ import { getTranslations } from 'next-intl/server';
 import { EmptyState } from '@kynite/ui';
 import { HubBoard } from '@/modules/calendar';
 import { requireHubDevice } from '@/modules/devices';
+import { completeStepAction } from '@/modules/routines';
+import { toggleTaskAction } from '@/modules/tasks';
 import {
   RoutinesBoard,
   TodayHeader,
@@ -96,7 +98,12 @@ export default async function HubRoutinesOverviewPage({
         />
 
         {board ? (
-          <RoutinesBoard board={board} dayKey={dayKey} />
+          <RoutinesBoard
+            board={board}
+            dayKey={dayKey}
+            completeStepAction={completeStepAction}
+            toggleTaskAction={toggleTaskAction}
+          />
         ) : (
           <p className="text-body-sm text-ink-secondary">{t('routines.otherDay')}</p>
         )}
