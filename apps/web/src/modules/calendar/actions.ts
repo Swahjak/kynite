@@ -18,9 +18,11 @@ import {
   RECURRENCE_PRESETS,
   preservesExistingRule,
   ruleForPreset,
+  ruleForWeeklySelection,
   type RecurrencePreset,
 } from './domain/presets';
 import { addExdate, exdateLine } from './domain/ical';
+import { WEEKDAYS } from './domain/rrule';
 import { fromWall, parseDateKey } from './domain/zone';
 import { EVENT_TYPES, event } from './schema';
 import { pushToGoogle } from './sync-bridge';
@@ -56,6 +58,10 @@ const eventSchema = z
     eventType: z.enum(EVENT_TYPES),
     calendarId: z.uuid().optional().or(z.literal('')),
     recurrence: z.enum(RECURRENCE_PRESETS),
+    // Weekday chips (Google-Calendar-style) for the `weekly` preset only — see
+    // `resolveInput` below. Not a general RRULE input: every other preset
+    // still authors its rule from `ruleForPreset` alone.
+    byweekday: z.array(z.enum(WEEKDAYS)).min(1).max(7).optional(),
   })
   .refine((value) => (value.allDay ? true : LOCAL_DATE_TIME.test(value.startsAt)), {
     path: ['startsAt'],
@@ -67,6 +73,10 @@ function read(formData: FormData, key: string): string {
 }
 
 function eventInput(formData: FormData) {
+  const byweekday = formData
+    .getAll('byweekday')
+    .filter((value): value is string => typeof value === 'string' && value !== '');
+
   return eventSchema.safeParse({
     title: read(formData, 'title'),
     description: read(formData, 'description'),
@@ -81,6 +91,7 @@ function eventInput(formData: FormData) {
     eventType: read(formData, 'eventType'),
     calendarId: read(formData, 'calendarId'),
     recurrence: read(formData, 'recurrence') || 'none',
+    byweekday: byweekday.length > 0 ? byweekday : undefined,
   });
 }
 
@@ -204,7 +215,10 @@ async function resolveInput(
         attendeeMemberIds: input.attendeeMemberIds,
         eventType: input.eventType,
         calendarId,
-        rrule: ruleForPreset(input.recurrence),
+        rrule:
+          input.recurrence === 'weekly'
+            ? ruleForWeeklySelection(input.byweekday, startsAt, timeZone)
+            : ruleForPreset(input.recurrence),
       },
     },
   };

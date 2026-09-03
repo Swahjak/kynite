@@ -38,12 +38,19 @@ import {
 } from '@/components/ui/dialog';
 import { DateField } from '@/components/ui/date-field';
 import { DateTimeField } from '@/components/ui/date-time-field';
+import { useDateTimeFormat } from '@/components/formatting';
 import type { Member } from '@/modules/family';
 import { idleState } from '../action-state';
 import { createEventAction, deleteEventAction, updateEventAction } from '../actions';
 import { categoryForType } from '../domain/event-type';
-import { presetFor, RECURRENCE_PRESETS } from '../domain/presets';
-import { toWall } from '../domain/zone';
+import {
+  presetFor,
+  RECURRENCE_PRESETS,
+  weeklyDaysOf,
+  type RecurrencePreset,
+} from '../domain/presets';
+import { WEEKDAYS, type Weekday } from '../domain/rrule';
+import { isoWeekday, toWall } from '../domain/zone';
 import { EVENT_TYPES } from '../schema';
 import type { CalendarEvent } from '../queries';
 import { CATEGORY_CLASSES, EVENT_TYPE_ICONS } from './tokens';
@@ -149,6 +156,84 @@ function WhenField({
   );
 }
 
+/**
+ * A Monday-first reference week, used only to name each weekday in the
+ * household's locale (`formatDateTime(..., { weekday: 'short' })`) — same
+ * idiom as `month-view.tsx`'s header row. `2024-01-01` was a Monday; the
+ * dates themselves are never shown, so any Monday works and `UTC` keeps the
+ * household's own time zone from shifting which calendar day (and so which
+ * weekday) each one names.
+ */
+const REFERENCE_MONDAY = Date.UTC(2024, 0, 1);
+const REFERENCE_WEEK = WEEKDAYS.map((_, index) => new Date(REFERENCE_MONDAY + index * 86_400_000));
+
+/**
+ * Google-Calendar-style weekday chips for the `weekly` preset: ma/di/wo/do/vr
+ * /za/zo, locale-ordered and Monday-first (`WEEKDAYS` already is). At least
+ * one day must stay selected — a weekly series with zero weekdays is not a
+ * rule `domain/rrule.ts` can expand.
+ *
+ * The last checked chip is blocked in `onToggle` (`toggleWeeklyDay`), not via
+ * HTML `disabled` on the `<input>`: a disabled checkbox is excluded from
+ * `FormData` even while `checked`, which would post an *empty* `byweekday`
+ * for exactly the one-day-left case — the one this guard exists to protect —
+ * and silently fall back to the wrong rule server-side. `aria-disabled`
+ * (rather than `disabled`) keeps assistive tech honest about the control
+ * being inert without pulling it out of the submit.
+ */
+function WeeklyDayChips({
+  selected,
+  onToggle,
+}: {
+  selected: Weekday[];
+  onToggle: (day: Weekday) => void;
+}) {
+  const t = useTranslations('calendar');
+  const formatDateTime = useDateTimeFormat();
+
+  return (
+    <Field>
+      <FieldLabel>{t('form.weeklyDays')}</FieldLabel>
+      <div
+        role="group"
+        aria-label={t('form.weeklyDays')}
+        className="flex flex-wrap gap-2"
+        data-testid="event-weekly-days"
+      >
+        {WEEKDAYS.map((day, index) => {
+          const checked = selected.includes(day);
+          const locked = checked && selected.length === 1;
+          const reference = REFERENCE_WEEK[index];
+
+          return (
+            <label
+              key={day}
+              className={cn(
+                'flex min-h-12 min-w-12 cursor-pointer items-center justify-center rounded-4xl border border-border px-3 transition-colors has-checked:border-ring has-checked:bg-accent',
+                locked && 'cursor-not-allowed opacity-70'
+              )}
+            >
+              <input
+                type="checkbox"
+                name="byweekday"
+                value={day}
+                checked={checked}
+                aria-disabled={locked}
+                onChange={() => onToggle(day)}
+                className="sr-only"
+                aria-label={formatDateTime(reference, { weekday: 'long', timeZone: 'UTC' })}
+              />
+              <span className="text-body-sm" aria-hidden="true">
+                {formatDateTime(reference, { weekday: 'short', timeZone: 'UTC' })}
+              </span>
+            </label>
+          );
+        })}
+      </div>
+    </Field>
+  );
+}
+
 /** An instant → the `datetime-local` value that reads as it does in `timeZone`. */
 function toLocalInput(instant: Date, timeZone: string, allDay: boolean): string {
   const wall = toWall(instant, allDay ? 'UTC' : timeZone);
@@ -195,6 +280,35 @@ export function EventDialog({
     event?.calendarId ?? (event ? '' : (householdCalendarId ?? ''))
   );
   const [scope, setScope] = useState<'series' | 'occurrence'>('occurrence');
+  const start = event?.startsAt ?? defaultStart ?? new Date();
+  /**
+   * The `weekly` preset's weekday chips. Controlled rather than left to
+   * `defaultValue` because the chips row's very
+   * visibility depends on the current selection, not just its initial one.
+   *
+   * Seeded from the stored rule when it is a `weeklyDaysOf`-shaped rule (a
+   * school-schedule import or an earlier chip-authored edit); otherwise from
+   * DTSTART's own weekday, which is what a bare `weekly` rule already means
+   * and what the dialog shows checked by default.
+   */
+  const [recurrence, setRecurrence] = useState<RecurrencePreset>(() =>
+    presetFor(event?.rrule ?? null)
+  );
+  const [weeklyDays, setWeeklyDays] = useState<Weekday[]>(() => {
+    const fromRule = weeklyDaysOf(event?.rrule ?? null);
+    if (fromRule) return fromRule;
+    return [WEEKDAYS[isoWeekday(toWall(start, timeZone)) - 1]];
+  });
+
+  function toggleWeeklyDay(day: Weekday) {
+    setWeeklyDays((current) => {
+      if (current.includes(day)) {
+        if (current.length === 1) return current;
+        return current.filter((entry) => entry !== day);
+      }
+      return [...current, day];
+    });
+  }
   // M18: a delete is confirmed rather than performed on the first tap.
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const deleteGuard = useSubmitGuard(deletePending);
@@ -212,7 +326,6 @@ export function EventDialog({
     wasPending.current = busy;
   }, [pending, deletePending, state, deleteState, onOpenChange, router]);
 
-  const start = event?.startsAt ?? defaultStart ?? new Date();
   const end = event?.endsAt ?? new Date(start.getTime() + 60 * 60 * 1000);
   const error = state.status === 'error' ? state.error : null;
   const deleteError = deleteState.status === 'error' ? deleteState.error : null;
@@ -344,7 +457,11 @@ export function EventDialog({
 
             <Field>
               <FieldLabel>{t('form.recurrence')}</FieldLabel>
-              <Select name="recurrence" defaultValue={presetFor(event?.rrule ?? null)}>
+              <Select
+                name="recurrence"
+                value={recurrence}
+                onValueChange={(value) => setRecurrence((value as RecurrencePreset) ?? 'none')}
+              >
                 <SelectTrigger size="hub" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
@@ -357,6 +474,10 @@ export function EventDialog({
                 </SelectContent>
               </Select>
             </Field>
+
+            {recurrence === 'weekly' && (
+              <WeeklyDayChips selected={weeklyDays} onToggle={toggleWeeklyDay} />
+            )}
 
             {isEdit && event.recurring && (
               <Field>
