@@ -103,7 +103,14 @@ export {
   type EventRowSize,
   type EventRowState,
 } from './components/event-row';
-export { Fab, FabSlot, type FabProps } from './components/fab';
+export {
+  Fab,
+  FabSlot,
+  FabSpeedDial,
+  type FabProps,
+  type FabSpeedDialAction,
+  type FabSpeedDialProps,
+} from './components/fab';
 export {
   Field,
   FieldDescription,
