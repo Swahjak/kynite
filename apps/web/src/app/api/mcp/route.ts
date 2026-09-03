@@ -322,16 +322,6 @@ function registerTools(
   );
 }
 
-/**
- * Must match `mcp({ resource })` in `src/server/auth.ts` exactly: that value
- * is what every issued access token's `aud` claim is bound to, and
- * `requireMcpAuth`'s own default (`opts.resource` unset) is the auth
- * instance's resolved *base* URL — `${BETTER_AUTH_URL}/api/auth` — not this
- * resource. Leaving this unset would verify every token against the wrong
- * audience and reject them all.
- */
-const MCP_RESOURCE = `${env.BETTER_AUTH_URL}/api/mcp`;
-
 /** The 403 body for each way `principalForMcpUser` can refuse. */
 const PRINCIPAL_REFUSAL_MESSAGES: Record<McpPrincipalRefusal, string> = {
   noMember: 'No family member is associated with this account.',
@@ -339,47 +329,77 @@ const PRINCIPAL_REFUSAL_MESSAGES: Record<McpPrincipalRefusal, string> = {
     'This account belongs to multiple families; MCP access is not yet supported for multi-family accounts.',
 };
 
-const handleMcpRequest = requireMcpAuth(
-  auth,
-  async (request, claims) => {
-    const userId = typeof claims.sub === 'string' ? claims.sub : undefined;
+type McpRequestHandler = (request: Request) => Promise<Response>;
 
-    // Rate-limit before the member lookup: `sub` is already verified by
-    // `requireMcpAuth` at this point (this callback only runs for a
-    // signature/issuer/audience/expiry-valid token), so keying off it here is
-    // safe, and a client hammering the endpoint with a valid token gets
-    // turned away before it costs a `member` SELECT — see
-    // `checkMcpRateLimit`'s doc comment (`src/server/mcp-auth.ts`) for why
-    // this is in-memory and keyed by `sub` rather than by IP.
-    if (userId) {
-      const rateLimit = checkMcpRateLimit(userId);
-      if (rateLimit.limited) {
-        return jsonRpcError(429, 'rateLimited: too many requests, slow down', {
-          'Retry-After': String(rateLimit.retryAfterSeconds),
-        });
+let handleMcpRequest: McpRequestHandler | undefined;
+
+/**
+ * Builds (and memoises) the `requireMcpAuth`-wrapped handler on first use,
+ * the same lazy-singleton shape as `getAuth()`/`getEnv()`: `MCP_RESOURCE`
+ * reads `env.BETTER_AUTH_URL`, and `env` validates on first property read
+ * (`src/server/env.ts`), so building this at module scope would make
+ * importing this route throw the moment `next build` collects its
+ * page-data — the builder stage has no runtime environment at all. Every
+ * request after the first reuses the same handler instance, matching the
+ * previous eager behaviour.
+ */
+function getHandleMcpRequest(): McpRequestHandler {
+  if (handleMcpRequest) return handleMcpRequest;
+
+  /**
+   * Must match `mcp({ resource })` in `src/server/auth.ts` exactly: that
+   * value is what every issued access token's `aud` claim is bound to, and
+   * `requireMcpAuth`'s own default (`opts.resource` unset) is the auth
+   * instance's resolved *base* URL — `${BETTER_AUTH_URL}/api/auth` — not
+   * this resource. Leaving this unset would verify every token against the
+   * wrong audience and reject them all.
+   */
+  const mcpResource = `${env.BETTER_AUTH_URL}/api/mcp`;
+
+  handleMcpRequest = requireMcpAuth(
+    auth,
+    async (request, claims) => {
+      const userId = typeof claims.sub === 'string' ? claims.sub : undefined;
+
+      // Rate-limit before the member lookup: `sub` is already verified by
+      // `requireMcpAuth` at this point (this callback only runs for a
+      // signature/issuer/audience/expiry-valid token), so keying off it here
+      // is safe, and a client hammering the endpoint with a valid token gets
+      // turned away before it costs a `member` SELECT — see
+      // `checkMcpRateLimit`'s doc comment (`src/server/mcp-auth.ts`) for why
+      // this is in-memory and keyed by `sub` rather than by IP.
+      if (userId) {
+        const rateLimit = checkMcpRateLimit(userId);
+        if (rateLimit.limited) {
+          return jsonRpcError(429, 'rateLimited: too many requests, slow down', {
+            'Retry-After': String(rateLimit.retryAfterSeconds),
+          });
+        }
       }
-    }
 
-    const principalResult = userId
-      ? await principalForMcpUser(userId)
-      : ({ ok: false, reason: 'noMember' } as const);
-    if (!principalResult.ok) {
-      return jsonRpcError(403, PRINCIPAL_REFUSAL_MESSAGES[principalResult.reason]);
-    }
-    const principal = principalResult.principal;
+      const principalResult = userId
+        ? await principalForMcpUser(userId)
+        : ({ ok: false, reason: 'noMember' } as const);
+      if (!principalResult.ok) {
+        return jsonRpcError(403, PRINCIPAL_REFUSAL_MESSAGES[principalResult.reason]);
+      }
+      const principal = principalResult.principal;
 
-    const grantedScopes = grantedScopesOf(claims);
+      const grantedScopes = grantedScopesOf(claims);
 
-    const mcpHandler = createMcpHandler(
-      (server) => registerTools(server, principal, grantedScopes),
-      { serverInfo: { name: 'kynite', version: '1.0.0' } }
-    );
+      const mcpHandler = createMcpHandler(
+        (server) => registerTools(server, principal, grantedScopes),
+        { serverInfo: { name: 'kynite', version: '1.0.0' } }
+      );
 
-    return withMcpHeaders(await mcpHandler(request));
-  },
-  { resource: MCP_RESOURCE }
-);
+      return withMcpHeaders(await mcpHandler(request));
+    },
+    { resource: mcpResource }
+  );
 
-export const GET = handleMcpRequest;
-export const POST = handleMcpRequest;
-export const DELETE = handleMcpRequest;
+  return handleMcpRequest;
+}
+
+export const GET = (request: Request) => getHandleMcpRequest()(request);
+export const POST = (request: Request) => getHandleMcpRequest()(request);
+export const DELETE = (request: Request) => getHandleMcpRequest()(request);
