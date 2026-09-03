@@ -145,7 +145,7 @@ export { EventDialog, type WritableCalendar } from './ui/event-dialog';
 export { DayAgendaRow, type DayAgendaRowProps } from './ui/day-agenda-row';
 export { HubBoard, type HubBoardSnapshot } from './ui/hub-board';
 export { MonthView } from './ui/month-view';
-export { NewEventFab, type NewEventFabProps } from './ui/new-event-fab';
+export { AddEventFabAction, type AddEventFabActionProps } from './ui/add-event-fab-action';
 export { NewEventAction, type NewEventActionProps } from './ui/new-event-action';
 export { PersonColumns } from './ui/person-columns';
 export { TimeGrid } from './ui/time-grid';

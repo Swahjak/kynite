@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@kynite/ui';
-import { Link, useRouter } from '@/i18n/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { createTaskAction, toggleTaskAction } from '../actions';
 import type { TodayTask } from '../page-data';
 import { useTaskComposer } from './use-task-composer';
@@ -62,21 +62,6 @@ export type TaskListProps = {
   title: string;
   /** `MEMBER_COLOR_CLASSES[color].surface` per member id, resolved server-side. */
   memberSurface: Record<string, string>;
-  /**
-   * Where the "start a timer" shortcut goes. The two surfaces that render this
-   * list live in different route trees — `/timers` in the parent app,
-   * `/hub/timers` on the wall — and a kiosk that followed the app's link would
-   * be handed to a gate that bounces it straight back to the pair screen.
-   */
-  timersHref?: string;
-  /**
-   * The two pills at the foot of the list ("Timer starten", "Taak erbij").
-   *
-   * False on the wall board, where the August sheet promotes both into the
-   * quick-action grid at the top of the same column. The *field* they open
-   * still lives here; only the buttons moved.
-   */
-  showQuickActions?: boolean;
 };
 
 export function TaskList({
@@ -86,10 +71,9 @@ export function TaskList({
   canComplete,
   title,
   memberSurface,
-  timersHref = '/timers',
-  showQuickActions = true,
 }: TaskListProps) {
   const t = useTranslations('today');
+  const tCommon = useTranslations('common');
   const router = useRouter();
 
   const [optimistic, setOptimistic] = useOptimistic<
@@ -98,8 +82,13 @@ export function TaskList({
   >(new Map<string, boolean>(), (previous, next) => new Map(previous).set(next.id, next.done));
   const [, startTransition] = useTransition();
 
-  // Shared with the board's quick-action grid, which is where "Taak erbij"
-  // now lives on the wall — see `use-task-composer.ts`.
+  // Shared module state (`use-task-composer.ts`) rather than local — the
+  // trigger that flips it to `true` no longer lives in this component (it
+  // used to be the second of this list's own pills). It is now
+  // `TaskComposerFabAction` (`@/modules/tasks`), the phone's "Taak erbij"
+  // action on `TodayFab`; this field is still the one it opens. The *close*
+  // path stays local to the form below (a cancel button and Escape) — opening
+  // is the one thing that moved off-component, not closing.
   const { open: adding, setOpen: setAdding } = useTaskComposer();
   const [draft, setDraft] = useState('');
   const [assignee, setAssignee] = useState<string>(UNASSIGNED);
@@ -124,6 +113,16 @@ export function TaskList({
       });
       router.refresh();
     });
+  };
+
+  // The one way to close the field again, now that opening it lives outside
+  // this component (`TaskComposerFabAction`). Clears the draft too — a
+  // cancelled add should not leave half a task sitting in the field for next
+  // time it opens.
+  const cancel = () => {
+    setAdding(false);
+    setDraft('');
+    setAssignee(UNASSIGNED);
   };
 
   return (
@@ -215,6 +214,11 @@ export function TaskList({
               event.preventDefault();
               submit();
             }}
+            onKeyDown={(event) => {
+              if (event.key !== 'Escape') return;
+              event.stopPropagation();
+              cancel();
+            }}
           >
             <Input
               autoFocus
@@ -240,43 +244,12 @@ export function TaskList({
             <Button type="submit" disabled={draft.trim().length === 0}>
               {t('tasks.save')}
             </Button>
+            <Button type="button" variant="outline" onClick={cancel}>
+              {tCommon('cancel')}
+            </Button>
           </form>
         ) : null}
       </Card>
-
-      {showQuickActions ? (
-        <>
-          {/* The mockup's two quick actions. Both are white pills with brand text:
-          one leaves the page, one opens the field above.
-
-          `showQuickActions={false}` on the wall board: the August sheet
-          promotes both of these into the quick-action grid at the top of the
-          same column, and a second copy at the foot of the list would be the
-          same two buttons twice on one screen. */}
-          <div className="flex flex-wrap gap-2.5">
-            <Button
-              variant="outline"
-              className="flex-1 rounded-4xl border-primary/20 font-display font-bold text-primary"
-              nativeButton={false}
-              render={<Link href={timersHref} />}
-            >
-              <Icon name="timer" size="sm" inline="start" />
-              {t('tasks.startTimer')}
-            </Button>
-
-            <Button
-              variant="outline"
-              data-testid="today-task-add-toggle"
-              disabled={!canWrite}
-              onClick={() => setAdding(!adding)}
-              className="flex-1 rounded-4xl border-primary/20 font-display font-bold text-primary"
-            >
-              <Icon name="add_task" size="sm" inline="start" />
-              {t('tasks.add')}
-            </Button>
-          </div>
-        </>
-      ) : null}
     </div>
   );
 }

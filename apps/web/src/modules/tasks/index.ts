@@ -31,4 +31,7 @@ export { loadTodayTasks, type TodayTask, type TodayTasksData } from './page-data
 
 export { TaskList, type TaskListProps } from './ui/task-list';
 export { openTaskComposer, useTaskComposer } from './ui/use-task-composer';
-export { TaskComposerAction, type TaskComposerActionProps } from './ui/task-composer-action';
+export {
+  TaskComposerFabAction,
+  type TaskComposerFabActionProps,
+} from './ui/task-composer-fab-action';

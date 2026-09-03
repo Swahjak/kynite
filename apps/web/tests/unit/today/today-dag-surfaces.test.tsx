@@ -67,10 +67,6 @@ vi.mock('@/modules/today/ui/today-now-strip', () => ({
   TodayNowStrip: () => <div data-testid="today-now" />,
 }));
 
-vi.mock('@/modules/today/ui/today-quick-actions', () => ({
-  TodayQuickActions: () => <div data-testid="today-quick-actions" />,
-}));
-
 vi.mock('@/modules/today/ui/today-tab-routines', () => ({
   TodayTabRoutines: () => <div data-testid="today-routines" />,
 }));
@@ -124,8 +120,6 @@ async function renderDag({
       flowMode: 'next',
       referenceNow: NOW,
       kids: [],
-      timersHref: surface === 'hub' ? '/hub/timers' : undefined,
-      canGiveStars: surface === 'hub',
     })
   );
 
@@ -192,27 +186,14 @@ describe('TodayTabDag — what stays surface-shaped', () => {
   });
 });
 
-describe('TodayTabDag — the quick actions are never doubled', () => {
-  it('gives the wall the grid and turns the list’s own pills off', async () => {
-    const { container } = await renderDag({ surface: 'hub' });
-
-    expect(container.querySelector('[data-testid="today-quick-actions"]')).not.toBeNull();
-    expect(
-      container.querySelector('[data-testid="task-list"]')!.getAttribute('data-quick-actions')
-    ).toBe('false');
-  });
-
-  it('gives the phone the list’s own pills and no grid', async () => {
-    // The four tiles all have a home on the phone already — the FAB, the list's
-    // quick-add, the sterren pill — so the grid would be a third copy.
-    const { container } = await renderDag({ surface: 'app' });
-
-    expect(container.querySelector('[data-testid="today-quick-actions"]')).toBeNull();
-    expect(
-      container.querySelector('[data-testid="task-list"]')!.getAttribute('data-quick-actions')
-    ).toBe('true');
-  });
-});
+// The old "quick actions are never doubled" coverage lived here: the wall's
+// grid (`today-quick-actions`) and `TaskList`'s own pills, gated so exactly
+// one of the two ever drew. Both are gone — the grid's two tiles and the
+// list's two pills all moved onto `TodayFab`, the speed dial each page now
+// mounts beside this panel rather than inside it (`today-fab.tsx`) — so there
+// is nothing left inside `TodayTabDag` for this describe block to pin. New
+// coverage for "the wall's dial has two actions, the phone's has four"
+// belongs on `TodayFab` itself, not here.
 
 describe('the two routes render the same day panel', () => {
   // Vitest runs with `apps/web` as its working directory.

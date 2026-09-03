@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { OfflineIndicator } from '@/components/offline';
+import { FabSlot } from '@/components/ui/fab';
 import { DeviceSessionWatcher } from './device-session-watcher';
 import { FullyLauncherButton, GoogleHomeButton } from './fully-buttons';
 import { HubRail } from './hub-rail';
@@ -132,6 +133,11 @@ export function KioskShell({
       {device ? <SettingsWatcher /> : null}
       {/* M19. Not on the pair screen: there is no board to return to yet. */}
       {device ? <IdleReturn /> : null}
+      {/* The FAB slot (`components/ui/fab.tsx`) — this shell had none before
+          the wall grew a speed dial of its own (`(hub)/hub/page.tsx`'s
+          `TodayFab`). Not on the pair screen: there is no page there that
+          mounts one. */}
+      {device ? <FabSlot /> : null}
 
       <div className="flex min-h-0 flex-1">
         {/* The rail is the paired hub's only navigation, and — since M20 — its

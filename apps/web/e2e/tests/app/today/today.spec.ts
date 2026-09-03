@@ -20,7 +20,10 @@ test.describe('the takenlijst', () => {
     const list = page.getByTestId('today-tasklist');
     await expect(list).toBeVisible();
 
-    await page.getByTestId('today-task-add-toggle').click();
+    // "Taak erbij" moved off the list's own pill and onto the speed dial
+    // (`TodayFab`) — open it, then its "add task" action.
+    await page.getByRole('button', { name: 'Snelle acties' }).click();
+    await page.getByTestId('fab-action-add-task').click();
     const form = page.getByTestId('today-task-add');
     await expect(form).toBeVisible();
 

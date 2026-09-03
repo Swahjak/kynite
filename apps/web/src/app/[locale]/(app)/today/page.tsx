@@ -1,6 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import {
-  NewEventFab,
+  AddEventFabAction,
   dayKeysOf,
   isSameDay,
   loadCalendarPage,
@@ -8,8 +8,9 @@ import {
   toWall,
 } from '@/modules/calendar';
 import { firstNameOf, getMember, getPrincipal, greetingSlotFor, hourIn } from '@/modules/family';
-import { loadTodayTasks } from '@/modules/tasks';
+import { TaskComposerFabAction, loadTodayTasks } from '@/modules/tasks';
 import {
+  TodayFab,
   TodayHeader,
   TodayLive,
   TodayNowStrip,
@@ -216,13 +217,29 @@ export default async function TodayPage({
         }
       />
 
-      {/* The shell positions it; this page owns what it does (`ui/fab.tsx`). */}
-      <NewEventFab
-        members={data.members}
-        calendars={data.calendars}
-        timeZone={data.timeZone}
-        defaultStart={data.anchor}
-        canWrite={data.canWrite}
+      {/* The shell positions it; this page owns what it does (`ui/fab.tsx`).
+          Four actions: "Nieuw event" opens `EventDialog` (the calendar
+          slice's own trigger + dialog, resolved here for the same reason the
+          old `newEventAction` prop was — `TodayFab` may not reach it), "Taak
+          erbij" opens the task list's own inline field the same way
+          (`TaskComposerFabAction`, the tasks slice's), "Timer starten" is a
+          route, "Ster geven" switches this page's own `sterren` tab. `null`
+          wherever the write it needs is denied, rather than an action whose
+          submit would be refused. */}
+      <TodayFab
+        timersHref="/timers"
+        canGiveStars={progress?.canComplete ?? false}
+        newEventAction={
+          data.canWrite ? (
+            <AddEventFabAction
+              members={data.members}
+              calendars={data.calendars}
+              timeZone={data.timeZone}
+              defaultStart={data.anchor}
+            />
+          ) : null
+        }
+        taskAction={tasks?.canWrite ? <TaskComposerFabAction /> : null}
       />
     </main>
   );

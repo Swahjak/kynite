@@ -9,7 +9,7 @@ import { EventDialog, type WritableCalendar } from './event-dialog';
 /**
  * "Nieuw event" as a tile in the board's quick-action grid.
  *
- * Same pairing as `NewEventFab`, and here for the same reason: `EventDialog`
+ * Same pairing as `AddEventFabAction`, and here for the same reason: `EventDialog`
  * belongs to this slice, and a client component in `modules/today` cannot reach
  * it — importing `@/modules/calendar` from the browser graph pulls
  * `server-only` queries, and the deep import is banned by `eslint.config.mjs`.

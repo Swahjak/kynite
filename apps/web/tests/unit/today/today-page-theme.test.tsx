@@ -29,7 +29,7 @@ vi.mock('next-intl/server', () => ({
 const loadCalendarPage = vi.fn();
 
 vi.mock('@/modules/calendar', () => ({
-  NewEventFab: () => null,
+  AddEventFabAction: () => null,
   dayKeysOf: () => [] as string[],
   isSameDay: (a: Date, b: Date) => a.getTime() === b.getTime(),
   loadCalendarPage: (...args: unknown[]) => loadCalendarPage(...args),
@@ -71,6 +71,7 @@ vi.mock('@/modules/today', async () => {
     TodayThemeBanner: ({ theme }: { theme: { key: string } }) => (
       <div data-testid="today-theme-banner" data-slug={theme.key} />
     ),
+    TodayFab: () => null,
     TodayTabDag: ({ banner }: { banner?: ReactNode }) => (
       <div data-testid="today-dag">{banner}</div>
     ),

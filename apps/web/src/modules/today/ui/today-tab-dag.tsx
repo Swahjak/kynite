@@ -7,7 +7,6 @@ import { TaskList, type TodayTasksData } from '@/modules/tasks';
 import type { FlowMode } from '../domain/flow';
 import type { KidProgress } from '../page-data';
 import { TodayNowStrip } from './today-now-strip';
-import { TodayQuickActions } from './today-quick-actions';
 import { TodayTabRoutines } from './today-tab-routines';
 import { TodayTimeline } from './today-timeline';
 
@@ -27,8 +26,11 @@ import { TodayTimeline } from './today-timeline';
  * So `surface` varies **presentation only** — the column ratio, the timeline's
  * density, which stack the second column carries — and never what is fetched or
  * what a principal may do. Every permission below arrives as data (`tasks`'
- * own `canWrite`/`canComplete`) or as an already-resolved node (`taskAction`,
- * `newEventAction`), decided by the loader that owns it against the §7 matrix.
+ * own `canWrite`/`canComplete`), decided by the loader that owns it against the
+ * §7 matrix. What used to be a third shape — an already-resolved node
+ * (`taskAction`, `newEventAction`) for the wall's own quick-action grid — is
+ * gone: both tiles that grid ever actually drew are now actions on `TodayFab`,
+ * the speed dial each page mounts beside this panel rather than inside it.
  *
  * What each surface draws:
  *
@@ -81,8 +83,6 @@ export type TodayTabDagProps = {
   nowEventKey: string | null;
   /** Null while browsing another day: the list is today's, or it is nothing. */
   tasks: TodayTasksData | null;
-  /** The surface's own timers route — `/timers` in the app, `/hub/timers` on the wall. */
-  timersHref?: string;
   /**
    * The day's theme row, already resolved by the page (`domain/theme.ts`) — on
    * both surfaces. Null on the ordinary majority of the year.
@@ -103,7 +103,7 @@ export type TodayTabDagProps = {
    * page. The Vandaag sheet opens its third column with it
    * ("Vandaag.dc.html":145) and that column is this one — the August
    * recomposition merged the sheet's second and third columns, and the card
-   * still sits above the quick-action grid.
+   * still sits at the top of it.
    *
    * `null` on a browsed day, and the widget itself renders `null` whenever the
    * household has configured no location or nothing usable is cached, so the
@@ -119,20 +119,6 @@ export type TodayTabDagProps = {
    * a slot the wall fills, not a branch taken here.
    */
   launcher?: ReactNode;
-  /**
-   * The quick-action grid's "Nieuw event" tile, already resolved by the page:
-   * the dialog behind it lives in the calendar slice, and `null` wherever
-   * `event:write` is denied — which on the wall is every principal (§7).
-   */
-  newEventAction?: ReactNode;
-  /**
-   * The grid's "Taak erbij" tile (`TaskComposerAction`), resolved by the page
-   * for the same reason `newEventAction` is. `null` where `task:write` is
-   * denied — which on the wall is every principal (§7).
-   */
-  taskAction?: ReactNode;
-  /** `completion:write`, for the grid's "Ster geven" tile. */
-  canGiveStars?: boolean;
 };
 
 export async function TodayTabDag({
@@ -145,7 +131,6 @@ export async function TodayTabDag({
   isToday,
   nowEventKey,
   tasks,
-  timersHref,
   banner,
   heroEvent = null,
   flowMode = 'next',
@@ -153,9 +138,6 @@ export async function TodayTabDag({
   kids = null,
   weather,
   launcher,
-  newEventAction,
-  taskAction,
-  canGiveStars = false,
 }: TodayTabDagProps) {
   const t = await getTranslations('today');
 
@@ -221,25 +203,15 @@ export async function TodayTabDag({
               which draws the card at the top of the page instead. */}
           {weather}
 
-          {/* The August sheet's 2×2 grid — a *wall* affordance, and only that.
-              Its four tiles all already have a home on the phone: "Nieuw event"
-              is the FAB, "Taak erbij" is the task list's own quick-add pill,
-              "Timer" is the pill beside it and "Ster geven" is a tab. A grid
-              there would be a third copy of the same four buttons on a 390px
-              screen — the very argument that turned the list's pills off here.
-              The wall has none of those: no FAB, no quick-add (`task:write` is
-              denied), and a 56px target because a thumb aims at it from an
-              arm's length away. Of the sheet's four tiles it then draws the two
-              a device principal may actually perform, each gated on the
-              permission its action would need — see `TodayQuickActions`. */}
-          {hub ? (
-            <TodayQuickActions
-              timersHref={timersHref ?? '/timers'}
-              taskAction={taskAction}
-              newEventAction={newEventAction}
-              canGiveStars={canGiveStars}
-            />
-          ) : null}
+          {/* The August sheet's 2×2 grid used to live here — a *wall*
+              affordance, gated tile by tile on the permission it would need
+              (`event:write`/`task:write` are `deny` for a device, §7, so only
+              "Timer" and "Ster geven" ever drew). Both are now actions on
+              `TodayFab`, the speed dial each page mounts beside this panel
+              (`(hub)/hub/page.tsx`, `(app)/today/page.tsx`) rather than inside
+              it — `FabSpeedDial` portals into the shell's slot regardless of
+              where in the tree it renders, so there is nothing this column
+              needs to carry any more. */}
 
           {/* The wall carries today's routines in this column as well: it has
               one frame and no scroll, and "how the routines are going" is the
@@ -259,12 +231,6 @@ export async function TodayTabDag({
               canComplete={tasks.canComplete}
               title={t('tasks.title')}
               memberSurface={memberSurface}
-              timersHref={timersHref}
-              // Off on the wall only: both of the list's own pills are in the
-              // grid at the top of this column there, and a second copy at its
-              // foot would be the same two buttons twice on one screen. On the
-              // phone, where there is no grid, they are the whole affordance.
-              showQuickActions={!hub}
             />
           ) : (
             <Card className="gap-3 p-5">

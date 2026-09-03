@@ -21,10 +21,10 @@ import { createPortal } from 'react-dom';
  * and branching on `usePathname()` — would make the shell import every page's
  * concerns, which is the thing the layout exists to avoid.
  *
- * A page that renders `<SlotPortal>` where the slot does not exist (the hub
- * kiosk shell has neither) renders **nothing**. That is deliberate: a FAB
- * escaping onto a wall display is worse than a missing one, and the kiosk is
- * documented as having no parent-app chrome at all.
+ * A page that renders `<SlotPortal>` where the slot does not exist (the hub's
+ * pair screen, which has no `FabSlot` yet — no device, no board to act on)
+ * renders **nothing**. That is deliberate: a FAB escaping onto a wall display
+ * with nowhere to portal into is worse than a missing one.
  */
 export const FAB_SLOT_ID = 'app-fab-slot';
 

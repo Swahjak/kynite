@@ -26,8 +26,9 @@ import { FAB_SLOT_ID, SlotPortal } from './slot-portal';
  * It steps up to 64px from `sm` — `motion.md`'s "64px on tablet vs. 48px
  * minimum" rule for a primary, high-frequency action. The glyph rotates 90° on
  * hover. The shell owns the *position* (`FabSlot`, rendered by
- * `(app)/layout.tsx` clear of the mobile bottom bar and the safe-area inset);
- * a page owns the *action* and renders `<Fab>` anywhere in its own tree.
+ * `(app)/layout.tsx` clear of the mobile bottom bar and the safe-area inset,
+ * and by the hub's `KioskShell`); a page owns the *action* and renders
+ * `<Fab>` anywhere in its own tree.
  *
  * Exactly one `<Fab>` should be mounted at a time. Two pages cannot both be
  * mounted in the App Router, so that falls out of the routing rather than

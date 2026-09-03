@@ -590,6 +590,7 @@
       "eventTypeHint": "Bepaalt de kleur en het icoon op het bord.",
       "attendees": "Wie gaat er mee",
       "recurrence": "Herhaling",
+      "weeklyDays": "Op welke dagen",
       "calendar": "Agenda",
       "calendarHint": "Alleen in Kynite, of doorsturen naar een gekoppelde Google-agenda.",
       "nativeCalendar": "Alleen in Kynite",
@@ -837,7 +838,8 @@
     "familyLabel": "Het gezin",
     "actions": {
       "newEvent": "Nieuw event",
-      "giveStar": "Ster geven"
+      "giveStar": "Ster geven",
+      "quickActions": "Snelle acties"
     }
   },
   "routines": {

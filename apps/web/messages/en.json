@@ -590,6 +590,7 @@
       "eventTypeHint": "Sets the colour and the icon on the board.",
       "attendees": "Who is coming",
       "recurrence": "Repeat",
+      "weeklyDays": "On which days",
       "calendar": "Calendar",
       "calendarHint": "Kynite only, or pushed to a linked Google calendar.",
       "nativeCalendar": "Kynite only",
@@ -837,7 +838,8 @@
     "familyLabel": "The family",
     "actions": {
       "newEvent": "New event",
-      "giveStar": "Give a star"
+      "giveStar": "Give a star",
+      "quickActions": "Quick actions"
     }
   },
   "routines": {

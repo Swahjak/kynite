@@ -14,6 +14,7 @@ import { MEMBER_COLOR_CLASSES, greetingSlotFor, hourIn, initialsOf } from '@/mod
 import { loadFamilyRoutineTotals } from '@/modules/routines';
 import { loadTodayTasks } from '@/modules/tasks';
 import {
+  TodayFab,
   TodayHeader,
   TodayLive,
   TodayTabDag,
@@ -61,11 +62,11 @@ export const dynamic = 'force-dynamic';
  *  - **the star matrix** — fully interactive, because `completion:write` is
  *    `allow` for a device; that is the whole point of a screen kids can reach.
  *    Taps are recorded with `source: 'hub'`, like every other hub completion.
- *  - **events** — no FAB at all: `event:write` is `deny`, so the wall offers no
- *    writes rather than offering some that would be refused. The board's
- *    quick-action grid drops its "Nieuw event" tile for the same reason, and
- *    its "Taak erbij" tile because `task:write` is denied too: of the sheet's
- *    four tiles the wall performs the two it is allowed to.
+ *  - **events** — no "add event" action at all: `event:write` is `deny`, so
+ *    `TodayFab` below never resolves a `newEventAction`. `task:write` being
+ *    denied too is why there is no "Taak erbij" action either — of the
+ *    design sheet's four quick actions the wall performs the two it is
+ *    allowed to, where the phone's dial carries all four.
  *
  * ## What stays hub-shaped
  *
@@ -312,17 +313,6 @@ export default async function HubPage({
               // took the bottom third of an 834px wall away from the columns
               // the design gives the whole panel to ("Vandaag.dc.html":72–75).
               launcher={<ChildLauncher entries={children} />}
-              // The kiosk's own timers screen, not the app's.
-              timersHref="/hub/timers"
-              // No "Nieuw event" tile for the same reason there is no FAB
-              // below: `event:write` is `deny` for a device principal (§7).
-              newEventAction={null}
-              // Nor a "Taak erbij" tile: `task:write` is `deny` too, which is
-              // why the list's own quick-add never renders here either.
-              taskAction={null}
-              // `completion:write` *is* `allow` for a device — a screen kids
-              // can reach is the whole point — so the grid keeps this one.
-              canGiveStars={progress?.canComplete ?? false}
             />
           }
           personen={
@@ -352,7 +342,13 @@ export default async function HubPage({
           server's clock, and a cached one would be a wrong number. */}
       {timers ? <AmbientTimers board={timers} /> : null}
 
-      {/* No `NewEventFab`: `event:write` is `deny` for a device principal (§7). */}
+      {/* The wall's own two-action speed dial (M27-ish): "Timer starten" and
+          "Ster geven", the only two of the design sheet's four quick actions a
+          device principal may perform (§7 — `event:write`/`task:write` are
+          `deny`). No `newEventAction`: unlike `(app)/today`'s `TodayFab`, this
+          one never resolves an "add event" action at all, rather than
+          building one that would be refused on submit. */}
+      <TodayFab timersHref="/hub/timers" canGiveStars={progress?.canComplete ?? false} />
     </main>
   );
 }
