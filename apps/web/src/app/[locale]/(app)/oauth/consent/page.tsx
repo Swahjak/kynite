@@ -1,11 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { PageHeader } from '@kynite/ui';
-import {
-  KNOWN_OAUTH_SCOPES,
-  OAuthConsentForm,
-  loadOAuthConsentPage,
-} from '@/modules/oauth-consent';
+import { OAuthConsentForm, loadOAuthConsentPage, scopeMessageKey } from '@/modules/oauth-consent';
 
 /** Session-dependent: never prerendered, so `next build` needs no database. */
 export const dynamic = 'force-dynamic';
@@ -33,9 +29,10 @@ export default async function OAuthConsentPage({
 
   const t = await getTranslations('oauth');
 
-  const scopeLabels = data.scopes.map((scope) =>
-    KNOWN_OAUTH_SCOPES.has(scope) ? t(`scopes.${scope}`) : t('unknownScope', { scope })
-  );
+  const scopeLabels = data.scopes.map((scope) => {
+    const key = scopeMessageKey(scope);
+    return key ? t(`scopes.${key}`) : t('unknownScope', { scope });
+  });
 
   return (
     <main

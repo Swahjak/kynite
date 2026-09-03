@@ -8,6 +8,7 @@ export { oauthConsentAction } from './actions';
 export {
   KNOWN_OAUTH_SCOPES,
   loadOAuthConsentPage,
+  scopeMessageKey,
   type OAuthConsentClient,
   type OAuthConsentPageData,
 } from './page-data';

@@ -4,23 +4,47 @@ import { getPrincipal } from '@/modules/family';
 import { getAuth } from '@/server/auth';
 
 /**
- * The scopes `messages/{nl,en}.json`'s `oauth.scopes` has a label for —
- * mirrors `MCP_SCOPES` in `server/auth.ts` (not imported from there: the
- * consent page's job is "what can I explain to a human", which is a UI
- * concern, not an auth-config one). A scope outside this set — should not
- * happen, since the AS only grants what it was configured to accept — falls
- * back to `oauth.unknownScope` instead of a raw, untranslated key.
+ * Maps a granted scope string to its `messages/{nl,en}.json` `oauth.scopes`
+ * key — mirrors `MCP_SCOPES` in `server/auth.ts` (not imported from there:
+ * the consent page's job is "what can I explain to a human", which is a UI
+ * concern, not an auth-config one).
+ *
+ * The message key is deliberately *not* the scope string itself: next-intl
+ * treats a `.` in a message key as a nesting separator, so a raw
+ * `oauth.scopes.${scope}` lookup for e.g. `kynite:calendar.read` resolves to
+ * `oauth.scopes.kynite:calendar.read` → nested under `scopes.kynite:calendar`
+ * → `read`, which doesn't exist, and next-intl throws `MISSING_MESSAGE`
+ * rather than returning undefined. Every scope this consent page can display
+ * is routed through this dot/colon-free key instead.
  */
-export const KNOWN_OAUTH_SCOPES: ReadonlySet<string> = new Set([
-  'openid',
-  'profile',
-  'email',
-  'offline_access',
-  'kynite:calendar.read',
-  'kynite:calendar.write',
-  'kynite:tasks.read',
-  'kynite:tasks.write',
-]);
+export const SCOPE_MESSAGE_KEYS: Readonly<Record<string, string>> = {
+  openid: 'openid',
+  profile: 'profile',
+  email: 'email',
+  offline_access: 'offlineAccess',
+  'kynite:calendar.read': 'calendarRead',
+  'kynite:calendar.write': 'calendarWrite',
+  'kynite:tasks.read': 'tasksRead',
+  'kynite:tasks.write': 'tasksWrite',
+};
+
+/**
+ * The scopes `messages/{nl,en}.json`'s `oauth.scopes` has a label for. A
+ * scope outside this set — should not happen, since the AS only grants what
+ * it was configured to accept — falls back to `oauth.unknownScope` instead
+ * of a raw, untranslated key.
+ */
+export const KNOWN_OAUTH_SCOPES: ReadonlySet<string> = new Set(Object.keys(SCOPE_MESSAGE_KEYS));
+
+/**
+ * Resolves a scope string to its safe `oauth.scopes` message key, or `null`
+ * for a scope this consent page doesn't know how to label — the caller
+ * should fall back to `oauth.unknownScope` rather than attempt a dynamic
+ * lookup keyed on the raw scope string.
+ */
+export function scopeMessageKey(scope: string): string | null {
+  return SCOPE_MESSAGE_KEYS[scope] ?? null;
+}
 
 export type OAuthConsentClient = {
   clientId: string;
