@@ -27,6 +27,8 @@ export {
   type ToggleTaskInput,
 } from './actions';
 
+export { createTask, createTaskSchema, type CreateTaskResult } from './write';
+
 export { loadTodayTasks, type TodayTask, type TodayTasksData } from './page-data';
 
 export { TaskList, type TaskListProps } from './ui/task-list';

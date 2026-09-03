@@ -11,21 +11,14 @@ import { getDb } from '@/server/db';
 // query module — and make this file unimportable from a plain Node test. The
 // barrel is for *behaviour*; `server/db/schema.ts` is for tables (§2).
 import { CALENDAR_VISIBILITIES, calendar } from '@/server/db/schema';
-import { assertCan, getFamily, getMember, type Principal } from '@/modules/family';
+import { assertCan, type Principal } from '@/modules/family';
 import { publish } from '@/modules/realtime';
 import { actionFailure as failure, idleState, type ActionState } from './action-state';
-import {
-  RECURRENCE_PRESETS,
-  preservesExistingRule,
-  ruleForPreset,
-  ruleForWeeklySelection,
-  type RecurrencePreset,
-} from './domain/presets';
+import { preservesExistingRule } from './domain/presets';
 import { addExdate, exdateLine } from './domain/ical';
-import { WEEKDAYS } from './domain/rrule';
-import { fromWall, parseDateKey } from './domain/zone';
 import { EVENT_TYPES, event } from './schema';
 import { pushToGoogle } from './sync-bridge';
+import { createEvent, eventInputFromForm, resolveInput } from './write';
 
 /**
  * Mutations for the calendar slice (M06).
@@ -38,190 +31,18 @@ import { pushToGoogle } from './sync-bridge';
  * Family scoping is not left to the capability check: every `where` clause
  * carries `familyId` from the *principal*, never from the form, so a forged id
  * addresses nothing.
+ *
+ * `createEventAction` is a thin wrapper over `./write.ts`'s `createEvent` —
+ * the MCP-server write seam (M-B): authorize → parse the form → delegate the
+ * actual write, insert, publish and Google push to the shared seam →
+ * revalidate. `resolveInput` and the form→input parsing it shares with
+ * `updateEventAction` live there too, verbatim, so the two Server Actions and
+ * a future `/api/mcp` route all map a form (or JSON) to the same row values.
  */
-
-const trimmed = z.string().trim();
-
-/** `2026-03-02T08:30` from a `datetime-local`, or `2026-03-02` when all-day. */
-const LOCAL_DATE_TIME = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/;
-
-const eventSchema = z
-  .object({
-    title: trimmed.min(1).max(200),
-    description: trimmed.max(4000).optional().or(z.literal('')),
-    location: trimmed.max(400).optional().or(z.literal('')),
-    startsAt: trimmed.min(1),
-    endsAt: trimmed.min(1),
-    allDay: z.boolean(),
-    ownerMemberId: z.uuid().optional().or(z.literal('')),
-    attendeeMemberIds: z.array(z.uuid()).max(50),
-    eventType: z.enum(EVENT_TYPES),
-    calendarId: z.uuid().optional().or(z.literal('')),
-    recurrence: z.enum(RECURRENCE_PRESETS),
-    // Weekday chips (Google-Calendar-style) for the `weekly` preset only — see
-    // `resolveInput` below. Not a general RRULE input: every other preset
-    // still authors its rule from `ruleForPreset` alone.
-    byweekday: z.array(z.enum(WEEKDAYS)).min(1).max(7).optional(),
-  })
-  .refine((value) => (value.allDay ? true : LOCAL_DATE_TIME.test(value.startsAt)), {
-    path: ['startsAt'],
-  });
 
 function read(formData: FormData, key: string): string {
   const value = formData.get(key);
   return typeof value === 'string' ? value : '';
-}
-
-function eventInput(formData: FormData) {
-  const byweekday = formData
-    .getAll('byweekday')
-    .filter((value): value is string => typeof value === 'string' && value !== '');
-
-  return eventSchema.safeParse({
-    title: read(formData, 'title'),
-    description: read(formData, 'description'),
-    location: read(formData, 'location'),
-    startsAt: read(formData, 'startsAt'),
-    endsAt: read(formData, 'endsAt'),
-    allDay: formData.get('allDay') === 'on' || formData.get('allDay') === 'true',
-    ownerMemberId: read(formData, 'ownerMemberId'),
-    attendeeMemberIds: formData
-      .getAll('attendeeMemberIds')
-      .filter((value): value is string => typeof value === 'string' && value !== ''),
-    eventType: read(formData, 'eventType'),
-    calendarId: read(formData, 'calendarId'),
-    recurrence: read(formData, 'recurrence') || 'none',
-    byweekday: byweekday.length > 0 ? byweekday : undefined,
-  });
-}
-
-/**
- * A form's local date/time → an instant in the family's zone.
- *
- * All-day values are stored as UTC midnights, matching M05's mapper: an
- * all-day event is a *date*, and giving it a zone is what makes it drift.
- */
-function toInstant(value: string, timeZone: string, allDay: boolean): Date | null {
-  if (allDay) {
-    const wall = parseDateKey(value.slice(0, 10));
-    if (!wall) return null;
-    return new Date(Date.UTC(wall.year, wall.month - 1, wall.day));
-  }
-
-  const match = LOCAL_DATE_TIME.exec(value);
-  if (!match) return null;
-
-  return fromWall(
-    {
-      year: Number(match[1]),
-      month: Number(match[2]),
-      day: Number(match[3]),
-      hour: Number(match[4]),
-      minute: Number(match[5]),
-      second: 0,
-    },
-    timeZone
-  );
-}
-
-type Resolved = {
-  familyId: string;
-  timeZone: string;
-  /** Kept alongside the values so `update` can honour the `custom` case. */
-  recurrence: RecurrencePreset;
-  values: {
-    title: string;
-    description: string | null;
-    location: string | null;
-    startsAt: Date;
-    endsAt: Date;
-    allDay: boolean;
-    tz: string;
-    ownerMemberId: string | null;
-    attendeeMemberIds: string[];
-    eventType: (typeof EVENT_TYPES)[number];
-    calendarId: string | null;
-    rrule: string | null;
-  };
-};
-
-/**
- * Form input → row values, with the checks a form cannot make itself: the
- * calendar must belong to this family and be writable, the event must not end
- * before it starts, and `ownerMemberId`/`attendeeMemberIds` must each name a
- * member of this family (B3) — a form field is just a UUID the client sent,
- * and a forged one must not address another family's member.
- */
-async function resolveInput(
-  familyId: string,
-  formData: FormData
-): Promise<{ ok: true; resolved: Resolved } | { ok: false; error: string }> {
-  const parsed = eventInput(formData);
-  if (!parsed.success) return { ok: false, error: 'invalidInput' };
-
-  const input = parsed.data;
-  const family = await getFamily(familyId);
-  const timeZone = family?.timezone ?? 'Europe/Amsterdam';
-
-  const startsAt = toInstant(input.startsAt, timeZone, input.allDay);
-  const endsAt = toInstant(input.endsAt, timeZone, input.allDay);
-  if (!startsAt || !endsAt) return { ok: false, error: 'invalidInput' };
-  if (endsAt.getTime() < startsAt.getTime()) return { ok: false, error: 'endBeforeStart' };
-
-  let calendarId: string | null = null;
-  if (input.calendarId) {
-    const [row] = await getDb()
-      .select({ id: calendar.id, writable: calendar.writable })
-      .from(calendar)
-      .where(and(eq(calendar.id, input.calendarId), eq(calendar.familyId, familyId)))
-      .limit(1);
-
-    if (!row) return { ok: false, error: 'calendarNotFound' };
-    // A read-only Google calendar cannot take our writes; storing the event
-    // against it would guarantee a push failure and a permanent pip.
-    if (!row.writable) return { ok: false, error: 'calendarReadOnly' };
-    calendarId = row.id;
-  }
-
-  // B3: `ownerMemberId`/`attendeeMemberIds` are ids a form supplied, exactly
-  // like `calendarId` above — so they get the same re-scoping. `getMember`
-  // returns null for an id that exists but belongs to another family, which
-  // is what turns a forged cross-family id into a rejection instead of a
-  // silent cross-tenant write.
-  if (input.ownerMemberId && !(await getMember(familyId, input.ownerMemberId))) {
-    return { ok: false, error: 'memberNotFound' };
-  }
-  for (const attendeeMemberId of input.attendeeMemberIds) {
-    if (!(await getMember(familyId, attendeeMemberId))) {
-      return { ok: false, error: 'memberNotFound' };
-    }
-  }
-
-  return {
-    ok: true,
-    resolved: {
-      familyId,
-      timeZone,
-      recurrence: input.recurrence,
-      values: {
-        title: input.title,
-        description: input.description || null,
-        location: input.location || null,
-        startsAt,
-        endsAt,
-        allDay: input.allDay,
-        tz: timeZone,
-        ownerMemberId: input.ownerMemberId || null,
-        attendeeMemberIds: input.attendeeMemberIds,
-        eventType: input.eventType,
-        calendarId,
-        rrule:
-          input.recurrence === 'weekly'
-            ? ruleForWeeklySelection(input.byweekday, startsAt, timeZone)
-            : ruleForPreset(input.recurrence),
-      },
-    },
-  };
 }
 
 async function revalidateCalendar(): Promise<void> {
@@ -282,16 +103,12 @@ export async function createEventAction(
   const principal = await assertCan('event:write').catch(() => null);
   if (!principal) return failure('forbidden');
 
-  const input = await resolveInput(principal.familyId, formData);
-  if (!input.ok) return failure(input.error);
+  const parsed = eventInputFromForm(formData);
+  if (!parsed.success) return failure('invalidInput');
 
-  const [created] = await getDb()
-    .insert(event)
-    .values({ familyId: principal.familyId, ...input.resolved.values })
-    .returning({ id: event.id });
+  const result = await createEvent(principal, parsed.data);
+  if (!result.ok) return failure(result.error);
 
-  await publishEvent(principal, 'event.upserted', [created.id]);
-  await pushToGoogle(created.id);
   await revalidateCalendar();
   return idleState;
 }
@@ -306,7 +123,10 @@ export async function updateEventAction(
   const eventId = read(formData, 'eventId');
   if (!z.uuid().safeParse(eventId).success) return failure('invalidInput');
 
-  const input = await resolveInput(principal.familyId, formData);
+  const parsedForm = eventInputFromForm(formData);
+  if (!parsedForm.success) return failure('invalidInput');
+
+  const input = await resolveInput(principal.familyId, parsedForm.data);
   if (!input.ok) return failure(input.error);
 
   const db = getDb();

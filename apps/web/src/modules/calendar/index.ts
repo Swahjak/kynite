@@ -127,6 +127,8 @@ export {
 
 export { pushToGoogle } from './sync-bridge';
 
+export { createEvent, eventSchema, type CreateEventInput, type CreateEventResult } from './write';
+
 export {
   loadCalendarDisplay,
   loadCalendarPage,

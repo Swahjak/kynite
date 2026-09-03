@@ -9,9 +9,10 @@ import { getDb } from '@/server/db';
 // (same note as `modules/timers/actions.ts`): a barrel re-exports client
 // components, which must not enter a server mutation module.
 import { task } from '@/server/db/schema';
-import { assertCan, getMember, type Principal } from '@/modules/family';
+import { assertCan, type Principal } from '@/modules/family';
 import { publish } from '@/modules/realtime';
 import { actionFailure, type ActionState } from './action-state';
+import { createTask, type CreateTaskInput } from './write';
 
 /**
  * Mutations for the tasks slice.
@@ -33,15 +34,6 @@ import { actionFailure, type ActionState } from './action-state';
  * audits structurally.
  */
 
-const trimmed = z.string().trim();
-
-/** `YYYY-MM-DD` in the family's zone; the column is a `date`, never an instant. */
-const dateKey = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/)
-  .nullable()
-  .optional();
-
 /**
  * The realtime `actor` for a principal. A `member` principal names itself; a
  * paired kiosk names its device. Neither is invented from a form.
@@ -58,60 +50,17 @@ async function revalidateTasks(): Promise<void> {
   revalidatePath(`/${locale}/today`);
 }
 
-const createSchema = z.object({
-  title: trimmed.min(1).max(200),
-  /** Null / omitted = nobody in particular, which is most of a household list. */
-  assigneeMemberId: z.uuid().nullable().optional(),
-  dueDate: dateKey,
-});
-
-export type CreateTaskInput = z.infer<typeof createSchema>;
+export type { CreateTaskInput } from './write';
 
 export async function createTaskAction(input: CreateTaskInput): Promise<ActionState> {
   const principal = await assertCan('task:write').catch(() => null);
   if (!principal) return actionFailure('forbidden');
 
-  const parsed = createSchema.safeParse(input);
-  if (!parsed.success) return actionFailure('invalidInput');
-
-  const { title, assigneeMemberId, dueDate } = parsed.data;
-
-  // The assignee is *proven* to be in this family rather than trusted from the
-  // form: a forged id from another household resolves to nothing and the task
-  // is written unassigned rather than pointing across a family boundary.
-  const assignee = assigneeMemberId
-    ? ((await getMember(principal.familyId, assigneeMemberId))?.id ?? null)
-    : null;
-  if (assigneeMemberId && !assignee) return actionFailure('memberNotFound');
-
-  const created = await getDb().transaction(async (tx) => {
-    const [row] = await tx
-      .insert(task)
-      .values({
-        familyId: principal.familyId,
-        title,
-        assigneeMemberId: assignee,
-        dueDate: dueDate ?? null,
-        createdByMemberId: principal.kind === 'member' ? principal.memberId : null,
-      })
-      .returning({ id: task.id });
-
-    await publish(
-      {
-        familyId: principal.familyId,
-        type: 'task.upserted',
-        entity: { id: row.id },
-        actor: { ...actorOf(principal), source: 'mobile' },
-        patch: { title, assigneeMemberId: assignee, dueDate: dueDate ?? null, completed: false },
-      },
-      tx
-    );
-
-    return row;
-  });
+  const result = await createTask(principal, input);
+  if (!result.ok) return actionFailure(result.error);
 
   await revalidateTasks();
-  return { status: 'saved', taskId: created.id };
+  return { status: 'saved', taskId: result.taskId };
 }
 
 const toggleSchema = z.object({
