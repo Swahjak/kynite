@@ -4,6 +4,7 @@ import { headers } from 'next/headers';
 import { redirect as externalRedirect } from 'next/navigation';
 import { getPrincipal } from '@/modules/family';
 import { getAuth } from '@/server/auth';
+import { env } from '@/server/env';
 
 /**
  * Next 16's typed routes accept an off-site destination only as a literal
@@ -46,10 +47,36 @@ export async function oauthConsentAction(accept: boolean, oauthQuery: string): P
     throw new Error('OAuth consent requires a signed-in member.');
   }
 
-  const requestHeaders = await headers();
+  /**
+   * `auth.api.*` calls don't carry a raw `Request` unless one is passed
+   * explicitly, but the oauth-provider plugin's authorize continuation
+   * (reached from the accept branch of `/oauth2/consent`) requires
+   * `ctx.request` unconditionally — see `authorizeEndpoint` in the installed
+   * `@better-auth/oauth-provider` dist (`dist/authorize-*.mjs`):
+   * `if (!ctx.request) throw new APIError('UNAUTHORIZED', {error_description:
+   * 'request not found', error: 'invalid_request'})`. Without it, clicking
+   * approve threw that error before ever reaching the redirect it was meant
+   * to build.
+   *
+   * We satisfy it with a synthetic `Request`, built from a *copy* of the
+   * incoming headers rather than the object `next/headers()` hands back:
+   * `consentEndpoint` mutates `ctx.headers` (`.set('accept',
+   * 'application/json')`) to steer the shared authorize continuation toward
+   * returning `{redirect, url}` instead of throwing an HTTP redirect —
+   * Next's `ReadonlyHeaders` throws on any mutation, so the same object
+   * can't be handed through as `headers` either. better-call's context
+   * builder (`node_modules/better-call/dist/context.mjs`) assigns
+   * `request` and `headers` straight from what's passed in, so a fresh
+   * `Headers` copy shared between both fields keeps `ctx.headers` and
+   * `ctx.request.headers` consistent.
+   */
+  const requestHeaders = new Headers(await headers());
+  const consentUrl = new URL('/api/auth/oauth2/consent', env.BETTER_AUTH_URL);
+
   const result = await getAuth().api.oauth2Consent({
     body: { accept, oauth_query: oauthQuery },
     headers: requestHeaders,
+    request: new Request(consentUrl, { method: 'POST', headers: requestHeaders }),
   });
 
   externalRedirect(asExternalUrl(result.url));
