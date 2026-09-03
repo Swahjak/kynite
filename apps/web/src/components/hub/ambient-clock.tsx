@@ -44,11 +44,11 @@ export function AmbientClock({ now, className }: AmbientClockProps) {
     >
       <time
         dateTime={current.toISOString()}
-        className="font-display text-display-xl font-extrabold tabular-nums text-white"
+        className="font-display text-display-3xl font-extrabold tabular-nums text-white"
       >
         {time}
       </time>
-      <span className="text-h3 font-medium text-white/60">{date}</span>
+      <span className="text-h2 font-medium text-white/60">{date}</span>
     </div>
   );
 }
