@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { ProgressBar } from '@kynite/ui';
 import { useRouter } from '@/i18n/navigation';
-import { elapsedRatio, minutesRemaining, startsInReading } from '../domain/flow';
+import { elapsedRatio, remainingReading, startsInReading } from '../domain/flow';
 
 /**
  * The part of the NU strip a clock changes.
@@ -91,8 +91,16 @@ export function NowStripMeter({
   const block = { startsAt, endsAt, allDay };
   const live = state === 'live';
   const reading = startsInReading(block, now);
+  const remaining = remainingReading(block, now);
   const detail = live
-    ? t('nowStrip.remaining', { minutes: minutesRemaining(block, now) })
+    ? remaining.kind === 'minutes'
+      ? t('nowStrip.remaining', { minutes: remaining.minutes })
+      : remaining.minutes === 0
+        ? t('nowStrip.remainingHours', { hours: remaining.hours })
+        : t('nowStrip.remainingHoursMinutes', {
+            hours: remaining.hours,
+            minutes: remaining.minutes,
+          })
     : reading.kind === 'minutes'
       ? t('nowStrip.startsIn', { minutes: reading.minutes })
       : reading.kind === 'hours'

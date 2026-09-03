@@ -7,6 +7,7 @@ import {
   flowOf,
   minutesRemaining,
   minutesUntil,
+  remainingReading,
   startsInReading,
   upcomingBlocks,
   type DayReference,
@@ -318,6 +319,52 @@ describe('minutesRemaining / minutesUntil', () => {
   it('never goes negative', () => {
     expect(minutesRemaining(breakfast, NOW_0900)).toBe(0);
     expect(minutesUntil(breakfast, NOW_0900)).toBe(0);
+  });
+});
+
+describe('remainingReading', () => {
+  // The NU strip's "nog …" countdown: minutes under an hour, hours past it —
+  // an 8-hour school day used to read "nog 480 minuten".
+  const workday = block('2026-08-07T07:00:00.000Z', '2026-08-07T15:00:00.000Z');
+
+  it('reads as minutes under the 60-minute mark', () => {
+    expect(remainingReading(breakfast, at('2026-08-07T05:29:30.000Z'))).toEqual({
+      kind: 'minutes',
+      minutes: 1,
+    });
+    expect(remainingReading(school, at('2026-08-07T12:40:00.000Z'))).toEqual({
+      kind: 'minutes',
+      minutes: 20,
+    });
+  });
+
+  it('reads as a whole hour once the remainder is exactly zero', () => {
+    // school ends at 13:00Z — exactly 60 minutes out from 12:00Z.
+    expect(remainingReading(school, at('2026-08-07T12:00:00.000Z'))).toEqual({
+      kind: 'hours',
+      hours: 1,
+      minutes: 0,
+    });
+    // The reported bug: an 8-hour workday, measured from its start.
+    expect(remainingReading(workday, at('2026-08-07T07:00:00.000Z'))).toEqual({
+      kind: 'hours',
+      hours: 8,
+      minutes: 0,
+    });
+  });
+
+  it('splits into hours and a minute remainder otherwise', () => {
+    // school starts 06:30Z, ends 13:00Z — 390 minutes at its own start.
+    expect(remainingReading(school, at('2026-08-07T06:30:00.000Z'))).toEqual({
+      kind: 'hours',
+      hours: 6,
+      minutes: 30,
+    });
+    expect(remainingReading(school, at('2026-08-07T11:45:00.000Z'))).toEqual({
+      kind: 'hours',
+      hours: 1,
+      minutes: 15,
+    });
   });
 });
 

@@ -788,6 +788,8 @@
     },
     "nowStrip": {
       "remaining": "{minutes} min left",
+      "remainingHours": "{hours, plural, one {# hour} other {# hours}} left",
+      "remainingHoursMinutes": "{hours} h {minutes} min left",
       "startsIn": "in {minutes} min",
       "startsInHours": "in {hours, plural, one {# hour} other {# hours}}",
       "startsAt": "at {time}",

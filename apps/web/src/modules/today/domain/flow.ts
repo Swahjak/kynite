@@ -223,6 +223,25 @@ export function minutesUntil(block: TimeBlock, now: Date): number {
 }
 
 /**
+ * How the NU strip's "nog …" countdown should read.
+ *
+ * Under an hour, minutes are still a number a family reads at a glance — an
+ * eight-hour school day showing "nog 480 minuten" is the opposite of that.
+ * Past 60 minutes the reading switches to hours, split back into whole
+ * minutes only when the block doesn't end on the hour: `minutesRemaining` is
+ * already whole minutes, so the split is exact rather than a second rounding
+ * pass.
+ */
+export type RemainingReading =
+  { kind: 'minutes'; minutes: number } | { kind: 'hours'; hours: number; minutes: number };
+
+export function remainingReading(block: TimeBlock, now: Date): RemainingReading {
+  const minutes = minutesRemaining(block, now);
+  if (minutes < 60) return { kind: 'minutes', minutes };
+  return { kind: 'hours', hours: Math.floor(minutes / 60), minutes: minutes % 60 };
+}
+
+/**
  * How the STRAKS countdown should read, in the same three registers the
  * routines board already draws for its own upcoming chip
  * (`modules/routines/ui/routine-board.tsx`'s `countdownFor`): a duration close
