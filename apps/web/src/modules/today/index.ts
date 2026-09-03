@@ -46,6 +46,11 @@ export {
 } from './domain/star-matrix';
 
 export { loadTodayProgress, type KidProgress, type TodayProgressData } from './page-data';
+export {
+  loadHubBoardComposition,
+  type HubBoardComposition,
+  type HubBoardCompositionInclude,
+} from './page-data-hub';
 
 export { StarMatrix, type StarMatrixColumn, type StarMatrixProps } from './ui/star-matrix';
 

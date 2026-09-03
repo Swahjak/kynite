@@ -257,6 +257,10 @@ test.describe('kiosk layout audit', { tag: '@heavy' }, () => {
 
   for (const surface of [
     { name: 'ambient board', path: () => '/nl/hub' },
+    // M-R1: real rail destinations, not tabs of the ambient board.
+    { name: 'kalender', path: () => '/nl/hub/kalender' },
+    { name: 'routines overview', path: () => '/nl/hub/routines' },
+    { name: 'store', path: () => '/nl/hub/store' },
     { name: 'timers', path: () => '/nl/hub/timers' },
     { name: 'pair screen', path: () => '/nl/hub/pair', unpaired: true },
   ]) {

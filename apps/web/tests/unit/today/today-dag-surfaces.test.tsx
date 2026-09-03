@@ -201,6 +201,11 @@ describe('the two routes render the same day panel', () => {
 
   const hubPage = read('app/[locale]/(hub)/hub/page.tsx');
   const todayPage = read('app/[locale]/(app)/today/page.tsx');
+  // M-R1: the hub's read moved into a loader shared with `/hub/kalender`
+  // (`loadHubBoardComposition`), so `resolveTodayTheme` now lives there
+  // rather than in the page itself — the page still renders the banner off
+  // what the loader hands back.
+  const hubLoader = read('modules/today/page-data-hub.ts');
 
   it('renders <TodayTabDag> on both surfaces', () => {
     expect(hubPage).toContain('<TodayTabDag');
@@ -214,9 +219,9 @@ describe('the two routes render the same day panel', () => {
   });
 
   it('resolves the day’s theme on both surfaces', () => {
-    for (const page of [hubPage, todayPage]) {
-      expect(page).toContain('resolveTodayTheme');
-      expect(page).toContain('TodayThemeBanner');
-    }
+    expect(hubLoader).toContain('resolveTodayTheme');
+    expect(hubPage).toContain('TodayThemeBanner');
+    expect(todayPage).toContain('resolveTodayTheme');
+    expect(todayPage).toContain('TodayThemeBanner');
   });
 });

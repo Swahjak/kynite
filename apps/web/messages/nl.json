@@ -1119,7 +1119,7 @@
       "goalProgress": "{have} van {need} sterren",
       "unavailableTitle": "Nog geen winkel om te tonen",
       "unavailableBody": "Dit scherm is nog niet aan een gezinslid gekoppeld.",
-      "heading": "Winkel",
+      "heading": "Sterren",
       "back": "Terug",
       "choose": "Kiezen",
       "shortBy": "nog {count}",
@@ -1546,9 +1546,10 @@
   "hub": {
     "nav": {
       "label": "Hubnavigatie",
-      "board": "Bord",
-      "store": "Winkel",
-      "timers": "Timers"
+      "vandaag": "Vandaag",
+      "kalender": "Kalender",
+      "routines": "Taken",
+      "sterren": "Sterren"
     },
     "children": {
       "title": "De dag van iedereen",

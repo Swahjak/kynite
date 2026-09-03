@@ -1119,7 +1119,7 @@
       "goalProgress": "{have} of {need} stars",
       "unavailableTitle": "No shelf to show yet",
       "unavailableBody": "This screen is not linked to a family member yet.",
-      "heading": "Shop",
+      "heading": "Stars",
       "back": "Back",
       "choose": "Choose",
       "shortBy": "{count} to go",
@@ -1546,9 +1546,10 @@
   "hub": {
     "nav": {
       "label": "Hub navigation",
-      "board": "Board",
-      "store": "Store",
-      "timers": "Timers"
+      "vandaag": "Today",
+      "kalender": "Calendar",
+      "routines": "Tasks",
+      "sterren": "Stars"
     },
     "children": {
       "title": "Everyone's day",

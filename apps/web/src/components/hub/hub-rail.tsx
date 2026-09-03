@@ -15,11 +15,19 @@ import { Link, usePathname } from '@/i18n/navigation';
  * mostly a wiring job, and this is the first wire — a child standing at the
  * wall has to be able to get to the shelf and to their own steps.
  *
- * It is the Stitch left rail (`…/today_s_flow_light_mode_landscape_hub`), and
- * it is deliberately **three destinations and no more**: the board, the shelf,
- * the timers. Per-child screens are not here — they are reached by tapping the
- * child on the board (`ChildLauncher`), because "whose routines" is a question
- * a nav rail cannot answer and a face can.
+ * It is the Stitch left rail (`…/today_s_flow_light_mode_landscape_hub`). Until
+ * M-R1 it was deliberately three destinations and no more — the board, the
+ * shelf, the timers — because the sheet's own four (Vandaag / Kalender /
+ * Routines / Sterren) were the parent app's tabs, unreachable from a device
+ * principal. M-R1 turned those four into real hub routes (`/hub`,
+ * `/hub/kalender`, `/hub/routines`, `/hub/store`), so the rail now draws them
+ * instead: **Vandaag** (this rail's board), **Kalender** (the per-person
+ * view), **Routines** (today's check-in) and **Sterren** (the shelf,
+ * unchanged route, relabelled). Timers dropped off the rail itself — it stays
+ * one tap away from every hub screen through `TodayFab`'s speed dial instead
+ * of taking a permanent tile. Per-child screens are still not here — they are
+ * reached by tapping the child on the board (`ChildLauncher`), because "whose
+ * routines" is a question a nav rail cannot answer and a face can.
  *
  * What it still is not: a browser. No back button, no sign-out. Settings
  * *does* live here now (M20 pulled it down from the header strip it used to
@@ -27,22 +35,25 @@ import { Link, usePathname } from '@/i18n/navigation';
  * the `footer` slot: one tap away, and still out of the room's eyeline
  * because it is the same discreet icon it always was, just moved.
  *
- * ## D1: the design's rail, not the design's destinations
+ * ## D1: the design's rail, and now the design's destinations too
  *
  * "Vandaag.dc.html":39–47 draws this rail 76px wide, with a 36px indigo brand
  * tile above four 52px sentence-case tiles and the signed-in parent's face
- * pinned below them. The *shape* is now that drawing: the tile, the width, the
- * 52px targets, the 16px radius, the rgba(93,95,239,.10) active wash, the
- * labels written rather than shouted.
+ * pinned below them. The *shape* has always been that drawing: the tile, the
+ * width, the 52px targets, the 16px radius, the rgba(93,95,239,.10) active
+ * wash, the labels written rather than shouted.
  *
- * The *destinations* deliberately are not. The sheet's four are the parent
- * app's tabs (Vandaag / Kalender / Routines / Sterren), which live in the
- * `(app)` tree behind a member session; a device principal navigating there is
- * sent straight back to the pair screen, so drawing them would be four tiles
- * that bounce. What a wall tablet has instead is the board, the shelf and the
- * timers — the three surfaces a child standing in front of it can actually
- * reach — and per-child screens still arrive through a face on the board
- * rather than through a nav rail that cannot name whose.
+ * Until M-R1 the *destinations* deliberately were not: the sheet's four were
+ * the parent app's tabs, which lived in the `(app)` tree behind a member
+ * session, and a device principal navigating there was sent straight back to
+ * the pair screen — drawing them would have been four tiles that bounce. M-R1
+ * removed that mismatch by building the four as hub routes in their own right
+ * (`/hub`, `/hub/kalender`, `/hub/routines`, `/hub/store`), so the rail now
+ * draws the sheet's own four tiles. Timers is the one destination that does
+ * *not* appear — `/hub/timers` still exists and is still reached, just through
+ * `TodayFab` rather than a permanent rail tile — and per-child screens still
+ * arrive through a face on the board rather than through a nav rail that
+ * cannot name whose.
  *
  * The face at the foot of the sheet's rail is out for the same reason: there
  * is nobody signed in at a kiosk by construction — what sits at the foot
@@ -53,15 +64,20 @@ import { Link, usePathname } from '@/i18n/navigation';
  */
 
 type RailItem = {
-  key: 'board' | 'store' | 'timers';
-  href: '/hub' | '/hub/store' | '/hub/timers';
+  key: 'vandaag' | 'kalender' | 'routines' | 'sterren';
+  href: '/hub' | '/hub/kalender' | '/hub/routines' | '/hub/store';
   icon: IconName;
 };
 
 const ITEMS: readonly RailItem[] = [
-  { key: 'board', href: '/hub', icon: 'space_dashboard' },
-  { key: 'store', href: '/hub/store', icon: 'redeem' },
-  { key: 'timers', href: '/hub/timers', icon: 'timer' },
+  { key: 'vandaag', href: '/hub', icon: 'calendar_month' },
+  { key: 'kalender', href: '/hub/kalender', icon: 'view_column' },
+  { key: 'routines', href: '/hub/routines', icon: 'checklist' },
+  // `bar_chart`, not the shelf's old `redeem` gift icon: the tile is now
+  // "Sterren" rather than "Winkel", and the glyph follows the label — the
+  // same icon `/today`'s own sterren tab already uses for this panel
+  // (`today-tabs.tsx`'s `TAB_ICONS`).
+  { key: 'sterren', href: '/hub/store', icon: 'bar_chart' },
 ];
 
 /** The board is the only exact match; everything else owns its subtree. */

@@ -56,9 +56,22 @@ export type TodayFabProps = {
     className?: string;
     children?: unknown;
   }> | null;
+  /**
+   * The route "Ster geven" navigates to instead of switching a tab — the hub
+   * passes `/hub/store` (M-R1: the star matrix is a route there, not a panel
+   * of `/hub`). Absent on `(app)/today`, where the star matrix stays a tab of
+   * the same page and the action switches `useTodayTab` as it always has.
+   */
+  starsHref?: string;
 };
 
-export function TodayFab({ timersHref, canGiveStars, newEventAction, taskAction }: TodayFabProps) {
+export function TodayFab({
+  timersHref,
+  canGiveStars,
+  newEventAction,
+  taskAction,
+  starsHref,
+}: TodayFabProps) {
   const t = useTranslations('today');
   const { setTab } = useTodayTab();
 
@@ -94,10 +107,16 @@ export function TodayFab({ timersHref, canGiveStars, newEventAction, taskAction 
       id: 'stars',
       icon: 'star',
       label: t('actions.giveStar'),
-      // Not a route: the star matrix is a tab of this very page, and the tab
-      // state is a shared store (`use-today-tab.ts`), so the action that
-      // sends you there is the same switch `TodayTabSterren`'s pills use.
-      onClick: () => setTab('sterren'),
+      ...(starsHref
+        ? // A route on the hub since M-R1: the star matrix is `/hub/store`,
+          // not a tab of this page there, so the action navigates like the
+          // timer action above (the same `render`-prop pattern).
+          { render: <Link href={starsHref} /> }
+        : // Not a route on `(app)/today`: the star matrix is a tab of this
+          // very page, and the tab state is a shared store
+          // (`use-today-tab.ts`), so the action that sends you there is the
+          // same switch `TodayTabSterren`'s pills use.
+          { onClick: () => setTab('sterren') }),
     });
   }
 
