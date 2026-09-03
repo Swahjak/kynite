@@ -52,7 +52,7 @@ import { TodayTimeline } from './today-timeline';
  * - **the NU block** — a band of `(app)/today` itself on the phone, above the
  *   tabs, so it survives a tab switch; the head of the first column on the wall
  *   ("Vandaag.dc.html"), where the panel owns the whole frame below the pills.
- *   Hence `heroEvent`/`flowMode`/`referenceNow` are only read on `hub`.
+ *   Hence `heroEvents`/`flowMode`/`referenceNow` are only read on `hub`.
  * - **the weather card** — the top of the phone page (`0dbcd61`: what it is
  *   doing outside decides the coat before the schedule decides anything), and
  *   the head of this panel's second column on the wall.
@@ -79,8 +79,13 @@ export type TodayTabDagProps = {
   now: Date;
   /** False while browsing another day — then nothing is "now" and nothing is past. */
   isToday: boolean;
-  /** `CalendarEvent.key` of the live block, from the page's own `flowOf`. */
-  nowEventKey: string | null;
+  /**
+   * `CalendarEvent.key` of every block currently live, from the page's own
+   * `flowOf().liveBlocks`. The timeline collapses these behind the same
+   * disclosure it already uses for what's already over — they are already
+   * shown in full in the NU strip, so the list below stays about what's next.
+   */
+  nowEventKeys: readonly string[];
   /** Null while browsing another day: the list is today's, or it is nothing. */
   tasks: TodayTasksData | null;
   /**
@@ -91,8 +96,13 @@ export type TodayTabDagProps = {
   /**
    * The NU block's own inputs, from the page's `flowOf`. Read on `hub`, where
    * this panel draws the block; on the phone the strip is a band of the page.
+   *
+   * `heroEvents` is `flow.liveBlocks` while live (every overlapping current
+   * block), or `flow.hero` alone in every other mode — `flowOf` only ever
+   * hands back more than one block in `liveBlocks`, so this is never plural
+   * outside `live`.
    */
-  heroEvent?: CalendarEvent | null;
+  heroEvents?: CalendarEvent[];
   flowMode?: FlowMode;
   /** The instant the NU block measures against — the day's own on a browsed day. */
   referenceNow?: Date;
@@ -129,10 +139,10 @@ export async function TodayTabDag({
   dayKey,
   now,
   isToday,
-  nowEventKey,
+  nowEventKeys,
   tasks,
   banner,
-  heroEvent = null,
+  heroEvents = [],
   flowMode = 'next',
   referenceNow,
   kids = null,
@@ -176,7 +186,7 @@ export async function TodayTabDag({
               and would otherwise be drawn twice. */}
           {hub && !banner ? (
             <TodayNowStrip
-              event={heroEvent}
+              events={heroEvents}
               mode={flowMode}
               members={members}
               now={referenceNow ?? now}
@@ -191,7 +201,7 @@ export async function TodayTabDag({
             dayKey={dayKey}
             now={now}
             isToday={isToday}
-            nowEventKey={nowEventKey}
+            nowEventKeys={nowEventKeys}
             density={hub ? 'list' : 'card'}
           />
         </div>

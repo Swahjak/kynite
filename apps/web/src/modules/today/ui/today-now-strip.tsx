@@ -34,17 +34,26 @@ import { NowStripMeter } from './now-strip-meter';
  *
  * The countdown half is a client component (`now-strip-meter.tsx`); everything
  * else here is a fact about the event and stays on the server.
+ *
+ * **More than one event can be "now".** Two members' overlapping blocks
+ * (`currentBlocks` in `../domain/flow`) are both true right now, and the strip
+ * used to have to pick one — a household glancing at the wall would see one
+ * child's morning and not the other's. `events` is the whole live set instead
+ * (never more than one outside `live` mode, since `flowOf` only ever hands
+ * plural blocks to a `live` hero): each gets its own icon/title/meter row,
+ * stacked inside the one tinted card, separated by a hairline rather than
+ * repeating the card's own chrome per event.
  */
 
 export type TodayNowStripProps = {
-  event: CalendarEvent | null;
+  events: CalendarEvent[];
   mode: FlowMode;
   members: Member[];
   now: Date;
   timeZone: string;
 };
 
-export async function TodayNowStrip({ event, mode, members, now, timeZone }: TodayNowStripProps) {
+export async function TodayNowStrip({ events, mode, members, now, timeZone }: TodayNowStripProps) {
   const t = await getTranslations('today');
   const tCalendar = await getTranslations('calendar');
   const formattingLocale = await getHouseholdFormattingLocale();
@@ -52,8 +61,8 @@ export async function TodayNowStrip({ event, mode, members, now, timeZone }: Tod
   const at = (instant: Date) =>
     formatDateTime(instant, formattingLocale, { hour: '2-digit', minute: '2-digit', timeZone });
 
-  if (!event || mode === 'clear' || mode === 'past') {
-    const clear = mode === 'clear' || !event;
+  if (events.length === 0 || mode === 'clear' || mode === 'past') {
+    const clear = mode === 'clear' || events.length === 0;
 
     return (
       <Card
@@ -72,56 +81,49 @@ export async function TodayNowStrip({ event, mode, members, now, timeZone }: Tod
     );
   }
 
-  const palette = CATEGORY_CLASSES[event.category];
-  // `null` is the *withheld* audience of a busy-only block, not an empty one —
-  // see `participantsOf`. The strip then says nothing about whose hour this is:
-  // no faces, no names, and not "Iedereen" either, which would still narrow a
-  // redacted hour to "the household's, rather than one person's". The title is
-  // already redacted below; this is the other half of the same fact.
-  const ids = participantsOf(event);
-  // A household event belongs to everybody by construction, and so does one
-  // that names nobody at all — "Iedereen" is a different fact from a list of
-  // names, not a longer one.
-  const everyone =
-    ids !== null && (event.householdWide || ids.length === 0 || ids.length >= members.length);
-  const people =
-    ids === null ? '' : everyone ? tCalendar('everyone') : joinNames(namesOf(members, ids));
-  const faceIds = ids === null ? null : everyone ? members.map((member) => member.id) : ids;
-
   const live = mode === 'live';
   const counted = live || mode === 'next';
 
-  // Rendered here and handed to the (client) meter as a node: `MemberFaces`
-  // reaches `@/modules/family`, which is `server-only`.
-  const faces = (
-    <MemberFaces
-      members={members}
-      memberIds={faceIds}
-      size="xs"
-      // The faces sit on the tinted card, not on white, so their separating
-      // ring has to be the card's own ground.
-      className="[&_[data-slot=avatar]]:ring-surface-container"
-    />
-  );
+  const row = (event: CalendarEvent) => {
+    const palette = CATEGORY_CLASSES[event.category];
+    // `null` is the *withheld* audience of a busy-only block, not an empty
+    // one — see `participantsOf`. The strip then says nothing about whose
+    // hour this is: no faces, no names, and not "Iedereen" either, which
+    // would still narrow a redacted hour to "the household's, rather than
+    // one person's". The title is already redacted below; this is the other
+    // half of the same fact.
+    const ids = participantsOf(event);
+    // A household event belongs to everybody by construction, and so does
+    // one that names nobody at all — "Iedereen" is a different fact from a
+    // list of names, not a longer one.
+    const everyone =
+      ids !== null && (event.householdWide || ids.length === 0 || ids.length >= members.length);
+    const people =
+      ids === null ? '' : everyone ? tCalendar('everyone') : joinNames(namesOf(members, ids));
+    const faceIds = ids === null ? null : everyone ? members.map((member) => member.id) : ids;
 
-  return (
-    <Card
-      variant="muted"
-      data-testid="today-now"
-      data-state={mode}
-      className="relative gap-0 overflow-hidden rounded-3xl p-4 sm:p-5"
-    >
-      {/* The mockup's soft bloom in the top-right corner. Decorative by having
-          no content at all; the card is `relative` for exactly this. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -top-10 -right-10 size-30 rounded-4xl bg-primary/8 blur-2xl"
+    // Rendered here and handed to the (client) meter as a node: `MemberFaces`
+    // reaches `@/modules/family`, which is `server-only`.
+    const faces = (
+      <MemberFaces
+        members={members}
+        memberIds={faceIds}
+        size="xs"
+        // The faces sit on the tinted card, not on white, so their
+        // separating ring has to be the card's own ground.
+        className="[&_[data-slot=avatar]]:ring-surface-container"
       />
+    );
 
-      {/* A two-column grid rather than nested flexes: the progress bar has to
-          span the *whole* strip, and the countdown beside it has to sit in the
-          text column. One grid says both. */}
-      <div className="relative grid grid-cols-[3rem_minmax(0,1fr)] items-center gap-x-3.5">
+    return (
+      <div
+        key={event.key}
+        data-testid="today-now-event"
+        // A two-column grid rather than nested flexes: the progress bar has
+        // to span the *whole* strip, and the countdown beside it has to sit
+        // in the text column. One grid says both.
+        className="relative grid grid-cols-[3rem_minmax(0,1fr)] items-center gap-x-3.5"
+      >
         {/* A squircle tile in the event's own category tint, at the design's
             48px. `IconMedallion` carries no category tints — category is the
             calendar's vocabulary, not the medallion's — so the hue arrives as
@@ -178,6 +180,38 @@ export async function TodayNowStrip({ event, mode, members, now, timeZone }: Tod
             </span>
           </div>
         )}
+      </div>
+    );
+  };
+
+  return (
+    <Card
+      variant="muted"
+      data-testid="today-now"
+      data-state={mode}
+      className="relative gap-0 overflow-hidden rounded-3xl p-4 sm:p-5"
+    >
+      {/* The mockup's soft bloom in the top-right corner. Decorative by having
+          no content at all; the card is `relative` for exactly this. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-10 -right-10 size-30 rounded-4xl bg-primary/8 blur-2xl"
+      />
+
+      {/* Stacked, not wrapped in a second card each: the tinted card is one
+          "what's now" statement, and a household with two members' blocks
+          overlapping reads it as one glance down a short list rather than as
+          two competing cards. A hairline between rows, not a full gap, keeps
+          the strip from doubling in height for every extra event. */}
+      <div className="relative flex flex-col divide-y divide-line-subtle/60">
+        {events.map((event, index) => (
+          <div
+            key={event.key}
+            className={cn(index > 0 && 'pt-3', index < events.length - 1 && 'pb-3')}
+          >
+            {row(event)}
+          </div>
+        ))}
       </div>
     </Card>
   );

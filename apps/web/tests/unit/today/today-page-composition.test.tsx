@@ -65,7 +65,7 @@ vi.mock('@/modules/today', () => ({
   TodayTabRoutines: () => null,
   TodayTabSterren: () => null,
   TodayTabs: () => <div data-testid="today-tabs" />,
-  flowOf: () => ({ mode: 'next', hero: null, live: false }),
+  flowOf: () => ({ mode: 'next', hero: null, live: false, liveBlocks: [] }),
   loadTodayProgress: async () => null,
 }));
 

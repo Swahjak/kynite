@@ -75,11 +75,18 @@ export function TodayTimelineFilter({
         <div data-testid="today-timeline-filter" className="flex items-center gap-1.5">
           {/* The resting state is drawn as the selected pill rather than as one
             option among five, so an unfiltered day never looks like a filtered
-            one somebody forgot to clear. */}
+            one somebody forgot to clear. Flat white/`outline` rather than
+            `status`'s solid primary fill on both counts — the selected read
+            comes from the stronger border and bold ink instead of a filled
+            chip, since "Iedereen" sits beside the member faces' own primary
+            ring and a filled pill here doubled that signal. */}
           <Badge
-            variant={selected === null ? 'status' : 'outline'}
+            variant="outline"
             size="lg"
-            className="cursor-pointer"
+            className={cn(
+              'cursor-pointer bg-card',
+              selected === null ? 'border-ink font-bold text-ink' : 'text-ink-secondary'
+            )}
             data-state={selected === null ? 'on' : 'off'}
             render={<button type="button" onClick={() => setSelected(null)} />}
           >

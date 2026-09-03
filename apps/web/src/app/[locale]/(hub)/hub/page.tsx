@@ -197,6 +197,11 @@ export default async function HubPage({
   ]);
 
   const nowEventKey = flow.live ? (flow.hero?.key ?? null) : null;
+  // Every block currently live, not just the hero — feeds both the NU strip
+  // (which now draws all of them) and the timeline's collapse of the same
+  // rows. `flow.liveBlocks` is only ever non-empty while `flow.live`.
+  const nowEventKeys = flow.liveBlocks.map((event) => event.key);
+  const heroEvents = flow.live ? flow.liveBlocks : flow.hero ? [flow.hero] : [];
 
   /**
    * The day's theme, resolved *here* rather than inside the banner, because the
@@ -292,8 +297,8 @@ export default async function HubPage({
               dayKey={dayKey}
               now={data.now}
               isToday={isToday}
-              nowEventKey={nowEventKey}
-              heroEvent={flow.hero}
+              nowEventKeys={nowEventKeys}
+              heroEvents={heroEvents}
               flowMode={flow.mode}
               referenceNow={reference.now}
               // `canWrite` / `canComplete` come from the matrix inside

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   UP_NEXT_LIMIT,
   currentBlock,
+  currentBlocks,
   elapsedRatio,
   flowOf,
   minutesRemaining,
@@ -95,6 +96,37 @@ describe('currentBlock', () => {
   });
 });
 
+describe('currentBlocks', () => {
+  it('returns the single live block as a one-element array', () => {
+    expect(currentBlocks(day, NOW_0710)).toEqual([breakfast]);
+  });
+
+  it('returns every overlapping block, soonest-ending first', () => {
+    // Inside "school" (until 15:00) and a 10:00–10:30 dentist visit — the same
+    // overlap `currentBlock` picks the dentist out of, but here both come back.
+    const dentist = block('2026-08-07T08:00:00.000Z', '2026-08-07T08:30:00.000Z');
+    expect(currentBlocks([school, dentist], at('2026-08-07T08:15:00.000Z'))).toEqual([
+      dentist,
+      school,
+    ]);
+  });
+
+  it('is an empty array when nothing is live', () => {
+    expect(currentBlocks(day, at('2026-08-07T13:30:00.000Z'))).toEqual([]);
+    expect(currentBlocks([], NOW_0900)).toEqual([]);
+  });
+
+  it('never includes an all-day block', () => {
+    expect(currentBlocks([holiday], NOW_0900)).toEqual([]);
+  });
+
+  it("its first element is always currentBlock's answer", () => {
+    const dentist = block('2026-08-07T08:00:00.000Z', '2026-08-07T08:30:00.000Z');
+    const now = at('2026-08-07T08:15:00.000Z');
+    expect(currentBlocks([school, dentist], now)[0]).toBe(currentBlock([school, dentist], now));
+  });
+});
+
 describe('upcomingBlocks', () => {
   it('keeps only what has not started, earliest first', () => {
     expect(upcomingBlocks(day, NOW_0710)).toEqual([school, swimming, dinner]);
@@ -133,7 +165,21 @@ describe('flowOf — today', () => {
     expect(flow.hero).toBe(breakfast);
     expect(flow.live).toBe(true);
     expect(flow.mode).toBe('live');
+    expect(flow.liveBlocks).toEqual([breakfast]);
     expect(flow.upNext).toEqual([school, swimming, dinner]);
+  });
+
+  it('lists every overlapping block in liveBlocks, hero first', () => {
+    const dentist = block('2026-08-07T06:45:00.000Z', '2026-08-07T07:15:00.000Z'); // 08:45–09:15
+    const flow = flowOf([...day, dentist], today(at('2026-08-07T07:00:00.000Z'))); // 09:00 local
+
+    expect(flow.hero).toBe(dentist);
+    expect(flow.live).toBe(true);
+    expect(flow.liveBlocks).toEqual([dentist, school]);
+    // Neither overlapping block repeats in the grid — both are already the hero
+    // or a sibling of it, and `upcomingBlocks` excludes what has already
+    // started anyway.
+    expect(flow.upNext).toEqual([swimming, dinner]);
   });
 
   it('falls back to the next block when nothing is live, and never repeats it', () => {
@@ -142,6 +188,7 @@ describe('flowOf — today', () => {
     expect(flow.hero).toBe(swimming);
     expect(flow.live).toBe(false);
     expect(flow.mode).toBe('next');
+    expect(flow.liveBlocks).toEqual([]);
     expect(flow.upNext).toEqual([dinner]);
   });
 
@@ -160,6 +207,7 @@ describe('flowOf — today', () => {
     expect(flow.hero).toBe(nightShift);
     expect(flow.live).toBe(true);
     expect(flow.mode).toBe('live');
+    expect(flow.liveBlocks).toEqual([nightShift]);
   });
 
   it('is clear once nothing is left', () => {
@@ -174,7 +222,13 @@ describe('flowOf — today', () => {
   it('is clear on a day with no blocks at all', () => {
     const flow = flowOf([], today(NOW_0900));
 
-    expect(flow).toEqual({ hero: null, live: false, mode: 'clear', upNext: [] });
+    expect(flow).toEqual({
+      hero: null,
+      live: false,
+      mode: 'clear',
+      liveBlocks: [],
+      upNext: [],
+    });
   });
 
   it('caps the grid at the limit it is given', () => {
@@ -204,6 +258,7 @@ describe('flowOf — a browsed day', () => {
     expect(flow.hero).toBe(breakfast);
     expect(flow.live).toBe(false);
     expect(flow.mode).toBe('preview');
+    expect(flow.liveBlocks).toEqual([]);
     expect(flow.upNext).toEqual([school, swimming, dinner]);
   });
 
@@ -214,6 +269,7 @@ describe('flowOf — a browsed day', () => {
     expect(flow.hero).toBe(breakfast);
     expect(flow.live).toBe(false);
     expect(flow.mode).toBe('past');
+    expect(flow.liveBlocks).toEqual([]);
     expect(flow.upNext).toEqual([school, swimming, dinner]);
   });
 

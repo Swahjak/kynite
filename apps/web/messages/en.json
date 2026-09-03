@@ -797,7 +797,9 @@
     "timeline": {
       "title": "Day overview",
       "done": "{count, plural, one {# done} other {# done}} — {title} ({time})",
-      "showDone": "Show what already happened"
+      "hidden": "{count, plural, one {# hidden} other {# hidden}} — {title} ({time})",
+      "showDone": "Show what already happened",
+      "showHidden": "Show what is hidden"
     },
     "tasks": {
       "title": "To-do list",

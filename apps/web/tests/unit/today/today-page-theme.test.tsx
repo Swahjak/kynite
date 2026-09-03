@@ -63,7 +63,7 @@ vi.mock('@/modules/today', async () => {
 
   return {
     resolveTodayTheme,
-    flowOf: () => ({ mode: 'next', hero: null, live: false }),
+    flowOf: () => ({ mode: 'next', hero: null, live: false, liveBlocks: [] }),
     loadTodayProgress: async () => null,
     TodayHeader: () => <div data-testid="today-header" />,
     TodayLive: () => null,

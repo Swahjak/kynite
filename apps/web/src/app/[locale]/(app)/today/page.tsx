@@ -127,6 +127,11 @@ export default async function TodayPage({
   ]);
 
   const nowEventKey = flow.live ? (flow.hero?.key ?? null) : null;
+  // Every block currently live, not just the hero — feeds both the NU strip
+  // (which now draws all of them) and the timeline's collapse of the same
+  // rows. `flow.liveBlocks` is only ever non-empty while `flow.live`.
+  const nowEventKeys = flow.liveBlocks.map((event) => event.key);
+  const heroEvents = flow.live ? flow.liveBlocks : flow.hero ? [flow.hero] : [];
 
   /**
    * The day's theme (M26), resolved *here* rather than inside the banner — the
@@ -170,7 +175,7 @@ export default async function TodayPage({
           composition neither surface can be read at a glance any more. */}
       {theme ? null : (
         <TodayNowStrip
-          event={flow.hero}
+          events={heroEvents}
           mode={flow.mode}
           members={data.members}
           now={reference.now}
@@ -187,7 +192,7 @@ export default async function TodayPage({
             dayKey={dayKey}
             now={data.now}
             isToday={isToday}
-            nowEventKey={nowEventKey}
+            nowEventKeys={nowEventKeys}
             tasks={tasks}
             // M26: the same row the wall draws, from the same resolver. It used
             // to reach only the hub, which is why a phone was quiet through the

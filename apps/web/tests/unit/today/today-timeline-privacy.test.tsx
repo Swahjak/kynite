@@ -129,7 +129,7 @@ async function renderTimeline(
       dayKey: DAY_KEY,
       now: NOW,
       isToday: true,
-      nowEventKey: null,
+      nowEventKeys: [],
       density,
     })
   );

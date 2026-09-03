@@ -797,7 +797,9 @@
     "timeline": {
       "title": "Dagoverzicht",
       "done": "{count, plural, one {# afgerond} other {# afgerond}} — {title} ({time})",
-      "showDone": "Toon wat al geweest is"
+      "hidden": "{count, plural, one {# verborgen} other {# verborgen}} — {title} ({time})",
+      "showDone": "Toon wat al geweest is",
+      "showHidden": "Toon wat verborgen is"
     },
     "tasks": {
       "title": "Takenlijst",

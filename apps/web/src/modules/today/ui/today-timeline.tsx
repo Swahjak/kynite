@@ -29,7 +29,8 @@ import { TodayTimelineFilter } from './today-timeline-filter';
  * Two rows read differently, and both are facts rather than decoration:
  *
  * - **The one happening now** gets a tinted row and the NU badge — the single
- *   thing on this list a glance should land on.
+ *   thing on this list a glance should land on. Except it doesn't land here:
+ *   see below.
  * - **A busy-only row** — a private calendar rendered free/busy — gets a lock
  *   and the word "Bezet" instead of a title, which is exactly as much as the
  *   viewer is allowed to know.
@@ -37,6 +38,15 @@ import { TodayTimelineFilter } from './today-timeline-filter';
  * Everything already over collapses into one line at the top
  * (`today-past-rows.tsx`). Nothing is dropped; the morning simply stops being
  * the first six rows of the afternoon's screen.
+ *
+ * **Live rows collapse the same way.** The NU strip above this list already
+ * draws every currently-live block in full (`today-now-strip.tsx`), so a live
+ * row repeated here would say the same thing twice — once tinted and once
+ * plain. Rather than invent a second disclosure, a live row joins the same
+ * "already happened" bucket a finished row does: it is folded behind the one
+ * chevron, in its usual chronological place, still drawn with its `now` tint
+ * once opened. `nowEventKeys` is what tells this component which rows those
+ * are — every key in `flow.liveBlocks`, not just the hero's.
  *
  * The row's anatomy is documented on `render` below. `density` no longer
  * changes its *shape* — since the August sheet both surfaces draw the same
@@ -55,8 +65,13 @@ export type TodayTimelineProps = {
   now: Date;
   /** False while browsing another day — then nothing is "now" and nothing is past. */
   isToday: boolean;
-  /** `CalendarEvent.key` of the live block, from the page's own `flowOf`. */
-  nowEventKey: string | null;
+  /**
+   * `CalendarEvent.key` of every block currently live, from the page's own
+   * `flowOf().liveBlocks`. Each one gets the `now` tint if the disclosure that
+   * hides it is opened, and — like a finished row — is folded out of the
+   * default view, because the NU strip above already draws it in full.
+   */
+  nowEventKeys: readonly string[];
   /**
    * `list` is the design's hub row — a flat line in a card. `card` is the phone's
    * — each row its own bordered tile, which is what survives at 390px.
@@ -72,7 +87,7 @@ export async function TodayTimeline({
   dayKey,
   now,
   isToday,
-  nowEventKey,
+  nowEventKeys,
   density = 'list',
   className,
 }: TodayTimelineProps) {
@@ -94,8 +109,18 @@ export async function TodayTimeline({
   const isPast = (event: CalendarEvent) =>
     isToday && !event.allDay && event.endsAt.getTime() <= now.getTime();
 
-  const past = rows.filter(({ event }) => isPast(event));
-  const rest = rows.filter(({ event }) => !isPast(event));
+  const liveKeys = new Set(isToday ? nowEventKeys : []);
+  const isLive = (event: CalendarEvent) => liveKeys.has(event.key);
+
+  // Live rows fold into the same disclosure a finished row already gets — see
+  // the module note above. A single predicate keeps the two collapsed groups
+  // in their one true chronological order rather than sorting past before
+  // live, which would put a still-running block ahead of something that
+  // already finished after it started.
+  const isCollapsed = (event: CalendarEvent) => isPast(event) || isLive(event);
+
+  const collapsed = rows.filter(({ event }) => isCollapsed(event));
+  const rest = rows.filter(({ event }) => !isCollapsed(event));
 
   /**
    * One row, in the anatomy the August sheet settled on: the category rail,
@@ -138,7 +163,7 @@ export async function TodayTimeline({
           : joinNames(namesOf(members, memberIds));
     const faceIds =
       memberIds === null ? null : everyone ? members.map((member) => member.id) : memberIds;
-    const live = isToday && event.key === nowEventKey;
+    const live = isToday && isLive(event);
     const done = isPast(event);
     const phone = density === 'card';
 
@@ -174,7 +199,14 @@ export async function TodayTimeline({
     );
   };
 
-  const lastPast = past.at(-1);
+  const lastCollapsed = collapsed.at(-1);
+  // Whether *anything* live is folded in — not just the last row — decides the
+  // summary's wording. The live block is almost always the last chronological
+  // row once there is one (every past row ends before "now", every live one
+  // spans across it), so this is the common case whenever the household is
+  // mid-event, not an edge case: calling it "3 afgerond" would misdescribe the
+  // one row that has not actually finished.
+  const collapsedHasLive = collapsed.some(({ event }) => isLive(event));
 
   /**
    * The phone's heading is an *eyebrow*, not a card title
@@ -185,20 +217,20 @@ export async function TodayTimeline({
   const eyebrow = <h2 className="label-overline text-ink-muted">{t('timeline.title')}</h2>;
 
   const disclosure =
-    past.length > 0 && lastPast ? (
+    collapsed.length > 0 && lastCollapsed ? (
       <TodayPastRows
-        summary={t('timeline.done', {
-          count: past.length,
-          title: titleOf(lastPast.event, {
+        summary={t(collapsedHasLive ? 'timeline.hidden' : 'timeline.done', {
+          count: collapsed.length,
+          title: titleOf(lastCollapsed.event, {
             untitled: tCalendar('untitled'),
             busy: tCalendar('busy'),
           }),
-          time: lastPast.event.allDay ? t('allDay') : at(lastPast.event.startsAt),
+          time: lastCollapsed.event.allDay ? t('allDay') : at(lastCollapsed.event.startsAt),
         })}
-        label={t('timeline.showDone')}
+        label={t(collapsedHasLive ? 'timeline.showHidden' : 'timeline.showDone')}
         header={density === 'card' ? eyebrow : undefined}
       >
-        {past.map(render)}
+        {collapsed.map(render)}
       </TodayPastRows>
     ) : null;
 

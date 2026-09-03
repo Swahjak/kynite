@@ -66,20 +66,34 @@ export type DayReference = {
 export type FlowMode = 'live' | 'next' | 'preview' | 'past' | 'clear';
 
 /**
- * The timed block `now` falls inside, or null.
+ * Every timed block `now` falls inside, soonest-ending first.
  *
  * Half-open on the end (`start <= now < end`) so a block that ends at 09:00 and
- * one that starts at 09:00 never both count as current at 09:00 sharp.
+ * one that starts at 09:00 never both count as current at 09:00 sharp. An
+ * all-day block is never "current" — see the module note on why it cannot
+ * lead the hero, which applies here just the same.
+ *
+ * Sort is stable, so two blocks ending at the same instant keep the order they
+ * were given in — the same tie-break `currentBlock` used to make explicit with
+ * its `<` comparison.
  */
-export function currentBlock<T extends TimeBlock>(blocks: readonly T[], now: Date): T | null {
+export function currentBlocks<T extends TimeBlock>(blocks: readonly T[], now: Date): T[] {
   const instant = now.getTime();
 
-  return blocks.reduce<T | null>((best, block) => {
-    if (block.allDay) return best;
-    if (block.startsAt.getTime() > instant || block.endsAt.getTime() <= instant) return best;
-    // Finishing soonest wins — see the note above on overlapping blocks.
-    return best === null || block.endsAt.getTime() < best.endsAt.getTime() ? block : best;
-  }, null);
+  return blocks
+    .filter(
+      (block) =>
+        !block.allDay && block.startsAt.getTime() <= instant && block.endsAt.getTime() > instant
+    )
+    .sort((a, b) => a.endsAt.getTime() - b.endsAt.getTime());
+}
+
+/**
+ * The timed block `now` falls inside, or null — the one finishing soonest
+ * when several overlap. `currentBlocks(blocks, now)[0] ?? null`.
+ */
+export function currentBlock<T extends TimeBlock>(blocks: readonly T[], now: Date): T | null {
+  return currentBlocks(blocks, now)[0] ?? null;
 }
 
 /**
@@ -123,6 +137,17 @@ export type Flow<T extends TimeBlock> = {
   live: boolean;
   /** What the hero should say: see `FlowMode`. */
   mode: FlowMode;
+  /**
+   * Every timed block live right now, soonest-ending first — `hero` is
+   * `liveBlocks[0]` whenever `live` is true. Empty unless `mode === 'live'`:
+   * a browsed day never has a "now", and a today with nothing live falls
+   * hero back to what's next rather than inventing a live block.
+   *
+   * The featured "nu" strip draws one of these per overlapping event; the
+   * timeline collapses the same keys behind its "already happened" disclosure
+   * so the two surfaces never say the same thing twice.
+   */
+  liveBlocks: T[];
   /** The tiles under the hero — never repeats the hero. */
   upNext: T[];
 };
@@ -145,11 +170,13 @@ export function flowOf<T extends TimeBlock>(
       hero,
       live: false,
       mode: hero === null ? 'clear' : reference.kind === 'past' ? 'past' : 'preview',
+      liveBlocks: [],
       upNext: ordered.slice(1, 1 + cap),
     };
   }
 
-  const current = currentBlock(blocks, reference.now);
+  const currents = currentBlocks(blocks, reference.now);
+  const current = currents[0] ?? null;
   const upcoming = upcomingBlocks(blocks, reference.now);
   const hero = current ?? upcoming[0] ?? null;
 
@@ -157,6 +184,7 @@ export function flowOf<T extends TimeBlock>(
     hero,
     live: current !== null,
     mode: hero === null ? 'clear' : current !== null ? 'live' : 'next',
+    liveBlocks: currents,
     upNext: upcoming.filter((block) => block !== hero).slice(0, cap),
   };
 }

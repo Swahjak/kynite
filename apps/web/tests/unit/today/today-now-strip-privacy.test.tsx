@@ -118,7 +118,7 @@ async function renderStrip(
       timeZone={TZ}
       messages={{ today: nlMessages.today, calendar: nlMessages.calendar }}
     >
-      {await TodayNowStrip({ event: calendarEvent, mode, members, now: NOW, timeZone: TZ })}
+      {await TodayNowStrip({ events: [calendarEvent], mode, members, now: NOW, timeZone: TZ })}
     </NextIntlClientProvider>
   );
 
