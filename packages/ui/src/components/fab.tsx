@@ -2,7 +2,9 @@
 
 import {
   cloneElement,
+  createContext,
   useCallback,
+  useContext,
   useEffect,
   useId,
   useRef,
@@ -11,6 +13,7 @@ import {
   type CSSProperties,
   type MouseEvent,
   type ReactElement,
+  type ReactNode,
 } from 'react';
 import { cn } from '../lib/utils';
 import { Icon } from './icon';
@@ -125,6 +128,47 @@ export type FabSpeedDialAction = {
    */
   disabled?: boolean;
 };
+
+/**
+ * What `cloneElement` would have injected onto `action.render`, handed over
+ * through context instead when the element cannot be cloned.
+ *
+ * **Why this exists:** `action.render` crosses the RSC boundary — a page
+ * (Server Component) passes a finished client-component element
+ * (`<AddEventFabAction …/>`) as a prop into a client component
+ * (`TodayFab`/`FabSpeedDial`). React Flight is free to deliver that element as
+ * a *lazy reference* (`$$typeof: react.lazy`, `.props` unset until React
+ * itself resolves and renders it) rather than the plain element object it is
+ * on the server. `cloneElement` needs to read `.props` to compose `onClick`
+ * and `style` and to merge `className` — on a lazy reference that throws
+ * (`Cannot destructure property 'onClick' of 'a.render.props' as it is
+ * undefined`) before the element ever gets a chance to render and resolve
+ * itself. There is no clone-safe way around this: the element has to be
+ * rendered as-is, so what `cloneElement` would have merged in is passed down
+ * through context instead, and the element reads it back with
+ * `useFabSpeedDialAction()`.
+ */
+export type FabSpeedDialActionSlot = {
+  className: string;
+  children: ReactNode;
+  onClick: (event: MouseEvent<HTMLElement>) => void;
+  style: CSSProperties;
+  disabled: boolean;
+  'data-testid': string;
+};
+
+const FabSpeedDialActionContext = createContext<FabSpeedDialActionSlot | null>(null);
+
+/**
+ * Reads the chrome a `FabSpeedDial` action would otherwise have received via
+ * `cloneElement` — the fallback path for an `action.render` element that
+ * arrived as a lazy RSC reference and so could not be cloned. See
+ * `FabSpeedDialActionSlot`. Returns `null` outside a `FabSpeedDial`, or on the
+ * ordinary clone path (that element gets its props the old way, directly).
+ */
+export function useFabSpeedDialAction() {
+  return useContext(FabSpeedDialActionContext);
+}
 
 export type FabSpeedDialProps = {
   /** The resting glyph. Rotates 45° when open, which turns `add` into a close. */
@@ -289,38 +333,77 @@ export function FabSpeedDial({
               : 'pointer-events-none translate-y-2 opacity-0';
 
             if (action.render) {
+              const composedClassName = cn(
+                actionButtonClass,
+                stateClass,
+                action.disabled && 'pointer-events-none opacity-50'
+              );
+              const composedStyle = { ...style };
+              const testId = `fab-action-${action.id}`;
+
               // The element the app handed us may carry its own behaviour and
               // its own inline style (`<Link onClick={track} style={…}>`).
               // Cloning *over* either of those silently drops it, so both
               // compose: the consumer's handler runs first, and this
               // component's `transitionDelay` wins only the key it owns.
-              const { onClick: renderOnClick, style: renderStyle } = action.render.props;
+              //
+              // Only safe when `.props` is actually readable. An element that
+              // crossed the RSC boundary (a page — Server Component — passing
+              // a finished client element into this client component) may
+              // arrive as a React Flight *lazy reference* instead of a plain
+              // element, whose `.props` is undefined until React itself
+              // resolves it — `cloneElement` cannot introspect or clone that.
+              // See `FabSpeedDialActionSlot` for the fallback.
+              if (action.render.props !== undefined) {
+                const { onClick: renderOnClick, style: renderStyle } = action.render.props;
 
-              return cloneElement(action.render, {
-                key: action.id,
-                className: cn(
-                  actionButtonClass,
-                  stateClass,
-                  action.disabled && 'pointer-events-none opacity-50'
-                ),
+                return cloneElement(action.render, {
+                  key: action.id,
+                  className: composedClassName,
+                  children: content,
+                  // A link has no `disabled`, so a disabled one is stated
+                  // three ways: `aria-disabled` for assistive tech,
+                  // `tabIndex={-1}` to take it out of the tab order, and the
+                  // click swallowed — `pointer-events-none` alone still
+                  // leaves Enter working.
+                  onClick: (event: MouseEvent<HTMLElement>) => {
+                    if (action.disabled) {
+                      event.preventDefault();
+                      return;
+                    }
+                    renderOnClick?.(event);
+                    handleClick();
+                  },
+                  style: { ...renderStyle, ...composedStyle },
+                  'aria-disabled': action.disabled || undefined,
+                  tabIndex: action.disabled ? -1 : undefined,
+                  'data-testid': testId,
+                });
+              }
+
+              // Can't read or clone this element's props — hand over what the
+              // clone would have injected via context instead, and render the
+              // element as-is so React resolves and mounts it normally.
+              const slot: FabSpeedDialActionSlot = {
+                className: composedClassName,
                 children: content,
-                // A link has no `disabled`, so a disabled one is stated three
-                // ways: `aria-disabled` for assistive tech, `tabIndex={-1}` to
-                // take it out of the tab order, and the click swallowed —
-                // `pointer-events-none` alone still leaves Enter working.
                 onClick: (event: MouseEvent<HTMLElement>) => {
                   if (action.disabled) {
                     event.preventDefault();
                     return;
                   }
-                  renderOnClick?.(event);
                   handleClick();
                 },
-                style: { ...renderStyle, ...style },
-                'aria-disabled': action.disabled || undefined,
-                tabIndex: action.disabled ? -1 : undefined,
-                'data-testid': `fab-action-${action.id}`,
-              });
+                style: composedStyle,
+                disabled: Boolean(action.disabled),
+                'data-testid': testId,
+              };
+
+              return (
+                <FabSpeedDialActionContext.Provider key={action.id} value={slot}>
+                  {action.render}
+                </FabSpeedDialActionContext.Provider>
+              );
             }
 
             return (

@@ -107,8 +107,10 @@ export {
   Fab,
   FabSlot,
   FabSpeedDial,
+  useFabSpeedDialAction,
   type FabProps,
   type FabSpeedDialAction,
+  type FabSpeedDialActionSlot,
   type FabSpeedDialProps,
 } from './components/fab';
 export {

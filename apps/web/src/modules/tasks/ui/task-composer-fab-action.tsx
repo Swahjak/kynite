@@ -1,6 +1,7 @@
 'use client';
 
 import type { CSSProperties, MouseEvent, ReactNode } from 'react';
+import { useFabSpeedDialAction } from '@kynite/ui';
 import { openTaskComposer } from './use-task-composer';
 
 /**
@@ -19,7 +20,11 @@ import { openTaskComposer } from './use-task-composer';
  * whatever is passed there with its own `className`, `children`, `onClick`
  * (composed over whatever this element already carried) and a few ARIA/test
  * attributes, so this component forwards every one of those rather than
- * building its own trigger chrome.
+ * building its own trigger chrome — except when the element crossed the
+ * Server→Client boundary as a React Flight lazy reference `cloneElement`
+ * can't read; then `FabSpeedDial` renders it as-is and this component reads
+ * the same chrome back with `useFabSpeedDialAction()` instead (see
+ * `FabSpeedDialActionSlot`).
  *
  * There is no dialog and no local `open` state to hold, unlike
  * `AddEventFabAction`: `openTaskComposer()` just flips the shared module store
@@ -52,16 +57,34 @@ export function TaskComposerFabAction({
   children,
   ...cloneProps
 }: TaskComposerFabActionProps) {
+  // Fallback for when `FabSpeedDial` could not `cloneElement` this element
+  // (see `FabSpeedDialActionSlot`) — `null` on the ordinary clone path, where
+  // `cloneProps` already carries everything below directly.
+  const slot = useFabSpeedDialAction();
+
+  const buttonClassName = cloneProps.className ?? slot?.className;
+  const kids = children ?? slot?.children;
+  const style = cloneProps.style ?? slot?.style;
+  const testId = cloneProps['data-testid'] ?? slot?.['data-testid'];
+  const ariaDisabled = cloneProps['aria-disabled'] ?? slot?.disabled;
+
   return (
     <button
       type="button"
       {...cloneProps}
+      className={buttonClassName}
+      style={style}
+      aria-disabled={ariaDisabled}
+      data-testid={testId}
       onClick={(event) => {
         onClick?.(event);
         openTaskComposer();
+        // No-op on the clone path — `FabSpeedDial` already composed the
+        // close into `onClick` above.
+        slot?.onClick(event);
       }}
     >
-      {children}
+      {kids}
     </button>
   );
 }

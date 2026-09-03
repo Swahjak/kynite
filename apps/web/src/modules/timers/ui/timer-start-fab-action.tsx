@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 import { useTranslations } from 'next-intl';
-import { Button, cn, Icon } from '@kynite/ui';
+import { Button, cn, Icon, useFabSpeedDialAction } from '@kynite/ui';
 import {
   Dialog,
   DialogClose,
@@ -35,7 +35,11 @@ import { DEFAULT_TIMER_ICON, TIMER_ICONS, TIMER_TAP_TARGET_CLASS, type TimerIcon
  * (`modules/calendar`, `modules/tasks`): a plain `<button>` that
  * `FabSpeedDialAction.render` clones its FAB chrome onto, opening a dialog
  * this component owns, rather than a `DialogTrigger` — `FabSpeedDial` already
- * *is* the trigger. `TodayFab` (`modules/today`) may not import this slice's
+ * *is* the trigger. When the element arrives as a React Flight lazy
+ * reference `cloneElement` can't read (crossing the hub page's
+ * Server→Client boundary), `FabSpeedDial` renders it as-is instead and this
+ * component reads the same chrome back via `useFabSpeedDialAction()` (see
+ * `FabSpeedDialActionSlot`). `TodayFab` (`modules/today`) may not import this slice's
  * barrel from a client component (`server-only` reads live behind it), so —
  * same as the calendar/tasks pair — the slice that owns the dialog owns the
  * button that opens it, and the hub page hands the finished element down as
@@ -64,18 +68,35 @@ export function TimerStartFabAction({
   ...cloneProps
 }: TimerStartFabActionProps) {
   const [open, setOpen] = useState(false);
+  // Fallback for when `FabSpeedDial` could not `cloneElement` this element
+  // (see `FabSpeedDialActionSlot`) — `null` on the ordinary clone path, where
+  // `cloneProps` already carries everything below directly.
+  const slot = useFabSpeedDialAction();
+
+  const buttonClassName = cloneProps.className ?? slot?.className;
+  const kids = children ?? slot?.children;
+  const style = cloneProps.style ?? slot?.style;
+  const testId = cloneProps['data-testid'] ?? slot?.['data-testid'];
+  const ariaDisabled = cloneProps['aria-disabled'] ?? slot?.disabled;
 
   return (
     <>
       <button
         type="button"
         {...cloneProps}
+        className={buttonClassName}
+        style={style}
+        aria-disabled={ariaDisabled}
+        data-testid={testId}
         onClick={(event) => {
           onClick?.(event);
           setOpen(true);
+          // No-op on the clone path — `FabSpeedDial` already composed the
+          // close into `onClick` above.
+          slot?.onClick(event);
         }}
       >
-        {children}
+        {kids}
       </button>
       {/* Remounted per opening (same `key` trick `AddEventFabAction` uses) so a
           cancelled open never leaves a stale duration/icon selection for the
