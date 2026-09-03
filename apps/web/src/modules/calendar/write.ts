@@ -1,5 +1,5 @@
 import 'server-only';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { getDb } from '@/server/db';
 // Table objects come from the schema assembly point, not from the owning
@@ -7,6 +7,7 @@ import { getDb } from '@/server/db';
 import { calendar } from '@/server/db/schema';
 import { can, getFamily, getMember, type Principal } from '@/modules/family';
 import { publish } from '@/modules/realtime';
+import { addExdate, exdateLine } from './domain/ical';
 import { RECURRENCE_PRESETS, ruleForPreset, ruleForWeeklySelection } from './domain/presets';
 import { WEEKDAYS } from './domain/rrule';
 import { fromWall, parseDateKey } from './domain/zone';
@@ -30,8 +31,15 @@ import { pushToGoogle } from './sync-bridge';
  * `resolveInput` and its helpers moved here too, verbatim, because
  * `updateEventAction` still needs the identical parsed-input → row-values
  * mapping — one function, two callers, per architecture.md §2's shared write
- * path. Only `createEvent` is the seam `/api/mcp` will call; update and delete
- * stay Server-Action-only for this milestone.
+ * path.
+ *
+ * M-E adds `skipEventOccurrence` and `updateEventOccurrence`: the two
+ * occurrence-scoped seams, extracted from what used to be inlined in
+ * `deleteEventAction`'s and `updateEventAction`'s `scope === 'occurrence'`
+ * branches (`./actions.ts`). Same discipline as `createEvent` — those two
+ * Server Actions are now thin wrappers over these, and `/api/mcp` reaches the
+ * identical write path. Whole-series editing/deleting/rescheduling stays
+ * inlined in `./actions.ts`; only the per-occurrence override shape moved.
  */
 
 const trimmed = z.string().trim();
@@ -290,4 +298,231 @@ export async function createEvent(
   await pushToGoogle(created.id);
 
   return { ok: true, eventId: created.id };
+}
+
+/**
+ * `event.upserted` for one or more ids, the flavour `updateEventAction`,
+ * `deleteEventAction` and `rescheduleEventAction` all fan out over (a parent
+ * gaining an EXDATE and a child override are two separate facts for a
+ * client). `./actions.ts` keeps its own copy of this — unchanged by this
+ * milestone — for the whole-series branches that still live there; the
+ * occurrence seams below use this one so both callers publish identically.
+ */
+async function publishEvent(
+  principal: Principal,
+  type: 'event.upserted' | 'event.deleted',
+  eventIds: readonly string[]
+): Promise<void> {
+  for (const id of eventIds) {
+    await publish({
+      familyId: principal.familyId,
+      type,
+      entity: { id },
+      actor: { ...actorOf(principal), source: 'mobile' },
+    });
+  }
+}
+
+export type SkipEventOccurrenceInput = {
+  eventId: string;
+  /** ISO instant identifying which occurrence of the series to suppress. */
+  occurrenceStart: string;
+};
+
+export type SkipEventOccurrenceResult = { ok: true } | { ok: false; error: string };
+
+/**
+ * Suppress one occurrence of a recurring series — the write seam behind
+ * `deleteEventAction`'s `scope === 'occurrence'` branch (M-E). Mirrors it
+ * exactly: an EXDATE appended to the *parent*, no row deleted, the series
+ * still an upsert from a client's point of view (every other instance
+ * survives), same Google push.
+ *
+ * Deliberately does not special-case a Google-synced calendar: neither does
+ * `deleteEventAction` — `pushToGoogle` (`pushEventWithRetry`) already treats
+ * an unsyncable/foreign calendar as a no-op `'skipped'` outcome rather than a
+ * failure, so refusing here would be a restriction the web app itself does
+ * not have. An EXDATE against a Google-authored series is exactly the
+ * passthrough `domain/ical.ts`'s `exdateLine` is built to produce.
+ */
+export async function skipEventOccurrence(
+  principal: Principal,
+  input: SkipEventOccurrenceInput
+): Promise<SkipEventOccurrenceResult> {
+  if (!can(principal, 'event:write', { familyId: principal.familyId })) {
+    return { ok: false, error: 'forbidden' };
+  }
+
+  const instant = new Date(input.occurrenceStart);
+  if (Number.isNaN(instant.getTime())) return { ok: false, error: 'invalidInput' };
+
+  const db = getDb();
+  const [existing] = await db
+    .select()
+    .from(event)
+    .where(and(eq(event.id, input.eventId), eq(event.familyId, principal.familyId)))
+    .limit(1);
+
+  // Same shape as `deleteEventAction`: `!existing` alone, no `deletedAt`
+  // check — a soft-deleted series has no further occurrences to skip, but
+  // failing loudly here isn't the action's behaviour either, so this seam
+  // keeps parity rather than inventing a stricter check.
+  if (!existing) return { ok: false, error: 'eventNotFound' };
+  if (!existing.rrule) return { ok: false, error: 'notRecurring' };
+
+  await db
+    .update(event)
+    .set({
+      exdates: addExdate(existing.exdates, exdateLine(instant, existing.tz, existing.allDay)),
+      version: sql`${event.version} + 1`,
+      updatedAt: new Date(),
+    })
+    .where(and(eq(event.id, existing.id), eq(event.familyId, principal.familyId)));
+
+  await publishEvent(principal, 'event.upserted', [existing.id]);
+  await pushToGoogle(existing.id);
+
+  return { ok: true };
+}
+
+export type UpdateEventOccurrenceInput = {
+  eventId: string;
+  /** ISO instant identifying which occurrence of the series to override. */
+  occurrenceStart: string;
+  /**
+   * A patch over the *parent* series' current values, so a caller only
+   * states what changes — any field left `undefined` is carried over from
+   * `existing`, `startsAt`/`endsAt` defaulting to the occurrence's own slot
+   * (same duration as the parent). This is what makes the same seam serve
+   * two very different callers unchanged:
+   *
+   * - `updateEventAction`'s occurrence branch (`./actions.ts`) is a thin
+   *   wrapper that passes *every* field explicitly — the dialog form always
+   *   submits the full set (owner, attendees, type, calendar, all-day-ness
+   *   included), pre-filled from the existing event the way `EventDialog`
+   *   does — so nothing here is ever defaulted for that caller and behaviour
+   *   is byte-for-byte what the inlined branch used to do.
+   * - The MCP tool (`skip_event_occurrence`'s sibling in `route.ts`) has no
+   *   such form to prefill from, so its schema exposes only
+   *   `startsAt`/`endsAt`/`title`/`location`/`description` — the task's
+   *   "don't invent more" — and leaves owner/attendees/type/calendar/all-day
+   *   to default from the parent. A caller that needs to change one of those
+   *   on a single occurrence still has to go through the app.
+   */
+  startsAt?: string;
+  endsAt?: string;
+  title?: string;
+  location?: string | null;
+  description?: string | null;
+  ownerMemberId?: string | null;
+  attendeeMemberIds?: string[];
+  eventType?: (typeof EVENT_TYPES)[number];
+  calendarId?: string | null;
+  allDay?: boolean;
+};
+
+export type UpdateEventOccurrenceResult =
+  { ok: true; eventId: string; occurrenceEventId: string } | { ok: false; error: string };
+
+/**
+ * Override one occurrence of a recurring series — the write seam behind
+ * `updateEventAction`'s `scope === 'occurrence'` branch (M-E). Mirrors its
+ * mechanics byte-for-byte: a single transaction inserts the child override
+ * row (`recurrenceParentId` → parent, `rrule: null`) and appends the parent's
+ * EXDATE for the replaced slot, then both rows publish and push to Google —
+ * the parent's new EXDATE and the child override are two separate facts for
+ * a client, same as the action.
+ *
+ * The child's `tz` is the family's *current* timezone (`getFamily`, the same
+ * source `resolveInput` reads), not `existing.tz` — the inlined branch this
+ * replaces built the child from `input.resolved.values`, which always came
+ * from a fresh `resolveInput` call, so a family that changed timezone since
+ * the parent series was created got the new zone on every occurrence
+ * override, not the parent's stale one. Reading `existing.tz` here would be
+ * a quiet divergence from that.
+ *
+ * Same Google-sync stance as `skipEventOccurrence` above: `updateEventAction`
+ * does not refuse a synced calendar's occurrence edit either, so neither does
+ * this.
+ */
+export async function updateEventOccurrence(
+  principal: Principal,
+  input: UpdateEventOccurrenceInput
+): Promise<UpdateEventOccurrenceResult> {
+  if (!can(principal, 'event:write', { familyId: principal.familyId })) {
+    return { ok: false, error: 'forbidden' };
+  }
+
+  const instant = new Date(input.occurrenceStart);
+  if (Number.isNaN(instant.getTime())) return { ok: false, error: 'invalidInput' };
+
+  const db = getDb();
+  const [existing] = await db
+    .select()
+    .from(event)
+    .where(and(eq(event.id, input.eventId), eq(event.familyId, principal.familyId)))
+    .limit(1);
+
+  // `updateEventAction` refuses a soft-deleted event outright — the same
+  // check applies here.
+  if (!existing || existing.deletedAt) return { ok: false, error: 'eventNotFound' };
+  if (!existing.rrule) return { ok: false, error: 'notRecurring' };
+
+  const family = await getFamily(principal.familyId);
+  const tz = family?.timezone ?? 'Europe/Amsterdam';
+
+  const startsAt = input.startsAt ? new Date(input.startsAt) : instant;
+  if (Number.isNaN(startsAt.getTime())) return { ok: false, error: 'invalidInput' };
+
+  const seriesDurationMs = existing.endsAt.getTime() - existing.startsAt.getTime();
+  const endsAt = input.endsAt
+    ? new Date(input.endsAt)
+    : new Date(startsAt.getTime() + seriesDurationMs);
+  if (Number.isNaN(endsAt.getTime())) return { ok: false, error: 'invalidInput' };
+  if (endsAt.getTime() < startsAt.getTime()) return { ok: false, error: 'endBeforeStart' };
+
+  const title = input.title !== undefined ? input.title.trim() : existing.title;
+  if (title.length === 0) return { ok: false, error: 'invalidInput' };
+
+  const childId = await db.transaction(async (tx) => {
+    const [child] = await tx
+      .insert(event)
+      .values({
+        familyId: principal.familyId,
+        title,
+        description:
+          input.description !== undefined ? input.description || null : existing.description,
+        location: input.location !== undefined ? input.location || null : existing.location,
+        startsAt,
+        endsAt,
+        allDay: input.allDay ?? existing.allDay,
+        tz,
+        ownerMemberId:
+          input.ownerMemberId !== undefined ? input.ownerMemberId || null : existing.ownerMemberId,
+        attendeeMemberIds: input.attendeeMemberIds ?? existing.attendeeMemberIds,
+        eventType: input.eventType ?? existing.eventType,
+        calendarId: input.calendarId !== undefined ? input.calendarId || null : existing.calendarId,
+        // The override is a single instance, never a series of its own.
+        rrule: null,
+        recurrenceParentId: existing.id,
+      })
+      .returning({ id: event.id });
+
+    await tx
+      .update(event)
+      .set({
+        exdates: addExdate(existing.exdates, exdateLine(instant, existing.tz, existing.allDay)),
+        version: sql`${event.version} + 1`,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(event.id, existing.id), eq(event.familyId, principal.familyId)));
+
+    return child.id;
+  });
+
+  await publishEvent(principal, 'event.upserted', [existing.id, childId]);
+  await pushToGoogle(existing.id);
+  await pushToGoogle(childId);
+
+  return { ok: true, eventId: existing.id, occurrenceEventId: childId };
 }

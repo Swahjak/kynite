@@ -127,7 +127,18 @@ export {
 
 export { pushToGoogle } from './sync-bridge';
 
-export { createEvent, eventSchema, type CreateEventInput, type CreateEventResult } from './write';
+export {
+  createEvent,
+  eventSchema,
+  skipEventOccurrence,
+  updateEventOccurrence,
+  type CreateEventInput,
+  type CreateEventResult,
+  type SkipEventOccurrenceInput,
+  type SkipEventOccurrenceResult,
+  type UpdateEventOccurrenceInput,
+  type UpdateEventOccurrenceResult,
+} from './write';
 
 export {
   loadCalendarDisplay,

@@ -180,7 +180,8 @@ separate server, see `docs/adr/20260903-mcp-server.md` for why.
   handler, check the token's scope first (`hasAllScopes`/`hasAnyScope` from
   `src/server/mcp-auth.ts` against `MCP_CALENDAR_READ`/`_WRITE`/`MCP_TASKS_READ`/`_WRITE`),
   then — for anything that mutates — call `can()` (`@/modules/family`) against the resolved
-  `Principal` before touching a write seam (`createEvent`, `createTask`, …). Scopes gate
+  `Principal` before touching a write seam (`createEvent`, `skipEventOccurrence`,
+  `updateEventOccurrence`, `createTask`, …). Scopes gate
   which tool *runs*; `can()` is what a member's role actually permits — a mutating tool must
   pass both, and must call the write seam either way so `can()` is re-checked there too, not
   trusted from the tool layer. Return `toolError(message)` (not a thrown error) for any

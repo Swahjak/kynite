@@ -18,7 +18,13 @@ import { preservesExistingRule } from './domain/presets';
 import { addExdate, exdateLine } from './domain/ical';
 import { EVENT_TYPES, event } from './schema';
 import { pushToGoogle } from './sync-bridge';
-import { createEvent, eventInputFromForm, resolveInput } from './write';
+import {
+  createEvent,
+  eventInputFromForm,
+  resolveInput,
+  skipEventOccurrence,
+  updateEventOccurrence,
+} from './write';
 
 /**
  * Mutations for the calendar slice (M06).
@@ -145,38 +151,28 @@ export async function updateEventAction(
   const occurrenceStart = read(formData, 'occurrenceStart');
 
   if (scope === 'occurrence' && existing.rrule && occurrenceStart) {
-    const instant = new Date(occurrenceStart);
-    if (Number.isNaN(instant.getTime())) return failure('invalidInput');
-
-    const childId = await db.transaction(async (tx) => {
-      const [child] = await tx
-        .insert(event)
-        .values({
-          familyId: principal.familyId,
-          ...input.resolved.values,
-          // The override is a single instance, never a series of its own.
-          rrule: null,
-          recurrenceParentId: existing.id,
-        })
-        .returning({ id: event.id });
-
-      await tx
-        .update(event)
-        .set({
-          exdates: addExdate(existing.exdates, exdateLine(instant, existing.tz, existing.allDay)),
-          version: sql`${event.version} + 1`,
-          updatedAt: new Date(),
-        })
-        .where(and(eq(event.id, existing.id), eq(event.familyId, principal.familyId)));
-
-      return child.id;
+    // `./write.ts`'s `updateEventOccurrence` is the write seam (M-E): the
+    // dialog form always submits every field, so every one of them is passed
+    // through explicitly here — the seam's own per-field defaulting from the
+    // parent (its one MCP-tool caller's use case) never triggers for this
+    // caller, keeping this wrapper's behaviour identical to the inlined
+    // branch it replaces.
+    const result = await updateEventOccurrence(principal, {
+      eventId,
+      occurrenceStart,
+      title: input.resolved.values.title,
+      description: input.resolved.values.description,
+      location: input.resolved.values.location,
+      startsAt: input.resolved.values.startsAt.toISOString(),
+      endsAt: input.resolved.values.endsAt.toISOString(),
+      allDay: input.resolved.values.allDay,
+      ownerMemberId: input.resolved.values.ownerMemberId,
+      attendeeMemberIds: input.resolved.values.attendeeMemberIds,
+      eventType: input.resolved.values.eventType,
+      calendarId: input.resolved.values.calendarId,
     });
+    if (!result.ok) return failure(result.error);
 
-    // Both rows changed, so both push — and both broadcast: the parent's new
-    // EXDATE and the child override are two separate facts for a client.
-    await publishEvent(principal, 'event.upserted', [existing.id, childId]);
-    await pushToGoogle(existing.id);
-    await pushToGoogle(childId);
     await revalidateCalendar();
     return idleState;
   }
@@ -224,38 +220,32 @@ export async function deleteEventAction(
   const occurrenceStart = read(formData, 'occurrenceStart');
 
   // Deleting one occurrence of a series is an EXDATE, not a deletion: the
-  // series itself survives and every other instance with it.
+  // series itself survives and every other instance with it. `./write.ts`'s
+  // `skipEventOccurrence` is the write seam (M-E) — this is now a thin
+  // wrapper over it.
   if (scope === 'occurrence' && existing.rrule && occurrenceStart) {
-    const instant = new Date(occurrenceStart);
-    if (Number.isNaN(instant.getTime())) return failure('invalidInput');
+    // The seam already publishes and pushes to Google itself (same order as
+    // the whole-series branch below), so this wrapper returns right after —
+    // no second push for the same event.
+    const result = await skipEventOccurrence(principal, { eventId, occurrenceStart });
+    if (!result.ok) return failure(result.error);
 
-    await db
-      .update(event)
-      .set({
-        exdates: addExdate(existing.exdates, exdateLine(instant, existing.tz, existing.allDay)),
-        version: sql`${event.version} + 1`,
-        updatedAt: new Date(),
-      })
-      .where(and(eq(event.id, eventId), eq(event.familyId, principal.familyId)));
-
-    // Still an *upsert* of the series row, not a deletion: the series gained
-    // an EXDATE and every other instance of it survives.
-    await publishEvent(principal, 'event.upserted', [eventId]);
-  } else {
-    // Soft delete: the row stays so the sync engine can echo the tombstone
-    // and so a remote resurrection has something to un-delete (§3).
-    await db
-      .update(event)
-      .set({
-        deletedAt: new Date(),
-        version: sql`${event.version} + 1`,
-        updatedAt: new Date(),
-      })
-      .where(and(eq(event.id, eventId), eq(event.familyId, principal.familyId)));
-
-    await publishEvent(principal, 'event.deleted', [eventId]);
+    await revalidateCalendar();
+    return idleState;
   }
 
+  // Soft delete: the row stays so the sync engine can echo the tombstone and
+  // so a remote resurrection has something to un-delete (§3).
+  await db
+    .update(event)
+    .set({
+      deletedAt: new Date(),
+      version: sql`${event.version} + 1`,
+      updatedAt: new Date(),
+    })
+    .where(and(eq(event.id, eventId), eq(event.familyId, principal.familyId)));
+
+  await publishEvent(principal, 'event.deleted', [eventId]);
   await pushToGoogle(eventId);
   await revalidateCalendar();
   return idleState;

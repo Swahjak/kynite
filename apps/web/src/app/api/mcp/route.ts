@@ -24,7 +24,10 @@ import {
   createEvent,
   EVENT_TYPES,
   listEvents,
+  skipEventOccurrence,
+  updateEventOccurrence,
   type CreateEventInput,
+  type UpdateEventOccurrenceInput,
 } from '@/modules/calendar';
 import { type Calendar, listFamilyCalendars } from '@/modules/google';
 import { can, decide, listMembers, type Principal } from '@/modules/family';
@@ -293,6 +296,73 @@ function registerTools(
       const result = await createEvent(principal, input as CreateEventInput);
       if (!result.ok) return toolError(result.error);
       return ok({ eventId: result.eventId });
+    }
+  );
+
+  server.registerTool(
+    'skip_event_occurrence',
+    {
+      title: 'Skip one occurrence of a recurring event',
+      description:
+        'Suppress a single occurrence of a recurring event — the series and every other ' +
+        'occurrence survive. `eventId` and `occurrenceStart` come from a `list_events` ' +
+        '`key` such as "d4526712-...:2026-09-07T06:20:00.000Z": the id is the part before ' +
+        'the first ":", the occurrence start is the ISO datetime after it. Works on any ' +
+        'series the family can edit, including one synced from Google — Google sync is a ' +
+        'passthrough, not a restriction here.',
+      inputSchema: z.object({
+        eventId: z.uuid(),
+        occurrenceStart: z.iso.datetime({ offset: true }),
+      }),
+    },
+    async ({ eventId, occurrenceStart }) => {
+      if (!hasAllScopes(grantedScopes, [MCP_CALENDAR_WRITE])) {
+        return toolError('insufficientScope: requires kynite:calendar.write');
+      }
+      if (!can(principal, 'event:write', { familyId: principal.familyId })) {
+        return toolError('forbidden');
+      }
+
+      const result = await skipEventOccurrence(principal, { eventId, occurrenceStart });
+      if (!result.ok) return toolError(result.error);
+      return ok({ skipped: true });
+    }
+  );
+
+  server.registerTool(
+    'update_event_occurrence',
+    {
+      title: 'Edit one occurrence of a recurring event',
+      description:
+        'Override a single occurrence of a recurring event without touching the series or ' +
+        'its other occurrences. `eventId` and `occurrenceStart` come from a `list_events` ' +
+        '`key` such as "d4526712-...:2026-09-07T06:20:00.000Z": the id is the part before ' +
+        'the first ":", the occurrence start is the ISO datetime after it. Only ' +
+        'startsAt/endsAt/title/location/description can be changed this way — anything else ' +
+        'is carried over from the series (owner, attendees, type, calendar, all-day-ness); ' +
+        'use the app to change those on a single occurrence. Works on a series synced from ' +
+        'Google too, same as `skip_event_occurrence`.',
+      inputSchema: z.object({
+        eventId: z.uuid(),
+        occurrenceStart: z.iso.datetime({ offset: true }),
+        startsAt: z.iso.datetime({ offset: true }).optional(),
+        endsAt: z.iso.datetime({ offset: true }).optional(),
+        title: z.string().min(1).max(200).optional(),
+        location: z.string().max(400).nullable().optional(),
+        description: z.string().max(4000).nullable().optional(),
+      }),
+    },
+    async (input) => {
+      if (!hasAllScopes(grantedScopes, [MCP_CALENDAR_WRITE])) {
+        return toolError('insufficientScope: requires kynite:calendar.write');
+      }
+      if (!can(principal, 'event:write', { familyId: principal.familyId })) {
+        return toolError('forbidden');
+      }
+
+      const result = await updateEventOccurrence(principal, input as UpdateEventOccurrenceInput);
+      if (!result.ok) return toolError(result.error);
+      return ok({ eventId: result.eventId, occurrenceEventId: result.occurrenceEventId });
     }
   );
 
