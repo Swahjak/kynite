@@ -31,7 +31,7 @@ vi.mock('@/i18n/navigation', () => ({
   },
 }));
 
-const { principalForMcpUser, grantedScopesOf, hasAllScopes, hasAnyScope } =
+const { principalForMcpUser, grantedScopesOf, hasAllScopes, hasAnyScope, slideRateLimitWindow } =
   await import('@/server/mcp-auth');
 
 const FAMILY_ID = '11111111-1111-4111-8111-111111111111';
@@ -111,5 +111,28 @@ describe('grantedScopesOf / hasAllScopes / hasAnyScope', () => {
     const scopes = new Set(['kynite:tasks.read']);
     expect(hasAnyScope(scopes, ['kynite:calendar.read', 'kynite:tasks.read'])).toBe(true);
     expect(hasAnyScope(scopes, ['kynite:calendar.read', 'kynite:calendar.write'])).toBe(false);
+  });
+});
+
+describe('slideRateLimitWindow', () => {
+  it('allows requests under the max and keeps their timestamps', () => {
+    const { result, kept } = slideRateLimitWindow([1_000, 2_000], 3_000, 60_000, 3);
+    expect(result).toEqual({ limited: false });
+    expect(kept).toEqual([1_000, 2_000, 3_000]);
+  });
+
+  it('limits once the window is at max, with a Retry-After derived from the oldest timestamp', () => {
+    const { result, kept } = slideRateLimitWindow([0, 1_000, 2_000], 2_500, 60_000, 3);
+    expect(result).toEqual({ limited: true, retryAfterSeconds: 58 });
+    // The window is unchanged — a refused request is not itself recorded.
+    expect(kept).toEqual([0, 1_000, 2_000]);
+  });
+
+  it('drops timestamps that have aged out of the window before counting', () => {
+    // Two timestamps are 61s old (outside a 60s window) and should not count
+    // toward the max, so a third request at `now` is allowed.
+    const { result, kept } = slideRateLimitWindow([0, 1_000], 61_000, 60_000, 2);
+    expect(result).toEqual({ limited: false });
+    expect(kept).toEqual([61_000]);
   });
 });

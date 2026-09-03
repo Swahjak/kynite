@@ -48,13 +48,35 @@ function isForwardedWellKnownPath(request: Request): boolean {
 }
 
 function notFound(): Response {
-  return new Response(null, { status: 404 });
+  return new Response(null, { status: 404, headers: WELL_KNOWN_RESPONSE_HEADERS });
+}
+
+/**
+ * OAuth discovery metadata (M-E hardening): never cached by an intermediary
+ * and never indexed, same reasoning as `/api/mcp`'s own
+ * `MCP_RESPONSE_HEADERS` (`src/app/api/mcp/route.ts`) — these documents
+ * describe an internal agent-authorization flow, not public content.
+ */
+const WELL_KNOWN_RESPONSE_HEADERS: HeadersInit = {
+  'Cache-Control': 'no-store',
+  'X-Robots-Tag': 'noindex',
+};
+
+function withWellKnownHeaders(response: Response): Response {
+  for (const [key, value] of Object.entries(WELL_KNOWN_RESPONSE_HEADERS)) {
+    response.headers.set(key, value);
+  }
+  return response;
 }
 
 const authHandler = toNextJsHandler((request: Request) => getAuth().handler(request));
 
-export const GET = (request: Request) =>
-  isForwardedWellKnownPath(request) ? authHandler.GET(request) : notFound();
+export const GET = async (request: Request) =>
+  isForwardedWellKnownPath(request)
+    ? withWellKnownHeaders(await authHandler.GET(request))
+    : notFound();
 
-export const POST = (request: Request) =>
-  isForwardedWellKnownPath(request) ? authHandler.POST(request) : notFound();
+export const POST = async (request: Request) =>
+  isForwardedWellKnownPath(request)
+    ? withWellKnownHeaders(await authHandler.POST(request))
+    : notFound();

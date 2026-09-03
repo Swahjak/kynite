@@ -11,6 +11,7 @@ import {
   MCP_CALENDAR_WRITE,
   MCP_TASKS_READ,
   MCP_TASKS_WRITE,
+  checkMcpRateLimit,
   grantedScopesOf,
   hasAllScopes,
   hasAnyScope,
@@ -77,12 +78,32 @@ import { createTask, type CreateTaskInput } from '@/modules/tasks';
  */
 export const dynamic = 'force-dynamic';
 
-function jsonRpcError(status: number, message: string): Response {
+/**
+ * Applied to every response this route sends, success or error. This is an
+ * agent-authorization endpoint, not a page or a public API — nothing about it
+ * should be cached by an intermediary or indexed by a crawler that somehow
+ * reaches it. `next.config.ts`'s `headers()` only covers static/asset routes
+ * (`/serwist/:path*`); a dynamic route sets its own, the same pattern
+ * `jsonRpcError` already used for `Cache-Control` before this hardening pass.
+ */
+const MCP_RESPONSE_HEADERS: Record<string, string> = {
+  'Cache-Control': 'no-store',
+  'X-Robots-Tag': 'noindex',
+};
+
+function withMcpHeaders(response: Response): Response {
+  for (const [key, value] of Object.entries(MCP_RESPONSE_HEADERS)) {
+    response.headers.set(key, value);
+  }
+  return response;
+}
+
+function jsonRpcError(status: number, message: string, extraHeaders?: HeadersInit): Response {
   return new Response(
     JSON.stringify({ jsonrpc: '2.0', error: { code: -32000, message }, id: null }),
     {
       status,
-      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
+      headers: { 'Content-Type': 'application/json', ...MCP_RESPONSE_HEADERS, ...extraHeaders },
     }
   );
 }
@@ -322,6 +343,23 @@ const handleMcpRequest = requireMcpAuth(
   auth,
   async (request, claims) => {
     const userId = typeof claims.sub === 'string' ? claims.sub : undefined;
+
+    // Rate-limit before the member lookup: `sub` is already verified by
+    // `requireMcpAuth` at this point (this callback only runs for a
+    // signature/issuer/audience/expiry-valid token), so keying off it here is
+    // safe, and a client hammering the endpoint with a valid token gets
+    // turned away before it costs a `member` SELECT — see
+    // `checkMcpRateLimit`'s doc comment (`src/server/mcp-auth.ts`) for why
+    // this is in-memory and keyed by `sub` rather than by IP.
+    if (userId) {
+      const rateLimit = checkMcpRateLimit(userId);
+      if (rateLimit.limited) {
+        return jsonRpcError(429, 'rateLimited: too many requests, slow down', {
+          'Retry-After': String(rateLimit.retryAfterSeconds),
+        });
+      }
+    }
+
     const principalResult = userId
       ? await principalForMcpUser(userId)
       : ({ ok: false, reason: 'noMember' } as const);
@@ -337,7 +375,7 @@ const handleMcpRequest = requireMcpAuth(
       { serverInfo: { name: 'kynite', version: '1.0.0' } }
     );
 
-    return mcpHandler(request);
+    return withMcpHeaders(await mcpHandler(request));
   },
   { resource: MCP_RESOURCE }
 );

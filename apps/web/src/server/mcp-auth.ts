@@ -53,6 +53,110 @@ export function hasAnyScope(granted: ReadonlySet<string>, anyOf: readonly string
   return anyOf.some((scope) => granted.has(scope));
 }
 
+/**
+ * Per-token-`sub` sliding-window rate limiter for `/api/mcp` (M-E hardening).
+ *
+ * `@better-auth/oauth-provider` already rate-limits the OAuth *flow* endpoints
+ * a client hits before it ever holds a token (`/oauth2/token`, `/authorize`,
+ * `/introspect`, `/revoke`, `/register`, `/userinfo` — checked against the
+ * installed `authorize-*.mjs`, defaults 20-100 req/min per path). None of
+ * that covers `/api/mcp` itself: once a client holds an access token, every
+ * `tools/call` it makes goes straight through `requireMcpAuth` to this
+ * route's own handler, which better-auth's plugin never sees. This is the
+ * limiter for *that* traffic.
+ *
+ * **In-memory, deliberately.** This app runs single-instance on Railway (no
+ * horizontal scaling, no separate edge tier), so a per-process `Map` sees
+ * every request there is to see — there is no second instance whose counters
+ * would disagree with this one. A `Map` also resets on every deploy/restart,
+ * which just means a fresh window, not a leak. If this app ever moves to
+ * multiple instances, this needs a shared store (Redis, Postgres) instead —
+ * see `docs/adr/20251225-rate-limiting.md` for the same trade-off made (and
+ * revisited) for other endpoints.
+ *
+ * Keyed by the verified token's `sub` (a user id), not by IP: MCP clients sit
+ * behind arbitrary hosting, and the identity that matters here is the
+ * account the token was minted for.
+ */
+const MCP_RATE_LIMIT_WINDOW_MS = 60_000;
+const MCP_RATE_LIMIT_MAX = 60;
+
+export type RateLimitResult = { limited: false } | { limited: true; retryAfterSeconds: number };
+
+/**
+ * Pure sliding-window check: given the request timestamps already recorded
+ * for `key` (oldest first) and `now`, decides whether one more request is
+ * allowed and returns the timestamps to keep for next time.
+ *
+ * Separated from `checkMcpRateLimit`'s `Map` bookkeeping so the windowing
+ * logic itself is unit-testable without faking module-level state or timers.
+ */
+export function slideRateLimitWindow(
+  timestamps: readonly number[],
+  now: number,
+  windowMs: number = MCP_RATE_LIMIT_WINDOW_MS,
+  max: number = MCP_RATE_LIMIT_MAX
+): { result: RateLimitResult; kept: number[] } {
+  const windowStart = now - windowMs;
+  const kept = timestamps.filter((t) => t > windowStart);
+
+  if (kept.length >= max) {
+    const retryAfterSeconds = Math.max(1, Math.ceil((kept[0] + windowMs - now) / 1000));
+    return { result: { limited: true, retryAfterSeconds }, kept };
+  }
+
+  kept.push(now);
+  return { result: { limited: false }, kept };
+}
+
+/**
+ * Above this many tracked subs, `checkMcpRateLimit` sweeps the whole map for
+ * idle entries before adding another one. This is a family app with a
+ * handful of members and MCP clients — reaching this cap at all would mean
+ * something is already wrong — so the cap exists only to bound the sweep's
+ * own cost (an O(map size) pass) rather than to model any expected load.
+ */
+const MCP_RATE_LIMIT_SWEEP_CAP = 1000;
+
+const rateLimitState = new Map<string, number[]>();
+
+/**
+ * Drops every entry whose newest recorded request has already aged out of
+ * the window — i.e. every sub that has gone quiet. Called only when the map
+ * has grown past `MCP_RATE_LIMIT_SWEEP_CAP`, so a normal (small) family
+ * install never pays for it; the per-call pruning in `checkMcpRateLimit`
+ * (deleting a sub's key the moment its own window empties) is what keeps the
+ * common case tidy without ever needing this.
+ */
+function sweepIdleRateLimitEntries(now: number): void {
+  const windowStart = now - MCP_RATE_LIMIT_WINDOW_MS;
+  for (const [sub, timestamps] of rateLimitState) {
+    const newest = timestamps.at(-1);
+    if (newest === undefined || newest <= windowStart) {
+      rateLimitState.delete(sub);
+    }
+  }
+}
+
+/** `slideRateLimitWindow`, applied to this route's module-level state. */
+export function checkMcpRateLimit(sub: string, now: number = Date.now()): RateLimitResult {
+  const { result, kept } = slideRateLimitWindow(rateLimitState.get(sub) ?? [], now);
+
+  // A sub whose window is empty after filtering has nothing worth
+  // remembering — drop the key outright instead of storing `[]` forever.
+  if (kept.length === 0) {
+    rateLimitState.delete(sub);
+  } else {
+    rateLimitState.set(sub, kept);
+  }
+
+  if (rateLimitState.size > MCP_RATE_LIMIT_SWEEP_CAP) {
+    sweepIdleRateLimitEntries(now);
+  }
+
+  return result;
+}
+
 /** Why `principalForMcpUser` refused to mint a `Principal`. */
 export type McpPrincipalRefusal =
   /** The user exists in better-auth but never joined or was removed from a family. */

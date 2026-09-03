@@ -159,6 +159,46 @@ ngrok http 3000
 # Set BETTER_AUTH_URL=https://abc123.ngrok.io
 ```
 
+### MCP server
+
+`/api/mcp` (`apps/web/src/app/api/mcp/route.ts`) exposes the family's calendar and tasks to
+MCP clients (Claude Desktop, or any OAuth 2.1 MCP host) — built in-app rather than as a
+separate server, see `docs/adr/20260903-mcp-server.md` for why.
+
+- **OAuth flow**: `mcp()` + `cimd()` (`src/server/auth.ts`) turn the existing better-auth
+  instance into the OAuth 2.1 authorization server. A client discovers it through the
+  standard endpoints — RFC 9728 protected resource metadata at
+  `/.well-known/oauth-protected-resource/api/mcp` and RFC 8414 authorization server
+  metadata at `/.well-known/oauth-authorization-server/api/auth` — both forwarded by
+  `src/app/.well-known/[...all]/route.ts` (Next needs *a* file route there before
+  better-auth's own raw-pathname matching runs). Client identity is a CIMD URL, not
+  dynamic registration.
+- **Where tools live**: registered in `registerTools()` inside `route.ts` itself, a fresh
+  `McpServer` per request (the verified principal/scopes are closures, not read off
+  `ctx.http.authInfo`).
+- **Adding a tool**: `server.registerTool(name, { inputSchema: zod }, handler)`. Inside the
+  handler, check the token's scope first (`hasAllScopes`/`hasAnyScope` from
+  `src/server/mcp-auth.ts` against `MCP_CALENDAR_READ`/`_WRITE`/`MCP_TASKS_READ`/`_WRITE`),
+  then — for anything that mutates — call `can()` (`@/modules/family`) against the resolved
+  `Principal` before touching a write seam (`createEvent`, `createTask`, …). Scopes gate
+  which tool *runs*; `can()` is what a member's role actually permits — a mutating tool must
+  pass both, and must call the write seam either way so `can()` is re-checked there too, not
+  trusted from the tool layer. Return `toolError(message)` (not a thrown error) for any
+  refusal — a normal MCP tool error, not the 401/403 HTTP layer `requireMcpAuth` already
+  owns for missing/invalid tokens.
+- **Principal resolution**: `principalForMcpUser()` (`src/server/mcp-auth.ts`) maps a
+  token's `sub` to a family member, refusing (403) a user with no member row or with live
+  member rows in more than one family — a bearer token has no family selector to disambiguate
+  with.
+- **Rate limiting**: `checkMcpRateLimit()` (`src/server/mcp-auth.ts`) is an in-memory
+  per-token-`sub` sliding window (60 req/min, 429 + `Retry-After`) — separate from
+  `@better-auth/oauth-provider`'s own rate limits on the OAuth flow endpoints
+  (`/oauth2/token` etc.), which don't cover `/api/mcp` itself. In-memory is a deliberate
+  single-instance (Railway) assumption; revisit if the app ever scales horizontally.
+- **Smoke test**: `node apps/web/scripts/mcp-smoke.mjs` against a running `pnpm dev` —
+  checks the unauthenticated 401 + `WWW-Authenticate` challenge and that the discovery
+  documents are reachable. Does not touch the database; kill the dev server when done.
+
 ### Environment Variables
 
 Required in `.env.local`:
