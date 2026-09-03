@@ -35,6 +35,10 @@ COPY apps/web/package.json ./apps/web/
 # resolve a workspace link to a manifest that is not in the context — so the
 # package's own manifest has to be copied alongside the app's.
 COPY packages/ui/package.json ./packages/ui/
+# `pnpm.patchedDependencies` (root package.json) references patch files by
+# path, so the install layer needs them alongside the manifests. Same
+# cache-invalidation logic as above: a patch change *should* re-install.
+COPY patches ./patches
 RUN pnpm install --frozen-lockfile --filter web...
 
 # ---------------------------------------------------------------------------
