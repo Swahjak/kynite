@@ -1,0 +1,58 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["eslint", "react", "typescript"],
+  "categories": {
+    "correctness": "error"
+  },
+  "ignorePatterns": ["node_modules/**", "storybook-static/**"],
+  "rules": {
+    "no-restricted-imports": [
+      "error",
+      {
+        "paths": [
+          {
+            "name": "next-intl",
+            "message": "`@kynite/ui` is not localised. Every user-visible string arrives as a prop, so the app translates and the package renders. (Storybook has no next-intl provider, and never will.)"
+          },
+          {
+            "name": "next-intl/server",
+            "message": "`@kynite/ui` is not localised. Every user-visible string arrives as a prop, so the app translates and the package renders."
+          },
+          {
+            "name": "server-only",
+            "message": "`@kynite/ui` is client/presentational code — there is no server module in it."
+          }
+        ],
+        "patterns": [
+          {
+            "group": ["next", "next/*", "next/**"],
+            "message": "`@kynite/ui` must render outside a Next tree (Storybook). A component that needs a link takes Base UI's `render` prop and lets the app pass `next/link`; a component that needs an image takes `src` and a `render` prop the same way."
+          },
+          {
+            "group": [
+              "@/*",
+              "src/*",
+              "**/apps/web/**",
+              "../../apps/**",
+              "../../../apps/**",
+              "../../../../apps/**"
+            ],
+            "message": "The package may not import from the app. It is the *dependency*, not a consumer: anything it needs has to move into `packages/ui` (or be passed in as a prop)."
+          }
+        ]
+      }
+    ],
+    "typescript/no-unused-vars": [
+      "error",
+      { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }
+    ],
+    "react/rules-of-hooks": "error",
+    "react/exhaustive-deps": "warn",
+    "react/react-in-jsx-scope": "off",
+    // Real finding (src/components/calendar.tsx:80, a component defined
+    // inline during render) that eslint never flagged. Not a trivial fix —
+    // hoisting it changes how it closes over the parent's props/state —
+    // so it's left for a deliberate follow-up rather than folded into S1.
+    "react/no-unstable-nested-components": "off"
+  }
+}

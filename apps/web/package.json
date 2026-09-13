@@ -11,8 +11,8 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.sw.json --noEmit",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "lint": "oxlint .",
+    "lint:fix": "oxlint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest",
@@ -46,7 +46,7 @@
   },
   "lint-staged": {
     "*.{ts,tsx,mjs,cjs,js,jsx}": [
-      "eslint --fix",
+      "oxlint --fix",
       "prettier --write"
     ],
     "*.{json,md,css,yml,yaml}": [
@@ -84,7 +84,6 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
-    "@eslint/js": "^10.0.1",
     "@playwright/test": "1.62.1",
     "@serwist/turbopack": "9.5.12",
     "@tailwindcss/postcss": "4.3.3",
@@ -103,16 +102,13 @@
     "dotenv": "^17.4.2",
     "drizzle-kit": "0.31.10",
     "esbuild": "^0.28.2",
-    "eslint": "10.8.1",
-    "eslint-config-next": "16.3.1",
-    "eslint-config-prettier": "^10.1.8",
     "jsdom": "^30.0.1",
+    "oxlint": "^1.82.0",
     "prettier": "3.9.6",
     "shadcn": "4.18.0",
     "subset-font": "^2.5.0",
     "tailwindcss": "4.3.3",
     "typescript": "npm:@typescript/typescript6@6.0.2",
-    "typescript-eslint": "8.67.0",
     "typescript-native": "npm:typescript@7.0.2",
     "vitest": "4.1.10"
   }

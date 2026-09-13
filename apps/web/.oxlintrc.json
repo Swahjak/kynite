@@ -1,0 +1,241 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["eslint", "react", "typescript", "jsx-a11y", "nextjs"],
+  "categories": {
+    "correctness": "error"
+  },
+  "ignorePatterns": [
+    ".next/**",
+    ".next-e2e-google/**",
+    "coverage/**",
+    "docs/**",
+    ".claude/**",
+    ".github/**",
+    "node_modules/**",
+    "next-env.d.ts",
+    "tests/fixtures/**",
+    "e2e/test-results/**",
+    "e2e/playwright-report/**"
+  ],
+  "settings": {
+    "react": { "version": "19.2" }
+  },
+  "rules": {
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            // `**` (not `*`) after the slice segment: unlike ESLint's `ignore`-
+            // package matcher (gitignore semantics, where banning a directory
+            // implicitly bans everything below it), oxlint's glob matching is
+            // literal per segment — `@/modules/*/*` would only catch exactly
+            // two-segment deep imports and silently miss e.g.
+            // `@/modules/rewards/domain/award`. Verified empirically: see S1's
+            // report.
+            "group": ["@/modules/*/**", "src/modules/*/**", "**/modules/*/**"],
+            "message": "Deep module imports are banned. Import the slice public surface instead: `@/modules/<slice>`."
+          }
+        ]
+      }
+    ],
+    "typescript/no-unused-vars": [
+      "error",
+      { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }
+    ],
+    "react/jsx-key": "error",
+    "react/rules-of-hooks": "error",
+    "react/exhaustive-deps": "warn",
+    // Matches eslint-config-next: React 19's JSX transform needs neither.
+    "react/no-unknown-property": "off",
+    "react/react-in-jsx-scope": "off",
+    "nextjs/no-html-link-for-pages": "error",
+    "nextjs/no-img-element": "error",
+    "nextjs/no-sync-scripts": "error",
+    "nextjs/no-document-import-in-page": "error",
+    "nextjs/no-head-import-in-document": "error",
+    "nextjs/no-duplicate-head": "error",
+    "nextjs/google-font-display": "warn",
+    "nextjs/google-font-preconnect": "warn",
+    "nextjs/no-css-tags": "warn",
+    "nextjs/no-page-custom-font": "warn",
+    "nextjs/no-styled-jsx-in-document": "warn",
+    "nextjs/no-title-in-document-head": "warn",
+    "nextjs/no-unwanted-polyfillio": "warn",
+    "nextjs/inline-script-id": "error",
+    "nextjs/no-before-interactive-script-outside-document": "error",
+    "nextjs/no-script-component-in-head": "error",
+    "nextjs/no-assign-module-variable": "error",
+    "nextjs/no-typos": "warn",
+
+    /**
+     * oxlint's jsx-a11y `correctness` category is broader than the six warns
+     * `eslint-config-next/core-web-vitals` actually turns on (alt-text,
+     * aria-props, aria-proptypes, aria-unsupported-elements,
+     * role-has-required-aria-props, role-supports-aria-props — see
+     * eslint-config-next/dist/index.js). The rules below are real findings
+     * (role="group"/"status"/"img" instead of a semantic element, some
+     * unlabelled controls, a couple of `autoFocus` uses) but fixing ~40
+     * call sites is a design-review-sized change, not a lint-tooling swap.
+     * Disabled here to keep this port scoped to S1; worth enabling
+     * deliberately as a follow-up a11y pass.
+     */
+    "jsx-a11y/label-has-associated-control": "off",
+    "jsx-a11y/control-has-associated-label": "off",
+    "jsx-a11y/prefer-tag-over-role": "off",
+    "jsx-a11y/no-autofocus": "off",
+    "jsx-a11y/no-static-element-interactions": "off",
+    "jsx-a11y/no-noninteractive-element-interactions": "off",
+    "jsx-a11y/no-noninteractive-tabindex": "off",
+
+    // Not part of eslint-config-next's rule set; oxlint's `eslint` plugin
+    // enables it under `correctness`, but this repo has never opted in.
+    "no-underscore-dangle": "off"
+  },
+  "overrides": [
+    {
+      "files": ["tests/**/*.ts", "tests/**/*.tsx"],
+      "rules": { "no-restricted-imports": "off" }
+    },
+    {
+      "files": ["src/modules/*/schema.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "@/modules/*/**",
+                  "!@/modules/*/schema",
+                  "src/modules/*/**",
+                  "!src/modules/*/schema",
+                  "**/modules/*/**",
+                  "!**/modules/*/schema"
+                ],
+                "message": "A slice schema may deep-import another slice `schema` only (foreign keys). Everything else goes through `@/modules/<slice>`."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/modules/*/domain/**/*.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "@/modules/*/**",
+                  "!@/modules/*/domain",
+                  "!@/modules/*/domain/**",
+                  "src/modules/*/**",
+                  "!src/modules/*/domain",
+                  "!src/modules/*/domain/**",
+                  "**/modules/*/**",
+                  "!**/modules/*/domain",
+                  "!**/modules/*/domain/**"
+                ],
+                "message": "A slice `domain` module may deep-import another slice `domain` only (pure, framework-free code). Everything else goes through `@/modules/<slice>`."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/app/**/(share)/**/*.ts", "src/app/**/(share)/**/*.tsx"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "@/modules/*/**",
+                  "!@/modules/sharing/view",
+                  "src/modules/*/**",
+                  "!src/modules/sharing/view",
+                  "**/modules/*/**",
+                  "!**/modules/sharing/view"
+                ],
+                "message": "The (share) route tree may import `@/modules/sharing/view` only — every other slice module is one hop from a Server Action, and this tree must reach none."
+              },
+              {
+                "regex": "^(@/|src/|(\\.\\.?/)+)modules/[^/]+$",
+                "message": "The (share) route tree may not import a slice barrel — every one of them re-exports Server Actions. Import `@/modules/sharing/view`."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "src/modules/sharing/view/**/*.ts",
+        "src/modules/sharing/view/**/*.tsx",
+        "src/modules/sharing/resolve.ts"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "@/modules/*/**",
+                  "!@/modules/*/queries",
+                  "!@/modules/*/authorize",
+                  "!@/modules/*/schema",
+                  "!@/modules/*/domain",
+                  "!@/modules/*/domain/**",
+                  "src/modules/*/**",
+                  "!src/modules/*/queries",
+                  "!src/modules/*/authorize",
+                  "!src/modules/*/schema",
+                  "!src/modules/*/domain",
+                  "!src/modules/*/domain/**",
+                  "**/modules/*/**",
+                  "!**/modules/*/queries",
+                  "!**/modules/*/authorize",
+                  "!**/modules/*/schema",
+                  "!**/modules/*/domain",
+                  "!**/modules/*/domain/**"
+                ],
+                "message": "The share view read path may deep-import another slice `queries`, `domain`, `authorize` or `schema` only — everything else in a slice is reachable from a Server Action, which the (share) tree must never reach."
+              },
+              {
+                "regex": "^(@/|src/|(\\.\\.?/)+)modules/[^/]+$",
+                "message": "The share view read path may not import a slice barrel — every one of them re-exports Server Actions. Deep-import `queries`, `domain`, `authorize` or `schema` instead."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["e2e/**/*.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "regex": "^@/modules/[^/]+$",
+                "message": "The e2e tree may not import a slice barrel — it re-exports Server Actions and server-only code into the test process. Import `@/modules/<slice>/domain/<module>` if you need pure logic."
+              }
+            ]
+          }
+        ],
+        "react/rules-of-hooks": "off"
+      }
+    },
+    {
+      "files": ["src/server/db/schema.ts"],
+      "rules": { "no-restricted-imports": "off" }
+    }
+  ]
+}

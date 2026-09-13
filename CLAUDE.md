@@ -279,12 +279,16 @@ Do NOT include Co-Authored-By or similar Claude references in commit messages. U
   package name in `apps/web` and `packages/ui`:
   - `typescript` → `npm:@typescript/typescript6@6.0.2`, Microsoft's official
     compat shim (a straight re-export of `typescript@6.0.3`). Anything that
-    resolves the *name* `typescript` gets the JS API: `typescript-eslint`
-    (which hard-throws on TS 7 — it parses with `ts.createSourceFile`), and
+    resolves the *name* `typescript` gets the JS API:
     `tests/unit/server-action-authorization.test.ts` /
     `tests/unit/share-tree-no-server-actions.test.ts`, which walk the AST. Those
     tests keep their plain `import ts from 'typescript'` — do not "fix" it.
-    This package ships `tsc6`, not `tsc`.
+    This package ships `tsc6`, not `tsc`. (`typescript-eslint` used to be the
+    other consumer here — it hard-threw on TS 7 by parsing with
+    `ts.createSourceFile` — but S1 replaced ESLint with oxlint, which is a
+    native Rust linter with no dependency on the `typescript` npm package, so
+    that constraint is gone. The alias stays for the two AST-walking tests
+    above; removing it is S2's job, not this one's.)
   - `typescript-native` → `npm:typescript@7.0.2`, which owns the `tsc` binary.
     So plain `tsc` — i.e. `pnpm typecheck` — is the native compiler. Measured
     ~5x faster than TS 6 on this repo (≈29s → ≈6s across the three projects).
@@ -301,9 +305,9 @@ Do NOT include Co-Authored-By or similar Claude references in commit messages. U
     internally parallel and already runs at 300–430% CPU, so widening the
     workspace concurrency contends rather than helps.
 
-  Revisit when TS 7.1 restores the public API *and* typescript-eslint supports
-  it (tracking: typescript-eslint#10940) — then `typescript` can simply be 7 and
-  both the alias and the Next flag go away.
+  Revisit when TS 7.1 restores the public API the two AST-walking tests need
+  — then `typescript` can simply be 7 and both the alias and the Next flag go
+  away.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
