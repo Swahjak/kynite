@@ -8,8 +8,13 @@ import { calendar } from '@/server/db/schema';
 import { can, getFamily, getMember, type Principal } from '@/modules/family';
 import { publish } from '@/modules/realtime';
 import { addExdate, exdateLine } from './domain/ical';
-import { RECURRENCE_PRESETS, ruleForPreset, ruleForWeeklySelection } from './domain/presets';
-import { WEEKDAYS } from './domain/rrule';
+import {
+  RECURRENCE_PRESETS,
+  preservesExistingRule,
+  ruleForPreset,
+  ruleForWeeklySelection,
+} from './domain/presets';
+import { WEEKDAYS, type Weekday } from './domain/rrule';
 import { fromWall, parseDateKey } from './domain/zone';
 import { EVENT_TYPES, event } from './schema';
 import { pushToGoogle } from './sync-bridge';
@@ -525,4 +530,195 @@ export async function updateEventOccurrence(
   await pushToGoogle(childId);
 
   return { ok: true, eventId: existing.id, occurrenceEventId: childId };
+}
+
+/**
+ * Whichever field of {@link updateEvent}'s input is left `undefined` carries
+ * over from the existing row unchanged — same "patch, not replace" contract as
+ * {@link UpdateEventOccurrenceInput}. Unlike that occurrence override,
+ * `startsAt`/`endsAt` here move the *whole* event (or the whole series when
+ * it recurs) rather than splitting off a child row.
+ */
+export type UpdateEventInput = {
+  eventId: string;
+  title?: string;
+  description?: string | null;
+  location?: string | null;
+  /** ISO instant. */
+  startsAt?: string;
+  /** ISO instant. */
+  endsAt?: string;
+  allDay?: boolean;
+  ownerMemberId?: string | null;
+  attendeeMemberIds?: string[];
+  eventType?: (typeof EVENT_TYPES)[number];
+  calendarId?: string | null;
+  recurrence?: (typeof RECURRENCE_PRESETS)[number];
+  byweekday?: Weekday[];
+};
+
+export type UpdateEventResult = { ok: true; eventId: string } | { ok: false; error: string };
+
+/**
+ * Move/edit the whole event — a one-off event outright, or every occurrence
+ * of a recurring series at once (the MCP tool behind this,
+ * `update_event`, is what a host reaches for when `update_event_occurrence`
+ * doesn't apply because the event isn't recurring, or the host wants the
+ * change to land on the whole series rather than one instance).
+ *
+ * Deliberately does not special-case a Google-synced event: neither does
+ * `updateEventAction`'s pre-M-F whole-series branch this replaces — the app
+ * lets a parent edit a Google-linked event and pushes the change back
+ * (`pushToGoogle`), same passthrough stance as `updateEventOccurrence`. A
+ * caller that wants to refuse Google-synced events (the `update_event` MCP
+ * tool does) checks that itself before reaching this seam.
+ */
+export async function updateEvent(
+  principal: Principal,
+  input: UpdateEventInput
+): Promise<UpdateEventResult> {
+  if (!can(principal, 'event:write', { familyId: principal.familyId })) {
+    return { ok: false, error: 'forbidden' };
+  }
+
+  const db = getDb();
+  const [existing] = await db
+    .select()
+    .from(event)
+    .where(and(eq(event.id, input.eventId), eq(event.familyId, principal.familyId)))
+    .limit(1);
+
+  if (!existing || existing.deletedAt) return { ok: false, error: 'eventNotFound' };
+
+  const title = input.title !== undefined ? input.title.trim() : existing.title;
+  if (title.length === 0) return { ok: false, error: 'invalidInput' };
+
+  const allDay = input.allDay ?? existing.allDay;
+
+  const startsAt = input.startsAt !== undefined ? new Date(input.startsAt) : existing.startsAt;
+  if (Number.isNaN(startsAt.getTime())) return { ok: false, error: 'invalidInput' };
+  const endsAt = input.endsAt !== undefined ? new Date(input.endsAt) : existing.endsAt;
+  if (Number.isNaN(endsAt.getTime())) return { ok: false, error: 'invalidInput' };
+  if (endsAt.getTime() < startsAt.getTime()) return { ok: false, error: 'endBeforeStart' };
+
+  let calendarId = existing.calendarId;
+  if (input.calendarId !== undefined) {
+    if (input.calendarId === null) {
+      calendarId = null;
+    } else {
+      const [row] = await db
+        .select({ id: calendar.id, writable: calendar.writable })
+        .from(calendar)
+        .where(and(eq(calendar.id, input.calendarId), eq(calendar.familyId, principal.familyId)))
+        .limit(1);
+      if (!row) return { ok: false, error: 'calendarNotFound' };
+      if (!row.writable) return { ok: false, error: 'calendarReadOnly' };
+      calendarId = row.id;
+    }
+  }
+
+  let ownerMemberId = existing.ownerMemberId;
+  if (input.ownerMemberId !== undefined) {
+    if (input.ownerMemberId === null) {
+      ownerMemberId = null;
+    } else {
+      if (!(await getMember(principal.familyId, input.ownerMemberId))) {
+        return { ok: false, error: 'memberNotFound' };
+      }
+      ownerMemberId = input.ownerMemberId;
+    }
+  }
+
+  let attendeeMemberIds = existing.attendeeMemberIds;
+  if (input.attendeeMemberIds !== undefined) {
+    for (const id of input.attendeeMemberIds) {
+      if (!(await getMember(principal.familyId, id))) {
+        return { ok: false, error: 'memberNotFound' };
+      }
+    }
+    attendeeMemberIds = input.attendeeMemberIds;
+  }
+
+  const family = await getFamily(principal.familyId);
+  const tz = family?.timezone ?? 'Europe/Amsterdam';
+
+  let rrule = existing.rrule;
+  if (input.recurrence !== undefined) {
+    rrule = preservesExistingRule(input.recurrence)
+      ? existing.rrule
+      : input.recurrence === 'weekly'
+        ? ruleForWeeklySelection(input.byweekday, startsAt, tz)
+        : ruleForPreset(input.recurrence);
+  }
+
+  await db
+    .update(event)
+    .set({
+      title,
+      description:
+        input.description !== undefined ? input.description || null : existing.description,
+      location: input.location !== undefined ? input.location || null : existing.location,
+      startsAt,
+      endsAt,
+      allDay,
+      tz,
+      ownerMemberId,
+      attendeeMemberIds,
+      eventType: input.eventType ?? existing.eventType,
+      calendarId,
+      rrule,
+      version: sql`${event.version} + 1`,
+      updatedAt: new Date(),
+    })
+    .where(and(eq(event.id, existing.id), eq(event.familyId, principal.familyId)));
+
+  await publishEvent(principal, 'event.upserted', [existing.id]);
+  await pushToGoogle(existing.id);
+
+  return { ok: true, eventId: existing.id };
+}
+
+export type DeleteEventResult = { ok: true } | { ok: false; error: string };
+
+/**
+ * Delete the whole event — a one-off event outright, or an entire recurring
+ * series (every occurrence, past and future). For a single occurrence of a
+ * series, use {@link skipEventOccurrence} instead; this seam always soft-
+ * deletes the row itself, same mechanics as `deleteEventAction`'s whole-
+ * series branch.
+ *
+ * Same Google-sync stance as {@link updateEvent}: this seam does not refuse a
+ * linked event — `deleteEventAction`'s whole-series branch never has either.
+ * The `delete_event` MCP tool checks that itself before reaching this seam.
+ */
+export async function deleteEvent(
+  principal: Principal,
+  eventId: string
+): Promise<DeleteEventResult> {
+  if (!can(principal, 'event:write', { familyId: principal.familyId })) {
+    return { ok: false, error: 'forbidden' };
+  }
+
+  const db = getDb();
+  const [existing] = await db
+    .select()
+    .from(event)
+    .where(and(eq(event.id, eventId), eq(event.familyId, principal.familyId)))
+    .limit(1);
+
+  if (!existing) return { ok: false, error: 'eventNotFound' };
+
+  await db
+    .update(event)
+    .set({
+      deletedAt: new Date(),
+      version: sql`${event.version} + 1`,
+      updatedAt: new Date(),
+    })
+    .where(and(eq(event.id, existing.id), eq(event.familyId, principal.familyId)));
+
+  await publishEvent(principal, 'event.deleted', [existing.id]);
+  await pushToGoogle(existing.id);
+
+  return { ok: true };
 }

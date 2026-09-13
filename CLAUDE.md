@@ -180,8 +180,9 @@ separate server, see `docs/adr/20260903-mcp-server.md` for why.
   `registerTools()` just calls all six against a fresh `McpServer` per request (the verified
   principal/scopes are closures, not read off `ctx.http.authInfo`). Shared helpers (`ok`,
   `toolError`, the `McpToolServer` type) live in `tools/shared.ts`. One tool list per domain,
-  verified against the registrars: calendar 5 (`list_calendars`, `list_events`,
-  `create_event`, `skip_event_occurrence`, `update_event_occurrence`), tasks 5 (`list_tasks`,
+  verified against the registrars: calendar 7 (`list_calendars`, `list_events`,
+  `create_event`, `skip_event_occurrence`, `update_event_occurrence`, `update_event`,
+  `delete_event`), tasks 5 (`list_tasks`,
   `get_task`, `create_task`, `toggle_task`, `delete_task`), routines 9 (`list_routines`,
   `get_routine`, `create_routine`, `update_routine`, `delete_routine`, `set_routine_active`,
   `set_routine_reward`, `complete_step`, `undo_completion`), timers 7 (`list_timers`,
@@ -190,7 +191,14 @@ separate server, see `docs/adr/20260903-mcp-server.md` for why.
   `list_star_history`, `create_reward`, `update_reward`, `delete_reward`, `award_stars`,
   `request_redemption`, `decide_redemption`, `fulfill_redemption`), family 7 (`list_members`,
   `get_family`, `get_member`, `create_member`, `update_member`, `delete_member`,
-  `update_family`).
+  `update_family`). `update_event`/`delete_event` move/edit/delete a whole event or series
+  (`modules/calendar/write.ts`'s `updateEvent`/`deleteEvent`, extracted from
+  `updateEventAction`'s/`deleteEventAction`'s whole-series branches) — distinct from
+  `update_event_occurrence`/`skip_event_occurrence`, which touch one occurrence of a
+  recurring series and pass a Google-synced series through unchanged. The whole-event tools
+  refuse a Google-linked event outright (`googleEventId` set) instead: that check lives in
+  `tools/calendar.ts`'s `googleSyncCheck`, not the shared seam, since the web app itself still
+  edits/deletes a Google-linked event and pushes the change back — the refusal is MCP-only.
 - **Scopes**: one read/write pair per domain — `kynite:calendar.read`/`.write`,
   `kynite:tasks.read`/`.write`, `kynite:routines.read`/`.write`, `kynite:timers.read`/`.write`,
   `kynite:rewards.read`/`.write`, `kynite:family.read`/`.write` — 12 scopes in total, declared

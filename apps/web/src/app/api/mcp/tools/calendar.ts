@@ -8,11 +8,15 @@ import {
   RECURRENCE_PRESETS,
   WEEKDAYS,
   createEvent,
+  deleteEvent,
   EVENT_TYPES,
+  getEvent,
   listEvents,
   skipEventOccurrence,
+  updateEvent,
   updateEventOccurrence,
   type CreateEventInput,
+  type UpdateEventInput,
   type UpdateEventOccurrenceInput,
 } from '@/modules/calendar';
 import { type Calendar, listFamilyCalendars } from '@/modules/google';
@@ -50,6 +54,32 @@ async function nativeCalendarCheck(
     };
   }
 
+  return { ok: true };
+}
+
+/**
+ * Whether `eventId` names an event this MCP tool may move/edit/delete as a
+ * whole. Unlike `skip_event_occurrence`/`update_event_occurrence` — which
+ * treat a Google-authored series as a passthrough, same as the app itself —
+ * a *whole-event* move/edit/delete from an MCP host is refused outright when
+ * the event is linked to Google (`googleEventId` set): overwriting or
+ * deleting the row locally would fight the next poll from Google, which owns
+ * that event's identity. This is an MCP-only restriction the web app does
+ * not have (it edits/deletes a Google-linked event and pushes the change
+ * back), so the check lives here rather than in the shared `write.ts` seam.
+ */
+async function googleSyncCheck(
+  familyId: string,
+  eventId: string
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const existing = await getEvent(familyId, eventId);
+  if (existing?.googleEventId) {
+    return {
+      ok: false,
+      error:
+        'googleSynced: this event is synced from Google Calendar — change it in Google Calendar',
+    };
+  }
   return { ok: true };
 }
 
@@ -189,7 +219,8 @@ export function registerCalendarTools(
         '`key` such as "d4526712-...:2026-09-07T06:20:00.000Z": the id is the part before ' +
         'the first ":", the occurrence start is the ISO datetime after it. Works on any ' +
         'series the family can edit, including one synced from Google — Google sync is a ' +
-        'passthrough, not a restriction here.',
+        'passthrough, not a restriction here. For a one-off event, or to delete the whole ' +
+        'series, use `delete_event`.',
       inputSchema: z.object({
         eventId: z.uuid(),
         occurrenceStart: z.iso.datetime({ offset: true }),
@@ -221,7 +252,8 @@ export function registerCalendarTools(
         'startsAt/endsAt/title/location/description can be changed this way — anything else ' +
         'is carried over from the series (owner, attendees, type, calendar, all-day-ness); ' +
         'use the app to change those on a single occurrence. Works on a series synced from ' +
-        'Google too, same as `skip_event_occurrence`.',
+        'Google too, same as `skip_event_occurrence`. For a one-off event, or to move/edit ' +
+        'the whole series, use `update_event`.',
       inputSchema: z.object({
         eventId: z.uuid(),
         occurrenceStart: z.iso.datetime({ offset: true }),
@@ -243,6 +275,80 @@ export function registerCalendarTools(
       const result = await updateEventOccurrence(principal, input as UpdateEventOccurrenceInput);
       if (!result.ok) return toolError(result.error);
       return ok({ eventId: result.eventId, occurrenceEventId: result.occurrenceEventId });
+    }
+  );
+
+  server.registerTool(
+    'update_event',
+    {
+      title: 'Move or edit an event',
+      description:
+        'Move or edit a whole event — a one-off event, or every occurrence of a recurring ' +
+        'series at once. Every field but `eventId` is optional: only the fields given are ' +
+        'changed, everything else is left as it is. For one occurrence of a recurring ' +
+        'series, use `update_event_occurrence` instead. Refuses an event synced from Google ' +
+        'Calendar — change that one in Google Calendar.',
+      inputSchema: z.object({
+        eventId: z.uuid(),
+        title: z.string().min(1).max(200).optional(),
+        description: z.string().max(4000).nullable().optional(),
+        location: z.string().max(400).nullable().optional(),
+        startsAt: z.iso.datetime({ offset: true }).optional(),
+        endsAt: z.iso.datetime({ offset: true }).optional(),
+        allDay: z.boolean().optional(),
+        ownerMemberId: z.uuid().nullable().optional(),
+        attendeeMemberIds: z.array(z.uuid()).max(50).optional(),
+        eventType: z.enum(EVENT_TYPES).optional(),
+        calendarId: z.uuid().nullable().optional(),
+        recurrence: z.enum(RECURRENCE_PRESETS).optional(),
+        byweekday: z.array(z.enum(WEEKDAYS)).min(1).max(7).optional(),
+      }),
+    },
+    async (input) => {
+      if (!hasAllScopes(grantedScopes, [MCP_CALENDAR_WRITE])) {
+        return toolError('insufficientScope: requires kynite:calendar.write');
+      }
+      if (!can(principal, 'event:write', { familyId: principal.familyId })) {
+        return toolError('forbidden');
+      }
+
+      const { eventId } = input as UpdateEventInput;
+      const syncCheck = await googleSyncCheck(principal.familyId, eventId);
+      if (!syncCheck.ok) return toolError(syncCheck.error);
+
+      const result = await updateEvent(principal, input as UpdateEventInput);
+      if (!result.ok) return toolError(result.error);
+      return ok({ eventId: result.eventId });
+    }
+  );
+
+  server.registerTool(
+    'delete_event',
+    {
+      title: 'Delete an event',
+      description:
+        'Delete a whole event — a one-off event, or an entire recurring series (every ' +
+        'occurrence, past and future). For a single occurrence of a recurring event, use ' +
+        '`skip_event_occurrence` instead. Refuses an event synced from Google Calendar — ' +
+        'change that one in Google Calendar.',
+      inputSchema: z.object({
+        eventId: z.uuid(),
+      }),
+    },
+    async ({ eventId }) => {
+      if (!hasAllScopes(grantedScopes, [MCP_CALENDAR_WRITE])) {
+        return toolError('insufficientScope: requires kynite:calendar.write');
+      }
+      if (!can(principal, 'event:write', { familyId: principal.familyId })) {
+        return toolError('forbidden');
+      }
+
+      const syncCheck = await googleSyncCheck(principal.familyId, eventId);
+      if (!syncCheck.ok) return toolError(syncCheck.error);
+
+      const result = await deleteEvent(principal, eventId);
+      if (!result.ok) return toolError(result.error);
+      return ok({ deleted: true });
     }
   );
 }

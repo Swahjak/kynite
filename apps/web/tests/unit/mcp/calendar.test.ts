@@ -12,24 +12,35 @@ import type { McpToolServer } from '@/app/api/mcp/tools/shared';
 
 const listFamilyCalendars = vi.hoisted(() => vi.fn());
 
+const seams = vi.hoisted(() => ({
+  createEvent: vi.fn(),
+  listEvents: vi.fn(),
+  getEvent: vi.fn(),
+  skipEventOccurrence: vi.fn(),
+  updateEvent: vi.fn(),
+  updateEventOccurrence: vi.fn(),
+  deleteEvent: vi.fn(),
+}));
+
+const can = vi.hoisted(() => vi.fn());
+
 vi.mock('@/modules/google', () => ({ listFamilyCalendars }));
 vi.mock('@/modules/calendar', () => ({
   EVENT_TYPES: ['appointment'] as const,
   RECURRENCE_PRESETS: ['none'] as const,
   WEEKDAYS: ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'] as const,
-  createEvent: vi.fn(),
-  listEvents: vi.fn(),
-  skipEventOccurrence: vi.fn(),
-  updateEventOccurrence: vi.fn(),
+  ...seams,
 }));
-vi.mock('@/modules/family', () => ({ can: vi.fn(), decide: vi.fn() }));
+vi.mock('@/modules/family', () => ({ can, decide: vi.fn() }));
 vi.mock('@/server/db', () => ({ getDb: vi.fn() }));
 
 const { registerCalendarTools } = await import('@/app/api/mcp/tools/calendar');
 
 const FAMILY_ID = '11111111-1111-4111-8111-111111111111';
 const CALENDAR_ID = '55555555-5555-4555-8555-555555555555';
+const EVENT_ID = '77777777-7777-4777-8777-777777777777';
 const READ = 'kynite:calendar.read';
+const WRITE = 'kynite:calendar.write';
 
 const principal = {
   kind: 'member',
@@ -63,12 +74,14 @@ beforeEach(() => {
 });
 
 describe('tool registration', () => {
-  it('registers every calendar tool the pre-split route.ts had', () => {
+  it('registers every calendar tool', () => {
     expect([...register([READ]).keys()].sort()).toEqual([
       'create_event',
+      'delete_event',
       'list_calendars',
       'list_events',
       'skip_event_occurrence',
+      'update_event',
       'update_event_occurrence',
     ]);
   });
@@ -117,5 +130,130 @@ describe('list_calendars', () => {
         visibility: 'busy',
       },
     ]);
+  });
+});
+
+/**
+ * `update_event` and `delete_event` (the "whole event/whole series" tools,
+ * distinct from the occurrence-scoped `update_event_occurrence` /
+ * `skip_event_occurrence` above) share the same ladder: scope, then
+ * `can('event:write')`, then a Google-sync check via `getEvent`, then the
+ * seam. Unlike the occurrence tools, a Google-linked event is refused
+ * outright rather than passed through — an MCP-only restriction layered in
+ * `calendar.ts` itself (`googleSyncCheck`), not in the shared write seam.
+ */
+describe('update_event', () => {
+  it('refuses a token without kynite:calendar.write', async () => {
+    const { isError, body } = await call([READ], 'update_event', { eventId: EVENT_ID });
+
+    expect(isError).toBe(true);
+    expect(body.error).toContain('insufficientScope');
+    expect(seams.updateEvent).not.toHaveBeenCalled();
+  });
+
+  it('refuses a member whose role cannot write events', async () => {
+    can.mockReturnValue(false);
+
+    const { isError, body } = await call([WRITE], 'update_event', { eventId: EVENT_ID });
+
+    expect(isError).toBe(true);
+    expect(body).toEqual({ error: 'forbidden' });
+    expect(can).toHaveBeenCalledWith(principal, 'event:write', { familyId: FAMILY_ID });
+    expect(seams.updateEvent).not.toHaveBeenCalled();
+  });
+
+  it('refuses an event synced from Google Calendar', async () => {
+    can.mockReturnValue(true);
+    seams.getEvent.mockResolvedValue({ id: EVENT_ID, googleEventId: 'g_evt_1' });
+
+    const { isError, body } = await call([WRITE], 'update_event', {
+      eventId: EVENT_ID,
+      title: 'Zwemles',
+    });
+
+    expect(isError).toBe(true);
+    expect(body.error).toContain('googleSynced');
+    expect(seams.getEvent).toHaveBeenCalledWith(FAMILY_ID, EVENT_ID);
+    expect(seams.updateEvent).not.toHaveBeenCalled();
+  });
+
+  it('passes the seam’s refusal through as a tool error', async () => {
+    can.mockReturnValue(true);
+    seams.getEvent.mockResolvedValue({ id: EVENT_ID, googleEventId: null });
+    seams.updateEvent.mockResolvedValue({ ok: false, error: 'eventNotFound' });
+
+    const { isError, body } = await call([WRITE], 'update_event', { eventId: EVENT_ID });
+
+    expect(isError).toBe(true);
+    expect(body).toEqual({ error: 'eventNotFound' });
+  });
+
+  it('moves/edits a native event through the seam', async () => {
+    can.mockReturnValue(true);
+    seams.getEvent.mockResolvedValue({ id: EVENT_ID, googleEventId: null });
+    seams.updateEvent.mockResolvedValue({ ok: true, eventId: EVENT_ID });
+
+    const input = { eventId: EVENT_ID, title: 'Zwemles', allDay: false };
+    const { isError, body } = await call([WRITE], 'update_event', input);
+
+    expect(isError).toBe(false);
+    expect(seams.updateEvent).toHaveBeenCalledWith(principal, input);
+    expect(body).toEqual({ eventId: EVENT_ID });
+  });
+});
+
+describe('delete_event', () => {
+  it('refuses a token without kynite:calendar.write', async () => {
+    const { isError, body } = await call([READ], 'delete_event', { eventId: EVENT_ID });
+
+    expect(isError).toBe(true);
+    expect(body.error).toContain('insufficientScope');
+    expect(seams.deleteEvent).not.toHaveBeenCalled();
+  });
+
+  it('refuses a member whose role cannot write events', async () => {
+    can.mockReturnValue(false);
+
+    const { isError, body } = await call([WRITE], 'delete_event', { eventId: EVENT_ID });
+
+    expect(isError).toBe(true);
+    expect(body).toEqual({ error: 'forbidden' });
+    expect(can).toHaveBeenCalledWith(principal, 'event:write', { familyId: FAMILY_ID });
+    expect(seams.deleteEvent).not.toHaveBeenCalled();
+  });
+
+  it('refuses an event synced from Google Calendar', async () => {
+    can.mockReturnValue(true);
+    seams.getEvent.mockResolvedValue({ id: EVENT_ID, googleEventId: 'g_evt_1' });
+
+    const { isError, body } = await call([WRITE], 'delete_event', { eventId: EVENT_ID });
+
+    expect(isError).toBe(true);
+    expect(body.error).toContain('googleSynced');
+    expect(seams.getEvent).toHaveBeenCalledWith(FAMILY_ID, EVENT_ID);
+    expect(seams.deleteEvent).not.toHaveBeenCalled();
+  });
+
+  it('passes the seam’s refusal through as a tool error', async () => {
+    can.mockReturnValue(true);
+    seams.getEvent.mockResolvedValue({ id: EVENT_ID, googleEventId: null });
+    seams.deleteEvent.mockResolvedValue({ ok: false, error: 'eventNotFound' });
+
+    const { isError, body } = await call([WRITE], 'delete_event', { eventId: EVENT_ID });
+
+    expect(isError).toBe(true);
+    expect(body).toEqual({ error: 'eventNotFound' });
+  });
+
+  it('deletes a native event through the seam', async () => {
+    can.mockReturnValue(true);
+    seams.getEvent.mockResolvedValue({ id: EVENT_ID, googleEventId: null });
+    seams.deleteEvent.mockResolvedValue({ ok: true });
+
+    const { isError, body } = await call([WRITE], 'delete_event', { eventId: EVENT_ID });
+
+    expect(isError).toBe(false);
+    expect(seams.deleteEvent).toHaveBeenCalledWith(principal, EVENT_ID);
+    expect(body).toEqual({ deleted: true });
   });
 });

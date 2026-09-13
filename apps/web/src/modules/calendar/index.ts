@@ -129,13 +129,18 @@ export { pushToGoogle } from './sync-bridge';
 
 export {
   createEvent,
+  deleteEvent,
   eventSchema,
   skipEventOccurrence,
+  updateEvent,
   updateEventOccurrence,
   type CreateEventInput,
   type CreateEventResult,
+  type DeleteEventResult,
   type SkipEventOccurrenceInput,
   type SkipEventOccurrenceResult,
+  type UpdateEventInput,
+  type UpdateEventResult,
   type UpdateEventOccurrenceInput,
   type UpdateEventOccurrenceResult,
 } from './write';

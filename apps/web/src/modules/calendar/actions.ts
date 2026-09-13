@@ -14,15 +14,16 @@ import { CALENDAR_VISIBILITIES, calendar } from '@/server/db/schema';
 import { assertCan, type Principal } from '@/modules/family';
 import { publish } from '@/modules/realtime';
 import { actionFailure as failure, idleState, type ActionState } from './action-state';
-import { preservesExistingRule } from './domain/presets';
 import { addExdate, exdateLine } from './domain/ical';
 import { EVENT_TYPES, event } from './schema';
 import { pushToGoogle } from './sync-bridge';
 import {
   createEvent,
+  deleteEvent,
   eventInputFromForm,
   resolveInput,
   skipEventOccurrence,
+  updateEvent,
   updateEventOccurrence,
 } from './write';
 
@@ -177,22 +178,28 @@ export async function updateEventAction(
     return idleState;
   }
 
-  await db
-    .update(event)
-    .set({
-      ...input.resolved.values,
-      // An imported rule we did not author (`custom`) is preserved verbatim:
-      // the dialog cannot represent it, so it must not get to overwrite it.
-      // Same reasoning as M05's verbatim storage — a rule we cannot round-trip
-      // is a rule we must not touch.
-      ...(preservesExistingRule(input.resolved.recurrence) ? { rrule: existing.rrule } : {}),
-      version: sql`${event.version} + 1`,
-      updatedAt: new Date(),
-    })
-    .where(and(eq(event.id, eventId), eq(event.familyId, principal.familyId)));
+  // Whole-event/whole-series edit: `./write.ts`'s `updateEvent` is the write
+  // seam (MCP `update_event`'s sibling here) — an imported rule we did not
+  // author (`custom`) is preserved verbatim inside that seam, same reasoning
+  // as M05's verbatim storage: a rule we cannot round-trip is a rule we must
+  // not touch.
+  const result = await updateEvent(principal, {
+    eventId,
+    title: input.resolved.values.title,
+    description: input.resolved.values.description,
+    location: input.resolved.values.location,
+    startsAt: input.resolved.values.startsAt.toISOString(),
+    endsAt: input.resolved.values.endsAt.toISOString(),
+    allDay: input.resolved.values.allDay,
+    ownerMemberId: input.resolved.values.ownerMemberId,
+    attendeeMemberIds: input.resolved.values.attendeeMemberIds,
+    eventType: input.resolved.values.eventType,
+    calendarId: input.resolved.values.calendarId,
+    recurrence: parsedForm.data.recurrence,
+    byweekday: parsedForm.data.byweekday,
+  });
+  if (!result.ok) return failure(result.error);
 
-  await publishEvent(principal, 'event.upserted', [eventId]);
-  await pushToGoogle(eventId);
   await revalidateCalendar();
   return idleState;
 }
@@ -234,19 +241,13 @@ export async function deleteEventAction(
     return idleState;
   }
 
-  // Soft delete: the row stays so the sync engine can echo the tombstone and
-  // so a remote resurrection has something to un-delete (§3).
-  await db
-    .update(event)
-    .set({
-      deletedAt: new Date(),
-      version: sql`${event.version} + 1`,
-      updatedAt: new Date(),
-    })
-    .where(and(eq(event.id, eventId), eq(event.familyId, principal.familyId)));
+  // Whole-event/whole-series delete: `./write.ts`'s `deleteEvent` is the
+  // write seam (MCP `delete_event`'s sibling here) — a soft delete, so the
+  // row stays for the sync engine to echo the tombstone and for a remote
+  // resurrection to have something to un-delete (§3).
+  const result = await deleteEvent(principal, eventId);
+  if (!result.ok) return failure(result.error);
 
-  await publishEvent(principal, 'event.deleted', [eventId]);
-  await pushToGoogle(eventId);
   await revalidateCalendar();
   return idleState;
 }
