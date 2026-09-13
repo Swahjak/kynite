@@ -7,7 +7,7 @@
   "engines": {
     "node": ">=24"
   },
-  "//": "Every app script below is a thin proxy onto `apps/web` so the commands documented in CLAUDE.md keep working from the repo root. `format`/`format:check` are the exception: prettier runs at the root because it also owns README.md, docs config and the workspace manifests, which no package can see.",
+  "//": "Every app script below is a thin proxy onto `apps/web` so the commands documented in CLAUDE.md keep working from the repo root. `format`/`format:check` are the exception: oxfmt runs at the root because it also owns README.md, docs config and the workspace manifests, which no package can see.",
   "scripts": {
     "dev": "pnpm --filter web dev",
     "build": "pnpm --filter web build",
@@ -16,8 +16,8 @@
     "typecheck": "pnpm -r --workspace-concurrency=1 typecheck",
     "lint": "pnpm -r --workspace-concurrency=1 lint",
     "lint:fix": "pnpm -r --workspace-concurrency=1 lint:fix",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
     "test": "pnpm --filter web test",
     "test:run": "pnpm --filter web test:run",
     "test:coverage": "pnpm --filter web test:coverage",
@@ -60,7 +60,7 @@
   "//lint-staged": "Root-level files only. Files under `apps/web` are matched to that package's own `lint-staged` block (lint-staged picks the config closest to each staged file and runs it from that directory), which is where eslint.config.mjs lives.",
   "lint-staged": {
     "*.{json,md,css,yml,yaml,mjs,cjs,js}": [
-      "prettier --write"
+      "oxfmt"
     ]
   },
   "devDependencies": {
@@ -68,6 +68,6 @@
     "@commitlint/config-conventional": "21.2.2",
     "husky": "9.1.7",
     "lint-staged": "17.5.1",
-    "prettier": "3.9.6"
+    "oxfmt": "0.67.0"
   }
 }

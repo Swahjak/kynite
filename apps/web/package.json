@@ -13,8 +13,8 @@
     "typecheck": "tsc --noEmit && tsc -p tsconfig.sw.json --noEmit",
     "lint": "oxlint .",
     "lint:fix": "oxlint . --fix",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "format": "oxfmt .",
+    "format:check": "oxfmt --check .",
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
@@ -47,10 +47,10 @@
   "lint-staged": {
     "*.{ts,tsx,mjs,cjs,js,jsx}": [
       "oxlint --fix",
-      "prettier --write"
+      "oxfmt"
     ],
     "*.{json,md,css,yml,yaml}": [
-      "prettier --write"
+      "oxfmt"
     ]
   },
   "dependencies": {
@@ -104,8 +104,8 @@
     "drizzle-kit": "0.31.10",
     "esbuild": "^0.28.2",
     "jsdom": "^30.0.1",
+    "oxfmt": "0.67.0",
     "oxlint": "^1.82.0",
-    "prettier": "3.9.6",
     "shadcn": "4.21.0",
     "subset-font": "^2.7.0",
     "tailwindcss": "4.3.3",

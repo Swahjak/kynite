@@ -11,7 +11,7 @@ Family Planner is a Next.js 16 application designed as a family organizational h
 This is a pnpm workspace: the Next.js app lives in `apps/web` (all of `src/`,
 `tests/`, `e2e/`, `drizzle/`, `scripts/` and the app-level config), `packages/`
 is an empty scaffold for the future design-system package, and the root holds
-only workspace tooling (husky, commitlint, lint-staged, prettier, Dockerfile,
+only workspace tooling (husky, commitlint, lint-staged, oxfmt, Dockerfile,
 `.github`, `docs`). Every command below still runs **from the repo root** —
 the root scripts proxy to `pnpm --filter web <script>`.
 
@@ -22,7 +22,7 @@ pnpm build            # Production build (runs migrations first)
 pnpm typecheck        # TypeScript type checking
 pnpm lint             # Run ESLint
 pnpm lint:fix         # Fix linting issues
-pnpm format           # Format with Prettier
+pnpm format           # Format with oxfmt
 pnpm format:check     # Check formatting
 
 # Unit Tests (Vitest)
@@ -261,7 +261,7 @@ BETTER_AUTH_URL=http://localhost:3000  # Also used for Google Calendar webhooks
 
 ## Code Quality
 
-- oxlint with Next.js and Prettier integration
+- oxlint with Next.js integration, oxfmt for formatting
 - Husky pre-commit hooks run lint-staged
 - Commitlint enforces conventional commits (feat:, fix:, etc.)
 - TypeScript strict mode enabled
