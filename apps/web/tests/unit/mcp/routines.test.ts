@@ -128,6 +128,19 @@ beforeEach(() => {
   can.mockReturnValue(true);
 });
 
+/** One tool's declared zod input schema, for the star-rate assertions below. */
+function schemaOf(name: string) {
+  const tool = register([READ, WRITE]).get(name);
+  if (!tool) throw new Error(`tool not registered: ${name}`);
+  return (
+    tool.config as {
+      inputSchema: {
+        safeParse: (input: unknown) => { success: boolean; data?: { starsPerCompletion?: number } };
+      };
+    }
+  ).inputSchema;
+}
+
 describe('tool registration', () => {
   it('registers every routines tool', () => {
     expect([...register([READ, WRITE]).keys()].sort()).toEqual(
@@ -396,5 +409,51 @@ describe('undo_completion', () => {
 
     expect(isError).toBe(true);
     expect(body).toEqual({ error: 'completionNotFound' });
+  });
+});
+
+/**
+ * The MCP layer caps the star rate at 5 where the seam still allows 0-20: the
+ * app's own routine editor keeps the wider range, but a host that quietly
+ * raises the rate is the failure mode this layer exists for. And because stars
+ * pay per *step*, the rate a host omits must land on 1, not on nothing.
+ */
+describe('starsPerCompletion', () => {
+  const { starsPerCompletion: _omitted, ...WITHOUT_RATE } = ROUTINE_BODY;
+
+  it('defaults to 1 when create_routine omits it', () => {
+    const parsed = schemaOf('create_routine').safeParse(WITHOUT_RATE);
+
+    expect(parsed.success).toBe(true);
+    expect(parsed.data?.starsPerCompletion).toBe(1);
+  });
+
+  it('accepts a rate inside the cap', () => {
+    expect(
+      schemaOf('create_routine').safeParse({ ...WITHOUT_RATE, starsPerCompletion: 5 }).success
+    ).toBe(true);
+  });
+
+  it('refuses a rate above 5', () => {
+    expect(
+      schemaOf('create_routine').safeParse({ ...WITHOUT_RATE, starsPerCompletion: 6 }).success
+    ).toBe(false);
+  });
+
+  it('allows 0 — the routine a child already enjoys', () => {
+    expect(
+      schemaOf('create_routine').safeParse({ ...WITHOUT_RATE, starsPerCompletion: 0 }).success
+    ).toBe(true);
+  });
+
+  it('applies the same cap to update_routine', () => {
+    const body = { ...WITHOUT_RATE, routineId: ROUTINE_ID };
+
+    expect(schemaOf('update_routine').safeParse({ ...body, starsPerCompletion: 6 }).success).toBe(
+      false
+    );
+    expect(schemaOf('update_routine').safeParse({ ...body, starsPerCompletion: 5 }).success).toBe(
+      true
+    );
   });
 });

@@ -11,6 +11,7 @@ import {
 import { type Principal } from '@/modules/family';
 import { registerCalendarTools } from './tools/calendar';
 import { registerFamilyTools } from './tools/family';
+import { KYNITE_MCP_INSTRUCTIONS } from './tools/instructions';
 import { registerRewardsTools } from './tools/rewards';
 import { registerRoutinesTools } from './tools/routines';
 import { registerTasksTools } from './tools/tasks';
@@ -175,7 +176,14 @@ function getHandleMcpRequest(): McpRequestHandler {
 
       const mcpHandler = createMcpHandler(
         (server) => registerTools(server, principal, grantedScopes),
-        { serverInfo: { name: 'kynite', version: '1.0.0' } }
+        {
+          serverInfo: { name: 'kynite', version: '1.0.0' },
+          // Sent on `initialize`, before the host has seen a single tool: the
+          // star economy's rules (per-step payout, never a deduction, praise
+          // before star, ask the parent) are product decisions a host cannot
+          // infer from tool names. See `./tools/instructions.ts`.
+          instructions: KYNITE_MCP_INSTRUCTIONS,
+        }
       );
 
       return withMcpHeaders(await mcpHandler(request));

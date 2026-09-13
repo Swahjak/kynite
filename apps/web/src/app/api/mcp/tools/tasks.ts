@@ -58,7 +58,7 @@ export function registerTasksTools(
     {
       title: 'List tasks',
       description:
-        'List this family’s tasks for a day: open and undated, open and due that day or earlier, and completed that day. Defaults to today in the family’s own timezone.',
+        'List this family’s tasks for a day: open and undated, open and due that day or earlier, and completed that day. Defaults to today in the family’s own timezone; an overdue task is simply still open, never a failure to report.',
       inputSchema: z.object({
         date: z
           .string()
@@ -108,7 +108,8 @@ export function registerTasksTools(
     'create_task',
     {
       title: 'Create a task',
-      description: 'Create a one-off family task, optionally assigned to a member with a due date.',
+      description:
+        'Create a one-off family task, optionally assigned to a member with a due date. Tasks pay no stars — use a routine when a child should earn for repeated, tedious effort.',
       inputSchema: z.object({
         title: z.string().min(1).max(200),
         assigneeMemberId: z.uuid().nullable().optional(),
@@ -134,7 +135,7 @@ export function registerTasksTools(
     {
       title: 'Tick a task off, or take it back',
       description:
-        'Set a task’s done state to a target value (never a flip), so a replayed call is a no-op.',
+        'Set a task’s done state to a target value (never a flip), so a replayed call is a no-op. On completion, reply with specific praise for what was done — tasks carry no star, so the praise is the whole reward.',
       inputSchema: z.object({ taskId: z.uuid(), completed: z.boolean() }),
     },
     async (input) => {
@@ -151,7 +152,8 @@ export function registerTasksTools(
     'delete_task',
     {
       title: 'Delete a task',
-      description: 'Delete a task outright.',
+      description:
+        'Delete a task outright. Deleting is not a consequence: an unfinished task should be left open or rescheduled, never removed to mark a miss.',
       inputSchema: z.object({ taskId: z.uuid() }),
     },
     async (input) => {

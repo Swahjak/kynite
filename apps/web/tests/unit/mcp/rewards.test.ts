@@ -17,6 +17,7 @@ const seams = vi.hoisted(() => ({
   listRedemptions: vi.fn(),
   getStarTotals: vi.fn(),
   listStarTotals: vi.fn(),
+  listStarsEarnedSince: vi.fn(),
   listStarHistory: vi.fn(),
   createReward: vi.fn(),
   updateReward: vi.fn(),
@@ -116,7 +117,16 @@ const REDEMPTION_ROW = {
 beforeEach(() => {
   vi.clearAllMocks();
   can.mockReturnValue(true);
+  seams.listStarsEarnedSince.mockResolvedValue(new Map());
 });
+
+/** One tool's declared zod input schema, for the cap assertions below. */
+function schemaOf(name: string) {
+  const tool = register([READ, WRITE]).get(name);
+  if (!tool) throw new Error(`tool not registered: ${name}`);
+  return (tool.config as { inputSchema: { safeParse: (input: unknown) => { success: boolean } } })
+    .inputSchema;
+}
 
 describe('tool registration', () => {
   it('registers every rewards tool', () => {
@@ -263,7 +273,13 @@ describe('get_star_totals', () => {
     expect(isError).toBe(false);
     expect(seams.getStarTotals).toHaveBeenCalledWith(FAMILY_ID, MEMBER_ID);
     expect(seams.listStarTotals).not.toHaveBeenCalled();
-    expect(body).toEqual({ earned: 10, spent: 5, available: 5 });
+    expect(body).toEqual({
+      earned: 10,
+      spent: 5,
+      available: 5,
+      earnedLast7Days: 0,
+      avgPerDay: 0,
+    });
   });
 
   it('returns the whole family’s totals when memberId is omitted', async () => {
@@ -276,7 +292,35 @@ describe('get_star_totals', () => {
     expect(isError).toBe(false);
     expect(seams.listStarTotals).toHaveBeenCalledWith(FAMILY_ID);
     expect(seams.getStarTotals).not.toHaveBeenCalled();
-    expect(body).toEqual({ [MEMBER_ID]: { earned: 10, spent: 5, available: 5 } });
+    expect(body).toEqual({
+      [MEMBER_ID]: { earned: 10, spent: 5, available: 5, earnedLast7Days: 0, avgPerDay: 0 },
+    });
+  });
+
+  it('reports the 7-day earning window a reward should be priced against', async () => {
+    seams.getStarTotals.mockResolvedValue({ earned: 100, spent: 20, available: 80 });
+    seams.listStarsEarnedSince.mockResolvedValue(new Map([[MEMBER_ID, 70]]));
+
+    const { isError, body } = await call([READ], 'get_star_totals', { memberId: MEMBER_ID });
+
+    expect(isError).toBe(false);
+    expect(body.earnedLast7Days).toBe(70);
+    expect(body.avgPerDay).toBe(10);
+
+    const [args] = seams.listStarsEarnedSince.mock.calls[0] as [{ familyId: string; since: Date }];
+    expect(args.familyId).toBe(FAMILY_ID);
+    const windowDays = (Date.now() - args.since.getTime()) / 86_400_000;
+    expect(windowDays).toBeGreaterThan(6.9);
+    expect(windowDays).toBeLessThan(7.1);
+  });
+
+  it('rounds avgPerDay to one decimal', async () => {
+    seams.getStarTotals.mockResolvedValue({ earned: 5, spent: 0, available: 5 });
+    seams.listStarsEarnedSince.mockResolvedValue(new Map([[MEMBER_ID, 5]]));
+
+    const { body } = await call([READ], 'get_star_totals', { memberId: MEMBER_ID });
+
+    expect(body.avgPerDay).toBe(0.7);
   });
 });
 
@@ -619,5 +663,49 @@ describe('fulfill_redemption', () => {
       redemptionId: REDEMPTION_ID,
     });
     expect(body).toEqual({ fulfilled: true });
+  });
+});
+
+/**
+ * The MCP layer's own price band, narrower than the seam's. The app's store
+ * editor still accepts the wider range; what is capped here is an LLM host's
+ * ability to invent an economy the child can never reach.
+ */
+describe('star economy caps', () => {
+  const rewardBody = {
+    title: 'Extra voorleesverhaal',
+    icon: 'book',
+    category: 'privilege',
+    costStars: 10,
+  };
+
+  it('accepts a reward priced inside the band', () => {
+    expect(schemaOf('create_reward').safeParse(rewardBody).success).toBe(true);
+  });
+
+  it('refuses a reward priced past 250 stars', () => {
+    expect(schemaOf('create_reward').safeParse({ ...rewardBody, costStars: 400 }).success).toBe(
+      false
+    );
+  });
+
+  it('refuses a free reward', () => {
+    expect(schemaOf('create_reward').safeParse({ ...rewardBody, costStars: 0 }).success).toBe(
+      false
+    );
+  });
+
+  it('applies the same band to update_reward', () => {
+    const body = { ...rewardBody, rewardId: REWARD_ID, costStars: 251 };
+
+    expect(schemaOf('update_reward').safeParse(body).success).toBe(false);
+    expect(schemaOf('update_reward').safeParse({ ...body, costStars: 250 }).success).toBe(true);
+  });
+
+  it('caps a surprise bonus at 10 stars per call', () => {
+    const body = { memberId: MEMBER_ID, reason: 'surprise' };
+
+    expect(schemaOf('award_stars').safeParse({ ...body, amount: 5 }).success).toBe(true);
+    expect(schemaOf('award_stars').safeParse({ ...body, amount: 11 }).success).toBe(false);
   });
 });

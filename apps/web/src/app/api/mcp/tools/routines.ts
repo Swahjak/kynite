@@ -102,17 +102,27 @@ const routineBodySchema = {
     .max(MAX_GRACE_DAYS)
     .default(0)
     .describe('How many days after the due day the routine can still be ticked off.'),
+  /**
+   * Capped at 5 here, not at the seam's 20: the app's own routine editor still
+   * allows the wider range, but an LLM host inflating the rate is exactly the
+   * failure this layer exists to prevent. Optional with a default of 1 so the
+   * common case needs no decision at all.
+   */
   starsPerCompletion: z
     .number()
     .int()
     .min(0)
-    .max(20)
+    .max(5)
     .default(1)
-    .describe('Stars paid per completed step (the economy is per step, not per routine).'),
+    .describe(
+      'Stars paid PER COMPLETED STEP, not per routine — 5 steps at 3 pays 15. Default 1, rarely 2; 0 for a routine the child already enjoys.'
+    ),
   rewardEnabled: z
     .boolean()
     .default(true)
-    .describe('False graduates the routine: it keeps working but stops paying stars.'),
+    .describe(
+      'False graduates the routine: it keeps working but stops paying stars. Propose this once a child sustains the routine unaided.'
+    ),
   active: z.boolean().default(true).describe('False pauses the routine without deleting it.'),
   steps: z
     .array(
@@ -149,7 +159,7 @@ export function registerRoutinesTools(
     {
       title: 'List routines',
       description:
-        'List this family’s routines with their steps, optionally narrowed to one member or to the active ones.',
+        'List this family’s routines with their steps, optionally narrowed to one member or to the active ones. Step counts matter: payout is `starsPerCompletion` × steps completed.',
       inputSchema: z.object({
         ownerMemberId: z.uuid().optional().describe('Only routines on this member’s board.'),
         activeOnly: z.boolean().optional().describe('Skip paused routines.'),
@@ -186,7 +196,7 @@ export function registerRoutinesTools(
     {
       title: 'Create a routine',
       description:
-        'Create a routine on a member’s board. A routine always has at least one step; the steps are what a child ticks off, and stars are paid per step.',
+        'Create a routine on a member’s board; its steps are what a child ticks off. `starsPerCompletion` is paid PER STEP — default 1, and 0 for anything the child already enjoys; ask the parent before setting a higher rate.',
       inputSchema: z.object(routineBodySchema),
     },
     async (input) => {
@@ -202,7 +212,7 @@ export function registerRoutinesTools(
     {
       title: 'Update a routine',
       description:
-        'Replace a routine’s whole body, steps included. Steps are matched by id: omit a step’s id to add it, leave a step out entirely to delete it (its completions go with it; stars already earned never do).',
+        'Replace a routine’s whole body, steps included — steps are matched by id, so omit an id to add a step and leave a step out to delete it. Adding steps raises the routine’s payout (stars are per step), so re-check the rate before you raise it.',
       inputSchema: z.object({ routineId: z.uuid(), ...routineBodySchema }),
     },
     async (input) => {
@@ -218,7 +228,7 @@ export function registerRoutinesTools(
     {
       title: 'Delete a routine',
       description:
-        'Delete a routine and its steps. Prefer `set_routine_active` for a pause — deleting takes the routine’s history with it, though the star ledger is append-only and keeps every star already earned.',
+        'Delete a routine and its steps. Prefer `set_routine_active` to pause or `set_routine_reward` to graduate — deleting takes the routine’s history with it, and a child should never experience a routine vanishing as a punishment.',
       inputSchema: z.object({ routineId: z.uuid() }),
     },
     async ({ routineId }) => {
@@ -234,7 +244,7 @@ export function registerRoutinesTools(
     {
       title: 'Pause or resume a routine',
       description:
-        'Switch a routine off (it stops appearing on the child’s board) or back on. Nothing is deleted and no star is touched. Takes the target state, not a toggle.',
+        'Switch a routine off (it stops appearing on the child’s board) or back on; takes the target state, not a toggle. Nothing is deleted and no star is ever withdrawn.',
       inputSchema: z.object({ routineId: z.uuid(), active: z.boolean() }),
     },
     async ({ routineId, active }) => {
@@ -250,7 +260,7 @@ export function registerRoutinesTools(
     {
       title: 'Graduate a routine (or un-graduate it)',
       description:
-        'Turn star payout off for one routine — the fade path. The routine keeps working and keeps celebrating; only its payout goes to zero, and every star already earned stays. Turning it back on clears the graduation stamp.',
+        'Turn star payout off for one routine — the fade path, and the intended end state for every routine a child sustains unaided. The routine keeps working and keeps celebrating; only its payout stops, and every star already earned stays.',
       inputSchema: z.object({ routineId: z.uuid(), rewardEnabled: z.boolean() }),
     },
     async ({ routineId, rewardEnabled }) => {
@@ -266,7 +276,7 @@ export function registerRoutinesTools(
     {
       title: 'Tick off a routine step',
       description:
-        'Mark one step of one routine done for one member on one date. Idempotent by `clientId`: replaying the same call never pays a second star.',
+        'Mark one step done for one member on one date; idempotent by `clientId`, so a replay never pays twice. Reply with specific praise for what the child actually did first, and mention the star second.',
       inputSchema: z.object({
         routineId: z.uuid(),
         routineStepId: z.uuid(),
@@ -310,7 +320,7 @@ export function registerRoutinesTools(
     {
       title: 'Take a completion back',
       description:
-        'Undo a tick, addressed by the `clientId` it was made with. The star is not withdrawn — the ledger is append-only — and undoing twice is harmless.',
+        'Undo a tick, addressed by the `clientId` it was made with; undoing twice is harmless. The star is not withdrawn — the ledger is append-only — so never tell a child an undo cost them anything.',
       inputSchema: z.object({ clientId: z.string().min(8).max(200) }),
     },
     async ({ clientId }) => {

@@ -18,12 +18,14 @@ import {
   listRewards,
   listStarHistory,
   listStarTotals,
+  listStarsEarnedSince,
   requestRedemption,
   updateReward,
   type Redemption,
   type RedemptionWithReward,
   type Reward,
   type StarEntry,
+  type StarTotals,
 } from '@/modules/rewards';
 import { ok, toolError, type McpToolServer } from './shared';
 
@@ -40,6 +42,28 @@ import { ok, toolError, type McpToolServer } from './shared';
 
 const SCOPE_READ = 'insufficientScope: requires kynite:rewards.read';
 const SCOPE_WRITE = 'insufficientScope: requires kynite:rewards.write';
+
+/** The calibration window `get_star_totals` reports against. */
+const EARNING_WINDOW_DAYS = 7;
+
+/**
+ * The price band, narrower here than the seam's 1–500.
+ *
+ * A store only works if it is priced against what the child actually earns: at
+ * roughly ten stars a day, 3–10 is the same-day treat, 20–50 the few-day
+ * saving, 100–250 the multi-week goal. Anything past 250 is a horizon no child
+ * in this age range can hold, so the MCP layer refuses it rather than letting a
+ * host invent a 400-star bicycle. The app's own store editor keeps the wider
+ * range.
+ */
+const costStarsSchema = z
+  .number()
+  .int()
+  .min(1)
+  .max(250)
+  .describe(
+    'Price relative to what this child earns per day (see `get_star_totals`): small 3–10, medium 20–50, big 100–250.'
+  );
 
 /** A reward as an MCP client sees it: no `familyId`. */
 function rewardView(row: Reward) {
@@ -69,6 +93,29 @@ function redemptionView(row: RedemptionWithReward | Redemption) {
   };
 }
 
+/** The instant `days` ago — the left edge of the calibration window. */
+function windowStart(days: number): Date {
+  return new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+}
+
+/**
+ * Totals, plus the two numbers a host needs to price anything.
+ *
+ * A star total alone says nothing about what a reward should cost: 40 stars is
+ * a fortnight for one child and three days for another. `avgPerDay` over the
+ * last week is the exchange rate, and it is deliberately returned alongside the
+ * totals rather than left for the host to compute from `list_star_history`,
+ * which caps at 100 entries and would give a silently wrong answer for a busy
+ * family.
+ */
+function withEarningRate(totals: StarTotals, earnedInWindow: number) {
+  return {
+    ...totals,
+    earnedLast7Days: earnedInWindow,
+    avgPerDay: Math.round((earnedInWindow / EARNING_WINDOW_DAYS) * 10) / 10,
+  };
+}
+
 function starEntryView(row: StarEntry) {
   return {
     id: row.id,
@@ -89,7 +136,7 @@ export function registerRewardsTools(
     {
       title: 'List rewards',
       description:
-        'List this family’s reward catalogue, optionally narrowed to one member’s shelf or to only the active rewards.',
+        'List this family’s reward catalogue, optionally narrowed to one member’s shelf or to only the active rewards. Read it before adding a reward, so the price ladder stays coherent.',
       inputSchema: z.object({
         memberId: z.uuid().optional().describe('Only rewards available to this member.'),
         activeOnly: z.boolean().optional().describe('Skip inactive rewards.'),
@@ -148,18 +195,34 @@ export function registerRewardsTools(
     {
       title: 'Get star totals',
       description:
-        'Star totals (earned, spent, available). Pass `memberId` for one member, or omit it for the whole family.',
-      inputSchema: z.object({ memberId: z.uuid().optional() }),
+        'Star totals (earned, spent, available) plus `earnedLast7Days` and `avgPerDay`. `avgPerDay` is the number to price a reward or a star rate against — call this before either.',
+      inputSchema: z.object({
+        memberId: z.uuid().optional().describe('One member; omit for every member of the family.'),
+      }),
     },
     async ({ memberId }) => {
       if (!hasAllScopes(grantedScopes, [MCP_REWARDS_READ])) return toolError(SCOPE_READ);
 
+      // One family-wide scan for the window, whichever branch runs: the query
+      // is indexed on `(familyId, memberId, createdAt)` and a week of one
+      // household's ledger is a handful of rows, so narrowing it per member
+      // would cost a round trip to save nothing.
+      const earned = await listStarsEarnedSince({
+        familyId: principal.familyId,
+        since: windowStart(EARNING_WINDOW_DAYS),
+      });
+
       if (memberId) {
-        return ok(await getStarTotals(principal.familyId, memberId));
+        const totals = await getStarTotals(principal.familyId, memberId);
+        return ok(withEarningRate(totals, earned.get(memberId) ?? 0));
       }
 
       const totals = await listStarTotals(principal.familyId);
-      return ok(Object.fromEntries(totals));
+      return ok(
+        Object.fromEntries(
+          [...totals].map(([id, row]) => [id, withEarningRate(row, earned.get(id) ?? 0)])
+        )
+      );
     }
   );
 
@@ -168,7 +231,7 @@ export function registerRewardsTools(
     {
       title: 'List star history',
       description:
-        'One member’s recent star-ledger entries, newest first. The ledger is append-only.',
+        'One member’s recent star-ledger entries, newest first. The ledger is append-only — there is no debit row here and never will be.',
       inputSchema: z.object({
         memberId: z.uuid(),
         limit: z.number().int().min(1).max(100).default(20),
@@ -186,11 +249,12 @@ export function registerRewardsTools(
     'create_reward',
     {
       title: 'Create a reward',
-      description: 'Add a reward to the family’s catalogue.',
+      description:
+        'Add a reward to the family’s catalogue. Price it against the child’s daily earning (small 3–10, medium 20–50, big 100–250) and keep it a privilege or an experience — never money or allowance.',
       inputSchema: z.object({
         title: z.string().min(1).max(120),
         icon: z.string().refine(isRewardIcon),
-        costStars: z.number().int().min(1).max(500),
+        costStars: costStarsSchema,
         category: z.enum(REWARD_CATEGORIES),
         availableToMemberIds: z
           .array(z.uuid())
@@ -216,12 +280,12 @@ export function registerRewardsTools(
     {
       title: 'Update a reward',
       description:
-        'Replace a reward’s whole body. Re-pricing never re-prices a request already in flight.',
+        'Replace a reward’s whole body; re-pricing never re-prices a request already in flight. Raising a price a child is already saving toward is a broken promise — confirm with the parent first.',
       inputSchema: z.object({
         rewardId: z.uuid(),
         title: z.string().min(1).max(120),
         icon: z.string().refine(isRewardIcon),
-        costStars: z.number().int().min(1).max(500),
+        costStars: costStarsSchema,
         category: z.enum(REWARD_CATEGORIES),
         availableToMemberIds: z.array(z.uuid()).default([]),
         active: z.boolean().default(true),
@@ -244,7 +308,7 @@ export function registerRewardsTools(
     {
       title: 'Delete a reward',
       description:
-        'Delete a reward and its redemption history. The star ledger is append-only and keeps every star already earned.',
+        'Delete a reward and its redemption history. The star ledger is append-only, so every star already earned survives — but a child saving toward this reward loses the goal, so confirm with the parent.',
       inputSchema: z.object({ rewardId: z.uuid() }),
     },
     async ({ rewardId }) => {
@@ -264,12 +328,27 @@ export function registerRewardsTools(
     {
       title: 'Award stars',
       description:
-        'Give a member a manual or surprise star award, recorded on the append-only ledger.',
+        'Give a member a small surprise bonus (1–5) for effort they actually showed, naming the behaviour in `note`. Never announce a bonus in advance — a promised reward is a bribe and undermines the motivation it buys.',
       inputSchema: z.object({
         memberId: z.uuid(),
-        amount: z.number().int().min(1).max(20),
-        reason: z.enum(['bonus', 'manual', 'surprise']),
-        note: z.string().max(200).optional(),
+        amount: z
+          .number()
+          .int()
+          .min(1)
+          .max(10)
+          .describe(
+            'A surprise bonus is small: 1–5. A bonus large enough to bargain over stops being a surprise and starts being a wage.'
+          ),
+        reason: z
+          .enum(['bonus', 'manual', 'surprise'])
+          .describe(
+            '"surprise" for effort noticed after the fact (the default choice), "bonus" for an agreed extra, "manual" for a parent correction.'
+          ),
+        note: z
+          .string()
+          .max(200)
+          .optional()
+          .describe('Name the behaviour, not the child — "kept going when the box was heavy".'),
       }),
     },
     async (input) => {
@@ -289,7 +368,7 @@ export function registerRewardsTools(
     {
       title: 'Request a redemption',
       description:
-        'Ask for a reward on behalf of a member. No stars move here — a request is a question; only approval spends. Idempotent by `clientId`.',
+        'Ask for a reward on behalf of a member. No stars move here — a request is a question, and only approval spends. Idempotent by `clientId`.',
       inputSchema: z.object({
         rewardId: z.uuid(),
         memberId: z.uuid(),
@@ -322,7 +401,7 @@ export function registerRewardsTools(
     {
       title: 'Approve or deny a redemption',
       description:
-        'Decide an open redemption request. Approving is the whole deduction — the balance view subtracts approved and fulfilled requests. Denying costs nothing.',
+        'Decide an open redemption request. Approving spends the stars; denying is perfectly fine and costs the child nothing — never remove stars, and never frame a denial as a punishment.',
       inputSchema: z.object({
         redemptionId: z.uuid(),
         decision: z.enum(REDEMPTION_DECISIONS),
@@ -344,7 +423,8 @@ export function registerRewardsTools(
     'fulfill_redemption',
     {
       title: 'Mark a redemption fulfilled',
-      description: '"Handed over" — an approved redemption becomes fulfilled. Moves no stars.',
+      description:
+        '"Handed over" — an approved redemption becomes fulfilled. Moves no stars; the spend already happened at approval.',
       inputSchema: z.object({ redemptionId: z.uuid() }),
     },
     async ({ redemptionId }) => {

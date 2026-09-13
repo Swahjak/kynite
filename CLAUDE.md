@@ -225,6 +225,18 @@ separate server, see `docs/adr/20260903-mcp-server.md` for why.
   `@better-auth/oauth-provider`'s own rate limits on the OAuth flow endpoints
   (`/oauth2/token` etc.), which don't cover `/api/mcp` itself. In-memory is a deliberate
   single-instance (Railway) assumption; revisit if the app ever scales horizontally.
+- **Guidance**: the server steers the host toward the family's reward model at two levels.
+  `tools/instructions.ts` holds `KYNITE_MCP_INSTRUCTIONS`, passed as the SDK's
+  `ServerOptions.instructions` in `route.ts` and sent on every `initialize` — the star rules
+  (per completed *step*, never a deduction, praise before star, ask the parent, no sibling
+  comparison) from `docs/research/psychology-and-product-principles.md` and PRD FR11–FR19.
+  Each tool `description` then carries the one rule that matters at that call site, and the
+  MCP layer narrows the schemas: `starsPerCompletion` defaults to 1 and caps at 5,
+  `award_stars.amount` at 10, `costStars` to 1–250, and `get_star_totals` returns
+  `earnedLast7Days`/`avgPerDay` to price against. **The seams stay permissive** (0–20 stars,
+  1–500 cost) — the app's own editors keep the wider range; the caps exist because an LLM
+  host inflating the economy is the failure the tool layer is there to prevent. Change a
+  rule in `instructions.ts`, not in a tool description.
 - **Smoke test**: `node apps/web/scripts/mcp-smoke.mjs` against a running `pnpm dev` —
   checks the unauthenticated 401 + `WWW-Authenticate` challenge and that the discovery
   documents are reachable. Does not touch the database; kill the dev server when done.
