@@ -35,9 +35,32 @@ Gates never run concurrently (shared CPU). Each step = own commit(s) on the bran
         Also `tests/unit/utils.test.ts` (`display-3xl` token drift) and
         `tests/unit/oauth-consent/scope-message-key.test.ts` (next-intl module resolution).
         Left alone — out of scope for a lint-tooling swap; fix in R.
-- [ ] S2 — TypeScript 7 plain (sonnet). Remove `typescript-native` alias + TS6 shim, `typescript@7`.
-      AST tests → explicit `@typescript/typescript6` devDep (or oxc-parser). Verify Next 16.3.1 with
-      native tsc; drop `experimental.useTypeScriptCli: false` if it works. Update CLAUDE.md TS notes.
+- [x] S2 — TypeScript 7 plain (sonnet). Both workspaces: dropped `typescript-native`, `typescript`
+      is now plain `^7.0.2`. Confirmed TS 7.0.2's npm package still has no JS compiler API (`ts.createSourceFile`
+      is `undefined`), as expected.
+      - Found 5 AST-walking test consumers, not the 2 named in the brief — grep also caught
+        `tests/unit/i18n/hardcoded-strings.test.ts`, `tests/unit/realtime/event-coverage.test.ts`,
+        `tests/unit/append-only-star-ledger.test.ts`. All 5 now `import ts from '@typescript/typescript6'`
+        explicitly (added as an `apps/web` devDependency, `6.0.2`); verified the shim's CJS export
+        interops correctly as a default import.
+      - `apps/web/next.config.ts`: removed `experimental.useTypeScriptCli: false` and its comment.
+        `pnpm --filter web exec next build` succeeds, "Finished TypeScript" with no "typescript is
+        not installed" — Next 16.3.1 type-checks fine on the native TS7 CLI checker now.
+      - `pnpm typecheck`: passes, wall time ~3.4s (both workspaces, `--workspace-concurrency=1`).
+      - `pnpm lint`: passes. Hit a transient rtk-hook flake (`[warn] Linter process terminated
+        abnormally` / `ESLint output (JSON parse failed...)`) misreading oxlint's output as if it
+        were ESLint's — pre-existing rtk/oxlint mismatch from S1, not caused by this step;
+        `rtk proxy pnpm lint` bypasses it and passes clean every time.
+      - Full unit suite (`vitest run --maxWorkers=1`): 1712 pass, 2 fail (both pre-existing/known:
+        `utils.test.ts` display-3xl token drift, `i18n/hardcoded-strings`), 372 skipped. No new
+        failures from the TS7/shim swap. The third previously-known failure
+        (`oauth-consent/scope-message-key`) did not reproduce this run.
+      - CLAUDE.md: rewrote the "TypeScript runs side-by-side" paragraph in `# Notes` to the new
+        reality; fixed "Code Quality" section's stale "ESLint" → "oxlint" line (S1 missed it).
+        Note: `CLAUDE.md` is in `.prettierignore` — do not run `prettier --write` on it directly,
+        it reformats unrelated pre-existing emphasis-style drift across the whole file; use
+        `pnpm format:check` (which respects the ignore) to gate it instead.
+      - Commit `f12151c`.
 - [ ] S3 — dependency lift (sonnet). `pnpm up --latest -r`, one commit per major family
       (next/react, drizzle, better-auth + plugins, zod, tailwind, vitest/playwright, rest).
       better-auth: run `scripts/mcp-smoke.mjs` + DCR curl. Playwright: only `--grep @smoke --workers=1`.
@@ -50,3 +73,4 @@ Gates never run concurrently (shared CPU). Each step = own commit(s) on the bran
 | id | unit | model | subagent_tokens | tool_uses | status |
 |---|---|---|---|---|---|
 | s1 | S1 eslint→oxlint | sonnet | 220k | 153 | done — commit `6947faa` |
+| s2 | S2 TypeScript 7 | sonnet | 90k | 55 | done — commit `f12151c` |
