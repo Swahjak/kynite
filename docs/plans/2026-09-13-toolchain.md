@@ -73,4 +73,4 @@ Gates never run concurrently (shared CPU). Each step = own commit(s) on the bran
 | id | unit | model | subagent_tokens | tool_uses | status |
 |---|---|---|---|---|---|
 | s1 | S1 eslint→oxlint | sonnet | 220k | 153 | done — commit `6947faa` |
-| s2 | S2 TypeScript 7 | sonnet | 90k | 55 | done — commit `f12151c` |
+| s2 | S2 TypeScript 7 | sonnet | 119k | 74 | done — commit `f12151c` |
