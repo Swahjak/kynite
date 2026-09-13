@@ -163,4 +163,4 @@ Gates never run concurrently (shared CPU). Each step = own commit(s) on the bran
 | s1 | S1 eslint→oxlint | sonnet | 220k | 153 | done — commit `6947faa` |
 | s2 | S2 TypeScript 7 | sonnet | 119k | 74 | done — commit `f12151c` |
 | s3 | S3 dependency lift | sonnet | 173k | 157 | done — commits `c255a63`, `240bb2e`, `7cb30dd`, `e788142`, `e0e88eb` |
-| s4 | S4 prettier→oxfmt | sonnet | 125k | 55 | done — commits `958906f`, `ad7c0e0` |
+| s4 | S4 prettier→oxfmt | sonnet | 130k | 102 | done — commits `958906f`, `ad7c0e0` |
