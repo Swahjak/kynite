@@ -60,7 +60,7 @@
   "//lint-staged": "Root-level files only. Files under `apps/web` are matched to that package's own `lint-staged` block (lint-staged picks the config closest to each staged file and runs it from that directory), which is where eslint.config.mjs lives.",
   "lint-staged": {
     "*.{json,md,css,yml,yaml,mjs,cjs,js}": [
-      "oxfmt"
+      "oxfmt --no-error-on-unmatched-pattern"
     ]
   },
   "devDependencies": {

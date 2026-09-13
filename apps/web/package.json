@@ -47,10 +47,10 @@
   "lint-staged": {
     "*.{ts,tsx,mjs,cjs,js,jsx}": [
       "oxlint --fix",
-      "oxfmt"
+      "oxfmt --no-error-on-unmatched-pattern"
     ],
     "*.{json,md,css,yml,yaml}": [
-      "oxfmt"
+      "oxfmt --no-error-on-unmatched-pattern"
     ]
   },
   "dependencies": {
