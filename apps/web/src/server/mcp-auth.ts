@@ -29,6 +29,14 @@ export const MCP_CALENDAR_READ = 'kynite:calendar.read';
 export const MCP_CALENDAR_WRITE = 'kynite:calendar.write';
 export const MCP_TASKS_READ = 'kynite:tasks.read';
 export const MCP_TASKS_WRITE = 'kynite:tasks.write';
+export const MCP_ROUTINES_READ = 'kynite:routines.read';
+export const MCP_ROUTINES_WRITE = 'kynite:routines.write';
+export const MCP_REWARDS_READ = 'kynite:rewards.read';
+export const MCP_REWARDS_WRITE = 'kynite:rewards.write';
+export const MCP_FAMILY_READ = 'kynite:family.read';
+export const MCP_FAMILY_WRITE = 'kynite:family.write';
+export const MCP_TIMERS_READ = 'kynite:timers.read';
+export const MCP_TIMERS_WRITE = 'kynite:timers.write';
 
 /**
  * Parses the space-delimited `scope` claim an MCP access token JWT carries

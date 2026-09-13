@@ -110,6 +110,22 @@ export {
 export { recordCompletion, completeStepSchema, type CompleteStepInput } from './complete';
 
 export {
+  completeStep,
+  createRoutine,
+  deleteRoutine,
+  routineSchema,
+  setRoutineActive,
+  setRoutineReward,
+  undoCompletion,
+  updateRoutine,
+  type RoutineInput,
+  type RoutineWriteResult,
+  type SetRoutineActiveInput,
+  type SetRoutineRewardInput,
+  type UpdateRoutineInput,
+} from './write';
+
+export {
   completeStepAction,
   createRoutineAction,
   deleteRoutineAction,

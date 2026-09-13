@@ -1640,7 +1640,15 @@
       "calendarRead": "View your calendar",
       "calendarWrite": "Create and change events on your calendar",
       "tasksRead": "View your tasks",
-      "tasksWrite": "Create and change tasks"
+      "tasksWrite": "Create and change tasks",
+      "routinesRead": "View routines and completed steps",
+      "routinesWrite": "Create and change routines, and tick off steps",
+      "rewardsRead": "View rewards, stars and redemption requests",
+      "rewardsWrite": "Manage rewards, award stars and handle redemptions",
+      "familyRead": "View your family and its members",
+      "familyWrite": "Change family members and family settings",
+      "timersRead": "View running timers",
+      "timersWrite": "Start, pause and stop timers"
     },
     "unknownScope": "Unknown access ({scope})",
     "approve": "Allow",

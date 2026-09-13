@@ -1640,7 +1640,15 @@
       "calendarRead": "Je agenda bekijken",
       "calendarWrite": "Gebeurtenissen in je agenda aanmaken en wijzigen",
       "tasksRead": "Je taken bekijken",
-      "tasksWrite": "Taken aanmaken en wijzigen"
+      "tasksWrite": "Taken aanmaken en wijzigen",
+      "routinesRead": "Routines en afgeronde stappen bekijken",
+      "routinesWrite": "Routines aanmaken en wijzigen, en stappen afvinken",
+      "rewardsRead": "Beloningen, sterren en inwisselverzoeken bekijken",
+      "rewardsWrite": "Beloningen beheren, sterren toekennen en inwisselverzoeken afhandelen",
+      "familyRead": "Je gezin en gezinsleden bekijken",
+      "familyWrite": "Gezinsleden en gezinsinstellingen wijzigen",
+      "timersRead": "Lopende timers bekijken",
+      "timersWrite": "Timers starten, pauzeren en stoppen"
     },
     "unknownScope": "Onbekende toegang ({scope})",
     "approve": "Toestaan",

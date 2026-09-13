@@ -26,6 +26,14 @@ export const SCOPE_MESSAGE_KEYS: Readonly<Record<string, string>> = {
   'kynite:calendar.write': 'calendarWrite',
   'kynite:tasks.read': 'tasksRead',
   'kynite:tasks.write': 'tasksWrite',
+  'kynite:routines.read': 'routinesRead',
+  'kynite:routines.write': 'routinesWrite',
+  'kynite:rewards.read': 'rewardsRead',
+  'kynite:rewards.write': 'rewardsWrite',
+  'kynite:family.read': 'familyRead',
+  'kynite:family.write': 'familyWrite',
+  'kynite:timers.read': 'timersRead',
+  'kynite:timers.write': 'timersWrite',
 };
 
 /**

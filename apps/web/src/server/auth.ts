@@ -30,6 +30,14 @@ const MCP_SCOPES = [
   'kynite:calendar.write',
   'kynite:tasks.read',
   'kynite:tasks.write',
+  'kynite:routines.read',
+  'kynite:routines.write',
+  'kynite:rewards.read',
+  'kynite:rewards.write',
+  'kynite:family.read',
+  'kynite:family.write',
+  'kynite:timers.read',
+  'kynite:timers.write',
 ] as const;
 
 /**
