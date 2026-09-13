@@ -233,7 +233,8 @@ export function minutesUntil(block: TimeBlock, now: Date): number {
  * pass.
  */
 export type RemainingReading =
-  { kind: 'minutes'; minutes: number } | { kind: 'hours'; hours: number; minutes: number };
+  | { kind: 'minutes'; minutes: number }
+  | { kind: 'hours'; hours: number; minutes: number };
 
 export function remainingReading(block: TimeBlock, now: Date): RemainingReading {
   const minutes = minutesRemaining(block, now);
@@ -258,7 +259,9 @@ export function remainingReading(block: TimeBlock, now: Date): RemainingReading 
  * and, for `clock`, supplies the already-formatted time.
  */
 export type StartsInReading =
-  { kind: 'minutes'; minutes: number } | { kind: 'hours'; hours: number } | { kind: 'clock' };
+  | { kind: 'minutes'; minutes: number }
+  | { kind: 'hours'; hours: number }
+  | { kind: 'clock' };
 
 export function startsInReading(block: TimeBlock, now: Date): StartsInReading {
   const minutes = minutesUntil(block, now);

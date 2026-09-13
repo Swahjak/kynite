@@ -13,7 +13,8 @@ import { MAX_CUSTOM_AVATAR_BYTES, checkCustomAvatar, type AvatarRejection } from
 export type AvatarUploadError = 'tooLarge' | 'invalidFile';
 
 export type AvatarUploadResult =
-  { ok: true; dataUri: string } | { ok: false; error: AvatarUploadError };
+  | { ok: true; dataUri: string }
+  | { ok: false; error: AvatarUploadError };
 
 /** Only the size rejection gets its own message; the rest are all "that file will not work". */
 function messageFor(reason: AvatarRejection): AvatarUploadError {

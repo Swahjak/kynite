@@ -114,7 +114,8 @@ export async function listPendingPairingCodes(
 }
 
 export type CreatePairingCodeResult =
-  { status: 'created'; code: string; expiresAt: Date } | { status: 'tooManyPending' };
+  | { status: 'created'; code: string; expiresAt: Date }
+  | { status: 'tooManyPending' };
 
 /**
  * Mint a pairing code. Returns the **raw** digits — the only moment they

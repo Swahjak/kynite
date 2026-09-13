@@ -427,7 +427,8 @@ export type UpdateEventOccurrenceInput = {
 };
 
 export type UpdateEventOccurrenceResult =
-  { ok: true; eventId: string; occurrenceEventId: string } | { ok: false; error: string };
+  | { ok: true; eventId: string; occurrenceEventId: string }
+  | { ok: false; error: string };
 
 /**
  * Override one occurrence of a recurring series — the write seam behind

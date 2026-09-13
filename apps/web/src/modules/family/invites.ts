@@ -192,7 +192,8 @@ export async function revokeInvite(familyId: string, inviteId: string): Promise<
 export type ClaimFailure = 'notFound' | 'alreadyClaimed' | 'revoked' | 'expired' | 'memberTaken';
 
 export type ClaimResult =
-  { ok: true; member: Member; invite: MemberInvite } | { ok: false; reason: ClaimFailure };
+  | { ok: true; member: Member; invite: MemberInvite }
+  | { ok: false; reason: ClaimFailure };
 
 /**
  * Attach a login to the member row this invite points at — the heart of M14.

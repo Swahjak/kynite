@@ -182,7 +182,8 @@ export type McpPrincipalRefusal =
   | 'multipleFamilies';
 
 export type McpPrincipalResult =
-  { ok: true; principal: Principal } | { ok: false; reason: McpPrincipalRefusal };
+  | { ok: true; principal: Principal }
+  | { ok: false; reason: McpPrincipalRefusal };
 
 /**
  * Maps an MCP access token's `sub` claim (a better-auth user id — the token

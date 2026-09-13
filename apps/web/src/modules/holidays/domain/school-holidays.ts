@@ -56,7 +56,14 @@ export const DEFAULT_SCHOOL_REGION: SchoolRegion = 'south';
 
 /** The eight category hues, by name — the same local union `nl.ts` declares. */
 export type SchoolHolidayAccent =
-  'blue' | 'purple' | 'orange' | 'green' | 'red' | 'yellow' | 'pink' | 'teal';
+  | 'blue'
+  | 'purple'
+  | 'orange'
+  | 'green'
+  | 'red'
+  | 'yellow'
+  | 'pink'
+  | 'teal';
 
 export type SchoolHoliday = {
   slug: SchoolHolidaySlug;

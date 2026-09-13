@@ -20,7 +20,11 @@
 
 /** Why a URL was refused. Each value is a translation key under `ics.errors`. */
 export type UrlRejection =
-  'urlInvalid' | 'urlScheme' | 'urlCredentials' | 'urlPrivateHost' | 'urlTooLong';
+  | 'urlInvalid'
+  | 'urlScheme'
+  | 'urlCredentials'
+  | 'urlPrivateHost'
+  | 'urlTooLong';
 
 export type UrlCheck = { ok: true; url: URL } | { ok: false; error: UrlRejection };
 

@@ -7,7 +7,9 @@
  */
 
 export type ActionState =
-  { status: 'idle' } | { status: 'saved'; taskId: string } | { status: 'error'; error: string };
+  | { status: 'idle' }
+  | { status: 'saved'; taskId: string }
+  | { status: 'error'; error: string };
 
 export const idleState: ActionState = { status: 'idle' };
 

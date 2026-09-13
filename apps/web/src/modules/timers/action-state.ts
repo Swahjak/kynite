@@ -18,7 +18,8 @@ export const actionFailure = (error: string): ActionState => ({ status: 'error',
  * countdown on the wall, but they are different facts.
  */
 export type StartTimerState =
-  { status: 'started'; timerId: string; replayed: boolean } | { status: 'error'; error: string };
+  | { status: 'started'; timerId: string; replayed: boolean }
+  | { status: 'error'; error: string };
 
 export const startFailure = (error: string): StartTimerState => ({ status: 'error', error });
 

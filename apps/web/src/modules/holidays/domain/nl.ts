@@ -74,7 +74,14 @@ export type SpecialDayKind = 'official' | 'fun';
  * UI seam — and the day the two lists diverge, that seam is where it is caught.
  */
 export type SpecialDayAccent =
-  'blue' | 'purple' | 'orange' | 'green' | 'red' | 'yellow' | 'pink' | 'teal';
+  | 'blue'
+  | 'purple'
+  | 'orange'
+  | 'green'
+  | 'red'
+  | 'yellow'
+  | 'pink'
+  | 'teal';
 
 /**
  * A day, before it is placed in a year.

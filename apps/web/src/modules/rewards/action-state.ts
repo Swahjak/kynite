@@ -25,7 +25,8 @@ export const actionFailure = (error: string): ActionState => ({ status: 'error',
  * is a defence-in-depth check, not a message a child is meant to read.
  */
 export type RedemptionState =
-  { status: 'requested'; replayed: boolean } | { status: 'error'; error: string };
+  | { status: 'requested'; replayed: boolean }
+  | { status: 'error'; error: string };
 
 export const redemptionFailure = (error: string): RedemptionState => ({
   status: 'error',
