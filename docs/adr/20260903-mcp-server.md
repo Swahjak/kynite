@@ -38,10 +38,20 @@ drift between two authorization implementations.
   `oauthProvider()` plugin — and it owns the RFC 9728/8414 discovery documents,
   `/oauth2/authorize`, `/oauth2/token`, consent, and JWT-signed access tokens (via the
   `jwt()` plugin it depends on).
-- **Client ID Metadata Documents (`cimd()`), not Dynamic Client Registration.** A client
-  identifies itself with an HTTPS URL and the plugin fetches/validates the document there,
-  per MCP's 2026-07-28 spec revision — no registration round-trip, no client secret to
-  store or rotate.
+- **Client ID Metadata Documents (`cimd()`), plus Dynamic Client Registration (RFC 7591,
+  `allowDynamicClientRegistration`) for hosts that don't speak CIMD.** Claude identifies
+  itself with an HTTPS URL and the plugin fetches/validates the document there, per MCP's
+  2026-07-28 spec revision — no registration round-trip, no client secret to store or
+  rotate. ChatGPT's custom-connector flow (and other DCR-only MCP hosts) only know how to
+  `POST /oauth2/register` with a self-asserted body, so DCR is on alongside CIMD, with
+  `allowUnauthenticatedClientRegistration` also on since that POST carries no Kynite
+  session or initial access token. This lets anyone self-register a client — there is no
+  allowlist or approval step in `@better-auth/oauth-provider` 1.7.2 — but registering a
+  client grants no data access on its own: `scopes` doubles as the registration default,
+  so a self-registered client can only ever request `MCP_SCOPES`, and every token still
+  requires a logged-in Kynite member to complete the consent screen, with `can()`
+  re-checking that member's family role on every tool call regardless of what the token's
+  scope claims.
 - **Split read/write scopes, one pair per domain**: `kynite:calendar.read`,
   `kynite:calendar.write`, `kynite:tasks.read`, `kynite:tasks.write`. A client requests only
   what it needs; a calendar-only integration can never even attempt a task write regardless

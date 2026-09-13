@@ -171,8 +171,10 @@ separate server, see `docs/adr/20260903-mcp-server.md` for why.
   `/.well-known/oauth-protected-resource/api/mcp` and RFC 8414 authorization server
   metadata at `/.well-known/oauth-authorization-server/api/auth` — both forwarded by
   `src/app/.well-known/[...all]/route.ts` (Next needs *a* file route there before
-  better-auth's own raw-pathname matching runs). Client identity is a CIMD URL, not
-  dynamic registration.
+  better-auth's own raw-pathname matching runs). Client identity is a CIMD URL for Claude;
+  RFC 7591 Dynamic Client Registration is also on (unauthenticated) for hosts like ChatGPT
+  that only speak DCR — see the "CIMD, plus Dynamic Client Registration" bullet in the ADR
+  for what that opens up and what already mitigates it.
 - **Where tools live**: one registrar per domain, `src/app/api/mcp/tools/<domain>.ts`, each
   exporting `register<Domain>Tools(server, principal, grantedScopes)`; `route.ts`'s
   `registerTools()` just calls all six against a fresh `McpServer` per request (the verified

@@ -341,14 +341,42 @@ function createAuth() {
        * loopback, which is what local dev's `BETTER_AUTH_URL` is); M-D owns the
        * actual route.
        *
-       * Dynamic Client Registration (`allowDynamicClientRegistration`) is left
-       * unset/off — client onboarding goes through `cimd()` below instead.
+       * Dynamic Client Registration (RFC 7591, `allowDynamicClientRegistration`)
+       * is also on, alongside `cimd()` below — Claude registers via CIMD, but
+       * ChatGPT's custom-connector flow (and other DCR-only MCP hosts) only
+       * know how to `POST /oauth2/register` with a self-asserted body, no
+       * HTTPS metadata URL to fetch. `allowUnauthenticatedClientRegistration`
+       * has to go with it: that POST carries no Kynite session and we define
+       * no `validateInitialAccessToken`, so without it every unauthenticated
+       * registration would be refused and DCR would be dead code.
+       *
+       * This does mean anyone can self-register a client — there is no
+       * allowlist or approval step in 1.7.2. Two things already in place
+       * bound the blast radius rather than a new one built for this:
+       * - `scopes` below doubles as `clientRegistrationDefaultScopes`
+       *   (the oauth-provider fallback when that option is unset), so a
+       *   self-registered client can only ever request `MCP_SCOPES` — never
+       *   an unrelated scope this server doesn't define.
+       * - Registering a client grants no data access by itself. Every token
+       *   still requires a logged-in Kynite member to complete the consent
+       *   screen, and `can()` (see `route.ts`) re-checks that member's family
+       *   role on every tool call regardless of what the token's scope claims.
+       * `validateClientRedirectUri` (oauth-provider, not our code) already
+       * refuses non-HTTPS `redirect_uris` for the "web" application type DCR
+       * clients default to, loopback HTTP excepted — no extra hook needed for
+       * that. 1.7.2 exposes no per-registration rate limit or scope-cap hook
+       * beyond `clientRegistrationAllowedScopes`/`clientRegistrationDefaultScopes`
+       * (both already satisfied by reusing `scopes`); `/oauth2/register` falls
+       * under oauth-provider's own default flow-endpoint rate limiting (see the
+       * ADR's M-E section), same as `/oauth2/token` and friends.
        */
       mcp({
         loginPage: '/sign-in',
         consentPage: '/oauth/consent',
         resource: `${env.BETTER_AUTH_URL}/api/mcp`,
         scopes: [...MCP_SCOPES],
+        allowDynamicClientRegistration: true,
+        allowUnauthenticatedClientRegistration: true,
       }),
       /**
        * Client ID Metadata Document discovery (MCP 2026-07-28 pins CIMD

@@ -110,6 +110,12 @@ async function main() {
       authServerMetadata.scopes_supported.includes('kynite:calendar.write'),
     `got ${JSON.stringify(authServerMetadata?.scopes_supported)}`
   );
+  report(
+    'authorization server metadata advertises a registration_endpoint (DCR)',
+    typeof authServerMetadata?.registration_endpoint === 'string' &&
+      authServerMetadata.registration_endpoint.length > 0,
+    `got ${JSON.stringify(authServerMetadata?.registration_endpoint)}`
+  );
 
   console.log(failures === 0 ? '\nAll checks passed.' : `\n${failures} check(s) failed.`);
   process.exitCode = failures === 0 ? 0 : 1;
