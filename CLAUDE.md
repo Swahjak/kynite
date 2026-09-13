@@ -261,7 +261,7 @@ BETTER_AUTH_URL=http://localhost:3000  # Also used for Google Calendar webhooks
 
 ## Code Quality
 
-- ESLint with Next.js and Prettier integration
+- oxlint with Next.js and Prettier integration
 - Husky pre-commit hooks run lint-staged
 - Commitlint enforces conventional commits (feat:, fix:, etc.)
 - TypeScript strict mode enabled
@@ -273,41 +273,27 @@ Do NOT include Co-Authored-By or similar Claude references in commit messages. U
 # Notes
 
 - Nextjs 16+ uses proxy.ts instead of middleware.ts
-- **TypeScript runs side-by-side: native 7 for `tsc`, the 6 API for everything
-  that reads an AST.** TS 7 is the Go port and its npm package no longer exports
-  the JS compiler API (it returns in 7.1), so the two consumers are split by
-  package name in `apps/web` and `packages/ui`:
-  - `typescript` → `npm:@typescript/typescript6@6.0.2`, Microsoft's official
-    compat shim (a straight re-export of `typescript@6.0.3`). Anything that
-    resolves the *name* `typescript` gets the JS API:
-    `tests/unit/server-action-authorization.test.ts` /
-    `tests/unit/share-tree-no-server-actions.test.ts`, which walk the AST. Those
-    tests keep their plain `import ts from 'typescript'` — do not "fix" it.
-    This package ships `tsc6`, not `tsc`. (`typescript-eslint` used to be the
-    other consumer here — it hard-threw on TS 7 by parsing with
-    `ts.createSourceFile` — but S1 replaced ESLint with oxlint, which is a
-    native Rust linter with no dependency on the `typescript` npm package, so
-    that constraint is gone. The alias stays for the two AST-walking tests
-    above; removing it is S2's job, not this one's.)
-  - `typescript-native` → `npm:typescript@7.0.2`, which owns the `tsc` binary.
-    So plain `tsc` — i.e. `pnpm typecheck` — is the native compiler. Measured
-    ~5x faster than TS 6 on this repo (≈29s → ≈6s across the three projects).
-
-  Two consequences worth knowing:
-  - `next build` type-checks through `experimental.useTypeScriptCli: false`
-    (set in `apps/web/next.config.ts`, see the comment there). Next's default
-    CLI checker shells out to the `tsc` binary declared *by the `typescript`
-    package*, and the compat shim only declares `tsc6`, so the default fails
-    with a misleading "typescript is not installed". The build is still fully
-    type-checked, just on the TS 6 checker. Do not "fix" this with
-    `typescript.ignoreBuildErrors`, which would skip type checking entirely.
+- **TypeScript is plain 7** (`"typescript": "^7.0.2"` in `apps/web` and
+  `packages/ui`) — the Go-ported native compiler owns the `tsc` binary, so
+  `pnpm typecheck` and `next build`'s own type-checking both run on it
+  directly. No alias, no `experimental.useTypeScriptCli` opt-out in
+  `apps/web/next.config.ts` — that flag existed only because the old compat
+  shim didn't declare a plain `tsc`, and TS 7 does.
+  - TS 7's npm package doesn't export the JS compiler API yet (it returns in
+    7.1), so the handful of tests that walk a TypeScript AST
+    (`tests/unit/server-action-authorization.test.ts`,
+    `tests/unit/share-tree-no-server-actions.test.ts`,
+    `tests/unit/i18n/hardcoded-strings.test.ts`,
+    `tests/unit/realtime/event-coverage.test.ts`,
+    `tests/unit/append-only-star-ledger.test.ts`) import the compiler API
+    explicitly from `@typescript/typescript6` (an `apps/web` devDependency,
+    Microsoft's official compat shim) instead of from `typescript`:
+    `import ts from '@typescript/typescript6'`. Revisit once TS 7.1 restores
+    the API — then those imports can go back to plain `typescript` and the
+    shim devDependency can be dropped.
   - Keep `typecheck`/`lint` serialised (`--workspace-concurrency=1`). TS 7 is
     internally parallel and already runs at 300–430% CPU, so widening the
     workspace concurrency contends rather than helps.
-
-  Revisit when TS 7.1 restores the public API the two AST-walking tests need
-  — then `typescript` can simply be 7 and both the alias and the Next flag go
-  away.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
