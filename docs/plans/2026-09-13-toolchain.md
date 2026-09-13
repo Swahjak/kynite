@@ -154,7 +154,7 @@ Gates never run concurrently (shared CPU). Each step = own commit(s) on the bran
         `oauth-consent/scope-message-key`), no new failures from the format swap.
       - Two commits: `958906f` (config/scripts, no reformat) and `ad7c0e0` (reformat only, 12
         files, +43/-13).
-- [ ] R — review S1–S4 diff (sonnet) → fix → merge to main → deploy.
+- [x] R — review S1–S4 diff (sonnet) → fix → merge to main → deploy. 0🔴 1🟡 (IF EXISTS on 0033) 3🔵 doc nits, fixed in `564a25d`.
 
 ## Agent log
 
@@ -164,3 +164,5 @@ Gates never run concurrently (shared CPU). Each step = own commit(s) on the bran
 | s2 | S2 TypeScript 7 | sonnet | 119k | 74 | done — commit `f12151c` |
 | s3 | S3 dependency lift | sonnet | 173k | 157 | done — commits `c255a63`, `240bb2e`, `7cb30dd`, `e788142`, `e0e88eb` |
 | s4 | S4 prettier→oxfmt | sonnet | 130k | 102 | done — commits `958906f`, `ad7c0e0` |
+| r | R review S1–S4 | sonnet | 72k | 41 | done — MERGE |
+| rfix | R fixes | haiku | 49k | 12 | done — `564a25d` |
