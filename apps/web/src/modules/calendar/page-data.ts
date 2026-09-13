@@ -49,7 +49,7 @@ export type CalendarPageData = {
 };
 
 export type LoadOptions = {
-  /** `?view=` — anything unrecognised falls back to `week`. */
+  /** `?view=` — anything unrecognised falls back to `day`. */
   view?: string;
   /** `?date=YYYY-MM-DD` — anything unrecognised falls back to today. */
   date?: string;
@@ -85,7 +85,7 @@ export async function loadCalendarPage(options: LoadOptions): Promise<CalendarPa
    * follow a change (`family.hubDefaultView`).
    */
   const fallbackView: CalendarView =
-    options.surface === 'hub' ? (family?.hubDefaultView ?? 'day') : 'week';
+    options.surface === 'hub' ? (family?.hubDefaultView ?? 'day') : 'day';
   const view: CalendarView = isCalendarView(options.view) ? options.view : fallbackView;
   const now = new Date();
 
