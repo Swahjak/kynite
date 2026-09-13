@@ -61,9 +61,49 @@ Gates never run concurrently (shared CPU). Each step = own commit(s) on the bran
         it reformats unrelated pre-existing emphasis-style drift across the whole file; use
         `pnpm format:check` (which respects the ignore) to gate it instead.
       - Commit `f12151c`.
-- [ ] S3 — dependency lift (sonnet). `pnpm up --latest -r`, one commit per major family
-      (next/react, drizzle, better-auth + plugins, zod, tailwind, vitest/playwright, rest).
-      better-auth: run `scripts/mcp-smoke.mjs` + DCR curl. Playwright: only `--grep @smoke --workers=1`.
+- [x] S3 — dependency lift (sonnet). `pnpm outdated -r` found 30 outdated packages, all
+      patch/minor except vitest's major. Six commits, one per family, gated (typecheck + oxlint +
+      unit tests) before each:
+      - **a** (`c255a63`) next 16.3.1→16.3.5, react/react-dom 19.2.8→19.3.0,
+        @types/react(-dom)→19.3.0, next-intl 4.13.6→4.14.4. All patch/minor within the same Next
+        minor — no doc-breaking-change section applied. `next build` run once, green.
+      - **b** drizzle-orm/drizzle-kit/pg — already at latest (not in the outdated list), no commit
+        needed.
+      - **c** (`240bb2e`) better-auth + @better-auth/cimd,mcp,oauth-provider 1.7.2→1.7.4. Found and
+        fixed a real regression along the way: 1.7.3 reverted the 1.7.0–1.7.2 `account.issuer`
+        requirement back to plain `providerId`/`accountId` identity (better-auth's own 1.7 upgrade
+        guide, confirmed via `--depth 1` clone). Dev server 500'd on both `.well-known` MCP
+        discovery endpoints with `SCHEMA_MISMATCH` until fixed. Dropped `issuer` and its unique
+        index from `auth-schema.ts` (back to the exact pre-1.7 shape), generated drizzle migration
+        `0033_nervous_roxanne_simpson.sql`, applied it, rewrote the stale comment block in
+        `auth.ts`. Also dropped the `@better-auth/oauth-provider` patch (loopback-port-variance for
+        `localhost`): upstream PR #11090 shipped the same fix natively in 1.7.3
+        (`stripLoopbackRedirectPort`), so `patchedDependencies` and the patch file are gone.
+        Verified: `mcp-smoke.mjs` all green, DCR curl 201 with capped `kynite:*`-plus-OIDC scopes,
+        `http://` non-loopback redirect 400.
+      - **d** (`7cb30dd`) zod 4.4.3→4.6.4, @base-ui/react 1.7.0→1.8.0, lucide-react 1.31.0→1.45.0,
+        shadcn 4.18.0→4.21.0. tailwindcss/@tailwindcss/postcss already latest, untouched.
+      - **e** (`e788142`) vitest + @vitest/coverage-v8 4.1.10→5.0.0 (major), @playwright/test
+        1.62.1→1.63.0, storybook + @storybook/react-vite 10.5.8→10.6.0, @storybook/addon-mcp
+        0.7.0→10.6.0 (now tracks storybook's own versioning; incidentally fixed the unmet
+        `valibot` peer warning noted in S1/family-a). Checked vitest 5's migration guide in full —
+        `clearMocks`-by-default, removed `test.sequential`/`describe.sequential`, `toThrow('')`
+        semantics, hoisted-mock-call enforcement: none match anything in this repo (grepped).
+        `storybook:build` run once, green.
+      - **f** (`e0e88eb`) everything else: subset-font, @testing-library/user-event, vite,
+        @types/pg, @vitejs/plugin-react, tailwind-merge, pg-boss, @types/node,
+        @testing-library/react, lint-staged. All patch/minor.
+      - Nothing held back — `pnpm outdated -r` is clean after family f.
+      - Final full gate: `pnpm typecheck`, `rtk proxy pnpm lint`,
+        `pnpm --filter web exec vitest run --maxWorkers=1` (1712 pass / 2 fail, same three
+        pre-existing failures as S1/S2: `utils.test.ts` display-3xl,
+        `i18n/hardcoded-strings.test.ts`, `oauth-consent/scope-message-key.test.ts` — no new
+        failures at any point across all six families), `next build`, and Playwright
+        `--grep @smoke --workers=1` against `e2e:setup`'s test DB (9/9 pass) — all green. Had to
+        `playwright install chromium` once (new `@playwright/test` binary version); `--with-deps`
+        needs sudo unavailable in this sandbox, plain `install chromium` was sufficient.
+        `.env.local` moved aside and restored per the e2e gotcha; ports 3100/3101 and the test DB
+        container torn down afterward.
 - [ ] S4 — prettier → oxfmt (sonnet). Same options; one reformat commit; keep prettier only for
       extensions oxfmt can't format (check md/css/yml/json). lint-staged + CI updated.
 - [ ] R — review S1–S4 diff (sonnet) → fix → merge to main → deploy.
@@ -74,3 +114,4 @@ Gates never run concurrently (shared CPU). Each step = own commit(s) on the bran
 |---|---|---|---|---|---|
 | s1 | S1 eslint→oxlint | sonnet | 220k | 153 | done — commit `6947faa` |
 | s2 | S2 TypeScript 7 | sonnet | 119k | 74 | done — commit `f12151c` |
+| s3 | S3 dependency lift | sonnet | ~185k | ~140 | done — commits `c255a63`, `240bb2e`, `7cb30dd`, `e788142`, `e0e88eb` |
