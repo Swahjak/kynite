@@ -200,26 +200,15 @@ function createAuth() {
     socialProviders: googleSignIn,
     account: {
       /**
-       * 1.7: `account` gained an `issuer` column — the identity namespace an
-       * `accountId` is scoped to — with a new `(issuer, accountId)` unique
-       * constraint replacing the old bare-`accountId` one.
-       *
-       * The 1.7 upgrade guide's prose describes this as configurable via an
-       * `account.identityStrategy: "provider-id" | "issuer"` option. That key
-       * does **not** exist in the installed 1.7.2 API — checked against
-       * `@better-auth/core`'s `init-options.d.mts` (the full `account`
-       * options block) and grepped across `better-auth`'s and
-       * `@better-auth/core`'s dist: no `identityStrategy` anywhere. Issuer
-       * resolution in 1.7.2 is unconditional, not strategy-gated:
-       * `internal-adapter.mjs` calls `createLocalAccountIssuer("credential")`
-       * outright for email/password, and `oauth2/account-key.mjs` calls
-       * `createOAuthAccountIssuer(provider.id)` outright for any OAuth
-       * provider that sets no custom `accountIssuer` (this app's Google
-       * config sets none). There is no config knob here to set — the two
-       * providers this app has ever written resolve to `local:credential`
-       * and `local:oauth:google` regardless. See the drizzle migration that
-       * adds the column for the exact backfill mapping and the same source
-       * citations.
+       * 1.7.0–1.7.2 briefly required an `account.issuer` column and scoped
+       * `accountId` uniqueness to `(issuer, accountId)` instead of the plain
+       * `providerId`/`accountId` pair. 1.7.3 removed that requirement again
+       * — accounts are resolved by `providerId`/`accountId` exactly as in
+       * 1.6, with no `identityStrategy` config knob. This app upgraded
+       * through that window and back out: `issuer` and its unique index were
+       * added in commit `c14cf19` and dropped again once the dependency lift
+       * moved past 1.7.2 (see the drizzle migration that drops them for the
+       * relax-then-cleanup steps from better-auth's 1.7 upgrade guide).
        *
        * F2, half one: anything better-auth *does* persist in `account`
        * (`access_token`, `refresh_token`, `id_token`) is AES-256-GCM encrypted
