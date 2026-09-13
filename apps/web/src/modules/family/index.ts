@@ -21,6 +21,17 @@ export {
 export { assertCan, getPrincipal, requireDevicePrincipal } from './principal';
 
 export {
+  createMember,
+  deleteMember,
+  updateFamily,
+  updateMember,
+  type DeleteMemberInput,
+  type FamilySettingsInput,
+  type MemberInput,
+  type UpdateMemberInput,
+} from './write';
+
+export {
   HUB_VIEWS,
   MEMBER_COLORS,
   MEMBER_ROLES,

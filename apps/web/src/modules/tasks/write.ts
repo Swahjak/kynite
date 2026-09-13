@@ -1,4 +1,5 @@
 import 'server-only';
+import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { getDb } from '@/server/db';
 // Table object from the schema assembly point, not the slice barrel — same
@@ -115,4 +116,111 @@ export async function createTask(
   });
 
   return { ok: true, taskId: created.id };
+}
+
+const toggleTaskSchema = z.object({
+  taskId: z.uuid(),
+  /** What the row should become — never a flip, so a double tap is idempotent. */
+  completed: z.boolean(),
+});
+
+/** The raw (pre-validation) shape `toggleTask` accepts — untrusted. */
+export type ToggleTaskInput = z.input<typeof toggleTaskSchema>;
+
+export type ToggleTaskResult = { ok: true; taskId: string } | { ok: false; error: string };
+
+/**
+ * Tick a task off, or take it back — `toggleTaskAction`'s seam (MCP milestone
+ * M2). `task:complete` rather than `task:write`: finishing something and
+ * being allowed to invent or remove it are different powers (see
+ * `task:complete`'s doc comment in `modules/family/authorize.ts`), which is
+ * also why a child member or a paired hub device can call this.
+ *
+ * The input states the *target* state rather than asking for a flip, so two
+ * taps racing from two devices agree instead of cancelling each other out,
+ * and a replayed request is a no-op rather than an un-tick.
+ */
+export async function toggleTask(
+  principal: Principal,
+  input: ToggleTaskInput
+): Promise<ToggleTaskResult> {
+  if (!can(principal, 'task:complete', { familyId: principal.familyId })) {
+    return { ok: false, error: 'forbidden' };
+  }
+
+  const parsed = toggleTaskSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: 'invalidInput' };
+
+  const { taskId, completed } = parsed.data;
+
+  return getDb().transaction(async (tx): Promise<ToggleTaskResult> => {
+    const [row] = await tx
+      .update(task)
+      .set({ completedAt: completed ? new Date() : null, updatedAt: new Date() })
+      // Scope from the principal, never from the input: another household's id
+      // matches nothing.
+      .where(and(eq(task.id, taskId), eq(task.familyId, principal.familyId)))
+      .returning({ id: task.id });
+
+    if (!row) return { ok: false, error: 'taskNotFound' };
+
+    await publish(
+      {
+        familyId: principal.familyId,
+        type: 'task.upserted',
+        entity: { id: row.id },
+        actor: { ...actorOf(principal), source: 'mobile' },
+        patch: { completed },
+      },
+      tx
+    );
+
+    return { ok: true, taskId: row.id };
+  });
+}
+
+const deleteTaskSchema = z.object({ taskId: z.uuid() });
+
+/** The raw (pre-validation) shape `deleteTask` accepts — untrusted. */
+export type DeleteTaskInput = z.input<typeof deleteTaskSchema>;
+
+export type DeleteTaskResult = { ok: true; taskId: string } | { ok: false; error: string };
+
+/**
+ * Delete a task outright — `deleteTaskAction`'s seam (MCP milestone M2).
+ * `task:write`, the authoring grade: owner/adult only, same as `createTask`.
+ */
+export async function deleteTask(
+  principal: Principal,
+  input: DeleteTaskInput
+): Promise<DeleteTaskResult> {
+  if (!can(principal, 'task:write', { familyId: principal.familyId })) {
+    return { ok: false, error: 'forbidden' };
+  }
+
+  const parsed = deleteTaskSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: 'invalidInput' };
+
+  const { taskId } = parsed.data;
+
+  return getDb().transaction(async (tx): Promise<DeleteTaskResult> => {
+    const [row] = await tx
+      .delete(task)
+      .where(and(eq(task.id, taskId), eq(task.familyId, principal.familyId)))
+      .returning({ id: task.id });
+
+    if (!row) return { ok: false, error: 'taskNotFound' };
+
+    await publish(
+      {
+        familyId: principal.familyId,
+        type: 'task.deleted',
+        entity: { id: row.id },
+        actor: { ...actorOf(principal), source: 'mobile' },
+      },
+      tx
+    );
+
+    return { ok: true, taskId: row.id };
+  });
 }

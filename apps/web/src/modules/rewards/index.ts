@@ -83,6 +83,22 @@ export {
 } from './actions';
 
 export {
+  awardStars,
+  createReward,
+  decideRedemption,
+  deleteReward,
+  fulfillRedemption,
+  requestRedemption,
+  updateReward,
+  type AwardStarsInput,
+  type DecideRedemptionInput,
+  type DeleteRewardInput,
+  type FulfillRedemptionInput,
+  type RewardInput,
+  type UpdateRewardInput,
+} from './write';
+
+export {
   loadRewardsPage,
   loadStarChart,
   loadStore,

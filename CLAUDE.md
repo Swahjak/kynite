@@ -173,20 +173,47 @@ separate server, see `docs/adr/20260903-mcp-server.md` for why.
   `src/app/.well-known/[...all]/route.ts` (Next needs *a* file route there before
   better-auth's own raw-pathname matching runs). Client identity is a CIMD URL, not
   dynamic registration.
-- **Where tools live**: registered in `registerTools()` inside `route.ts` itself, a fresh
-  `McpServer` per request (the verified principal/scopes are closures, not read off
-  `ctx.http.authInfo`).
-- **Adding a tool**: `server.registerTool(name, { inputSchema: zod }, handler)`. Inside the
-  handler, check the token's scope first (`hasAllScopes`/`hasAnyScope` from
-  `src/server/mcp-auth.ts` against `MCP_CALENDAR_READ`/`_WRITE`/`MCP_TASKS_READ`/`_WRITE`),
-  then — for anything that mutates — call `can()` (`@/modules/family`) against the resolved
-  `Principal` before touching a write seam (`createEvent`, `skipEventOccurrence`,
-  `updateEventOccurrence`, `createTask`, …). Scopes gate
-  which tool *runs*; `can()` is what a member's role actually permits — a mutating tool must
-  pass both, and must call the write seam either way so `can()` is re-checked there too, not
-  trusted from the tool layer. Return `toolError(message)` (not a thrown error) for any
-  refusal — a normal MCP tool error, not the 401/403 HTTP layer `requireMcpAuth` already
-  owns for missing/invalid tokens.
+- **Where tools live**: one registrar per domain, `src/app/api/mcp/tools/<domain>.ts`, each
+  exporting `register<Domain>Tools(server, principal, grantedScopes)`; `route.ts`'s
+  `registerTools()` just calls all six against a fresh `McpServer` per request (the verified
+  principal/scopes are closures, not read off `ctx.http.authInfo`). Shared helpers (`ok`,
+  `toolError`, the `McpToolServer` type) live in `tools/shared.ts`. One tool list per domain,
+  verified against the registrars: calendar 5 (`list_calendars`, `list_events`,
+  `create_event`, `skip_event_occurrence`, `update_event_occurrence`), tasks 5 (`list_tasks`,
+  `get_task`, `create_task`, `toggle_task`, `delete_task`), routines 9 (`list_routines`,
+  `get_routine`, `create_routine`, `update_routine`, `delete_routine`, `set_routine_active`,
+  `set_routine_reward`, `complete_step`, `undo_completion`), timers 7 (`list_timers`,
+  `get_timer`, `start_timer`, `stop_timer`, `pause_timer`, `resume_timer`, `extend_timer`),
+  rewards 12 (`list_rewards`, `get_reward`, `list_redemptions`, `get_star_totals`,
+  `list_star_history`, `create_reward`, `update_reward`, `delete_reward`, `award_stars`,
+  `request_redemption`, `decide_redemption`, `fulfill_redemption`), family 7 (`list_members`,
+  `get_family`, `get_member`, `create_member`, `update_member`, `delete_member`,
+  `update_family`).
+- **Scopes**: one read/write pair per domain — `kynite:calendar.read`/`.write`,
+  `kynite:tasks.read`/`.write`, `kynite:routines.read`/`.write`, `kynite:timers.read`/`.write`,
+  `kynite:rewards.read`/`.write`, `kynite:family.read`/`.write` — 12 scopes in total, declared
+  in three places that must be kept in sync by hand: `MCP_SCOPES` in `src/server/auth.ts` (what
+  the OAuth provider offers), the `MCP_<DOMAIN>_READ`/`_WRITE` constants in
+  `src/server/mcp-auth.ts` (what a tool checks), and `SCOPE_MESSAGE_KEYS` in
+  `src/modules/oauth-consent/page-data.ts` plus `oauth.scopes.*` in
+  `messages/{nl,en}.json` (what the consent screen labels — an unlisted scope falls back to
+  `oauth.unknownScope`). `list_members` is the one deliberate any-of: it accepts
+  `kynite:family.read`, `kynite:calendar.read` **or** `kynite:tasks.read`, since naming the
+  family's members is the lookup table every other domain's ids resolve against.
+- **The seam rule**: every mutating tool calls its domain's `modules/<domain>/write.ts`
+  seam — never a Server Action from `actions.ts`. Each seam function takes an explicit
+  `Principal`, calls `can()` itself (redundantly with the tool's own pre-check — a stolen
+  scope still can't bypass what the member's role permits), validates its own input, and does
+  its own side effects (publish/realtime, notifications) — `next/cache` revalidation stays out
+  of the seam, since MCP has no page to revalidate; `actions.ts` wraps the same seam with
+  `assertCan → delegate → revalidate` for the web app. Adding a tool: pick the seam function
+  (or add one to `write.ts` if the mutation has none yet), write
+  `server.registerTool(name, { inputSchema: zod }, handler)` in the domain's registrar, and
+  inside the handler check the token's scope first (`hasAllScopes`/`hasAnyScope` from
+  `src/server/mcp-auth.ts`), then — for anything that mutates — call `can()` against the
+  resolved `Principal` before calling the seam. Return `toolError(message)` (not a thrown
+  error) for any refusal — a normal MCP tool error, not the 401/403 HTTP layer
+  `requireMcpAuth` already owns for missing/invalid tokens.
 - **Principal resolution**: `principalForMcpUser()` (`src/server/mcp-auth.ts`) maps a
   token's `sub` to a family member, refusing (403) a user with no member row or with live
   member rows in more than one family — a bearer token has no family selector to disambiguate

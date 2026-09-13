@@ -83,6 +83,8 @@ export {
   type StopTimerInput,
 } from './actions';
 
+export { extendTimer, pauseTimer, resumeTimer, startTimer, stopTimer } from './write';
+
 export {
   loadTimerBoard,
   loadTimersPage,

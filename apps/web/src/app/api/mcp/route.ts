@@ -11,8 +11,10 @@ import {
 import { type Principal } from '@/modules/family';
 import { registerCalendarTools } from './tools/calendar';
 import { registerFamilyTools } from './tools/family';
+import { registerRewardsTools } from './tools/rewards';
 import { registerRoutinesTools } from './tools/routines';
 import { registerTasksTools } from './tools/tasks';
+import { registerTimersTools } from './tools/timers';
 import { type McpToolServer } from './tools/shared';
 
 /**
@@ -102,6 +104,8 @@ function registerTools(
   registerCalendarTools(server, principal, grantedScopes);
   registerTasksTools(server, principal, grantedScopes);
   registerRoutinesTools(server, principal, grantedScopes);
+  registerTimersTools(server, principal, grantedScopes);
+  registerRewardsTools(server, principal, grantedScopes);
 }
 
 /** The 403 body for each way `principalForMcpUser` can refuse. */

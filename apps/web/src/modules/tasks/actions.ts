@@ -2,17 +2,16 @@
 
 import { revalidatePath } from 'next/cache';
 import { getLocale } from 'next-intl/server';
-import { and, eq } from 'drizzle-orm';
-import { z } from 'zod';
-import { getDb } from '@/server/db';
-// Table objects come from the schema assembly point, not from a slice barrel
-// (same note as `modules/timers/actions.ts`): a barrel re-exports client
-// components, which must not enter a server mutation module.
-import { task } from '@/server/db/schema';
-import { assertCan, type Principal } from '@/modules/family';
-import { publish } from '@/modules/realtime';
+import { assertCan } from '@/modules/family';
 import { actionFailure, type ActionState } from './action-state';
-import { createTask, type CreateTaskInput } from './write';
+import {
+  createTask,
+  deleteTask,
+  toggleTask,
+  type CreateTaskInput,
+  type DeleteTaskInput,
+  type ToggleTaskInput,
+} from './write';
 
 /**
  * Mutations for the tasks slice.
@@ -34,16 +33,6 @@ import { createTask, type CreateTaskInput } from './write';
  * audits structurally.
  */
 
-/**
- * The realtime `actor` for a principal. A `member` principal names itself; a
- * paired kiosk names its device. Neither is invented from a form.
- */
-function actorOf(principal: Principal): { memberId?: string; deviceId?: string } {
-  if (principal.kind === 'member') return { memberId: principal.memberId };
-  if (principal.kind === 'device') return { deviceId: principal.deviceId };
-  return {};
-}
-
 /** Every surface a task appears on. Today's list is the only one so far. */
 async function revalidateTasks(): Promise<void> {
   const locale = await getLocale();
@@ -63,93 +52,38 @@ export async function createTaskAction(input: CreateTaskInput): Promise<ActionSt
   return { status: 'saved', taskId: result.taskId };
 }
 
-const toggleSchema = z.object({
-  taskId: z.uuid(),
-  /** What the row should become — never a flip, so a double tap is idempotent. */
-  completed: z.boolean(),
-});
-
-export type ToggleTaskInput = z.infer<typeof toggleSchema>;
+export type { ToggleTaskInput } from './write';
 
 /**
  * Tick a task off, or take it back.
  *
  * The input states the *target* state rather than asking for a flip. Two taps
  * racing from two devices then agree instead of cancelling each other out, and
- * a replayed request is a no-op rather than an un-tick.
+ * a replayed request is a no-op rather than an un-tick. `assertCan` here is a
+ * cheap early rejection, not the decision — `toggleTask` (`./write.ts`)
+ * re-checks `can()` against the resolved principal, the same discipline
+ * `createTaskAction` already follows below.
  */
 export async function toggleTaskAction(input: ToggleTaskInput): Promise<ActionState> {
   const principal = await assertCan('task:complete').catch(() => null);
   if (!principal) return actionFailure('forbidden');
 
-  const parsed = toggleSchema.safeParse(input);
-  if (!parsed.success) return actionFailure('invalidInput');
+  const result = await toggleTask(principal, input);
+  if (!result.ok) return actionFailure(result.error);
 
-  const { taskId, completed } = parsed.data;
-
-  const result = await getDb().transaction(async (tx): Promise<ActionState> => {
-    const [row] = await tx
-      .update(task)
-      .set({ completedAt: completed ? new Date() : null, updatedAt: new Date() })
-      // Scope from the principal, never from the input: another household's id
-      // matches nothing.
-      .where(and(eq(task.id, taskId), eq(task.familyId, principal.familyId)))
-      .returning({ id: task.id });
-
-    if (!row) return actionFailure('taskNotFound');
-
-    await publish(
-      {
-        familyId: principal.familyId,
-        type: 'task.upserted',
-        entity: { id: row.id },
-        actor: { ...actorOf(principal), source: 'mobile' },
-        patch: { completed },
-      },
-      tx
-    );
-
-    return { status: 'saved', taskId: row.id };
-  });
-
-  if (result.status === 'saved') await revalidateTasks();
-  return result;
+  await revalidateTasks();
+  return { status: 'saved', taskId: result.taskId };
 }
 
-const deleteSchema = z.object({ taskId: z.uuid() });
-
-export type DeleteTaskInput = z.infer<typeof deleteSchema>;
+export type { DeleteTaskInput } from './write';
 
 export async function deleteTaskAction(input: DeleteTaskInput): Promise<ActionState> {
   const principal = await assertCan('task:write').catch(() => null);
   if (!principal) return actionFailure('forbidden');
 
-  const parsed = deleteSchema.safeParse(input);
-  if (!parsed.success) return actionFailure('invalidInput');
+  const result = await deleteTask(principal, input);
+  if (!result.ok) return actionFailure(result.error);
 
-  const { taskId } = parsed.data;
-
-  const result = await getDb().transaction(async (tx): Promise<ActionState> => {
-    const [row] = await tx
-      .delete(task)
-      .where(and(eq(task.id, taskId), eq(task.familyId, principal.familyId)))
-      .returning({ id: task.id });
-
-    if (!row) return actionFailure('taskNotFound');
-
-    await publish(
-      {
-        familyId: principal.familyId,
-        type: 'task.deleted',
-        entity: { id: row.id },
-        actor: { ...actorOf(principal), source: 'mobile' },
-      },
-      tx
-    );
-
-    return { status: 'saved', taskId: row.id };
-  });
-
-  if (result.status === 'saved') await revalidateTasks();
-  return result;
+  await revalidateTasks();
+  return { status: 'saved', taskId: result.taskId };
 }

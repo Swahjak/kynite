@@ -27,7 +27,15 @@ export {
   type ToggleTaskInput,
 } from './actions';
 
-export { createTask, createTaskSchema, type CreateTaskResult } from './write';
+export {
+  createTask,
+  createTaskSchema,
+  deleteTask,
+  toggleTask,
+  type CreateTaskResult,
+  type DeleteTaskResult,
+  type ToggleTaskResult,
+} from './write';
 
 export { loadTodayTasks, type TodayTask, type TodayTasksData } from './page-data';
 

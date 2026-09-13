@@ -9,15 +9,13 @@ import { redirect as externalRedirect } from 'next/navigation';
 import { getLocale } from 'next-intl/server';
 import { and, eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
-import { locales } from '@/i18n/routing';
 import { redirect } from '@/i18n/navigation';
-import { FORMATTING_LOCALES } from '@/i18n/formatting-locale';
 import { getAuth } from '@/server/auth';
 import { getDb } from '@/server/db';
 // The `calendar` table from the schema assembly point (§2) rather than from
 // the google slice's barrel: this file needs the table object and nothing else.
 import { calendar } from '@/server/db/schema';
-import { session as sessionTable, user } from '@/server/db/auth-schema';
+import { user } from '@/server/db/auth-schema';
 import { env } from '@/server/env';
 import { sanitizeCallbackUrl, withoutLocalePrefix } from '@/lib/callback-url';
 import { hashInviteToken, inviteUrlFor } from '@/lib/invite-token';
@@ -32,6 +30,13 @@ import {
 import { inviteStateOf } from './domain/invite';
 import { claimInvite, mintInvite, resolveInvite, revokeInvite } from './invites';
 import { assertCan, getPrincipal } from './principal';
+import {
+  createMember,
+  deleteMember,
+  updateFamily,
+  updateMember,
+  type FamilySettingsInput,
+} from './write';
 
 /**
  * The household's built-in calendar, written with the family (M23).
@@ -61,10 +66,8 @@ import {
   MEMBER_ROLES,
   REWARD_HORIZONS,
   family,
-  formerMember,
   member,
   memberInvite,
-  type MemberRole,
 } from './schema';
 import { MEMBER_AVATARS, avatarUrlFor } from './ui/tokens';
 import { MAX_CUSTOM_AVATAR_URI_LENGTH, checkCustomAvatar } from './domain/avatar';
@@ -556,29 +559,9 @@ export async function createMemberAction(
   const parsed = memberInput(formData);
   if (!parsed.success) return failure('invalidInput');
 
-  const input = parsed.data;
-  if (input.role === 'owner') return failure('singleOwner');
-
-  const db = getDb();
-  const [{ next }] = await db
-    .select({ next: sql<number>`coalesce(max(${member.sortOrder}), -1) + 1` })
-    .from(member)
-    .where(eq(member.familyId, principal.familyId));
-
-  // Children never get a login: `userId` stays null (docs/architecture.md §3).
-  await db.insert(member).values({
-    familyId: principal.familyId,
-    displayName: input.displayName,
-    role: input.role as MemberRole,
-    color: input.color,
-    rewardHorizon: input.rewardHorizon,
-    avatarUrl: input.avatarUrl || null,
-    birthDate: input.birthDate || null,
-    sortOrder: Number(next),
-  });
-
+  const result = await createMember(principal, parsed.data);
   revalidatePath(`/${await getLocale()}/family`);
-  return idleState;
+  return result;
 }
 
 export async function updateMemberAction(
@@ -590,37 +573,11 @@ export async function updateMemberAction(
   if (!principal) return failure('forbidden');
 
   const parsed = memberInput(formData);
-  if (!parsed.success || !z.uuid().safeParse(memberId).success) return failure('invalidInput');
+  if (!parsed.success) return failure('invalidInput');
 
-  const input = parsed.data;
-  const db = getDb();
-
-  const [existing] = await db
-    .select({ role: member.role })
-    .from(member)
-    .where(and(eq(member.id, memberId), eq(member.familyId, principal.familyId)))
-    .limit(1);
-
-  if (!existing) return failure('memberNotFound');
-  // Exactly one owner per family: the role of the owner row is immutable here.
-  if (existing.role === 'owner' && input.role !== 'owner') return failure('singleOwner');
-  if (existing.role !== 'owner' && input.role === 'owner') return failure('singleOwner');
-
-  await db
-    .update(member)
-    .set({
-      displayName: input.displayName,
-      role: input.role as MemberRole,
-      color: input.color,
-      rewardHorizon: input.rewardHorizon,
-      avatarUrl: input.avatarUrl || null,
-      birthDate: input.birthDate || null,
-      updatedAt: new Date(),
-    })
-    .where(and(eq(member.id, memberId), eq(member.familyId, principal.familyId)));
-
+  const result = await updateMember(principal, { ...parsed.data, memberId });
   revalidatePath(`/${await getLocale()}/family`);
-  return idleState;
+  return result;
 }
 
 export async function deleteMemberAction(
@@ -631,56 +588,9 @@ export async function deleteMemberAction(
   const principal = await assertCan('member:manage', { memberId }).catch(() => null);
   if (!principal) return failure('forbidden');
 
-  if (!z.uuid().safeParse(memberId).success) return failure('invalidInput');
-
-  const db = getDb();
-  const [existing] = await db
-    .select({ role: member.role, userId: member.userId })
-    .from(member)
-    .where(and(eq(member.id, memberId), eq(member.familyId, principal.familyId)))
-    .limit(1);
-
-  if (!existing) return failure('memberNotFound');
-  if (existing.role === 'owner') return failure('cannotRemoveOwner');
-
-  /**
-   * F4: removing a member with a login is removing *access*, and three things
-   * have to happen together or the removal is cosmetic.
-   *
-   *  1. The member row goes (the removal itself).
-   *  2. A tombstone is written. `member` is hard-deleted, so without one the
-   *     database can no longer distinguish "this login never had a household"
-   *     from "this login had one taken away" — and `(auth)/onboarding` needs
-   *     exactly that distinction, or a removed parent signing back in is
-   *     silently handed a form to create a household of their own.
-   *  3. Their sessions are revoked. Otherwise the removed parent keeps a valid
-   *     cookie; it resolves to no principal on the next request (no member row
-   *     to scope it), but a session that outlives the membership is a session
-   *     the app has to keep reasoning about, and it is what put them in the
-   *     redirect loop this finding is about.
-   *
-   * The sessions are deleted directly rather than through better-auth:
-   * `/revoke-sessions` revokes the *caller's own* sessions, and revoking
-   * another user's needs the admin plugin this app does not install. Same
-   * caveat as everywhere else in `server/auth.ts`: the signed cookie cache
-   * (300s) can serve a stale copy on another device for up to that long.
-   */
-  await db.transaction(async (tx) => {
-    await tx
-      .delete(member)
-      .where(and(eq(member.id, memberId), eq(member.familyId, principal.familyId)));
-
-    if (existing.userId) {
-      await tx.insert(formerMember).values({
-        userId: existing.userId,
-        familyId: principal.familyId,
-      });
-      await tx.delete(sessionTable).where(eq(sessionTable.userId, existing.userId));
-    }
-  });
-
+  const result = await deleteMember(principal, { memberId });
   revalidatePath(`/${await getLocale()}/family`);
-  return idleState;
+  return result;
 }
 
 /* ---------------------------------------------------------------------------
@@ -688,36 +598,9 @@ export async function deleteMemberAction(
  * ------------------------------------------------------------------------ */
 
 /**
- * A timezone is valid iff the platform's own ICU database knows it.
- *
- * Not an enum: the IANA list is ~600 entries, it changes with the tzdata
- * release the runtime ships, and pinning a copy of it in this file would mean
- * a family in a newly-split zone cannot select their own clock until we
- * redeploy. `Intl` is the same database every date/time render in the app
- * resolves against, so "valid" here means exactly "renders correctly there".
- */
-function isKnownTimeZone(value: string): boolean {
-  try {
-    new Intl.DateTimeFormat('en', { timeZone: value });
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-const familySettingsSchema = z.object({
-  name: trimmed.min(1).max(80),
-  locale: z.enum(locales),
-  /** The date/time convention (`src/i18n/formatting-locale.ts`), not the UI language above. */
-  formattingLocale: z.enum(FORMATTING_LOCALES),
-  timezone: trimmed.min(1).max(64).refine(isKnownTimeZone),
-  /** ISO-8601 weekday numbers; the UI offers Monday and Sunday. */
-  weekStartsOn: z.coerce.number().int().min(1).max(7),
-});
-
-/**
  * The household's own identity: name, language, clock, date/time format, week
- * start (M16, formatting locale added later — see `formattingLocale` below).
+ * start (M16, formatting locale added later — see the `formattingLocale` note
+ * below).
  *
  * Owner-only through `family:manage` — see that capability's note in
  * `authorize.ts` for why an adult second parent may run the household without
@@ -749,60 +632,27 @@ const familySettingsSchema = z.object({
  *    `requireHubDevice`, which sends a hub on the wrong locale prefix to the
  *    family's.
  *
- * The realtime event is what closes "without re-login" for the wall: a kiosk
- * that nobody touches has no reason to re-render otherwise.
+ * The realtime event (published inside `./write.ts#updateFamily`) is what
+ * closes "without re-login" for the wall: a kiosk that nobody touches has no
+ * reason to re-render otherwise.
  */
 export async function updateFamilyAction(
   _previous: ActionState,
   formData: FormData
 ): Promise<ActionState> {
   const principal = await assertCan('family:manage').catch(() => null);
-  // `family:manage` is `deny` for every non-member column, so this narrowing
-  // can only ever be the compiler catching up with the matrix.
-  if (!principal || principal.kind !== 'member') return failure('forbidden');
+  if (!principal) return failure('forbidden');
 
-  const parsed = familySettingsSchema.safeParse({
+  const result = await updateFamily(principal, {
     name: read(formData, 'name'),
-    locale: read(formData, 'locale'),
-    formattingLocale: read(formData, 'formattingLocale'),
+    locale: read(formData, 'locale') as FamilySettingsInput['locale'],
+    formattingLocale: read(formData, 'formattingLocale') as FamilySettingsInput['formattingLocale'],
     timezone: read(formData, 'timezone'),
     weekStartsOn: read(formData, 'weekStartsOn'),
   });
-  if (!parsed.success) return failure('invalidInput');
-
-  const input = parsed.data;
-
-  await getDb().transaction(async (tx) => {
-    await tx
-      .update(family)
-      .set({
-        name: input.name,
-        locale: input.locale,
-        formattingLocale: input.formattingLocale,
-        timezone: input.timezone,
-        weekStartsOn: input.weekStartsOn,
-        updatedAt: new Date(),
-      })
-      .where(eq(family.id, principal.familyId));
-
-    await publish(
-      {
-        familyId: principal.familyId,
-        type: 'settings.updated',
-        entity: { id: principal.familyId },
-        actor: { memberId: principal.memberId, source: 'mobile' },
-        patch: {
-          locale: input.locale,
-          formattingLocale: input.formattingLocale,
-          timezone: input.timezone,
-        },
-      },
-      tx
-    );
-  });
 
   await revalidateSettings();
-  return idleState;
+  return result;
 }
 
 const hubDisplaySchema = z.object({ hubDefaultView: z.enum(HUB_VIEWS) });
