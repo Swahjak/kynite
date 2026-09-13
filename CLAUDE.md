@@ -20,7 +20,7 @@ the root scripts proxy to `pnpm --filter web <script>`.
 pnpm dev              # Start dev server with Turbopack (http://localhost:3000)
 pnpm build            # Production build (runs migrations first)
 pnpm typecheck        # TypeScript type checking
-pnpm lint             # Run ESLint
+pnpm lint             # Run oxlint
 pnpm lint:fix         # Fix linting issues
 pnpm format           # Format with oxfmt
 pnpm format:check     # Check formatting
@@ -90,7 +90,7 @@ The primitives and the token layer live in the workspace package, not in the app
 - **What deliberately stayed in the app**: `modules/calendar/ui/time-grid.tsx` and `modules/timers/ui/timer-tile.tsx`. Both derive their whole visual state from a slice's domain (timezone + recurrence + a drag hook; the countdown clock + the timers `tokens.ts` three sibling surfaces share), so moving them would drag the slice into the design system. They are covered in Storybook by specimen stories instead.
 - **Tokens**: `packages/ui/src/styles/{tokens,utilities}.css`, the *only* copy. `apps/web/src/app/globals.css` is a five-line consumer of them, and so is Storybook's preview. Change a colour, a type step or a radius there, nowhere else.
 - **`cn()`**: `import { cn } from '@kynite/ui'` (it moved out of `@/lib/utils`).
-- **The package boundary is a lint rule.** `@kynite/ui` may not import `next-intl`, `next/*`, `server-only`, or anything from the app. Labels arrive as props; a component that needs a link takes Base UI's `render` prop and lets the app pass `next/link`. `packages/ui/eslint.config.mjs` has the rule and the reasoning.
+- **The package boundary is a lint rule.** `@kynite/ui` may not import `next-intl`, `next/*`, `server-only`, or anything from the app. Labels arrive as props; a component that needs a link takes Base UI's `render` prop and lets the app pass `next/link`. `packages/ui/.oxlintrc.json` has the rule and the reasoning.
 - **`apps/web/src/components/ui/` is now wrappers, not components.** `Dialog`, `Sheet`, `Toast`, `Fab`, `ConfirmButton`, `Calendar` and the date/time fields moved into the package; what is left under that path are thin client wrappers of the same name that inject what the package may not know — `t('close')`, `t('cancel')`, `next/link`, `useFormattingLocale()`. Keep importing `@/components/ui/dialog` from product code; import `@kynite/ui` directly only where no translation is involved. Adding a string to a package primitive means adding a **prop with an English default**, then filling it in the wrapper — never a `useTranslations` call inside `packages/ui`.
 - Tailwind scans the package through `@source '../../../../packages/ui/src'` in `globals.css`. A new class only used inside the package still compiles because of that line.
 

@@ -1,2 +1,2 @@
-DROP INDEX "account_issuer_account_id_uidx";--> statement-breakpoint
-ALTER TABLE "account" DROP COLUMN "issuer";
+DROP INDEX IF EXISTS "account_issuer_account_id_uidx";--> statement-breakpoint
+ALTER TABLE "account" DROP COLUMN IF EXISTS "issuer";
