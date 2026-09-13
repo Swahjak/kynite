@@ -594,6 +594,17 @@ export async function updateEvent(
   if (title.length === 0) return { ok: false, error: 'invalidInput' };
 
   const allDay = input.allDay ?? existing.allDay;
+  // `existing.startsAt`/`endsAt` are stored to match `existing.allDay` — a
+  // timed instant, or a UTC midnight (`toInstant`'s all-day convention above).
+  // Flipping `allDay` without supplying both dates would carry one of those
+  // shapes forward under the *other* meaning (a UTC-midnight `Date` read as a
+  // timed instant, or vice versa), so that combination is refused rather than
+  // silently breaking the invariant.
+  if (input.allDay !== undefined && input.allDay !== existing.allDay) {
+    if (input.startsAt === undefined || input.endsAt === undefined) {
+      return { ok: false, error: 'invalidInput' };
+    }
+  }
 
   const startsAt = input.startsAt !== undefined ? new Date(input.startsAt) : existing.startsAt;
   if (Number.isNaN(startsAt.getTime())) return { ok: false, error: 'invalidInput' };

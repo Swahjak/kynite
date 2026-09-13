@@ -285,9 +285,11 @@ export function registerCalendarTools(
       description:
         'Move or edit a whole event — a one-off event, or every occurrence of a recurring ' +
         'series at once. Every field but `eventId` is optional: only the fields given are ' +
-        'changed, everything else is left as it is. For one occurrence of a recurring ' +
-        'series, use `update_event_occurrence` instead. Refuses an event synced from Google ' +
-        'Calendar — change that one in Google Calendar.',
+        'changed, everything else is left as it is — except when changing allDay, which ' +
+        'also requires passing startsAt and endsAt, since an all-day date and a timed ' +
+        'instant are stored differently. For one occurrence of a recurring series, use ' +
+        '`update_event_occurrence` instead. Refuses an event synced from Google Calendar — ' +
+        'change that one in Google Calendar.',
       inputSchema: z.object({
         eventId: z.uuid(),
         title: z.string().min(1).max(200).optional(),
