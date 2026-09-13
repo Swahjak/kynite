@@ -32,7 +32,9 @@ Gates never run concurrently (shared CPU). Each step = own commit(s) on the bran
       - `pnpm lint` (both workspaces): ~1s, was OOMing before. `pnpm typecheck`: unaffected, ~2s.
       - Pre-existing, unrelated failure on this branch (predates S1, from `96067b9`/`6922407`):
         `tests/unit/i18n/hardcoded-strings.test.ts` flags un-i18n'd MCP tool `description` strings.
-        Left alone — out of scope for a lint-tooling swap.
+        Also `tests/unit/utils.test.ts` (`display-3xl` token drift) and
+        `tests/unit/oauth-consent/scope-message-key.test.ts` (next-intl module resolution).
+        Left alone — out of scope for a lint-tooling swap; fix in R.
 - [ ] S2 — TypeScript 7 plain (sonnet). Remove `typescript-native` alias + TS6 shim, `typescript@7`.
       AST tests → explicit `@typescript/typescript6` devDep (or oxc-parser). Verify Next 16.3.1 with
       native tsc; drop `experimental.useTypeScriptCli: false` if it works. Update CLAUDE.md TS notes.
@@ -47,3 +49,4 @@ Gates never run concurrently (shared CPU). Each step = own commit(s) on the bran
 
 | id | unit | model | subagent_tokens | tool_uses | status |
 |---|---|---|---|---|---|
+| s1 | S1 eslint→oxlint | sonnet | 220k | 153 | done — commit `6947faa` |
