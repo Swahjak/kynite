@@ -121,8 +121,8 @@ Uses shadcn/ui component library with CSS variables for theming (see `packages/u
 
 - Project: **Kynite Design System**, `projectId` `3c19b279-cfe7-4b23-b09d-b468627219ce` (https://claude.ai/design/p/3c19b279-cfe7-4b23-b09d-b468627219ce).
 - Fetch with the `DesignSync` tool (load it via `ToolSearch` first): `get_project` → `list_files` → `get_file` per path. `list_projects` returns **empty** for this one — it is `PROJECT_TYPE_PROJECT`, not a design-system project, and that method only lists design-system projects. Always address it by the id above rather than concluding there is no project.
-- A `.dc.html` is a large single-file mockup (40–170 KB). Fetch and diff it in a **subagent** that writes the remote copy to a scratch file and reports only the design deltas; pulling several of these into the main context burns it for no reason.
-- When a design changes, the local export in `docs/design/claude-design/` is refreshed from the remote and committed, so a diff of that directory is the record of what moved.
+- `DesignSync` is a built-in Claude Code tool (not an MCP server) meant for the `/design-sync` skill, which pushes a local component library *up* to a design-system project. Pulling mockups *down* with `get_file` is a side capability: it returns the file into the main context (no write-to-disk), is capped at 256 KiB, and is **not available to subagents** — so the old "fetch in a subagent" approach no longer works, and a wholesale pull of every mockup (~700 KB across 8 files) is not affordable. `list_files` carries no hashes or timestamps, so changed files can't be detected remotely either.
+- Sync discipline (2026-09-14): only pull a mockup the owner names as changed, in the main session, writing it straight to `docs/design/claude-design/` and diffing there; for anything larger, export from Claude Design by hand into that directory. Either way the commit of that directory is the record of what moved. Pulling `DESIGN.md` (~7 KB) on every sync is fine.
 
 ### Calendar Component
 
