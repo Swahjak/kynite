@@ -819,7 +819,8 @@
       "title": "Routines today",
       "steps": "{done} of {total} steps",
       "progressLabel": "{name}'s routines today",
-      "otherDay": "Routines are only shown for today."
+      "otherDay": "Routines are only shown for today.",
+      "viewLink": "View {name}'s routines"
     },
     "stars": {
       "title": "Stars today",

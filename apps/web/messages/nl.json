@@ -819,7 +819,8 @@
       "title": "Routines vandaag",
       "steps": "{done} van {total} stappen",
       "progressLabel": "Routines van {name} vandaag",
-      "otherDay": "Routines worden alleen voor vandaag getoond."
+      "otherDay": "Routines worden alleen voor vandaag getoond.",
+      "viewLink": "Bekijk de routines van {name}"
     },
     "stars": {
       "title": "Sterren vandaag",

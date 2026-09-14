@@ -65,6 +65,23 @@ type Story = StoryObj<typeof meta>;
 
 export const Playground: Story = {};
 
+export const Linked: Story = {
+  args: {
+    // Storybook has no `next/link` router; a plain anchor stands in for the
+    // app wrapper's `<Link href="/hub/routines/…" />` — the package itself
+    // only ever clones whatever element `render` is given.
+    render: <a href="#" aria-label="Bekijk de routines van Mila" />,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "The hub dashboard's card: `render` turns the whole card into a link (a visible chevron and focus ring), for `/hub/routines/[memberId]`.",
+      },
+    },
+  },
+};
+
 export const Family: Story = {
   render: () => (
     <Section title="Kid stat card — the family, at both sizes">
