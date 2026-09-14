@@ -319,5 +319,29 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
 
       await expect(page).toHaveScreenshot(`hub-agenda-${name}.png`, { fullPage: true });
     });
+
+    test('hub kalender', async ({ page, family }) => {
+      // M4, hub-calendar-shell: `/hub/kalender` mounts the app's own
+      // `CalendarShell surface="hub"` — a day board with one column per
+      // member, no header/view-switcher chrome (that lives in `TodayHeader`
+      // above it) and no create/dialog affordances (`canWrite` is false for
+      // a device principal). Same future anchor and per-person fixtures as
+      // the ambient board above, so the chips are never in their "already
+      // finished" state.
+      await pairHub(page, family.familyId);
+
+      await seedBoardDay(family.familyId);
+
+      await page.goto(`/nl/hub/kalender?date=${FUTURE_ANCHOR}`);
+      await expect(page.getByTestId('hub-kalender')).toBeVisible();
+      await expect(page.getByTestId('calendar-view-day')).toBeVisible();
+      await expect(page.getByTestId('kiosk-shell')).toHaveAttribute('data-hub-theme', 'light');
+
+      await pinLiveText(page, 'today-greeting', 'Goedemorgen');
+
+      await settlePage(page);
+
+      await expect(page).toHaveScreenshot(`hub-kalender-${name}.png`, { fullPage: true });
+    });
   });
 }

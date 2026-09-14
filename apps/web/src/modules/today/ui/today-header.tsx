@@ -145,7 +145,9 @@ export async function TodayHeader({
 
   const chevron = cn(
     'flex items-center justify-center rounded-4xl text-ink-muted transition-colors duration-200 ease-brand hover:bg-surface-container hover:text-ink focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none',
-    hub ? 'size-9' : 'size-8'
+    // `size-9` (36px) sat under the kiosk-audit's 48px touch-target floor —
+    // the app keeps its 32px chevron, the hub gets the full 48px.
+    hub ? 'size-12' : 'size-8'
   );
 
   /**

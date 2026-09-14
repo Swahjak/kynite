@@ -305,7 +305,10 @@ export function CalendarShell({
             className="rounded-full transition-opacity focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
           >
             <MemberFace
-              size="default"
+              // `hub` is the 56px avatar step (`packages/ui/src/components/avatar.tsx`)
+              // — the kiosk-audit's 48px touch-target floor, which the app's
+              // 32px `default` face doesn't meet and isn't required to meet.
+              size={hub ? 'hub' : 'default'}
               name={member.displayName}
               avatarUrl={member.avatarUrl}
               surfaceClass={palette.track}

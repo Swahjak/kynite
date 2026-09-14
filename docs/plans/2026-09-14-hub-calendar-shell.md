@@ -18,7 +18,7 @@ Owner decision (2026-09-14): the hub (`/hub/kalender`, device principal) is the 
 - [x] M1 — surface + route swap (sonnet). `calendar-shell.tsx` (`surface`, `basePath` for the three hard-coded `/calendar` pushes ~:145/:158/:187, suppress header + view switcher on hub), `modules/calendar/index.ts`, `(hub)/hub/kalender/page.tsx` (mount `CalendarShell` inside `HubBoard`, keep `TodayLive` + `TodayHeader`). AC: `/nl/hub/kalender` renders `calendar-view-day` with one column per member; no `event-create`/`event-dialog`; typecheck + lint clean.
 - [x] M2 — read-only gating (sonnet). `time-grid.tsx`, `member-day-grid.tsx` get `canWrite`; when false no `onPointerDown`/`suppressClick`/`cursor-grab` (drag is gated on `event.editable` today, `queries.ts:311` leaves it true for device principals). `MemberDayGrid` threads `hub` to `EventChip`. Unit tests. AC: app calendar behaviour unchanged.
 - [x] M3 — kiosk metrics (sonnet). `ui/tokens.ts` hub constants; `layout`/`verticalSpan` take `metrics`; `MemberDayGrid`/`TimeGrid` accept `metrics` (default app); `HEADER_HEIGHT` in metrics; scroll-to-now effect. Metrics unit test.
-- [ ] M4 — tests & baselines (sonnet). `calendar-shell-hub.test.tsx`; hub visual spec baseline for `/nl/hub/kalender`; `kiosk-audit.spec.ts` green at both viewports.
+- [x] M4 — tests & baselines (sonnet). `calendar-shell-hub.test.tsx` (already landed in M2, verified still covers `surface="hub"`); hub visual spec baseline for `/nl/hub/kalender` added (`hub-kalender-{tablet,mobile}.png`); `kiosk-audit.spec.ts` fixes: `MemberFace size="hub"` on the calendar's member-filter faces (`calendar-shell.tsx`) and `size-12` (48px) day-nav chevrons on the hub (`today-header.tsx`, was `size-9`/36px) — both hub-only, app sizes untouched. `kalender` surface now green on both audits; unrelated pre-existing failure on `/hub/routines` (`pill-tab-morning/afternoon/evening` at 40px) left alone, out of scope.
 - [ ] R — review → fix → merge → deploy.
 
 ## Agent log
@@ -29,3 +29,4 @@ Owner decision (2026-09-14): the hub (`/hub/kalender`, device principal) is the 
 | plan | plan | opus | 106k | 31 | done |
 | m1m2 | M1 + M2 | sonnet | ~90k | ~45 | done |
 | m3 | M3 | sonnet | ~55k | ~35 | done |
+| m4 | M4 | sonnet | ~95k | ~55 | done |
