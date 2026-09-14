@@ -122,7 +122,9 @@ export function StepRow({
       tint="none"
       className={cn(
         'shrink-0',
-        done ? 'bg-cat-green-surface text-cat-green-fg' : (iconTintClass ?? 'bg-surface-container text-ink-secondary')
+        done
+          ? 'bg-cat-green-surface text-cat-green-fg'
+          : (iconTintClass ?? 'bg-surface-container text-ink-secondary')
       )}
     />
   ) : null;
@@ -185,7 +187,7 @@ export function StepRow({
                     tile allows. */}
                 <span
                   data-testid="step-praise"
-                  className="min-w-0 font-display text-caption leading-snug font-bold text-brand-ink"
+                  className="min-w-0 font-display text-caption leading-snug font-bold text-cat-green-fg"
                 >
                   {praiseText}
                 </span>

@@ -59,10 +59,15 @@ export function isActivityIcon(value: string): value is ActivityIcon {
 
 /**
  * Keyword → icon, nl first (the household's own language) then en. Matched
- * against a lowercased title as a substring, in declaration order — so a
- * title that matches two keywords takes the first table entry, which is why
- * the more specific words (`ontbijt`, `afwas`) come before the general ones
- * (`eten`, `was`).
+ * word-boundary based, in declaration order — so a title that matches two
+ * keywords takes the first table entry, which is why the more specific words
+ * (`ontbijt`, `afwas`) come before the general ones (`eten`, `was`). A
+ * keyword with a space is matched as a substring (a phrase); a single-word
+ * keyword is matched against the lowercased title's tokens (split on
+ * non-letters) — a token must equal the keyword, or (for keywords of 4+
+ * letters, to keep short keywords like `bin` from prefix-matching unrelated
+ * words like "Bingo") start with it, so `tanden` still catches
+ * `tandenpoetsen`.
  */
 const KEYWORDS: ReadonlyArray<readonly [string, ActivityIcon]> = [
   // Hygiene
@@ -188,9 +193,18 @@ const KEYWORDS: ReadonlyArray<readonly [string, ActivityIcon]> = [
  */
 export function suggestIcon(title: string): ActivityIcon {
   const lower = title.toLowerCase();
+  const tokens = lower.split(/[^\p{L}]+/u).filter(Boolean);
 
   for (const [keyword, icon] of KEYWORDS) {
-    if (lower.includes(keyword)) return icon;
+    if (keyword.includes(' ')) {
+      if (lower.includes(keyword)) return icon;
+      continue;
+    }
+
+    const matches = tokens.some(
+      (token) => token === keyword || (keyword.length >= 4 && token.startsWith(keyword))
+    );
+    if (matches) return icon;
   }
 
   return DEFAULT_ACTIVITY_ICON;

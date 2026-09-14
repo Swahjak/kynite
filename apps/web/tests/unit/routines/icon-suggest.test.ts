@@ -40,4 +40,11 @@ describe('suggestIcon', () => {
     expect(suggestIcon('Huiswerk maken')).toBe('task_alt');
     expect(suggestIcon('')).toBe('task_alt');
   });
+
+  it('matches on word boundaries, not bare substrings', () => {
+    expect(suggestIcon('Fantasie spelen')).not.toBe('backpack');
+    expect(suggestIcon('Bingo avond')).not.toBe('delete');
+    expect(suggestIcon('Tas inpakken')).toBe('backpack');
+    expect(suggestIcon('Tanden poetsen')).toBe('dentistry');
+  });
 });

@@ -153,11 +153,15 @@ export async function RoutineManager({
               >
                 <GripHandle />
                 <IconMedallion
-                  icon={routineIconOf(routine.icon)}
+                  icon={routineIconOf(routine.icon, routine.title)}
                   tint={routine.active ? 'none' : 'muted'}
                   shape="squircle"
                   size="md"
-                  className={routine.active ? ROUTINE_ICON_TILE[routineIconOf(routine.icon)] : ''}
+                  className={
+                    routine.active
+                      ? ROUTINE_ICON_TILE[routineIconOf(routine.icon, routine.title)]
+                      : ''
+                  }
                 />
 
                 {canWrite ? (
@@ -230,11 +234,11 @@ export async function RoutineManager({
               className="flex items-center gap-2.5 border-t border-line-subtle pt-2.5"
             >
               <IconMedallion
-                icon={routineIconOf(routine.icon)}
+                icon={routineIconOf(routine.icon, routine.title)}
                 tint="none"
                 shape="squircle"
                 size="sm"
-                className={ROUTINE_ICON_TILE[routineIconOf(routine.icon)]}
+                className={ROUTINE_ICON_TILE[routineIconOf(routine.icon, routine.title)]}
               />
               <span className="min-w-0 flex-1 truncate text-body-sm font-semibold">
                 {routine.title} ·{' '}
