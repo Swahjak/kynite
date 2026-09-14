@@ -72,13 +72,13 @@ type RailItem = {
 const ITEMS: readonly RailItem[] = [
   { key: 'vandaag', href: '/hub', icon: 'calendar_month' },
   { key: 'kalender', href: '/hub/kalender', icon: 'view_column' },
-  // `repeat`, not `checklist`: the taken-board-routines-page plan (M1+M2)
-  // gives the family-wide task board its own tile below, so this one no
-  // longer borrows the checklist glyph — a recurring routine is what is
+  // `restart_alt`, not `checklist`: the taken-board-routines-page plan
+  // (M1+M2) gives the family-wide task board its own tile below, so this one
+  // no longer borrows the checklist glyph — a recurring routine is what is
   // left at this destination once M3 lands the family-wide "Actieve
-  // routines" page here. Until then this still points at `/hub/routines`,
-  // which is a temporary redirect to `/hub/taken`.
-  { key: 'routines', href: '/hub/routines', icon: 'repeat' },
+  // routines" page here. `repeat` (the M1+M2 placeholder) is replaced by M5
+  // now that the glyph is in the subset.
+  { key: 'routines', href: '/hub/routines', icon: 'restart_alt' },
   { key: 'taken', href: '/hub/taken', icon: 'checklist' },
   // `bar_chart`, not the shelf's old `redeem` gift icon: the tile is now
   // "Sterren" rather than "Winkel", and the glyph follows the label — the

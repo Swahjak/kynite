@@ -182,7 +182,7 @@ export function RoutinesBoard({ board, dayKey, toggleTaskAction }: RoutinesBoard
       </div>
 
       <div className="flex flex-shrink-0 items-center gap-2.5 pt-1">
-        <Icon name="arrow_forward" size="sm" className="text-ink-muted" />
+        <Icon name="swipe" size="sm" className="text-ink-muted" />
         <span className="text-body-sm text-ink-muted">{t('board.footerHint')}</span>
       </div>
     </div>
