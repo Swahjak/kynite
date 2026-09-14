@@ -33,6 +33,7 @@ import { assertCan, getPrincipal } from './principal';
 import {
   createMember,
   deleteMember,
+  reorderMember,
   updateFamily,
   updateMember,
   type FamilySettingsInput,
@@ -590,6 +591,24 @@ export async function deleteMemberAction(
 
   const result = await deleteMember(principal, { memberId });
   revalidatePath(`/${await getLocale()}/family`);
+  return result;
+}
+
+/** The up/down buttons on `member-list.tsx` (M1, adjustable member order). */
+export async function reorderMemberAction(
+  _previous: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const memberId = read(formData, 'memberId');
+  const direction = read(formData, 'direction');
+  const principal = await assertCan('member:manage', { memberId }).catch(() => null);
+  if (!principal) return failure('forbidden');
+
+  if (direction !== 'up' && direction !== 'down') return failure('invalidInput');
+
+  const result = await reorderMember(principal, { memberId, direction });
+  revalidatePath(`/${await getLocale()}/family`);
+  revalidatePath(`/${await getLocale()}/settings`);
   return result;
 }
 

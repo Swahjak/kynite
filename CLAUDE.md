@@ -190,9 +190,9 @@ separate server, see `docs/adr/20260903-mcp-server.md` for why.
   `get_timer`, `start_timer`, `stop_timer`, `pause_timer`, `resume_timer`, `extend_timer`),
   rewards 12 (`list_rewards`, `get_reward`, `list_redemptions`, `get_star_totals`,
   `list_star_history`, `create_reward`, `update_reward`, `delete_reward`, `award_stars`,
-  `request_redemption`, `decide_redemption`, `fulfill_redemption`), family 7 (`list_members`,
+  `request_redemption`, `decide_redemption`, `fulfill_redemption`), family 8 (`list_members`,
   `get_family`, `get_member`, `create_member`, `update_member`, `delete_member`,
-  `update_family`). `update_event`/`delete_event` move/edit/delete a whole event or series
+  `update_family`, `reorder_members`). `update_event`/`delete_event` move/edit/delete a whole event or series
   (`modules/calendar/write.ts`'s `updateEvent`/`deleteEvent`, extracted from
   `updateEventAction`'s/`deleteEventAction`'s whole-series branches) — distinct from
   `update_event_occurrence`/`skip_event_occurrence`, which touch one occurrence of a
