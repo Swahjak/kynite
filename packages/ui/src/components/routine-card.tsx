@@ -88,9 +88,44 @@ export type RoutineCardProps = {
     tileClass?: string;
   };
   onComplete?: (stepId: string, origin: { x: number; y: number }) => void;
+  /**
+   * Makes the card an accordion (`Actieve routines.dc.html`): the header
+   * becomes one tap target with a chevron, and the parent decides which card
+   * in a column is open. Omitted — the child's own board — the card keeps the
+   * non-interactive header it has always had, because there the expansion is
+   * decided by the day rather than by a tap.
+   */
+  onToggle?: () => void;
+  /**
+   * A single column of steps instead of the two-column grid.
+   *
+   * The family-wide page draws three-plus columns across 1280px, so a routine
+   * card is ~380px wide and the grid's second column would leave two-word
+   * tiles. Same component, same tap targets, one column.
+   */
+  dense?: boolean;
+  /**
+   * This routine was finished *just now*, on this device (M3's owner ask).
+   *
+   * Adds the spring to the KLAAR state as it enters, using the design system's
+   * own big-pop keyframe — which is already inert under
+   * `prefers-reduced-motion`, so there is no second guard here. It is a
+   * transition, never a state: the caller only sets it for a routine its own
+   * tap completed, so a refresh that re-renders a finished routine does not
+   * bounce it again.
+   */
+  celebrating?: boolean;
 };
 
-export function RoutineCard({ routine, expanded, copy, onComplete }: RoutineCardProps) {
+export function RoutineCard({
+  routine,
+  expanded,
+  copy,
+  onComplete,
+  onToggle,
+  dense = false,
+  celebrating = false,
+}: RoutineCardProps) {
   // The step the routine is *on*. Presentational only — the board's completion
   // flow is unchanged; this just tells `StepRow` which tile to draw as next.
   const activeStepId = routine.steps.find((step) => !step.done)?.id ?? null;
@@ -112,7 +147,11 @@ export function RoutineCard({ routine, expanded, copy, onComplete }: RoutineCard
     return (
       <article
         {...shared}
-        className="flex items-center gap-4 rounded-xl bg-surface-container-low px-5 py-4"
+        data-celebrating={celebrating ? 'true' : 'false'}
+        className={cn(
+          'flex items-center gap-4 rounded-xl bg-surface-container-low px-5 py-4',
+          celebrating && 'kynite-anim-pop-big'
+        )}
       >
         <Icon name="check_circle" filled size="lg" className="shrink-0 text-cat-green-fg" />
         <h3 className="min-w-0 flex-1 font-display text-h3 font-bold text-ink-secondary">
@@ -140,8 +179,25 @@ export function RoutineCard({ routine, expanded, copy, onComplete }: RoutineCard
     return (
       <article
         {...shared}
-        className="flex items-center gap-4 rounded-xl border border-line-subtle bg-surface-container-lowest px-5 py-4"
+        className={cn(
+          'relative flex items-center gap-4 rounded-xl border border-line-subtle bg-surface-container-lowest px-5 py-4',
+          onToggle && 'min-h-14'
+        )}
       >
+        {/* The whole row is the tap target, as a transparent overlay rather
+            than a wrapper: the badges and the medallion beside it stay plain
+            content, so nothing interactive is nested inside a button. */}
+        {onToggle ? (
+          <button
+            type="button"
+            data-testid="routine-toggle"
+            aria-expanded={false}
+            aria-label={routine.title}
+            onClick={onToggle}
+            className="absolute inset-0 rounded-xl focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+          />
+        ) : null}
+
         <IconMedallion
           icon={routine.icon}
           tint={copy.tileClass ? 'none' : 'muted'}
@@ -180,6 +236,10 @@ export function RoutineCard({ routine, expanded, copy, onComplete }: RoutineCard
             {copy.countdown}
           </Badge>
         ) : null}
+
+        {onToggle ? (
+          <Icon name="expand_more" size="lg" className="shrink-0 text-ink-muted" />
+        ) : null}
       </article>
     );
   }
@@ -191,13 +251,27 @@ export function RoutineCard({ routine, expanded, copy, onComplete }: RoutineCard
   return (
     <article
       {...shared}
-      className="relative isolate overflow-hidden rounded-xl border border-line-subtle bg-surface-container-lowest py-6 pr-6 pl-7 shadow-sm"
+      className={cn(
+        'relative isolate overflow-hidden rounded-xl border border-line-subtle bg-surface-container-lowest shadow-sm',
+        dense ? 'py-4 pr-4 pl-5' : 'py-6 pr-6 pl-7'
+      )}
     >
       {/* The rail. Six pixels of indigo down the whole left edge is the board's
           only "this one, now" marker that needs no reading at all. */}
       <span aria-hidden className="absolute inset-y-0 left-0 w-1.5 bg-primary" />
 
-      <header className="flex items-center gap-4">
+      <header className={cn('relative flex items-center gap-4', onToggle && 'pr-9')}>
+        {onToggle ? (
+          <button
+            type="button"
+            data-testid="routine-toggle"
+            aria-expanded
+            aria-label={routine.title}
+            onClick={onToggle}
+            className="absolute -inset-x-2 -inset-y-1 rounded-xl focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+          />
+        ) : null}
+
         <IconMedallion
           icon={routine.icon}
           tint={copy.tileClass ? 'none' : 'brand-container'}
@@ -231,6 +305,14 @@ export function RoutineCard({ routine, expanded, copy, onComplete }: RoutineCard
             className="shrink-0"
           />
         ) : null}
+
+        {onToggle ? (
+          <Icon
+            name="expand_more"
+            size="lg"
+            className="absolute right-0 shrink-0 rotate-180 text-ink-muted"
+          />
+        ) : null}
       </header>
 
       {copy.praiseLine ? (
@@ -243,7 +325,13 @@ export function RoutineCard({ routine, expanded, copy, onComplete }: RoutineCard
         </p>
       ) : null}
 
-      <ul className={cn('grid gap-3 sm:grid-cols-2', copy.praiseLine ? undefined : 'mt-4.5')}>
+      <ul
+        className={cn(
+          'grid gap-3',
+          dense ? undefined : 'sm:grid-cols-2',
+          copy.praiseLine ? undefined : 'mt-4.5'
+        )}
+      >
         {routine.steps.map((step) => (
           <StepRow
             key={step.id}

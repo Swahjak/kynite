@@ -887,6 +887,16 @@
         "undo": "{title} weer openzetten"
       },
       "footerHint": "Veeg om meer gezinsleden te zien"
+    },
+    "routinesPage": {
+      "title": "Routines",
+      "stepCount": "{done} van {total} stappen",
+      "percent": "{value}%",
+      "bandCount": "{done}/{total}",
+      "routineMeta": "{time} · {done}/{total} stappen",
+      "starsEarned": "{count, plural, =1 {# ster vandaag verdiend} other {# sterren vandaag verdiend}}",
+      "empty": "Geen routines dit dagdeel",
+      "celebrate": "Goed gedaan, {name}! {routine} klaar · +{stars} sterren"
     }
   },
   "routines": {
@@ -1041,7 +1051,8 @@
     "graceChip": "Nog te doen",
     "praiseRemaining": "{count, plural, one {Goed bezig! Nog één stapje.} other {Goed bezig! Nog # stapjes.}}",
     "graduatedHint": "dat kun jij al zelf!",
-    "startsAt": "om {time}"
+    "startsAt": "om {time}",
+    "routineCelebration": "Goed gedaan, {name}! {routine} klaar · +{stars} sterren"
   },
   "rewards": {
     "title": "Beloningen",

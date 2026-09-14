@@ -15,7 +15,9 @@ import {
   sectionOf,
   timingAt,
   wallClockOf,
+  type OpenOccurrence,
   type RoutineState,
+  type RoutineTiming,
   type TimeSection,
 } from './domain/occurrence';
 import {
@@ -25,6 +27,14 @@ import {
   type PraiseKey,
   type RoutineDoneKey,
 } from './domain/praise';
+import {
+  bandsOf,
+  columnProgress,
+  firstOpenRoutineId,
+  starsEarnedIn,
+  type ColumnBand,
+  type ColumnProgress,
+} from './domain/board-columns';
 import { isOneOff } from './domain/schedule';
 import { completionRatio } from './domain/steps';
 import { hasGraduated, starsFor } from './domain/stars';
@@ -34,7 +44,7 @@ import {
   listRoutines,
   type RoutineWithSteps,
 } from './queries';
-import { routineIconOf, type RoutineIcon } from './ui/tokens';
+import { ROUTINE_ICON_TILE, routineIconOf, type RoutineIcon } from './ui/tokens';
 
 /**
  * The two server-side reads the routine surfaces compose (architecture §2 rule
@@ -265,6 +275,77 @@ export async function loadFamilyRoutineTotals(
   return totals;
 }
 
+type TimedRoutine = {
+  row: RoutineWithSteps;
+  timing: RoutineTiming;
+  occurrence: OpenOccurrence;
+};
+
+/**
+ * One open occurrence → the board row every routine surface draws.
+ *
+ * Extracted from `loadMemberRoutines` when M3 added the family-wide page: the
+ * two loaders ask the same question for one member and for every member, and
+ * a second copy of this mapping is exactly how "what counts as done" and
+ * "which praise line this step wears" would start to differ between a child's
+ * own board and the wall's overview of the whole household.
+ */
+function toBoardRoutine({
+  row,
+  timing,
+  occurrence,
+  memberId,
+  doneKeys,
+  timeZone,
+}: TimedRoutine & {
+  memberId: string;
+  /** `${stepId}:${occurrenceDate}` for every step this member has finished. */
+  doneKeys: ReadonlySet<string>;
+  timeZone: string;
+}): BoardRoutine {
+  const steps: BoardStep[] = row.steps.map((step) => ({
+    id: step.id,
+    title: step.title,
+    timerSeconds: step.timerSeconds,
+    done: doneKeys.has(`${step.id}:${occurrence.occurrenceDate}`),
+    praiseKey: praiseKeyFor(
+      completionSeed({
+        memberId,
+        routineStepId: step.id,
+        occurrenceDate: occurrence.occurrenceDate,
+      })
+    ),
+    clientId: completionSeed({
+      memberId,
+      routineStepId: step.id,
+      occurrenceDate: occurrence.occurrenceDate,
+    }),
+  }));
+
+  const doneCount = steps.filter((step) => step.done).length;
+
+  return {
+    id: row.id,
+    title: row.title,
+    icon: routineIconOf(row.icon),
+    memberId,
+    section: sectionOf(row.schedule),
+    state: timing.state,
+    occurrenceDate: occurrence.occurrenceDate,
+    minutesUntil: timing.minutesUntil,
+    dueTime: wallClockOf(occurrence.startsAt, timeZone),
+    steps,
+    doneCount,
+    total: steps.length,
+    complete: steps.length > 0 && doneCount === steps.length,
+    ratio: completionRatio(steps.length, doneCount),
+    oneOff: isOneOff(row.schedule),
+    starsPerCompletion: starsFor(row),
+    graduated: hasGraduated(row),
+    doneKey: routineDoneKeyFor(`${row.id}:${occurrence.occurrenceDate}`),
+  };
+}
+
 /** Null when there is no principal, or the member is not in this family. */
 export async function loadMemberRoutines(options: BoardOptions): Promise<RoutineBoard | null> {
   const principal = await getPrincipal();
@@ -301,49 +382,9 @@ export async function loadMemberRoutines(options: BoardOptions): Promise<Routine
     completed.map((entry) => `${entry.routineStepId}:${entry.occurrenceDate}`)
   );
 
-  const board: BoardRoutine[] = timed.map(({ row, timing, occurrence }) => {
-    const steps: BoardStep[] = row.steps.map((step) => ({
-      id: step.id,
-      title: step.title,
-      timerSeconds: step.timerSeconds,
-      done: doneKeys.has(`${step.id}:${occurrence.occurrenceDate}`),
-      praiseKey: praiseKeyFor(
-        completionSeed({
-          memberId: member.id,
-          routineStepId: step.id,
-          occurrenceDate: occurrence.occurrenceDate,
-        })
-      ),
-      clientId: completionSeed({
-        memberId: member.id,
-        routineStepId: step.id,
-        occurrenceDate: occurrence.occurrenceDate,
-      }),
-    }));
-
-    const doneCount = steps.filter((step) => step.done).length;
-
-    return {
-      id: row.id,
-      title: row.title,
-      icon: routineIconOf(row.icon),
-      memberId: member.id,
-      section: sectionOf(row.schedule),
-      state: timing.state,
-      occurrenceDate: occurrence.occurrenceDate,
-      minutesUntil: timing.minutesUntil,
-      dueTime: wallClockOf(occurrence.startsAt, timeZone),
-      steps,
-      doneCount,
-      total: steps.length,
-      complete: steps.length > 0 && doneCount === steps.length,
-      ratio: completionRatio(steps.length, doneCount),
-      oneOff: isOneOff(row.schedule),
-      starsPerCompletion: starsFor(row),
-      graduated: hasGraduated(row),
-      doneKey: routineDoneKeyFor(`${row.id}:${occurrence.occurrenceDate}`),
-    };
-  });
+  const board: BoardRoutine[] = timed.map((entry) =>
+    toBoardRoutine({ ...entry, memberId: member.id, doneKeys, timeZone })
+  );
 
   /**
    * A finished one-off is **done with**, not merely ticked (M20).
@@ -393,19 +434,157 @@ export async function loadMemberRoutines(options: BoardOptions): Promise<Routine
   // The expanded routine: the first unfinished one that is actually live.
   // A routine still ahead of its time, or one already done, does not steal the
   // expansion from the thing the child is meant to be doing right now.
-  const active =
-    visible.find(
-      (entry) => !entry.complete && (entry.state === 'due' || entry.state === 'grace')
-    ) ??
-    visible.find((entry) => !entry.complete) ??
-    null;
+  const activeRoutineId = firstOpenRoutineId(visible);
 
   return {
     familyId: principal.familyId,
     member,
     sections,
-    activeRoutineId: active?.id ?? null,
+    activeRoutineId,
     now,
     timeZone,
+  };
+}
+
+/* -------------------------------------------------------------------------- */
+/* The family-wide "Actieve routines" page (`(hub)/hub/routines`, M3)          */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * A board routine with its icon tint already resolved.
+ *
+ * `ROUTINE_ICON_TILE` lives in the routines slice, and the page that draws
+ * these columns runs in the browser — a client component may not import this
+ * slice's value exports, because this barrel carries `server-only` reads
+ * beside them. Same reason `page-data-board.ts` resolves `accentClass` server
+ * side for the taken board.
+ */
+export type FamilyBoardRoutine = BoardRoutine & { tileClass: string };
+
+/** One member's column on the family-wide routines page. */
+export type FamilyRoutineColumn = {
+  memberId: string;
+  displayName: string;
+  avatarUrl: string | null;
+  initials: string;
+  role: Member['role'];
+  /** `MEMBER_COLOR_CLASSES[member.color]` — resolved here, see above. */
+  colorClasses: (typeof MEMBER_COLOR_CLASSES)[Member['color']];
+  /** Dayparts this member actually has something in; empty bands are dropped. */
+  bands: ColumnBand<FamilyBoardRoutine>[];
+  /** The one card this column opens with — see `firstOpenRoutineId`. */
+  activeRoutineId: string | null;
+  progress: ColumnProgress;
+  /** Stars earned today, per completed *step*. */
+  starsEarned: number;
+};
+
+export type FamilyRoutinesData = {
+  familyId: string;
+  columns: FamilyRoutineColumn[];
+  now: Date;
+  timeZone: string;
+  /** `completion:write` for this principal — gates tapping a step at all. */
+  canComplete: boolean;
+};
+
+/**
+ * Every member's routines for today, in one query set — the read behind the
+ * family-wide "Actieve routines" page (2026-09-14 plan, M3).
+ *
+ * The single-member sibling of this is `loadMemberRoutines`, and the two
+ * deliberately share `toBoardRoutine`: the wall's overview and a child's own
+ * page must agree, step for step, about what today contains. What differs is
+ * only the shape around it — one column per member with its own bands and its
+ * own progress, rather than one member's two-column board.
+ *
+ * Following `loadFamilyRoutineTotals`' family-scan pattern rather than calling
+ * `loadMemberRoutines` once per member: that would be four round trips per
+ * child on a display that re-renders on every realtime push.
+ *
+ * Null only when there is no principal. A member with nothing scheduled today
+ * is present with no bands at all — "niets vandaag" is something the column
+ * says, not a member the page omits.
+ */
+export async function loadFamilyRoutines(
+  options: { date?: string; time?: string } = {}
+): Promise<FamilyRoutinesData | null> {
+  const principal = await getPrincipal();
+  if (!principal) return null;
+
+  const [family, members, routines] = await Promise.all([
+    getFamily(principal.familyId),
+    listMembers(principal.familyId),
+    listRoutines(principal.familyId, { activeOnly: true }),
+  ]);
+
+  const timeZone = family?.timezone ?? 'Europe/Amsterdam';
+  const now = resolveNow(options, timeZone);
+
+  const timed = routines.flatMap((row) => {
+    const timing = timingAt({ schedule: row.schedule, anchor: row.createdAt, timeZone }, now);
+    return timing.occurrence ? [{ row, timing, occurrence: timing.occurrence }] : [];
+  });
+
+  const completions = await listCompletionsOn({
+    familyId: principal.familyId,
+    occurrenceDates: [...new Set(timed.map(({ occurrence }) => occurrence.occurrenceDate))],
+  });
+
+  // `memberId:stepId:date` — one scan for the whole household, narrowed per
+  // member below into the `stepId:date` keys `toBoardRoutine` expects.
+  const done = new Set(
+    completions.map((entry) => `${entry.memberId}:${entry.routineStepId}:${entry.occurrenceDate}`)
+  );
+
+  const byMember = new Map<string, typeof timed>();
+  for (const entry of timed) {
+    const bucket = byMember.get(entry.row.ownerMemberId);
+    if (bucket) bucket.push(entry);
+    else byMember.set(entry.row.ownerMemberId, [entry]);
+  }
+
+  const columns = members.map((member): FamilyRoutineColumn => {
+    const doneKeys = new Set(
+      [...done]
+        .filter((key) => key.startsWith(`${member.id}:`))
+        .map((key) => key.slice(member.id.length + 1))
+    );
+
+    const all: FamilyBoardRoutine[] = (byMember.get(member.id) ?? []).map((entry) => {
+      const routine = toBoardRoutine({ ...entry, memberId: member.id, doneKeys, timeZone });
+      return { ...routine, tileClass: ROUTINE_ICON_TILE[routine.icon] };
+    });
+
+    // A finished one-off leaves the board and keeps its credit — the same
+    // arithmetic `loadMemberRoutines` does, and for the same reason: a counter
+    // that shrank under the household would be the board rewriting what it
+    // asked for. So the bands *count* `all` and *render* what is left.
+    const visible = (routine: FamilyBoardRoutine) => !(routine.oneOff && routine.complete);
+
+    const bands = bandsOf(all)
+      .map((band) => ({ ...band, routines: band.routines.filter(visible) }))
+      .filter((band) => band.routines.length > 0);
+
+    return {
+      memberId: member.id,
+      displayName: member.displayName,
+      avatarUrl: member.avatarUrl,
+      initials: initialsOf(member.displayName),
+      role: member.role,
+      colorClasses: MEMBER_COLOR_CLASSES[member.color],
+      bands,
+      activeRoutineId: firstOpenRoutineId(all.filter(visible)),
+      progress: columnProgress(all),
+      starsEarned: starsEarnedIn(all),
+    };
+  });
+
+  return {
+    familyId: principal.familyId,
+    columns,
+    now,
+    timeZone,
+    canComplete: can(principal, 'completion:write', { familyId: principal.familyId }),
   };
 }

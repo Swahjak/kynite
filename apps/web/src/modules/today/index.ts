@@ -75,6 +75,7 @@ export { TodayTabDag, type TodayTabDagProps } from './ui/today-tab-dag';
 export { TodayTabPersonen, type TodayTabPersonenProps } from './ui/today-tab-personen';
 export { TodayTabRoutines, type TodayTabRoutinesProps } from './ui/today-tab-routines';
 export { RoutinesBoard, type RoutinesBoardProps } from './ui/routines-board';
+export { RoutinesPageBoard, type RoutinesPageBoardProps } from './ui/routines-page-board';
 export { TodayTabSterren, type TodayTabSterrenProps } from './ui/today-tab-sterren';
 export { TodayTabs, type TodayTabsProps } from './ui/today-tabs';
 export {

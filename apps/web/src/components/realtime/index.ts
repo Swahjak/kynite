@@ -32,3 +32,13 @@ export {
   type PendingCompletion,
   type OutboxCompletion,
 } from './outbox';
+
+export {
+  ROUTINE_CELEBRATION_MS,
+  useCompletionFlow,
+  type CompletionFlow,
+  type CompletionResult,
+  type FlowRoutine,
+  type FlowStep,
+  type RoutineCelebration,
+} from './use-completion-flow';

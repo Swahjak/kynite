@@ -887,6 +887,16 @@
         "undo": "Reopen {title}"
       },
       "footerHint": "Swipe to see more family members"
+    },
+    "routinesPage": {
+      "title": "Routines",
+      "stepCount": "{done} of {total} steps",
+      "percent": "{value}%",
+      "bandCount": "{done}/{total}",
+      "routineMeta": "{time} · {done}/{total} steps",
+      "starsEarned": "{count, plural, =1 {# star earned today} other {# stars earned today}}",
+      "empty": "No routines this part of the day",
+      "celebrate": "Well done, {name}! {routine} finished · +{stars} stars"
     }
   },
   "routines": {
@@ -1041,7 +1051,8 @@
     "graceChip": "Still to do",
     "praiseRemaining": "{count, plural, one {Nicely done! One more step.} other {Nicely done! # more steps.}}",
     "graduatedHint": "you can do this on your own!",
-    "startsAt": "at {time}"
+    "startsAt": "at {time}",
+    "routineCelebration": "Well done, {name}! {routine} finished · +{stars} stars"
   },
   "rewards": {
     "title": "Rewards",

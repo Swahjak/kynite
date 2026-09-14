@@ -137,13 +137,29 @@ export {
 } from './actions';
 
 export {
+  bandsOf,
+  columnProgress,
+  firstOpenRoutineId,
+  starsEarnedIn,
+  visibleBands,
+  type ColumnBand,
+  type ColumnProgress,
+  type CountableRoutine,
+  type OpenableRoutine,
+} from './domain/board-columns';
+
+export {
   loadFamilyRoutineTotals,
+  loadFamilyRoutines,
   loadMemberRoutines,
   loadRoutinesPage,
   type BoardOptions,
   type BoardRoutine,
   type BoardSection,
   type BoardStep,
+  type FamilyBoardRoutine,
+  type FamilyRoutineColumn,
+  type FamilyRoutinesData,
   type RoutineBoard as RoutineBoardData,
   type RoutinesPageData,
   type RoutineTotals,
