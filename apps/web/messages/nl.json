@@ -819,7 +819,8 @@
       "title": "Routines vandaag",
       "steps": "{done} van {total} stappen",
       "progressLabel": "Routines van {name} vandaag",
-      "otherDay": "Routines worden alleen voor vandaag getoond."
+      "otherDay": "Routines worden alleen voor vandaag getoond.",
+      "viewLink": "Bekijk de routines van {name}"
     },
     "stars": {
       "title": "Sterren vandaag",
@@ -846,10 +847,14 @@
     "board": {
       "title": "Taken & routines",
       "daypart": {
-        "label": "Dagdeel kiezen",
         "morning": "Ochtend",
         "afternoon": "Middag",
         "evening": "Avond"
+      },
+      "who": {
+        "label": "Wie",
+        "everyone": "Iedereen",
+        "filterByMember": "Filter op {name}"
       },
       "pool": {
         "title": "Voor het oppakken",
@@ -864,9 +869,16 @@
       },
       "celebrateBadge": "Klaar",
       "countLabel": "{done} van {total} klaar",
-      "starTotalLabel": "{count, plural, one {# ster} other {# sterren}}",
       "progressLabel": "Voortgang van {name}",
-      "celebrateCard": "Alles gedaan · +{count} sterren",
+      "allDone": "Alles gedaan!",
+      "routineCard": {
+        "title": {
+          "morning": "Ochtendroutine",
+          "afternoon": "Middagroutine",
+          "evening": "Avondroutine"
+        },
+        "meta": "{done} van {total} stappen"
+      },
       "section": {
         "tasks": "Taken"
       },
@@ -874,7 +886,18 @@
       "row": {
         "complete": "{title} afvinken",
         "undo": "{title} weer openzetten"
-      }
+      },
+      "footerHint": "Veeg om meer gezinsleden te zien"
+    },
+    "routinesPage": {
+      "title": "Routines",
+      "stepCount": "{done} van {total} stappen",
+      "percent": "{value}%",
+      "bandCount": "{done}/{total}",
+      "routineMeta": "{time} · {done}/{total} stappen",
+      "starsEarned": "{count, plural, =1 {# ster vandaag verdiend} other {# sterren vandaag verdiend}}",
+      "empty": "Geen routines dit dagdeel",
+      "celebrate": "Goed gedaan, {name}! {routine} klaar · +{stars} sterren"
     }
   },
   "routines": {
@@ -941,7 +964,9 @@
       "moreStars": "Meer sterren",
       "stepTimerShort": "sec",
       "graceDaysUnit": "{count, plural, one {dag} other {dagen}}",
-      "stepMenu": "Meer voor stap {number}"
+      "stepMenu": "Meer voor stap {number}",
+      "stepIcon": "Icoon voor stap {number}",
+      "stepIconMenuLabel": "Icoon"
     },
     "weekdays": {
       "MO": "ma",
@@ -960,7 +985,34 @@
       "checklist": "Checklist",
       "star": "Ster",
       "timer": "Timer",
-      "event_available": "Agenda"
+      "event_available": "Agenda",
+      "dentistry": "Tanden",
+      "checkroom": "Kleren",
+      "restaurant": "Eten",
+      "backpack": "Rugzak",
+      "wash": "Wassen",
+      "nutrition": "Voeding",
+      "menu_book": "Boek",
+      "auto_stories": "Voorlezen",
+      "wc": "Wc",
+      "crib": "Bedje",
+      "pets": "Huisdier",
+      "lunch_dining": "Lunch",
+      "directions_car": "Auto",
+      "local_laundry_service": "Was",
+      "pedal_bike": "Fiets",
+      "shopping_cart": "Boodschappen",
+      "countertops": "Keuken",
+      "toys": "Speelgoed",
+      "bedroom_baby": "Babykamer",
+      "delete": "Vuilnis",
+      "potted_plant": "Plant",
+      "mail": "Post",
+      "wb_twilight": "Ochtendgloren",
+      "celebration": "Feest",
+      "emoji_events": "Trofee",
+      "swipe": "Swipe",
+      "self_improvement": "Ontspanning"
     },
     "schedule": {
       "daily": "Elke dag",
@@ -1029,7 +1081,8 @@
     "graceChip": "Nog te doen",
     "praiseRemaining": "{count, plural, one {Goed bezig! Nog één stapje.} other {Goed bezig! Nog # stapjes.}}",
     "graduatedHint": "dat kun jij al zelf!",
-    "startsAt": "om {time}"
+    "startsAt": "om {time}",
+    "routineCelebration": "Goed gedaan, {name}! {routine} klaar · +{stars} sterren"
   },
   "rewards": {
     "title": "Beloningen",
@@ -1592,7 +1645,8 @@
       "label": "Hubnavigatie",
       "vandaag": "Vandaag",
       "kalender": "Kalender",
-      "routines": "Taken",
+      "routines": "Routines",
+      "taken": "Taken",
       "sterren": "Sterren",
       "timer": "Timer",
       "timerCount": "{count} timers"

@@ -25,9 +25,11 @@ import { listTodayTasks, type Task } from '@/modules/tasks';
 import { partitionTasksByAssignee } from './domain/routines-board';
 
 /**
- * The read behind the family-wide "Taken & routines" board
- * (`(hub)/hub/routines`, M-R2) — every member's routines *and* tasks in one
- * composition, unlike `loadTodayProgress` (children only, routines only) and
+ * The read behind the family-wide "Taken" board
+ * (`(hub)/hub/taken`, moved here from `/hub/routines` by the 2026-09-14
+ * taken-board-routines-page plan's M1+M2) — every member's routines *and*
+ * tasks in one composition, unlike `loadTodayProgress` (children only,
+ * routines only) and
  * `loadTodayTasks` (the household's flat list). This is the union the board
  * actually draws: one column per member, routines banded by
  * `sectionOf` and tasks always visible under them, plus the pool of tasks
@@ -44,11 +46,16 @@ export type BoardTaskRow = {
   title: string;
   done: boolean;
   /**
-   * The tile a task row's icon sits on — `ROUTINE_ICON_TILE.task_alt`,
-   * resolved here rather than in the client board. `RoutinesBoard` runs in
-   * the browser and may not import the routines slice's value exports (its
-   * barrel carries `server-only` reads alongside them); see the note on
-   * `RoutinesBoard` itself.
+   * The task's own icon, or `suggestIcon(title)` while nobody has picked one
+   * (M5) — resolved here, same reason as `accentClass` below.
+   */
+  icon: RoutineIcon;
+  /**
+   * The tile `icon` sits on — `ROUTINE_ICON_TILE[icon]`, resolved here rather
+   * than in the client board. `RoutinesBoard` runs in the browser and may not
+   * import the routines slice's value exports (its barrel carries
+   * `server-only` reads alongside them); see the note on `RoutinesBoard`
+   * itself.
    */
   accentClass: string;
 };
@@ -83,7 +90,14 @@ export type BoardColumn = {
    * may not import the family slice's value exports any more than the
    * routines slice's, for the same `server-only`-barrel reason.
    */
-  colorClasses: { dot: string; surface: string; ring: string; border: string };
+  colorClasses: {
+    dot: string;
+    surface: string;
+    ring: string;
+    border: string;
+    ink: string;
+    fill: string;
+  };
   role: Member['role'];
   /** Routine steps due today (plus any open grace day), banded by daypart. */
   sections: Record<TimeSection, BoardRoutineRow[]>;
@@ -156,10 +170,10 @@ export async function loadRoutinesBoardData(
     if (!bucket) continue;
 
     const section = sectionOf(row.schedule);
-    const icon = routineIconOf(row.icon);
     const stars = starsFor(row);
 
     for (const step of row.steps) {
+      const icon = routineIconOf(step.icon, step.title);
       bucket[section].push({
         kind: 'routine',
         id: step.id,
@@ -181,13 +195,17 @@ export async function loadRoutinesBoardData(
     }
   }
 
-  const boardTaskRow = (row: Task): BoardTaskRow => ({
-    kind: 'task',
-    id: row.id,
-    title: row.title,
-    done: row.completedAt !== null,
-    accentClass: ROUTINE_ICON_TILE.task_alt,
-  });
+  const boardTaskRow = (row: Task): BoardTaskRow => {
+    const icon = routineIconOf(row.icon, row.title);
+    return {
+      kind: 'task',
+      id: row.id,
+      title: row.title,
+      done: row.completedAt !== null,
+      icon,
+      accentClass: ROUTINE_ICON_TILE[icon],
+    };
+  };
 
   const { pool, byMember } = partitionTasksByAssignee(tasks);
 

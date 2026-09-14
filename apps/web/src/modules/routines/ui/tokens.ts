@@ -1,4 +1,11 @@
 import type { IconName } from '@kynite/ui';
+import {
+  ACTIVITY_ICONS,
+  DEFAULT_ACTIVITY_ICON,
+  isActivityIcon,
+  suggestIcon,
+  type ActivityIcon,
+} from '../domain/icon-suggest';
 
 /**
  * Design tokens for the routines slice.
@@ -9,28 +16,32 @@ import type { IconName } from '@kynite/ui';
  * Material Symbols font actually ships (`pnpm icons:subset`).
  */
 
-/** The icons a routine may wear. Every entry is in the subset font. */
-export const ROUTINE_ICONS = [
-  'task_alt',
-  'wb_sunny',
-  'dark_mode',
-  'schedule',
-  'checklist',
-  'star',
-  'timer',
-  'event_available',
-] as const satisfies readonly IconName[];
+export { ACTIVITY_ICONS, suggestIcon, type ActivityIcon };
 
-export type RoutineIcon = (typeof ROUTINE_ICONS)[number];
+/**
+ * `ROUTINE_ICONS` is `ACTIVITY_ICONS` under its original name (M5) — kept as
+ * an alias rather than renamed at every call site, since routines, steps and
+ * tasks all now share one closed icon set.
+ */
+export const ROUTINE_ICONS = ACTIVITY_ICONS;
 
-export const DEFAULT_ROUTINE_ICON: RoutineIcon = 'task_alt';
+export type RoutineIcon = ActivityIcon;
+
+export const DEFAULT_ROUTINE_ICON: RoutineIcon = DEFAULT_ACTIVITY_ICON;
 
 export function isRoutineIcon(value: string): value is RoutineIcon {
-  return (ROUTINE_ICONS as readonly string[]).includes(value);
+  return isActivityIcon(value);
 }
 
-export function routineIconOf(value: string | null): RoutineIcon {
-  return value && isRoutineIcon(value) ? value : DEFAULT_ROUTINE_ICON;
+/**
+ * The icon a routine or step actually shows: its own `icon` when set and
+ * valid, otherwise `suggestIcon(title)` — never a flat default once a title
+ * is available. `title` is optional only for call sites that genuinely have
+ * none yet; omitting it falls back to `DEFAULT_ROUTINE_ICON`.
+ */
+export function routineIconOf(value: string | null, title?: string): RoutineIcon {
+  if (value && isRoutineIcon(value)) return value;
+  return title ? suggestIcon(title) : DEFAULT_ROUTINE_ICON;
 }
 
 /**
@@ -75,6 +86,33 @@ export const ROUTINE_ICON_TILE: Record<RoutineIcon, string> = {
   star: 'bg-cat-orange-surface text-cat-orange-fg',
   timer: 'bg-cat-pink-surface text-cat-pink-fg',
   event_available: 'bg-cat-green-surface text-cat-green-fg',
+  dentistry: 'bg-cat-teal-surface text-cat-teal-fg',
+  checkroom: 'bg-cat-blue-surface text-cat-blue-fg',
+  restaurant: 'bg-cat-orange-surface text-cat-orange-fg',
+  backpack: 'bg-cat-blue-surface text-cat-blue-fg',
+  wash: 'bg-cat-teal-surface text-cat-teal-fg',
+  nutrition: 'bg-cat-orange-surface text-cat-orange-fg',
+  menu_book: 'bg-cat-purple-surface text-cat-purple-fg',
+  auto_stories: 'bg-cat-purple-surface text-cat-purple-fg',
+  wc: 'bg-cat-teal-surface text-cat-teal-fg',
+  crib: 'bg-cat-purple-surface text-cat-purple-fg',
+  pets: 'bg-cat-pink-surface text-cat-pink-fg',
+  lunch_dining: 'bg-cat-orange-surface text-cat-orange-fg',
+  directions_car: 'bg-cat-blue-surface text-cat-blue-fg',
+  local_laundry_service: 'bg-cat-teal-surface text-cat-teal-fg',
+  pedal_bike: 'bg-cat-green-surface text-cat-green-fg',
+  shopping_cart: 'bg-cat-green-surface text-cat-green-fg',
+  countertops: 'bg-cat-yellow-surface text-cat-yellow-fg',
+  toys: 'bg-cat-pink-surface text-cat-pink-fg',
+  bedroom_baby: 'bg-cat-purple-surface text-cat-purple-fg',
+  delete: 'bg-cat-red-surface text-cat-red-fg',
+  potted_plant: 'bg-cat-green-surface text-cat-green-fg',
+  mail: 'bg-cat-blue-surface text-cat-blue-fg',
+  wb_twilight: 'bg-cat-yellow-surface text-cat-yellow-fg',
+  celebration: 'bg-cat-orange-surface text-cat-orange-fg',
+  emoji_events: 'bg-cat-yellow-surface text-cat-yellow-fg',
+  swipe: 'bg-cat-teal-surface text-cat-teal-fg',
+  self_improvement: 'bg-cat-purple-surface text-cat-purple-fg',
 };
 
 /**

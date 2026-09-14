@@ -819,7 +819,8 @@
       "title": "Routines today",
       "steps": "{done} of {total} steps",
       "progressLabel": "{name}'s routines today",
-      "otherDay": "Routines are only shown for today."
+      "otherDay": "Routines are only shown for today.",
+      "viewLink": "View {name}'s routines"
     },
     "stars": {
       "title": "Stars today",
@@ -846,10 +847,14 @@
     "board": {
       "title": "Tasks & routines",
       "daypart": {
-        "label": "Choose part of day",
         "morning": "Morning",
         "afternoon": "Afternoon",
         "evening": "Evening"
+      },
+      "who": {
+        "label": "Who",
+        "everyone": "Everyone",
+        "filterByMember": "Filter by {name}"
       },
       "pool": {
         "title": "Up for grabs",
@@ -864,9 +869,16 @@
       },
       "celebrateBadge": "Done",
       "countLabel": "{done} of {total} done",
-      "starTotalLabel": "{count, plural, one {# star} other {# stars}}",
       "progressLabel": "{name}'s progress",
-      "celebrateCard": "All done · +{count} stars",
+      "allDone": "All done!",
+      "routineCard": {
+        "title": {
+          "morning": "Morning routine",
+          "afternoon": "Afternoon routine",
+          "evening": "Evening routine"
+        },
+        "meta": "{done} of {total} steps"
+      },
       "section": {
         "tasks": "Tasks"
       },
@@ -874,7 +886,18 @@
       "row": {
         "complete": "Tick off {title}",
         "undo": "Reopen {title}"
-      }
+      },
+      "footerHint": "Swipe to see more family members"
+    },
+    "routinesPage": {
+      "title": "Routines",
+      "stepCount": "{done} of {total} steps",
+      "percent": "{value}%",
+      "bandCount": "{done}/{total}",
+      "routineMeta": "{time} · {done}/{total} steps",
+      "starsEarned": "{count, plural, =1 {# star earned today} other {# stars earned today}}",
+      "empty": "No routines this part of the day",
+      "celebrate": "Well done, {name}! {routine} finished · +{stars} stars"
     }
   },
   "routines": {
@@ -941,7 +964,9 @@
       "moreStars": "More stars",
       "stepTimerShort": "sec",
       "graceDaysUnit": "{count, plural, one {day} other {days}}",
-      "stepMenu": "More for step {number}"
+      "stepMenu": "More for step {number}",
+      "stepIcon": "Icon for step {number}",
+      "stepIconMenuLabel": "Icon"
     },
     "weekdays": {
       "MO": "Mon",
@@ -960,7 +985,34 @@
       "checklist": "Checklist",
       "star": "Star",
       "timer": "Timer",
-      "event_available": "Calendar"
+      "event_available": "Calendar",
+      "dentistry": "Teeth",
+      "checkroom": "Clothes",
+      "restaurant": "Food",
+      "backpack": "Backpack",
+      "wash": "Wash",
+      "nutrition": "Nutrition",
+      "menu_book": "Book",
+      "auto_stories": "Story time",
+      "wc": "Toilet",
+      "crib": "Crib",
+      "pets": "Pet",
+      "lunch_dining": "Lunch",
+      "directions_car": "Car",
+      "local_laundry_service": "Laundry",
+      "pedal_bike": "Bike",
+      "shopping_cart": "Groceries",
+      "countertops": "Kitchen",
+      "toys": "Toys",
+      "bedroom_baby": "Nursery",
+      "delete": "Trash",
+      "potted_plant": "Plant",
+      "mail": "Mail",
+      "wb_twilight": "Dawn",
+      "celebration": "Celebration",
+      "emoji_events": "Trophy",
+      "swipe": "Swipe",
+      "self_improvement": "Relaxation"
     },
     "schedule": {
       "daily": "Every day",
@@ -1029,7 +1081,8 @@
     "graceChip": "Still to do",
     "praiseRemaining": "{count, plural, one {Nicely done! One more step.} other {Nicely done! # more steps.}}",
     "graduatedHint": "you can do this on your own!",
-    "startsAt": "at {time}"
+    "startsAt": "at {time}",
+    "routineCelebration": "Well done, {name}! {routine} finished · +{stars} stars"
   },
   "rewards": {
     "title": "Rewards",
@@ -1592,7 +1645,8 @@
       "label": "Hub navigation",
       "vandaag": "Today",
       "kalender": "Calendar",
-      "routines": "Tasks",
+      "routines": "Routines",
+      "taken": "Tasks",
       "sterren": "Stars",
       "timer": "Timer",
       "timerCount": "{count} timers"

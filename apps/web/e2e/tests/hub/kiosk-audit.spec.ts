@@ -259,6 +259,9 @@ test.describe('kiosk layout audit', { tag: '@heavy' }, () => {
     { name: 'ambient board', path: () => '/nl/hub' },
     // M-R1: real rail destinations, not tabs of the ambient board.
     { name: 'kalender', path: () => '/nl/hub/kalender' },
+    { name: 'taken board', path: () => '/nl/hub/taken' },
+    // M3 of the 2026-09-14 plan: the family-wide "Actieve routines" page,
+    // which replaced the redirect this path used to serve.
     { name: 'routines overview', path: () => '/nl/hub/routines' },
     { name: 'store', path: () => '/nl/hub/store' },
     { name: 'timers', path: () => '/nl/hub/timers' },

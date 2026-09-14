@@ -17,9 +17,16 @@ import { KidStatCard } from './kid-stat-card';
 
 export type TodayTabRoutinesProps = {
   kids: KidProgress[] | null;
+  /**
+   * True on the wall (`TodayTabDag`'s `hub` surface), where each card links to
+   * `/hub/routines/[memberId]`. That route requires a hub device
+   * (`requireHubDevice`), so `(app)/today`'s own routines tab — this same
+   * component, unwrapped — leaves the default `false` and stays inert.
+   */
+  hub?: boolean;
 };
 
-export async function TodayTabRoutines({ kids }: TodayTabRoutinesProps) {
+export async function TodayTabRoutines({ kids, hub = false }: TodayTabRoutinesProps) {
   const t = await getTranslations('today');
 
   return (
@@ -44,6 +51,8 @@ export async function TodayTabRoutines({ kids }: TodayTabRoutinesProps) {
               }
               starsLabel={t('kids.starsToday', { count: kid.starsToday })}
               progressLabel={t('routines.progressLabel', { name: kid.displayName })}
+              href={hub ? `/hub/routines/${kid.memberId}` : undefined}
+              linkLabel={hub ? t('routines.viewLink', { name: kid.displayName }) : undefined}
             />
           ))}
         </div>

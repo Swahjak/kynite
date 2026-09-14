@@ -46,9 +46,30 @@ const MORNING: RoutineCardRoutine = {
   complete: false,
   starsPerCompletion: 3,
   steps: [
-    { id: '1', title: 'Aankleden', done: true, timerSeconds: null, praiseKey: 'great' },
-    { id: '2', title: 'Tanden poetsen', done: false, timerSeconds: 120, praiseKey: 'proud' },
-    { id: '3', title: 'Ontbijt opeten', done: false, timerSeconds: null, praiseKey: 'great' },
+    {
+      id: '1',
+      title: 'Aankleden',
+      done: true,
+      timerSeconds: null,
+      praiseKey: 'great',
+      icon: 'checkroom',
+    },
+    {
+      id: '2',
+      title: 'Tanden poetsen',
+      done: false,
+      timerSeconds: 120,
+      praiseKey: 'proud',
+      icon: 'dentistry',
+    },
+    {
+      id: '3',
+      title: 'Ontbijt opeten',
+      done: false,
+      timerSeconds: null,
+      praiseKey: 'great',
+      icon: 'restaurant',
+    },
   ],
 };
 

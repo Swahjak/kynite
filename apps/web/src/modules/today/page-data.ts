@@ -7,7 +7,7 @@ import {
   completionSeed,
   listCompletionsOn,
   listRoutines,
-  routineIconOf,
+  suggestIcon,
   timingAt,
 } from '@/modules/routines';
 import { resolveStepIcon, type StarMatrixStep } from './domain/star-matrix';
@@ -137,14 +137,12 @@ export async function loadTodayProgress(
     const bucket = stepsByKid.get(row.ownerMemberId);
     if (!bucket) continue;
 
-    const fallbackIcon = routineIconOf(row.icon);
-
     for (const step of row.steps) {
       bucket.push({
         routineId: row.id,
         stepId: step.id,
         title: step.title,
-        icon: resolveStepIcon(step.icon, fallbackIcon),
+        icon: resolveStepIcon(step.icon, suggestIcon(step.title)),
         occurrenceDate: occurrence.occurrenceDate,
         done: done.has(`${row.ownerMemberId}:${step.id}:${occurrence.occurrenceDate}`),
         // Derived, not random — the same key the hub board mints for this

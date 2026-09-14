@@ -79,8 +79,15 @@ const CODEPOINTS = join(root, 'scripts/material-symbols.codepoints');
  * board's `waving_hand`/`emoji_events`) landed in the same window — each
  * bump above was sized for its own glyphs alone, and the two together came
  * in over the 68 KB step.
+ *
+ * Bumped to 90 KB for M5's household `ACTIVITY_ICONS` set (16 new glyphs for
+ * routine/step/task icons — dentistry, wash, nutrition, auto_stories, wc,
+ * crib, lunch_dining, directions_car, local_laundry_service, pedal_bike,
+ * shopping_cart, countertops, potted_plant, mail, swipe, restart_alt) —
+ * the 72 KB ceiling had under a kilobyte of headroom and the set took the
+ * subset to 88.0 KB with no room left for a phase-2 page.
  */
-export const BUDGET_BYTES = 72 * 1024;
+export const BUDGET_BYTES = 90 * 1024;
 
 /**
  * Icons named somewhere a static scan cannot see them as `<Icon name="…">`.
@@ -219,6 +226,34 @@ const EXTRA_ICONS = [
   // the same screen) needs no entry — it is a plain `<Icon name="close">`.
   'pause',
   'play_arrow',
+  // M5 — the household `ACTIVITY_ICONS` set (`modules/routines/ui/tokens.ts`),
+  // rendered through `routineIconOf`/`suggestIcon` rather than a literal
+  // `name="…"`, same blind spot as `ROUTINE_ICONS` above. `backpack`,
+  // `celebration`, `checkroom`, `delete`, `emoji_events`, `menu_book`,
+  // `pets`, `restaurant`, `self_improvement`, `toys` and `wb_twilight` were
+  // already reachable through an earlier entry. `swipe` also replaces the
+  // board's placeholder `arrow_forward` swipe-hint glyph, and `restart_alt`
+  // replaces the hub rail's placeholder `repeat` for the Routines tile. No
+  // Material Symbols glyph named "sink" exists (checked against
+  // fonts.google.com/icons) — the plan's kitchen-sink icon is dropped rather
+  // than substituted with something that would misread.
+  'dentistry',
+  'wash',
+  'nutrition',
+  'auto_stories',
+  'wc',
+  'crib',
+  'lunch_dining',
+  'directions_car',
+  'local_laundry_service',
+  'pedal_bike',
+  'shopping_cart',
+  'countertops',
+  'bedroom_baby',
+  'potted_plant',
+  'mail',
+  'swipe',
+  'restart_alt',
 ];
 
 const ICON_USAGE = /<Icon\b[^>]*?\bname=(?:"([a-z0-9_]+)"|\{'([a-z0-9_]+)'\}|'([a-z0-9_]+)')/g;

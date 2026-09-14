@@ -55,16 +55,17 @@ function readNumber(formData: FormData, key: string, fallback: number): number {
 }
 
 /**
- * The builder posts steps as three parallel arrays (`stepId`, `stepTitle`,
- * `stepTimerSeconds`) — the shape an `<input name="…">` repeater produces
- * without any client-side serialisation. Row order *is* the intended order, so
- * `sortOrder` is the array index and reordering in the dialog persists by
- * simply saving.
+ * The builder posts steps as four parallel arrays (`stepId`, `stepTitle`,
+ * `stepTimerSeconds`, `stepIcon`) — the shape an `<input name="…">` repeater
+ * produces without any client-side serialisation. Row order *is* the intended
+ * order, so `sortOrder` is the array index and reordering in the dialog
+ * persists by simply saving.
  */
 function readSteps(formData: FormData) {
   const ids = readAll(formData, 'stepId');
   const titles = readAll(formData, 'stepTitle');
   const timers = readAll(formData, 'stepTimerSeconds');
+  const icons = readAll(formData, 'stepIcon');
 
   return titles.flatMap((title, index) => {
     if (title.trim() === '') return [];
@@ -74,6 +75,7 @@ function readSteps(formData: FormData) {
         id: ids[index] ?? '',
         title,
         timerSeconds: Number.isFinite(seconds) && seconds > 0 ? seconds : null,
+        icon: icons[index] || null,
       },
     ];
   });

@@ -4,6 +4,8 @@ import type { MouseEvent } from 'react';
 
 import { cn } from '../lib/utils';
 import { Icon } from './icon';
+import type { IconName } from './icon-codepoints';
+import { IconMedallion } from './icon-medallion';
 import { StarPop } from './star-pop';
 
 /**
@@ -66,6 +68,21 @@ export type StepRowProps = {
    * they can honestly go.
    */
   variant?: 'row' | 'tile';
+  /**
+   * The step's own icon (`routine_step.icon`, falling back to
+   * `suggestIcon(title)` upstream — the row never guesses one itself).
+   * Optional and additive: omitted, the row draws exactly as it did before
+   * this existed — no empty tile reserving space for a glyph that never
+   * shows (`Actieve routines.dc.html`, step rows in the open routine).
+   */
+  icon?: IconName;
+  /**
+   * Tint for the icon tile — the routine's own colour surface, e.g.
+   * `bg-cat-teal-surface text-cat-teal-fg`. Ignored once `done`, when the
+   * tile always turns the same green tint every other done glyph on this row
+   * uses. Ignored entirely when `icon` is absent.
+   */
+  iconTintClass?: string;
   onComplete?: (origin: { x: number; y: number }) => void;
 };
 
@@ -87,9 +104,30 @@ export function StepRow({
   actionLabel,
   active = false,
   variant = 'row',
+  icon,
+  iconTintClass,
   onComplete,
 }: StepRowProps) {
   const live = active && !done;
+
+  // Shared by both shapes: a step's icon tile, tinted with the routine's
+  // colour surface and turning the same green tint every other done glyph on
+  // this row wears once the step is done. Absent when the step carries no
+  // icon at all, rather than an empty tile holding its place.
+  const iconTile = icon ? (
+    <IconMedallion
+      icon={icon}
+      shape="squircle"
+      size={variant === 'tile' ? 'sm' : 'md'}
+      tint="none"
+      className={cn(
+        'shrink-0',
+        done
+          ? 'bg-cat-green-surface text-cat-green-fg'
+          : (iconTintClass ?? 'bg-surface-container text-ink-secondary')
+      )}
+    />
+  ) : null;
 
   /** Shared by both shapes: one tap, no confirmation, no second fire. */
   const tap = (event: MouseEvent<HTMLButtonElement>) => {
@@ -131,6 +169,8 @@ export function StepRow({
             className={cn('shrink-0', done ? 'text-cat-green-fg kynite-anim-check' : 'text-line')}
           />
 
+          {iconTile}
+
           <span className="flex min-w-0 flex-1 flex-col gap-0.5">
             <span
               className={cn(
@@ -147,7 +187,7 @@ export function StepRow({
                     tile allows. */}
                 <span
                   data-testid="step-praise"
-                  className="min-w-0 font-display text-caption leading-snug font-bold text-brand-ink"
+                  className="min-w-0 font-display text-caption leading-snug font-bold text-cat-green-fg"
                 >
                   {praiseText}
                 </span>
@@ -156,14 +196,14 @@ export function StepRow({
                 </span>
               </span>
             ) : null}
-          </span>
 
-          {!done && timerSeconds ? (
-            <span className="flex shrink-0 items-center gap-1 rounded-4xl bg-surface-container px-3 py-1 font-display text-caption font-bold text-ink-secondary">
-              <Icon name="timer" size="sm" />
-              <span className="tabular-time">{formatTimer(timerSeconds)}</span>
-            </span>
-          ) : null}
+            {!done && timerSeconds ? (
+              <span className="flex items-center gap-1 self-start rounded-4xl bg-surface-container px-3 py-1 font-display text-caption font-bold text-ink-secondary mt-1">
+                <Icon name="timer" size="sm" />
+                <span className="tabular-time">{formatTimer(timerSeconds)}</span>
+              </span>
+            ) : null}
+          </span>
         </button>
       </li>
     );
@@ -229,6 +269,8 @@ export function StepRow({
             <Icon name="check" size="sm" filled className="text-white kynite-anim-check" />
           ) : null}
         </span>
+
+        {iconTile}
 
         <span
           className={cn(

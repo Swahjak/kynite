@@ -230,7 +230,7 @@ export async function TodayTabDag({
               second thing a household glances at. The phone reaches the same
               panel one pill away, and stacking it here would push the task list
               off the bottom of a phone screen. */}
-          {hub ? <TodayTabRoutines kids={kids} /> : null}
+          {hub ? <TodayTabRoutines kids={kids} hub /> : null}
 
           {tasks ? (
             <TaskList

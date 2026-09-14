@@ -137,13 +137,29 @@ export {
 } from './actions';
 
 export {
+  bandsOf,
+  columnProgress,
+  firstOpenRoutineId,
+  starsEarnedIn,
+  visibleBands,
+  type ColumnBand,
+  type ColumnProgress,
+  type CountableRoutine,
+  type OpenableRoutine,
+} from './domain/board-columns';
+
+export {
   loadFamilyRoutineTotals,
+  loadFamilyRoutines,
   loadMemberRoutines,
   loadRoutinesPage,
   type BoardOptions,
   type BoardRoutine,
   type BoardSection,
   type BoardStep,
+  type FamilyBoardRoutine,
+  type FamilyRoutineColumn,
+  type FamilyRoutinesData,
   type RoutineBoard as RoutineBoardData,
   type RoutinesPageData,
   type RoutineTotals,
@@ -156,6 +172,7 @@ export { RoutineCard, StepRow, type StepRowProps } from '@kynite/ui';
 export { RoutineDialog } from './ui/routine-dialog';
 export { RoutineManager, type ManagedRoutine } from './ui/routine-manager';
 export {
+  ACTIVITY_ICONS,
   DEFAULT_ROUTINE_ICON,
   ROUTINE_ICONS,
   ROUTINE_ICON_TILE,
@@ -164,5 +181,7 @@ export {
   STEP_ROW_HEIGHT,
   isRoutineIcon,
   routineIconOf,
+  suggestIcon,
+  type ActivityIcon,
   type RoutineIcon,
 } from './ui/tokens';

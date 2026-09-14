@@ -1,68 +1,54 @@
 import { getTranslations } from 'next-intl/server';
 import { EmptyState } from '@kynite/ui';
-import { HubBoard } from '@/modules/calendar';
 import { requireHubDevice } from '@/modules/devices';
-import { completeStepAction } from '@/modules/routines';
-import { toggleTaskAction } from '@/modules/tasks';
-import {
-  RoutinesBoard,
-  TodayHeader,
-  TodayLive,
-  loadHubBoardComposition,
-  loadRoutinesBoardData,
-} from '@/modules/today';
+import { completeStepAction, loadFamilyRoutines, todayKeyIn } from '@/modules/routines';
+import { RoutinesPageBoard, TodayLive } from '@/modules/today';
 
 /** Session-dependent: never prerendered, so `next build` needs no database. */
 export const dynamic = 'force-dynamic';
 
 /**
- * "Taken & routines" — the family-wide board (M-R2): one pool column for
- * tasks nobody has picked up yet, one column per member, routines banded by
- * the selected daypart and tasks always underneath.
+ * "Actieve routines" — the family-wide routine page (2026-09-14
+ * taken-board-routines-page plan, M3, after
+ * `docs/design/claude-design/Actieve routines.dc.html`).
  *
- * M-R1's `TodayTabRoutines` (a per-child check-in, read-only from here) is
- * gone from this route — this is the control surface itself, per M-R2. A
- * child who wants to tick off a *routine* step still has their own face on
- * the board too (`/hub/routines/[memberId]`, unchanged, and still the
- * larger single-child experience with praise and confetti); this route ticks
- * the same underlying completion, just for the whole household at once.
+ * Its own page on the wall tablet, separate from `/hub/taken`: one column per
+ * family member, the day running top to bottom inside each, the routine that
+ * is live standing open with its steps and the finished ones staying in place
+ * wearing KLAAR. This is where a routine step is tapped from the household's
+ * overview; `/hub/taken` shows only how far along a member's routine is, and
+ * `/hub/routines/[memberId]` (untouched) is still one child's own larger
+ * screen. All three tick the same completion through the same seam.
+ *
+ * `?date=`/`?time=` pin the rendered clock so a visual snapshot is
+ * deterministic; they affect display only, exactly as on `[memberId]`.
  */
 export default async function HubRoutinesOverviewPage({
   params,
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ date?: string; now?: string }>;
+  searchParams: Promise<{ date?: string; time?: string }>;
 }) {
   const { locale } = await params;
-  const { date, now } = await searchParams;
-  await requireHubDevice(locale, '/hub/routines', { date, now });
+  const { date, time } = await searchParams;
+  await requireHubDevice(locale, '/hub/routines', { date, time });
 
-  const composition = await loadHubBoardComposition({ date, now });
-  const t = await getTranslations('today');
-  const tCalendar = await getTranslations('calendar');
+  const data = await loadFamilyRoutines({ date, time });
+  const t = await getTranslations('routines');
 
-  if (!composition) {
-    // Unreachable in practice — see the same fallback on `/hub`.
+  if (!data) {
     return (
       <main className="min-h-full">
         <EmptyState
           size="hub"
           heading
-          title={tCalendar('hub.unpairedTitle')}
-          description={tCalendar('hub.unpairedBody')}
+          title={t('hub.unavailableTitle')}
+          description={t('hub.unavailableBody')}
         />
       </main>
     );
   }
-
-  const { data, dayKey, isToday, slot } = composition;
-
-  // Board data — routines and tasks — is a today-only concept, exactly like
-  // `TodayTabRoutines`'s old `kids` read: a browsed day has no completions of
-  // its own to show, so the panel says so rather than rendering an empty
-  // board that looks like nobody has anything to do.
-  const board = isToday ? await loadRoutinesBoardData({ now: data.now }) : null;
 
   return (
     <main
@@ -71,45 +57,11 @@ export default async function HubRoutinesOverviewPage({
     >
       <TodayLive />
 
-      <HubBoard
-        familyId={data.familyId}
-        greeting={t(`hubGreeting.${slot}`)}
-        snapshot={{
-          generatedAt: data.now.getTime(),
-          anchor: data.anchor,
-          now: data.now,
-          timeZone: data.timeZone,
-          view: data.view,
-          weekStartsOn: data.weekStartsOn,
-          members: data.members,
-          events: data.events,
-        }}
-      >
-        {/* RoutinesBoard renders its own header (title, date, daypart pills, clock), so TodayHeader only renders for the browsed-day fallback. */}
-        {board ? (
-          <RoutinesBoard
-            board={board}
-            dayKey={dayKey}
-            completeStepAction={completeStepAction}
-            toggleTaskAction={toggleTaskAction}
-          />
-        ) : (
-          <>
-            <TodayHeader
-              surface="hub"
-              greeting={t(`hubGreeting.${slot}`)}
-              anchor={data.anchor}
-              now={data.now}
-              timeZone={data.timeZone}
-              dayKey={dayKey}
-              isToday={isToday}
-              members={data.members}
-              href="/hub/routines"
-            />
-            <p className="text-body-sm text-ink-secondary">{t('routines.otherDay')}</p>
-          </>
-        )}
-      </HubBoard>
+      <RoutinesPageBoard
+        data={data}
+        dayKey={todayKeyIn(data.timeZone, data.now)}
+        completeStepAction={completeStepAction}
+      />
     </main>
   );
 }

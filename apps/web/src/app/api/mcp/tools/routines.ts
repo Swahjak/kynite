@@ -64,6 +64,7 @@ function stepView(step: RoutineStep) {
   return {
     id: step.id,
     title: step.title,
+    icon: step.icon,
     timerSeconds: step.timerSeconds,
     sortOrder: step.sortOrder,
   };
@@ -140,6 +141,13 @@ const routineBodySchema = {
           .nullable()
           .default(null)
           .describe('Optional per-step timer in seconds; null is untimed.'),
+        icon: z
+          .enum(ROUTINE_ICONS)
+          .nullable()
+          .default(null)
+          .describe(
+            'Which icon this step shows. Null suggests one from the title automatically — set it only to override that.'
+          ),
       })
     )
     .min(1)

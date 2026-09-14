@@ -1,4 +1,5 @@
 import { KidStatCard as UiKidStatCard } from '@kynite/ui';
+import { Link } from '@/i18n/navigation';
 import { MEMBER_COLOR_CLASSES } from '@/modules/family';
 import type { KidProgress } from '../page-data';
 
@@ -19,9 +20,13 @@ export type KidStatCardProps = {
   progressLabel: string;
   size?: 'compact' | 'default';
   className?: string;
+  /** When set, the whole card links there — `/hub/routines/[memberId]`. */
+  href?: string;
+  /** Accessible name for that link. Required together with `href`. */
+  linkLabel?: string;
 };
 
-export function KidStatCard({ kid, ...rest }: KidStatCardProps) {
+export function KidStatCard({ kid, href, linkLabel, ...rest }: KidStatCardProps) {
   return (
     <UiKidStatCard
       memberId={kid.memberId}
@@ -31,6 +36,7 @@ export function KidStatCard({ kid, ...rest }: KidStatCardProps) {
       barClass={MEMBER_COLOR_CLASSES[kid.color].dot}
       starsToday={kid.starsToday}
       percent={Math.round(kid.ratio * 100)}
+      render={href ? <Link href={href} aria-label={linkLabel ?? kid.displayName} /> : undefined}
       {...rest}
     />
   );
