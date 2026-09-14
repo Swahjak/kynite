@@ -50,6 +50,8 @@ export type RoutineCardStep = {
   timerSeconds: number | null;
   /** Selects the praise headline. Resolved to a sentence by `copy.praise`. */
   praiseKey: string;
+  /** The step's own icon tile (`StepRow`'s `icon`) — resolved upstream. */
+  icon: IconName;
 };
 
 export type RoutineCardRoutine = {
@@ -340,6 +342,8 @@ export function RoutineCard({
             title={step.title}
             done={step.done}
             timerSeconds={step.timerSeconds}
+            icon={step.icon}
+            iconTintClass={copy.tileClass}
             praiseText={copy.praise(step.praiseKey)}
             stars={routine.starsPerCompletion}
             starLabel={copy.starLabel(routine.starsPerCompletion)}

@@ -47,6 +47,8 @@ const meta = {
     starLabel: '3 sterren verdiend',
     actionLabel: 'Markeer Tanden poetsen als klaar',
     active: true,
+    icon: 'dentistry',
+    iconTintClass: 'bg-cat-teal-surface text-cat-teal-fg',
   },
   render: (args) => (
     <ul className="flex w-full max-w-xl flex-col gap-3">
@@ -73,6 +75,8 @@ export const States: Story = {
           stars={3}
           starLabel="3 sterren verdiend"
           actionLabel="Aankleden is klaar"
+          icon="checkroom"
+          iconTintClass="bg-cat-teal-surface text-cat-teal-fg"
         />
         <StepRow
           stepId="brush"
@@ -84,6 +88,8 @@ export const States: Story = {
           stars={3}
           starLabel="3 sterren verdiend"
           actionLabel="Markeer Tanden poetsen als klaar"
+          icon="dentistry"
+          iconTintClass="bg-cat-teal-surface text-cat-teal-fg"
         />
         <StepRow
           stepId="bed"
@@ -94,6 +100,8 @@ export const States: Story = {
           stars={3}
           starLabel="3 sterren verdiend"
           actionLabel="Markeer Bed opmaken als klaar"
+          icon="crib"
+          iconTintClass="bg-cat-teal-surface text-cat-teal-fg"
         />
         <StepRow
           stepId="pack"
@@ -104,6 +112,8 @@ export const States: Story = {
           stars={0}
           starLabel=""
           actionLabel="Tas inpakken is klaar"
+          icon="backpack"
+          iconTintClass="bg-cat-teal-surface text-cat-teal-fg"
         />
       </ul>
       <Specimen
@@ -131,6 +141,8 @@ export const Tiles: Story = {
           stars={3}
           starLabel="3 sterren verdiend"
           actionLabel="Uit bed is klaar"
+          icon="bedtime"
+          iconTintClass="bg-cat-teal-surface text-cat-teal-fg"
         />
         <StepRow
           variant="tile"
@@ -143,6 +155,8 @@ export const Tiles: Story = {
           stars={3}
           starLabel="3 sterren verdiend"
           actionLabel="Markeer Tanden poetsen als klaar"
+          icon="dentistry"
+          iconTintClass="bg-cat-teal-surface text-cat-teal-fg"
         />
         <StepRow
           variant="tile"
@@ -154,6 +168,8 @@ export const Tiles: Story = {
           stars={3}
           starLabel="3 sterren verdiend"
           actionLabel="Markeer Tas inpakken als klaar"
+          icon="backpack"
+          iconTintClass="bg-cat-teal-surface text-cat-teal-fg"
         />
         <StepRow
           variant="tile"
@@ -165,6 +181,8 @@ export const Tiles: Story = {
           stars={0}
           starLabel=""
           actionLabel="Ontbijt opeten is klaar"
+          icon="restaurant"
+          iconTintClass="bg-cat-teal-surface text-cat-teal-fg"
         />
       </ul>
       <Specimen

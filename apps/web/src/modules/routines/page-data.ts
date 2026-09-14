@@ -127,6 +127,8 @@ export type BoardStep = {
   praiseKey: PraiseKey;
   /** The idempotency key the tap will carry — derived, so a retry reuses it. */
   clientId: string;
+  /** The step's own icon, or `suggestIcon(title)` while nobody has picked one. */
+  icon: RoutineIcon;
 };
 
 export type BoardRoutine = {
@@ -320,6 +322,7 @@ function toBoardRoutine({
       routineStepId: step.id,
       occurrenceDate: occurrence.occurrenceDate,
     }),
+    icon: routineIconOf(step.icon, step.title),
   }));
 
   const doneCount = steps.filter((step) => step.done).length;

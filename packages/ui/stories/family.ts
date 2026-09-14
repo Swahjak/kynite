@@ -292,11 +292,46 @@ export const ROUTINE_PROGRESS = [
 
 /** The five steps of Mila's morning routine, three of them behind her. */
 export const MORNING_STEPS = [
-  { id: 'uit-bed', title: 'Uit bed', done: true, timerSeconds: null, praiseKey: 'great' },
-  { id: 'aankleden', title: 'Aankleden', done: true, timerSeconds: null, praiseKey: 'proud' },
-  { id: 'bed-opmaken', title: 'Bed opmaken', done: true, timerSeconds: null, praiseKey: 'great' },
-  { id: 'tanden', title: 'Tanden poetsen', done: false, timerSeconds: 120, praiseKey: 'proud' },
-  { id: 'tas', title: 'Tas inpakken', done: false, timerSeconds: null, praiseKey: 'great' },
+  {
+    id: 'uit-bed',
+    title: 'Uit bed',
+    done: true,
+    timerSeconds: null,
+    praiseKey: 'great',
+    icon: 'bedtime',
+  },
+  {
+    id: 'aankleden',
+    title: 'Aankleden',
+    done: true,
+    timerSeconds: null,
+    praiseKey: 'proud',
+    icon: 'checkroom',
+  },
+  {
+    id: 'bed-opmaken',
+    title: 'Bed opmaken',
+    done: true,
+    timerSeconds: null,
+    praiseKey: 'great',
+    icon: 'crib',
+  },
+  {
+    id: 'tanden',
+    title: 'Tanden poetsen',
+    done: false,
+    timerSeconds: 120,
+    praiseKey: 'proud',
+    icon: 'dentistry',
+  },
+  {
+    id: 'tas',
+    title: 'Tas inpakken',
+    done: false,
+    timerSeconds: null,
+    praiseKey: 'great',
+    icon: 'backpack',
+  },
 ] as const;
 
 /** The parent's beheer list — per child, in the order they run. */
