@@ -229,26 +229,32 @@ export async function reorderMember(
   if (input.direction !== 'up' && input.direction !== 'down') return failure('invalidInput');
 
   const db = getDb();
-  const rows = await db
-    .select({ id: member.id, sortOrder: member.sortOrder })
-    .from(member)
-    .where(eq(member.familyId, principal.familyId))
-    .orderBy(asc(member.sortOrder), asc(member.createdAt));
-
-  const index = rows.findIndex((row) => row.id === input.memberId);
-  if (index === -1) return failure('memberNotFound');
-
-  const neighborIndex = input.direction === 'up' ? index - 1 : index + 1;
-  // Already at the edge the caller asked to move past: a no-op, not a refusal
-  // — the UI disables the button at the ends, but MCP has no button to
-  // disable, so this has to be a legal (if pointless) call.
-  if (neighborIndex < 0 || neighborIndex >= rows.length) return idleState;
-
-  const reordered = [...rows];
-  const [moved] = reordered.splice(index, 1);
-  reordered.splice(neighborIndex, 0, moved);
+  let outcome: ActionState = idleState;
 
   await db.transaction(async (tx) => {
+    const rows = await tx
+      .select({ id: member.id, sortOrder: member.sortOrder })
+      .from(member)
+      .where(eq(member.familyId, principal.familyId))
+      .orderBy(asc(member.sortOrder), asc(member.createdAt))
+      .for('update');
+
+    const index = rows.findIndex((row) => row.id === input.memberId);
+    if (index === -1) {
+      outcome = failure('memberNotFound');
+      return;
+    }
+
+    const neighborIndex = input.direction === 'up' ? index - 1 : index + 1;
+    // Already at the edge the caller asked to move past: a no-op, not a
+    // refusal — the UI disables the button at the ends, but MCP has no
+    // button to disable, so this has to be a legal (if pointless) call.
+    if (neighborIndex < 0 || neighborIndex >= rows.length) return;
+
+    const reordered = [...rows];
+    const [moved] = reordered.splice(index, 1);
+    reordered.splice(neighborIndex, 0, moved);
+
     for (const [position, row] of reordered.entries()) {
       if (row.sortOrder === position) continue;
       await tx
@@ -258,7 +264,7 @@ export async function reorderMember(
     }
   });
 
-  return idleState;
+  return outcome;
 }
 
 export type SetMemberOrderInput = { orderedIds: string[] };
@@ -284,21 +290,28 @@ export async function setMemberOrder(
   const orderedIds = parsed.data;
 
   const db = getDb();
-  const rows = await db
-    .select({ id: member.id })
-    .from(member)
-    .where(eq(member.familyId, principal.familyId));
-
-  const currentIds = new Set(rows.map((row) => row.id));
-  const providedIds = new Set(orderedIds);
-  const isExactMatch =
-    orderedIds.length === rows.length &&
-    providedIds.size === orderedIds.length &&
-    orderedIds.every((id) => currentIds.has(id));
-
-  if (!isExactMatch) return failure('invalidInput');
+  let outcome: ActionState = idleState;
 
   await db.transaction(async (tx) => {
+    const rows = await tx
+      .select({ id: member.id })
+      .from(member)
+      .where(eq(member.familyId, principal.familyId))
+      .orderBy(asc(member.sortOrder), asc(member.createdAt))
+      .for('update');
+
+    const currentIds = new Set(rows.map((row) => row.id));
+    const providedIds = new Set(orderedIds);
+    const isExactMatch =
+      orderedIds.length === rows.length &&
+      providedIds.size === orderedIds.length &&
+      orderedIds.every((id) => currentIds.has(id));
+
+    if (!isExactMatch) {
+      outcome = failure('invalidInput');
+      return;
+    }
+
     for (const [position, memberId] of orderedIds.entries()) {
       await tx
         .update(member)
@@ -307,7 +320,7 @@ export async function setMemberOrder(
     }
   });
 
-  return idleState;
+  return outcome;
 }
 
 /**

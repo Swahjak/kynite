@@ -49,8 +49,10 @@ function makeFakeDb(): unknown {
       return {
         from: () => ({
           where: () => ({
-            orderBy: () => rows.current,
-            then: (resolve: (value: unknown) => void) => resolve(rows.current),
+            orderBy: () => ({
+              for: () => rows.current,
+              then: (resolve: (value: unknown) => void) => resolve(rows.current),
+            }),
           }),
         }),
       };
@@ -123,14 +125,16 @@ describe('reorderMember', () => {
     });
 
     expect(result).toEqual({ status: 'error', error: 'memberNotFound' });
-    expect(transactionCalls.count).toBe(0);
+    // The roster read now happens inside the transaction (row-locked), so a
+    // refusal discovered after the read still opens (and cleanly closes) one.
+    expect(transactionCalls.count).toBe(1);
   });
 
   it('is a no-op at the top of the list', async () => {
     const result = await reorderMember(ownerPrincipal, { memberId: ROW_A.id, direction: 'up' });
 
     expect(result).toEqual({ status: 'idle' });
-    expect(transactionCalls.count).toBe(0);
+    expect(transactionCalls.count).toBe(1);
     expect(updateCalls).toHaveLength(0);
   });
 
@@ -138,7 +142,7 @@ describe('reorderMember', () => {
     const result = await reorderMember(ownerPrincipal, { memberId: ROW_C.id, direction: 'down' });
 
     expect(result).toEqual({ status: 'idle' });
-    expect(transactionCalls.count).toBe(0);
+    expect(transactionCalls.count).toBe(1);
     expect(updateCalls).toHaveLength(0);
   });
 
@@ -207,6 +211,9 @@ describe('setMemberOrder', () => {
     const result = await setMemberOrder(ownerPrincipal, { orderedIds });
 
     expect(result).toEqual({ status: 'error', error: 'invalidInput' });
-    expect(transactionCalls.count).toBe(0);
+    // Same as reorderMember: the roster is read (and row-locked) inside the
+    // transaction, so an invalid-order refusal still opens one — it just
+    // writes nothing.
+    expect(transactionCalls.count).toBe(1);
   });
 });
