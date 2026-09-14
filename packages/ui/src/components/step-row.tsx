@@ -118,7 +118,7 @@ export function StepRow({
     <IconMedallion
       icon={icon}
       shape="squircle"
-      size="md"
+      size={variant === 'tile' ? 'sm' : 'md'}
       tint="none"
       className={cn(
         'shrink-0',
@@ -196,14 +196,14 @@ export function StepRow({
                 </span>
               </span>
             ) : null}
-          </span>
 
-          {!done && timerSeconds ? (
-            <span className="flex shrink-0 items-center gap-1 rounded-4xl bg-surface-container px-3 py-1 font-display text-caption font-bold text-ink-secondary">
-              <Icon name="timer" size="sm" />
-              <span className="tabular-time">{formatTimer(timerSeconds)}</span>
-            </span>
-          ) : null}
+            {!done && timerSeconds ? (
+              <span className="flex items-center gap-1 self-start rounded-4xl bg-surface-container px-3 py-1 font-display text-caption font-bold text-ink-secondary mt-1">
+                <Icon name="timer" size="sm" />
+                <span className="tabular-time">{formatTimer(timerSeconds)}</span>
+              </span>
+            ) : null}
+          </span>
         </button>
       </li>
     );
