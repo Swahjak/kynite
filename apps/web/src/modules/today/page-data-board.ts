@@ -25,9 +25,11 @@ import { listTodayTasks, type Task } from '@/modules/tasks';
 import { partitionTasksByAssignee } from './domain/routines-board';
 
 /**
- * The read behind the family-wide "Taken & routines" board
- * (`(hub)/hub/routines`, M-R2) — every member's routines *and* tasks in one
- * composition, unlike `loadTodayProgress` (children only, routines only) and
+ * The read behind the family-wide "Taken" board
+ * (`(hub)/hub/taken`, moved here from `/hub/routines` by the 2026-09-14
+ * taken-board-routines-page plan's M1+M2) — every member's routines *and*
+ * tasks in one composition, unlike `loadTodayProgress` (children only,
+ * routines only) and
  * `loadTodayTasks` (the household's flat list). This is the union the board
  * actually draws: one column per member, routines banded by
  * `sectionOf` and tasks always visible under them, plus the pool of tasks
@@ -83,7 +85,7 @@ export type BoardColumn = {
    * may not import the family slice's value exports any more than the
    * routines slice's, for the same `server-only`-barrel reason.
    */
-  colorClasses: { dot: string; surface: string; ring: string; border: string };
+  colorClasses: { dot: string; surface: string; ring: string; border: string; ink: string; fill: string };
   role: Member['role'];
   /** Routine steps due today (plus any open grace day), banded by daypart. */
   sections: Record<TimeSection, BoardRoutineRow[]>;

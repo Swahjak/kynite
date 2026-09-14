@@ -259,7 +259,7 @@ test.describe('kiosk layout audit', { tag: '@heavy' }, () => {
     { name: 'ambient board', path: () => '/nl/hub' },
     // M-R1: real rail destinations, not tabs of the ambient board.
     { name: 'kalender', path: () => '/nl/hub/kalender' },
-    { name: 'routines overview', path: () => '/nl/hub/routines' },
+    { name: 'taken board', path: () => '/nl/hub/taken' },
     { name: 'store', path: () => '/nl/hub/store' },
     { name: 'timers', path: () => '/nl/hub/timers' },
     // M-T2: the fullscreen watch screen. No timer is seeded for this suite,

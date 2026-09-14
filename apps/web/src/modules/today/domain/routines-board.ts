@@ -1,6 +1,6 @@
 /**
  * Pure domain logic for the family-wide "Taken & routines" board
- * (`(hub)/hub/routines`, M-R2).
+ * (`(hub)/hub/taken`, M-R2).
  *
  * Framework-free (architecture §2 rule 2), like every other file under
  * `domain/`: no database, no React. Three questions live here, independent of
@@ -23,6 +23,14 @@
  *   and whether that is 100%. Shared by every member column and the pool so
  *   "3 van 5" and the celebration threshold can never disagree between one
  *   column and the next.
+ *
+ *   Generic on purpose: the 2026-09-14 taken-board-routines-page plan (M1+M2)
+ *   calls this on two different lists that must never be confused — a
+ *   column's *header* (count label, bar, celebrate treatment) counts that
+ *   member's **tasks only**, while the collapsed routine progress card at
+ *   the top of the column calls it again on that member's routine steps for
+ *   the daypart to get its own "X van Y stappen". Neither call site may feed
+ *   it the other's list.
  */
 
 import type { TimeSection } from '@/modules/routines';

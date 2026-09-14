@@ -846,10 +846,14 @@
     "board": {
       "title": "Tasks & routines",
       "daypart": {
-        "label": "Choose part of day",
         "morning": "Morning",
         "afternoon": "Afternoon",
         "evening": "Evening"
+      },
+      "who": {
+        "label": "Who",
+        "everyone": "Everyone",
+        "filterByMember": "Filter by {name}"
       },
       "pool": {
         "title": "Up for grabs",
@@ -864,9 +868,16 @@
       },
       "celebrateBadge": "Done",
       "countLabel": "{done} of {total} done",
-      "starTotalLabel": "{count, plural, one {# star} other {# stars}}",
       "progressLabel": "{name}'s progress",
-      "celebrateCard": "All done · +{count} stars",
+      "allDone": "All done!",
+      "routineCard": {
+        "title": {
+          "morning": "Morning routine",
+          "afternoon": "Afternoon routine",
+          "evening": "Evening routine"
+        },
+        "meta": "{done} of {total} steps"
+      },
       "section": {
         "tasks": "Tasks"
       },
@@ -874,7 +885,8 @@
       "row": {
         "complete": "Tick off {title}",
         "undo": "Reopen {title}"
-      }
+      },
+      "footerHint": "Swipe to see more family members"
     }
   },
   "routines": {
@@ -1592,7 +1604,8 @@
       "label": "Hub navigation",
       "vandaag": "Today",
       "kalender": "Calendar",
-      "routines": "Tasks",
+      "routines": "Routines",
+      "taken": "Tasks",
       "sterren": "Stars",
       "timer": "Timer",
       "timerCount": "{count} timers"

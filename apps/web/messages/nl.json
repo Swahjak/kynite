@@ -846,10 +846,14 @@
     "board": {
       "title": "Taken & routines",
       "daypart": {
-        "label": "Dagdeel kiezen",
         "morning": "Ochtend",
         "afternoon": "Middag",
         "evening": "Avond"
+      },
+      "who": {
+        "label": "Wie",
+        "everyone": "Iedereen",
+        "filterByMember": "Filter op {name}"
       },
       "pool": {
         "title": "Voor het oppakken",
@@ -864,9 +868,16 @@
       },
       "celebrateBadge": "Klaar",
       "countLabel": "{done} van {total} klaar",
-      "starTotalLabel": "{count, plural, one {# ster} other {# sterren}}",
       "progressLabel": "Voortgang van {name}",
-      "celebrateCard": "Alles gedaan · +{count} sterren",
+      "allDone": "Alles gedaan!",
+      "routineCard": {
+        "title": {
+          "morning": "Ochtendroutine",
+          "afternoon": "Middagroutine",
+          "evening": "Avondroutine"
+        },
+        "meta": "{done} van {total} stappen"
+      },
       "section": {
         "tasks": "Taken"
       },
@@ -874,7 +885,8 @@
       "row": {
         "complete": "{title} afvinken",
         "undo": "{title} weer openzetten"
-      }
+      },
+      "footerHint": "Veeg om meer gezinsleden te zien"
     }
   },
   "routines": {
@@ -1592,7 +1604,8 @@
       "label": "Hubnavigatie",
       "vandaag": "Vandaag",
       "kalender": "Kalender",
-      "routines": "Taken",
+      "routines": "Routines",
+      "taken": "Taken",
       "sterren": "Sterren",
       "timer": "Timer",
       "timerCount": "{count} timers"

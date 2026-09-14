@@ -64,15 +64,22 @@ import { Link, usePathname } from '@/i18n/navigation';
  */
 
 type RailItem = {
-  key: 'vandaag' | 'kalender' | 'routines' | 'sterren';
-  href: '/hub' | '/hub/kalender' | '/hub/routines' | '/hub/store';
+  key: 'vandaag' | 'kalender' | 'routines' | 'taken' | 'sterren';
+  href: '/hub' | '/hub/kalender' | '/hub/routines' | '/hub/taken' | '/hub/store';
   icon: IconName;
 };
 
 const ITEMS: readonly RailItem[] = [
   { key: 'vandaag', href: '/hub', icon: 'calendar_month' },
   { key: 'kalender', href: '/hub/kalender', icon: 'view_column' },
-  { key: 'routines', href: '/hub/routines', icon: 'checklist' },
+  // `repeat`, not `checklist`: the taken-board-routines-page plan (M1+M2)
+  // gives the family-wide task board its own tile below, so this one no
+  // longer borrows the checklist glyph — a recurring routine is what is
+  // left at this destination once M3 lands the family-wide "Actieve
+  // routines" page here. Until then this still points at `/hub/routines`,
+  // which is a temporary redirect to `/hub/taken`.
+  { key: 'routines', href: '/hub/routines', icon: 'repeat' },
+  { key: 'taken', href: '/hub/taken', icon: 'checklist' },
   // `bar_chart`, not the shelf's old `redeem` gift icon: the tile is now
   // "Sterren" rather than "Winkel", and the glyph follows the label — the
   // same icon `/today`'s own sterren tab already uses for this panel
