@@ -44,6 +44,12 @@ const stepSchema = z.object({
   title: trimmed.min(1).max(120),
   /** `null` = untimed. Bounded at two hours: a step is a step, not a day. */
   timerSeconds: z.number().int().min(5).max(7200).nullable(),
+  /**
+   * `null` when nobody has picked one yet — `routineIconOf`/`suggestIcon`
+   * resolve the fallback at render time (M5), so the seam only rejects a
+   * value that is *set* to something outside the closed icon set.
+   */
+  icon: trimmed.refine(isRoutineIcon).nullable(),
 });
 
 /**
@@ -171,6 +177,7 @@ export async function createRoutine(
       body.steps.map((step, index) => ({
         routineId: row.id,
         title: step.title,
+        icon: step.icon,
         timerSeconds: step.timerSeconds,
         sortOrder: index,
       }))
@@ -255,6 +262,7 @@ export async function updateRoutine(
         await tx.insert(routineStep).values({
           routineId,
           title: step.title,
+          icon: step.icon,
           timerSeconds: step.timerSeconds,
           sortOrder: index,
         });
@@ -263,6 +271,7 @@ export async function updateRoutine(
           .update(routineStep)
           .set({
             title: step.title,
+            icon: step.icon,
             timerSeconds: step.timerSeconds,
             sortOrder: index,
             updatedAt: new Date(),

@@ -3,12 +3,14 @@
 import { useActionState, useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { Menu } from '@base-ui/react/menu';
+import { Popover } from '@base-ui/react/popover';
 import {
   Button,
   cn,
   GripHandle,
   Icon,
   IconMedallion,
+  IconPicker,
   Input,
   MemberChip,
   Overline,
@@ -43,7 +45,7 @@ import {
 import type { OwnerOption } from '../page-data';
 import type { RoutineWithSteps } from '../queries';
 import { DeleteRoutineButton } from './delete-routine-button';
-import { ROUTINE_ICONS, ROUTINE_ICON_TILE, routineIconOf } from './tokens';
+import { ROUTINE_ICONS, ROUTINE_ICON_TILE, routineIconOf, type RoutineIcon } from './tokens';
 
 /**
  * The routine builder (`Routines.dc.html`, mobile routinebouwer).
@@ -125,6 +127,65 @@ function StepRowMenu({
   );
 }
 
+/**
+ * The step row's icon button (M5 of the 2026-09-14 taken-board-routines-page
+ * plan) — a 48px tile showing the step's current glyph (its own `icon`, or
+ * `suggestIcon(title)` while nobody has picked one) that opens the shared
+ * `IconPicker` in a popover. Compact by design: the row already spends its
+ * width on the grip, the name and the `more_horiz` menu, so this is one more
+ * tap target rather than an inline grid.
+ */
+function StepIconButton({
+  label,
+  icon,
+  title,
+  onChange,
+}: {
+  label: string;
+  icon: string | null;
+  title: string;
+  onChange: (icon: IconName) => void;
+}) {
+  const t = useTranslations('routines');
+  const [open, setOpen] = useState(false);
+  const pickerName = useId();
+  const resolved = routineIconOf(icon, title || undefined);
+
+  return (
+    <Popover.Root open={open} onOpenChange={setOpen}>
+      <Popover.Trigger
+        aria-label={label}
+        data-testid="step-icon-trigger"
+        className={cn(
+          'flex size-12 shrink-0 items-center justify-center rounded-xl transition-colors',
+          ROUTINE_ICON_TILE[resolved]
+        )}
+      >
+        <Icon name={resolved} size="sm" />
+      </Popover.Trigger>
+      <Popover.Portal>
+        <Popover.Positioner side="bottom" align="start" sideOffset={6} className="z-50">
+          <Popover.Popup className="rounded-2xl bg-popover p-3 shadow-lg ring-1 ring-foreground/10 outline-none">
+            <IconPicker
+              icons={ROUTINE_ICONS}
+              value={resolved}
+              onChange={(next) => {
+                onChange(next);
+                setOpen(false);
+              }}
+              name={pickerName}
+              ariaLabel={label}
+              labelFor={(option) => t(`icons.${option}`)}
+              tileClassFor={(option) => ROUTINE_ICON_TILE[option as RoutineIcon]}
+              testIdPrefix="step-icon-option"
+            />
+          </Popover.Popup>
+        </Popover.Positioner>
+      </Popover.Portal>
+    </Popover.Root>
+  );
+}
+
 type Draft = {
   /** Empty for a step that does not exist yet. */
   id: string;
@@ -132,13 +193,15 @@ type Draft = {
   title: string;
   timerSeconds: string;
   sortOrder: number;
+  /** `null` when nobody has picked one — the row shows `suggestIcon(title)`. */
+  icon: string | null;
 };
 
 function draftsFrom(routine: RoutineWithSteps | undefined): Draft[] {
   if (!routine || routine.steps.length === 0) {
     return [
-      { id: '', key: 'new-0', title: '', timerSeconds: '', sortOrder: 0 },
-      { id: '', key: 'new-1', title: '', timerSeconds: '', sortOrder: 1 },
+      { id: '', key: 'new-0', title: '', timerSeconds: '', sortOrder: 0, icon: null },
+      { id: '', key: 'new-1', title: '', timerSeconds: '', sortOrder: 1, icon: null },
     ];
   }
 
@@ -148,6 +211,7 @@ function draftsFrom(routine: RoutineWithSteps | undefined): Draft[] {
     title: step.title,
     timerSeconds: step.timerSeconds === null ? '' : String(step.timerSeconds),
     sortOrder: index,
+    icon: step.icon,
   }));
 }
 
@@ -573,19 +637,34 @@ function RoutineForm({
                   className="flex items-center gap-2 rounded-xl bg-surface-container px-2.5 py-2"
                 >
                   <input type="hidden" name="stepId" value={step.id} />
-                  {/* The timer posts from the row, never from the menu. The
-                      three step fields are parallel arrays read positionally by
-                      the Server Action, and a popup that unmounts when it
-                      closes would drop one entry and shift every timer onto the
-                      wrong step. The control inside the menu edits this. */}
+                  {/* The timer and icon post from the row, never from the
+                      menu. The four step fields are parallel arrays read
+                      positionally by the Server Action, and a popup that
+                      unmounts when it closes would drop one entry and shift
+                      every timer/icon onto the wrong step. The controls
+                      inside the menu (timer) and the button beside the name
+                      (icon) edit these. */}
                   <input type="hidden" name="stepTimerSeconds" value={step.timerSeconds} />
+                  <input type="hidden" name="stepIcon" value={step.icon ?? ''} />
                   <GripHandle />
+                  <StepIconButton
+                    label={t('form.stepIcon', { number: index + 1 })}
+                    icon={step.icon}
+                    title={step.title}
+                    onChange={(next) =>
+                      setSteps((current) =>
+                        current.map((entry) =>
+                          entry.key === step.key ? { ...entry, icon: next } : entry
+                        )
+                      )
+                    }
+                  />
                   {/* The name owns the row (`Routines.dc.html` r394-417). A
-                      grip, a name and *one* control on the right — everything
-                      else moved under the `more_horiz` menu below, because four
-                      icon buttons and a number field beside the name left it
-                      82 pixels wide on a 390px phone and "Aanklede|" is not a
-                      step anybody wrote. */}
+                      grip, an icon, a name and *one* control on the right —
+                      everything else moved under the `more_horiz` menu below,
+                      because four icon buttons and a number field beside the
+                      name left it 82 pixels wide on a 390px phone and
+                      "Aanklede|" is not a step anybody wrote. */}
                   <Input
                     name="stepTitle"
                     maxLength={120}
@@ -670,6 +749,7 @@ function RoutineForm({
                     title: '',
                     timerSeconds: '',
                     sortOrder: current.length,
+                    icon: null,
                   },
                 ])
               }

@@ -124,6 +124,7 @@ export { FieldPicker, type FieldPickerProps } from './components/field-picker';
 export { FORMATTING_LOCALES, type FormattingLocale } from './components/formatting-locale';
 export { Icon, ICON_SIZES, type IconProps, type IconSize } from './components/icon';
 export { ICON_CODEPOINTS, type IconName } from './components/icon-codepoints';
+export { IconPicker, type IconPickerProps } from './components/icon-picker';
 export { Input, inputVariants } from './components/input';
 export {
   Select,
