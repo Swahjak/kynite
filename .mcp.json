@@ -19,6 +19,10 @@
     "kynite": {
       "type": "http",
       "url": "https://kynite.app/api/mcp"
+    },
+    "claude-design": {
+      "type": "http",
+      "url": "https://api.anthropic.com/v1/design/mcp"
     }
   }
 }
