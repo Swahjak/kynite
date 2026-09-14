@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Poppins:wght@400;500;600;700&display=swap"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
+<style>
+  body{margin:0;-webkit-font-smoothing:antialiased;}
+  .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;vertical-align:middle;}
+  .tnum{font-variant-numeric:tabular-nums;}
+  a{color:#5d5fef;}
+  a:hover{color:#4547c9;}
+  .noscroll::-webkit-scrollbar{width:0;height:0;}
+  .noscroll{scrollbar-width:none;}
+  .xbar{overflow-x:auto;}
+  .xbar::-webkit-scrollbar{height:10px;}
+  .xbar::-webkit-scrollbar-thumb{background:#d6d3cb;border-radius:9999px;}
+  .xbar::-webkit-scrollbar-track{background:transparent;}
+  @keyframes kyn-pop{0%{transform:scale(0.9);}60%{transform:scale(1.06);}100%{transform:scale(1);}}
+  @keyframes kyn-shimmer{0%{background-position:-120px 0;}100%{background-position:240px 0;}}
+  .kyn-pop{animation:kyn-pop 260ms ease-out;}
+  .kyn-shimmer{background-image:linear-gradient(100deg,rgba(255,255,255,0) 0%,rgba(255,255,255,0.65) 45%,rgba(255,255,255,0) 90%);background-repeat:no-repeat;background-size:120px 100%;animation:kyn-shimmer 2.4s linear infinite;}
+  @media (prefers-reduced-motion: reduce){.kyn-pop,.kyn-shimmer{animation:none;}}
+</style>
+</helmet>
+
+<div style="background:#eceae4;min-height:100vh;font-family:'Poppins',sans-serif;color:#191c1d;padding:36px 40px 80px;">
+
+  <div style="margin-bottom:28px;">
+    <h1 style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:34px;line-height:1.1;letter-spacing:-0.02em;margin:0 0 6px;">Actieve routines</h1>
+    <p style="margin:0;font-size:14px;color:#434656;max-width:820px;">Eigen pagina op de wandtablet, los van de takenpagina. Eén kolom per gezinslid op minimaal een derde van de breedte, met horizontale scroll zodra er meer leden zijn dan er passen. Per kolom loopt de dag van boven naar onder: de routine die nú speelt staat open met zijn stappen, de rest blijft een rustige regel.</p>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;"><span class="material-symbols-outlined" style="font-size:18px;">tablet_mac</span>Wandtablet 1280 × 800</div>
+
+  <div style="width:1280px;height:800px;background:#fbf9f4;border-radius:16px;border:1px solid #dcdad4;box-shadow:0 18px 40px rgba(0,0,0,0.10);overflow:hidden;display:flex;">
+
+    <div style="width:76px;flex-shrink:0;background:#f5f3ee;border-right:1px solid #e6e3dc;display:flex;flex-direction:column;align-items:center;padding:18px 0;gap:6px;">
+      <span style="width:36px;height:36px;border-radius:8px;background:#5d5fef;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:16px;margin-bottom:14px;">K</span>
+      <span style="width:52px;height:52px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#747688;"><span class="material-symbols-outlined" style="font-size:22px;">home</span><span style="font-size:9px;font-family:'Baloo 2',sans-serif;font-weight:700;">Vandaag</span></span>
+      <span style="width:52px;height:52px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#747688;"><span class="material-symbols-outlined" style="font-size:22px;">calendar_month</span><span style="font-size:9px;font-family:'Baloo 2',sans-serif;font-weight:700;">Kalender</span></span>
+      <span style="width:52px;height:52px;border-radius:8px;background:rgba(93,95,239,0.10);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#5d5fef;"><span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 1;">restart_alt</span><span style="font-size:9px;font-family:'Baloo 2',sans-serif;font-weight:700;">Routines</span></span>
+      <span style="width:52px;height:52px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#747688;"><span class="material-symbols-outlined" style="font-size:22px;">checklist</span><span style="font-size:9px;font-family:'Baloo 2',sans-serif;font-weight:700;">Taken</span></span>
+      <span style="width:52px;height:52px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#747688;"><span class="material-symbols-outlined" style="font-size:22px;">star</span><span style="font-size:9px;font-family:'Baloo 2',sans-serif;font-weight:700;">Sterren</span></span>
+      <span style="flex:1;"></span>
+      <span style="width:36px;height:36px;border-radius:9999px;overflow:hidden;background:oklch(94% 0.03 65);"><img src="uploads/parent1.svg" alt="Peep" style="width:100%;height:100%;object-fit:cover;display:block;"/></span>
+    </div>
+
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;">
+
+      <div style="display:flex;align-items:center;gap:22px;padding:18px 24px 16px;border-bottom:1px solid #eceae4;flex-shrink:0;">
+        <div style="min-width:0;">
+          <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:30px;line-height:1.1;letter-spacing:-0.02em;">Routines</span>
+          <span style="display:block;font-size:15px;color:#434656;margin-top:1px;">donderdag 3 september</span>
+        </div>
+        <span style="flex:1;"></span>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;">Wie</span>
+          <button onClick="{{ selectAll }}" style="display:flex;align-items:center;height:48px;padding:0;background:none;border:none;cursor:pointer;"><span style="{{ allStyle }}">Iedereen</span></button>
+          <sc-for list="{{ who }}" as="w" hint-placeholder-count="4">
+          <span onClick="{{ w.toggle }}" style="width:48px;height:48px;border-radius:9999px;flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;"><span style="{{ w.style }}"></span></span>
+          </sc-for>
+        </div>
+        <span class="tnum" style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:34px;letter-spacing:-0.02em;">07:41</span>
+      </div>
+
+      <div class="xbar" style="flex:1;min-height:0;display:flex;gap:16px;padding:16px 24px 14px;align-items:stretch;">
+
+        <sc-for list="{{ cols }}" as="col" hint-placeholder-count="3">
+        <div style="{{ col.colStyle }}">
+
+          <div style="{{ col.headStyle }}">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <span style="{{ col.ringStyle }}"></span>
+              <div style="flex:1;min-width:0;">
+                <span style="display:block;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:24px;line-height:1.1;">{{ col.name }}</span>
+                <span style="display:block;font-size:13px;color:#5f6274;">{{ col.sub }}</span>
+              </div>
+              <sc-if value="{{ col.showStarTotal }}" hint-placeholder-val="{{ true }}">
+              <span class="tnum" style="display:inline-flex;align-items:center;gap:5px;background:rgba(239,141,93,0.16);color:#b8600f;border-radius:9999px;padding:7px 13px;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:16px;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:20px;font-variation-settings:'FILL' 1;">star</span>{{ col.starTotal }}</span>
+              </sc-if>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:14px;">
+              <span class="tnum" style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;color:#434656;">{{ col.countLabel }}</span>
+              <span style="flex:1;height:8px;border-radius:9999px;background:#e4e2db;overflow:hidden;"><span style="{{ col.barStyle }}"><span class="{{ col.shimmerClass }}" style="{{ col.shimmerStyle }}"></span></span></span>
+              <span class="tnum" style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;color:#747688;">{{ col.pctLabel }}</span>
+            </div>
+          </div>
+
+          <div class="noscroll" style="flex:1;min-height:0;overflow-y:auto;padding:14px 16px 18px;display:flex;flex-direction:column;gap:12px;">
+
+            <sc-for list="{{ col.bands }}" as="b" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;gap:10px;padding:6px 2px 0;">
+              <span class="material-symbols-outlined" style="{{ b.iconStyle }}">{{ b.icon }}</span>
+              <span style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:17px;letter-spacing:-0.01em;">{{ b.label }}</span>
+              <span style="flex:1;height:6px;border-radius:9999px;background:#e4e2db;overflow:hidden;"><span style="{{ b.barStyle }}"></span></span>
+              <span class="tnum" style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;color:#747688;">{{ b.countLabel }}</span>
+            </div>
+            <sc-for list="{{ b.routines }}" as="r" hint-placeholder-count="2">
+            <div style="{{ r.cardStyle }}">
+
+              <div onClick="{{ r.toggleOpen }}" style="display:flex;align-items:center;gap:12px;cursor:pointer;">
+                <span style="{{ r.tileStyle }}"><span class="material-symbols-outlined" style="{{ r.tileIconStyle }}">{{ r.icon }}</span></span>
+                <div style="flex:1;min-width:0;">
+                  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <span style="{{ r.titleStyle }}">{{ r.title }}</span>
+                    <sc-if value="{{ r.isNow }}" hint-placeholder-val="{{ true }}">
+                    <span style="background:#5d5fef;color:#fff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12px;letter-spacing:0.05em;padding:3px 10px;border-radius:9999px;">NU</span>
+                    </sc-if>
+                    <sc-if value="{{ r.isDone }}" hint-placeholder-val="{{ false }}">
+                    <span style="background:oklch(93% 0.05 155);color:oklch(40% 0.1 155);font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12px;letter-spacing:0.05em;padding:3px 10px;border-radius:9999px;">KLAAR</span>
+                    </sc-if>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:2px;">
+                    <span class="tnum" style="font-size:14px;color:#5f6274;">{{ r.metaLabel }}</span>
+                    <sc-if value="{{ r.hasStar }}" hint-placeholder-val="{{ true }}">
+                    <span class="tnum" style="display:inline-flex;align-items:center;gap:3px;color:#ef8d5d;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;"><span class="material-symbols-outlined" style="font-size:17px;font-variation-settings:'FILL' 1;">star</span>+{{ r.stars }}</span>
+                    </sc-if>
+                  </div>
+                </div>
+                <span class="material-symbols-outlined" style="{{ r.chevronStyle }}">expand_more</span>
+              </div>
+
+              <sc-if value="{{ r.open }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;flex-direction:column;gap:6px;margin-top:14px;">
+                <sc-for list="{{ r.steps }}" as="s" hint-placeholder-count="4">
+                <div onClick="{{ s.toggle }}" style="{{ s.rowStyle }}">
+                  <span style="{{ s.tileStyle }}"><span class="material-symbols-outlined" style="{{ s.iconStyle }}">{{ s.icon }}</span></span>
+                  <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;">
+                    <span style="{{ s.titleStyle }}">{{ s.title }}</span>
+                    <sc-if value="{{ s.hasTimer }}" hint-placeholder-val="{{ false }}">
+                    <span class="tnum" style="display:inline-flex;align-items:center;gap:4px;color:#5f6274;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;"><span class="material-symbols-outlined" style="font-size:17px;">timer</span>{{ s.timer }}</span>
+                    </sc-if>
+                  </div>
+                  <span style="{{ s.circleStyle }}"><sc-if value="{{ s.done }}" hint-placeholder-val="{{ false }}"><span class="material-symbols-outlined kyn-pop" style="font-size:30px;color:#ffffff;font-variation-settings:'FILL' 1,'wght' 600;">check</span></sc-if></span>
+                </div>
+                </sc-for>
+              </div>
+              </sc-if>
+
+            </div>
+            </sc-for>
+            </sc-for>
+
+            <sc-if value="{{ col.empty }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:34px 18px;border:1px dashed #dcdad4;border-radius:16px;color:#747688;text-align:center;">
+              <span class="material-symbols-outlined" style="font-size:30px;">self_improvement</span>
+              <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:17px;">Geen routines dit dagdeel</span>
+            </div>
+            </sc-if>
+
+          </div>
+        </div>
+        </sc-for>
+
+      </div>
+
+      <div style="flex-shrink:0;display:flex;align-items:center;gap:10px;padding:0 24px 14px;">
+        <span class="material-symbols-outlined" style="font-size:20px;color:#747688;">swipe</span>
+        <span style="font-size:13px;color:#747688;">Veeg om meer gezinsleden te zien</span>
+        <span style="flex:1;"></span>
+        <sc-for list="{{ pager }}" as="p" hint-placeholder-count="4">
+        <span style="{{ p.style }}"></span>
+        </sc-for>
+      </div>
+
+    </div>
+  </div>
+
+  <p style="width:1280px;margin:14px 0 0;font-size:13px;color:#434656;line-height:1.6;">Een kolom is {{ widthLabel }} breed, dus er staan er ruim drie in beeld en de vierde kondigt zich aan de rand aan. De open routine geeft zijn stappen op volle rijhoogte (64px, cirkel van 46px) — dezelfde tikzone als op de takenpagina. Afgeronde routines zakken naar een rustige regel met een KLAAR-token in plaats van te verdwijnen, zodat kinderen hun dag terugzien.</p>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;colWidth&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;33%&quot;,&quot;40%&quot;,&quot;50%&quot;],&quot;default&quot;:&quot;33%&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Kolommen&quot;},&quot;showStars&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Kolommen&quot;},&quot;expandAll&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Kolommen&quot;}}">
+class Component extends DCLogic {
+  state = {
+    dp: 'ochtend',
+    done: {
+      'fien|ochtendroutine|0': true, 'fien|ochtendroutine|1': true, 'fien|ochtendroutine|2': true,
+      'fien|bed opmaken|0': true, 'fien|bed opmaken|1': true,
+      'joep|ochtendroutine|0': true,
+      'peep|hond & lunch|0': true
+    },
+    openKey: null,
+    closedKeys: {},
+    who: []
+  };
+
+  toggleWho(key) {
+    this.setState(s => ({
+      who: s.who.indexOf(key) !== -1 ? s.who.filter(x => x !== key) : s.who.concat([key])
+    }));
+  }
+
+  data() {
+    return [
+      {
+        key: 'fien', name: 'Fien', sub: '5 jaar', hue: 335, avatar: 'uploads/child1.svg',
+        routines: {
+          ochtend: [
+            { title: 'Bed opmaken', icon: 'bed', time: '07:00', stars: 1, steps: [
+              { title: 'Dekbed rechttrekken', icon: 'bed' },
+              { title: 'Knuffels op het bed', icon: 'toys' }
+            ] },
+            { title: 'Ochtendroutine', icon: 'sunny', time: '07:15', stars: 3, steps: [
+              { title: 'Uit bed', icon: 'bed' },
+              { title: 'Aankleden', icon: 'checkroom' },
+              { title: 'Ontbijt eten', icon: 'restaurant' },
+              { title: 'Bordje in de keuken zetten', icon: 'countertops' },
+              { title: 'Tanden poetsen', icon: 'dentistry', timer: '2:00' },
+              { title: 'Tas inpakken', icon: 'backpack' }
+            ] },
+            { title: 'Schoenen aan en jas pakken', icon: 'checkroom', time: '08:10', stars: 1, steps: [
+              { title: 'Schoenen aan', icon: 'steps' },
+              { title: 'Jas pakken', icon: 'dry_cleaning' }
+            ] }
+          ],
+          middag: [
+            { title: 'Thuiskomst', icon: 'home', time: '15:30', stars: 1, steps: [
+              { title: 'Handen wassen', icon: 'wash' },
+              { title: 'Tas leegmaken', icon: 'backpack' },
+              { title: 'Fruit eten', icon: 'nutrition' }
+            ] },
+            { title: 'Huiswerk', icon: 'menu_book', time: '16:00', stars: 2, steps: [
+              { title: 'Lezen 10 minuten', icon: 'menu_book', timer: '10:00' },
+              { title: 'Rekenblad', icon: 'calculate' }
+            ] }
+          ],
+          avond: [
+            { title: 'Bedtime routine', icon: 'nights_stay', time: '19:00', stars: 3, steps: [
+              { title: 'Pyjama aan', icon: 'bedtime' },
+              { title: 'Tanden poetsen', icon: 'dentistry', timer: '2:00' },
+              { title: 'Plas doen', icon: 'wc' },
+              { title: 'Voorlezen', icon: 'auto_stories' }
+            ] }
+          ]
+        }
+      },
+      {
+        key: 'joep', name: 'Joep', sub: '3 jaar', hue: 245, avatar: 'uploads/child2.svg',
+        routines: {
+          ochtend: [
+            { title: 'Ochtendroutine', icon: 'sunny', time: '07:30', stars: 3, steps: [
+              { title: 'Aankleden', icon: 'checkroom' },
+              { title: 'Ontbijt eten', icon: 'restaurant' },
+              { title: 'Tanden poetsen', icon: 'dentistry', timer: '2:00' }
+            ] }
+          ],
+          middag: [
+            { title: 'Slaapje', icon: 'crib', time: '13:00', stars: 1, steps: [
+              { title: 'Plas doen', icon: 'wc' },
+              { title: 'Knuffel pakken', icon: 'bedroom_baby' }
+            ] }
+          ],
+          avond: [
+            { title: 'Bedtime routine', icon: 'nights_stay', time: '18:45', stars: 2, steps: [
+              { title: 'Pyjama aan', icon: 'bedtime' },
+              { title: 'Tanden poetsen', icon: 'dentistry', timer: '2:00' },
+              { title: 'Liedje', icon: 'music_note' }
+            ] }
+          ]
+        }
+      },
+      {
+        key: 'peep', name: 'Peep', sub: 'papa', hue: 65, avatar: 'uploads/parent1.svg',
+        routines: {
+          ochtend: [
+            { title: 'Hond & lunch', icon: 'pets', time: '06:45', steps: [
+              { title: 'Hond uitlaten', icon: 'pets' },
+              { title: 'Lunch inpakken', icon: 'lunch_dining' }
+            ] },
+            { title: 'Wegbrengen', icon: 'directions_car', time: '08:20', steps: [
+              { title: 'Fietsen klaarzetten', icon: 'pedal_bike' },
+              { title: 'Naar school', icon: 'school' }
+            ] }
+          ],
+          middag: [
+            { title: 'Ophalen', icon: 'directions_car', time: '15:15', steps: [
+              { title: 'Kinderen ophalen', icon: 'directions_car' }
+            ] }
+          ],
+          avond: [
+            { title: 'Keuken sluiten', icon: 'countertops', time: '19:30', steps: [
+              { title: 'Afwas doen', icon: 'sink' },
+              { title: 'Aanrecht opruimen', icon: 'countertops' }
+            ] }
+          ]
+        }
+      },
+      {
+        key: 'veerle', name: 'Veerle', sub: 'mama', hue: 290, avatar: 'uploads/parent2.svg',
+        routines: {
+          ochtend: [
+            { title: 'Huis opstarten', icon: 'local_laundry_service', time: '07:00', steps: [
+              { title: 'Was ophangen', icon: 'local_laundry_service' },
+              { title: 'Rugzakken checken', icon: 'backpack' }
+            ] }
+          ],
+          middag: [
+            { title: 'Boodschappen', icon: 'shopping_cart', time: '14:00', steps: [
+              { title: 'Lijstje aanvullen', icon: 'list_alt' },
+              { title: 'Bestellen', icon: 'shopping_cart' }
+            ] }
+          ],
+          avond: [
+            { title: 'Dag afsluiten', icon: 'bedtime', time: '20:30', steps: [
+              { title: 'Morgen doornemen', icon: 'event' },
+              { title: 'Lampen uit', icon: 'lightbulb' }
+            ] }
+          ]
+        }
+      }
+    ];
+  }
+
+  toggleStep(id) {
+    this.setState(s => ({ done: Object.assign({}, s.done, { [id]: !s.done[id] }) }));
+  }
+
+  toggleOpen(key, autoOpen) {
+    this.setState(s => {
+      const isOpen = s.openKey ? s.openKey === key : (autoOpen && !s.closedKeys[key]);
+      if (isOpen) return { openKey: null, closedKeys: Object.assign({}, s.closedKeys, { [key]: true }) };
+      return { openKey: key, closedKeys: {} };
+    });
+  }
+
+  renderVals() {
+    const dps = [
+      { key: 'ochtend', label: 'Ochtend', icon: 'wb_twilight', hue: 65 },
+      { key: 'middag', label: 'Middag', icon: 'wb_sunny', hue: 200 },
+      { key: 'avond', label: 'Avond', icon: 'bedtime', hue: 290 }
+    ];
+    const showStars = this.props.showStars !== false;
+    const expandAll = this.props.expandAll === true;
+    const w = this.props.colWidth || '33%';
+    const basis = { '33%': 'calc(33.333% - 11px)', '40%': 'calc(40% - 11px)', '50%': 'calc(50% - 8px)' }[w] || 'calc(33.333% - 11px)';
+
+    const members = this.data();
+    const whoSel = this.state.who;
+    const visible = whoSel.length ? members.filter(m => whoSel.indexOf(m.key) !== -1) : members;
+    const cols = visible.map(m => {
+      const flat = [];
+      dps.forEach(d => (m.routines[d.key] || []).forEach(r => flat.push({ r, d })));
+      let firstOpenCandidate = null;
+      const routines = flat.map(fr => {
+        const r = fr.r;
+        const rkey = m.key + '|' + r.title.toLowerCase();
+        const steps = r.steps.map((s, i) => {
+          const id = rkey + '|' + i;
+          const done = !!this.state.done[id];
+          return {
+            title: s.title, icon: s.icon, done,
+            hasTimer: !!s.timer, timer: s.timer,
+            toggle: () => this.toggleStep(id),
+            rowStyle: 'display:flex;align-items:center;gap:12px;padding:9px 12px;min-height:64px;box-sizing:border-box;border-radius:8px;cursor:pointer;'
+              + (done ? 'background:oklch(96% 0.03 155);' : 'background:#fbf9f4;'),
+            tileStyle: 'width:38px;height:38px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:'
+              + (done ? 'oklch(93% 0.05 155);' : 'oklch(95% 0.03 ' + m.hue + ');'),
+            iconStyle: 'font-size:22px;color:' + (done ? 'oklch(45% 0.1 155);' : 'oklch(45% 0.1 ' + m.hue + ');'),
+            titleStyle: 'min-width:0;font-size:18px;font-weight:600;line-height:1.25;text-wrap:pretty;overflow-wrap:anywhere;'
+              + (done ? 'color:#8a8c98;text-decoration:line-through;' : 'color:#191c1d;'),
+            circleStyle: 'width:46px;height:46px;border-radius:9999px;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-sizing:border-box;'
+              + (done ? 'background:oklch(55% 0.14 155);border:none;' : 'background:#ffffff;border:3px solid #dcdad4;')
+        };
+        });
+        const doneCount = steps.filter(s => s.done).length;
+        const isDone = steps.length > 0 && doneCount === steps.length;
+        if (!isDone && firstOpenCandidate === null) firstOpenCandidate = rkey;
+        return { r, d: fr.d, rkey, steps, doneCount, isDone };
+      });
+
+      routines.forEach(o => {
+        const auto = o.rkey === firstOpenCandidate;
+        const open = expandAll || (this.state.openKey ? this.state.openKey === o.rkey : (auto && !this.state.closedKeys[o.rkey]));
+        o.open = open;
+        o.isNow = o.rkey === firstOpenCandidate && !o.isDone;
+        o.auto = auto;
+      });
+
+      const totalSteps = routines.reduce((n, o) => n + o.steps.length, 0);
+      const doneSteps = routines.reduce((n, o) => n + o.doneCount, 0);
+      const pct = totalSteps ? Math.round((doneSteps / totalSteps) * 100) : 0;
+      const allDone = totalSteps > 0 && doneSteps === totalSteps;
+      const starTotal = routines.filter(o => o.isDone && o.r.stars).reduce((n, o) => n + o.r.stars, 0);
+
+      const viewOf = (o) => ({
+        title: o.r.title, icon: o.r.icon, stars: o.r.stars,
+        hasStar: showStars && !!o.r.stars,
+        open: o.open, isNow: o.isNow, isDone: o.isDone,
+        steps: o.steps,
+        metaLabel: o.r.time + ' · ' + o.doneCount + '/' + o.steps.length + ' stappen',
+        toggleOpen: () => this.toggleOpen(o.rkey, o.auto),
+        cardStyle: 'border-radius:16px;padding:16px;box-sizing:border-box;'
+          + (o.isNow
+              ? 'background:#ffffff;border:1px solid #d3d4f7;box-shadow:0 6px 18px rgba(25,28,29,0.07);'
+              : o.isDone
+                ? 'background:#f5f3ee;border:1px solid #eceae4;'
+                : 'background:#ffffff;border:1px solid #eceae4;'),
+        tileStyle: 'width:52px;height:52px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:'
+          + (o.isDone ? 'oklch(93% 0.05 155);' : 'oklch(95% 0.03 ' + m.hue + ');'),
+        tileIconStyle: 'font-size:28px;color:' + (o.isDone ? 'oklch(45% 0.1 155);' : 'oklch(45% 0.1 ' + m.hue + ');'),
+        titleStyle: 'display:block;min-width:0;font-family:\'Baloo 2\',sans-serif;font-weight:800;font-size:21px;line-height:1.15;letter-spacing:-0.01em;text-wrap:pretty;overflow-wrap:anywhere;hyphens:auto;'
+          + (o.isDone ? 'color:#5f6274;' : 'color:#191c1d;'),
+        chevronStyle: 'font-size:26px;color:#747688;flex-shrink:0;transition:transform 160ms ease;' + (o.open ? 'transform:rotate(180deg);' : '')
+      });
+
+      const bands = dps.map(d => {
+        const rs = routines.filter(o => o.d.key === d.key);
+        const st = rs.reduce((n, o) => n + o.steps.length, 0);
+        const sd = rs.reduce((n, o) => n + o.doneCount, 0);
+        return {
+          label: d.label, icon: d.icon,
+          iconStyle: 'font-size:20px;color:oklch(58% 0.14 ' + d.hue + ');font-variation-settings:\'FILL\' 1;',
+          barStyle: 'display:block;height:100%;border-radius:9999px;background:oklch(58% 0.14 ' + d.hue + ');width:' + (st ? Math.round((sd / st) * 100) : 0) + '%;',
+          countLabel: sd + '/' + st,
+          routines: rs.map(viewOf)
+        };
+      }).filter(b => b.routines.length > 0);
+
+      return {
+        name: m.name, sub: m.sub, empty: routines.length === 0, bands,
+        colStyle: 'flex:0 0 ' + basis + ';min-width:340px;display:flex;flex-direction:column;min-height:0;border-radius:16px;overflow:hidden;border:1px solid #e6e3dc;'
+          + (allDone ? 'background:linear-gradient(180deg,#fffaf1,#ffffff 40%);' : 'background:#ffffff;'),
+        headStyle: 'flex-shrink:0;padding:16px 16px 15px;border-bottom:3px solid ' + (allDone ? '#ef8d5d;' : 'oklch(58% 0.14 ' + m.hue + ');'),
+        ringStyle: 'width:52px;height:52px;border-radius:9999px;flex-shrink:0;box-sizing:border-box;background-color:oklch(94% 0.03 ' + m.hue + ');background-image:url(' + m.avatar + ');background-size:cover;background-position:center;box-shadow:0 0 0 3px ' + (allDone ? '#ef8d5d' : 'oklch(58% 0.14 ' + m.hue + ')') + ';',
+        countLabel: doneSteps + ' van ' + totalSteps + ' stappen',
+        pctLabel: pct + '%',
+        barStyle: 'position:relative;overflow:hidden;display:block;height:100%;border-radius:9999px;width:' + pct + '%;background:' + (allDone ? '#ef8d5d;' : 'oklch(58% 0.14 ' + m.hue + ');'),
+        shimmerStyle: allDone ? 'position:absolute;inset:0;display:block;' : 'display:none;',
+        shimmerClass: allDone ? 'kyn-shimmer' : '',
+        starTotal, showStarTotal: showStars && starTotal > 0
+      };
+    });
+
+    const allOn = whoSel.length === 0;
+    const who = members.map(m => {
+      const on = allOn || whoSel.indexOf(m.key) !== -1;
+      return {
+        toggle: () => this.toggleWho(m.key),
+        style: 'width:32px;height:32px;border-radius:9999px;box-sizing:border-box;background-color:oklch(94% 0.03 ' + m.hue + ');background-image:url(' + m.avatar + ');background-size:cover;background-position:center;'
+          + (allOn ? '' : (on ? 'box-shadow:0 0 0 2px #5d5fef;' : 'opacity:0.45;'))
+      };
+    });
+
+    return {
+      cols, who,
+      widthLabel: w,
+      pager: visible.map((m, i) => ({ style: 'width:' + (i < 3 ? '22px' : '8px') + ';height:8px;border-radius:9999px;background:' + (i < 3 ? '#5d5fef' : '#d6d3cb') + ';' })),
+      allStyle: 'display:inline-flex;align-items:center;height:32px;padding:0 14px;border-radius:9999px;font-family:\'Baloo 2\',sans-serif;font-weight:700;font-size:13px;box-sizing:border-box;'
+        + (allOn ? 'background:#e1e3e4;color:#191c1d;border:none;' : 'background:#ffffff;color:#434656;border:1px solid #e1e3e4;'),
+      selectAll: () => this.setState({ who: [], openKey: null, closedKeys: {} })
+    };
+  }
+}
+</script>
+</body>
+</html>

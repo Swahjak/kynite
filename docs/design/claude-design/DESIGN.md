@@ -95,9 +95,7 @@ typography:
 rounded:
   sm: 0.25rem
   DEFAULT: 0.5rem
-  md: 0.75rem
   lg: 1rem
-  xl: 1.5rem
   full: 9999px
 spacing:
   unit: 4px
@@ -148,24 +146,46 @@ The system uses an **8px grid** (with a 4px sub-unit for tight components).
 We use **Tonal Layering** combined with **Soft Ambient Shadows** to define hierarchy.
 
 - **Level 0 (Background):** Base surface color (Cream/Deep Slate).
-- **Level 1 (Cards):** White/Dark Gray surfaces with a 1px border (`neutral-200`) and a subtle 4px blur shadow. 
+- **Level 1 (Cards):** White/Dark Gray surfaces with a subtle 4px blur shadow. A 1px `outline-variant` border is used **only** where the card sits directly on the background; cards nested inside another card and rows inside a list use tonal fill or a hairline divider instead, never their own border.
 - **Level 2 (Modals/Popovers):** Elevated with a 12px blur shadow, 0.1 opacity, and a slight Y-offset (4px) to simulate "lifting" off the family board.
 - **Glassmorphism:** Use only for sticky headers and navigation bars (`backdrop-blur: 12px; opacity: 0.8`) to maintain context of the content scrolling beneath.
 
 ## Shapes
 
-The shape language is approachable and soft. 
-- **Cards & Containers:** Use `rounded-xl` (1.5rem) to evoke a friendly, modern feel.
-- **Buttons & Inputs:** Use `rounded-lg` (1rem) for a standard "Modern" look.
-- **Chips & Avatars:** Always use **Pill-shaped** (full radius) to distinguish individual family members and status tags from the structural grid of cards.
+Four radii exist. Nothing else is allowed anywhere in the product.
+
+| Token | Value | Used for |
+|---|---|---|
+| `sm` | 4px | Inputs, tags, code labels, small colour tiles |
+| `DEFAULT` | 8px | Buttons, event rows, list items, icon tiles, checkboxes, cards nested inside a card |
+| `lg` | 16px | All cards, panels, sheets, modals |
+| `full` | pill | Chips, avatars, filter toggles, progress bars, FAB |
+
+The distinction is structural, not decorative: rectangular surfaces are containers (16 outer, 8 nested, 4 for fields inside them), pills are identity and state. A button is always one step tighter than the card it sits in — the same radius on a 48px-high button reads far rounder than on a 300px card. A card never uses 20, 24 or 32 — if a surface feels like it needs a bigger radius, it is probably a sheet and still uses 16.
 
 ## Components
 
 Following the **shadcn/ui (New York)** baseline, components are customized as follows:
 
-- **Buttons:** Primary buttons use a solid Indigo fill. Secondary buttons use a thick 2px border and no fill. Use a `0.98` scale transform on `:active` to provide tactile feedback.
+- **Buttons:** Primary buttons use a solid Indigo fill. Secondary buttons use a 1px border and no fill. Use a `0.98` scale transform on `:active` to provide tactile feedback.
 - **Chips:** Full pill-shaped. Categorized chips use the Category Palette `bg` and `base` text. Include a small "X" or icon that scales slightly on hover.
 - **Input Fields:** Use a subtle background tint (`neutral-100`) and a 2px bottom border that expands on focus. Labels should be small, bold, and Hanken Grotesk.
-- **Cards:** Cards are the primary unit of the "Hub." Every card should have a 1px soft border. For celebrations (e.g., "Chore Completed"), the card should support a "bouncy" entry animation using `spring` physics.
-- **Checkboxes:** Larger than standard (24x24px visual) with a rounded-sm profile. On check, trigger a haptic-style "pop" animation and use the `green` category color.
+- **Cards:** Cards are the primary unit of the "Hub." Cards that sit directly on the background get a 1px soft border; nested cards do not (see Elevation). For celebrations (e.g., "Chore Completed"), the card should support a "bouncy" entry animation using `spring` physics.
+- **Checkboxes:** Larger than standard (24x24px visual) with a `DEFAULT` (8px) profile. On check, trigger a haptic-style "pop" animation and use the `green` category color.
+## Event primitives
+
+Every appointment anywhere in the product is one of two components.
+
+**Event row** — colour bar → start time over end time → category icon → title (+ subtitle) → avatars → at most one status token (NU, lock or check). Three densities: compact 40px (mobile lists, month day list), default 48px, roomy 56px (hub). Row radius 8px (`DEFAULT`); rows sit inside one card with hairline dividers, never as separate bordered cards.
+
+**Event block** (time grids) — tiered by available height: ≥80px full (icon, title, avatar, time line), 40–79px medium (icon, title, avatar), <40px minimal (fill, colour bar, title only). Private "busy" blocks use the hatch fill with a lock and keep the avatar.
+
+**Category = colour + icon.** Eleven categories over eight hues, so the icon is what separates the pairs (School/Opvang, Muziek/Spelen, Familie/Verjaardag). Each hue renders as a four-step ramp: bar `oklch(58% 0.14 H)`, fill `95% 0.025`, icon `45% 0.1`, text `32% 0.08`. Routines are not a category — they borrow the Overig purple with their own moment icon (sunrise, meal, bedtime).
+
+**Avatars** come in three sizes only: 16 (dense), 24 (row), 32 (header/filter); overlap by a third with a 2px surface ring; "everyone" collapses into a single `groups` disc.
+
+**Who filter** — one control, always behind a "Wie" label: an Iedereen pill plus 32px avatar toggles (selected full opacity with a 2px indigo ring, rest at 45%). Ownership is never expressed by this control; that is the row's avatars.
+
+Radii across the app follow the four-step scale in **Shapes**: rows 8, cards and panels 16.
+
 - **Progress Bars:** Thick (8px) with fully rounded caps. For "Streaks," use the `secondary` gold color with a subtle shimmer effect.
