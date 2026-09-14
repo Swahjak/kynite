@@ -1,21 +1,24 @@
 import { getTranslations } from 'next-intl/server';
 import { EmptyState } from '@kynite/ui';
-import { HubBoard } from '@/modules/calendar';
+import { CalendarShell, HubBoard } from '@/modules/calendar';
 import { requireHubDevice } from '@/modules/devices';
-import { TodayHeader, TodayLive, TodayTabPersonen, loadHubBoardComposition } from '@/modules/today';
+import { TodayHeader, TodayLive, loadHubBoardComposition } from '@/modules/today';
 
 /** Session-dependent: never prerendered, so `next build` needs no database. */
 export const dynamic = 'force-dynamic';
 
 /**
- * "Kalender" — the wall's per-person view (M-R1).
+ * "Kalender" — the wall's per-person calendar (M-R1, hub-calendar-shell).
  *
  * One of the four panels `TodayTabs` used to switch between on `/hub`, now its
  * own route: the rail's second destination, for the household's other
  * question — not "what's happening" but "whose day is this". It reads the same
  * composition `/hub` does (`loadHubBoardComposition`, `@/modules/today`) and
- * draws only the one panel this route is for, `TodayTabPersonen` — the day
- * overview, the routine check-in and the star matrix stay on their own routes.
+ * renders the parent app's own calendar (`CalendarShell`) with lesser
+ * permissions — the owner's 2026-09-14 decision that the hub is the same
+ * calendar as `/calendar`, not a second UI. `TodayTabPersonen` — the compact
+ * per-person columns — stays the day overview's own panel; the routine
+ * check-in and the star matrix stay on their own routes.
  *
  * Mounted the same way `/hub` is (own `TodayHeader`/`TodayLive`/`HubBoard`),
  * rather than nested under it — it is a peer destination in the rail, not a
@@ -27,16 +30,16 @@ export default async function HubKalenderPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ date?: string; now?: string }>;
+  searchParams: Promise<{ view?: string; date?: string; now?: string }>;
 }) {
   const { locale } = await params;
-  const { date, now } = await searchParams;
-  await requireHubDevice(locale, '/hub/kalender', { date, now });
+  const { view, date, now } = await searchParams;
+  await requireHubDevice(locale, '/hub/kalender', { view, date, now });
 
-  // `TodayTabPersonen` draws no children launcher, task list, weather widget
-  // or star progress — none of the four opt-in reads, so `include` is left at
-  // its default (all off).
-  const composition = await loadHubBoardComposition({ date, now });
+  // The shell draws its own board, its own view and its own member filter —
+  // none of the four opt-in reads (`children`/`progress`/`tasks`/`weather`),
+  // so `include` is left at its default (all off).
+  const composition = await loadHubBoardComposition({ date, now, view });
   const t = await getTranslations('today');
   const tCalendar = await getTranslations('calendar');
 
@@ -54,8 +57,7 @@ export default async function HubKalenderPage({
     );
   }
 
-  const { data, dayKey, isToday, flow, slot } = composition;
-  const nowEventKey = flow.live ? (flow.hero?.key ?? null) : null;
+  const { data, dayKey, isToday, slot } = composition;
 
   return (
     <main
@@ -90,14 +92,18 @@ export default async function HubKalenderPage({
           href="/hub/kalender"
         />
 
-        <TodayTabPersonen
-          members={data.members}
+        <CalendarShell
+          surface="hub"
+          basePath="/hub/kalender"
+          view={data.view}
+          anchor={data.anchor}
           events={data.events}
+          members={data.members}
+          calendars={data.calendars}
           timeZone={data.timeZone}
-          dayKey={dayKey}
+          weekStartsOn={data.weekStartsOn}
           now={data.now}
-          isToday={isToday}
-          nowEventKey={nowEventKey}
+          canWrite={data.canWrite}
         />
       </HubBoard>
     </main>

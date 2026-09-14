@@ -83,11 +83,17 @@ export type HubBoardComposition = {
 export async function loadHubBoardComposition(options: {
   date?: string;
   now?: string;
+  /**
+   * `?view=` (`/hub/kalender` only) — `loadCalendarPage` still wins with the
+   * family's `hubDefaultView` when this is absent, exactly as
+   * `page-data.ts`'s own comment describes.
+   */
+  view?: string;
   include?: HubBoardCompositionInclude;
 }): Promise<HubBoardComposition | null> {
   const include = options.include ?? {};
 
-  const data = await loadCalendarPage({ date: options.date, surface: 'hub' });
+  const data = await loadCalendarPage({ date: options.date, view: options.view, surface: 'hub' });
   if (!data) return null;
 
   // M19: one entry per child, carrying today's step count — see the note this

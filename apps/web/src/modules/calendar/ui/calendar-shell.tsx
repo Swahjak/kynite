@@ -55,6 +55,19 @@ export type CalendarShellProps = {
   now: Date | null;
   /** False for a principal without `event:write` — the UI offers no writes. */
   canWrite: boolean;
+  /**
+   * Presentation only (precedent: `modules/today/ui/today-header.tsx`'s
+   * `surface`) — write gating stays on `canWrite`. `'hub'` renders no shell
+   * header (the route's own `TodayHeader surface="hub"` already carries the
+   * date, the chevrons, the faces and the clock) and no view switcher: the
+   * hub is fetched for exactly the view it renders
+   * (`page-data.ts`'s `viewWindow`), so a client-side switch would draw
+   * another view over a window that was never fetched for it. The member
+   * filter stays either way.
+   */
+  surface?: 'app' | 'hub';
+  /** Base path the arrows, "Vandaag" and month "+N" navigate to. */
+  basePath?: string;
 };
 
 export function CalendarShell({
@@ -67,7 +80,10 @@ export function CalendarShell({
   weekStartsOn,
   now,
   canWrite,
+  surface = 'app',
+  basePath = '/calendar',
 }: CalendarShellProps) {
+  const hub = surface === 'hub';
   const t = useTranslations('calendar');
   const formatDateTime = useDateTimeFormat();
   const router = useRouter();
@@ -142,9 +158,9 @@ export function CalendarShell({
   const navigate = useCallback(
     (direction: -1 | 1) => {
       const next = shiftAnchor(view, options, direction);
-      router.push(`/calendar?view=${view}&date=${toDateKey(toWall(next, timeZone))}`);
+      router.push(`${basePath}?view=${view}&date=${toDateKey(toWall(next, timeZone))}`);
     },
-    [view, options, timeZone, router]
+    [view, options, timeZone, router, basePath]
   );
 
   /**
@@ -155,8 +171,8 @@ export function CalendarShell({
    * compute from a device clock that may be in another timezone entirely.
    */
   const goToday = useCallback(() => {
-    router.push(`/calendar?view=${view}`);
-  }, [router, view]);
+    router.push(`${basePath}?view=${view}`);
+  }, [router, view, basePath]);
 
   const openCreate = useCallback(() => {
     setSelected(null);
@@ -184,9 +200,9 @@ export function CalendarShell({
    */
   const openDay = useCallback(
     (dayKey: string) => {
-      router.push(`/calendar?view=day&date=${dayKey}`);
+      router.push(`${basePath}?view=day&date=${dayKey}`);
     },
-    [router]
+    [router, basePath]
   );
 
   /**
@@ -250,6 +266,60 @@ export function CalendarShell({
       ? todayKey
       : '';
 
+  /**
+   * Member filters. A deselected member is **dimmed, never removed** — the row
+   * is the family, and a family member who disappears because somebody
+   * unticked them is a different, worse message than one who is visibly
+   * switched off.
+   *
+   * Rendered on both surfaces (the plan's decision): the app draws it inside
+   * the shell header, the hub draws it on its own since the hub's header row
+   * is the route's `TodayHeader`, not this one.
+   */
+  const memberFilter = members.length > 0 && (
+    <div
+      data-slot="member-filter"
+      role="group"
+      aria-label={t('filter.label')}
+      className="hidden shrink-0 items-center gap-1.5 sm:flex"
+    >
+      {members.map((member) => {
+        const included = !excluded.has(member.id);
+        const palette = MEMBER_COLOR_CLASSES[member.color];
+
+        return (
+          <button
+            key={member.id}
+            type="button"
+            data-slot="member-filter-face"
+            data-member-id={member.id}
+            aria-pressed={included}
+            aria-label={t(included ? 'filter.hide' : 'filter.show', {
+              name: member.displayName,
+            })}
+            onClick={() => toggleMember(member.id)}
+            className="rounded-full transition-opacity focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+          >
+            <MemberFace
+              size="default"
+              name={member.displayName}
+              avatarUrl={member.avatarUrl}
+              surfaceClass={palette.track}
+              // Indigo, not the member's own hue: the ring is the
+              // *filter's* state ("Kalender.dc.html":70–73 draws every
+              // included face with `box-shadow 0 0 0 2px #5d5fef`), and a
+              // ring that changed colour per person said "this is Mila"
+              // twice instead of saying "Mila is switched on" once.
+              ringClass="ring-primary"
+              ringed={included}
+              className={included ? undefined : 'opacity-45'}
+            />
+          </button>
+        );
+      })}
+    </div>
+  );
+
   return (
     <div
       data-slot="calendar-shell"
@@ -264,151 +334,118 @@ export function CalendarShell({
         <Fab icon="add" label={t('actions.add')} onClick={openCreate} data-testid="event-create" />
       )}
 
-      {/* The header is one row on the wide screen, exactly as the mock draws
-          it: arrows, title, "Vandaag", then — pushed right — the member
-          filters, the view switcher and "Nieuw". At 390px the row wraps and
-          the switcher takes the second line at full width. */}
-      <header className="flex min-w-0 flex-wrap items-center gap-2 border-b border-line-subtle px-3 pt-3 pb-2.5 sm:gap-2.5 sm:px-6 sm:pt-4.5 sm:pb-3.5">
-        {/* Arrows, title and "Vandaag" travel together and take the row's
-            slack, so the button stays beside the heading the way the mock
-            draws it instead of drifting to the far right. */}
-        <div className="flex min-w-0 flex-1 items-center gap-1 sm:gap-2.5">
-          <Button
-            variant="ghost"
-            size="icon-hub"
-            onClick={() => navigate(-1)}
-            aria-label={t('actions.previous')}
-          >
-            <Icon name="chevron_left" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon-hub"
-            onClick={() => navigate(1)}
-            aria-label={t('actions.next')}
-          >
-            <Icon name="chevron_right" />
-          </Button>
-
-          <h1
-            // `basis-0 grow`: the title takes whatever the controls leave and
-            // truncates below that, so the row **never wraps**. A
-            // content-sized title reads better but pushed "Nieuw" onto a
-            // second line at tablet width — this app carries a 133px nav rail
-            // and a fourth view (agenda) the mock's tablet does not, so the
-            // row is ~180px tighter than the drawing and something has to
-            // give. A heading that ellipsises is a smaller lie than a header
-            // that reflows.
-            className="min-w-0 flex-1 basis-0 truncate font-display text-h2 font-extrabold tracking-tight sm:text-h1"
-            data-testid="calendar-heading"
-          >
-            {/* Two spellings of one heading, and only ever one in the
-                document's flow — the short one below `sm`, the full one above
-                it. Rendered as two spans rather than picked in JS so the choice
-                survives SSR without a layout shift. */}
-            <span className="sm:hidden">{mobileHeading}</span>
-            <span className="hidden sm:inline">{heading}</span>
-          </h1>
-
-          <Button variant="outline" size="sm" onClick={goToday} className="shrink-0">
-            {t('actions.today')}
-          </Button>
-        </div>
-
-        {/* Member filters. A deselected member is **dimmed, never removed** —
-            the row is the family, and a family member who disappears because
-            somebody unticked them is a different, worse message than one who
-            is visibly switched off. */}
-        {members.length > 0 && (
-          <div
-            data-slot="member-filter"
-            role="group"
-            aria-label={t('filter.label')}
-            className="hidden shrink-0 items-center gap-1.5 sm:flex"
-          >
-            {members.map((member) => {
-              const included = !excluded.has(member.id);
-              const palette = MEMBER_COLOR_CLASSES[member.color];
-
-              return (
-                <button
-                  key={member.id}
-                  type="button"
-                  data-slot="member-filter-face"
-                  data-member-id={member.id}
-                  aria-pressed={included}
-                  aria-label={t(included ? 'filter.hide' : 'filter.show', {
-                    name: member.displayName,
-                  })}
-                  onClick={() => toggleMember(member.id)}
-                  className="rounded-full transition-opacity focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
-                >
-                  <MemberFace
-                    size="default"
-                    name={member.displayName}
-                    avatarUrl={member.avatarUrl}
-                    surfaceClass={palette.track}
-                    // Indigo, not the member's own hue: the ring is the
-                    // *filter's* state ("Kalender.dc.html":70–73 draws every
-                    // included face with `box-shadow 0 0 0 2px #5d5fef`), and a
-                    // ring that changed colour per person said "this is Mila"
-                    // twice instead of saying "Mila is switched on" once.
-                    ringClass="ring-primary"
-                    ringed={included}
-                    className={included ? undefined : 'opacity-45'}
-                  />
-                </button>
-              );
-            })}
+      {hub ? (
+        // The hub's own `TodayHeader surface="hub"` already carries the date,
+        // the chevrons, the faces and the clock (`(hub)/hub/kalender/page.tsx`)
+        // — this shell adds only what that header does not: the member
+        // filter, in a row of its own rather than the app's full navigation
+        // header.
+        memberFilter && (
+          <div className="flex justify-end border-b border-line-subtle px-3 pt-3 pb-2.5 sm:px-6 sm:pt-4.5 sm:pb-3.5">
+            {memberFilter}
           </div>
-        )}
+        )
+      ) : (
+        /* The header is one row on the wide screen, exactly as the mock draws
+           it: arrows, title, "Vandaag", then — pushed right — the member
+           filters, the view switcher and "Nieuw". At 390px the row wraps and
+           the switcher takes the second line at full width. */
+        <header className="flex min-w-0 flex-wrap items-center gap-2 border-b border-line-subtle px-3 pt-3 pb-2.5 sm:gap-2.5 sm:px-6 sm:pt-4.5 sm:pb-3.5">
+          {/* Arrows, title and "Vandaag" travel together and take the row's
+              slack, so the button stays beside the heading the way the mock
+              draws it instead of drifting to the far right. */}
+          <div className="flex min-w-0 flex-1 items-center gap-1 sm:gap-2.5">
+            <Button
+              variant="ghost"
+              size="icon-hub"
+              onClick={() => navigate(-1)}
+              aria-label={t('actions.previous')}
+            >
+              <Icon name="chevron_left" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon-hub"
+              onClick={() => navigate(1)}
+              aria-label={t('actions.next')}
+            >
+              <Icon name="chevron_right" />
+            </Button>
 
-        {/* `order-last w-full` below `sm`: the pill drops onto its own line and
-            spans it rather than squeezing the title. `min-w-0` +
-            `overflow-x-auto` keep any spill inside the pill instead of
-            widening the page. */}
-        <Tabs
-          value={view}
-          onValueChange={(value) => changeView(value as CalendarView)}
-          className="order-last w-full min-w-0 sm:order-none sm:w-auto"
-        >
-          <TabsList
-            data-testid="view-switcher"
-            // The height override carries the same `group-data-horizontal`
-            // variant the primitive's default does, or the default's higher
-            // specificity keeps the 32px track under 40px triggers.
-            className="w-full max-w-full overflow-x-auto rounded-4xl bg-surface-container p-1 group-data-horizontal/tabs:h-12 sm:w-auto"
+            <h1
+              // `basis-0 grow`: the title takes whatever the controls leave and
+              // truncates below that, so the row **never wraps**. A
+              // content-sized title reads better but pushed "Nieuw" onto a
+              // second line at tablet width — this app carries a 133px nav rail
+              // and a fourth view (agenda) the mock's tablet does not, so the
+              // row is ~180px tighter than the drawing and something has to
+              // give. A heading that ellipsises is a smaller lie than a header
+              // that reflows.
+              className="min-w-0 flex-1 basis-0 truncate font-display text-h2 font-extrabold tracking-tight sm:text-h1"
+              data-testid="calendar-heading"
+            >
+              {/* Two spellings of one heading, and only ever one in the
+                  document's flow — the short one below `sm`, the full one above
+                  it. Rendered as two spans rather than picked in JS so the choice
+                  survives SSR without a layout shift. */}
+              <span className="sm:hidden">{mobileHeading}</span>
+              <span className="hidden sm:inline">{heading}</span>
+            </h1>
+
+            <Button variant="outline" size="sm" onClick={goToday} className="shrink-0">
+              {t('actions.today')}
+            </Button>
+          </div>
+
+          {memberFilter}
+
+          {/* `order-last w-full` below `sm`: the pill drops onto its own line and
+              spans it rather than squeezing the title. `min-w-0` +
+              `overflow-x-auto` keep any spill inside the pill instead of
+              widening the page. */}
+          <Tabs
+            value={view}
+            onValueChange={(value) => changeView(value as CalendarView)}
+            className="order-last w-full min-w-0 sm:order-none sm:w-auto"
           >
-            {CALENDAR_VIEWS.map((candidate) => (
-              <TabsTrigger
-                key={candidate}
-                value={candidate}
-                data-testid={`view-${candidate}`}
-                // Baloo, bold, *sentence case* — "Dag / Week / Maand", which
-                // is how the design writes it ("Kalender.dc.html":76–78). The
-                // caps of `label-overline` are the metadata register, and a
-                // view switcher is a control.
-                className="h-10 flex-1 rounded-4xl px-3 font-display text-body-sm font-bold data-active:bg-surface-container-lowest data-active:text-primary data-active:shadow-sm sm:flex-none sm:px-3.5"
-              >
-                {/* Words, not glyphs — on the phone too. The sheet's mobile
-                    segmented control is "Dag / Week / Maand" in Baloo
-                    ("Kalender.dc.html":270–274), and four calendar glyphs that
-                    all differ by a few pixels of internal grid is a puzzle,
-                    not a control. They fit: four labels at 14px come to about
-                    two thirds of a 390px row. */}
-                <span>{t(`views.${candidate}`)}</span>
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
+            <TabsList
+              data-testid="view-switcher"
+              // The height override carries the same `group-data-horizontal`
+              // variant the primitive's default does, or the default's higher
+              // specificity keeps the 32px track under 40px triggers.
+              className="w-full max-w-full overflow-x-auto rounded-4xl bg-surface-container p-1 group-data-horizontal/tabs:h-12 sm:w-auto"
+            >
+              {CALENDAR_VIEWS.map((candidate) => (
+                <TabsTrigger
+                  key={candidate}
+                  value={candidate}
+                  data-testid={`view-${candidate}`}
+                  // Baloo, bold, *sentence case* — "Dag / Week / Maand", which
+                  // is how the design writes it ("Kalender.dc.html":76–78). The
+                  // caps of `label-overline` are the metadata register, and a
+                  // view switcher is a control.
+                  className="h-10 flex-1 rounded-4xl px-3 font-display text-body-sm font-bold data-active:bg-surface-container-lowest data-active:text-primary data-active:shadow-sm sm:flex-none sm:px-3.5"
+                >
+                  {/* Words, not glyphs — on the phone too. The sheet's mobile
+                      segmented control is "Dag / Week / Maand" in Baloo
+                      ("Kalender.dc.html":270–274), and four calendar glyphs that
+                      all differ by a few pixels of internal grid is a puzzle,
+                      not a control. They fit: four labels at 14px come to about
+                      two thirds of a 390px row. */}
+                  <span>{t(`views.${candidate}`)}</span>
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
 
-        {canWrite && isWide && (
-          <Button size="sm" onClick={openCreate} data-testid="event-create" className="shrink-0">
-            <Icon name="add" size="sm" />
-            {t('actions.new')}
-          </Button>
-        )}
-      </header>
+          {canWrite && isWide && (
+            <Button size="sm" onClick={openCreate} data-testid="event-create" className="shrink-0">
+              <Icon name="add" size="sm" />
+              {t('actions.new')}
+            </Button>
+          )}
+        </header>
+      )}
 
       <div
         className="flex min-h-0 min-w-0 flex-1 flex-col"
@@ -455,6 +492,8 @@ export function CalendarShell({
               timeZone={timeZone}
               now={now}
               onSelect={onSelect}
+              hub={hub}
+              canWrite={canWrite}
             />
           ) : (
             // Week, at 390px, is an **agenda list per day** — the shape
@@ -492,6 +531,8 @@ export function CalendarShell({
             day={days[0]}
             now={now}
             onSelect={onSelect}
+            canWrite={canWrite}
+            hub={hub}
           />
         ) : (
           <div className="flex min-h-0 flex-1 flex-col">
@@ -512,6 +553,8 @@ export function CalendarShell({
               timeZone={timeZone}
               now={now}
               onSelect={onSelect}
+              hub={hub}
+              canWrite={canWrite}
               showHeader={isWide}
             />
           </div>
