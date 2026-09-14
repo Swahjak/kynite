@@ -232,13 +232,7 @@ function PoolColumn({
   );
 }
 
-function RoutineProgressCard({
-  column,
-  daypart,
-}: {
-  column: BoardColumn;
-  daypart: TimeSection;
-}) {
+function RoutineProgressCard({ column, daypart }: { column: BoardColumn; daypart: TimeSection }) {
   const t = useTranslations('today');
   const routines = column.sections[daypart];
 
@@ -392,9 +386,7 @@ function MemberColumn({
         {celebrate ? (
           <div className="mt-2.5 flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-gold/16 to-gold/5 px-2.5 py-1.5">
             <Icon name="emoji_events" size="sm" filled className="text-gold-ink" />
-            <span className="tnum text-caption font-bold text-gold-ink">
-              {t('board.allDone')}
-            </span>
+            <span className="tnum text-caption font-bold text-gold-ink">{t('board.allDone')}</span>
           </div>
         ) : null}
       </div>

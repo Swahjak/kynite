@@ -90,7 +90,14 @@ export type BoardColumn = {
    * may not import the family slice's value exports any more than the
    * routines slice's, for the same `server-only`-barrel reason.
    */
-  colorClasses: { dot: string; surface: string; ring: string; border: string; ink: string; fill: string };
+  colorClasses: {
+    dot: string;
+    surface: string;
+    ring: string;
+    border: string;
+    ink: string;
+    fill: string;
+  };
   role: Member['role'];
   /** Routine steps due today (plus any open grace day), banded by daypart. */
   sections: Record<TimeSection, BoardRoutineRow[]>;
