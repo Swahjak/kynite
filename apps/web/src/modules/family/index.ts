@@ -23,11 +23,15 @@ export { assertCan, getPrincipal, requireDevicePrincipal } from './principal';
 export {
   createMember,
   deleteMember,
+  reorderMember,
+  setMemberOrder,
   updateFamily,
   updateMember,
   type DeleteMemberInput,
   type FamilySettingsInput,
   type MemberInput,
+  type ReorderMemberInput,
+  type SetMemberOrderInput,
   type UpdateMemberInput,
 } from './write';
 

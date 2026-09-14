@@ -235,7 +235,9 @@
       "save": "Opslaan",
       "cancel": "Annuleren",
       "removeConfirm": "Deze persoon uit het gezin halen?",
-      "removeConfirmYes": "Ja, weghalen"
+      "removeConfirmYes": "Ja, weghalen",
+      "moveUp": "Naar boven verplaatsen",
+      "moveDown": "Naar beneden verplaatsen"
     },
     "dialog": {
       "addTitle": "Gezinslid toevoegen",

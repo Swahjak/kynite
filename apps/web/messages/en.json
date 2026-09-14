@@ -235,7 +235,9 @@
       "save": "Save",
       "cancel": "Cancel",
       "removeConfirm": "Remove this person from the family?",
-      "removeConfirmYes": "Yes, remove"
+      "removeConfirmYes": "Yes, remove",
+      "moveUp": "Move up",
+      "moveDown": "Move down"
     },
     "dialog": {
       "addTitle": "Add family member",

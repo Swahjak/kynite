@@ -20,6 +20,7 @@ import {
   getFamily,
   getMember,
   listMembers,
+  setMemberOrder,
   updateFamily,
   updateMember,
   type Family,
@@ -237,6 +238,26 @@ export function registerFamilyTools(
       const result = await updateFamily(principal, input);
       if (result.status === 'error') return toolError(result.error);
       return ok({ updated: true });
+    }
+  );
+
+  server.registerTool(
+    'reorder_members',
+    {
+      title: 'Reorder family members',
+      description:
+        'Set the household’s whole board order at once. orderedIds must be exactly the family’s current member ids, each once.',
+      inputSchema: z.object({ orderedIds: z.array(z.uuid()) }),
+    },
+    async ({ orderedIds }) => {
+      if (!hasAllScopes(grantedScopes, [MCP_FAMILY_WRITE])) return toolError(SCOPE_WRITE);
+      if (!can(principal, 'member:manage', { familyId: principal.familyId })) {
+        return toolError('forbidden');
+      }
+
+      const result = await setMemberOrder(principal, { orderedIds });
+      if (result.status === 'error') return toolError(result.error);
+      return ok({ reordered: true });
     }
   );
 }

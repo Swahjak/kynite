@@ -5,6 +5,7 @@ import { DeleteMemberButton } from './delete-member-button';
 import { MemberAvatar } from './member-avatar';
 import { MemberDialog } from './member-dialog';
 import { MemberInvite, type MemberInviteView } from './member-invite';
+import { ReorderMemberButtons } from './reorder-member-buttons';
 import { MEMBER_COLOR_CLASSES } from './tokens';
 
 /**
@@ -45,7 +46,7 @@ export async function MemberList({
 
   return (
     <ul className="grid gap-3 sm:grid-cols-2">
-      {members.map((member) => (
+      {members.map((member, index) => (
         <li key={member.id} data-testid="member-row" data-member-id={member.id}>
           <Card className="h-full">
             {/* The member's colour, full-bleed: `Card` pads vertically with
@@ -110,6 +111,13 @@ export async function MemberList({
                 {canManage ? <MemberDialog member={member} /> : null}
                 {canManage && member.role !== 'owner' ? (
                   <DeleteMemberButton memberId={member.id} displayName={member.displayName} />
+                ) : null}
+                {canManage ? (
+                  <ReorderMemberButtons
+                    memberId={member.id}
+                    canMoveUp={index > 0}
+                    canMoveDown={index < members.length - 1}
+                  />
                 ) : null}
               </span>
             </CardContent>

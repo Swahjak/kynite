@@ -1,5 +1,5 @@
 import 'server-only';
-import { and, eq, sql } from 'drizzle-orm';
+import { and, asc, eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { getDb } from '@/server/db';
 // Table objects from the schema assembly point, not this module's own
@@ -195,6 +195,115 @@ export async function deleteMember(
         familyId: principal.familyId,
       });
       await tx.delete(sessionTable).where(eq(sessionTable.userId, existing.userId));
+    }
+  });
+
+  return idleState;
+}
+
+export type ReorderMemberInput = { memberId: string; direction: 'up' | 'down' };
+
+/**
+ * Swap a member with its board-order neighbour (M1, adjustable member order).
+ *
+ * Reads the whole family's roster in board order, swaps the target with the
+ * neighbour in that array (not just the two `sortOrder` values — see below),
+ * then renumbers every row `0..n-1` in one transaction. Renumbering the whole
+ * list rather than swapping the two `sortOrder` values directly is what keeps
+ * the invariant "board order is always a dense `0..n-1` sequence" true even
+ * starting from a roster with gaps or ties (pre-migration-`0035` data, or a
+ * row created concurrently) — a bare value swap would preserve whatever gap
+ * or tie was already there.
+ */
+export async function reorderMember(
+  principal: Principal,
+  input: ReorderMemberInput
+): Promise<ActionState> {
+  if (
+    !can(principal, 'member:manage', { familyId: principal.familyId, memberId: input.memberId })
+  ) {
+    return failure('forbidden');
+  }
+
+  if (!z.uuid().safeParse(input.memberId).success) return failure('invalidInput');
+  if (input.direction !== 'up' && input.direction !== 'down') return failure('invalidInput');
+
+  const db = getDb();
+  const rows = await db
+    .select({ id: member.id, sortOrder: member.sortOrder })
+    .from(member)
+    .where(eq(member.familyId, principal.familyId))
+    .orderBy(asc(member.sortOrder), asc(member.createdAt));
+
+  const index = rows.findIndex((row) => row.id === input.memberId);
+  if (index === -1) return failure('memberNotFound');
+
+  const neighborIndex = input.direction === 'up' ? index - 1 : index + 1;
+  // Already at the edge the caller asked to move past: a no-op, not a refusal
+  // — the UI disables the button at the ends, but MCP has no button to
+  // disable, so this has to be a legal (if pointless) call.
+  if (neighborIndex < 0 || neighborIndex >= rows.length) return idleState;
+
+  const reordered = [...rows];
+  const [moved] = reordered.splice(index, 1);
+  reordered.splice(neighborIndex, 0, moved);
+
+  await db.transaction(async (tx) => {
+    for (const [position, row] of reordered.entries()) {
+      if (row.sortOrder === position) continue;
+      await tx
+        .update(member)
+        .set({ sortOrder: position, updatedAt: new Date() })
+        .where(and(eq(member.id, row.id), eq(member.familyId, principal.familyId)));
+    }
+  });
+
+  return idleState;
+}
+
+export type SetMemberOrderInput = { orderedIds: string[] };
+
+/**
+ * The MCP twin of `reorderMember`: takes the *whole* new order at once
+ * (`reorder_members`'s natural shape for a tool call) rather than one swap.
+ * `orderedIds` must be exactly the family's current member ids, each once —
+ * anything else (a foreign id, a missing member, a duplicate) is refused
+ * outright and nothing is written, since a partial application would leave
+ * the roster in an order nobody asked for.
+ */
+export async function setMemberOrder(
+  principal: Principal,
+  input: SetMemberOrderInput
+): Promise<ActionState> {
+  if (!can(principal, 'member:manage', { familyId: principal.familyId })) {
+    return failure('forbidden');
+  }
+
+  const parsed = z.array(z.uuid()).safeParse(input.orderedIds);
+  if (!parsed.success) return failure('invalidInput');
+  const orderedIds = parsed.data;
+
+  const db = getDb();
+  const rows = await db
+    .select({ id: member.id })
+    .from(member)
+    .where(eq(member.familyId, principal.familyId));
+
+  const currentIds = new Set(rows.map((row) => row.id));
+  const providedIds = new Set(orderedIds);
+  const isExactMatch =
+    orderedIds.length === rows.length &&
+    providedIds.size === orderedIds.length &&
+    orderedIds.every((id) => currentIds.has(id));
+
+  if (!isExactMatch) return failure('invalidInput');
+
+  await db.transaction(async (tx) => {
+    for (const [position, memberId] of orderedIds.entries()) {
+      await tx
+        .update(member)
+        .set({ sortOrder: position, updatedAt: new Date() })
+        .where(and(eq(member.id, memberId), eq(member.familyId, principal.familyId)));
     }
   });
 

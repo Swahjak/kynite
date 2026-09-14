@@ -19,6 +19,7 @@ const seams = vi.hoisted(() => ({
   updateMember: vi.fn(),
   deleteMember: vi.fn(),
   updateFamily: vi.fn(),
+  setMemberOrder: vi.fn(),
 }));
 
 const can = vi.hoisted(() => vi.fn());
@@ -114,6 +115,7 @@ describe('tool registration', () => {
         'get_family',
         'get_member',
         'list_members',
+        'reorder_members',
         'update_family',
         'update_member',
       ].sort()
@@ -408,5 +410,48 @@ describe('update_family', () => {
     expect(isError).toBe(false);
     expect(seams.updateFamily).toHaveBeenCalledWith(principal, input);
     expect(body).toEqual({ updated: true });
+  });
+});
+
+describe('reorder_members', () => {
+  const OTHER_MEMBER_ID = '33333333-3333-4333-8333-333333333333';
+  const orderedIds = [OTHER_MEMBER_ID, MEMBER_ID];
+
+  it('refuses a token without the write scope', async () => {
+    const { isError, body } = await call([READ], 'reorder_members', { orderedIds });
+
+    expect(isError).toBe(true);
+    expect(body.error).toContain('insufficientScope');
+    expect(seams.setMemberOrder).not.toHaveBeenCalled();
+  });
+
+  it('refuses a principal that cannot manage members', async () => {
+    can.mockReturnValue(false);
+
+    const { isError, body } = await call([WRITE], 'reorder_members', { orderedIds });
+
+    expect(isError).toBe(true);
+    expect(body).toEqual({ error: 'forbidden' });
+    expect(can).toHaveBeenCalledWith(principal, 'member:manage', { familyId: FAMILY_ID });
+    expect(seams.setMemberOrder).not.toHaveBeenCalled();
+  });
+
+  it('passes the seam’s refusal through as a tool error', async () => {
+    seams.setMemberOrder.mockResolvedValue({ status: 'error', error: 'invalidInput' });
+
+    const { isError, body } = await call([WRITE], 'reorder_members', { orderedIds });
+
+    expect(isError).toBe(true);
+    expect(body).toEqual({ error: 'invalidInput' });
+  });
+
+  it('calls the seam and reports success', async () => {
+    seams.setMemberOrder.mockResolvedValue({ status: 'idle' });
+
+    const { isError, body } = await call([WRITE], 'reorder_members', { orderedIds });
+
+    expect(isError).toBe(false);
+    expect(seams.setMemberOrder).toHaveBeenCalledWith(principal, { orderedIds });
+    expect(body).toEqual({ reordered: true });
   });
 });
