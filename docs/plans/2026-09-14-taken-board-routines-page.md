@@ -16,7 +16,7 @@ Owner ask (2026-09-14): bring the hub taken board in line with the refreshed `Ta
 ## Milestones
 
 - [x] M1+M2 — board (sonnet). `a3e3523` on feat/taken-board-routines-page. Route move + redirect, `MemberFilter`, routine progress card + link, tasks-only progress, widths/scroll, nav item, tests.
-- [ ] M3 — Actieve routines page at `/hub/routines` (opus).
+- [x] M3 — Actieve routines page at `/hub/routines` (opus). `d807b92`. Deviations: steps complete-only (no un-tap, matches `[memberId]`); `StepRow variant="tile"` 80px instead of 64px hand-built rows; star pill = stars earned today from the board; `swipe` glyph pending M5.
 - [ ] M4 — dashboard card link + baselines/kiosk audit for new routes (sonnet).
 - [ ] M5 — icons (sonnet). Owner (2026-09-14): routines and tasks are missing icons. Today: `routine.icon` nullable with an 8-entry `ROUTINE_ICONS` subset (`modules/routines/ui/tokens.ts`, fallback `task_alt`); `routine_step.icon` column exists but no picker, not in the MCP schema, always null; `task` has no icon column at all (`routines-board.tsx` draws one fixed `TASK_ROW_ICON`). Work: (1) extend the icon subset (`packages/ui/scripts/subset-icons.mjs` → `icon-codepoints.ts` + woff2, `pnpm icons:check`) with the mockup's household set — dentistry, checkroom, restaurant, backpack, wash, nutrition, menu_book, auto_stories, wc, crib, pets, lunch_dining, directions_car, sink, local_laundry_service, pedal_bike, shopping_cart, countertops, toys, bedroom_baby, delete, potted_plant, mail, wb_twilight, celebration, emoji_events, swipe, self_improvement, plus the current eight — one shared `ACTIVITY_ICONS` list; (2) `suggestIcon(title)` keyword map (nl+en: tanden→dentistry, aankleden→checkroom, ontbijt/eten→restaurant, tas→backpack, …) used as the default whenever `icon` is null for routines, steps and tasks; (3) step icon: picker per step in `routine-dialog.tsx`, `icon` in the MCP `create_routine`/`update_routine` step schema, rendered by `StepRow`; (4) task icon: `icon` column + migration on `modules/tasks/schema.ts`, picker in the task editor, `create_task`/`update` MCP input, board row uses it. Icon picker = one shared component (grid of 48px tiles) reused by routine, step and task editors.
 - [ ] R — review → fix → merge → deploy.
@@ -30,3 +30,4 @@ Owner ask (2026-09-14): bring the hub taken board in line with the refreshed `Ta
 | m12 | M1+M2 board | sonnet | 230k | 147 | done `a3e3523`; `swipe`/`restart_alt` glyphs deferred to M5 |
 | r1 | review M1+M2 | sonnet | 66k | 30 | 1 bug (star banner) + 2 nits |
 | f1 | fix r1 | sonnet (builder) | 37k | 18 | done, gates run by main |
+| m3 | M3 routines page | opus | 183k | 62 | done `d807b92` |
