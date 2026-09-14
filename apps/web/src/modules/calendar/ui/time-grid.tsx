@@ -10,7 +10,7 @@ import { dayKeysOf } from '../domain/expand';
 import { minutesIntoDay, toDateKey, toWall } from '../domain/zone';
 import type { CalendarEvent } from '../queries';
 import { EventChip } from './event-chip';
-import { GRID_END_HOUR, GRID_START_HOUR, HOUR_HEIGHT } from './tokens';
+import { APP_GRID_METRICS, type GridMetrics } from './tokens';
 import { useDragReschedule } from './use-drag-reschedule';
 
 /**
@@ -48,6 +48,12 @@ export type TimeGridProps = {
    * Defaults to `true` to keep the app surface byte-identical.
    */
   canWrite?: boolean;
+  /**
+   * Grid geometry — hour height, hour range, header height. Defaults to
+   * `APP_GRID_METRICS` so every existing app call site is byte-identical;
+   * the hub surface passes `HUB_GRID_METRICS` (`calendar-shell.tsx`).
+   */
+  metrics?: GridMetrics;
 };
 
 type Positioned = {
@@ -65,8 +71,6 @@ type Positioned = {
 
 const MINUTES_PER_DAY = 1440;
 
-const GRID_HOURS = GRID_END_HOUR - GRID_START_HOUR;
-
 /**
  * Overlap layout: events that share time split the column between them.
  *
@@ -74,7 +78,12 @@ const GRID_HOURS = GRID_END_HOUR - GRID_START_HOUR;
  * are live at this moment" is the only question worth answering, and it gives
  * the same answer with none of the machinery.
  */
-function layout(events: CalendarEvent[], timeZone: string, dayKey: string): Positioned[] {
+function layout(
+  events: CalendarEvent[],
+  timeZone: string,
+  dayKey: string,
+  metrics: GridMetrics = APP_GRID_METRICS
+): Positioned[] {
   const sorted = [...events].sort(
     (a, b) => a.startsAt.getTime() - b.startsAt.getTime() || b.endsAt.getTime() - a.endsAt.getTime()
   );
@@ -108,7 +117,7 @@ function layout(events: CalendarEvent[], timeZone: string, dayKey: string): Posi
     for (const event of cluster) {
       positioned.push({
         event,
-        ...verticalSpan(event, timeZone, dayKey),
+        ...verticalSpan(event, timeZone, dayKey, metrics),
         columnIndex: columnIndexOf.get(event)!,
         columnCount: columnEnds.length,
       });
@@ -139,14 +148,15 @@ function layout(events: CalendarEvent[], timeZone: string, dayKey: string): Posi
  * day's copy into a four-hour block starting at 22:00).
  *
  * The result is then clamped into the rendered hour window. An event before
- * `GRID_START_HOUR` used to produce a negative `top` and float above the grid;
+ * `metrics.startHour` used to produce a negative `top` and float above the grid;
  * it now parks on the first hour line and the chip carries a clip cue instead
  * (`continuesBefore` / `continuesAfter`).
  */
 function verticalSpan(
   event: CalendarEvent,
   timeZone: string,
-  dayKey: string
+  dayKey: string,
+  metrics: GridMetrics = APP_GRID_METRICS
 ): { top: number; height: number; continuesBefore: boolean; continuesAfter: boolean } {
   const startKey = toDateKey(toWall(event.startsAt, timeZone));
   const endKey = toDateKey(toWall(event.endsAt, timeZone));
@@ -156,15 +166,15 @@ function verticalSpan(
   // reads as 00:00 of the next day — fills this day to the bottom.
   const dayEnd = endKey === dayKey ? minutesIntoDay(event.endsAt, timeZone) : MINUTES_PER_DAY;
 
-  const windowTop = GRID_START_HOUR * 60;
-  const windowBottom = GRID_END_HOUR * 60;
+  const windowTop = metrics.startHour * 60;
+  const windowBottom = metrics.endHour * 60;
 
   const start = Math.min(Math.max(dayStart, windowTop), windowBottom);
   const end = Math.min(Math.max(dayEnd, start), windowBottom);
 
   return {
-    top: ((start - windowTop) / 60) * HOUR_HEIGHT,
-    height: Math.max(((end - start) / 60) * HOUR_HEIGHT, 22),
+    top: ((start - windowTop) / 60) * metrics.hourHeight,
+    height: Math.max(((end - start) / 60) * metrics.hourHeight, 22),
     continuesBefore: dayStart < windowTop,
     continuesAfter: dayEnd > windowBottom,
   };
@@ -180,10 +190,12 @@ export function TimeGrid({
   hub = false,
   showHeader = true,
   canWrite = true,
+  metrics = APP_GRID_METRICS,
 }: TimeGridProps) {
   const t = useTranslations('calendar');
   const formatDateTime = useDateTimeFormat();
   const columnsRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [columnWidth, setColumnWidth] = useState(0);
 
   // Measured rather than computed: the column width is whatever flex resolved
@@ -234,11 +246,25 @@ export function TimeGrid({
     },
   });
 
-  const hours = Array.from({ length: GRID_HOURS + 1 }, (_, index) => GRID_START_HOUR + index);
+  const gridHours = metrics.endHour - metrics.startHour;
+  const hours = Array.from({ length: gridHours + 1 }, (_, index) => metrics.startHour + index);
   const nowKey = now ? toDateKey(toWall(now, timeZone)) : null;
   const nowTop = now
-    ? ((minutesIntoDay(now, timeZone) - GRID_START_HOUR * 60) / 60) * HOUR_HEIGHT
+    ? ((minutesIntoDay(now, timeZone) - metrics.startHour * 60) / 60) * metrics.hourHeight
     : 0;
+  const showNow = nowKey !== null && dayKeys.includes(nowKey);
+
+  // Scroll the grid so "now" sits a couple of hours from the top rather than
+  // opening on the first rendered hour with the current moment off-screen —
+  // see the same effect in `member-day-grid.tsx`. Gated on `showNow` so a
+  // snapshot pinned to a fixed future date stays deterministic.
+  useEffect(() => {
+    if (!showNow) return;
+    const element = scrollRef.current;
+    if (!element) return;
+    element.scrollTop = Math.max(0, nowTop - 2 * metrics.hourHeight);
+    // oxlint-disable-next-line react/exhaustive-deps
+  }, [showNow, dayKeys.join(',')]);
 
   return (
     <div data-slot="time-grid" className="flex min-h-0 flex-col">
@@ -313,13 +339,13 @@ export function TimeGrid({
           first one ("06:00") is not sheared off by the scroll container's
           top edge. Gutter and columns both sit inside it, so the labels stay
           aligned to their rules. */}
-      <div className="relative flex min-h-0 flex-1 overflow-y-auto pt-2">
+      <div ref={scrollRef} className="relative flex min-h-0 flex-1 overflow-y-auto pt-2">
         {/* Hour gutter */}
         <div className="w-14 shrink-0" aria-hidden>
           {hours.slice(0, -1).map((hour) => (
             <div
               key={hour}
-              style={{ height: HOUR_HEIGHT }}
+              style={{ height: metrics.hourHeight }}
               className="relative -top-2 pr-2 text-right tabular-time text-caption text-ink-muted"
             >
               {String(hour).padStart(2, '0')}:00
@@ -334,7 +360,7 @@ export function TimeGrid({
               <div
                 key={hour}
                 className="absolute inset-x-0 border-t border-line-subtle"
-                style={{ top: (hour - GRID_START_HOUR) * HOUR_HEIGHT }}
+                style={{ top: (hour - metrics.startHour) * metrics.hourHeight }}
               />
             ))}
           </div>
@@ -351,9 +377,9 @@ export function TimeGrid({
                 // with the event blocks sitting on it.
                 nowKey === key && 'bg-primary/4'
               )}
-              style={{ height: GRID_HOURS * HOUR_HEIGHT }}
+              style={{ height: gridHours * metrics.hourHeight }}
             >
-              {layout(timed.get(key) ?? [], timeZone, key).map((positioned) => {
+              {layout(timed.get(key) ?? [], timeZone, key, metrics).map((positioned) => {
                 const offset = drag.offsetFor(positioned.event);
                 const isDragging = drag.drag?.key === positioned.event.key;
                 const width = 100 / positioned.columnCount;
@@ -400,7 +426,7 @@ export function TimeGrid({
               grid's right edge in both the day and the *week* view — the hour
               it marks is the same hour on Tuesday as on Friday, and a rule
               that stopped at one column read as a property of that day. */}
-          {nowKey !== null && dayKeys.includes(nowKey) && (
+          {showNow && (
             <div
               data-testid="now-line"
               className="pointer-events-none absolute inset-x-0 z-20 h-0.5 bg-now"

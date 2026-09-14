@@ -17,7 +17,7 @@ import { MemberDayGrid } from './member-day-grid';
 import { MobileMonthView } from './mobile-month-view';
 import { MonthView } from './month-view';
 import { TimeGrid } from './time-grid';
-import { MEMBER_COLOR_CLASSES } from './tokens';
+import { APP_GRID_METRICS, HUB_GRID_METRICS, MEMBER_COLOR_CLASSES } from './tokens';
 import { useIsWide } from './use-is-wide';
 
 /**
@@ -84,6 +84,10 @@ export function CalendarShell({
   basePath = '/calendar',
 }: CalendarShellProps) {
   const hub = surface === 'hub';
+  // Kiosk rows/header at 6-foot legibility — see `tokens.ts`'s `GridMetrics`
+  // doc comment for why grid geometry needs its own surface override rather
+  // than inheriting the `[data-surface='hub']` type scale.
+  const gridMetrics = hub ? HUB_GRID_METRICS : APP_GRID_METRICS;
   const t = useTranslations('calendar');
   const formatDateTime = useDateTimeFormat();
   const router = useRouter();
@@ -494,6 +498,7 @@ export function CalendarShell({
               onSelect={onSelect}
               hub={hub}
               canWrite={canWrite}
+              metrics={gridMetrics}
             />
           ) : (
             // Week, at 390px, is an **agenda list per day** — the shape
@@ -533,6 +538,7 @@ export function CalendarShell({
             onSelect={onSelect}
             canWrite={canWrite}
             hub={hub}
+            metrics={gridMetrics}
           />
         ) : (
           <div className="flex min-h-0 flex-1 flex-col">
@@ -556,6 +562,7 @@ export function CalendarShell({
               hub={hub}
               canWrite={canWrite}
               showHeader={isWide}
+              metrics={gridMetrics}
             />
           </div>
         )}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { useDateTimeFormat } from '@/components/formatting';
 import { cn, EmptyState, Icon, MemberFace } from '@kynite/ui';
@@ -12,7 +12,7 @@ import { splitByMember } from '../domain/day-board';
 import { minutesIntoDay, toDateKey, toWall } from '../domain/zone';
 import type { CalendarEvent } from '../queries';
 import { EventChip } from './event-chip';
-import { GRID_END_HOUR, GRID_START_HOUR, HOUR_HEIGHT, MEMBER_COLOR_CLASSES } from './tokens';
+import { APP_GRID_METRICS, MEMBER_COLOR_CLASSES, type GridMetrics } from './tokens';
 import { layout } from './time-grid';
 import { useDragReschedule } from './use-drag-reschedule';
 
@@ -60,11 +60,13 @@ export type MemberDayGridProps = {
   canWrite?: boolean;
   /** Hub surfaces render `EventChip` at 6-foot legibility. */
   hub?: boolean;
+  /**
+   * Grid geometry — hour height, hour range, header height. Defaults to
+   * `APP_GRID_METRICS` so every existing app call site is byte-identical;
+   * the hub surface passes `HUB_GRID_METRICS` (`calendar-shell.tsx`).
+   */
+  metrics?: GridMetrics;
 };
-
-const GRID_HOURS = GRID_END_HOUR - GRID_START_HOUR;
-/** Sticky per-member column header, in px — the overlays start below it. */
-const HEADER_HEIGHT = 48;
 
 export function MemberDayGrid({
   members,
@@ -75,10 +77,13 @@ export function MemberDayGrid({
   onSelect,
   canWrite = true,
   hub = false,
+  metrics = APP_GRID_METRICS,
 }: MemberDayGridProps) {
   const t = useTranslations('calendar');
   const formatDateTime = useDateTimeFormat();
   const dayKey = toDateKey(toWall(day, timeZone));
+  const gridHours = metrics.endHour - metrics.startHour;
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   /**
    * Two splits, one rule (`domain/day-board.ts`): the all-day band above the
@@ -130,18 +135,36 @@ export function MemberDayGrid({
     columnIndexOf: () => 0,
   });
 
-  const hours = Array.from({ length: GRID_HOURS + 1 }, (_, index) => GRID_START_HOUR + index);
+  const hours = Array.from({ length: gridHours + 1 }, (_, index) => metrics.startHour + index);
   const showNow = now ? toDateKey(toWall(now, timeZone)) === dayKey : false;
-  // Clamped: before `GRID_START_HOUR` an unclamped line floats above the grid
-  // and over the sticky headers.
+  // Clamped: before `metrics.startHour` an unclamped line floats above the
+  // grid and over the sticky headers.
   const nowTop = now
     ? Math.min(
-        Math.max(((minutesIntoDay(now, timeZone) - GRID_START_HOUR * 60) / 60) * HOUR_HEIGHT, 0),
-        GRID_HOURS * HOUR_HEIGHT
+        Math.max(
+          ((minutesIntoDay(now, timeZone) - metrics.startHour * 60) / 60) * metrics.hourHeight,
+          0
+        ),
+        gridHours * metrics.hourHeight
       )
     : 0;
 
-  const bodyHeight = GRID_HOURS * HOUR_HEIGHT;
+  const bodyHeight = gridHours * metrics.hourHeight;
+
+  // Scroll the grid so "now" sits a couple of hours from the top, rather
+  // than opening on 06:00 with the current moment scrolled off-screen — a
+  // kiosk left on all day should land near the useful part of the day. Gated
+  // on `showNow` (today's grid) so a snapshot pinned to a fixed future date
+  // stays deterministic.
+  useEffect(() => {
+    if (!showNow) return;
+    const element = scrollRef.current;
+    if (!element) return;
+    element.scrollTop = Math.max(0, nowTop - 2 * metrics.hourHeight);
+    // Only on mount / day change — a later "now" tick should not keep
+    // yanking the scroll position out from under someone reading the grid.
+    // oxlint-disable-next-line react/exhaustive-deps
+  }, [showNow, dayKey]);
 
   return (
     <div data-slot="member-day-grid" className="flex min-h-0 flex-1 flex-col">
@@ -215,13 +238,13 @@ export function MemberDayGrid({
       {/* One scroll container for both axes: the hour gutter sticks to the
           left edge and the member headers to the top, so a phone can scroll
           four columns sideways without losing either reference. */}
-      <div className="relative flex min-h-0 flex-1 overflow-auto">
+      <div ref={scrollRef} className="relative flex min-h-0 flex-1 overflow-auto">
         <div className="flex min-w-max flex-1">
           {/* Hour gutter */}
           <div className="sticky left-0 z-30 w-14 shrink-0 bg-surface" aria-hidden>
             <div
               className="sticky top-0 z-10 bg-surface"
-              style={{ height: HEADER_HEIGHT }}
+              style={{ height: metrics.headerHeight }}
               data-slot="grid-corner"
             />
             {/* `pt-2` cancels the `-top-2` the labels are lifted by, so the
@@ -231,7 +254,7 @@ export function MemberDayGrid({
               {hours.slice(0, -1).map((hour) => (
                 <div
                   key={hour}
-                  style={{ height: HOUR_HEIGHT }}
+                  style={{ height: metrics.hourHeight }}
                   className="relative -top-2 pr-2 text-right tabular-time text-caption text-ink-muted"
                 >
                   {String(hour).padStart(2, '0')}:00
@@ -245,14 +268,14 @@ export function MemberDayGrid({
                 every column and offset past the sticky header strip. */}
             <div
               className="pointer-events-none absolute inset-x-0 z-0"
-              style={{ top: HEADER_HEIGHT, height: bodyHeight }}
+              style={{ top: metrics.headerHeight, height: bodyHeight }}
               aria-hidden
             >
               {hours.map((hour) => (
                 <div
                   key={hour}
                   className="absolute inset-x-0 border-t border-line-subtle"
-                  style={{ top: (hour - GRID_START_HOUR) * HOUR_HEIGHT }}
+                  style={{ top: (hour - metrics.startHour) * metrics.hourHeight }}
                 />
               ))}
             </div>
@@ -266,7 +289,7 @@ export function MemberDayGrid({
               >
                 <div
                   className="glass sticky top-0 z-20 flex items-center justify-center gap-2 border-b border-line-subtle px-2"
-                  style={{ height: HEADER_HEIGHT }}
+                  style={{ height: metrics.headerHeight }}
                 >
                   <Icon name="group" size="sm" className="text-ink-muted" />
                   <span className="truncate font-display text-body-sm font-bold text-ink">
@@ -284,6 +307,7 @@ export function MemberDayGrid({
                     onSelect={onSelect}
                     canWrite={canWrite}
                     hub={hub}
+                    metrics={metrics}
                   />
                 </div>
               </div>
@@ -305,7 +329,7 @@ export function MemberDayGrid({
                 >
                   <div
                     className="glass sticky top-0 z-20 flex items-center justify-center gap-2 border-b border-line-subtle px-2"
-                    style={{ height: HEADER_HEIGHT }}
+                    style={{ height: metrics.headerHeight }}
                   >
                     <MemberFace
                       size="sm"
@@ -350,6 +374,7 @@ export function MemberDayGrid({
                         onSelect={onSelect}
                         canWrite={canWrite}
                         hub={hub}
+                        metrics={metrics}
                       />
                     )}
                   </div>
@@ -367,7 +392,7 @@ export function MemberDayGrid({
                 // to be a 1px `border-t` with a 8px pip, which at kitchen
                 // distance is indistinguishable from an hour rule.
                 className="pointer-events-none absolute inset-x-0 z-20 h-0.5 bg-now"
-                style={{ top: HEADER_HEIGHT + nowTop }}
+                style={{ top: metrics.headerHeight + nowTop }}
               >
                 <span className="absolute -top-1 -left-1 size-2.5 rounded-full bg-now" />
               </div>
@@ -397,6 +422,7 @@ function TimedChips({
   onSelect,
   canWrite = true,
   hub = false,
+  metrics = APP_GRID_METRICS,
 }: {
   events: CalendarEvent[];
   /**
@@ -414,8 +440,9 @@ function TimedChips({
   onSelect?: (event: CalendarEvent) => void;
   canWrite?: boolean;
   hub?: boolean;
+  metrics?: GridMetrics;
 }) {
-  return layout(events, timeZone, dayKey).map((positioned) => {
+  return layout(events, timeZone, dayKey, metrics).map((positioned) => {
     const offset = drag.offsetFor(positioned.event);
     const isDragging = drag.drag?.key === positioned.event.key;
     const width = 100 / positioned.columnCount;

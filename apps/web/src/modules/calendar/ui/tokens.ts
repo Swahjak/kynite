@@ -274,3 +274,46 @@ export const HOUR_HEIGHT = 58;
 
 /** Drag-and-drop snaps to this many minutes. */
 export const SNAP_MINUTES = 15;
+
+/**
+ * The grid geometry `layout()`/`verticalSpan()` (`time-grid.tsx`) and the two
+ * grid components (`TimeGrid`, `MemberDayGrid`) need, bundled so a surface can
+ * override all four together rather than the app's CSS-scale trick alone.
+ *
+ * `[data-surface='hub']` scales *type* ~1.45× (`packages/ui/src/styles/
+ * tokens.css`), inherited from `<html>`. Grid geometry is JS px, not CSS, so
+ * it does not inherit that scale — at 1.45× a 22px chip label crammed into a
+ * 29px half-hour block is unreadable, and a header sized for app type clips.
+ * The hub surface gets its own metrics instead of a CSS transform on the app's,
+ * so drag math, the now-line and chip heights all agree with what is drawn.
+ */
+export type GridMetrics = {
+  /** Pixels per hour — see `HOUR_HEIGHT` for why 58 on the app surface. */
+  hourHeight: number;
+  /** First rendered hour, inclusive. */
+  startHour: number;
+  /** Last rendered hour, inclusive. */
+  endHour: number;
+  /** Sticky member-column header height, in px (`MemberDayGrid` only). */
+  headerHeight: number;
+};
+
+/** The app surface's grid geometry — unchanged from the pre-M3 constants. */
+export const APP_GRID_METRICS: GridMetrics = {
+  hourHeight: HOUR_HEIGHT,
+  startHour: GRID_START_HOUR,
+  endHour: GRID_END_HOUR,
+  headerHeight: 48,
+};
+
+/**
+ * The hub kiosk's grid geometry. Same 06–23 hour range (decision: the day
+ * doesn't get shorter on a wall display), taller rows and header so a chip's
+ * label clears the ~1.45× type scale at arm's length.
+ */
+export const HUB_GRID_METRICS: GridMetrics = {
+  hourHeight: 84,
+  startHour: GRID_START_HOUR,
+  endHour: GRID_END_HOUR,
+  headerHeight: 64,
+};
