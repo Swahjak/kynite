@@ -40,6 +40,14 @@ export type TimeGridProps = {
    * header under it would say it twice.
    */
   showHeader?: boolean;
+  /**
+   * False for a principal without `event:write` (a hub device). The drag hook
+   * still runs — hooks order can't depend on this — but chips get no
+   * `onPointerDown`/`suppressClick` and no grab cursor, so the grid is
+   * genuinely read-only rather than only refusing the write server-side.
+   * Defaults to `true` to keep the app surface byte-identical.
+   */
+  canWrite?: boolean;
 };
 
 type Positioned = {
@@ -171,6 +179,7 @@ export function TimeGrid({
   onSelect,
   hub = false,
   showHeader = true,
+  canWrite = true,
 }: TimeGridProps) {
   const t = useTranslations('calendar');
   const formatDateTime = useDateTimeFormat();
@@ -363,14 +372,14 @@ export function TimeGrid({
                       positioned.event.endsAt.getTime() <= now.getTime()
                     }
                     onSelect={onSelect}
-                    onPointerDown={drag.onPointerDown}
-                    suppressClick={drag.shouldIgnoreClick}
+                    onPointerDown={canWrite ? drag.onPointerDown : undefined}
+                    suppressClick={canWrite ? drag.shouldIgnoreClick : undefined}
                     continuesBefore={positioned.continuesBefore}
                     continuesAfter={positioned.continuesAfter}
                     className={cn(
                       'touch-none',
                       isDragging && 'z-30 opacity-90 shadow-lg',
-                      positioned.event.editable && 'cursor-grab active:cursor-grabbing'
+                      canWrite && positioned.event.editable && 'cursor-grab active:cursor-grabbing'
                     )}
                     style={{
                       top: positioned.top + offset.top,

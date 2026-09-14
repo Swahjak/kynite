@@ -51,6 +51,15 @@ export type MemberDayGridProps = {
   /** Rendered as "now" — passed in rather than read, so snapshots are stable. */
   now?: Date | null;
   onSelect?: (event: CalendarEvent) => void;
+  /**
+   * False for a principal without `event:write` (a hub device). The drag hook
+   * still runs — hooks order can't depend on this — but chips get no
+   * `onPointerDown`/`suppressClick` and no grab cursor. Defaults to `true` to
+   * keep the app surface byte-identical.
+   */
+  canWrite?: boolean;
+  /** Hub surfaces render `EventChip` at 6-foot legibility. */
+  hub?: boolean;
 };
 
 const GRID_HOURS = GRID_END_HOUR - GRID_START_HOUR;
@@ -64,6 +73,8 @@ export function MemberDayGrid({
   day,
   now,
   onSelect,
+  canWrite = true,
+  hub = false,
 }: MemberDayGridProps) {
   const t = useTranslations('calendar');
   const formatDateTime = useDateTimeFormat();
@@ -271,6 +282,8 @@ export function MemberDayGrid({
                     dayKey={dayKey}
                     drag={drag}
                     onSelect={onSelect}
+                    canWrite={canWrite}
+                    hub={hub}
                   />
                 </div>
               </div>
@@ -335,6 +348,8 @@ export function MemberDayGrid({
                         dayKey={dayKey}
                         drag={drag}
                         onSelect={onSelect}
+                        canWrite={canWrite}
+                        hub={hub}
                       />
                     )}
                   </div>
@@ -380,6 +395,8 @@ function TimedChips({
   dayKey,
   drag,
   onSelect,
+  canWrite = true,
+  hub = false,
 }: {
   events: CalendarEvent[];
   /**
@@ -395,6 +412,8 @@ function TimedChips({
   dayKey: string;
   drag: ReturnType<typeof useDragReschedule>;
   onSelect?: (event: CalendarEvent) => void;
+  canWrite?: boolean;
+  hub?: boolean;
 }) {
   return layout(events, timeZone, dayKey).map((positioned) => {
     const offset = drag.offsetFor(positioned.event);
@@ -408,15 +427,16 @@ function TimedChips({
         variant="block"
         showOwner
         members={members}
+        hub={hub}
         onSelect={onSelect}
-        onPointerDown={drag.onPointerDown}
-        suppressClick={drag.shouldIgnoreClick}
+        onPointerDown={canWrite ? drag.onPointerDown : undefined}
+        suppressClick={canWrite ? drag.shouldIgnoreClick : undefined}
         continuesBefore={positioned.continuesBefore}
         continuesAfter={positioned.continuesAfter}
         className={cn(
           'touch-none',
           isDragging && 'z-30 opacity-90 shadow-lg',
-          positioned.event.editable && 'cursor-grab active:cursor-grabbing'
+          canWrite && positioned.event.editable && 'cursor-grab active:cursor-grabbing'
         )}
         style={{
           top: positioned.top + offset.top,

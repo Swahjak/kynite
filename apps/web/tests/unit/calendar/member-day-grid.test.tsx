@@ -71,7 +71,8 @@ function event(overrides: Partial<CalendarEvent> = {}): CalendarEvent {
 function renderGrid(
   members: Member[],
   events: CalendarEvent[],
-  onSelect?: (event: CalendarEvent) => void
+  onSelect?: (event: CalendarEvent) => void,
+  options?: { canWrite?: boolean }
 ) {
   return render(
     <NextIntlClientProvider locale="en" timeZone={TZ} messages={{ calendar: messages.calendar }}>
@@ -82,6 +83,7 @@ function renderGrid(
         day={new Date('2026-03-11T12:00:00.000Z')}
         now={null}
         onSelect={onSelect}
+        canWrite={options?.canWrite}
       />
     </NextIntlClientProvider>
   );
@@ -284,6 +286,47 @@ describe('MemberDayGrid', () => {
     fireEvent.click(chip);
 
     expect(onSelect).toHaveBeenCalledTimes(1);
+  });
+
+  /**
+   * hub-calendar-shell M2: a hub device is denied `event:write`, but until
+   * now drag-to-reschedule was gated on `event.editable` alone
+   * (`queries.ts:311` leaves that `true` for a device principal), so a wall
+   * tablet could still drag a block and silently write the reschedule.
+   * `canWrite={false}` must remove the handler and the grab cursor, not just
+   * the click-to-edit callback.
+   */
+  it('canWrite=false: no pointer-down handler and no grab cursor on a block', () => {
+    const { container } = renderGrid(members, [event({ ownerMemberId: 'm1' })], undefined, {
+      canWrite: false,
+    });
+
+    const chip = container.querySelector('[data-slot="event-chip"]')!;
+    expect(chip.className).not.toContain('cursor-grab');
+
+    // No drag handler wired: a pointer-down/move/up sequence must not enter
+    // the drag hook's gesture state and must not suppress the click that
+    // follows it — canWrite=false means "no drag" the way canWrite=true's
+    // 4px-threshold drag suppresses its own trailing click.
+    const onSelect = vi.fn();
+    const { container: c2 } = renderGrid(members, [event({ ownerMemberId: 'm1' })], onSelect, {
+      canWrite: false,
+    });
+    const chip2 = c2.querySelector('[data-slot="event-chip"]')!;
+
+    fireEvent.pointerDown(chip2, { button: 0, clientX: 10, clientY: 10 });
+    fireEvent.pointerMove(window, { clientX: 10, clientY: 66 });
+    fireEvent.pointerUp(window);
+    fireEvent.click(chip2);
+
+    expect(onSelect).toHaveBeenCalledTimes(1);
+  });
+
+  it('canWrite=true (default) still grants the grab cursor on an editable block', () => {
+    const { container } = renderGrid(members, [event({ ownerMemberId: 'm1', editable: true })]);
+
+    const chip = container.querySelector('[data-slot="event-chip"]')!;
+    expect(chip.className).toContain('cursor-grab');
   });
 
   /** F21. An all-day commitment is still a commitment — the day is not free. */
