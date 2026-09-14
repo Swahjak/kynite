@@ -35,4 +35,7 @@ Owner ask (2026-09-14): bring the hub taken board in line with the refreshed `Ta
 | m4 | M4 dashboard link | sonnet | 122k | 48 | done `7bb9e47` |
 | m3b | r2 fixes (resumed m3) | opus | +18k (201k total) | 12 | done `cdcaaff`, retired |
 | m5 | M5 icons | sonnet | 263k | 251 | done, 5 commits; first run aborted (plan not on branch, my fault); retired at ceiling |
-| m5b | StepRow icon render | sonnet | — | — | running |
+| m5b | StepRow icon render | sonnet | 110k | 52 | done `26c4074` |
+| r3 | review M4+M5 | sonnet | 69k | 47 | 3 risks (suggester substrings, manager fallback) |
+| f2 | fix r3 | sonnet (builder) | 46k | 12 | done `728dfdf` |
+| f3 | axe contrast fix | sonnet (builder) | 26k | 3 | done `728dfdf` |
