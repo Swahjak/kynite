@@ -34,6 +34,7 @@ export {
 } from './outbox';
 
 export {
+  JUST_FINISHED_MS,
   ROUTINE_CELEBRATION_MS,
   useCompletionFlow,
   type CompletionFlow,

@@ -3,6 +3,7 @@ import {
   columnProgress,
   daypartFromHour,
   partitionTasksByAssignee,
+  resolveOpenRoutineId,
 } from '@/modules/today/domain/routines-board';
 
 describe('the daypart selected by default', () => {
@@ -69,5 +70,60 @@ describe('splitting tasks into the pool and per-member buckets', () => {
     const { pool, byMember } = partitionTasksByAssignee([]);
     expect(pool).toEqual([]);
     expect(byMember.size).toBe(0);
+  });
+});
+
+/**
+ * Which card the "Actieve routines" page opens (M3 review finding 2): a
+ * viewer's tap must not park a column on one routine for the rest of the day.
+ */
+describe('the card a column opens', () => {
+  const routines = [
+    { id: 'morning', complete: false },
+    { id: 'evening', complete: false },
+  ];
+
+  it("follows the server's choice until someone taps", () => {
+    expect(resolveOpenRoutineId(routines, 'morning', undefined)).toBe('morning');
+  });
+
+  it('honours a viewer opening a different card', () => {
+    expect(
+      resolveOpenRoutineId(routines, 'morning', { against: 'morning', openId: 'evening' })
+    ).toBe('evening');
+  });
+
+  it('honours a viewer closing the open card', () => {
+    expect(resolveOpenRoutineId(routines, 'morning', { against: 'morning', openId: null })).toBe(
+      null
+    );
+  });
+
+  it('yields once the routine the viewer opened is finished', () => {
+    const done = [
+      { id: 'morning', complete: false },
+      { id: 'evening', complete: true },
+    ];
+
+    expect(resolveOpenRoutineId(done, 'morning', { against: 'morning', openId: 'evening' })).toBe(
+      'morning'
+    );
+  });
+
+  it('yields once the routine the viewer opened has left the board', () => {
+    expect(resolveOpenRoutineId(routines, 'morning', { against: 'morning', openId: 'gone' })).toBe(
+      'morning'
+    );
+  });
+
+  it('yields when the server has moved on to another live routine', () => {
+    expect(
+      resolveOpenRoutineId(routines, 'evening', { against: 'morning', openId: 'morning' })
+    ).toBe('evening');
+
+    // Including a viewer's explicit close: that choice was about this morning.
+    expect(resolveOpenRoutineId(routines, 'evening', { against: 'morning', openId: null })).toBe(
+      'evening'
+    );
   });
 });

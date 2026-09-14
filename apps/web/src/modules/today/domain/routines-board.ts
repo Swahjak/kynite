@@ -95,3 +95,44 @@ export function partitionTasksByAssignee<T extends { assigneeMemberId: string | 
 
   return { pool, byMember };
 }
+
+/**
+ * A viewer's manual accordion choice on the "Actieve routines" page, pinned to
+ * the server state it was made against.
+ *
+ * `against` is the `activeRoutineId` the column was showing when the tap
+ * happened; `openId` is what the viewer opened, or `null` for "they closed the
+ * open card". Storing the pair is what lets the override *yield*: without it a
+ * single tap would park a column on one card forever, and once that routine
+ * finished the column would sit on a done card while the live one stayed
+ * collapsed — the opposite of what an open card is there to say.
+ */
+export type OpenOverride = { against: string | null; openId: string | null };
+
+/** The read subset of a routine the accordion decision needs. */
+export type OpenableItem = { id: string; complete: boolean };
+
+/**
+ * Which card a column actually opens: the server's choice, unless a viewer has
+ * overridden it *and* that override is still about today's state.
+ *
+ * The override is dropped when either half of it goes stale — the server has
+ * moved on to a different live routine, or the routine it names has since been
+ * finished (or has left the board). In both cases the column reopens whatever
+ * the loader's `firstOpenRoutineId` now points at, exactly as a fresh load
+ * would, which is also how `/hub/routines/[memberId]` behaves.
+ */
+export function resolveOpenRoutineId(
+  routines: readonly OpenableItem[],
+  activeRoutineId: string | null,
+  override: OpenOverride | undefined
+): string | null {
+  if (!override) return activeRoutineId;
+  // The day moved under the viewer's choice: their tap was about a board that
+  // no longer exists, so it stops speaking for this column.
+  if (override.against !== activeRoutineId) return activeRoutineId;
+  if (override.openId === null) return null;
+
+  const target = routines.find((routine) => routine.id === override.openId);
+  return target && !target.complete ? override.openId : activeRoutineId;
+}

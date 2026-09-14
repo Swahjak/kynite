@@ -1,10 +1,11 @@
 'use client';
 
-import { useRef, useState, type UIEvent } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Icon, MemberFace, ProgressBar, RoutineCard, cn, type IconName } from '@kynite/ui';
 import { useCompletionFlow } from '@/components/realtime';
 import { useDateTimeFormat } from '@/components/formatting';
+import { resolveOpenRoutineId, type OpenOverride } from '../domain/routines-board';
 import type {
   CompleteStepInput,
   CompletionState,
@@ -95,11 +96,17 @@ export function RoutinesPageBoard({ data, dayKey, completeStepAction }: Routines
    * Which card a column has open, once someone has tapped one.
    *
    * Absent means "whatever the server decided" (`activeRoutineId`, the first
-   * live unfinished routine). `null` means a viewer closed that column's open
-   * card. One open card per column, never one for the whole page — the columns
-   * belong to different people.
+   * live unfinished routine). One open card per column, never one for the whole
+   * page — the columns belong to different people.
+   *
+   * The entry is an `OpenOverride`, not a bare id: it carries the
+   * `activeRoutineId` it was made against, so `resolveOpenRoutineId` can let it
+   * yield once the day moves on. Without that, one tap would park a column on
+   * one card for the rest of the evening — including on a *finished* one, with
+   * the live routine collapsed underneath it, which is the opposite of what an
+   * open card is for.
    */
-  const [openByColumn, setOpenByColumn] = useState<ReadonlyMap<string, string | null>>(
+  const [openByColumn, setOpenByColumn] = useState<ReadonlyMap<string, OpenOverride>>(
     () => new Map()
   );
 
@@ -115,28 +122,57 @@ export function RoutinesPageBoard({ data, dayKey, completeStepAction }: Routines
       ? data.columns
       : data.columns.filter((column) => selectedIds.has(column.memberId));
 
-  /** Pager dots: which columns the scroller currently has in view. */
+  /**
+   * Pager dots: which columns the scroller currently has in view.
+   *
+   * Measured rather than assumed. How many columns fit depends on the viewport
+   * (three at 1280, one on a phone looking at the hub, and fewer again once the
+   * 340px floor beats the 33% basis), so a hardcoded initial range would light
+   * the wrong dots until the first scroll — and on a wall tablet that never
+   * scrolls, forever.
+   */
   const scroller = useRef<HTMLDivElement | null>(null);
-  const [inView, setInView] = useState<{ first: number; last: number }>({ first: 0, last: 2 });
+  const [inView, setInView] = useState<{ first: number; last: number }>({ first: 0, last: 0 });
 
-  const measure = (event: UIEvent<HTMLDivElement>) => {
-    const node = event.currentTarget;
+  const measure = useCallback(() => {
+    const node = scroller.current;
+    if (!node) return;
+
     const children = [...node.children] as HTMLElement[];
     if (children.length === 0) return;
 
     const left = node.scrollLeft;
     const right = left + node.clientWidth;
-    // A column counts as in view once more than a sliver of it is: the mockup's
-    // fourth column "announces itself at the edge" and is deliberately not lit.
-    const indices = children.flatMap((child, index) =>
-      child.offsetLeft + child.offsetWidth * 0.5 > left &&
-      child.offsetLeft + child.offsetWidth * 0.5 < right
-        ? [index]
-        : []
-    );
+    // A column counts as in view once its middle is: the mockup's fourth column
+    // "announces itself at the edge" and is deliberately not lit.
+    const indices = children.flatMap((child, index) => {
+      const middle = child.offsetLeft + child.offsetWidth / 2;
+      return middle > left && middle < right ? [index] : [];
+    });
     if (indices.length === 0) return;
-    setInView({ first: indices[0] ?? 0, last: indices[indices.length - 1] ?? 0 });
-  };
+
+    setInView((previous) => {
+      const first = indices[0] ?? 0;
+      const last = indices[indices.length - 1] ?? 0;
+      return previous.first === first && previous.last === last ? previous : { first, last };
+    });
+  }, []);
+
+  // On mount, and on every resize of the scroller or its columns (which covers
+  // a window resize, the rail collapsing, and a column being filtered in or
+  // out) — torn down with the component.
+  useEffect(() => {
+    measure();
+
+    const node = scroller.current;
+    if (!node || typeof ResizeObserver === 'undefined') return;
+
+    const observer = new ResizeObserver(measure);
+    observer.observe(node);
+    for (const child of node.children) observer.observe(child);
+
+    return () => observer.disconnect();
+  }, [measure, visibleColumns.length]);
 
   return (
     <div data-testid="routines-page-board" className="flex min-h-0 flex-1 flex-col gap-4">
@@ -182,18 +218,23 @@ export function RoutinesPageBoard({ data, dayKey, completeStepAction }: Routines
             key={column.memberId}
             column={column}
             canComplete={data.canComplete}
-            openRoutineId={
-              openByColumn.has(column.memberId)
-                ? (openByColumn.get(column.memberId) ?? null)
-                : column.activeRoutineId
-            }
+            openRoutineId={resolveOpenRoutineId(
+              column.bands.flatMap((band) => band.routines),
+              column.activeRoutineId,
+              openByColumn.get(column.memberId)
+            )}
             onToggleRoutine={(routineId) =>
               setOpenByColumn((previous) => {
-                const current = previous.has(column.memberId)
-                  ? previous.get(column.memberId)
-                  : column.activeRoutineId;
+                const current = resolveOpenRoutineId(
+                  column.bands.flatMap((band) => band.routines),
+                  column.activeRoutineId,
+                  previous.get(column.memberId)
+                );
                 const next = new Map(previous);
-                next.set(column.memberId, current === routineId ? null : routineId);
+                next.set(column.memberId, {
+                  against: column.activeRoutineId,
+                  openId: current === routineId ? null : routineId,
+                });
                 return next;
               })
             }

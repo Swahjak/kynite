@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useOptimistic, useRef, useState, useTransition } from 'react';
+import { useCallback, useEffect, useOptimistic, useRef, useState, useTransition } from 'react';
 import { fireConfettiBurst } from '@/components/celebration';
 import { useRouter } from '@/i18n/navigation';
 import { dropCompletion, enqueueCompletion, type PendingCompletion } from './outbox';
@@ -62,6 +62,18 @@ export type RoutineCelebration<R> = { routine: R; stars: number };
 /** How long the celebrate banner stays up before it clears itself. */
 export const ROUTINE_CELEBRATION_MS = 7_000;
 
+/**
+ * How long a routine stays in `justFinished`.
+ *
+ * Long enough for the KLAAR card's pop to play out, and no longer:
+ * `celebrating` is documented on `RoutineCard` as a *transition*, and a set
+ * that never empties would break that promise the first time the card
+ * remounts — which the Wie filter does every time a member is toggled back in.
+ * A stale flag would then replay the bounce for a routine finished an hour
+ * ago.
+ */
+export const JUST_FINISHED_MS = 1_500;
+
 export type CompletionFlow<R extends FlowRoutine> = {
   /** Folds this device's completions into a server-rendered routine. */
   withOptimistic: (routine: R) => R;
@@ -118,6 +130,19 @@ export function useCompletionFlow<R extends FlowRoutine>({
    */
   const announced = useRef<Set<string>>(new Set());
   const clearTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const bounceTimers = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
+
+  // Nothing here may outlive the component: a timer that fires into an
+  // unmounted tree is a React warning at best and a leak at worst, and this
+  // board is unmounted every time the hub navigates away from it.
+  useEffect(
+    () => () => {
+      if (clearTimer.current) clearTimeout(clearTimer.current);
+      for (const timer of bounceTimers.current) clearTimeout(timer);
+      bounceTimers.current.clear();
+    },
+    []
+  );
 
   const flush = useCallback(
     async (entry: PendingCompletion) => {
@@ -195,6 +220,18 @@ export function useCompletionFlow<R extends FlowRoutine>({
     if (lastStep && !announced.current.has(routine.id)) {
       announced.current.add(routine.id);
       setJustFinished((previous) => new Set(previous).add(routine.id));
+
+      const bounce = setTimeout(() => {
+        bounceTimers.current.delete(bounce);
+        setJustFinished((previous) => {
+          if (!previous.has(routine.id)) return previous;
+          const next = new Set(previous);
+          next.delete(routine.id);
+          return next;
+        });
+      }, JUST_FINISHED_MS);
+      bounceTimers.current.add(bounce);
+
       setCelebration({ routine, stars: starsFor?.(routine) ?? 0 });
 
       if (clearTimer.current) clearTimeout(clearTimer.current);

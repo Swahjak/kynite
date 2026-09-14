@@ -35,6 +35,12 @@ export {
   type TimeBlock,
 } from './domain/flow';
 
+export {
+  resolveOpenRoutineId,
+  type OpenableItem,
+  type OpenOverride,
+} from './domain/routines-board';
+
 export { resolveTodayTheme, type ResolveTodayThemeInput, type TodayTheme } from './domain/theme';
 
 export {
