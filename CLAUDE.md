@@ -181,7 +181,7 @@ separate server, see `docs/adr/20260903-mcp-server.md` for why.
   `registerTools()` just calls all six against a fresh `McpServer` per request (the verified
   principal/scopes are closures, not read off `ctx.http.authInfo`). Shared helpers (`ok`,
   `toolError`, the `McpToolServer` type) live in `tools/shared.ts`. One tool list per domain,
-  verified against the registrars: calendar 7 (`list_calendars`, `list_events`,
+  verified against the registrars: calendar 8 (`list_calendars`, `list_events`, `get_event`,
   `create_event`, `skip_event_occurrence`, `update_event_occurrence`, `update_event`,
   `delete_event`), tasks 5 (`list_tasks`,
   `get_task`, `create_task`, `toggle_task`, `delete_task`), routines 9 (`list_routines`,

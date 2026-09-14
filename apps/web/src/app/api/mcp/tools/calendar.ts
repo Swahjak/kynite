@@ -2,9 +2,10 @@ import 'server-only';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { getDb } from '@/server/db';
-import { icsSubscription } from '@/server/db/schema';
+import { calendar, icsSubscription } from '@/server/db/schema';
 import { MCP_CALENDAR_READ, MCP_CALENDAR_WRITE, hasAllScopes } from '@/server/mcp-auth';
 import {
+  BUSY_LABEL,
   RECURRENCE_PRESETS,
   WEEKDAYS,
   createEvent,
@@ -12,9 +13,11 @@ import {
   EVENT_TYPES,
   getEvent,
   listEvents,
+  presetFor,
   skipEventOccurrence,
   updateEvent,
   updateEventOccurrence,
+  weeklyDaysOf,
   type CreateEventInput,
   type UpdateEventInput,
   type UpdateEventOccurrenceInput,
@@ -168,6 +171,80 @@ export function registerCalendarTools(
           busyOnly: e.busyOnly,
         }))
       );
+    }
+  );
+
+  server.registerTool(
+    'get_event',
+    {
+      title: 'Get one event',
+      description:
+        'Look up a single event or recurring series by id — full stored detail, including ' +
+        'the recurrence preset, the raw `rrule`, `byweekday` and Google sync status, which ' +
+        '`list_events` narrows or omits. `eventId` is the part before the ":" in a ' +
+        '`list_events` `key`. A private event you may not see the detail of comes back ' +
+        'busy-only, same redaction as `list_events`.',
+      inputSchema: z.object({ eventId: z.uuid() }),
+    },
+    async ({ eventId }) => {
+      if (!hasAllScopes(grantedScopes, [MCP_CALENDAR_READ])) {
+        return toolError('insufficientScope: requires kynite:calendar.read');
+      }
+
+      const row = await getEvent(principal.familyId, eventId);
+      if (!row || row.deletedAt) return toolError('eventNotFound');
+
+      let isPrivate = false;
+      let calendarOwnerMemberId: string | null = null;
+      if (row.calendarId) {
+        const [cal] = await getDb()
+          .select({ visibility: calendar.visibility, ownerMemberId: calendar.ownerMemberId })
+          .from(calendar)
+          .where(eq(calendar.id, row.calendarId))
+          .limit(1);
+        isPrivate = cal?.visibility === 'private';
+        calendarOwnerMemberId = cal?.ownerMemberId ?? null;
+      }
+
+      const privateGrade = decide(principal, 'calendar:view_private', {
+        familyId: principal.familyId,
+      });
+      const ownPrivate =
+        privateGrade === 'own' &&
+        principal.kind === 'member' &&
+        calendarOwnerMemberId === principal.memberId;
+      const redacted = isPrivate && privateGrade !== 'allow' && !ownPrivate;
+
+      if (redacted) {
+        return ok({
+          eventId: row.id,
+          title: BUSY_LABEL,
+          startsAt: row.startsAt.toISOString(),
+          endsAt: row.endsAt.toISOString(),
+          allDay: row.allDay,
+          recurring: row.rrule !== null,
+          busyOnly: true,
+        });
+      }
+
+      return ok({
+        eventId: row.id,
+        title: row.title,
+        description: row.description,
+        location: row.location,
+        startsAt: row.startsAt.toISOString(),
+        endsAt: row.endsAt.toISOString(),
+        allDay: row.allDay,
+        ownerMemberId: row.ownerMemberId,
+        attendeeMemberIds: row.attendeeMemberIds,
+        eventType: row.eventType,
+        calendarId: row.calendarId,
+        recurrence: presetFor(row.rrule),
+        rrule: row.rrule,
+        byweekday: weeklyDaysOf(row.rrule),
+        googleEventId: row.googleEventId,
+        busyOnly: false,
+      });
     }
   );
 

@@ -68,6 +68,7 @@ export {
   presetFor,
   preservesExistingRule,
   ruleForPreset,
+  weeklyDaysOf,
   type RecurrencePreset,
 } from './domain/presets';
 
