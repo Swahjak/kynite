@@ -655,12 +655,20 @@ export async function updateEvent(
   const tz = family?.timezone ?? 'Europe/Amsterdam';
 
   let rrule = existing.rrule;
-  if (input.recurrence !== undefined) {
-    rrule = preservesExistingRule(input.recurrence)
+  if (input.recurrence !== undefined || input.byweekday !== undefined) {
+    // `byweekday` only means something for a `weekly` rule — default the
+    // preset to `weekly` when only the days were given, and refuse a
+    // combination that would otherwise silently drop the days (mirrors the
+    // allDay/startsAt-endsAt guard above).
+    const recurrence = input.recurrence ?? 'weekly';
+    if (input.byweekday !== undefined && recurrence !== 'weekly') {
+      return { ok: false, error: 'invalidInput' };
+    }
+    rrule = preservesExistingRule(recurrence)
       ? existing.rrule
-      : input.recurrence === 'weekly'
+      : recurrence === 'weekly'
         ? ruleForWeeklySelection(input.byweekday, startsAt, tz)
-        : ruleForPreset(input.recurrence);
+        : ruleForPreset(recurrence);
   }
 
   await db
