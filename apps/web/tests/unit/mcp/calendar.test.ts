@@ -23,16 +23,28 @@ const seams = vi.hoisted(() => ({
 }));
 
 const can = vi.hoisted(() => vi.fn());
+const decide = vi.hoisted(() => vi.fn());
+const presetFor = vi.hoisted(() => vi.fn(() => 'weekly'));
+const weeklyDaysOf = vi.hoisted(() => vi.fn(() => ['MO', 'TH']));
+const dbSelect = vi.hoisted(() => vi.fn());
+const getDb = vi.hoisted(() => vi.fn(() => ({ select: dbSelect })));
 
 vi.mock('@/modules/google', () => ({ listFamilyCalendars }));
 vi.mock('@/modules/calendar', () => ({
   EVENT_TYPES: ['appointment'] as const,
   RECURRENCE_PRESETS: ['none'] as const,
   WEEKDAYS: ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'] as const,
+  BUSY_LABEL: 'busy',
+  presetFor,
+  weeklyDaysOf,
   ...seams,
 }));
-vi.mock('@/modules/family', () => ({ can, decide: vi.fn() }));
-vi.mock('@/server/db', () => ({ getDb: vi.fn() }));
+vi.mock('@/modules/family', () => ({ can, decide }));
+vi.mock('@/server/db', () => ({ getDb }));
+vi.mock('@/server/db/schema', () => ({
+  calendar: {},
+  icsSubscription: {},
+}));
 
 const { registerCalendarTools } = await import('@/app/api/mcp/tools/calendar');
 
@@ -78,12 +90,139 @@ describe('tool registration', () => {
     expect([...register([READ]).keys()].sort()).toEqual([
       'create_event',
       'delete_event',
+      'get_event',
       'list_calendars',
       'list_events',
       'skip_event_occurrence',
       'update_event',
       'update_event_occurrence',
     ]);
+  });
+});
+
+function mockCalendarRow(row: { visibility: string; ownerMemberId: string | null } | null) {
+  dbSelect.mockReturnValue({
+    from: () => ({
+      where: () => ({
+        limit: async () => (row ? [row] : []),
+      }),
+    }),
+  });
+}
+
+describe('get_event', () => {
+  it('refuses a token without kynite:calendar.read', async () => {
+    const { isError, body } = await call([], 'get_event', { eventId: EVENT_ID });
+
+    expect(isError).toBe(true);
+    expect(body).toEqual({ error: 'insufficientScope: requires kynite:calendar.read' });
+    expect(seams.getEvent).not.toHaveBeenCalled();
+  });
+
+  it('reports eventNotFound for an unknown id', async () => {
+    seams.getEvent.mockResolvedValue(null);
+
+    const { isError, body } = await call([READ], 'get_event', { eventId: EVENT_ID });
+
+    expect(isError).toBe(true);
+    expect(body).toEqual({ error: 'eventNotFound' });
+  });
+
+  it('reports eventNotFound for a soft-deleted event', async () => {
+    seams.getEvent.mockResolvedValue({ id: EVENT_ID, deletedAt: new Date('2026-01-01') });
+
+    const { isError, body } = await call([READ], 'get_event', { eventId: EVENT_ID });
+
+    expect(isError).toBe(true);
+    expect(body).toEqual({ error: 'eventNotFound' });
+  });
+
+  it('returns full detail, including rrule, for a non-private event', async () => {
+    decide.mockReturnValue('deny');
+    seams.getEvent.mockResolvedValue({
+      id: EVENT_ID,
+      title: 'BSO',
+      description: null,
+      location: null,
+      startsAt: new Date('2026-09-08T06:30:00.000Z'),
+      endsAt: new Date('2026-09-08T13:30:00.000Z'),
+      allDay: false,
+      ownerMemberId: null,
+      attendeeMemberIds: [],
+      eventType: 'appointment',
+      calendarId: null,
+      rrule: 'FREQ=WEEKLY;BYDAY=TU,TH',
+      googleEventId: null,
+      deletedAt: null,
+    });
+
+    const { isError, body } = await call([READ], 'get_event', { eventId: EVENT_ID });
+
+    expect(isError).toBe(false);
+    expect(dbSelect).not.toHaveBeenCalled();
+    expect(body).toMatchObject({
+      eventId: EVENT_ID,
+      title: 'BSO',
+      rrule: 'FREQ=WEEKLY;BYDAY=TU,TH',
+      recurrence: 'weekly',
+      byweekday: ['MO', 'TH'],
+      busyOnly: false,
+    });
+  });
+
+  it('redacts a private event the principal cannot see the detail of', async () => {
+    decide.mockReturnValue('deny');
+    mockCalendarRow({ visibility: 'private', ownerMemberId: 'someone-else' });
+    seams.getEvent.mockResolvedValue({
+      id: EVENT_ID,
+      title: 'Therapie',
+      startsAt: new Date('2026-09-08T06:30:00.000Z'),
+      endsAt: new Date('2026-09-08T07:30:00.000Z'),
+      allDay: false,
+      calendarId: CALENDAR_ID,
+      rrule: null,
+      deletedAt: null,
+    });
+
+    const { isError, body } = await call([READ], 'get_event', { eventId: EVENT_ID });
+
+    expect(isError).toBe(false);
+    expect(body).toEqual({
+      eventId: EVENT_ID,
+      title: 'busy',
+      startsAt: '2026-09-08T06:30:00.000Z',
+      endsAt: '2026-09-08T07:30:00.000Z',
+      allDay: false,
+      recurring: false,
+      busyOnly: true,
+    });
+  });
+
+  it('lets the calendar’s own member read their own private event in full', async () => {
+    const memberId = '22222222-2222-4222-8222-222222222222';
+    decide.mockReturnValue('own');
+    mockCalendarRow({ visibility: 'private', ownerMemberId: memberId });
+    seams.getEvent.mockResolvedValue({
+      id: EVENT_ID,
+      title: 'Therapie',
+      description: null,
+      location: null,
+      startsAt: new Date('2026-09-08T06:30:00.000Z'),
+      endsAt: new Date('2026-09-08T07:30:00.000Z'),
+      allDay: false,
+      ownerMemberId: memberId,
+      attendeeMemberIds: [],
+      eventType: 'appointment',
+      calendarId: CALENDAR_ID,
+      rrule: null,
+      googleEventId: null,
+      deletedAt: null,
+    });
+
+    const { isError, body } = await call([READ], 'get_event', { eventId: EVENT_ID });
+
+    expect(isError).toBe(false);
+    expect(body).toMatchObject({ title: 'Therapie', busyOnly: false });
   });
 });
 
