@@ -327,7 +327,7 @@ function toBoardRoutine({
   return {
     id: row.id,
     title: row.title,
-    icon: routineIconOf(row.icon),
+    icon: routineIconOf(row.icon, row.title),
     memberId,
     section: sectionOf(row.schedule),
     state: timing.state,

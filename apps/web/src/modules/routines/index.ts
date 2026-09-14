@@ -172,6 +172,7 @@ export { RoutineCard, StepRow, type StepRowProps } from '@kynite/ui';
 export { RoutineDialog } from './ui/routine-dialog';
 export { RoutineManager, type ManagedRoutine } from './ui/routine-manager';
 export {
+  ACTIVITY_ICONS,
   DEFAULT_ROUTINE_ICON,
   ROUTINE_ICONS,
   ROUTINE_ICON_TILE,
@@ -180,5 +181,7 @@ export {
   STEP_ROW_HEIGHT,
   isRoutineIcon,
   routineIconOf,
+  suggestIcon,
+  type ActivityIcon,
   type RoutineIcon,
 } from './ui/tokens';

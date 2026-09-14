@@ -16,6 +16,7 @@ import {
   routineIconOf,
   sectionOf,
   starsFor,
+  suggestIcon,
   timingAt,
   todayKeyIn,
   type RoutineIcon,
@@ -158,10 +159,10 @@ export async function loadRoutinesBoardData(
     if (!bucket) continue;
 
     const section = sectionOf(row.schedule);
-    const icon = routineIconOf(row.icon);
     const stars = starsFor(row);
 
     for (const step of row.steps) {
+      const icon = routineIconOf(step.icon, step.title);
       bucket[section].push({
         kind: 'routine',
         id: step.id,
@@ -188,7 +189,7 @@ export async function loadRoutinesBoardData(
     id: row.id,
     title: row.title,
     done: row.completedAt !== null,
-    accentClass: ROUTINE_ICON_TILE.task_alt,
+    accentClass: ROUTINE_ICON_TILE[suggestIcon(row.title)],
   });
 
   const { pool, byMember } = partitionTasksByAssignee(tasks);

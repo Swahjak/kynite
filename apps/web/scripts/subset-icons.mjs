@@ -249,6 +249,7 @@ const EXTRA_ICONS = [
   'pedal_bike',
   'shopping_cart',
   'countertops',
+  'bedroom_baby',
   'potted_plant',
   'mail',
   'swipe',

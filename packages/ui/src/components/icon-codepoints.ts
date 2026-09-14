@@ -20,6 +20,7 @@ export const ICON_CODEPOINTS = {
   backpack: '\uf19c',
   bar_chart: '\ue26b',
   beach_access: '\ueb3e',
+  bedroom_baby: '\uefe0',
   bedtime: '\uf159',
   brush: '\ue3ae',
   cake: '\ue7e9',
