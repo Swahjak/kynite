@@ -225,6 +225,31 @@ describe('updateEvent', () => {
     expect(updateCalls.count).toBe(0);
   });
 
+  it('applies byweekday given alone, defaulting the preset to weekly', async () => {
+    selectRows.set(event, [{ ...eventRow, rrule: 'FREQ=WEEKLY;BYDAY=TU,TH' }]);
+
+    const result = await updateEvent(adultPrincipal, {
+      eventId: EVENT_ID,
+      byweekday: ['MO', 'TH'],
+    });
+
+    expect(result).toEqual({ ok: true, eventId: EVENT_ID });
+    expect(updateCalls.lastSet).toMatchObject({ rrule: 'FREQ=WEEKLY;BYDAY=MO,TH' });
+  });
+
+  it('refuses byweekday paired with a non-weekly recurrence instead of silently dropping it', async () => {
+    selectRows.set(event, [{ ...eventRow, rrule: 'FREQ=WEEKLY;BYDAY=TU,TH' }]);
+
+    const result = await updateEvent(adultPrincipal, {
+      eventId: EVENT_ID,
+      recurrence: 'custom',
+      byweekday: ['MO', 'TH'],
+    });
+
+    expect(result).toEqual({ ok: false, error: 'invalidInput' });
+    expect(updateCalls.count).toBe(0);
+  });
+
   it('publishes and pushes to Google on the happy path', async () => {
     const result = await updateEvent(adultPrincipal, { eventId: EVENT_ID, title: 'Zwembad' });
 
