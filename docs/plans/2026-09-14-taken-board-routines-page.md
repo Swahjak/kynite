@@ -33,3 +33,4 @@ Owner ask (2026-09-14): bring the hub taken board in line with the refreshed `Ta
 | m3 | M3 routines page | opus | 183k | 62 | done `d807b92`; resumed for r2 fixes |
 | r2 | review M3 | sonnet | 88k | 27 | 2 risks + 1 nit |
 | m4 | M4 dashboard link | sonnet | 122k | 48 | done `7bb9e47` |
+| m3b | r2 fixes (resumed m3) | opus | +18k (201k total) | 12 | done `cdcaaff`, retired |
