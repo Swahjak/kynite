@@ -468,7 +468,7 @@ function BoardRowView({
           done ? 'bg-surface-container text-ink-muted opacity-70' : row.accentClass
         )}
       >
-        <Icon name="task_alt" size="sm" />
+        <Icon name={row.icon} size="sm" />
       </span>
 
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">

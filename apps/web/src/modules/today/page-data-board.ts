@@ -16,7 +16,6 @@ import {
   routineIconOf,
   sectionOf,
   starsFor,
-  suggestIcon,
   timingAt,
   todayKeyIn,
   type RoutineIcon,
@@ -47,11 +46,16 @@ export type BoardTaskRow = {
   title: string;
   done: boolean;
   /**
-   * The tile a task row's icon sits on — `ROUTINE_ICON_TILE.task_alt`,
-   * resolved here rather than in the client board. `RoutinesBoard` runs in
-   * the browser and may not import the routines slice's value exports (its
-   * barrel carries `server-only` reads alongside them); see the note on
-   * `RoutinesBoard` itself.
+   * The task's own icon, or `suggestIcon(title)` while nobody has picked one
+   * (M5) — resolved here, same reason as `accentClass` below.
+   */
+  icon: RoutineIcon;
+  /**
+   * The tile `icon` sits on — `ROUTINE_ICON_TILE[icon]`, resolved here rather
+   * than in the client board. `RoutinesBoard` runs in the browser and may not
+   * import the routines slice's value exports (its barrel carries
+   * `server-only` reads alongside them); see the note on `RoutinesBoard`
+   * itself.
    */
   accentClass: string;
 };
@@ -184,13 +188,17 @@ export async function loadRoutinesBoardData(
     }
   }
 
-  const boardTaskRow = (row: Task): BoardTaskRow => ({
-    kind: 'task',
-    id: row.id,
-    title: row.title,
-    done: row.completedAt !== null,
-    accentClass: ROUTINE_ICON_TILE[suggestIcon(row.title)],
-  });
+  const boardTaskRow = (row: Task): BoardTaskRow => {
+    const icon = routineIconOf(row.icon, row.title);
+    return {
+      kind: 'task',
+      id: row.id,
+      title: row.title,
+      done: row.completedAt !== null,
+      icon,
+      accentClass: ROUTINE_ICON_TILE[icon],
+    };
+  };
 
   const { pool, byMember } = partitionTasksByAssignee(tasks);
 

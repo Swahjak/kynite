@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { MCP_TASKS_READ, MCP_TASKS_WRITE, hasAllScopes } from '@/server/mcp-auth';
 import { startOfDay } from '@/modules/calendar';
 import { can, getFamily, type Principal } from '@/modules/family';
+import { ACTIVITY_ICONS } from '@/modules/routines';
 import {
   createTask,
   deleteTask,
@@ -34,6 +35,7 @@ function taskView(row: Task) {
   return {
     id: row.id,
     title: row.title,
+    icon: row.icon,
     assigneeMemberId: row.assigneeMemberId,
     dueDate: row.dueDate,
     done: row.completedAt !== null,
@@ -118,6 +120,13 @@ export function registerTasksTools(
           .regex(/^\d{4}-\d{2}-\d{2}$/)
           .nullable()
           .optional(),
+        icon: z
+          .enum(ACTIVITY_ICONS)
+          .nullable()
+          .optional()
+          .describe(
+            'Which icon the board shows for this task. Omit to suggest one from the title automatically.'
+          ),
       }),
     },
     async (input) => {

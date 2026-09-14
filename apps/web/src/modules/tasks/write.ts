@@ -7,6 +7,7 @@ import { getDb } from '@/server/db';
 import { task } from '@/server/db/schema';
 import { can, getMember, type Principal } from '@/modules/family';
 import { publish } from '@/modules/realtime';
+import { isRoutineIcon } from '@/modules/routines';
 
 /**
  * The write seam for the tasks slice (MCP milestone M-B).
@@ -36,6 +37,12 @@ export const createTaskSchema = z.object({
   /** Null / omitted = nobody in particular, which is most of a household list. */
   assigneeMemberId: z.uuid().nullable().optional(),
   dueDate: dateKey,
+  /**
+   * Null / omitted = nobody has picked one — the board falls back to
+   * `suggestIcon(title)` at render time (M5) rather than storing a computed
+   * default, so the icon keeps tracking the title until someone overrides it.
+   */
+  icon: trimmed.refine(isRoutineIcon).nullable().optional(),
 });
 
 /** The raw (pre-validation) shape `createTask` accepts — untrusted. */
@@ -82,7 +89,7 @@ export async function createTask(
   const parsed = createTaskSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: 'invalidInput' };
 
-  const { title, assigneeMemberId, dueDate } = parsed.data;
+  const { title, assigneeMemberId, dueDate, icon } = parsed.data;
 
   const assignee = assigneeMemberId
     ? ((await getMember(principal.familyId, assigneeMemberId))?.id ?? null)
@@ -95,6 +102,7 @@ export async function createTask(
       .values({
         familyId: principal.familyId,
         title,
+        icon: icon ?? null,
         assigneeMemberId: assignee,
         dueDate: dueDate ?? null,
         createdByMemberId: principal.kind === 'member' ? principal.memberId : null,

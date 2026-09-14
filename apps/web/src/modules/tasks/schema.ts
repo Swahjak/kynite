@@ -48,6 +48,13 @@ export const task = pgTable(
       onDelete: 'set null',
     }),
     title: text('title').notNull(),
+    /**
+     * Which glyph the board shows for this task (M5). Null = nobody has
+     * picked one — the render sites fall back to `suggestIcon(title)` rather
+     * than storing a computed default, so a task's icon keeps tracking its
+     * title until someone deliberately overrides it.
+     */
+    icon: text('icon'),
     /** `YYYY-MM-DD` in the family's timezone. Null = no day at all. */
     dueDate: date('due_date'),
     /** When it was ticked off. Null = still open. */
