@@ -440,45 +440,20 @@ function RoutineForm({
               />
             </div>
 
-            <div
-              role="radiogroup"
-              aria-label={t('form.icon')}
-              className="mt-2.5 flex flex-wrap items-center gap-2"
-            >
-              {ROUTINE_ICONS.map((option) => {
-                const selected = option === icon;
-                return (
-                  <label
-                    key={option}
-                    data-testid={`routine-icon-${option}`}
-                    data-selected={selected ? 'true' : 'false'}
-                    // Squircles, not circles (`Routines.dc.html` r378-385):
-                    // 40px at radius 12, and the chosen one grows to 52 at
-                    // radius 16 with the indigo edge. The size *is* the
-                    // selection cue — a ring alone reads as focus.
-                    className={cn(
-                      'flex cursor-pointer items-center justify-center transition-all',
-                      selected
-                        ? cn(
-                            'size-13 rounded-xl border-2 border-primary',
-                            ROUTINE_ICON_TILE[option]
-                          )
-                        : 'size-10 rounded-lg bg-surface-container text-ink-muted hover:text-ink-secondary'
-                    )}
-                  >
-                    <input
-                      type="radio"
-                      name="iconChoice"
-                      value={option}
-                      checked={selected}
-                      onChange={() => setIcon(option)}
-                      className="sr-only"
-                    />
-                    <Icon name={option} size="sm" label={t(`icons.${option}`)} />
-                  </label>
-                );
-              })}
-            </div>
+            {/* Squircles, not circles (`Routines.dc.html` r378-385): 40px
+                unselected, 48px selected with the indigo edge — the shared
+                `IconPicker` (M5), same grid the step and task pickers use. */}
+            <IconPicker
+              icons={ROUTINE_ICONS}
+              value={icon}
+              onChange={(next) => setIcon(next as RoutineIcon)}
+              name="iconChoice"
+              ariaLabel={t('form.icon')}
+              labelFor={(option) => t(`icons.${option}`)}
+              tileClassFor={(option) => ROUTINE_ICON_TILE[option as RoutineIcon]}
+              testIdPrefix="routine-icon"
+              className="mt-2.5"
+            />
           </div>
 
           {/* ── Voor wie ──────────────────────────────────────────────────── */}
