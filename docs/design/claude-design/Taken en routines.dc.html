@@ -19,6 +19,10 @@
   a:hover{color:#4547c9;}
   .noscroll::-webkit-scrollbar{width:0;height:0;}
   .noscroll{scrollbar-width:none;}
+  .xbar{overflow-x:auto;}
+  .xbar::-webkit-scrollbar{height:10px;}
+  .xbar::-webkit-scrollbar-thumb{background:#d6d3cb;border-radius:9999px;}
+  .xbar::-webkit-scrollbar-track{background:transparent;}
   @keyframes kyn-pop{0%{transform:scale(0.9);}60%{transform:scale(1.06);}100%{transform:scale(1);}}
   @keyframes kyn-shimmer{0%{background-position:-120px 0;}100%{background-position:220px 0;}}
   @keyframes kyn-spark{0%,100%{transform:translateY(0) scale(1);opacity:0.85;}50%{transform:translateY(-3px) scale(1.12);opacity:1;}}
@@ -33,7 +37,7 @@
 
   <div style="margin-bottom:28px;">
     <h1 style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:34px;line-height:1.1;letter-spacing:-0.02em;margin:0 0 6px;">Taken &amp; routines</h1>
-    <p style="margin:0;font-size:14px;color:#434656;max-width:780px;">Wandtablet 1280 × 800. Eén kolom per gezinslid, links de taken die nog een eigenaar zoeken. Routines volgen het dagdeel, taken staan er altijd onder. Onder: dezelfde board met Fien op 100%.</p>
+    <p style="margin:0;font-size:14px;color:#434656;max-width:780px;">Wandtablet 1280 × 800. Eén kolom per gezinslid, links de taken die nog een eigenaar zoeken. Routines staan hier alleen nog als voortgangsblok bovenaan de kolom — tikken opent de eigen routinepagina. Kolommen zijn minimaal een derde breed met horizontale scroll voor de rest. Onder: dezelfde board met Fien op 100%.</p>
   </div>
 
   <div style="display:flex;flex-direction:column;gap:44px;">
@@ -47,6 +51,7 @@
           <span style="width:36px;height:36px;border-radius:8px;background:#5d5fef;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:16px;margin-bottom:14px;">K</span>
           <span style="width:52px;height:52px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#747688;"><span class="material-symbols-outlined" style="font-size:22px;">home</span><span style="font-size:9px;font-family:'Baloo 2',sans-serif;font-weight:700;">Vandaag</span></span>
           <span style="width:52px;height:52px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#747688;"><span class="material-symbols-outlined" style="font-size:22px;">calendar_month</span><span style="font-size:9px;font-family:'Baloo 2',sans-serif;font-weight:700;">Kalender</span></span>
+          <span style="width:52px;height:52px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#747688;"><span class="material-symbols-outlined" style="font-size:22px;">restart_alt</span><span style="font-size:9px;font-family:'Baloo 2',sans-serif;font-weight:700;">Routines</span></span>
           <span style="width:52px;height:52px;border-radius:8px;background:rgba(93,95,239,0.10);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#5d5fef;"><span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 1;">checklist</span><span style="font-size:9px;font-family:'Baloo 2',sans-serif;font-weight:700;">Taken</span></span>
           <span style="width:52px;height:52px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#747688;"><span class="material-symbols-outlined" style="font-size:22px;">star</span><span style="font-size:9px;font-family:'Baloo 2',sans-serif;font-weight:700;">Sterren</span></span>
           <span style="flex:1;"></span>
@@ -61,15 +66,17 @@
               <span style="display:block;font-size:15px;color:#434656;margin-top:1px;">donderdag 3 september</span>
             </div>
             <span style="flex:1;"></span>
-            <div style="display:flex;gap:8px;">
-              <button onClick="{{ f.setOchtend }}" style="{{ f.ochtendStyle }}"><span class="material-symbols-outlined" style="font-size:24px;">wb_twilight</span>Ochtend</button>
-              <button onClick="{{ f.setMiddag }}" style="{{ f.middagStyle }}"><span class="material-symbols-outlined" style="font-size:24px;">wb_sunny</span>Middag</button>
-              <button onClick="{{ f.setAvond }}" style="{{ f.avondStyle }}"><span class="material-symbols-outlined" style="font-size:24px;">bedtime</span>Avond</button>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;">Wie</span>
+              <button onClick="{{ f.selectAll }}" style="display:flex;align-items:center;height:48px;padding:0;background:none;border:none;cursor:pointer;"><span style="{{ f.allStyle }}">Iedereen</span></button>
+              <sc-for list="{{ f.who }}" as="w" hint-placeholder-count="4">
+              <span onClick="{{ w.toggle }}" style="width:48px;height:48px;border-radius:9999px;flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;"><span style="{{ w.style }}"></span></span>
+              </sc-for>
             </div>
             <span class="tnum" style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:34px;letter-spacing:-0.02em;">{{ f.klok }}</span>
           </div>
 
-          <div class="noscroll" style="flex:1;min-height:0;display:flex;gap:10px;padding:16px 24px 20px;">
+          <div class="xbar" style="flex:1;min-height:0;display:flex;gap:14px;padding:16px 24px 8px;align-items:stretch;">
 
             <sc-for list="{{ f.cols }}" as="col" hint-placeholder-count="5">
             <div style="{{ col.colStyle }}">
@@ -128,24 +135,20 @@
               <div class="noscroll" style="flex:1;min-height:0;overflow-y:auto;padding:0 8px 10px;">
 
                 <sc-if value="{{ col.hasRoutines }}" hint-placeholder-val="{{ true }}">
-                <div style="display:flex;align-items:center;gap:6px;padding:12px 6px 6px;">
-                  <span class="material-symbols-outlined" style="font-size:17px;color:#747688;">{{ col.dpIcon }}</span>
-                  <span style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12px;letter-spacing:0.05em;text-transform:uppercase;color:#747688;">{{ col.dpLabel }}</span>
+                <div style="padding:12px 6px 8px;">
+                  <div style="{{ col.rbCardStyle }}">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                      <span style="{{ col.rbTileStyle }}"><span class="material-symbols-outlined" style="{{ col.rbIconStyle }}">{{ col.dpIcon }}</span></span>
+                      <div style="flex:1;min-width:0;">
+                        <span style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:16px;line-height:1.15;">{{ col.rbTitle }}</span>
+                        <span class="tnum" style="display:block;font-size:12px;color:#5f6274;">{{ col.rbMeta }}</span>
+                      </div>
+                      <span class="material-symbols-outlined" style="font-size:20px;color:#747688;flex-shrink:0;">chevron_right</span>
+                    </div>
+                    <div style="width:100%;height:8px;border-radius:9999px;background:#e4e2db;overflow:hidden;margin-top:10px;"><span style="{{ col.rbBarStyle }}"></span></div>
+                  </div>
                 </div>
                 </sc-if>
-
-                <sc-for list="{{ col.routines }}" as="t" hint-placeholder-count="4">
-                <div onClick="{{ t.toggle }}" style="{{ t.rowStyle }}">
-                  <span style="{{ t.tileStyle }}"><span class="material-symbols-outlined" style="{{ t.iconStyle }}">{{ t.icon }}</span></span>
-                  <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;">
-                    <span style="{{ t.titleStyle }}">{{ t.title }}</span>
-                    <sc-if value="{{ t.hasStar }}" hint-placeholder-val="{{ false }}">
-                    <span class="tnum" style="display:inline-flex;align-items:center;gap:2px;color:#ef8d5d;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12px;"><span class="material-symbols-outlined" style="font-size:14px;font-variation-settings:'FILL' 1;">star</span>{{ t.stars }}</span>
-                    </sc-if>
-                  </div>
-                  <span style="{{ t.circleStyle }}"><sc-if value="{{ t.done }}" hint-placeholder-val="{{ false }}"><span class="material-symbols-outlined kyn-pop" style="font-size:30px;color:#ffffff;font-variation-settings:'FILL' 1,'wght' 600;">check</span></sc-if></span>
-                </div>
-                </sc-for>
 
                 <sc-if value="{{ col.hasChores }}" hint-placeholder-val="{{ true }}">
                 <div style="display:flex;align-items:center;gap:6px;padding:14px 6px 6px;">
@@ -172,6 +175,11 @@
             </sc-for>
 
           </div>
+
+          <div style="flex-shrink:0;display:flex;align-items:center;gap:10px;padding:0 24px 14px;">
+            <span class="material-symbols-outlined" style="font-size:20px;color:#747688;">swipe</span>
+            <span style="font-size:13px;color:#747688;">Veeg om meer gezinsleden te zien</span>
+          </div>
         </div>
       </div>
       <p style="width:1280px;margin:14px 0 0;font-size:13px;color:#434656;line-height:1.6;">{{ f.caption }}</p>
@@ -180,13 +188,22 @@
   </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;showStars&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Board&quot;},&quot;showPool&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Board&quot;},&quot;progressStyle&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;balk&quot;,&quot;stippen&quot;],&quot;default&quot;:&quot;balk&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Board&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;colWidth&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;33%&quot;,&quot;40%&quot;,&quot;50%&quot;],&quot;default&quot;:&quot;33%&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Kolommen&quot;},&quot;showStars&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Board&quot;},&quot;showPool&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Board&quot;},&quot;progressStyle&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;balk&quot;,&quot;stippen&quot;],&quot;default&quot;:&quot;balk&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Board&quot;}}">
 class Component extends DCLogic {
   state = {
     doneA: { 'fien-ochtend-0': true, 'fien-ochtend-1': true, 'joep-ochtend-0': true, 'peep-ochtend-0': true, 'pool-0': true },
     doneB: { 'fien-ochtend-0': true, 'fien-ochtend-1': true, 'fien-ochtend-2': true, 'fien-ochtend-3': true, 'fien-ochtend-4': true, 'fien-chore-0': true, 'joep-ochtend-0': true, 'peep-ochtend-0': true, 'pool-0': true },
-    dpA: 'ochtend', dpB: 'ochtend'
+    dpA: 'ochtend', dpB: 'ochtend',
+    whoA: [], whoB: []
   };
+
+  toggleWho(frame, key) {
+    const k = frame === 'a' ? 'whoA' : 'whoB';
+    this.setState(s => {
+      const cur = s[k];
+      return { [k]: cur.indexOf(key) !== -1 ? cur.filter(x => x !== key) : cur.concat([key]) };
+    });
+  }
 
   toggle(frame, id) {
     const k = frame === 'a' ? 'doneA' : 'doneB';
@@ -297,12 +314,14 @@ class Component extends DCLogic {
     const dpMeta = { ochtend: { label: 'Ochtend', icon: 'wb_twilight' }, middag: { label: 'Middag', icon: 'wb_sunny' }, avond: { label: 'Avond', icon: 'bedtime' } }[dp];
     const progressStyle = this.props.progressStyle || 'balk';
     const showPool = this.props.showPool !== false;
+    const cw = this.props.colWidth || '33%';
+    const colBasis = { '33%': 'calc(33.333% - 10px)', '40%': 'calc(40% - 10px)', '50%': 'calc(50% - 7px)' }[cw] || 'calc(33.333% - 10px)';
 
     const cols = [];
     if (showPool) {
       cols.push({
         isPool: true, isMember: false, hasRoutines: false, hasChores: false, routines: [], chores: [],
-        colStyle: 'flex:0 0 240px;display:flex;flex-direction:column;min-height:0;background:#ffffff;border:2px dashed rgba(93,95,239,0.35);border-radius:16px;overflow:hidden;',
+        colStyle: 'flex:0 0 280px;min-width:280px;display:flex;flex-direction:column;min-height:0;background:#ffffff;border:2px dashed rgba(93,95,239,0.35);border-radius:16px;overflow:hidden;',
         celebrate: false, barMode: false, dotsMode: false, dots: [],
         chores2: null
       });
@@ -310,48 +329,68 @@ class Component extends DCLogic {
       cols[0].hasChores = false;
     }
 
-    d.members.forEach(m => {
+    const whoSel = frame === 'a' ? this.state.whoA : this.state.whoB;
+    const visible = whoSel.length ? d.members.filter(m => whoSel.indexOf(m.key) !== -1) : d.members;
+
+    visible.forEach(m => {
       const routines = (m.routines[dp] || []).map((t, i) => this.row(t, m.key + '-' + dp + '-' + i, frame, doneMap, m.hue));
       const chores = m.chores.map((t, i) => this.row(t, m.key + '-chore-' + i, frame, doneMap, m.hue));
       const all = routines.concat(chores);
       const doneCount = all.filter(r => r.done).length;
-      const pct = all.length ? Math.round((doneCount / all.length) * 100) : 0;
+      const pct = chores.length ? Math.round((chores.filter(r => r.done).length / chores.length) * 100) : 0;
       const celebrate = all.length > 0 && doneCount === all.length;
       const starTotal = all.filter(r => r.done && r.stars).reduce((s, r) => s + r.stars, 0);
       cols.push({
         isPool: false, isMember: true, name: m.name, sub: m.sub, avatar: m.avatar,
-        colStyle: 'flex:1 1 0;min-width:0;display:flex;flex-direction:column;min-height:0;border-radius:16px;overflow:hidden;border:1px solid #e6e3dc;'
+        colStyle: 'flex:0 0 ' + colBasis + ';min-width:340px;display:flex;flex-direction:column;min-height:0;border-radius:16px;overflow:hidden;border:1px solid #e6e3dc;'
           + (celebrate ? 'background:linear-gradient(180deg,#fffaf1,#ffffff 46%);' : 'background:#ffffff;'),
         headStyle: 'flex-shrink:0;padding:14px 14px 13px;border-bottom:3px solid ' + (celebrate ? '#ef8d5d;' : 'oklch(58% 0.14 ' + m.hue + ');'),
         ringStyle: 'width:40px;height:40px;border-radius:9999px;flex-shrink:0;box-sizing:border-box;background-color:oklch(94% 0.03 ' + m.hue + ');background-image:url(' + m.avatar + ');background-size:cover;background-position:center;box-shadow:0 0 0 3px ' + (celebrate ? '#ef8d5d' : 'oklch(58% 0.14 ' + m.hue + ')') + ';',
-        countLabel: doneCount + ' van ' + all.length + ' klaar',
+        countLabel: chores.filter(r => r.done).length + ' van ' + chores.length + ' taken',
+        rbTitle: dpMeta.label + 'routine',
+        rbMeta: routines.filter(r => r.done).length + ' van ' + routines.length + ' stappen',
+        rbCardStyle: 'border-radius:8px;padding:12px;box-sizing:border-box;cursor:pointer;'
+          + (routines.length && routines.every(r => r.done)
+              ? 'background:oklch(96% 0.03 155);'
+              : 'background:' + 'oklch(97% 0.015 ' + m.hue + ');'),
+        rbTileStyle: 'width:34px;height:34px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:oklch(95% 0.03 ' + m.hue + ');',
+        rbIconStyle: 'font-size:20px;color:oklch(45% 0.1 ' + m.hue + ');',
+        rbBarStyle: 'display:block;height:100%;border-radius:9999px;background:oklch(58% 0.14 ' + m.hue + ');width:'
+          + (routines.length ? Math.round((routines.filter(r => r.done).length / routines.length) * 100) : 0) + '%;',
         starTotal, showStarTotal: this.props.showStars !== false && starTotal > 0,
         celebrate, celebrateStars: starTotal,
         barMode: progressStyle === 'balk', dotsMode: progressStyle === 'stippen',
         barStyle: 'position:relative;overflow:hidden;height:100%;border-radius:9999px;width:' + pct + '%;background:' + (celebrate ? '#ef8d5d;' : 'oklch(58% 0.14 ' + m.hue + ');'),
         shimmerStyle: celebrate ? 'position:absolute;inset:0;display:block;' : 'display:none;',
         shimmerClass: celebrate ? 'kyn-shimmer' : '',
-        dots: all.map(r => ({ style: 'width:14px;height:14px;border-radius:9999px;flex-shrink:0;background:' + (r.done ? (celebrate ? '#ef8d5d' : 'oklch(58% 0.14 ' + m.hue + ')') : '#e4e2db') + ';' })),
+        dots: chores.map(r => ({ style: 'width:14px;height:14px;border-radius:9999px;flex-shrink:0;background:' + (r.done ? (celebrate ? '#ef8d5d' : 'oklch(58% 0.14 ' + m.hue + ')') : '#e4e2db') + ';' })),
         dpLabel: dpMeta.label, dpIcon: dpMeta.icon,
         hasRoutines: routines.length > 0, hasChores: chores.length > 0,
         routines, chores
       });
     });
 
-    const tab = (on) => 'display:flex;align-items:center;gap:7px;min-height:48px;padding:0 16px;border-radius:9999px;cursor:pointer;font-family:\'Baloo 2\',sans-serif;font-weight:700;font-size:16px;'
-      + (on ? 'background:#5d5fef;color:#ffffff;border:none;' : 'background:#ffffff;color:#434656;border:1px solid #e1e3e4;');
+    const allOn = whoSel.length === 0;
+    const who = d.members.map(m => {
+      const on = allOn || whoSel.indexOf(m.key) !== -1;
+      return {
+        toggle: () => this.toggleWho(frame, m.key),
+        style: 'width:32px;height:32px;border-radius:9999px;box-sizing:border-box;background-color:oklch(94% 0.03 ' + m.hue + ');background-image:url(' + m.avatar + ');background-size:cover;background-position:center;'
+          + (allOn ? '' : (on ? 'box-shadow:0 0 0 2px #5d5fef;' : 'opacity:0.45;'))
+      };
+    });
 
     return {
+      who,
+      allStyle: 'display:inline-flex;align-items:center;height:32px;padding:0 14px;border-radius:9999px;font-family:\'Baloo 2\',sans-serif;font-weight:700;font-size:13px;box-sizing:border-box;'
+        + (allOn ? 'background:#e1e3e4;color:#191c1d;border:none;' : 'background:#ffffff;color:#434656;border:1px solid #e1e3e4;'),
+      selectAll: () => this.setState(frame === 'a' ? { whoA: [] } : { whoB: [] }),
       cols,
       klok: frame === 'a' ? '07:41' : '08:06',
       label: frame === 'a' ? 'Standaard — ochtend' : 'Fien is klaar — 100%',
       caption: frame === 'a'
         ? 'Elke rij is één tik: de cirkel rechts vult zich groen. De kolomkop laat met een dunne streep en een balk zien wie hoever is, zonder dat je vinkjes hoeft te tellen.'
         : 'Bij 100% blijft de board rustig: alleen de streep en de ring worden oranje, de balk glanst en er komt een klein sterrenkaartje onder de laatste taak.',
-      ochtendStyle: tab(dp === 'ochtend'), middagStyle: tab(dp === 'middag'), avondStyle: tab(dp === 'avond'),
-      setOchtend: () => this.setState(frame === 'a' ? { dpA: 'ochtend' } : { dpB: 'ochtend' }),
-      setMiddag: () => this.setState(frame === 'a' ? { dpA: 'middag' } : { dpB: 'middag' }),
-      setAvond: () => this.setState(frame === 'a' ? { dpA: 'avond' } : { dpB: 'avond' })
     };
   }
 
