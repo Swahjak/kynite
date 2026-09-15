@@ -97,29 +97,7 @@ export const Utilities: Story = {
   ),
 };
 
-export const Kiosk: Story = {
-  name: 'Kiosk scale (data-surface="hub")',
-  render: () => (
-    <Section title="Typography — the six-foot scale">
-      <p className="max-w-prose text-body-sm text-ink-secondary">
-        The wall hub redefines the scale itself rather than branching every component: inside{' '}
-        <code>[data-surface=&quot;hub&quot;]</code> the <code>--text-*</code> variables are ~1.45×
-        on the reading sizes, and nothing is typeset below 16px. Same markup on both sides.
-      </p>
-      <div className="grid gap-8 md:grid-cols-2">
-        {(['phone', 'hub'] as const).map((surface) => (
-          <div
-            key={surface}
-            data-surface={surface === 'hub' ? 'hub' : undefined}
-            className="flex flex-col gap-3 rounded-2xl bg-card p-6 shadow-sm"
-          >
-            <span className="label-overline text-ink-muted">{surface}</span>
-            <span className="font-display text-h2">Needs your attention</span>
-            <span className="text-body">Bring gym clothes</span>
-            <span className="text-caption">Synced 2 minutes ago</span>
-          </div>
-        ))}
-      </div>
-    </Section>
-  ),
-};
+// The `[data-surface="hub"]` kiosk type-scale override this story used to
+// demonstrate was removed 2026-09-15 — the hub now renders at the same
+// `--text-*` scale as the rest of the app (see `tokens.css`'s "REMOVED
+// 2026-09-15" comment and `docs/plans/2026-09-15-routines-page-density.md`).

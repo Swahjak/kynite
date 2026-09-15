@@ -790,9 +790,7 @@
      fills most of a 1280×800 kiosk viewport — `display-xl` (80px) read as a
      small number inside that much ring; this is the Nest-Hub-reference "one
      huge number on a screen" size the wall actually wants there. Nothing else
-     uses it yet, and the kiosk `[data-surface='hub']` scale below
-     deliberately does not touch it — it is already a wall-hub size, and a
-     second multiplier on top would overflow the ring on a 1280px-wide panel. */
+     uses it yet — it is already a wall-hub size on its own. */
   --text-display-3xl: 7.5rem;
   --text-display-3xl--line-height: 1;
   --text-display-3xl--font-weight: 800;
@@ -1151,49 +1149,19 @@
 }
 
 /* ---------------------------------------------------------------------------
- * Kiosk (6-foot) type scale — M12
+ * Kiosk (6-foot) type scale — REMOVED 2026-09-15
  *
- * The hub is read from across a kitchen, not from 40cm. Rather than sprinkling
- * `text-body-lg sm:text-h3 hub:…` through every component that can appear on
- * both surfaces, the *scale itself* is redefined inside the kiosk shell: the
- * Tailwind 4 `text-*` utilities compile to `font-size: var(--text-…)`, so
- * overriding those custom properties on one subtree re-sizes everything below
- * it with no component churn and no branch on surface.
+ * M12 introduced a ~1.45× `[data-surface='hub']` override of the `--text-*`
+ * tokens so the hub could be read from across a kitchen. In practice it
+ * inflated ordinary UI (routine cards, step tiles, board labels) built against
+ * mockups that assume the app's own base scale, so the family routines board
+ * and the taken board rendered far too large on a 1280×800 wall tablet — see
+ * `docs/plans/2026-09-15-routines-page-density.md`. The hub now renders at the
+ * same `--text-*` scale as the rest of the app; components that need to read
+ * larger from a distance (the ambient clock, the countdown, etc.) size
+ * themselves explicitly instead of relying on a subtree-wide multiplier.
  *
- * The step is a constant ~1.45× on the reading sizes, tapering to 1× at the
- * Display end (which was already sized for a wall). The floor is the important
- * number: nothing on the hub is typeset below 1rem/16px, which is what
- * `e2e/tests/hub/kiosk-audit.spec.ts` asserts by walking every rendered text
- * node. Body copy lands at 22px.
- *
- * Line heights and letter-spacing come along for free: Tailwind emits them as
- * their own `--text-*--line-height` / `--letter-spacing` vars, both unitless or
- * em-relative, so they track the new size without being restated.
- *
- * The `@theme` block above is left untouched, which matters for more than
- * tidiness: `tests/unit/timers/legibility.test.ts` reads `--text-display-md`
- * out of this file to pin the countdown floor, and it must keep reading the
- * *design system's* value rather than the kiosk's local one.
+ * `e2e/tests/hub/kiosk-audit.spec.ts`'s 16px/22px legibility-floor assertions
+ * only held because of this override and are suspended (`test.fixme`) pending
+ * a new floor tuned to the base scale.
  * ------------------------------------------------------------------------- */
-
-[data-surface='hub'] {
-  --text-overline: 1rem;
-  --text-caption: 1.125rem;
-  --text-body-sm: 1.25rem;
-  --text-body: 1.375rem;
-  --text-body-lg: 1.625rem;
-  --text-h3: 1.75rem;
-  --text-h2: 2.25rem;
-  --text-h1: 3rem;
-  --text-display-md: 3.5rem;
-
-  /* Tailwind's own default scale, for the handful of pre-M12 hub components
-     that reached for `text-sm`/`text-base` instead of a brand token. Left
-     honest rather than silently exempted: they are still hub text, and the
-     audit does not care which token produced them. */
-  --text-xs: 1.125rem;
-  --text-sm: 1.25rem;
-  --text-base: 1.375rem;
-  --text-lg: 1.625rem;
-  --text-xl: 1.75rem;
-}

@@ -69,6 +69,14 @@ export type StepRowProps = {
    */
   variant?: 'row' | 'tile';
   /**
+   * Shrinks the `tile` variant's minimum height from 80px to 64px
+   * (`Actieve routines.dc.html`'s step tile) for the family-wide routines
+   * board, where a routine card is one column of ~380px rather than the
+   * two-column grid the 80px tile was sized for. Ignored on `variant="row"`,
+   * which has no dense reading.
+   */
+  dense?: boolean;
+  /**
    * The step's own icon (`routine_step.icon`, falling back to
    * `suggestIcon(title)` upstream — the row never guesses one itself).
    * Optional and additive: omitted, the row draws exactly as it did before
@@ -104,6 +112,7 @@ export function StepRow({
   actionLabel,
   active = false,
   variant = 'row',
+  dense = false,
   icon,
   iconTintClass,
   onComplete,
@@ -153,7 +162,8 @@ export function StepRow({
             // expanded grid, and a card nested in a card separates itself with
             // a tonal fill rather than an outline of its own. The done state
             // was already a fill; the todo state now is one too.
-            'flex min-h-20 w-full items-center gap-3.5 rounded-md px-4.5 py-4 text-left transition-all duration-200 ease-brand',
+            'flex w-full items-center gap-3.5 rounded-md px-4.5 py-4 text-left transition-all duration-200 ease-brand',
+            dense ? 'min-h-16' : 'min-h-20',
             'focus-visible:ring-3 focus-visible:ring-ring/50',
             done
               ? 'bg-cat-green-surface'
