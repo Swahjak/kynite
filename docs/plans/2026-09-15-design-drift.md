@@ -29,6 +29,7 @@ Scout s5 (diff of `c87f15d`):
 - D3 (owner, 2026-09-15): cap approved as proposed below.
 - D4 (owner, 2026-09-15): **follow the designs.** Every screen follows its own mockup verbatim, including `Actieve routines` / `Taken en routines` as they stand: done circle/dot filled in the member's lijn, NU badge tinted by the member hue (`93% 0.05 H` / `38% 0.1 H`), NU card border `86% 0.06 H`, tile steps `95% 0.03 H` / `97% 0.015 H`, icon inkt `45% 0.1 H`. Ledenkleuren is the rulebook only where a screen's mockup is silent. Vandaag's Takenlijst keeps its green check because that mockup says so.
 - D5 (owner, 2026-09-15): agy runs on `--tier flash` only; Claude side reviews.
+- D6 (owner, 2026-09-15 ~11:45): now that agy answers again, code units are limited to flash models: U3, U4 and every fix loop go to `agy-delegate --tier flash`. The Claude-builder detour (b1, b1b, b2) was the quota workaround only; b2 finishes because it was already running. Reviews stay on sonnet.
 - Layout values from the mockups win over current code (radii 16/8, ring 3px at 32–36px, 64px rows, 46px circle).
 
 ## Milestones
@@ -65,5 +66,7 @@ M1 (U1–U4 + R1): 6 agy runs (4 units + 2 retries), 4 Claude review agents (son
 | r1b | U1 leftovers review | sonnet (cavecrew-reviewer) | 39k | 7 | done: 2 risk + 1 question, all "unconditional new look for unmigrated callers"; accepted per D4, U2 migrates every call site |
 
 agy cost on a pay-as-you-go key (3.8 Flash promo $0.75/$3.75/$0.075 per 1M in/out/cached; lower bound, cache storage not reported): agy-0 $0.06, agy-u1 $1.71, agy-u1b $0.70, total ≈ $2.50 (≈ $5 at the post-2026 rate).
+
+Update (2026-09-15 ~11:40): agy answers again on `flash-lo` and `flash` (two pings, 11.8k in each, `SUCCESS`); the quota reset early. U2 stays on the running sonnet builder; executor for U3/U4 is the owner's call.
 
 Blocker (2026-09-15 10:45): the agy account's weekly quota is exhausted on every Gemini model (3.8/3.7/3.6 flash, 3.1 pro all 429, reset ≈2026-09-22). Two U1 runs burned ~2.4M input + ~5M cache_read on reading and 503 retries without a single file write. Options: (a) wait for the reset, (b) run U1–U4 on Claude subagents (sonnet builders) under the same cap, (c) upgrade the Antigravity plan. Owner (2026-09-15): **(b)**, and keep the token volume down — one sonnet builder per unit, explicit read lists, no mockup reads, ≤120k tokens / ≤50 tool calls per agent, digest-only replies; reviews via cavecrew-reviewer.
