@@ -2,7 +2,12 @@ import { getTranslations } from 'next-intl/server';
 import { EmptyState } from '@kynite/ui';
 import { CalendarShell, HubBoard } from '@/modules/calendar';
 import { requireHubDevice } from '@/modules/devices';
-import { TodayHeader, TodayLive, loadHubBoardComposition } from '@/modules/today';
+import {
+  TodayFilterProvider,
+  TodayHeader,
+  TodayLive,
+  loadHubBoardComposition,
+} from '@/modules/today';
 
 /** Session-dependent: never prerendered, so `next build` needs no database. */
 export const dynamic = 'force-dynamic';
@@ -80,31 +85,33 @@ export default async function HubKalenderPage({
           events: data.events,
         }}
       >
-        <TodayHeader
-          surface="hub"
-          greeting={t(`hubGreeting.${slot}`)}
-          anchor={data.anchor}
-          now={data.now}
-          timeZone={data.timeZone}
-          dayKey={dayKey}
-          isToday={isToday}
-          members={data.members}
-          href="/hub/kalender"
-        />
+        <TodayFilterProvider>
+          <TodayHeader
+            surface="hub"
+            greeting={t(`hubGreeting.${slot}`)}
+            anchor={data.anchor}
+            now={data.now}
+            timeZone={data.timeZone}
+            dayKey={dayKey}
+            isToday={isToday}
+            members={data.members}
+            href="/hub/kalender"
+          />
 
-        <CalendarShell
-          surface="hub"
-          basePath="/hub/kalender"
-          view={data.view}
-          anchor={data.anchor}
-          events={data.events}
-          members={data.members}
-          calendars={data.calendars}
-          timeZone={data.timeZone}
-          weekStartsOn={data.weekStartsOn}
-          now={data.now}
-          canWrite={data.canWrite}
-        />
+          <CalendarShell
+            surface="hub"
+            basePath="/hub/kalender"
+            view={data.view}
+            anchor={data.anchor}
+            events={data.events}
+            members={data.members}
+            calendars={data.calendars}
+            timeZone={data.timeZone}
+            weekStartsOn={data.weekStartsOn}
+            now={data.now}
+            canWrite={data.canWrite}
+          />
+        </TodayFilterProvider>
       </HubBoard>
     </main>
   );

@@ -28,7 +28,7 @@
  */
 
 import type { ReactNode } from 'react';
-import { useTodayFilter } from './today-filter-context';
+import { useTodayFilter } from '@/components/hub/today-filter-context';
 
 export type TimelineFace = {
   id: string;

@@ -1,7 +1,7 @@
 'use client';
 
 import { Badge, Button, cn, FaceStack, MemberFace } from '@kynite/ui';
-import { useTodayFilter } from './today-filter-context';
+import { useTodayFilter } from '@/components/hub/today-filter-context';
 import type { TimelineFace } from './today-timeline-filter';
 
 export function TodayHeaderFaces({

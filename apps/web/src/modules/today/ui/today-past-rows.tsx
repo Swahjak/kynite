@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from 'react';
 import { cn, Icon } from '@kynite/ui';
-import { useTodayFilter } from './today-filter-context';
+import { useTodayFilter } from '@/components/hub/today-filter-context';
 
 /**
  * The collapsed "already happened" band at the top of the day timeline.

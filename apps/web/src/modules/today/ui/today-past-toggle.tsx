@@ -1,7 +1,7 @@
 'use client';
 
 import { cn, Icon } from '@kynite/ui';
-import { useTodayFilter } from './today-filter-context';
+import { useTodayFilter } from '@/components/hub/today-filter-context';
 
 export function TodayPastToggle({ summary, label }: { summary: string; label: string }) {
   const filter = useTodayFilter();

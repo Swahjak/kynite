@@ -455,7 +455,7 @@ export function EventChip({
         // not (gap 25).
         'group/chip @container/chip relative flex min-w-0 flex-col justify-start gap-0.5 overflow-hidden rounded-md border-l-4 px-2 py-1 text-left',
         palette.surface,
-        ownerMember ? MEMBER_COLOR_CLASSES[ownerMember.color].line : palette.rule,
+        ownerMember ? MEMBER_COLOR_CLASSES[ownerMember.color].border : palette.rule,
         past && 'opacity-55',
         variant === 'block' && 'absolute inset-x-1 select-none',
         hub ? 'gap-1 px-3 py-2' : '',

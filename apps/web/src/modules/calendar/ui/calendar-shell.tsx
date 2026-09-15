@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useMemo, useState } from 'react';
+import { useTodayFilter } from '@/components/hub/today-filter-context';
 import { useTranslations } from 'next-intl';
 import { useDateTimeFormat } from '@/components/formatting';
 import { useRouter } from '@/i18n/navigation';
@@ -107,17 +108,41 @@ export function CalendarShell({
    * Stored as the **excluded** set rather than the included one so that a
    * member added to the family while the page is open appears rather than
    * silently starting out filtered away.
+   *
+   * On the hub surface, when a `TodayFilterProvider` is mounted above this
+   * shell, the single-select today-filter context is the source of truth
+   * instead (the wall header's own face row drives it) — `hubFilter` below is
+   * null everywhere else (app surface, or hub without a provider), in which
+   * case this falls back to the shell's own local `excluded` state unchanged.
    */
-  const [excluded, setExcluded] = useState<ReadonlySet<string>>(() => new Set());
+  const todayFilter = useTodayFilter();
+  const hubFilter = hub ? todayFilter : null;
 
-  const toggleMember = useCallback((id: string) => {
-    setExcluded((current) => {
-      const next = new Set(current);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }, []);
+  const [localExcluded, setLocalExcluded] = useState<ReadonlySet<string>>(() => new Set());
+
+  const excluded = useMemo(() => {
+    if (!hubFilter) return localExcluded;
+    if (hubFilter.selected === null) return new Set<string>();
+    return new Set(
+      members.filter((member) => member.id !== hubFilter.selected).map((member) => member.id)
+    );
+  }, [hubFilter, localExcluded, members]);
+
+  const toggleMember = useCallback(
+    (id: string) => {
+      if (hubFilter) {
+        hubFilter.setSelected(hubFilter.selected === id ? null : id);
+        return;
+      }
+      setLocalExcluded((current) => {
+        const next = new Set(current);
+        if (next.has(id)) next.delete(id);
+        else next.add(id);
+        return next;
+      });
+    },
+    [hubFilter]
+  );
 
   const options = useMemo(
     () => ({ anchor, timeZone, weekStartsOn }),
@@ -345,7 +370,10 @@ export function CalendarShell({
         // the chevrons, the faces and the clock (`(hub)/hub/kalender/page.tsx`)
         // — this shell adds only what that header does not: the member
         // filter, in a row of its own rather than the app's full navigation
-        // header.
+        // header. When a `TodayFilterProvider` is mounted (`hubFilter` is set),
+        // the header's own face row already IS the filter, so this row is
+        // skipped entirely rather than drawn twice.
+        !hubFilter &&
         memberFilter && (
           <div className="flex justify-end border-b border-line-subtle px-3 pt-3 pb-2.5 sm:px-6 sm:pt-4.5 sm:pb-3.5">
             {memberFilter}
