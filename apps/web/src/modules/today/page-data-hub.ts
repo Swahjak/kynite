@@ -107,7 +107,8 @@ export async function loadHubBoardComposition(options: {
   const data = await loadCalendarPage({ date: options.date, view: options.view, surface: 'hub' });
   if (!data) return null;
 
-  const pinned = options.date ? instantAt(options.date, options.time, data.timeZone) : null;
+  const pinned =
+    options.date && options.time ? instantAt(options.date, options.time, data.timeZone) : null;
   if (pinned) data.now = pinned;
 
   // M19: one entry per child, carrying today's step count — see the note this

@@ -414,7 +414,7 @@ function MemberRoutineColumn({
           <p
             data-testid="routine-celebration"
             role="status"
-            className="kynite-anim-pop flex items-center gap-2.5 rounded-2xl bg-accent px-3.5 py-2.5 font-display text-body font-extrabold text-brand-ink"
+            className="kynite-anim-pop flex items-center gap-2.5 rounded-2xl bg-accent px-3.5 py-2.5 font-display text-body font-extrabold text-accent-foreground"
           >
             <Icon name="celebration" filled size="sm" className="shrink-0" />
             {celebration}

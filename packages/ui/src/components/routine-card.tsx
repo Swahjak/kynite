@@ -333,7 +333,7 @@ export function RoutineCard({
       {copy.praiseLine ? (
         <p
           data-testid="routine-praise"
-          className="mt-3.5 mb-4.5 flex items-center gap-2.5 rounded-2xl bg-accent px-4 py-2.5 font-display text-body font-bold text-brand-ink"
+          className="mt-3.5 mb-4.5 flex items-center gap-2.5 rounded-2xl bg-accent px-4 py-2.5 font-display text-body font-bold text-accent-foreground"
         >
           <Icon name="celebration" filled size="sm" className="shrink-0" />
           {copy.praiseLine}
