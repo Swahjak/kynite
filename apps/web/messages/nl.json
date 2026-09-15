@@ -1032,6 +1032,7 @@
     "sectionProgress": "{done} van {total} klaar",
     "sectionEmpty": "Hier staat vandaag niets.",
     "boardEmpty": "Vandaag staat er niets op de lijst.",
+    "doneLabel": "Klaar",
     "stepCount": "{count, plural, =0 {Geen stappen} one {# stap} other {# stappen}}",
     "inProgress": "NU",
     "startsIn": "over {minutes} min",

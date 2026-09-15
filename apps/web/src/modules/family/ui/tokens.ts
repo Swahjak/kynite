@@ -64,6 +64,8 @@ export const MEMBER_COLOR_CLASSES: Record<
     nuInk: string;
     /** NU / live card border (`nu-lijn`). */
     nuBorder: string;
+    /** Step tile check-icon colour, done (`lijn`, as text). */
+    checkDone: string;
   }
 > = {
   raspberry: {
@@ -84,6 +86,7 @@ export const MEMBER_COLOR_CLASSES: Record<
     nuBadge: 'bg-member-raspberry-nu-baan',
     nuInk: 'text-member-raspberry-nu-inkt',
     nuBorder: 'border-member-raspberry-nu-lijn',
+    checkDone: 'text-member-raspberry-lijn',
   },
   blue: {
     dot: 'bg-member-blue-lijn',
@@ -103,6 +106,7 @@ export const MEMBER_COLOR_CLASSES: Record<
     nuBadge: 'bg-member-blue-nu-baan',
     nuInk: 'text-member-blue-nu-inkt',
     nuBorder: 'border-member-blue-nu-lijn',
+    checkDone: 'text-member-blue-lijn',
   },
   petrol: {
     dot: 'bg-member-petrol-lijn',
@@ -122,6 +126,7 @@ export const MEMBER_COLOR_CLASSES: Record<
     nuBadge: 'bg-member-petrol-nu-baan',
     nuInk: 'text-member-petrol-nu-inkt',
     nuBorder: 'border-member-petrol-nu-lijn',
+    checkDone: 'text-member-petrol-lijn',
   },
   orchid: {
     dot: 'bg-member-orchid-lijn',
@@ -141,6 +146,7 @@ export const MEMBER_COLOR_CLASSES: Record<
     nuBadge: 'bg-member-orchid-nu-baan',
     nuInk: 'text-member-orchid-nu-inkt',
     nuBorder: 'border-member-orchid-nu-lijn',
+    checkDone: 'text-member-orchid-lijn',
   },
   mustard: {
     dot: 'bg-member-mustard-lijn',
@@ -160,6 +166,7 @@ export const MEMBER_COLOR_CLASSES: Record<
     nuBadge: 'bg-member-mustard-nu-baan',
     nuInk: 'text-member-mustard-nu-inkt',
     nuBorder: 'border-member-mustard-nu-lijn',
+    checkDone: 'text-member-mustard-lijn',
   },
   terracotta: {
     dot: 'bg-member-terracotta-lijn',
@@ -179,6 +186,7 @@ export const MEMBER_COLOR_CLASSES: Record<
     nuBadge: 'bg-member-terracotta-nu-baan',
     nuInk: 'text-member-terracotta-nu-inkt',
     nuBorder: 'border-member-terracotta-nu-lijn',
+    checkDone: 'text-member-terracotta-lijn',
   },
 };
 

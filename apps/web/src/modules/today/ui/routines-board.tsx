@@ -279,6 +279,7 @@ function RoutineProgressCard({ column, daypart }: { column: BoardColumn; daypart
         value={progress.percent}
         size="sm"
         className="mt-2.5"
+        trackClassName={colors.track}
         fillClassName={colors.fill}
       />
     </Link>
@@ -330,25 +331,18 @@ function MemberColumn({
       data-testid="routines-board-column"
       data-member-id={column.memberId}
       data-celebrate={celebrate}
-      className={cn(
-        'flex min-w-[340px] flex-[0_0_calc(33.333%-10px)] flex-col overflow-hidden rounded-2xl border border-line-subtle',
-        celebrate ? 'bg-gradient-to-b from-gold/12 to-card' : 'bg-card'
-      )}
+      className="flex min-w-[340px] flex-[0_0_calc(33.333%-10px)] flex-col overflow-hidden rounded-2xl border border-line-subtle bg-card"
     >
-      <div
-        className={cn(
-          'flex-shrink-0 border-b-[3px] px-3.5 pt-3.5 pb-3',
-          celebrate ? 'border-gold' : colors.border
-        )}
-      >
+      <div className={cn('flex-shrink-0 border-b-[3px] px-3.5 pt-3.5 pb-3', colors.border)}>
         <div className="flex items-center gap-2.5">
           <MemberFace
             name={column.displayName}
             avatarUrl={column.avatarUrl}
             surfaceClass={colors.surface}
-            ringClass={celebrate ? 'ring-gold' : colors.ring}
+            ringClass={colors.ring}
             ringed
             size="default"
+            className="size-10"
           />
           <div className="min-w-0 flex-1">
             <span className="block truncate font-display text-h3 font-extrabold">
@@ -358,13 +352,6 @@ function MemberColumn({
               {t(`board.role.${column.role}`)}
             </span>
           </div>
-
-          {celebrate ? (
-            <span className="flex shrink-0 items-center gap-1 rounded-4xl bg-gold/18 px-2.5 py-1 text-caption font-bold text-gold-ink">
-              <Icon name="celebration" size="xs+" filled />
-              {t('board.celebrateBadge')}
-            </span>
-          ) : null}
         </div>
 
         <div className="mt-3 flex items-center gap-2">
@@ -378,8 +365,8 @@ function MemberColumn({
           value={progress.percent}
           size="sm"
           className="mt-2"
-          fillClassName={celebrate ? 'bg-gold' : colors.dot}
-          shimmer={celebrate}
+          trackClassName={colors.track}
+          fillClassName={colors.fill}
           label={t('board.progressLabel', { name: column.displayName })}
         />
 

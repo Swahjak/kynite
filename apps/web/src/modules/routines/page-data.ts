@@ -180,6 +180,12 @@ export type RoutineBoard = {
   activeRoutineId: string | null;
   now: Date;
   timeZone: string;
+  /**
+   * `MEMBER_COLOR_CLASSES[member.color]`, resolved here — `RoutineBoard`
+   * (`ui/routine-board.tsx`) is a client component and may not import the
+   * family slice's value exports (U2).
+   */
+  colorClasses: (typeof MEMBER_COLOR_CLASSES)[Member['color']];
 };
 
 export type BoardOptions = {
@@ -446,6 +452,7 @@ export async function loadMemberRoutines(options: BoardOptions): Promise<Routine
     activeRoutineId,
     now,
     timeZone,
+    colorClasses: MEMBER_COLOR_CLASSES[member.color],
   };
 }
 

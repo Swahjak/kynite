@@ -226,6 +226,8 @@ export function RoutineBoard({ board }: { board: RoutineBoardData }) {
                 expanded={expanded}
                 copy={copyFor(routine, expanded)}
                 celebrating={justFinished.has(routine.id)}
+                memberClasses={board.colorClasses}
+                doneLabel={t('doneLabel')}
                 onComplete={(stepId, origin) => complete(routine, stepId, origin)}
               />
             );

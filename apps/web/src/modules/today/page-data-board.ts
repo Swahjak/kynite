@@ -88,16 +88,11 @@ export type BoardColumn = {
   /**
    * `MEMBER_COLOR_CLASSES[member.color]`, resolved here — the client board
    * may not import the family slice's value exports any more than the
-   * routines slice's, for the same `server-only`-barrel reason.
+   * routines slice's, for the same `server-only`-barrel reason. Passed
+   * through in full (U2) so this board can build a `RoutineCardMemberClasses`
+   * /`StepRowMemberClasses` object and colour a `ProgressBar`'s track.
    */
-  colorClasses: {
-    dot: string;
-    surface: string;
-    ring: string;
-    border: string;
-    ink: string;
-    fill: string;
-  };
+  colorClasses: (typeof MEMBER_COLOR_CLASSES)[Member['color']];
   role: Member['role'];
   /** Routine steps due today (plus any open grace day), banded by daypart. */
   sections: Record<TimeSection, BoardRoutineRow[]>;

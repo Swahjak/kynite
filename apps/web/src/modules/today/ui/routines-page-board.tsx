@@ -344,26 +344,19 @@ function MemberRoutineColumn({
       data-testid="routines-page-column"
       data-member-id={column.memberId}
       data-complete={complete}
-      className={cn(
-        'flex min-h-0 min-w-[340px] flex-[0_0_calc(33.333%-11px)] flex-col overflow-hidden rounded-2xl border border-line-subtle',
-        complete ? 'bg-gradient-to-b from-gold/12 to-card' : 'bg-card'
-      )}
+      className="flex min-h-0 min-w-[340px] flex-[0_0_calc(33.333%-11px)] flex-col overflow-hidden rounded-2xl border border-line-subtle bg-card"
     >
-      <div
-        className={cn(
-          'flex-shrink-0 border-b-[3px] px-4 pt-4 pb-3.5',
-          complete ? 'border-gold' : colors.border
-        )}
-      >
+      <div className={cn('flex-shrink-0 border-b-[3px] px-4 pt-4 pb-3.5', colors.border)}>
         <div className="flex items-center gap-3">
           <MemberFace
-            size="hub"
             name={column.displayName}
             avatarUrl={column.avatarUrl}
             initials={column.initials}
             surfaceClass={colors.track}
-            ringClass={complete ? 'ring-gold' : colors.ring}
+            ringClass={colors.ring}
             ringed
+            size="default"
+            className="size-10"
           />
 
           <div className="min-w-0 flex-1">
@@ -399,8 +392,8 @@ function MemberRoutineColumn({
             value={percent}
             size="md"
             className="min-w-12 flex-1"
-            fillClassName={complete ? 'bg-gold' : colors.fill}
-            shimmer={complete}
+            trackClassName={colors.track}
+            fillClassName={colors.fill}
             label={t('board.progressLabel', { name: column.displayName })}
           />
           <span className="tnum shrink-0 font-display text-body-sm font-bold text-ink-muted">
@@ -466,6 +459,8 @@ function MemberRoutineColumn({
                   expanded={expanded}
                   dense
                   celebrating={justFinished.has(routine.id)}
+                  memberClasses={colors}
+                  doneLabel={tRoutines('doneLabel')}
                   onToggle={() => onToggleRoutine(routine.id)}
                   copy={{
                     stepCount: expanded
