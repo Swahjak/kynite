@@ -169,8 +169,8 @@ export function DayAgendaRow({
           // The current event is the one thing on this board that gets a
           // surface of its own: a full-width tint, so it is findable from
           // across the kitchen without reading a word of it.
-          current && 'mb-2 rounded-xl bg-primary/6 px-3 py-2',
-          interactive && !current && 'rounded-xl hover:bg-surface-container-low'
+          current && 'mb-2 rounded-lg bg-primary/6 px-3 py-2',
+          interactive && !current && 'rounded-lg hover:bg-surface-container-low'
         )}
       >
         <div className="flex min-w-0 items-center gap-2">

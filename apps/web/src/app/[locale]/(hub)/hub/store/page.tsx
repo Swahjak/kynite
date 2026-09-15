@@ -107,6 +107,7 @@ export default async function HubStorePage({
                   avatarUrl={chip.avatarUrl}
                   initials={chip.initials}
                   surfaceClass={chip.colorClass}
+                  ringClass={chip.ringClass}
                   selected={active}
                   data-testid="store-chip"
                   data-member-id={chip.id}

@@ -144,6 +144,7 @@ export type StoreChip = {
   avatarUrl: string | null;
   /** Design-system classes for this member's colour. */
   colorClass: string;
+  ringClass: string;
   initials: string;
 };
 
@@ -227,6 +228,7 @@ export async function loadStore(options: StoreOptions = {}): Promise<StoreData |
       displayName: entry.displayName,
       avatarUrl: entry.avatarUrl,
       colorClass: MEMBER_COLOR_CLASSES[entry.color].track,
+      ringClass: MEMBER_COLOR_CLASSES[entry.color].ring,
       initials: initialsOf(entry.displayName),
     })),
     horizon: member.rewardHorizon,

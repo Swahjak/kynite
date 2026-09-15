@@ -29,6 +29,7 @@ export function MemberChip({
   avatarUrl,
   initials,
   surfaceClass,
+  ringClass,
   selected = false,
   size = 'md',
   className,
@@ -39,6 +40,7 @@ export function MemberChip({
   avatarUrl?: string | null;
   initials?: string;
   surfaceClass?: string;
+  ringClass?: string;
   selected?: boolean;
   size?: 'sm' | 'md' | 'lg';
 }) {
@@ -63,7 +65,12 @@ export function MemberChip({
           // the face is the person and it looks the same whoever is chosen.
           selected
             ? 'border-2 border-primary bg-accent text-ink'
-            : 'border border-line-subtle bg-card text-ink-secondary hover:bg-surface-container',
+            : cn(
+                'text-ink-secondary hover:bg-surface-container',
+                ringClass
+                  ? cn('ring-3 ring-offset-2 ring-offset-card', ringClass)
+                  : 'border border-line-subtle bg-card'
+              ),
           className
         ),
         children: (

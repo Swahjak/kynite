@@ -195,7 +195,7 @@ export function MemberDayGrid({
                   // hue would put member colour on an event surface — where the
                   // only hue allowed is the event type's, carried by the chips
                   // inside it. The face beside it is what says whose these are.
-                  className="flex min-w-32 flex-1 items-center gap-1.5 rounded-xl border-l-4 border-line-subtle py-0.5 pl-1.5"
+                  className="flex min-w-32 flex-1 items-center gap-1.5 rounded-lg border-l-4 border-line-subtle py-0.5 pl-1.5"
                 >
                   <MemberFace
                     size="sm"
@@ -328,11 +328,14 @@ export function MemberDayGrid({
                   className="relative flex w-36 min-w-0 grow flex-col border-l border-line-subtle"
                 >
                   <div
-                    className="glass sticky top-0 z-20 flex items-center justify-center gap-2 border-b border-line-subtle px-2"
+                    className={cn(
+                      'glass sticky top-0 z-20 flex items-center justify-center gap-2 border-b-[3px] px-2',
+                      palette.border
+                    )}
                     style={{ height: metrics.headerHeight }}
                   >
                     <MemberFace
-                      size="sm"
+                      size="default"
                       avatarUrl={member.avatarUrl}
                       name={member.displayName}
                       surfaceClass={palette.track}

@@ -345,11 +345,11 @@ export function EventChip({
       <div
         {...shellProps}
         className={cn(
-          'flex min-h-12 min-w-0 items-center gap-2.5 rounded-xl border border-line-subtle bg-card px-3 py-2.5 text-left',
+          'flex min-h-12 min-w-0 items-center gap-2.5 rounded-lg border border-line-subtle bg-card px-3 py-2.5 text-left',
           past && 'opacity-55',
           // The wall board reads from across the kitchen, so the card grows
           // rather than the type shrinking to fit it.
-          hub && 'min-h-16 gap-4 rounded-2xl px-5 py-4',
+          hub && 'min-h-16 gap-4 rounded-lg px-5 py-4',
           interactive &&
             'cursor-pointer transition-all duration-200 ease-brand hover:shadow-md active:scale-95',
           className
@@ -363,7 +363,11 @@ export function EventChip({
           className={cn(
             'shrink-0 self-stretch rounded-full',
             hub ? 'w-1.5' : 'w-1',
-            event.busyOnly ? 'bg-line' : palette.solid
+            event.busyOnly
+              ? 'bg-line'
+              : ownerMember
+                ? MEMBER_COLOR_CLASSES[ownerMember.color].dot
+                : palette.solid
           )}
         />
         <div className="min-w-0 flex-1">
@@ -451,7 +455,7 @@ export function EventChip({
         // not (gap 25).
         'group/chip @container/chip relative flex min-w-0 flex-col justify-start gap-0.5 overflow-hidden rounded-md border-l-4 px-2 py-1 text-left',
         palette.surface,
-        palette.rule,
+        ownerMember ? MEMBER_COLOR_CLASSES[ownerMember.color].line : palette.rule,
         past && 'opacity-55',
         variant === 'block' && 'absolute inset-x-1 select-none',
         hub ? 'gap-1 px-3 py-2' : '',
