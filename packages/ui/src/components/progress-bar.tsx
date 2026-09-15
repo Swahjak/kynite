@@ -24,6 +24,7 @@ export function ProgressBar({
   max = 100,
   size = 'md',
   tone = 'brand',
+  trackClassName,
   fillClassName,
   shimmer = false,
   label,
@@ -35,6 +36,13 @@ export function ProgressBar({
   max?: number;
   size?: 'xs' | 'sm' | 'md' | 'lg';
   tone?: 'brand' | 'gold' | 'gold-gradient' | 'success' | 'inverse';
+  /**
+   * Overrides the track's default colour with an arbitrary class — the
+   * member's own `baan` step (`MEMBER_COLOR_CLASSES[color].track`), paired
+   * with `fillClassName`'s `lijn` (U1). Omitted, the track stays the
+   * existing `bg-surface-container-highest`.
+   */
+  trackClassName?: string;
   /**
    * Overrides the tone's fill colour with an arbitrary class.
    *
@@ -81,7 +89,8 @@ export function ProgressBar({
     <div
       data-slot="progress-bar"
       className={cn(
-        'overflow-hidden rounded-4xl bg-surface-container-highest',
+        'overflow-hidden rounded-4xl',
+        trackClassName ?? 'bg-surface-container-highest',
         vertical ? 'flex h-full items-end' : 'w-full',
         trackSize,
         className

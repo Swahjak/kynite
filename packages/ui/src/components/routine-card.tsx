@@ -93,6 +93,21 @@ export type RoutineCardProps = {
     /** The disc tint for this routine's icon, e.g. `bg-cat-teal-surface …`. */
     tileClass?: string;
   };
+  /**
+   * The routine's member colour, as class strings — structural, same
+   * contract as `StepRow`'s `memberClasses` (D4). Omitted, the card keeps
+   * the neutral indigo rail / plain border it has always drawn; passed, the
+   * NU badge and the live card's border pick up the member's `nu-baan`/
+   * `nu-inkt`/`nu-lijn` steps instead.
+   */
+  memberClasses?: {
+    /** NU badge fill (`nu-baan`). */
+    nuBadge?: string;
+    /** NU badge text (`nu-inkt`). */
+    nuInk?: string;
+    /** Live card border (`nu-lijn`). */
+    nuBorder?: string;
+  };
   onComplete?: (stepId: string, origin: { x: number; y: number }) => void;
   /**
    * Makes the card an accordion (`Actieve routines.dc.html`): the header
@@ -131,6 +146,7 @@ export function RoutineCard({
   onToggle,
   dense = false,
   celebrating = false,
+  memberClasses,
 }: RoutineCardProps) {
   // The step the routine is *on*. Presentational only — the board's completion
   // flow is unchanged; this just tells `StepRow` which tile to draw as next.
@@ -155,7 +171,7 @@ export function RoutineCard({
         {...shared}
         data-celebrating={celebrating ? 'true' : 'false'}
         className={cn(
-          'flex items-center gap-4 rounded-xl bg-surface-container-low px-5 py-4',
+          'flex items-center gap-4 rounded-2xl bg-surface-container-low px-5 py-4',
           celebrating && 'kynite-anim-pop-big'
         )}
       >
@@ -186,7 +202,7 @@ export function RoutineCard({
       <article
         {...shared}
         className={cn(
-          'relative flex items-center gap-4 rounded-xl border border-line-subtle bg-surface-container-lowest px-5 py-4',
+          'relative flex items-center gap-4 rounded-2xl border border-line-subtle bg-surface-container-lowest px-5 py-4',
           onToggle && 'min-h-14'
         )}
       >
@@ -200,7 +216,7 @@ export function RoutineCard({
             aria-expanded={false}
             aria-label={routine.title}
             onClick={onToggle}
-            className="absolute inset-0 rounded-xl focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+            className="absolute inset-0 rounded-2xl focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
           />
         ) : null}
 
@@ -258,7 +274,8 @@ export function RoutineCard({
     <article
       {...shared}
       className={cn(
-        'relative isolate overflow-hidden rounded-xl border border-line-subtle bg-surface-container-lowest shadow-sm',
+        'relative isolate overflow-hidden rounded-2xl border bg-surface-container-lowest shadow-sm',
+        memberClasses?.nuBorder ?? 'border-line-subtle',
         dense ? 'p-4' : 'py-6 pr-6 pl-7'
       )}
     >
@@ -278,7 +295,7 @@ export function RoutineCard({
             aria-expanded
             aria-label={routine.title}
             onClick={onToggle}
-            className="absolute -inset-x-2 -inset-y-1 rounded-xl focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+            className="absolute -inset-x-2 -inset-y-1 rounded-2xl focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
           />
         ) : null}
 
@@ -300,11 +317,18 @@ export function RoutineCard({
             >
               {routine.title}
             </h3>
+            {/* The mockups' NU badge (`Routines.dc.html`, `nu-baan`/`nu-inkt`)
+                — this is the same "in progress" pill this card has always
+                drawn, tinted by the member's colour once given rather than
+                a second, redundant badge. */}
             <Badge
               data-testid="routine-progress"
-              variant="status"
+              variant={memberClasses ? 'soft' : 'status'}
               size="md"
-              className="label-overline shrink-0"
+              className={cn(
+                'label-overline shrink-0',
+                memberClasses && cn(memberClasses.nuBadge, memberClasses.nuInk)
+              )}
             >
               {copy.inProgress}
             </Badge>

@@ -3,6 +3,16 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { StepRow } from '../../src/components/step-row';
 import { Section, Specimen } from '../specimen';
 
+/** Raspberry's own tokens (U1) — see `MEMBER_COLOR_CLASSES.raspberry`. */
+const raspberryClasses = {
+  tile: 'bg-member-raspberry-tegel',
+  tileDone: 'bg-member-raspberry-tegel-klaar',
+  icon: 'text-member-raspberry-inkt-tegel',
+  iconDone: 'text-member-raspberry-inkt-klaar',
+  circleDone: 'bg-member-raspberry-lijn',
+  rowDone: 'bg-member-raspberry-rij-klaar',
+};
+
 /**
  * `StepRow` — one routine step, and the single control a child uses.
  *
@@ -188,6 +198,46 @@ export const Tiles: Story = {
       <Specimen
         name="StepRow/tile notes"
         note="Tile 1 done (green, struck) · tile 2 live (border, empty ring, timer) · tile 3 ahead · tile 4 done on a graduated routine — no star."
+      >
+        <span />
+      </Specimen>
+    </Section>
+  ),
+};
+
+export const MemberColour: Story = {
+  name: 'Member colour (raspberry)',
+  render: () => (
+    <Section title="Step row — member colour via `memberClasses`">
+      <ul className="flex w-full max-w-xl flex-col gap-3">
+        <StepRow
+          stepId="dress"
+          title="Aankleden"
+          done
+          timerSeconds={null}
+          praiseText="Knap gedaan!"
+          stars={3}
+          starLabel="3 sterren verdiend"
+          actionLabel="Aankleden is klaar"
+          icon="checkroom"
+          memberClasses={raspberryClasses}
+        />
+        <StepRow
+          stepId="brush"
+          title="Tanden poetsen"
+          done={false}
+          timerSeconds={120}
+          praiseText="Goed bezig!"
+          stars={3}
+          starLabel="3 sterren verdiend"
+          actionLabel="Markeer Tanden poetsen als klaar"
+          icon="dentistry"
+          memberClasses={raspberryClasses}
+        />
+      </ul>
+      <Specimen
+        name="StepRow/member notes"
+        note="Same rows, tinted by `memberClasses` instead of a category surface — the 46px circle and the icon tile both carry raspberry's own steps once done."
       >
         <span />
       </Specimen>

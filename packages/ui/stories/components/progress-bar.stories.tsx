@@ -96,6 +96,20 @@ export const Tones: Story = {
             ))}
           </div>
         </Specimen>
+
+        <Specimen
+          name="ProgressBar/member colour"
+          note="`trackClassName` (`baan`) + `fillClassName` (`lijn`) — raspberry's own tokens (U1), not a tone."
+        >
+          <div className="w-80">
+            <ProgressBar
+              value={62}
+              trackClassName="bg-member-raspberry-baan"
+              fillClassName="bg-member-raspberry-lijn"
+              label="Voortgang"
+            />
+          </div>
+        </Specimen>
       </div>
     </Section>
   ),

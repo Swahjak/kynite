@@ -183,6 +183,24 @@ export const MEMBER_COLOR_CLASSES: Record<
     track: string;
     fill: string;
     ink: string;
+    /** Step icon tile, todo (`Routines.dc.html`'s `tegel`). */
+    tile: string;
+    /** Step icon tile, todo/dense (`tegel-zacht`, softer than `tile`). */
+    tileSoft: string;
+    /** Step icon tile, done (`tegel-klaar`). */
+    tileDone: string;
+    /** Done row fill (`rij-klaar`). */
+    rowDone: string;
+    /** Step icon glyph, todo (`inkt-tegel`). */
+    icon: string;
+    /** Step icon glyph, done (`inkt-klaar`). */
+    iconDone: string;
+    /** NU badge fill (`nu-baan`). */
+    nuBadge: string;
+    /** NU badge text (`nu-inkt`). */
+    nuInk: string;
+    /** NU / live card border (`nu-lijn`). */
+    nuBorder: string;
   }
 > = {
   raspberry: {
@@ -194,6 +212,15 @@ export const MEMBER_COLOR_CLASSES: Record<
     track: 'bg-member-raspberry-baan',
     fill: 'bg-member-raspberry-lijn',
     ink: 'text-member-raspberry-inkt',
+    tile: 'bg-member-raspberry-tegel',
+    tileSoft: 'bg-member-raspberry-tegel-zacht',
+    tileDone: 'bg-member-raspberry-tegel-klaar',
+    rowDone: 'bg-member-raspberry-rij-klaar',
+    icon: 'text-member-raspberry-inkt-tegel',
+    iconDone: 'text-member-raspberry-inkt-klaar',
+    nuBadge: 'bg-member-raspberry-nu-baan',
+    nuInk: 'text-member-raspberry-nu-inkt',
+    nuBorder: 'border-member-raspberry-nu-lijn',
   },
   blue: {
     dot: 'bg-member-blue-lijn',
@@ -204,6 +231,15 @@ export const MEMBER_COLOR_CLASSES: Record<
     track: 'bg-member-blue-baan',
     fill: 'bg-member-blue-lijn',
     ink: 'text-member-blue-inkt',
+    tile: 'bg-member-blue-tegel',
+    tileSoft: 'bg-member-blue-tegel-zacht',
+    tileDone: 'bg-member-blue-tegel-klaar',
+    rowDone: 'bg-member-blue-rij-klaar',
+    icon: 'text-member-blue-inkt-tegel',
+    iconDone: 'text-member-blue-inkt-klaar',
+    nuBadge: 'bg-member-blue-nu-baan',
+    nuInk: 'text-member-blue-nu-inkt',
+    nuBorder: 'border-member-blue-nu-lijn',
   },
   petrol: {
     dot: 'bg-member-petrol-lijn',
@@ -214,6 +250,15 @@ export const MEMBER_COLOR_CLASSES: Record<
     track: 'bg-member-petrol-baan',
     fill: 'bg-member-petrol-lijn',
     ink: 'text-member-petrol-inkt',
+    tile: 'bg-member-petrol-tegel',
+    tileSoft: 'bg-member-petrol-tegel-zacht',
+    tileDone: 'bg-member-petrol-tegel-klaar',
+    rowDone: 'bg-member-petrol-rij-klaar',
+    icon: 'text-member-petrol-inkt-tegel',
+    iconDone: 'text-member-petrol-inkt-klaar',
+    nuBadge: 'bg-member-petrol-nu-baan',
+    nuInk: 'text-member-petrol-nu-inkt',
+    nuBorder: 'border-member-petrol-nu-lijn',
   },
   orchid: {
     dot: 'bg-member-orchid-lijn',
@@ -224,6 +269,15 @@ export const MEMBER_COLOR_CLASSES: Record<
     track: 'bg-member-orchid-baan',
     fill: 'bg-member-orchid-lijn',
     ink: 'text-member-orchid-inkt',
+    tile: 'bg-member-orchid-tegel',
+    tileSoft: 'bg-member-orchid-tegel-zacht',
+    tileDone: 'bg-member-orchid-tegel-klaar',
+    rowDone: 'bg-member-orchid-rij-klaar',
+    icon: 'text-member-orchid-inkt-tegel',
+    iconDone: 'text-member-orchid-inkt-klaar',
+    nuBadge: 'bg-member-orchid-nu-baan',
+    nuInk: 'text-member-orchid-nu-inkt',
+    nuBorder: 'border-member-orchid-nu-lijn',
   },
   mustard: {
     dot: 'bg-member-mustard-lijn',
@@ -234,6 +288,15 @@ export const MEMBER_COLOR_CLASSES: Record<
     track: 'bg-member-mustard-baan',
     fill: 'bg-member-mustard-lijn',
     ink: 'text-member-mustard-inkt',
+    tile: 'bg-member-mustard-tegel',
+    tileSoft: 'bg-member-mustard-tegel-zacht',
+    tileDone: 'bg-member-mustard-tegel-klaar',
+    rowDone: 'bg-member-mustard-rij-klaar',
+    icon: 'text-member-mustard-inkt-tegel',
+    iconDone: 'text-member-mustard-inkt-klaar',
+    nuBadge: 'bg-member-mustard-nu-baan',
+    nuInk: 'text-member-mustard-nu-inkt',
+    nuBorder: 'border-member-mustard-nu-lijn',
   },
   terracotta: {
     dot: 'bg-member-terracotta-lijn',
@@ -244,6 +307,15 @@ export const MEMBER_COLOR_CLASSES: Record<
     track: 'bg-member-terracotta-baan',
     fill: 'bg-member-terracotta-lijn',
     ink: 'text-member-terracotta-inkt',
+    tile: 'bg-member-terracotta-tegel',
+    tileSoft: 'bg-member-terracotta-tegel-zacht',
+    tileDone: 'bg-member-terracotta-tegel-klaar',
+    rowDone: 'bg-member-terracotta-rij-klaar',
+    icon: 'text-member-terracotta-inkt-tegel',
+    iconDone: 'text-member-terracotta-inkt-klaar',
+    nuBadge: 'bg-member-terracotta-nu-baan',
+    nuInk: 'text-member-terracotta-nu-inkt',
+    nuBorder: 'border-member-terracotta-nu-lijn',
   },
 };
 

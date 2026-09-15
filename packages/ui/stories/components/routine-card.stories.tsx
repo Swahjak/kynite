@@ -105,6 +105,33 @@ export const Dense: Story = {
   ),
 };
 
+/** Raspberry's NU-badge/border tokens (U1) — see `MEMBER_COLOR_CLASSES.raspberry`. */
+const raspberryMemberClasses = {
+  nuBadge: 'bg-member-raspberry-nu-baan',
+  nuInk: 'text-member-raspberry-nu-inkt',
+  nuBorder: 'border-member-raspberry-nu-lijn',
+};
+
+export const MemberColour: Story = {
+  name: 'Member colour (raspberry)',
+  render: () => (
+    <Specimen
+      name="RoutineCard/member colour"
+      note="The NU badge and the live card border tinted by `memberClasses` instead of the plain indigo status badge / neutral border."
+    >
+      <div className="w-full max-w-xl">
+        <RoutineCard
+          routine={MORNING}
+          expanded
+          copy={COPY}
+          onComplete={() => {}}
+          memberClasses={raspberryMemberClasses}
+        />
+      </div>
+    </Specimen>
+  ),
+};
+
 export const States: Story = {
   render: () => (
     <Section title="Routine card — the five readings">

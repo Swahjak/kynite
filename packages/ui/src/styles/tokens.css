@@ -368,6 +368,78 @@
   --member-terracotta-lijn: oklch(58% 0.14 30);
   --member-terracotta-inkt: oklch(38% 0.09 30);
 
+  /* -- Member palette, routines extension (D4, `docs/plans/2026-09-15-
+     design-drift.md` U1) — `--member-<slot>-hue` names the slot's angle once
+     so the nine steps below can reference it, and the `Routines.dc.html` /
+     `Actieve routines.dc.html` mockups: `tegel`/`tegel-zacht`/`tegel-klaar`
+     (step icon tile, todo/soft/done), `rij-klaar` (done row fill),
+     `inkt-tegel`/`inkt-klaar` (step icon glyph, todo/done), `nu-baan`/
+     `nu-inkt`/`nu-lijn` (the NU badge fill/text and the live card border). */
+  --member-raspberry-hue: 335;
+  --member-raspberry-tegel: oklch(95% 0.03 var(--member-raspberry-hue));
+  --member-raspberry-tegel-zacht: oklch(97% 0.015 var(--member-raspberry-hue));
+  --member-raspberry-tegel-klaar: oklch(95% 0.03 var(--member-raspberry-hue));
+  --member-raspberry-rij-klaar: oklch(97% 0.02 var(--member-raspberry-hue));
+  --member-raspberry-inkt-tegel: oklch(45% 0.1 var(--member-raspberry-hue));
+  --member-raspberry-inkt-klaar: oklch(62% 0.06 var(--member-raspberry-hue));
+  --member-raspberry-nu-baan: oklch(93% 0.05 var(--member-raspberry-hue));
+  --member-raspberry-nu-inkt: oklch(38% 0.1 var(--member-raspberry-hue));
+  --member-raspberry-nu-lijn: oklch(86% 0.06 var(--member-raspberry-hue));
+
+  --member-blue-hue: 245;
+  --member-blue-tegel: oklch(95% 0.03 var(--member-blue-hue));
+  --member-blue-tegel-zacht: oklch(97% 0.015 var(--member-blue-hue));
+  --member-blue-tegel-klaar: oklch(95% 0.03 var(--member-blue-hue));
+  --member-blue-rij-klaar: oklch(97% 0.02 var(--member-blue-hue));
+  --member-blue-inkt-tegel: oklch(45% 0.1 var(--member-blue-hue));
+  --member-blue-inkt-klaar: oklch(62% 0.06 var(--member-blue-hue));
+  --member-blue-nu-baan: oklch(93% 0.05 var(--member-blue-hue));
+  --member-blue-nu-inkt: oklch(38% 0.1 var(--member-blue-hue));
+  --member-blue-nu-lijn: oklch(86% 0.06 var(--member-blue-hue));
+
+  --member-petrol-hue: 196;
+  --member-petrol-tegel: oklch(95% 0.03 var(--member-petrol-hue));
+  --member-petrol-tegel-zacht: oklch(97% 0.015 var(--member-petrol-hue));
+  --member-petrol-tegel-klaar: oklch(95% 0.03 var(--member-petrol-hue));
+  --member-petrol-rij-klaar: oklch(97% 0.02 var(--member-petrol-hue));
+  --member-petrol-inkt-tegel: oklch(45% 0.1 var(--member-petrol-hue));
+  --member-petrol-inkt-klaar: oklch(62% 0.06 var(--member-petrol-hue));
+  --member-petrol-nu-baan: oklch(93% 0.05 var(--member-petrol-hue));
+  --member-petrol-nu-inkt: oklch(38% 0.1 var(--member-petrol-hue));
+  --member-petrol-nu-lijn: oklch(86% 0.06 var(--member-petrol-hue));
+
+  --member-orchid-hue: 312;
+  --member-orchid-tegel: oklch(95% 0.03 var(--member-orchid-hue));
+  --member-orchid-tegel-zacht: oklch(97% 0.015 var(--member-orchid-hue));
+  --member-orchid-tegel-klaar: oklch(95% 0.03 var(--member-orchid-hue));
+  --member-orchid-rij-klaar: oklch(97% 0.02 var(--member-orchid-hue));
+  --member-orchid-inkt-tegel: oklch(45% 0.1 var(--member-orchid-hue));
+  --member-orchid-inkt-klaar: oklch(62% 0.06 var(--member-orchid-hue));
+  --member-orchid-nu-baan: oklch(93% 0.05 var(--member-orchid-hue));
+  --member-orchid-nu-inkt: oklch(38% 0.1 var(--member-orchid-hue));
+  --member-orchid-nu-lijn: oklch(86% 0.06 var(--member-orchid-hue));
+
+  --member-mustard-hue: 90;
+  --member-mustard-tegel: oklch(95% 0.03 var(--member-mustard-hue));
+  --member-mustard-tegel-zacht: oklch(97% 0.015 var(--member-mustard-hue));
+  --member-mustard-tegel-klaar: oklch(95% 0.03 var(--member-mustard-hue));
+  --member-mustard-rij-klaar: oklch(97% 0.02 var(--member-mustard-hue));
+  --member-mustard-inkt-tegel: oklch(45% 0.1 var(--member-mustard-hue));
+  --member-mustard-inkt-klaar: oklch(62% 0.06 var(--member-mustard-hue));
+  --member-mustard-nu-baan: oklch(93% 0.05 var(--member-mustard-hue));
+  --member-mustard-nu-inkt: oklch(38% 0.1 var(--member-mustard-hue));
+  --member-mustard-nu-lijn: oklch(86% 0.06 var(--member-mustard-hue));
+
+  --member-terracotta-hue: 30;
+  --member-terracotta-tegel: oklch(95% 0.03 var(--member-terracotta-hue));
+  --member-terracotta-tegel-zacht: oklch(97% 0.015 var(--member-terracotta-hue));
+  --member-terracotta-tegel-klaar: oklch(95% 0.03 var(--member-terracotta-hue));
+  --member-terracotta-rij-klaar: oklch(97% 0.02 var(--member-terracotta-hue));
+  --member-terracotta-inkt-tegel: oklch(45% 0.1 var(--member-terracotta-hue));
+  --member-terracotta-inkt-klaar: oklch(62% 0.06 var(--member-terracotta-hue));
+  --member-terracotta-nu-baan: oklch(93% 0.05 var(--member-terracotta-hue));
+  --member-terracotta-nu-inkt: oklch(38% 0.1 var(--member-terracotta-hue));
+  --member-terracotta-nu-lijn: oklch(86% 0.06 var(--member-terracotta-hue));
   /* -- Weather ------------------------------------------------------------
      "Kynite Design System" § "Weer-widget · kaartthema per weertype" and
      § "Weertypes". Two independent groups, and they are independent on
@@ -660,6 +732,77 @@
   --member-terracotta-lijn: oklch(66% 0.14 30);
   --member-terracotta-inkt: oklch(78% 0.11 30);
 
+  /* -- Member palette, routines extension, dark — see the light block's
+     comment for what each step carries. Surfaces (`tegel*`, `rij-klaar`,
+     `nu-baan`) drop to the same near-black wash depth as `wassing`/`baan`
+     above; glyph steps (`inkt-tegel`, `nu-inkt`) rise the way `inkt` does;
+     `inkt-klaar` and `nu-lijn` sit at a middle depth, re-tuned by hand
+     rather than a fixed formula since neither has a direct sibling above. */
+  --member-raspberry-hue: 335;
+  --member-raspberry-tegel: oklch(22% 0.05 var(--member-raspberry-hue));
+  --member-raspberry-tegel-zacht: oklch(18% 0.024 var(--member-raspberry-hue));
+  --member-raspberry-tegel-klaar: oklch(22% 0.05 var(--member-raspberry-hue));
+  --member-raspberry-rij-klaar: oklch(18% 0.032 var(--member-raspberry-hue));
+  --member-raspberry-inkt-tegel: oklch(85% 0.12 var(--member-raspberry-hue));
+  --member-raspberry-inkt-klaar: oklch(70% 0.06 var(--member-raspberry-hue));
+  --member-raspberry-nu-baan: oklch(30% 0.06 var(--member-raspberry-hue));
+  --member-raspberry-nu-inkt: oklch(78% 0.12 var(--member-raspberry-hue));
+  --member-raspberry-nu-lijn: oklch(45% 0.08 var(--member-raspberry-hue));
+
+  --member-blue-hue: 245;
+  --member-blue-tegel: oklch(22% 0.05 var(--member-blue-hue));
+  --member-blue-tegel-zacht: oklch(18% 0.024 var(--member-blue-hue));
+  --member-blue-tegel-klaar: oklch(22% 0.05 var(--member-blue-hue));
+  --member-blue-rij-klaar: oklch(18% 0.032 var(--member-blue-hue));
+  --member-blue-inkt-tegel: oklch(85% 0.12 var(--member-blue-hue));
+  --member-blue-inkt-klaar: oklch(70% 0.06 var(--member-blue-hue));
+  --member-blue-nu-baan: oklch(30% 0.06 var(--member-blue-hue));
+  --member-blue-nu-inkt: oklch(78% 0.12 var(--member-blue-hue));
+  --member-blue-nu-lijn: oklch(45% 0.08 var(--member-blue-hue));
+
+  --member-petrol-hue: 196;
+  --member-petrol-tegel: oklch(22% 0.05 var(--member-petrol-hue));
+  --member-petrol-tegel-zacht: oklch(18% 0.024 var(--member-petrol-hue));
+  --member-petrol-tegel-klaar: oklch(22% 0.05 var(--member-petrol-hue));
+  --member-petrol-rij-klaar: oklch(18% 0.032 var(--member-petrol-hue));
+  --member-petrol-inkt-tegel: oklch(85% 0.12 var(--member-petrol-hue));
+  --member-petrol-inkt-klaar: oklch(70% 0.06 var(--member-petrol-hue));
+  --member-petrol-nu-baan: oklch(30% 0.06 var(--member-petrol-hue));
+  --member-petrol-nu-inkt: oklch(78% 0.12 var(--member-petrol-hue));
+  --member-petrol-nu-lijn: oklch(45% 0.08 var(--member-petrol-hue));
+
+  --member-orchid-hue: 312;
+  --member-orchid-tegel: oklch(22% 0.05 var(--member-orchid-hue));
+  --member-orchid-tegel-zacht: oklch(18% 0.024 var(--member-orchid-hue));
+  --member-orchid-tegel-klaar: oklch(22% 0.05 var(--member-orchid-hue));
+  --member-orchid-rij-klaar: oklch(18% 0.032 var(--member-orchid-hue));
+  --member-orchid-inkt-tegel: oklch(85% 0.12 var(--member-orchid-hue));
+  --member-orchid-inkt-klaar: oklch(70% 0.06 var(--member-orchid-hue));
+  --member-orchid-nu-baan: oklch(30% 0.06 var(--member-orchid-hue));
+  --member-orchid-nu-inkt: oklch(78% 0.12 var(--member-orchid-hue));
+  --member-orchid-nu-lijn: oklch(45% 0.08 var(--member-orchid-hue));
+
+  --member-mustard-hue: 90;
+  --member-mustard-tegel: oklch(22% 0.05 var(--member-mustard-hue));
+  --member-mustard-tegel-zacht: oklch(18% 0.024 var(--member-mustard-hue));
+  --member-mustard-tegel-klaar: oklch(22% 0.05 var(--member-mustard-hue));
+  --member-mustard-rij-klaar: oklch(18% 0.032 var(--member-mustard-hue));
+  --member-mustard-inkt-tegel: oklch(85% 0.12 var(--member-mustard-hue));
+  --member-mustard-inkt-klaar: oklch(70% 0.06 var(--member-mustard-hue));
+  --member-mustard-nu-baan: oklch(30% 0.06 var(--member-mustard-hue));
+  --member-mustard-nu-inkt: oklch(78% 0.12 var(--member-mustard-hue));
+  --member-mustard-nu-lijn: oklch(45% 0.08 var(--member-mustard-hue));
+
+  --member-terracotta-hue: 30;
+  --member-terracotta-tegel: oklch(22% 0.05 var(--member-terracotta-hue));
+  --member-terracotta-tegel-zacht: oklch(18% 0.024 var(--member-terracotta-hue));
+  --member-terracotta-tegel-klaar: oklch(22% 0.05 var(--member-terracotta-hue));
+  --member-terracotta-rij-klaar: oklch(18% 0.032 var(--member-terracotta-hue));
+  --member-terracotta-inkt-tegel: oklch(85% 0.12 var(--member-terracotta-hue));
+  --member-terracotta-inkt-klaar: oklch(70% 0.06 var(--member-terracotta-hue));
+  --member-terracotta-nu-baan: oklch(30% 0.06 var(--member-terracotta-hue));
+  --member-terracotta-nu-inkt: oklch(78% 0.12 var(--member-terracotta-hue));
+  --member-terracotta-nu-lijn: oklch(45% 0.08 var(--member-terracotta-hue));
   /* -- Weather, dark ------------------------------------------------------
      Derived, like the `--cat-*` block above — the design sheet draws the
      weather card once, on cream, and says nothing about a dark room.
@@ -1050,6 +1193,60 @@
   --color-member-terracotta-baan: var(--member-terracotta-baan);
   --color-member-terracotta-lijn: var(--member-terracotta-lijn);
   --color-member-terracotta-inkt: var(--member-terracotta-inkt);
+  --color-member-raspberry-tegel: var(--member-raspberry-tegel);
+  --color-member-raspberry-tegel-zacht: var(--member-raspberry-tegel-zacht);
+  --color-member-raspberry-tegel-klaar: var(--member-raspberry-tegel-klaar);
+  --color-member-raspberry-rij-klaar: var(--member-raspberry-rij-klaar);
+  --color-member-raspberry-inkt-tegel: var(--member-raspberry-inkt-tegel);
+  --color-member-raspberry-inkt-klaar: var(--member-raspberry-inkt-klaar);
+  --color-member-raspberry-nu-baan: var(--member-raspberry-nu-baan);
+  --color-member-raspberry-nu-inkt: var(--member-raspberry-nu-inkt);
+  --color-member-raspberry-nu-lijn: var(--member-raspberry-nu-lijn);
+  --color-member-blue-tegel: var(--member-blue-tegel);
+  --color-member-blue-tegel-zacht: var(--member-blue-tegel-zacht);
+  --color-member-blue-tegel-klaar: var(--member-blue-tegel-klaar);
+  --color-member-blue-rij-klaar: var(--member-blue-rij-klaar);
+  --color-member-blue-inkt-tegel: var(--member-blue-inkt-tegel);
+  --color-member-blue-inkt-klaar: var(--member-blue-inkt-klaar);
+  --color-member-blue-nu-baan: var(--member-blue-nu-baan);
+  --color-member-blue-nu-inkt: var(--member-blue-nu-inkt);
+  --color-member-blue-nu-lijn: var(--member-blue-nu-lijn);
+  --color-member-petrol-tegel: var(--member-petrol-tegel);
+  --color-member-petrol-tegel-zacht: var(--member-petrol-tegel-zacht);
+  --color-member-petrol-tegel-klaar: var(--member-petrol-tegel-klaar);
+  --color-member-petrol-rij-klaar: var(--member-petrol-rij-klaar);
+  --color-member-petrol-inkt-tegel: var(--member-petrol-inkt-tegel);
+  --color-member-petrol-inkt-klaar: var(--member-petrol-inkt-klaar);
+  --color-member-petrol-nu-baan: var(--member-petrol-nu-baan);
+  --color-member-petrol-nu-inkt: var(--member-petrol-nu-inkt);
+  --color-member-petrol-nu-lijn: var(--member-petrol-nu-lijn);
+  --color-member-orchid-tegel: var(--member-orchid-tegel);
+  --color-member-orchid-tegel-zacht: var(--member-orchid-tegel-zacht);
+  --color-member-orchid-tegel-klaar: var(--member-orchid-tegel-klaar);
+  --color-member-orchid-rij-klaar: var(--member-orchid-rij-klaar);
+  --color-member-orchid-inkt-tegel: var(--member-orchid-inkt-tegel);
+  --color-member-orchid-inkt-klaar: var(--member-orchid-inkt-klaar);
+  --color-member-orchid-nu-baan: var(--member-orchid-nu-baan);
+  --color-member-orchid-nu-inkt: var(--member-orchid-nu-inkt);
+  --color-member-orchid-nu-lijn: var(--member-orchid-nu-lijn);
+  --color-member-mustard-tegel: var(--member-mustard-tegel);
+  --color-member-mustard-tegel-zacht: var(--member-mustard-tegel-zacht);
+  --color-member-mustard-tegel-klaar: var(--member-mustard-tegel-klaar);
+  --color-member-mustard-rij-klaar: var(--member-mustard-rij-klaar);
+  --color-member-mustard-inkt-tegel: var(--member-mustard-inkt-tegel);
+  --color-member-mustard-inkt-klaar: var(--member-mustard-inkt-klaar);
+  --color-member-mustard-nu-baan: var(--member-mustard-nu-baan);
+  --color-member-mustard-nu-inkt: var(--member-mustard-nu-inkt);
+  --color-member-mustard-nu-lijn: var(--member-mustard-nu-lijn);
+  --color-member-terracotta-tegel: var(--member-terracotta-tegel);
+  --color-member-terracotta-tegel-zacht: var(--member-terracotta-tegel-zacht);
+  --color-member-terracotta-tegel-klaar: var(--member-terracotta-tegel-klaar);
+  --color-member-terracotta-rij-klaar: var(--member-terracotta-rij-klaar);
+  --color-member-terracotta-inkt-tegel: var(--member-terracotta-inkt-tegel);
+  --color-member-terracotta-inkt-klaar: var(--member-terracotta-inkt-klaar);
+  --color-member-terracotta-nu-baan: var(--member-terracotta-nu-baan);
+  --color-member-terracotta-nu-inkt: var(--member-terracotta-nu-inkt);
+  --color-member-terracotta-nu-lijn: var(--member-terracotta-nu-lijn);
 
   --color-surface-night: var(--surface-night);
 

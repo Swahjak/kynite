@@ -88,11 +88,31 @@ describe('a step still to do', () => {
     expect(screen.getByText('1:30')).toBeInTheDocument();
   });
 
-  it('is 56px tall — the single-tap row height, well past the 48px kiosk minimum', () => {
+  it('is 64px tall — the single-tap row height, well past the 48px kiosk minimum', () => {
     render(<StepRow {...base} done={false} />);
-    // `h-14` is Tailwind's 3.5rem = 56px. jsdom computes no layout, so the
-    // class is the assertable contract here; the e2e target-size audit is what
-    // measures the rendered box.
-    expect(screen.getByTestId('step-tap').className).toContain('h-14');
+    // `min-h-16` is Tailwind's 4rem = 64px (`Routines.dc.html`, U1). jsdom
+    // computes no layout, so the class is the assertable contract here; the
+    // e2e target-size audit is what measures the rendered box.
+    expect(screen.getByTestId('step-tap').className).toContain('min-h-16');
+  });
+});
+
+describe('the row is the whole button', () => {
+  it('renders exactly one button, with no interactive element nested inside it', () => {
+    const { container } = render(<StepRow {...base} done={false} />);
+
+    const buttons = container.querySelectorAll('button');
+    expect(buttons).toHaveLength(1);
+
+    const nested = buttons[0]!.querySelectorAll('button, a[href], input, select, textarea');
+    expect(nested).toHaveLength(0);
+  });
+
+  it('reports its done state through aria-pressed, and only that', () => {
+    const { rerender } = render(<StepRow {...base} done={false} />);
+    expect(screen.getByTestId('step-tap')).toHaveAttribute('aria-pressed', 'false');
+
+    rerender(<StepRow {...base} done />);
+    expect(screen.getByTestId('step-tap')).toHaveAttribute('aria-pressed', 'true');
   });
 });

@@ -92,6 +92,31 @@ export type StepRowProps = {
    */
   iconTintClass?: string;
   onComplete?: (origin: { x: number; y: number }) => void;
+  /**
+   * The routine's member colour, as class strings rather than an imported
+   * `MemberColor` — structural, so the package never imports the app's
+   * enum (`Routines.dc.html`/`Actieve routines.dc.html`, D4). Omitted, every
+   * class below falls back to the neutral tone this row has always drawn in,
+   * so an existing caller that has not been migrated to member colours yet
+   * (U2) renders exactly as before.
+   */
+  memberClasses?: StepRowMemberClasses;
+};
+
+/** `memberClasses` prop shape — see `StepRowProps.memberClasses`. */
+export type StepRowMemberClasses = {
+  /** Icon tile, todo (`tegel`/`tegel-zacht`). */
+  tile?: string;
+  /** Icon tile, done (`tegel-klaar`). */
+  tileDone?: string;
+  /** Icon glyph colour, todo (`inkt-tegel`). */
+  icon?: string;
+  /** Icon glyph colour, done (`inkt-klaar`). */
+  iconDone?: string;
+  /** The 46px decorative circle's fill once done (`lijn`). */
+  circleDone?: string;
+  /** The whole row's background once done (`rij-klaar`). */
+  rowDone?: string;
 };
 
 /** `90` → `1:30`. Untimed steps show nothing rather than a zero. */
@@ -115,14 +140,17 @@ export function StepRow({
   dense = false,
   icon,
   iconTintClass,
+  memberClasses,
   onComplete,
 }: StepRowProps) {
   const live = active && !done;
 
-  // Shared by both shapes: a step's icon tile, tinted with the routine's
-  // colour surface and turning the same green tint every other done glyph on
-  // this row wears once the step is done. Absent when the step carries no
-  // icon at all, rather than an empty tile holding its place.
+  // Shared by both shapes: a step's icon tile. A member colour (`tile`/
+  // `tileDone`) wins over the routine's own category tint (`iconTintClass`)
+  // when both are given — D4, the mockups tint the step tile by the member
+  // the routine belongs to, not by the routine's category. Neither given, a
+  // neutral tile is what this row has always drawn (no green/orange baked
+  // in any more — that lived here only as a done-state default).
   const iconTile = icon ? (
     <IconMedallion
       icon={icon}
@@ -132,8 +160,12 @@ export function StepRow({
       className={cn(
         'shrink-0',
         done
-          ? 'bg-cat-green-surface text-cat-green-fg'
-          : (iconTintClass ?? 'bg-surface-container text-ink-secondary')
+          ? memberClasses
+            ? cn(memberClasses.tileDone, memberClasses.iconDone)
+            : 'bg-surface-container-high text-ink-secondary'
+          : memberClasses
+            ? cn(memberClasses.tile, memberClasses.icon)
+            : (iconTintClass ?? 'bg-surface-container text-ink-secondary')
       )}
     />
   ) : null;
@@ -231,19 +263,24 @@ export function StepRow({
         // reads as a list of what happened, not a list of dead controls.
         onClick={tap}
         className={cn(
-          // 56px — the Stitch hub step-row height, well past the 48px kiosk
-          // minimum, because this is the one control that matters here. The
-          // live step steps up to 72px, which is the mockup's only size change.
-          'group/step relative flex w-full items-center gap-4 overflow-hidden rounded-xl px-4 text-left transition-all duration-200 ease-brand',
+          // 64px min-height, 9px/12px padding, 8px radius, 12px gap
+          // (`Routines.dc.html` U1) — well past the 48px kiosk minimum,
+          // because this is the one control that matters here. The live step
+          // still steps up taller, which is the mockup's only size change.
+          'group/step relative flex w-full min-h-16 items-center gap-3 overflow-hidden rounded-lg px-3 py-[9px] text-left transition-all duration-200 ease-brand',
           'focus-visible:ring-3 focus-visible:ring-ring/50',
-          live ? 'h-18' : 'h-14',
+          live && 'min-h-18',
           // The "done" dim is decorative, but `opacity` applies to the text
           // inside the row as well — and a done step carries the star award in
           // `--gold-ink`, the darkest-tinted label on the row (6.49:1 on white).
           // At 80% it composited to 3.86:1 on the hub board and took the
           // routines surface under AA (M19). 90% keeps the recede the mockup
           // asks for and leaves every label on the row above 4.5:1.
-          done && 'bg-surface-container-low opacity-90 hover:opacity-100',
+          done &&
+            cn(
+              memberClasses?.rowDone ?? 'bg-surface-container-low',
+              'opacity-90 hover:opacity-100'
+            ),
           live && 'border-l-4 border-primary bg-primary/8 shadow-sm hover:bg-primary/12',
           !done && !live && 'bg-surface-container-lowest shadow-sm hover:bg-surface-hover',
           !done && 'active:scale-[0.99]'
@@ -265,18 +302,21 @@ export function StepRow({
             nesting one inside this button would add a second, invalid,
             interactive descendant and a duplicate keyboard target for a
             state this row already reports. */}
+        {/* 46px circle (`Routines.dc.html` U1) — white with a 3px
+            `#dcdad4` border when todo; the member's `lijn` fill and no
+            border once done. Uniform across the live/next step too: the row
+            itself still carries the taller live treatment above. */}
         <span
           aria-hidden
           className={cn(
-            'flex shrink-0 items-center justify-center rounded-sm transition-colors duration-200',
-            live ? 'size-10' : 'size-8',
-            done && 'bg-success',
-            live && !done && 'border-2 border-primary bg-surface-container-lowest',
-            !done && !live && 'border-2 border-line'
+            'flex size-[46px] shrink-0 items-center justify-center rounded-full transition-colors duration-200',
+            done
+              ? (memberClasses?.circleDone ?? 'bg-ink-muted')
+              : 'border-[3px] border-[#dcdad4] bg-white'
           )}
         >
           {done ? (
-            <Icon name="check" size="sm" filled className="text-white kynite-anim-check" />
+            <Icon name="check" size="lg" filled className="text-white kynite-anim-check" />
           ) : null}
         </span>
 
@@ -286,7 +326,7 @@ export function StepRow({
           className={cn(
             'min-w-0 flex-1 truncate',
             live ? 'font-display text-h3 font-semibold' : 'text-body-lg',
-            done && 'text-ink-secondary line-through decoration-ink-muted/50'
+            done && 'text-[#8a8c98] line-through decoration-ink-muted/50'
           )}
         >
           {title}
