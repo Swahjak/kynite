@@ -302,7 +302,7 @@ export function CalendarShell({
               name: member.displayName,
             })}
             onClick={() => toggleMember(member.id)}
-            className="rounded-full transition-opacity focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+            className="flex size-12 items-center justify-center rounded-full transition-opacity focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
           >
             <MemberFace
               // Filter faces are always 32px `default` with a 3px indigo ring when included;
