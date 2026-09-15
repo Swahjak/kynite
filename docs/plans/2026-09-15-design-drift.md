@@ -1,37 +1,50 @@
 # Design drift — Ledenkleuren, Vandaag, hub = app
 
-Owner ask (2026-09-15): the Claude Design mockups are ahead of the code. Biggest miss: the member-colour rules in `Ledenkleuren.dc.html` barely show in the rendered app. The Vandaag mockup was updated. Separately: the hub should be the same surface as the web app, only with lowered permissions. Orchestrator mode.
+Owner ask (2026-09-15): the Claude Design mockups are ahead of the code. Biggest miss: the member-colour rules in `Ledenkleuren.dc.html` barely show in the rendered app. Separately: the hub should be the same surface as the web app, only with lowered permissions, and every step/task row must be tappable as a whole. Orchestrator mode; code units go to Antigravity (`agy-delegate --tier flash`), reviews stay on the Claude side.
 
-Design sync `7caade9` pulled Vandaag, Actieve routines, Taken en routines (etags in `docs/design/claude-design/.etags.json`).
+Design syncs: `7caade9` (first Vandaag/routines pull), `c87f15d` (owner's member-colour alignment pass, 8 mockups; Ledenkleuren/DESIGN.md unchanged).
 
-## Findings (scouts s1–s3)
+## Findings
+
+Scouts s1–s4 (before the alignment pass):
 
 - Token layer already matches Ledenkleuren 1:1: `--member-<slot>-{wassing,baan,lijn,inkt}` in `packages/ui/src/styles/tokens.css:341-369`, six hues (335/245/196/312/90/30), `MEMBER_COLOR_CLASSES` in `modules/family/ui/tokens.ts:38` (+ duplicate `modules/calendar/ui/tokens.ts:175`).
-- The carriers are missing or overruled on the rendered surfaces (baselines checked by eye):
-  - Vandaag `/hub`: timeline left line = category colour, member only as 24px chip; kid cards face-wassing only, no ring/line. Mockup: 4px member line on rows/cards, rail dots.
-  - Routines board `/hub/routines`: icon tiles neutral (mockup: member wassing); done step green block (new mockup: member wassing + member lijn disc); NU indigo (new mockup: member wassing/inkt); 100% column goes fully orange (gradient + ring + head) — the mockup's own "Niet: de hele kaart in de ledenkleur" and orange hijacks identity; new mockup removed the orange takeover (`routines-board.tsx:335-381`, `step-row.tsx:135-273`, `routine-card.tsx:162,271`).
-  - Taken `/hub/taken`: head line + routine progress card wassing correct.
-  - Kalender `/hub/kalender`: event card line = category colour; column head has no baan/3px line; oversized face row with indigo ring top-right.
-- Rule conflict inside the design project: Ledenkleuren (2026-09-03) says green stays the checkmark, NU stays indigo, orange stays the reward. Actieve routines + Taken (edited 2026-09-14) moved done disc/tile and NU badge to member hue, dropped green. Vandaag (2026-09-15) keeps green check in Takenlijst and indigo NU. → decision D1.
-- Vandaag diff: tabs gone (app already has real routes instead), avatar filter moves from the Dagoverzicht header to beside the clock (app: still in card header, `today-timeline-filter.tsx:63`; header has a static `FaceStack`), "voorbij" toggle replaces it in the card header (collapse exists: `today-past-rows.tsx`), quick-actions grid → FAB (app has it), radii 20/14 → 16/8 (token check), weather/routines/tasks cards exist. Dead-ish: `today-tabs.tsx`, `today-tab-personen.tsx`, `today-tab-sterren.tsx` (check `(app)/today`).
-- Hub/app split today: two route groups `(hub)` and `(app)` (+ `(hub-clock)`), two layouts (`KioskShell` + `hub-rail.tsx` vs `AppRail`/`MobileNav`), per-page `requireHubDevice()` gate (`modules/devices/hub-gate.ts:27`), principal union member|device|share with a `device` column in the 20-capability matrix (`modules/family/authorize.ts:82`; device denied on every `*:write`/`*:manage`, allowed on `completion:write`, `task:complete`, `redemption:request`, `timer:control`, `calendar:view`). Loaders mostly shared per module; `today` has three (`page-data-hub.ts`, `page-data.ts`, `page-data-board.ts`). Domain pairs: calendar, routines, rewards/stars/store, timers duplicated in UI; tasks hub-only; settings/family app-only. `data-surface='hub'` now only drives dark theme + calendar comments (type scale removed 2026-09-15). Playwright projects `app` (phone) / `hub` (tablet, device session). Split documented in `docs/architecture.md` §2/§7, no ADR.
+- Carriers missing or overruled on the rendered surfaces: Vandaag timeline line = category colour, kid cards face-wassing only; routines board icon tiles neutral, done step green block, NU indigo block, 100% column fully orange (`routines-board.tsx:335-381`, `step-row.tsx:135-273`, `routine-card.tsx:162,271`); Kalender event line = category colour, no column-head line, oversized face row with indigo ring.
+- Vandaag diff: tabs gone, avatar filter moves beside the clock (app: `today-timeline-filter.tsx:63` in the card header; `today-header.tsx:229` static `FaceStack`), "voorbij" toggle in the card header (`today-past-rows.tsx` has the collapse), FAB exists (`today-fab.tsx:80`), radii 16/8, dead-ish `today-tabs.tsx` / `today-tab-personen.tsx` / `today-tab-sterren.tsx`.
+- Hub/app split: route groups `(hub)`, `(hub-clock)`, `(app)`; `requireHubDevice()` (`modules/devices/hub-gate.ts:27`); principal union member|device|share, 20-capability matrix (`modules/family/authorize.ts:82`), device denied on all `*:write`/`*:manage`. Settings are one DB store; hub-only prefs are per-device localStorage (`kynite.hub.theme`, `kynite.today.tab`, `kynite.today.day-view`). `CLAUDE.md`'s `components/calendar/contexts/calendar-context.tsx` reference is stale.
+- Whole-row tap: mockups bind toggle on the row (`s.toggle`/`t.toggle`); code binds on the 46px circle only.
 
-- Settings overlap (s4): household settings are one DB store shared by both surfaces (`family.hubDefaultView` via `HubDisplayForm`, calendar visibility/colour, weather location — all gated by `display:manage`, device denied). Hub-only, device-local: theme mode `kynite.hub.theme` (`components/hub/use-hub-theme.ts`), `kynite.today.tab`, `kynite.today.day-view`, confetti seen-flag. The `device` row carries no display prefs. The app has no theme toggle at all. `CLAUDE.md`'s `components/calendar/contexts/calendar-context.tsx` reference is stale (file gone).
-- Owner (2026-09-15): whole step/task row must be tappable, kids miss the 46px circle. Mockups already bind the toggle on the row (`s.toggle`/`t.toggle`); code binds it on the circle only. Scope: `StepRow` tile variant, task rows in `routines-board.tsx`, solo `[memberId]` page; row = one button (64px min), circle decorative, no nested interactive.
+Scout s5 (diff of `c87f15d`):
+
+- Canon values now shared by Vandaag, Kalender, Beloningen, Design System, Vandaag met thema's: wassing `oklch(95% 0.025 H)`, baan `oklch(90% 0.05 H)` (progress track), lijn `oklch(58% 0.14 H)` (4px row/card line, 3px column-head line, ring), inkt `oklch(38% 0.09 H)`. Done check green `oklch(58% 0.14 155)`. NU indigo `#5d5fef`. Selection ring indigo 2px. Orange untouched (reward only).
+- Vandaag: shared two-child rows use a `linear-gradient(180deg, A 50%, B 50%)` split on the one 4px line; no-owner rows go neutral grey `#b6b3ab`; own-user avatar gets a 3px lijn ring; progress track is member baan.
+- Kalender: agenda rows `border-left:3px solid lijn`, column heads `border-bottom:3px solid lijn`, face-row rings 3px/2px, FAB indigo, radii 16/12 → 8 on tiles/rail.
+- Rings: mockups use 3px on 32–36px avatars (Ledenkleuren says 2px@24, 3px@36–48) — house rounding, follow the mockups.
+- **Not aligned**: `Actieve routines.dc.html` and `Taken en routines.dc.html` only got hue constants + header avatar. Their templates still fill the done circle/dot in member lijn, tint the NU badge by member hue, stack a member-tinted card border on the NU card, and use off-canon steps (`94% 0.03`, `95% 0.03`, `97% 0.015`, `45% 0.1`).
 
 ## Decisions
 
-- D1 (owner, 2026-09-15): the design side resolves the conflict first — a design agent aligns all mockups in Claude Design with one member-colour rule set. Code waits; next step is a design sync (etag diff) once the owner signals, then milestone 1 is specced from the aligned mockups.
-- D2 (owner, 2026-09-15): **A** — one route tree; `(hub)` goes, member and device render the same pages, the principal decides the controls. Owner idea to explore in the design pass: one dedicated "management" page that gathers everything device-denied (`*:manage`, family, devices, Google, sharing, subscriptions) in one place instead of the current settings sub-tree.
-- D3 (owner): cap set after the D1 design lands.
-
-## Waiting on
-
-Owner signal that the Claude Design mockups are aligned. Then: `list_files` etag diff → pull changed files → spec milestone 1 (member-colour carriers, Vandaag layout, whole-row tap) and the D2-A route merge (own plan, own cap).
+- D1 (owner, 2026-09-15): design side resolves the rule conflict first. Done: `c87f15d`.
+- D2 (owner): **A** — one route tree; `(hub)` goes, member and device render the same pages, the principal decides the controls. Explore a dedicated "management" page gathering everything device-denied. Own plan, own cap, after M1–M2.
+- D3 (owner): cap set after D1. Proposed below.
+- D4 (orchestrator, 2026-09-15, pending owner veto): where `Actieve routines` / `Taken en routines` still contradict Ledenkleuren + the six aligned mockups, the code follows **Ledenkleuren**: done disc/dot green 155 with white check, NU badge/block indigo, one carrier per element, canon wassing/inkt steps via the existing tokens. Member colour on a step/task row = icon tile wassing + inkt (the row's one carrier); the done circle is state, not identity.
+- D5 (owner, 2026-09-15): agy runs on `--tier flash` only; Claude side reviews.
+- Layout values from the mockups win over current code (radii 16/8, ring 3px at 32–36px, 64px rows, 46px circle).
 
 ## Milestones
 
-(filled after D1–D3)
+Branch `feat/design-drift-m1`. Each unit = one `agy-delegate --tier flash --yolo --dir /var/www/personal/kynite --timeout 20m` run with `AGENTS.md` (repo root, executor rules) + this file as the brief; reviewer = Claude subagent (sonnet) on the diff; gates rerun by main thread.
+
+- [ ] **U1 — package primitives** (`packages/ui`): `StepRow` (tile + list variants) and the task row shape become one 64px `<button>` covering the whole row, circle decorative (`aria-hidden`), no nested interactive; `StepRow`/`RoutineCard` take `memberClasses` (wassing/inkt/lijn class strings) and apply them to the icon tile only; done circle green 155 + white check (`kyn-pop`), NU badge indigo; `ProgressBar` takes a track class (member baan) + fill class (member lijn); drop the orange 100% variants. Stories updated. Unit tests for the button semantics.
+- [ ] **U2 — routines surfaces** (`apps/web/src/modules/today/ui/routines-board.tsx`, `modules/routines/ui/*`, `(hub)/routines/[memberId]`): pass member classes into U1 components; column head 3px member lijn bottom line (exists on taken, verify) + 40px ring 3px; routine progress card wassing + lijn bar; remove orange gradient/ring/head on 100% (keep the small "Alles gedaan · +N sterren" chip); task rows whole-row tap; solo page same. `MemberFilter` selection ring indigo 2px, unselected opacity 0.45.
+- [ ] **U3 — Vandaag hub** (`modules/today/ui/*`): timeline row 4px line = owner member lijn (two owners: 180° split gradient, no owner: `#b6b3ab`), category colour moves to the icon tile only, rail dots 10px member lijn, NU row `rgba(93,95,239,0.07)` indigo; kid cards: face ring 3px + member baan progress track; avatar filter moves from the card header to beside the clock (36px faces, `Iedereen` pill), "voorbij" toggle takes its place in the card header; FAB 64px indigo with 4 pills; radii 16/8 via tokens; delete `today-tabs.tsx`, `today-tab-personen.tsx`, `today-tab-sterren.tsx` if unreferenced (verify `(app)/today` first).
+- [ ] **U4 — Kalender + Beloningen hub** (`modules/calendar/ui/*`, `modules/rewards|store ui`): agenda/event rows `border-left:3px` member lijn (category on the tile), column heads `border-bottom:3px` member lijn, face-row rings 3px, remove the oversized indigo-ringed face row, filter selection ring indigo; store/rewards avatar chips wassing `95% 0.025` + 3px ring, selected chip indigo border. Radii 8 on tiles/rail where the mockup changed them.
+- [ ] **R1 — review + gates + baselines** (main thread + reviewer agents): per-unit sonnet review, fix loops back to agy (flash, `--continue` only after quota/timeout), `pnpm typecheck`, scoped oxlint, vitest, then Playwright `@visual` hub project `--workers=1` with the `.env.local` move/restore rule; regenerate hub baselines; kiosk audit (48px floors) green; axe on routines/taken/hub. Merge, `railway up`.
+- [ ] **M3 — hub = app (D2-A)**: separate plan `docs/plans/<date>-hub-equals-app.md`, own cap; includes the "management" page idea and the `CLAUDE.md` stale reference.
+
+### Cap (proposal, D3)
+
+M1 (U1–U4 + R1): 6 agy runs (4 units + 2 retries), 4 Claude review agents (sonnet), plus the 1 scout already spent. Escalate a unit to a Claude builder only when flash fails twice on it. Fix loops after review also go to agy (counted in the 2 retries; above that, ask).
 
 ## Agent log
 
@@ -41,3 +54,5 @@ Owner signal that the Claude Design mockups are aligned. Then: `list_files` etag
 | s2 | hub/app map | sonnet | 55k | 19 | done |
 | s3 | Vandaag diff vs app | sonnet | 105k | 15 | done |
 | s4 | hub/app settings overlap | sonnet | 38k | 15 | done |
+| s5 | design diff `c87f15d` digest | sonnet | 119k | 48 | done |
+| agy-0 | smoke (workspace packages) | gemini flash-lo | 84k in / 0.3k out | — | ok |
