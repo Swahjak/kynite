@@ -10,6 +10,7 @@ import {
   type CalendarEvent,
 } from '@/modules/calendar';
 import { getHouseholdFormattingLocale, MEMBER_COLOR_CLASSES, type Member } from '@/modules/family';
+import { TodayAllDayStrip } from './today-allday-strip';
 import { MemberFaces, joinNames, namesOf } from './member-faces';
 import { TodayPastRows } from './today-past-rows';
 import { TodayPastToggle } from './today-past-toggle';
@@ -99,8 +100,11 @@ export async function TodayTimeline({
   const at = (instant: Date) =>
     formatDateTime(instant, formattingLocale, { hour: '2-digit', minute: '2-digit', timeZone });
 
+  const allDayEvents = events.filter((event) => event.allDay);
+  const timedEvents = events.filter((event) => !event.allDay);
+
   const rows = combineDayEvents(
-    events,
+    timedEvents,
     members.map((member) => member.id),
     { timeZone, dayKey }
   );
@@ -295,6 +299,7 @@ export async function TodayTimeline({
   if (density === 'card') {
     return (
       <section data-testid="today-timeline" className={cn('flex flex-col gap-2', className)}>
+        <TodayAllDayStrip events={allDayEvents} label={t('allDay')} />
         {disclosure ? null : eyebrow}
         <div className="rounded-2xl border border-line-subtle bg-card px-2">{body}</div>
       </section>
@@ -305,6 +310,7 @@ export async function TodayTimeline({
   // the "Per persoon" column used to give, in the width it used to cost.
   return (
     <Card data-testid="today-timeline" className={cn('gap-3.5 px-2 pt-5 pb-2', className)}>
+      <TodayAllDayStrip events={allDayEvents} label={t('allDay')} />
       {rows.length === 0 ? (
         <>
           <SectionHeading title={t('timeline.title')} size="card" level={2} className="px-3" />
