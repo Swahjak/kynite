@@ -17,7 +17,8 @@ Owner (2026-09-15, photo of the wall tablet): `/hub/routines` looks nothing like
 ## Milestones
 
 - [x] M1 — `5e9fcc6` (sonnet): hub `--text-*` block removed, RoutineCard dense (no rail, `text-h3`, medallion xl), StepRow tile dense 64px, Dense stories, kiosk-audit text floors on `fixme` (48px targets kept), visual specs family routines + taken. Seed fixes (hex ids, `blue`) by f1.
-- [ ] M2 — `/hub/taken` honours a pinned clock so its visual is deterministic (sonnet)
+- [x] M2 — `44a9805` `time` pin for `/hub/taken` via `loadHubBoardComposition`; regression (pin on `date` alone) fixed in `ef36cfa`.
+- [x] R — full hub suite: visual/axe/kiosk green except pre-existing (agenda-board stale baseline, store contrast on disabled reward cards, offline-hub foreign-family test — fails on main too). Contrast regressions from the smaller type fixed in `ef36cfa` (rail active pill, praise banner, Wie-filter resting opacity 45→80%). Baselines `c018272`. Merged, deployed.
 - [ ] R — baselines generated, screenshot vs mockup checked, merge, deploy
 
 ## Agent log
@@ -27,3 +28,7 @@ Owner (2026-09-15, photo of the wall tablet): `/hub/routines` looks nothing like
 | s1 | mockup vs code diff | sonnet | 119k | 25 | done |
 | m1 | density fix + specs | sonnet | 187k | 100 | done `5e9fcc6`, retired |
 | f1 | seed id/colour fixes | haiku (builder) ×2 | 21k + 23k | 5 + 4 | done |
+| m2 | taken clock pin | sonnet | 93k | 36 | done `44a9805`, introduced date-only pin regression |
+| f2 | pin regression + contrast | sonnet | 217k | 152 | done `ef36cfa` |
+
+Total: 5 dispatches (cap 3, +2: seed fixes and the m2 regression), ~660k subagent tokens.
