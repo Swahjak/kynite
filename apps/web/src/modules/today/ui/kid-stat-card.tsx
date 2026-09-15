@@ -33,7 +33,9 @@ export function KidStatCard({ kid, href, linkLabel, ...rest }: KidStatCardProps)
       name={kid.displayName}
       avatarUrl={kid.avatarUrl}
       avatarSurfaceClass={MEMBER_COLOR_CLASSES[kid.color].track}
+      avatarRingClass={MEMBER_COLOR_CLASSES[kid.color].ring}
       barClass={MEMBER_COLOR_CLASSES[kid.color].dot}
+      trackClass={MEMBER_COLOR_CLASSES[kid.color].track}
       starsToday={kid.starsToday}
       percent={Math.round(kid.ratio * 100)}
       render={href ? <Link href={href} aria-label={linkLabel ?? kid.displayName} /> : undefined}

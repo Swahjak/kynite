@@ -123,6 +123,7 @@
   --line: #c4c5d9; /* Outline Variant — borders, unchecked controls */
   --line-subtle: #e1e3e4; /* Border — dividers, progress track */
   --line-focus: #5d5fef; /* colors.md: "Focused input border: #5d5fef" */
+  --timeline-line-muted: #b6b3ab;
 
   /* -- Line widths --------------------------------------------------------
      The three widths the design system allows, and the whole of the scale:
@@ -636,6 +637,7 @@
   --line: #43484a;
   --line-subtle: #33393a;
   --line-focus: #b8c3ff;
+  --timeline-line-muted: #5f6274;
 
   --success: #71f8e4; /* colors.md "Tertiary Fixed" (bright mint) */
   --warning: #fecf6e; /* colors.md: "#fecf6e (yellow, confetti + trophy icon)" */
@@ -1122,6 +1124,7 @@
   --color-line: var(--line);
   --color-line-subtle: var(--line-subtle);
   --color-line-focus: var(--line-focus);
+  --color-timeline-line-muted: var(--timeline-line-muted);
 
   --color-now: var(--now);
   --color-now-foreground: var(--now-foreground);

@@ -56,7 +56,7 @@ export type FabProps = {
 } & Omit<ComponentProps<'button'>, 'className'>;
 
 const fabClass =
-  'group/fab flex size-14 items-center justify-center rounded-4xl bg-primary text-primary-foreground shadow-brand-lg transition-all duration-200 ease-brand hover:bg-brand-hover active:scale-95 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none sm:size-16';
+  'group/fab flex size-14 sm:size-16 items-center justify-center rounded-4xl bg-primary text-primary-foreground shadow-brand-lg transition-all duration-200 ease-brand hover:bg-brand-hover active:scale-95 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none';
 
 const fabIconClass = 'transition-transform duration-200 ease-brand group-hover/fab:rotate-90';
 

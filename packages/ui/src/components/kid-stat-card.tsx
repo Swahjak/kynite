@@ -44,8 +44,10 @@ export type KidStatCardProps = {
   avatarUrl?: string | null;
   /** `MEMBER_COLOR_CLASSES[color].surface` — the initials fallback's ground. */
   avatarSurfaceClass?: string;
+  avatarRingClass?: string;
   /** `MEMBER_COLOR_CLASSES[color].dot` — the bar's fill, in the child's hue. */
   barClass?: string;
+  trackClass?: string;
   starsToday: number;
   /** 0..100. */
   percent: number;
@@ -69,7 +71,9 @@ export function KidStatCard({
   name,
   avatarUrl,
   avatarSurfaceClass,
+  avatarRingClass,
   barClass,
+  trackClass,
   starsToday,
   percent,
   stepsLabel,
@@ -102,6 +106,8 @@ export function KidStatCard({
             name={name}
             avatarUrl={avatarUrl}
             surfaceClass={avatarSurfaceClass}
+            ringed={Boolean(avatarRingClass)}
+            ringClass={avatarRingClass}
             size={compact ? 'default' : 'lg'}
           />
           <div className="flex min-w-0 flex-col">
@@ -118,7 +124,12 @@ export function KidStatCard({
         </div>
       </div>
 
-      <ProgressBar value={percent} label={progressLabel} fillClassName={barClass} />
+      <ProgressBar
+        value={percent}
+        label={progressLabel}
+        fillClassName={barClass}
+        trackClassName={trackClass}
+      />
     </div>
   );
 }

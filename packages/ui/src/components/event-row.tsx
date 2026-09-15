@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import * as React from 'react';
 
 import { cn } from '../lib/utils';
@@ -141,6 +142,7 @@ export type EventRowProps = Omit<React.ComponentProps<'div'>, 'title'> & {
   busy?: boolean;
   /** The rail's hue, e.g. `CATEGORY_CLASSES[category].solid`. Ignored when `busy`. */
   railClass?: string;
+  railStyle?: CSSProperties;
   /** The category glyph. Pass `lock` for a busy row. */
   iconName?: IconName;
   /** The glyph's tone, e.g. `CATEGORY_CLASSES[category].icon`. Ignored when `busy`. */
@@ -165,6 +167,7 @@ export function EventRow({
   state = 'default',
   busy = false,
   railClass,
+  railStyle,
   iconName,
   iconClass,
   startTime,
@@ -190,7 +193,7 @@ export function EventRow({
       className={cn(
         'flex items-center border-t border-line-subtle first:border-t-0',
         spec.row,
-        live && 'rounded-xl bg-primary/7',
+        live && 'rounded-lg bg-primary/7',
         state === 'past' && 'opacity-50',
         className
       )}
@@ -198,6 +201,7 @@ export function EventRow({
     >
       <span
         aria-hidden
+        style={railStyle}
         className={cn('w-1 shrink-0 self-stretch rounded-4xl', busy ? 'bg-line' : railClass)}
       />
 

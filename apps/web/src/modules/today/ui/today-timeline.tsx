@@ -163,6 +163,12 @@ export async function TodayTimeline({
           : joinNames(namesOf(members, memberIds));
     const faceIds =
       memberIds === null ? null : everyone ? members.map((member) => member.id) : memberIds;
+    const ownerColors =
+      memberIds === null || everyone
+        ? []
+        : memberIds
+            .map((id) => members.find((m) => m.id === id)?.color)
+            .filter((c): c is NonNullable<typeof c> => Boolean(c));
     const live = isToday && isLive(event);
     const done = isPast(event);
     const phone = density === 'card';
@@ -175,7 +181,20 @@ export async function TodayTimeline({
         size={phone ? 'compact' : 'default'}
         state={live ? 'now' : done ? 'past' : 'default'}
         busy={event.busyOnly}
-        railClass={palette.solid}
+        railClass={
+          ownerColors.length === 1
+            ? MEMBER_COLOR_CLASSES[ownerColors[0]].dot
+            : ownerColors.length === 0
+              ? 'bg-timeline-line-muted'
+              : undefined
+        }
+        railStyle={
+          ownerColors.length >= 2
+            ? {
+                background: `linear-gradient(180deg, var(--member-${ownerColors[0]}-lijn) 50%, var(--member-${ownerColors[1]}-lijn) 50%)`,
+              }
+            : undefined
+        }
         iconName={event.busyOnly ? 'lock' : EVENT_TYPE_ICONS[event.eventType]}
         // The glyph's own step (45%), not the chip-text one (32%): the design
         // system gives the icon a tone between the rail and the label so it
