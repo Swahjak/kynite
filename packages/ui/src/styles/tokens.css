@@ -97,6 +97,13 @@
   --surface-container-high: #e7e8e9; /* Surface Container High — removable chip */
   --surface-container-highest: #e1e3e4; /* the border/track tone */
 
+  /* A finished `RoutineCard` (D4, `docs/plans/2026-09-15-design-drift.md` U1):
+     a warmer, quieter surface than the standard `surface-container-low`, and
+     the same line colour as the KLAAR pill's fill so the two read as one
+     family. */
+  --routine-done-surface: #faf8f3;
+  --routine-done-line: #eceae4;
+
   /* -- Ink --------------------------------------------------------------- */
   --ink: #191c1d; /* On Surface */
   --ink-secondary: #434656; /* On Surface Variant — 8.87:1 on cream */
@@ -619,6 +626,9 @@
   --surface-container-high: #383c3d;
   --surface-container-highest: #43484a;
 
+  --routine-done-surface: #232728;
+  --routine-done-line: #383c3d;
+
   --ink: #f0f1f2; /* colors.md: "#f0f1f2 (text-on-dark)" — 15.16:1 */
   --ink-secondary: #c8cacb; /* 10.42:1 on --background */
   --ink-muted: #a2a5a7; /* 6.92:1 on --background, 5.29:1 on --surface */
@@ -1074,6 +1084,8 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-routine-done-surface: var(--routine-done-surface);
+  --color-routine-done-line: var(--routine-done-line);
   --color-destructive: var(--destructive);
   --color-border: var(--border);
   --color-input: var(--input);

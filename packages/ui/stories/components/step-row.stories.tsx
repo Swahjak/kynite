@@ -6,11 +6,13 @@ import { Section, Specimen } from '../specimen';
 /** Raspberry's own tokens (U1) — see `MEMBER_COLOR_CLASSES.raspberry`. */
 const raspberryClasses = {
   tile: 'bg-member-raspberry-tegel',
+  tileSoft: 'bg-member-raspberry-tegel-zacht',
   tileDone: 'bg-member-raspberry-tegel-klaar',
   icon: 'text-member-raspberry-inkt-tegel',
   iconDone: 'text-member-raspberry-inkt-klaar',
   circleDone: 'bg-member-raspberry-lijn',
   rowDone: 'bg-member-raspberry-rij-klaar',
+  checkDone: 'text-member-raspberry-lijn',
 };
 
 /**
@@ -238,6 +240,42 @@ export const MemberColour: Story = {
       <Specimen
         name="StepRow/member notes"
         note="Same rows, tinted by `memberClasses` instead of a category surface — the 46px circle and the icon tile both carry raspberry's own steps once done."
+      >
+        <span />
+      </Specimen>
+
+      <ul className="grid w-full max-w-xl grid-cols-2 gap-3">
+        <StepRow
+          variant="tile"
+          stepId="uit-bed"
+          title="Uit bed"
+          done
+          timerSeconds={null}
+          praiseText="Goed bezig!"
+          stars={3}
+          starLabel="3 sterren verdiend"
+          actionLabel="Uit bed is klaar"
+          icon="bedtime"
+          memberClasses={raspberryClasses}
+        />
+        <StepRow
+          variant="tile"
+          stepId="tanden"
+          title="Tanden poetsen"
+          done={false}
+          active
+          timerSeconds={120}
+          praiseText="Knap gedaan!"
+          stars={3}
+          starLabel="3 sterren verdiend"
+          actionLabel="Markeer Tanden poetsen als klaar"
+          icon="dentistry"
+          memberClasses={raspberryClasses}
+        />
+      </ul>
+      <Specimen
+        name="StepRow/member tile notes"
+        note="Tile 1 done — `tileDone`/`iconDone` (tegel-klaar/inkt-klaar), a `#8a8c98` struck title, and the check in raspberry's own `lijn` (`checkDone`) rather than green. Tile 2 still to do — `tileSoft` (tegel-zacht), the softer step than the flat row's `tile` above."
       >
         <span />
       </Specimen>

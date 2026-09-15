@@ -116,3 +116,23 @@ describe('the row is the whole button', () => {
     expect(screen.getByTestId('step-tap')).toHaveAttribute('aria-pressed', 'true');
   });
 });
+
+describe('the tile variant is also the whole button', () => {
+  it('renders exactly one button, with no interactive element nested inside it', () => {
+    const { container } = render(<StepRow {...base} variant="tile" done={false} />);
+
+    const buttons = container.querySelectorAll('button');
+    expect(buttons).toHaveLength(1);
+
+    const nested = buttons[0]!.querySelectorAll('button, a[href], input, select, textarea');
+    expect(nested).toHaveLength(0);
+  });
+
+  it('reports its done state through aria-pressed, and only that', () => {
+    const { rerender } = render(<StepRow {...base} variant="tile" done={false} />);
+    expect(screen.getByTestId('step-tap')).toHaveAttribute('aria-pressed', 'false');
+
+    rerender(<StepRow {...base} variant="tile" done />);
+    expect(screen.getByTestId('step-tap')).toHaveAttribute('aria-pressed', 'true');
+  });
+});

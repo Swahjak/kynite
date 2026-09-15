@@ -6,7 +6,7 @@ import { Icon } from './icon';
 import type { IconName } from './icon-codepoints';
 import { IconMedallion } from './icon-medallion';
 import { StarCount } from './star-count';
-import { StepRow } from './step-row';
+import { StepRow, type StepRowMemberClasses } from './step-row';
 
 /**
  * A routine on the hub board, in one of its four readings (`Routines.dc.html`).
@@ -69,6 +69,21 @@ export type RoutineCardRoutine = {
   steps: readonly RoutineCardStep[];
 };
 
+/**
+ * The card's own member-colour contract: `StepRow`'s shape, widened by the
+ * three fields only this card draws — the NU badge and the live card's
+ * border. Forwarding the same object straight to every `StepRow` child works
+ * because it is a structural superset, not a coincidence.
+ */
+export type RoutineCardMemberClasses = StepRowMemberClasses & {
+  /** NU badge fill (`nu-baan`). */
+  nuBadge?: string;
+  /** NU badge text (`nu-inkt`). */
+  nuInk?: string;
+  /** Live card border (`nu-lijn`). */
+  nuBorder?: string;
+};
+
 export type RoutineCardProps = {
   routine: RoutineCardRoutine;
   expanded: boolean;
@@ -94,20 +109,23 @@ export type RoutineCardProps = {
     tileClass?: string;
   };
   /**
-   * The routine's member colour, as class strings — structural, same
-   * contract as `StepRow`'s `memberClasses` (D4). Omitted, the card keeps
-   * the neutral indigo rail / plain border it has always drawn; passed, the
-   * NU badge and the live card's border pick up the member's `nu-baan`/
-   * `nu-inkt`/`nu-lijn` steps instead.
+   * The KLAAR pill's label, once the routine is done. A plain prop rather
+   * than a `copy` field, with its own English default — `@kynite/ui` may not
+   * call `useTranslations`, so the default is what an unmigrated caller (one
+   * that has not added a translation for it yet) sees.
    */
-  memberClasses?: {
-    /** NU badge fill (`nu-baan`). */
-    nuBadge?: string;
-    /** NU badge text (`nu-inkt`). */
-    nuInk?: string;
-    /** Live card border (`nu-lijn`). */
-    nuBorder?: string;
-  };
+  doneLabel?: string;
+  /**
+   * The routine's member colour, as class strings — the same
+   * `StepRowMemberClasses` contract, widened by the three fields this card
+   * alone draws (D4). Omitted, the card keeps the neutral indigo rail /
+   * plain border it has always drawn and forwards nothing to its `StepRow`
+   * children, so an unmigrated caller (U2) renders exactly as before;
+   * passed, it forwards straight to every step tile as well, so one member
+   * colour tints the header medallion, the NU badge, the live border and
+   * every step in the grid.
+   */
+  memberClasses?: RoutineCardMemberClasses;
   onComplete?: (stepId: string, origin: { x: number; y: number }) => void;
   /**
    * Makes the card an accordion (`Actieve routines.dc.html`): the header
@@ -147,6 +165,7 @@ export function RoutineCard({
   dense = false,
   celebrating = false,
   memberClasses,
+  doneLabel = 'Done',
 }: RoutineCardProps) {
   // The step the routine is *on*. Presentational only — the board's completion
   // flow is unchanged; this just tells `StepRow` which tile to draw as next.
@@ -171,14 +190,35 @@ export function RoutineCard({
         {...shared}
         data-celebrating={celebrating ? 'true' : 'false'}
         className={cn(
-          'flex items-center gap-4 rounded-2xl bg-surface-container-low px-5 py-4',
+          'flex items-center gap-4 rounded-2xl border px-5 py-4',
+          memberClasses
+            ? 'border-routine-done-line bg-routine-done-surface'
+            : 'border-transparent bg-surface-container-low',
           celebrating && 'kynite-anim-pop-big'
         )}
       >
-        <Icon name="check_circle" filled size="lg" className="shrink-0 text-cat-green-fg" />
+        <IconMedallion
+          icon={routine.icon}
+          shape="squircle"
+          size="lg+"
+          tint="none"
+          className={cn(
+            memberClasses
+              ? cn(memberClasses.tileDone, memberClasses.iconDone)
+              : 'bg-surface-container-high text-ink-secondary'
+          )}
+        />
         <h3 className="min-w-0 flex-1 font-display text-h3 font-bold text-ink-secondary">
           {routine.title}
         </h3>
+        <Badge
+          data-testid="routine-done-pill"
+          variant="soft"
+          size="md"
+          className="shrink-0 bg-routine-done-line text-weather-ink-meta"
+        >
+          {doneLabel}
+        </Badge>
         <p
           data-testid="routine-done-line"
           className="flex shrink-0 items-center gap-1.5 font-display text-body font-bold text-gold-ink"
@@ -274,9 +314,8 @@ export function RoutineCard({
     <article
       {...shared}
       className={cn(
-        'relative isolate overflow-hidden rounded-2xl border bg-surface-container-lowest shadow-sm',
-        memberClasses?.nuBorder ?? 'border-line-subtle',
-        dense ? 'p-4' : 'py-6 pr-6 pl-7'
+        'relative isolate overflow-hidden rounded-2xl border bg-surface-container-lowest p-4 shadow-sm',
+        memberClasses?.nuBorder ?? 'border-line-subtle'
       )}
     >
       {/* The rail. Six pixels of indigo down the whole left edge is the
@@ -301,10 +340,10 @@ export function RoutineCard({
 
         <IconMedallion
           icon={routine.icon}
-          tint={copy.tileClass ? 'none' : 'brand-container'}
+          tint={copy.tileClass || memberClasses ? 'none' : 'brand-container'}
           shape="squircle"
-          size={dense ? 'xl' : '2xl'}
-          className={copy.tileClass}
+          size={memberClasses ? 'lg+' : dense ? 'xl' : '2xl'}
+          className={cn(copy.tileClass, memberClasses?.tile)}
         />
 
         <div className="min-w-0 flex-1">
@@ -387,6 +426,7 @@ export function RoutineCard({
             starLabel={copy.starLabel(routine.starsPerCompletion)}
             actionLabel={copy.actionLabel(step.title)}
             active={step.id === activeStepId}
+            memberClasses={memberClasses}
             onComplete={onComplete ? (origin) => onComplete(step.id, origin) : undefined}
           />
         ))}

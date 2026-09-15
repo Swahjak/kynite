@@ -44,6 +44,15 @@ const medallionVariants = cva('inline-flex shrink-0 items-center justify-center'
       sm: 'size-8',
       md: 'size-10',
       lg: 'size-12',
+      /**
+       * 52px — the `RoutineCard` header/done tile
+       * (`docs/plans/2026-09-15-design-drift.md` U1). One notch above `lg`
+       * (48px) and below `xl` (56px); neither named step is the 52px the
+       * mockup draws, so this fills the gap rather than rounding to a
+       * neighbour. Named with the same `+` convention `icon.tsx` uses for
+       * `xs+`, a step between two already-named sizes.
+       */
+      'lg+': 'size-[52px]',
       xl: 'size-14',
       '2xl': 'size-16',
       '3xl': 'size-24',
@@ -52,13 +61,14 @@ const medallionVariants = cva('inline-flex shrink-0 items-center justify-center'
   defaultVariants: { tint: 'brand', shape: 'circle', size: 'lg' },
 });
 
-type MedallionSize = 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
+type MedallionSize = 'sm' | 'md' | 'lg' | 'lg+' | 'xl' | '2xl' | '3xl';
 
 /** The icon size that visually fills each medallion step. */
 const ICON_FOR_SIZE: Record<MedallionSize, IconSize> = {
   sm: 'sm',
   md: 'md',
   lg: 'md',
+  'lg+': 'lg',
   xl: 'lg',
   '2xl': 'xl',
   '3xl': '2xl',

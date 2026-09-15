@@ -105,30 +105,64 @@ export const Dense: Story = {
   ),
 };
 
-/** Raspberry's NU-badge/border tokens (U1) — see `MEMBER_COLOR_CLASSES.raspberry`. */
+/**
+ * Raspberry's full member-colour set (U1) — the NU-badge/border tokens plus
+ * the `StepRowMemberClasses` superset this card forwards to every step tile.
+ * See `MEMBER_COLOR_CLASSES.raspberry`.
+ */
 const raspberryMemberClasses = {
   nuBadge: 'bg-member-raspberry-nu-baan',
   nuInk: 'text-member-raspberry-nu-inkt',
   nuBorder: 'border-member-raspberry-nu-lijn',
+  tile: 'bg-member-raspberry-tegel',
+  tileSoft: 'bg-member-raspberry-tegel-zacht',
+  tileDone: 'bg-member-raspberry-tegel-klaar',
+  icon: 'text-member-raspberry-inkt-tegel',
+  iconDone: 'text-member-raspberry-inkt-klaar',
+  circleDone: 'bg-member-raspberry-lijn',
+  rowDone: 'bg-member-raspberry-rij-klaar',
+  checkDone: 'text-member-raspberry-lijn',
 };
 
 export const MemberColour: Story = {
   name: 'Member colour (raspberry)',
   render: () => (
-    <Specimen
-      name="RoutineCard/member colour"
-      note="The NU badge and the live card border tinted by `memberClasses` instead of the plain indigo status badge / neutral border."
-    >
-      <div className="w-full max-w-xl">
-        <RoutineCard
-          routine={MORNING}
-          expanded
-          copy={COPY}
-          onComplete={() => {}}
-          memberClasses={raspberryMemberClasses}
-        />
-      </div>
-    </Specimen>
+    <div className="flex w-full max-w-xl flex-col gap-6">
+      <Specimen
+        name="RoutineCard/member colour — due"
+        note="The NU badge, the live card border and every step tile tinted by one `memberClasses` object instead of the plain indigo status badge / neutral border."
+      >
+        <div className="w-full">
+          <RoutineCard
+            routine={MORNING}
+            expanded
+            copy={COPY}
+            onComplete={() => {}}
+            memberClasses={raspberryMemberClasses}
+          />
+        </div>
+      </Specimen>
+
+      <Specimen
+        name="RoutineCard/member colour — done"
+        note="The KLAAR pill (`doneLabel`, English default 'Done') and the routine tile in raspberry's `tileDone`/`iconDone` — the card surface and border pick up `--routine-done-surface`/`--routine-done-line`."
+      >
+        <div className="w-full">
+          <RoutineCard
+            expanded={false}
+            copy={COPY}
+            memberClasses={raspberryMemberClasses}
+            doneLabel="Klaar"
+            routine={{
+              ...MORNING,
+              id: 'morning-done',
+              complete: true,
+              steps: MORNING.steps.map((step) => ({ ...step, done: true })),
+            }}
+          />
+        </div>
+      </Specimen>
+    </div>
   ),
 };
 

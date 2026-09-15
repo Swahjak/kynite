@@ -217,6 +217,7 @@ export {
 } from './components/reward-card';
 export {
   RoutineCard,
+  type RoutineCardMemberClasses,
   type RoutineCardProps,
   type RoutineCardRoutine,
   type RoutineCardStep,
@@ -227,7 +228,7 @@ export { SegmentedControl, type SegmentedOption } from './components/segmented-c
 export { StarCount, StarMedallion } from './components/star-count';
 export { StarPop, type StarPopProps } from './components/star-pop';
 export { StarStepper } from './components/star-stepper';
-export { StepRow, type StepRowProps } from './components/step-row';
+export { StepRow, type StepRowMemberClasses, type StepRowProps } from './components/step-row';
 export {
   ThemeBanner,
   type ThemeBannerProps,

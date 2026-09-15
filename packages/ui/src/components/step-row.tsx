@@ -105,9 +105,15 @@ export type StepRowProps = {
 
 /** `memberClasses` prop shape — see `StepRowProps.memberClasses`. */
 export type StepRowMemberClasses = {
-  /** Icon tile, todo (`tegel`/`tegel-zacht`). */
+  /** Icon tile, todo, `row` shape (`tegel`). */
   tile?: string;
-  /** Icon tile, done (`tegel-klaar`). */
+  /**
+   * Icon tile, todo, `tile` shape (`tegel-zacht`) — the softer step, since the
+   * tile already sits on its own tinted button rather than the row's plain
+   * surface. Falls back to `tile` when a caller has not migrated both.
+   */
+  tileSoft?: string;
+  /** Icon tile, done, both shapes (`tegel-klaar`). */
   tileDone?: string;
   /** Icon glyph colour, todo (`inkt-tegel`). */
   icon?: string;
@@ -117,6 +123,8 @@ export type StepRowMemberClasses = {
   circleDone?: string;
   /** The whole row's background once done (`rij-klaar`). */
   rowDone?: string;
+  /** The tile's done check-icon colour (`lijn`, as text rather than fill). */
+  checkDone?: string;
 };
 
 /** `90` → `1:30`. Untimed steps show nothing rather than a zero. */
@@ -164,7 +172,12 @@ export function StepRow({
             ? cn(memberClasses.tileDone, memberClasses.iconDone)
             : 'bg-surface-container-high text-ink-secondary'
           : memberClasses
-            ? cn(memberClasses.tile, memberClasses.icon)
+            ? cn(
+                variant === 'tile'
+                  ? (memberClasses.tileSoft ?? memberClasses.tile)
+                  : memberClasses.tile,
+                memberClasses.icon
+              )
             : (iconTintClass ?? 'bg-surface-container text-ink-secondary')
       )}
     />
@@ -198,17 +211,24 @@ export function StepRow({
             dense ? 'min-h-16' : 'min-h-20',
             'focus-visible:ring-3 focus-visible:ring-ring/50',
             done
-              ? 'bg-cat-green-surface'
+              ? cn(memberClasses?.rowDone ?? 'bg-surface-container-low')
               : 'bg-surface-container hover:bg-surface-container-high active:scale-[0.99]'
           )}
         >
-          {/* A done step is a green check; one still to do is an empty ring.
-              Never a cross, and nothing at all on the tiles around it. */}
+          {/* A done step is a check; one still to do is an empty ring. Never a
+              cross, and nothing at all on the tiles around it. No green here
+              any more — the member's own `lijn` carries the check once a
+              colour is given, a neutral ink otherwise. */}
           <Icon
             name={done ? 'check_circle' : 'radio_button_unchecked'}
             filled={done}
             size="lg"
-            className={cn('shrink-0', done ? 'text-cat-green-fg kynite-anim-check' : 'text-line')}
+            className={cn(
+              'shrink-0',
+              done
+                ? cn(memberClasses?.checkDone ?? 'text-ink-secondary', 'kynite-anim-check')
+                : 'text-line'
+            )}
           />
 
           {iconTile}
@@ -217,7 +237,7 @@ export function StepRow({
             <span
               className={cn(
                 'font-display text-h3 leading-tight font-bold text-balance',
-                done && 'text-ink-secondary line-through decoration-cat-green-border'
+                done && 'text-[#8a8c98] line-through decoration-ink-muted/50'
               )}
             >
               {title}
