@@ -2,7 +2,7 @@
 
 import { useEffect, useOptimistic, useRef, useState, useTransition, type MouseEvent } from 'react';
 import { useTranslations } from 'next-intl';
-import { Icon, MemberFace, ProgressBar, cn, type IconName } from '@kynite/ui';
+import { Icon, MemberFace, PageHeader, ProgressBar, cn, type IconName } from '@kynite/ui';
 import { fireConfettiBurst } from '@/components/celebration';
 import { useDateTimeFormat } from '@/components/formatting';
 import { Link, useRouter } from '@/i18n/navigation';
@@ -132,35 +132,34 @@ export function RoutinesBoard({ board, dayKey, toggleTaskAction }: RoutinesBoard
 
   return (
     <div data-testid="routines-board" className="flex min-h-0 flex-1 flex-col gap-4">
-      <header className="flex flex-shrink-0 items-center gap-5 border-b border-line-subtle pb-4">
-        <div className="min-w-0">
-          <h1 className="font-display text-h1 font-extrabold tracking-tight">{t('board.title')}</h1>
-          <span className="mt-0.5 block text-body-sm text-ink-secondary">
-            {formatDateTime(board.now, { dateStyle: 'full' })}
-          </span>
-        </div>
+      <PageHeader
+        surface="hub"
+        className="flex-shrink-0 border-b border-line-subtle pb-4"
+        title={t('board.title')}
+        subtitle={formatDateTime(board.now, { dateStyle: 'full' })}
+        action={
+          <div className="flex items-center gap-5">
+            <MemberFilter
+              members={filterMembers}
+              selectedIds={selectedIds}
+              onToggle={(memberId) =>
+                setSelectedIds((previous) => {
+                  const next = new Set(previous);
+                  if (next.has(memberId)) next.delete(memberId);
+                  else next.add(memberId);
+                  return next;
+                })
+              }
+              onClear={() => setSelectedIds(new Set())}
+              label={t('board.who.label')}
+              everyoneLabel={t('board.who.everyone')}
+              filterLabel={(name) => t('board.who.filterByMember', { name })}
+            />
 
-        <span className="flex-1" />
-
-        <MemberFilter
-          members={filterMembers}
-          selectedIds={selectedIds}
-          onToggle={(memberId) =>
-            setSelectedIds((previous) => {
-              const next = new Set(previous);
-              if (next.has(memberId)) next.delete(memberId);
-              else next.add(memberId);
-              return next;
-            })
-          }
-          onClear={() => setSelectedIds(new Set())}
-          label={t('board.who.label')}
-          everyoneLabel={t('board.who.everyone')}
-          filterLabel={(name) => t('board.who.filterByMember', { name })}
-        />
-
-        <TodayClock now={board.now} timeZone={board.timeZone} dayKey={dayKey} variant="hub" />
-      </header>
+            <TodayClock now={board.now} timeZone={board.timeZone} dayKey={dayKey} variant="hub" />
+          </div>
+        }
+      />
 
       <div className="flex min-h-0 flex-1 gap-3.5 overflow-x-auto [scrollbar-color:var(--line-subtle)_transparent] [scrollbar-width:thin]">
         <PoolColumn

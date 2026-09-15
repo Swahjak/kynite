@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { Button, EmptyState, Icon, MemberChip, StarCount } from '@kynite/ui';
+import { Button, EmptyState, Icon, MemberChip, PageHeader, StarCount } from '@kynite/ui';
 import { ChildTabs } from '@/components/hub';
 import { Link } from '@/i18n/navigation';
 import { requireHubDevice } from '@/modules/devices';
@@ -78,65 +78,68 @@ export default async function HubStorePage({
       data-testid="hub-store"
       data-member-id={store.member.id}
     >
-      <header className="flex flex-wrap items-center gap-4 border-b border-line-subtle pb-4">
-        <Button
-          variant="ghost"
-          size="icon-hub"
-          nativeButton={false}
-          aria-label={t('store.back')}
-          render={<Link href="/hub" />}
-        >
-          <Icon name="chevron_left" size="lg" />
-        </Button>
-
-        <h1 className="font-display text-display-md font-extrabold">{t('store.heading')}</h1>
-
-        {store.chips.length > 1 ? (
-          <nav
-            data-testid="store-chips"
-            aria-label={t('store.chooseMember')}
-            className="ml-3 flex flex-wrap gap-2.5"
+      <PageHeader
+        surface="hub"
+        className="flex-wrap border-b border-line-subtle pb-4"
+        leading={
+          <Button
+            variant="ghost"
+            size="icon-hub"
+            nativeButton={false}
+            aria-label={t('store.back')}
+            render={<Link href="/hub" />}
           >
-            {store.chips.map((chip) => {
-              const active = chip.id === store.member.id;
-              return (
-                <MemberChip
-                  key={chip.id}
-                  size="lg"
-                  name={chip.displayName}
-                  avatarUrl={chip.avatarUrl}
-                  initials={chip.initials}
-                  surfaceClass={chip.colorClass}
-                  ringClass={chip.ringClass}
-                  selected={active}
-                  data-testid="store-chip"
-                  data-member-id={chip.id}
-                  data-active={active ? 'true' : 'false'}
-                  render={
-                    <Link
-                      href={{ pathname: '/hub/store', query: { member: chip.id } }}
-                      aria-current={active ? 'page' : undefined}
-                    />
-                  }
-                />
-              );
-            })}
-          </nav>
-        ) : null}
-
-        <span className="flex-1" />
-
-        {/* The one number this screen is about, and it belongs to exactly one
-            child. `available`, not `earned`: this is what the shelf spends. */}
-        <StarCount
-          data-testid="available-stars"
-          data-member-id={store.member.id}
-          value={store.totals.available}
-          srLabel={t('store.availableStars')}
-          size="lg"
-          className="h-14 shrink-0 px-6 text-h1"
-        />
-      </header>
+            <Icon name="chevron_left" size="lg" />
+          </Button>
+        }
+        title={t('store.heading')}
+        meta={
+          store.chips.length > 1 ? (
+            <nav
+              data-testid="store-chips"
+              aria-label={t('store.chooseMember')}
+              className="flex flex-wrap gap-2.5"
+            >
+              {store.chips.map((chip) => {
+                const active = chip.id === store.member.id;
+                return (
+                  <MemberChip
+                    key={chip.id}
+                    size="lg"
+                    name={chip.displayName}
+                    avatarUrl={chip.avatarUrl}
+                    initials={chip.initials}
+                    surfaceClass={chip.colorClass}
+                    ringClass={chip.ringClass}
+                    selected={active}
+                    data-testid="store-chip"
+                    data-member-id={chip.id}
+                    data-active={active ? 'true' : 'false'}
+                    render={
+                      <Link
+                        href={{ pathname: '/hub/store', query: { member: chip.id } }}
+                        aria-current={active ? 'page' : undefined}
+                      />
+                    }
+                  />
+                );
+              })}
+            </nav>
+          ) : null
+        }
+        action={
+          // The one number this screen is about, and it belongs to exactly one
+          // child. `available`, not `earned`: this is what the shelf spends.
+          <StarCount
+            data-testid="available-stars"
+            data-member-id={store.member.id}
+            value={store.totals.available}
+            srLabel={t('store.availableStars')}
+            size="lg"
+            className="h-14 shrink-0 px-6 text-h1"
+          />
+        }
+      />
 
       {/* M19. Two different switches, deliberately: the store's own chips
           change *whose* shelf this is, these change *which screen* of that

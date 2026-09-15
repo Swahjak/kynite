@@ -20,8 +20,10 @@ Branch `feat/hub-equals-app`, units sequential in the main checkout (no parallel
 - D9 (owner): **one chrome for everyone** — one responsive shell; kiosk-only behaviour (idle-return to the clock, `HubReloadController`, pre-paint theme, chime panel) is what the device principal switches on, not a second layout.
 - D10 (owner): **Beheer page** — everything device-denied (routine builder, rewards management/approvals/award, family, settings, calendars, devices) gathers under one "Beheer" area; the everyday pages become read/tap surfaces for everyone (check-in board, shelf, timers board).
 - D11 (owner): M3 scope includes header unification, test rot (hub agenda board spec + stale baselines, `hardcoded-strings`), `CLAUDE.md` stale refs. Excludes the `reward-card.tsx` axe hits.
-- D12 (proposed, owner to confirm): **URLs** — one tree on unprefixed English paths (`/today`, `/calendar`, `/routines`, `/tasks`, `/store`, `/timers`, `/manage/*`, `/pair`, `/clock`); every `/hub/*` path permanently redirects to its twin, so the Fully start URL keeps working unchanged.
-- D13 (proposed): **density** — the `surface` presentation prop stays and follows the principal (device = wall scale); layout and navigation identical. Alternative: viewport-driven (CSS breakpoints), costlier because `surface` is decided server-side today.
+- D12 (owner, approved): **URLs** — one tree on unprefixed English paths (`/today`, `/calendar`, `/routines`, `/tasks`, `/store`, `/timers`, `/manage/*`, `/pair`, `/clock`); every `/hub/*` path permanently redirects to its twin, so the Fully start URL keeps working unchanged.
+- D13 (owner, approved): **density** — the `surface` presentation prop stays and follows the principal (device = wall scale); layout and navigation identical. Alternative: viewport-driven (CSS breakpoints), costlier because `surface` is decided server-side today.
+- D16 (owner, approved): **mobile nav** — bottom nav follows the Kalender mockup: Vandaag · Kalender · Taken (`/tasks`) · Sterren (`/store`) + Meer; the existing `nav-overflow-sheet.tsx` holds Actieve routines, Timers, Beheer (Beheer only when the principal can manage). Beheer is an index (routine builder, rewards + approvals, family, settings, devices, sharing), not loose items in Meer. Tablet width: the rail shows every destination, no Meer. The old bottom-nav "Routines"/"Rewards" (builder/management) move under Beheer.
+- D17 (owner, approved): **surface resolver** — `app | desktop | hub`, resolved server-side per request, first match wins: (1) device principal → `hub`; (2) per-browser cookie `kynite.surface` (member choice, `app | desktop` only — `hub` is reserved for paired devices); (3) default from `Sec-CH-UA-Mobile` / User-Agent: mobile → `app`, else `desktop`. Exposed as `data-surface` on `<html>` + Tailwind `@custom-variant app|desktop|hub`; the server-side `surface` prop reads the same resolver (supersedes D13's "follows the principal"). **For now `desktop` renders exactly like `hub`** (owner: touch tweaks for the wall come later); `app` gets sensible mobile defaults from the existing mobile designs (Kalender mockup bottom nav, D16).
 - D14 (orchestrator): `hardcoded-strings` excludes `src/app/api/mcp/**` — tool descriptions are English LLM-host text by design (`tools/instructions.ts`), not UI copy.
 - D15 (orchestrator): executor OpenCode `deepseek-v4-pro` (default), `--flash` only for mechanical renames/moves; max 2 retries per brief, then escalate to owner.
 
@@ -29,15 +31,16 @@ Branch `feat/hub-equals-app`, units sequential in the main checkout (no parallel
 
 Gates per unit: `pnpm typecheck` once, `pnpm exec oxlint --threads 1 <changed files>`, vitest scoped to touched slices `--maxWorkers=1`. Playwright only in H6/R (`--workers=1`, `.env.local` move/restore, visual straight to `--update-snapshots=all`).
 
-- [ ] **H0 — hardcoded-strings green** (D14): scope the scan in `apps/web/tests/unit/i18n/hardcoded-strings.test.ts` to skip `src/app/api/mcp/**`. First OpenCode trial.
+- [x] **H0 — hardcoded-strings green** (`2287b4d`, D14): `src/app/api/mcp` added to `EXCLUDED_DIR_SEGMENTS`. First OpenCode trial: 1 run, deepseek-v4-pro, $0.008, 16.5k in / 0.7k out / 81k cache, 34 s, no flags.
 - [ ] **H1 — one page header**: `routines-page-board.tsx`, `routines-board.tsx`, `hub/store/page.tsx` headers onto the `TodayHeader`/`PageHeader surface` pattern (title, optional date, member filter slot, clock slot, back link). No route changes.
-- [ ] **H2 — one shell** (D9): merge `AppRail`/`MobileNav` and `KioskShell`/`HubRail` into one responsive shell with one destination list (Vandaag, Kalender, Routines, Taken, Winkel, Timers, Beheer-if-allowed); kiosk behaviours mounted only for the device principal.
+- [ ] **H2a — surface resolver** (D17): server helper (principal + cookie + UA hint) → `data-surface` on `<html>` in the locale layout, Tailwind custom variants in `packages/ui/src/styles` (or `globals.css` if the package can't know the attribute), a member setting "Weergave in deze browser" (app/desktop) writing the cookie; `surface` props wired to the resolver (`desktop` maps to the hub presentation for now). Unit test the resolution order.
+- [ ] **H2 — one shell** (D9, D16, D17): merge `AppRail`/`MobileNav` and `KioskShell`/`HubRail` into one responsive shell with one destination list (Vandaag, Kalender, Routines, Taken, Winkel, Timers, Beheer-if-allowed); kiosk behaviours mounted only for the device principal.
 - [ ] **H3 — one route tree** (D12, blocked on owner): new group with a layout that accepts member **or** device; hub pages become the canonical pages at the new paths; per-page gate helper replacing `requireHubDevice()` (member|device, keeps the per-page pattern); `proxy.ts` pre-filter accepts either cookie on the shared tree; `/hub/*` redirects; rail/idle-return/hub-gate hrefs; `/pair`, `/clock`.
 - [ ] **H4 — Beheer** (D10): `/manage` index + move routine builder, rewards management, family, settings links under it; member-only gate (device gets redirected to `/today`); Beheer entry in the shell only when the principal can manage. Delete the now-orphaned `(app)` duplicates (app today tabs, `today-tabs.tsx` & co if unreferenced).
 - [ ] **H5 — e2e + docs**: move hub/app specs and fixtures to the new paths, rewrite `calendar.spec.ts:278 hub agenda board` (pill tabs gone since `b4ce25c`), regenerate visual baselines; `CLAUDE.md` Calendar Component section + stale `calendar-context.tsx` ref; architecture note on the one tree.
 - [ ] **R — review + gates + deploy**: sonnet review of the branch diff, full scoped gates, `@smoke` app+hub, merge, `railway up`, check discovery endpoints, then Fully start URL on the wall (redirect).
 
-## Cap (proposed)
+## Cap (owner: approved as a soft limit)
 
 OpenCode: ≤25 runs (≈15 briefs + retries). Claude: one sonnet dispatcher per unit ≤120k (7), one `unit-reviewer` per unit (7), ≤2 investigators buffer. Overrun → ask.
 
@@ -46,3 +49,6 @@ OpenCode: ≤25 runs (≈15 briefs + retries). Claude: one sonnet dispatcher per
 | id | model | role | tokens | tool uses | note |
 |---|---|---|---|---|---|
 | s6 | sonnet (Explore) | scout hub vs app | 80.6k | 27 | facts above |
+| d-h0 | sonnet | H0 dispatcher | 58.8k | 9 | 1 OpenCode run $0.008 |
+| d-h1 | sonnet | H1 dispatcher | 101.6k | 29 | 3 OpenCode runs $0.024 (pro, 160 s total, no flags); PageHeader gained `leading`/`meta` |
+| r-h1 | sonnet (unit-reviewer) | H1 review | 30.6k | 7 | 2🔴 routines boards on PageHeader default `surface="app"` on hub routes, 1🟡 prop docs; fix loop back to d-h1 |

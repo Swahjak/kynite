@@ -2,7 +2,15 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Icon, MemberFace, ProgressBar, RoutineCard, cn, type IconName } from '@kynite/ui';
+import {
+  Icon,
+  MemberFace,
+  PageHeader,
+  ProgressBar,
+  RoutineCard,
+  cn,
+  type IconName,
+} from '@kynite/ui';
 import { useCompletionFlow } from '@/components/realtime';
 import { useDateTimeFormat } from '@/components/formatting';
 import { resolveOpenRoutineId, type OpenOverride } from '../domain/routines-board';
@@ -176,37 +184,34 @@ export function RoutinesPageBoard({ data, dayKey, completeStepAction }: Routines
 
   return (
     <div data-testid="routines-page-board" className="flex min-h-0 flex-1 flex-col gap-4">
-      <header className="flex flex-shrink-0 items-center gap-5 border-b border-line-subtle pb-4">
-        <div className="min-w-0">
-          <h1 className="font-display text-h1 font-extrabold tracking-tight">
-            {t('routinesPage.title')}
-          </h1>
-          <span className="mt-0.5 block text-body-sm text-ink-secondary">
-            {formatDateTime(data.now, { dateStyle: 'full' })}
-          </span>
-        </div>
+      <PageHeader
+        surface="hub"
+        className="flex-shrink-0 border-b border-line-subtle pb-4"
+        title={t('routinesPage.title')}
+        subtitle={formatDateTime(data.now, { dateStyle: 'full' })}
+        action={
+          <div className="flex items-center gap-5">
+            <MemberFilter
+              members={filterMembers}
+              selectedIds={selectedIds}
+              onToggle={(memberId) =>
+                setSelectedIds((previous) => {
+                  const next = new Set(previous);
+                  if (next.has(memberId)) next.delete(memberId);
+                  else next.add(memberId);
+                  return next;
+                })
+              }
+              onClear={() => setSelectedIds(new Set())}
+              label={t('board.who.label')}
+              everyoneLabel={t('board.who.everyone')}
+              filterLabel={(name) => t('board.who.filterByMember', { name })}
+            />
 
-        <span className="flex-1" />
-
-        <MemberFilter
-          members={filterMembers}
-          selectedIds={selectedIds}
-          onToggle={(memberId) =>
-            setSelectedIds((previous) => {
-              const next = new Set(previous);
-              if (next.has(memberId)) next.delete(memberId);
-              else next.add(memberId);
-              return next;
-            })
-          }
-          onClear={() => setSelectedIds(new Set())}
-          label={t('board.who.label')}
-          everyoneLabel={t('board.who.everyone')}
-          filterLabel={(name) => t('board.who.filterByMember', { name })}
-        />
-
-        <TodayClock now={data.now} timeZone={data.timeZone} dayKey={dayKey} variant="hub" />
-      </header>
+            <TodayClock now={data.now} timeZone={data.timeZone} dayKey={dayKey} variant="hub" />
+          </div>
+        }
+      />
 
       <div
         ref={scroller}
