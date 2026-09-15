@@ -36,13 +36,13 @@ export default async function HubTakenBoardPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ date?: string; now?: string }>;
+  searchParams: Promise<{ date?: string; time?: string }>;
 }) {
   const { locale } = await params;
-  const { date, now } = await searchParams;
-  await requireHubDevice(locale, '/hub/taken', { date, now });
+  const { date, time } = await searchParams;
+  await requireHubDevice(locale, '/hub/taken', { date, time });
 
-  const composition = await loadHubBoardComposition({ date, now });
+  const composition = await loadHubBoardComposition({ date, time });
   const t = await getTranslations('today');
   const tCalendar = await getTranslations('calendar');
 

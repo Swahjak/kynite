@@ -141,7 +141,7 @@ async function seedFamilyBoard(familyId: string, scope: string) {
     ]);
     const [fien, joep] = await seedMembers(client, familyId, [
       { id: ID(scope, '00001'), displayName: 'Fien', role: 'child', color: 'orchid', sortOrder: 1 },
-      { id: ID(scope, '00002'), displayName: 'Joep', role: 'child', color: 'indigo', sortOrder: 2 },
+      { id: ID(scope, '00002'), displayName: 'Joep', role: 'child', color: 'blue', sortOrder: 2 },
     ]);
 
     const [fienMorning] = await seedRoutines(client, familyId, [
@@ -238,7 +238,7 @@ for (const [name, viewport] of Object.entries(VIEWPORTS) as [
     test('hub family routines board (nl)', async ({ page, family }) => {
       await pairHub(page, family.familyId);
 
-      const scope = { tablet: 'g', mobile: 'h' }[name];
+      const scope = { tablet: 'c', mobile: 'd' }[name];
       await seedFamilyBoard(family.familyId, scope);
       await withDb((client) => setFamilyLocale(client, family.familyId, 'nl'));
 
@@ -271,11 +271,11 @@ for (const [name, viewport] of Object.entries(VIEWPORTS) as [
     test('hub taken board (nl)', async ({ page, family }) => {
       await pairHub(page, family.familyId);
 
-      const scope = { tablet: 'i', mobile: 'j' }[name];
+      const scope = { tablet: '0', mobile: '1' }[name];
       await seedFamilyBoard(family.familyId, scope);
       await withDb((client) => setFamilyLocale(client, family.familyId, 'nl'));
 
-      await page.goto(`/nl/hub/taken?date=${ANCHOR}&now=${ANCHOR_TIME}`);
+      await page.goto(`/nl/hub/taken?date=${ANCHOR}&time=${ANCHOR_TIME}`);
       await expect(page.getByTestId('hub-taken-board')).toBeVisible();
       await settlePage(page);
 
