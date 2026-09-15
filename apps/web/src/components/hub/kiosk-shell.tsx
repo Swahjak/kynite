@@ -35,9 +35,10 @@ import { useHubTheme } from './use-hub-theme';
  *  - **it comes home by itself.** `IdleReturn` — a hub left on one child's
  *    screen returns to the board rather than showing the household one
  *    person's steps all evening.
- *  - **6-foot type.** Applied by `useHubTheme` as `data-surface="hub"` on the
- *    document element, which re-points the whole Tailwind type scale
- *    (globals.css). Nothing below has to know.
+ *  - **surface variant.** `data-surface="hub"` is set server-side by the
+ *    surface resolver (`@/modules/surface`), not by this component — it only
+ *    feeds the `app`/`desktop`/`hub` Tailwind variants now (there is no
+ *    automatic type-scale override anymore; that was removed 2026-09-15).
  *  - **dark-capable.** Same hook; see `hub-theme.ts` for why `auto` is the
  *    default and why the clock is the fallback.
  *  - **cursor hidden.** A kiosk is touched, not pointed at, and a stranded

@@ -313,7 +313,12 @@ describe('every Server Action authorizes first', () => {
     // 60 → 62 in M-T1: the timers slice's `pauseTimerAction` and
     // `resumeTimerAction`, the same `timer:control` capability as
     // start/stop/extend.
-    expect(findings.length).toBe(62);
+    // 62 → 64: the family slice's `reorderMemberAction` (commit 1f058cd, the
+    // member-order drag on `member-list.tsx`), behind `member:manage`, and the
+    // surface slice's `setSurfacePreferenceAction`, the per-browser "Weergave
+    // in deze browser" choice behind `member:self` — the same shape as
+    // `updateNotificationPreferencesAction`.
+    expect(findings.length).toBe(64);
   });
 
   it('reports no unauthorized action anywhere in src/', () => {

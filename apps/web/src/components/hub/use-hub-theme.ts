@@ -21,11 +21,13 @@ import {
  * white across the room. `useSyncExternalStore` is the primitive that has
  * neither problem, and it gives every mounted hub surface one shared answer.
  *
- * The `.dark` class and the `data-surface="hub"` attribute go on the document
+ * The `.dark` class and the `data-hub-theme` attribute go on the document
  * element rather than on the shell `div`, because portalled surfaces — sheets,
  * dialogs, toasts — render outside the shell's subtree and would otherwise come
- * back light, and phone-sized, on a dark 6-foot board. Both are removed on
- * unmount so navigating back to the parent app does not inherit them.
+ * back light on a dark 6-foot board. Both are removed on unmount so navigating
+ * back to the parent app does not inherit them. `data-surface` is not managed
+ * here: the server resolver (`@/modules/surface`) sets it once in the locale
+ * root layout and nothing client-side ever touches it.
  */
 
 /** Coarse on purpose: the only boundary it exists for is 20:00. */
@@ -130,11 +132,9 @@ export function useHubTheme(override?: ResolvedHubTheme): {
     const root = document.documentElement;
     root.classList.toggle('dark', theme === 'dark');
     root.dataset.hubTheme = theme;
-    root.dataset.surface = 'hub';
     return () => {
       root.classList.remove('dark');
       delete root.dataset.hubTheme;
-      delete root.dataset.surface;
     };
   }, [theme]);
 

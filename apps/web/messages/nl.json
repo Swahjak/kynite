@@ -1547,6 +1547,22 @@
         "invalidInput": "Controleer de ingevulde gegevens."
       }
     },
+    "surface": {
+      "title": "Weergave in deze browser",
+      "description": "Kies hoe Kynite eruitziet in déze browser — dit geldt niet voor andere apparaten.",
+      "label": "Weergave",
+      "hint": "Automatisch kiest op basis van dit apparaat. Een gepaard wandscherm ziet deze instelling niet.",
+      "options": {
+        "auto": "Automatisch",
+        "app": "Telefoon",
+        "desktop": "Desktop"
+      },
+      "save": "Opslaan",
+      "errors": {
+        "forbidden": "Je hebt geen rechten om dit aan te passen.",
+        "invalidInput": "Controleer de ingevulde gegevens."
+      }
+    },
     "weather": {
       "title": "Weer",
       "description": "Het weer op de hub gebruikt deze plek.",

@@ -34,13 +34,16 @@ export const dynamic = 'force-dynamic';
 
 /**
  * The pre-paint script for the ambient clock — always dark, unconditionally.
- * It sets `data-surface='hub'` to apply the 6-foot type scale (keyed in
- * globals.css on `[data-surface='hub']`) and adds the `dark` class before the
- * first frame paints, preventing a flash of incorrect sizing or colors on boot.
+ * It adds the `dark` class before the first frame paints, preventing a flash
+ * of light colors on boot. `data-surface` is not this script's concern: the
+ * server-side surface resolver (`@/modules/surface`) is the sole writer of
+ * that attribute, rendered on `<html>` in the locale root layout before this
+ * page even reaches the client. It only feeds the `app`/`desktop`/`hub`
+ * Tailwind variants (`packages/ui/src/styles/tokens.css`) — there is no
+ * automatic type-scale override keyed on it anymore (removed 2026-09-15).
  */
 const PRE_PAINT_CLOCK = `(function(){try{
 var r=document.documentElement;
-r.dataset.surface='hub';
 r.classList.add('dark');
 }catch(e){}})()`;
 

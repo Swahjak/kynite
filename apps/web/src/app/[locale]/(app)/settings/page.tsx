@@ -18,6 +18,7 @@ import {
 } from '@/modules/family';
 import { NotificationPreferencesForm, loadNotificationsPage } from '@/modules/notifications';
 import { RoutineGraduationList, hasGraduated, loadRoutinesPage } from '@/modules/routines';
+import { SurfacePreferenceForm, getSurfacePreference } from '@/modules/surface';
 import { WeatherLocationForm } from '@/modules/weather';
 
 /** Session-dependent: never prerendered, so `next build` needs no secrets. */
@@ -52,11 +53,12 @@ export default async function SettingsHubPage() {
   // The layout guard redirects unauthenticated requests; this is belt-and-braces.
   if (!settings) notFound();
 
-  const [roster, routines, calendars, notifications] = await Promise.all([
+  const [roster, routines, calendars, notifications, surfacePreference] = await Promise.all([
     loadFamilyPage(),
     loadRoutinesPage(),
     loadCalendarDisplay(),
     loadNotificationsPage(),
+    getSurfacePreference(),
   ]);
 
   const t = await getTranslations('settings');
@@ -162,6 +164,14 @@ export default async function SettingsHubPage() {
           label={t('calendars.manageSubscriptions')}
           bordered
         />
+      </SettingsSection>
+
+      <SettingsSection
+        id="surface"
+        title={t('surface.title')}
+        description={t('surface.description')}
+      >
+        <SurfacePreferenceForm preference={surfacePreference} />
       </SettingsSection>
 
       {settings.canManageDisplay && settings.family ? (

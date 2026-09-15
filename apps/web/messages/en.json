@@ -1547,6 +1547,22 @@
         "invalidInput": "Check the details you entered."
       }
     },
+    "surface": {
+      "title": "Display in this browser",
+      "description": "Choose how Kynite looks in this browser — this doesn't apply to other devices.",
+      "label": "Display",
+      "hint": "Automatic decides based on this device. A paired wall display never sees this setting.",
+      "options": {
+        "auto": "Automatic",
+        "app": "Phone",
+        "desktop": "Desktop"
+      },
+      "save": "Save",
+      "errors": {
+        "forbidden": "You are not allowed to change this.",
+        "invalidInput": "Check the details you entered."
+      }
+    },
     "weather": {
       "title": "Weather",
       "description": "The hub's weather uses this spot.",

@@ -54,7 +54,6 @@ export const dynamic = 'force-dynamic';
  */
 const PRE_PAINT_THEME = `(function(){try{
 var r=document.documentElement;
-r.dataset.surface='hub';
 var m=localStorage.getItem(${JSON.stringify(HUB_THEME_STORAGE_KEY)})||'auto';
 var h=new Date().getHours();
 var clock=h>=${DARK_FROM_HOUR}||h<${DARK_UNTIL_HOUR};

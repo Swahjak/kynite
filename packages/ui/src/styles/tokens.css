@@ -15,6 +15,14 @@
  * ------------------------------------------------------------------------- */
 
 @custom-variant dark (&:is(.dark *));
+/* Surface variants — key off `data-surface` on `<html>`, set server-side by the
+ * resolver in `apps/web/src/modules/surface` (H2a). `app`/`desktop`/`hub` are
+ * Tailwind variants a component can use like `hub:text-2xl` or `app:hidden`, the
+ * same way `dark:` already works. No existing utility or variant name collided
+ * with `app`, `desktop`, or `hub` before this change (verified by search). */
+@custom-variant app (&:is([data-surface='app'] *));
+@custom-variant desktop (&:is([data-surface='desktop'] *));
+@custom-variant hub (&:is([data-surface='hub'] *));
 /* ---------------------------------------------------------------------------
  * Kynite design tokens — `docs/design/` (the single source of truth for design,
  * see `docs/design/README.md`).
