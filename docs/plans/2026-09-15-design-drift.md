@@ -56,3 +56,7 @@ M1 (U1–U4 + R1): 6 agy runs (4 units + 2 retries), 4 Claude review agents (son
 | s4 | hub/app settings overlap | sonnet | 38k | 15 | done |
 | s5 | design diff `c87f15d` digest | sonnet | 119k | 48 | done |
 | agy-0 | smoke (workspace packages) | gemini flash-lo | 84k in / 0.3k out | — | ok |
+| agy-u1 | U1 primitives | gemini 3.8 flash-high | 1.69M in / 44k out / 3.76M cache | 148 steps | failed: 503 capacity all run, print timeout 25m, nothing written (retry 1 spent) |
+| agy-u1b | U1 primitives, retry | gemini 3.8 flash-high | 721k in / 18k out / 1.28M cache | — | failed: `Individual quota reached ... Resets in 166h52m` (429), nothing written |
+
+Blocker (2026-09-15 10:45): the agy account's weekly quota is exhausted on every Gemini model (3.8/3.7/3.6 flash, 3.1 pro all 429, reset ≈2026-09-22). Two U1 runs burned ~2.4M input + ~5M cache_read on reading and 503 retries without a single file write. Options: (a) wait for the reset, (b) run U1–U4 on Claude subagents (sonnet builders) under the same cap, (c) upgrade the Antigravity plan. Awaiting owner.
