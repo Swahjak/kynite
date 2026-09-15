@@ -53,7 +53,7 @@ Branch `feat/design-drift-m1`. Each unit = one `agy-delegate --tier flash --yolo
   - K2 finding (13:30): the "dark calendar blocks" were an M1 regression, not old code — `5e4c08d` put `MEMBER_COLOR_CLASSES[color].line` (a `bg-member-*-lijn` class) in the block's border slot, and that background beat `palette.surface`; `ce54284` baked it into the baselines. Fix is `.border` (`border-member-*-lijn`), baselines regenerated in run 4.
   - Gate fix (13:20): `calendar-shell.tsx` (client) importing the `@/modules/today` barrel pulled `server-only` into `calendar-shell-hub.test.tsx`; the lint rule forbids deep module imports, so `today-filter-context.tsx` moved to `src/components/hub/` (6 specifier edits, $0.10). Review 1🟡: weather form under the Calendars heading → own `SettingsSection id="weather"` ($0.02).
   - Header consistency (four header variants: `TodayHeader`, `routines-page-board.tsx:179`, `RoutinesBoard`, `store/page.tsx:77`) → M3.
-- [ ] **M3 — hub = app (D2-A)**: separate plan `docs/plans/<date>-hub-equals-app.md`, own cap; includes the "management" page idea and the `CLAUDE.md` stale reference.
+- [ ] **M3 — hub = app (D2-A)**: planned in `docs/plans/2026-09-15-hub-equals-app.md` (own cap, OpenCode executor); includes the "management" page idea and the `CLAUDE.md` stale reference.
 
 ### Cap (D3, approved 2026-09-15)
 
