@@ -124,6 +124,72 @@ async function seedBoard(familyId: string, scope: string) {
   });
 }
 
+/**
+ * Two-member seed for the family-wide `/hub/routines` overview (M3): one
+ * column with a live routine and a completed step (NU + praise), one column
+ * fully done (KLAAR), so both readings the dense card supports are in the
+ * shot — this is the regression coverage for dropping the hub type
+ * inflation (`packages/ui/src/styles/tokens.css`'s "REMOVED 2026-09-15"
+ * comment): the cards must still fit three columns without clipping at the
+ * base type scale.
+ */
+async function seedFamilyBoard(familyId: string, scope: string) {
+  return withDb(async (client) => {
+    await ownerMemberOf(client, familyId);
+    await client.query(`delete from member where id::text like $1`, [
+      `00000000-0000-4000-8000-000000${scope}%`,
+    ]);
+    const [fien, joep] = await seedMembers(client, familyId, [
+      { id: ID(scope, '00001'), displayName: 'Fien', role: 'child', color: 'orchid', sortOrder: 1 },
+      { id: ID(scope, '00002'), displayName: 'Joep', role: 'child', color: 'blue', sortOrder: 2 },
+    ]);
+
+    const [fienMorning] = await seedRoutines(client, familyId, [
+      {
+        id: ID(scope, '01000'),
+        title: 'Ochtendroutine',
+        ownerMemberId: fien.id,
+        icon: 'wb_sunny',
+        schedule: { rrule: 'FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR', timeOfDay: '07:15' },
+        starsPerCompletion: 3,
+        createdAt: SERIES_START,
+        steps: [
+          { id: ID(scope, '01001'), title: 'Aankleden' },
+          { id: ID(scope, '01002'), title: 'Ontbijt eten' },
+          { id: ID(scope, '01003'), title: 'Bordje in de keuken zetten' },
+          { id: ID(scope, '01004'), title: 'Tanden poetsen', timerSeconds: 120 },
+        ],
+      },
+    ]);
+
+    const [joepMorning] = await seedRoutines(client, familyId, [
+      {
+        id: ID(scope, '02000'),
+        title: 'Ochtendroutine',
+        ownerMemberId: joep.id,
+        icon: 'wb_sunny',
+        schedule: { rrule: 'FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR', timeOfDay: '07:30' },
+        starsPerCompletion: 3,
+        createdAt: SERIES_START,
+        steps: [
+          { id: ID(scope, '02001'), title: 'Aankleden' },
+          { id: ID(scope, '02002'), title: 'Ontbijt eten' },
+        ],
+      },
+    ]);
+
+    await seedCompletions(client, familyId, fien.id, [
+      { routineId: fienMorning.id, routineStepId: fienMorning.stepIds[0], occurrenceDate: ANCHOR },
+    ]);
+    await seedCompletions(client, familyId, joep.id, [
+      { routineId: joepMorning.id, routineStepId: joepMorning.stepIds[0], occurrenceDate: ANCHOR },
+      { routineId: joepMorning.id, routineStepId: joepMorning.stepIds[1], occurrenceDate: ANCHOR },
+    ]);
+
+    return { fien, joep };
+  });
+}
+
 type ViewportName = keyof typeof VIEWPORTS;
 
 for (const [name, viewport] of Object.entries(VIEWPORTS) as [
@@ -159,5 +225,63 @@ for (const [name, viewport] of Object.entries(VIEWPORTS) as [
         });
       });
     }
+  });
+}
+
+for (const [name, viewport] of Object.entries(VIEWPORTS) as [
+  ViewportName,
+  (typeof VIEWPORTS)[ViewportName],
+][]) {
+  test.describe(`family routines board visuals — ${name}`, { tag: '@visual' }, () => {
+    test.use({ viewport });
+
+    test('hub family routines board (nl)', async ({ page, family }) => {
+      await pairHub(page, family.familyId);
+
+      const scope = { tablet: 'c', mobile: 'd' }[name];
+      await seedFamilyBoard(family.familyId, scope);
+      await withDb((client) => setFamilyLocale(client, family.familyId, 'nl'));
+
+      await page.goto(`/nl/hub/routines?date=${ANCHOR}&time=${ANCHOR_TIME}`);
+      await expect(page.getByTestId('routines-page-board')).toBeVisible();
+      await settlePage(page);
+
+      await expect(page).toHaveScreenshot(`hub-routines-family-${name}.png`, {
+        fullPage: true,
+      });
+    });
+  });
+}
+
+/**
+ * `/hub/taken` shares `RoutinesBoard`'s member columns and progress cards
+ * with the same `--text-*` tokens the family routines page uses, so it is
+ * exposed to the same hub-type-inflation removal — see the "docs/plans/
+ * 2026-09-15-routines-page-density.md" note in `tokens.css`. No dedicated
+ * visual spec exists for this board yet, so its baseline lives alongside the
+ * routine visuals it shares seed data and fixtures with.
+ */
+for (const [name, viewport] of Object.entries(VIEWPORTS) as [
+  ViewportName,
+  (typeof VIEWPORTS)[ViewportName],
+][]) {
+  test.describe(`taken board visuals — ${name}`, { tag: '@visual' }, () => {
+    test.use({ viewport });
+
+    test('hub taken board (nl)', async ({ page, family }) => {
+      await pairHub(page, family.familyId);
+
+      const scope = { tablet: '0', mobile: '1' }[name];
+      await seedFamilyBoard(family.familyId, scope);
+      await withDb((client) => setFamilyLocale(client, family.familyId, 'nl'));
+
+      await page.goto(`/nl/hub/taken?date=${ANCHOR}&time=${ANCHOR_TIME}`);
+      await expect(page.getByTestId('hub-taken-board')).toBeVisible();
+      await settlePage(page);
+
+      await expect(page).toHaveScreenshot(`hub-taken-${name}.png`, {
+        fullPage: true,
+      });
+    });
   });
 }

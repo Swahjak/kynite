@@ -16,7 +16,7 @@ import {
   initialsOf,
   type GreetingSlot,
 } from '@/modules/family';
-import { loadFamilyRoutineTotals } from '@/modules/routines';
+import { instantAt, loadFamilyRoutineTotals } from '@/modules/routines';
 import { loadTodayTasks, type TodayTasksData } from '@/modules/tasks';
 import { getFamilyWeather, type WeatherView } from '@/modules/weather';
 import { flowOf, type DayReference, type Flow } from './domain/flow';
@@ -84,6 +84,17 @@ export async function loadHubBoardComposition(options: {
   date?: string;
   now?: string;
   /**
+   * `?time=HH:MM` — pins the rendered clock to `date` at this wall time in
+   * the family's time zone, exactly like `/hub/routines`'s own `?date=`/
+   * `?time=` (`loadFamilyRoutines`'s `resolveNow`). `loadCalendarPage` has no
+   * notion of "now" beyond the real clock (and stays that way for its other
+   * callers — the parent app has no use for a pinned clock), so the pin is
+   * applied here, after the read, by overriding `data.now` and recomputing
+   * every field derived from it. Ignored without `date`, same as the
+   * routines page.
+   */
+  time?: string;
+  /**
    * `?view=` (`/hub/kalender` only) — `loadCalendarPage` still wins with the
    * family's `hubDefaultView` when this is absent, exactly as
    * `page-data.ts`'s own comment describes.
@@ -95,6 +106,10 @@ export async function loadHubBoardComposition(options: {
 
   const data = await loadCalendarPage({ date: options.date, view: options.view, surface: 'hub' });
   if (!data) return null;
+
+  const pinned =
+    options.date && options.time ? instantAt(options.date, options.time, data.timeZone) : null;
+  if (pinned) data.now = pinned;
 
   // M19: one entry per child, carrying today's step count — see the note this
   // was lifted from in `hub/page.tsx`'s git history. One family-wide read,

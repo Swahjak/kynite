@@ -105,8 +105,13 @@ export function TodayTimelineFilter({
                 className={cn(
                   'rounded-full p-0 transition-opacity',
                   // Dimmed until chosen: at rest the faces are an affordance, not
-                  // four competing statements about whose day this is.
-                  active ? 'opacity-100 ring-2 ring-primary' : 'opacity-45 hover:opacity-80'
+                  // four competing statements about whose day this is. 80%, not
+                  // 45% — the initials inside are real text (AvatarFallback's
+                  // `text-foreground`), and axe measured the blended result of
+                  // 45% against every member baan tint below AA (as low as
+                  // 2.5:1). 80% is the floor axe measures at or above 4.5:1 on
+                  // every member baan tint.
+                  active ? 'opacity-100 ring-2 ring-primary' : 'opacity-80 hover:opacity-90'
                 )}
                 onClick={() => setSelected(active ? null : face.id)}
               >

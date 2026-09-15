@@ -91,6 +91,20 @@ type Story = StoryObj<typeof meta>;
 
 export const Playground: Story = {};
 
+export const Dense: Story = {
+  args: { dense: true },
+  render: (args) => (
+    <Specimen
+      name="RoutineCard/dense"
+      note="The family-wide `/hub/routines` board (`Actieve routines.dc.html`): no left rail, a smaller title and medallion, and a one-column step grid, at the ~380px width a card gets in a three-column layout."
+    >
+      <div className="w-[380px]">
+        <RoutineCard {...args} />
+      </div>
+    </Specimen>
+  ),
+};
+
 export const States: Story = {
   render: () => (
     <Section title="Routine card — the five readings">

@@ -146,7 +146,7 @@ export function HubRail({
               'flex size-13 flex-col items-center justify-center gap-0.5 rounded-2xl transition-colors duration-200 ease-brand',
               'focus-visible:ring-3 focus-visible:ring-ring/50',
               active
-                ? 'bg-primary/10 text-primary'
+                ? 'bg-accent text-accent-foreground'
                 : 'text-ink-secondary hover:bg-surface-hover hover:text-foreground'
             )}
           >

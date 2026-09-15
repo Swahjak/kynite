@@ -194,3 +194,48 @@ export const Tiles: Story = {
     </Section>
   ),
 };
+
+export const DenseTiles: Story = {
+  name: 'Tile variant — dense (family board)',
+  render: () => (
+    <Section title="Step row — dense tile, the family-wide `/hub/routines` column">
+      <ul className="grid w-full max-w-xs grid-cols-1 gap-2">
+        <StepRow
+          variant="tile"
+          dense
+          stepId="uit-bed"
+          title="Uit bed"
+          done
+          timerSeconds={null}
+          praiseText="Goed bezig!"
+          stars={3}
+          starLabel="3 sterren verdiend"
+          actionLabel="Uit bed is klaar"
+          icon="bedtime"
+          iconTintClass="bg-cat-teal-surface text-cat-teal-fg"
+        />
+        <StepRow
+          variant="tile"
+          dense
+          stepId="tanden"
+          title="Tanden poetsen"
+          done={false}
+          active
+          timerSeconds={120}
+          praiseText="Knap gedaan!"
+          stars={3}
+          starLabel="3 sterren verdiend"
+          actionLabel="Markeer Tanden poetsen als klaar"
+          icon="dentistry"
+          iconTintClass="bg-cat-teal-surface text-cat-teal-fg"
+        />
+      </ul>
+      <Specimen
+        name="StepRow/dense tile notes"
+        note="64px minimum height (`min-h-16`) instead of 80px — the one-column width a routine card gets on the family board."
+      >
+        <span />
+      </Specimen>
+    </Section>
+  ),
+};

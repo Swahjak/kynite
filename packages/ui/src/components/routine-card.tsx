@@ -14,7 +14,11 @@ import { StepRow } from './step-row';
  * - **Expanded** — the one routine that is live right now, and the only card a
  *   child interacts with. A 6px indigo rail down its left edge, the NU badge
  *   beside the title, a praise line, and the steps as a two-column grid of
- *   tiles. Exactly one card on the board is ever in this state.
+ *   tiles. Exactly one card on the board is ever in this state. `dense`
+ *   (the family-wide board, `Actieve routines.dc.html`) drops the rail — a
+ *   1px border plus a shadow already marks the live card there — shrinks the
+ *   title and the icon medallion, and lays the steps in one column instead
+ *   of two.
  * - **Done** — collapses to a calm success line on the container tone: a green
  *   check, the title, and the stars it paid. Not a trophy and not a score; a
  *   finished routine stops competing for attention with the one that has not
@@ -255,12 +259,16 @@ export function RoutineCard({
       {...shared}
       className={cn(
         'relative isolate overflow-hidden rounded-xl border border-line-subtle bg-surface-container-lowest shadow-sm',
-        dense ? 'py-4 pr-4 pl-5' : 'py-6 pr-6 pl-7'
+        dense ? 'p-4' : 'py-6 pr-6 pl-7'
       )}
     >
-      {/* The rail. Six pixels of indigo down the whole left edge is the board's
-          only "this one, now" marker that needs no reading at all. */}
-      <span aria-hidden className="absolute inset-y-0 left-0 w-1.5 bg-primary" />
+      {/* The rail. Six pixels of indigo down the whole left edge is the
+          board's "this one, now" marker that needs no reading at all — the
+          family-wide page (`dense`) drops it instead: at ~380px a card
+          already carries a 1px border plus a shadow when it is the live one
+          (`Actieve routines.dc.html`), and a second accent down the edge on
+          top of that reads as noise rather than emphasis. */}
+      {dense ? null : <span aria-hidden className="absolute inset-y-0 left-0 w-1.5 bg-primary" />}
 
       <header className={cn('relative flex items-center gap-4', onToggle && 'pr-9')}>
         {onToggle ? (
@@ -278,13 +286,18 @@ export function RoutineCard({
           icon={routine.icon}
           tint={copy.tileClass ? 'none' : 'brand-container'}
           shape="squircle"
-          size="2xl"
+          size={dense ? 'xl' : '2xl'}
           className={copy.tileClass}
         />
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-            <h3 className="min-w-0 font-display text-h1 font-extrabold text-balance text-ink">
+            <h3
+              className={cn(
+                'min-w-0 font-display font-extrabold text-balance text-ink',
+                dense ? 'text-h3 tracking-tight' : 'text-h1'
+              )}
+            >
               {routine.title}
             </h3>
             <Badge
@@ -320,7 +333,7 @@ export function RoutineCard({
       {copy.praiseLine ? (
         <p
           data-testid="routine-praise"
-          className="mt-3.5 mb-4.5 flex items-center gap-2.5 rounded-2xl bg-accent px-4 py-2.5 font-display text-body font-bold text-brand-ink"
+          className="mt-3.5 mb-4.5 flex items-center gap-2.5 rounded-2xl bg-accent px-4 py-2.5 font-display text-body font-bold text-accent-foreground"
         >
           <Icon name="celebration" filled size="sm" className="shrink-0" />
           {copy.praiseLine}
@@ -338,6 +351,7 @@ export function RoutineCard({
           <StepRow
             key={step.id}
             variant="tile"
+            dense={dense}
             stepId={step.id}
             title={step.title}
             done={step.done}
