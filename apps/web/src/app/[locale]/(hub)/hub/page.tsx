@@ -5,6 +5,7 @@ import { HubBoard } from '@/modules/calendar';
 import { requireHubDevice } from '@/modules/devices';
 import {
   TodayFab,
+  TodayFilterProvider,
   TodayHeader,
   TodayLive,
   TodayTabDag,
@@ -149,44 +150,46 @@ export default async function HubPage({
           events: data.events,
         }}
       >
-        <TodayHeader
-          surface="hub"
-          greeting={t(`hubGreeting.${slot}`)}
-          anchor={data.anchor}
-          now={data.now}
-          timeZone={data.timeZone}
-          dayKey={dayKey}
-          isToday={isToday}
-          members={data.members}
-          // A chevron must not navigate the kiosk out of the `(hub)` tree.
-          href="/hub"
-        />
+        <TodayFilterProvider>
+          <TodayHeader
+            surface="hub"
+            greeting={t(`hubGreeting.${slot}`)}
+            anchor={data.anchor}
+            now={data.now}
+            timeZone={data.timeZone}
+            dayKey={dayKey}
+            isToday={isToday}
+            members={data.members}
+            // A chevron must not navigate the kiosk out of the `(hub)` tree.
+            href="/hub"
+          />
 
-        <TodayTabDag
-          surface="hub"
-          members={data.members}
-          events={data.events}
-          timeZone={data.timeZone}
-          dayKey={dayKey}
-          now={data.now}
-          isToday={isToday}
-          nowEventKeys={nowEventKeys}
-          heroEvents={heroEvents}
-          flowMode={flow.mode}
-          referenceNow={reference.now}
-          // `canWrite` / `canComplete` come from the matrix inside
-          // `loadTodayTasks`: a device may tick a task off and may not
-          // invent or delete one.
-          tasks={tasks}
-          kids={progress?.kids ?? null}
-          // One full-width row above the columns on a day that means
-          // something, and nothing at all on the other 348.
-          banner={theme ? <TodayThemeBanner theme={theme} /> : null}
-          // Nothing at all when the household set no location — see the widget.
-          weather={weather ? <WeatherWidget view={weather} /> : null}
-          // The per-child entry points, inside the tab's own scroller.
-          launcher={<ChildLauncher entries={children} />}
-        />
+          <TodayTabDag
+            surface="hub"
+            members={data.members}
+            events={data.events}
+            timeZone={data.timeZone}
+            dayKey={dayKey}
+            now={data.now}
+            isToday={isToday}
+            nowEventKeys={nowEventKeys}
+            heroEvents={heroEvents}
+            flowMode={flow.mode}
+            referenceNow={reference.now}
+            // `canWrite` / `canComplete` come from the matrix inside
+            // `loadTodayTasks`: a device may tick a task off and may not
+            // invent or delete one.
+            tasks={tasks}
+            kids={progress?.kids ?? null}
+            // One full-width row above the columns on a day that means
+            // something, and nothing at all on the other 348.
+            banner={theme ? <TodayThemeBanner theme={theme} /> : null}
+            // Nothing at all when the household set no location — see the widget.
+            weather={weather ? <WeatherWidget view={weather} /> : null}
+            // The per-child entry points, inside the tab's own scroller.
+            launcher={<ChildLauncher entries={children} />}
+          />
+        </TodayFilterProvider>
       </HubBoard>
 
       {/* M09: a running timer is on the board without anyone navigating to it.

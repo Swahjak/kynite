@@ -12,6 +12,7 @@ import {
 import { getHouseholdFormattingLocale, MEMBER_COLOR_CLASSES, type Member } from '@/modules/family';
 import { MemberFaces, joinNames, namesOf } from './member-faces';
 import { TodayPastRows } from './today-past-rows';
+import { TodayPastToggle } from './today-past-toggle';
 import { TodayTimelineFilter } from './today-timeline-filter';
 
 /**
@@ -235,19 +236,27 @@ export async function TodayTimeline({
    */
   const eyebrow = <h2 className="label-overline text-ink-muted">{t('timeline.title')}</h2>;
 
-  const disclosure =
-    collapsed.length > 0 && lastCollapsed ? (
-      <TodayPastRows
-        summary={t(collapsedHasLive ? 'timeline.hidden' : 'timeline.done', {
+  const pastSummary =
+    collapsed.length > 0 && lastCollapsed
+      ? t(collapsedHasLive ? 'timeline.hidden' : 'timeline.done', {
           count: collapsed.length,
           title: titleOf(lastCollapsed.event, {
             untitled: tCalendar('untitled'),
             busy: tCalendar('busy'),
           }),
           time: lastCollapsed.event.allDay ? t('allDay') : at(lastCollapsed.event.startsAt),
-        })}
-        label={t(collapsedHasLive ? 'timeline.showHidden' : 'timeline.showDone')}
+        })
+      : null;
+
+  const pastLabel = collapsedHasLive ? t('timeline.showHidden') : t('timeline.showDone');
+
+  const disclosure =
+    pastSummary !== null ? (
+      <TodayPastRows
+        summary={pastSummary}
+        label={pastLabel}
         header={density === 'card' ? eyebrow : undefined}
+        hideToggle={density === 'list'}
       >
         {collapsed.map(render)}
       </TodayPastRows>
@@ -304,19 +313,17 @@ export async function TodayTimeline({
       ) : (
         <TodayTimelineFilter
           heading={<SectionHeading title={t('timeline.title')} size="card" level={2} />}
-          faces={members.map((member) => ({
-            id: member.id,
-            name: member.displayName,
-            avatarUrl: member.avatarUrl,
-            surfaceClass: MEMBER_COLOR_CLASSES[member.color].track,
-          }))}
           rows={rest.map((row) => ({
             id: row.event.key,
             memberIds: memberIdsFor(row),
             node: render(row),
           }))}
           disclosure={disclosure}
-          everyoneLabel={tCalendar('everyone')}
+          headerEnd={
+            pastSummary !== null ? (
+              <TodayPastToggle summary={pastSummary} label={pastLabel} />
+            ) : undefined
+          }
           emptyLabel={tCalendar('freeDay')}
         />
       )}

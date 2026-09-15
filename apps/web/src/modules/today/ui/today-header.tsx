@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { FaceStack, Icon, PageHeader, cn, type StackedFace } from '@kynite/ui';
+import { Icon, PageHeader, cn } from '@kynite/ui';
 import { Link } from '@/i18n/navigation';
 import { formatDateTime } from '@/i18n/formatting-locale';
 import { CATEGORY_CLASSES, addDays, toDateKey, toWall } from '@/modules/calendar';
@@ -12,6 +12,8 @@ import {
 import { CONFETTI_SLUGS, specialDaysOn, upcomingCountdown } from '@/modules/holidays';
 import { HolidayConfetti } from './holiday-confetti';
 import { TodayClock } from './today-clock';
+import { TodayHeaderFaces } from './today-header-faces';
+import type { TimelineFace } from './today-timeline-filter';
 
 /**
  * The top band of the day — on the phone (`(app)/today`) and on the wall hub
@@ -106,6 +108,7 @@ export async function TodayHeader({
 }: TodayHeaderProps) {
   const t = await getTranslations('today');
   const tHolidays = await getTranslations('holidays');
+  const tCalendar = await getTranslations('calendar');
   const formattingLocale = await getHouseholdFormattingLocale();
 
   const hub = surface === 'hub';
@@ -253,10 +256,10 @@ export async function TodayHeader({
   );
 
   if (hub) {
-    const faces: StackedFace[] = members.map((member) => ({
+    const faces: TimelineFace[] = members.map((member) => ({
       id: member.id,
       name: member.displayName,
-      avatarUrl: member.avatarUrl,
+      avatarUrl: member.avatarUrl ?? null,
       surfaceClass: MEMBER_COLOR_CLASSES[member.color].track,
     }));
 
@@ -279,18 +282,17 @@ export async function TodayHeader({
             <div className="flex items-center gap-4">
               {dayNav}
 
-              {/* Four separate faces, not a stack. `FaceStack` overlaps by
-                  default (`-space-x-2`), which is right on an event card where
-                  the faces answer "whose is this" as one picture — but the wall
-                  header's row *is* the household, drawn at the design's 34px
-                  with a 6px gap ("Vandaag.dc.html":56–61), and at the kiosk type
-                  scale the overlap was clipping the initials of every face but
-                  the last. */}
-              <FaceStack
+              {/* Four separate faces, not a stack, when unfiltered — `FaceStack`
+                  overlaps by default (`-space-x-2`), which is right on an event
+                  card where the faces answer "whose is this" as one picture,
+                  but the wall header's row *is* the household. When filtering
+                  is available (inside a `TodayFilterProvider`), the faces
+                  double as the day's member filter — the August sheet's
+                  replacement for the old "Per persoon" column. */}
+              <TodayHeaderFaces
                 faces={faces}
-                size="default"
-                label={t('familyLabel')}
-                className="space-x-0 gap-1.5"
+                everyoneLabel={tCalendar('everyone')}
+                familyLabel={t('familyLabel')}
               />
 
               {/* The one element on the screen sized for the far side of the

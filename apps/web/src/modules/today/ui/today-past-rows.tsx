@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from 'react';
 import { cn, Icon } from '@kynite/ui';
+import { useTodayFilter } from './today-filter-context';
 
 /**
  * The collapsed "already happened" band at the top of the day timeline.
@@ -44,6 +45,7 @@ export function TodayPastRows({
   summary,
   label,
   header,
+  hideToggle,
   children,
 }: {
   /** "3 afgerond — Ontbijt (07:30)". */
@@ -52,36 +54,43 @@ export function TodayPastRows({
   label: string;
   /** The section's own heading, put on the toggle's row and pushed left. */
   header?: ReactNode;
+  /** True when the toggle button is rendered elsewhere (e.g. a header slot). */
+  hideToggle?: boolean;
   children: ReactNode;
 }) {
-  const [open, setOpen] = useState(false);
+  const filter = useTodayFilter();
+  const [localOpen, setLocalOpen] = useState(false);
+  const open = filter ? filter.pastOpen : localOpen;
+  const setOpen = filter ? filter.setPastOpen : setLocalOpen;
 
   return (
     <div className="flex flex-col">
-      <div
-        className={header ? 'flex min-w-0 items-center justify-between gap-3 pb-2.5' : 'contents'}
-      >
-        {header ? <div className="shrink-0">{header}</div> : null}
-        <button
-          type="button"
-          data-testid="today-past-toggle"
-          aria-expanded={open}
-          aria-label={label}
-          onClick={() => setOpen((previous) => !previous)}
-          className={
-            header
-              ? 'flex min-w-0 items-center gap-1.5 rounded-lg text-ink-muted transition-colors duration-200 hover:text-ink focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none'
-              : 'flex items-center gap-2 self-start rounded-lg py-1 pb-3.5 pl-14 text-ink-muted transition-colors duration-200 hover:text-ink focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none'
-          }
+      {hideToggle ? null : (
+        <div
+          className={header ? 'flex min-w-0 items-center justify-between gap-3 pb-2.5' : 'contents'}
         >
-          <Icon
-            name="expand_more"
-            size={header ? 'xs+' : 'sm'}
-            className={cn('shrink-0 transition-transform', open && 'rotate-180')}
-          />
-          <span className={header ? 'truncate text-caption' : 'text-body-sm'}>{summary}</span>
-        </button>
-      </div>
+          {header ? <div className="shrink-0">{header}</div> : null}
+          <button
+            type="button"
+            data-testid="today-past-toggle"
+            aria-expanded={open}
+            aria-label={label}
+            onClick={() => setOpen((previous) => !previous)}
+            className={
+              header
+                ? 'flex min-w-0 items-center gap-1.5 rounded-lg text-ink-muted transition-colors duration-200 hover:text-ink focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none'
+                : 'flex items-center gap-2 self-start rounded-lg py-1 pb-3.5 pl-14 text-ink-muted transition-colors duration-200 hover:text-ink focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none'
+            }
+          >
+            <Icon
+              name="expand_more"
+              size={header ? 'xs+' : 'sm'}
+              className={cn('shrink-0 transition-transform', open && 'rotate-180')}
+            />
+            <span className={header ? 'truncate text-caption' : 'text-body-sm'}>{summary}</span>
+          </button>
+        </div>
+      )}
 
       {open ? <div className="flex flex-col">{children}</div> : null}
     </div>

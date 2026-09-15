@@ -1,8 +1,5 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
-import { Badge, Button, cn, MemberFace } from '@kynite/ui';
-
 /**
  * The day list's member filter — the August sheet's replacement for the "Per
  * persoon" column that used to sit beside it.
@@ -30,6 +27,9 @@ import { Badge, Button, cn, MemberFace } from '@kynite/ui';
  * idle-return brings it back to "Iedereen" without anyone tapping.
  */
 
+import type { ReactNode } from 'react';
+import { useTodayFilter } from './today-filter-context';
+
 export type TimelineFace = {
   id: string;
   name: string;
@@ -41,7 +41,6 @@ export type TimelineFace = {
 export type TodayTimelineFilterProps = {
   /** The list's own heading, which shares its row with the filter controls. */
   heading: ReactNode;
-  faces: TimelineFace[];
   /**
    * The rows, in order. `memberIds` is who the row is *for* — a household-wide
    * event carries everyone, so it survives every filter, which is right: a
@@ -50,21 +49,21 @@ export type TodayTimelineFilterProps = {
   rows: { id: string; memberIds: string[]; node: ReactNode }[];
   /** Rendered above the rows whatever the filter says — the "already done" line. */
   disclosure?: ReactNode;
-  /** "Iedereen" — the resting state's label. */
-  everyoneLabel: string;
+  /** Rendered at the right of the heading row, e.g. the past-rows toggle. */
+  headerEnd?: ReactNode;
   /** Shown when the chosen person has nothing left today. */
   emptyLabel: string;
 };
 
 export function TodayTimelineFilter({
   heading,
-  faces,
   rows,
   disclosure,
-  everyoneLabel,
+  headerEnd,
   emptyLabel,
 }: TodayTimelineFilterProps) {
-  const [selected, setSelected] = useState<string | null>(null);
+  const filter = useTodayFilter();
+  const selected = filter?.selected ?? null;
 
   const shown = selected === null ? rows : rows.filter((row) => row.memberIds.includes(selected));
 
@@ -72,59 +71,7 @@ export function TodayTimelineFilter({
     <>
       <div className="flex items-center gap-3 px-3">
         <div className="min-w-0 flex-1">{heading}</div>
-        <div data-testid="today-timeline-filter" className="flex items-center gap-1.5">
-          {/* The resting state is drawn as the selected pill rather than as one
-            option among five, so an unfiltered day never looks like a filtered
-            one somebody forgot to clear. Flat white/`outline` rather than
-            `status`'s solid primary fill on both counts — the selected read
-            comes from the stronger border and bold ink instead of a filled
-            chip, since "Iedereen" sits beside the member faces' own primary
-            ring and a filled pill here doubled that signal. */}
-          <Badge
-            variant="outline"
-            size="lg"
-            className={cn(
-              'cursor-pointer bg-card',
-              selected === null ? 'border-ink font-bold text-ink' : 'text-ink-secondary'
-            )}
-            data-state={selected === null ? 'on' : 'off'}
-            render={<button type="button" onClick={() => setSelected(null)} />}
-          >
-            {everyoneLabel}
-          </Badge>
-
-          {faces.map((face) => {
-            const active = selected === face.id;
-            return (
-              <Button
-                key={face.id}
-                variant="ghost"
-                size="icon-lg"
-                aria-pressed={active}
-                data-testid="today-timeline-filter-face"
-                className={cn(
-                  'rounded-full p-0 transition-opacity',
-                  // Dimmed until chosen: at rest the faces are an affordance, not
-                  // four competing statements about whose day this is. 80%, not
-                  // 45% — the initials inside are real text (AvatarFallback's
-                  // `text-foreground`), and axe measured the blended result of
-                  // 45% against every member baan tint below AA (as low as
-                  // 2.5:1). 80% is the floor axe measures at or above 4.5:1 on
-                  // every member baan tint.
-                  active ? 'opacity-100 ring-2 ring-primary' : 'opacity-80 hover:opacity-90'
-                )}
-                onClick={() => setSelected(active ? null : face.id)}
-              >
-                <MemberFace
-                  name={face.name}
-                  avatarUrl={face.avatarUrl}
-                  surfaceClass={face.surfaceClass}
-                  size="default"
-                />
-              </Button>
-            );
-          })}
-        </div>
+        {selected === null ? headerEnd : null}
       </div>
 
       <div className="flex flex-col">
