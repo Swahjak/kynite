@@ -61,6 +61,7 @@ M1 (U1–U4 + R1): 6 agy runs (4 units + 2 retries), 4 Claude review agents (son
 | b1 | U1 primitives | sonnet (builder) | 169k | 74 | done (over budget 120k/50); gates green in main thread; left out: tile variant restyle, KLAAR pill, RoutineCard→StepRow memberClasses forwarding, 52px tile/28px icon, 12px row padding |
 | r1 | U1 review | sonnet (cavecrew-reviewer) | 51k | 11 | done: 0 blocking, 1 question (memberClasses forwarding, deferred to b1b) |
 | b1b | U1 leftovers (tile variant, KLAAR pill, forwarding, sizes, padding) | sonnet (builder) | 150k | 67 | done (retry 1 of 2 spent); gates green in main thread |
+| b2 | U2 routines surfaces | sonnet (builder) | | | running |
 | r1b | U1 leftovers review | sonnet (cavecrew-reviewer) | 39k | 7 | done: 2 risk + 1 question, all "unconditional new look for unmigrated callers"; accepted per D4, U2 migrates every call site |
 
 agy cost on a pay-as-you-go key (3.8 Flash promo $0.75/$3.75/$0.075 per 1M in/out/cached; lower bound, cache storage not reported): agy-0 $0.06, agy-u1 $1.71, agy-u1b $0.70, total ≈ $2.50 (≈ $5 at the post-2026 rate).
