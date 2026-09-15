@@ -1547,6 +1547,21 @@
         "invalidInput": "Controleer de ingevulde gegevens."
       }
     },
+    "weather": {
+      "title": "Weer",
+      "description": "Het weer op de hub gebruikt deze plek.",
+      "latitude": "Breedtegraad",
+      "longitude": "Lengtegraad",
+      "label": "Naam (optioneel)",
+      "useMyLocation": "Gebruik mijn locatie",
+      "hint": "Leeg laten schakelt het weer uit.",
+      "save": "Opslaan",
+      "saved": "Opgeslagen",
+      "errors": {
+        "forbidden": "Je hebt geen rechten om dit aan te passen.",
+        "invalidInput": "Controleer de ingevulde gegevens."
+      }
+    },
     "members": {
       "title": "Gezinsleden",
       "description": "Wie er in huis is, met per kind de vorm van de beloning."

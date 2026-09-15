@@ -95,4 +95,6 @@ export {
 
 export { setWeatherLocationAction } from './actions';
 
+export { WeatherLocationForm, type WeatherLocationFormProps } from './ui/weather-location-form';
+
 export { actionFailure, idleState, type ActionState } from './action-state';

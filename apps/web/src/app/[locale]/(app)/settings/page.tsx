@@ -18,6 +18,7 @@ import {
 } from '@/modules/family';
 import { NotificationPreferencesForm, loadNotificationsPage } from '@/modules/notifications';
 import { RoutineGraduationList, hasGraduated, loadRoutinesPage } from '@/modules/routines';
+import { WeatherLocationForm } from '@/modules/weather';
 
 /** Session-dependent: never prerendered, so `next build` needs no secrets. */
 export const dynamic = 'force-dynamic';
@@ -162,6 +163,20 @@ export default async function SettingsHubPage() {
           bordered
         />
       </SettingsSection>
+
+      {settings.canManageDisplay && settings.family ? (
+        <SettingsSection
+          id="weather"
+          title={t('weather.title')}
+          description={t('weather.description')}
+        >
+          <WeatherLocationForm
+            latitude={settings.family.weatherLatitude}
+            longitude={settings.family.weatherLongitude}
+            label={settings.family.weatherLocationLabel}
+          />
+        </SettingsSection>
+      ) : null}
 
       <SettingsSection id="devices" title={t('devices.title')}>
         <SettingsNavRow

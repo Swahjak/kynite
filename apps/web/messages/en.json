@@ -1547,6 +1547,21 @@
         "invalidInput": "Check the details you entered."
       }
     },
+    "weather": {
+      "title": "Weather",
+      "description": "The hub's weather uses this spot.",
+      "latitude": "Latitude",
+      "longitude": "Longitude",
+      "label": "Name (optional)",
+      "useMyLocation": "Use my location",
+      "hint": "Leaving this empty switches the weather off.",
+      "save": "Save",
+      "saved": "Saved",
+      "errors": {
+        "forbidden": "You are not allowed to change this.",
+        "invalidInput": "Check the details you entered."
+      }
+    },
     "members": {
       "title": "Members",
       "description": "Who is in the house, and how each child's rewards work."
