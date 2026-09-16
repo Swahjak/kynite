@@ -14,7 +14,8 @@ import {
   SelectValue,
 } from '@kynite/ui';
 import { useActionToast } from '@/components/ui/use-action-toast';
-import { idleState, setSurfacePreferenceAction } from '../actions';
+import { setSurfacePreferenceAction } from '../actions';
+import { idleState } from '../action-state';
 import type { SurfacePreference } from '../queries';
 
 const SURFACE_OPTIONS = ['auto', 'app', 'desktop'] as const;

@@ -65,7 +65,6 @@ async function revalidateFeeds(): Promise<void> {
   revalidatePath(`/${locale}/settings`);
   revalidatePath(`/${locale}/calendar`);
   revalidatePath(`/${locale}/today`);
-  revalidatePath(`/${locale}/hub`);
 }
 
 const addSchema = z.object({

@@ -89,7 +89,6 @@ export async function setCalendarSyncAction(
   revalidatePath(`/${locale}/settings/google`);
   revalidatePath(`/${locale}/calendar`);
   revalidatePath(`/${locale}/today`);
-  revalidatePath(`/${locale}/hub`);
   return idleState;
 }
 
@@ -264,7 +263,6 @@ export async function applyCalendarSelectionAction(
   revalidatePath(`/${locale}/settings/google`);
   revalidatePath(`/${locale}/calendar`);
   revalidatePath(`/${locale}/today`);
-  revalidatePath(`/${locale}/hub`);
   return idleState;
 }
 

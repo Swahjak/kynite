@@ -1,21 +1,27 @@
+import type { ReactNode } from 'react';
 import { render } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 /**
- * The order of the phone `(app)/today` bands.
+ * What the phone `(main)/today` page still decides about the weather card.
  *
- * The weather card used to sit *between* the NU strip and the tabs. The design
- * moved it to the top of the phone screen: on a phone the first thing the day
- * answers is "what is it doing outside", because that is what decides the coat
- * before it decides the schedule. The wall's own placement (`TodayTabDag`'s
- * `weather` slot, which only `surface="hub"` fills) is a separate composition
- * and is deliberately untouched.
+ * The weather card used to be a band of the phone page itself — above the NU
+ * strip, below the header, at `density="phone"`. H3 merged the phone and wall
+ * routes into one page, so the bands moved into `TodayTabDag`: the panel now
+ * places the weather slot and the NU block (`today-dag-weather.test.tsx` pins
+ * that placement), and the page hands the resolved weather card to it as a
+ * prop rather than drawing a band of its own.
  *
- * The assertion is on *document order*, not on source order, so it survives a
- * refactor that moves the JSX around as long as what lands in the tree is
- * right. The two today-only rules the card shares with the rest of the page —
- * it is `density="phone"`, and a browsed day gets no card at all — are pinned
- * here too, since moving a block is exactly when a gate gets dropped.
+ * What remains the page's to decide is pinned here:
+ *
+ *  1. it forwards the resolved weather card into the panel on today;
+ *  2. it forwards nothing on a browsed day — weather is *now*, not a property
+ *     of the day being looked at;
+ *  3. it derives the density from the surface — `density="phone"` on `app`,
+ *     `density="hub"` on `hub`. The page now forwards the density it resolves;
+ *     it did not in H3a (it rendered `<WeatherWidget view={weather} />` with no
+ *     density, so every surface fell back to the wall's `hub` density). These
+ *     two assertions stay so a drop of the prop goes red again.
  */
 
 vi.mock('server-only', () => ({}));
@@ -29,6 +35,7 @@ vi.mock('next-intl/server', () => ({
 }));
 
 const loadCalendarPage = vi.fn();
+const loadHubBoardComposition = vi.fn();
 
 vi.mock('@/modules/calendar', () => ({
   AddEventFabAction: () => null,
@@ -37,6 +44,32 @@ vi.mock('@/modules/calendar', () => ({
   loadCalendarPage: (...args: unknown[]) => loadCalendarPage(...args),
   toDateKey: () => '2026-08-15',
   toWall: (date: Date) => date,
+  HubBoard: ({ children }: { children: ReactNode }) => <>{children}</>,
+}));
+
+vi.mock('@/modules/devices', () => ({
+  requireMemberOrDevice: async () => undefined,
+}));
+
+const getSurface = vi.fn();
+
+vi.mock('@/modules/surface', () => ({
+  getSurface: (...args: unknown[]) => getSurface(...args),
+  presentationFor: (surface: string) => (surface === 'app' ? 'app' : 'hub'),
+}));
+
+vi.mock('@/modules/timers', () => ({
+  AmbientTimers: () => null,
+  TimerStartFabAction: () => null,
+  loadTimerBoard: async () => null,
+}));
+
+vi.mock('@/components/hub', () => ({
+  ChildLauncher: () => null,
+}));
+
+vi.mock('@kynite/ui', () => ({
+  EmptyState: () => null,
 }));
 
 vi.mock('@/modules/family', () => ({
@@ -52,21 +85,37 @@ vi.mock('@/modules/tasks', () => ({
 }));
 
 vi.mock('@/modules/today', () => ({
-  // An ordinary day, so the NU strip is drawn and the band order below is the
-  // one this file is about. The themed day is `today-page-theme.test.tsx`.
+  // An ordinary day, so no banner is forwarded; the themed day is
+  // `today-page-theme.test.tsx`.
   resolveTodayTheme: () => null,
   TodayThemeBanner: () => <div data-testid="today-theme-banner" />,
   TodayHeader: () => <div data-testid="today-header" />,
   TodayLive: () => null,
   TodayNowStrip: () => <div data-testid="today-now" />,
   TodayFab: () => null,
-  TodayTabDag: () => null,
+  TodayFilterProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
+  TodayTabDag: ({
+    weather,
+    banner,
+    launcher,
+  }: {
+    weather?: ReactNode;
+    banner?: ReactNode;
+    launcher?: ReactNode;
+  }) => (
+    <div data-testid="today-dag">
+      {banner}
+      {weather}
+      {launcher}
+    </div>
+  ),
   TodayTabPersonen: () => null,
   TodayTabRoutines: () => null,
   TodayTabSterren: () => null,
   TodayTabs: () => <div data-testid="today-tabs" />,
   flowOf: () => ({ mode: 'next', hero: null, live: false, liveBlocks: [] }),
   loadTodayProgress: async () => null,
+  loadHubBoardComposition: (...args: unknown[]) => loadHubBoardComposition(...args),
 }));
 
 const weatherProps = vi.fn();
@@ -79,20 +128,35 @@ vi.mock('@/modules/weather', () => ({
   getFamilyWeather: async () => ({ status: 'ok' }),
 }));
 
-const TodayPage = (await import('@/app/[locale]/(app)/today/page')).default;
+const TodayPage = (await import('@/app/[locale]/(main)/today/page')).default;
 
 const NOW = new Date('2026-08-15T09:00:00.000Z');
 
 async function renderPage({ anchor }: { anchor: Date }) {
-  loadCalendarPage.mockResolvedValue({
-    now: NOW,
-    anchor,
-    timeZone: 'Europe/Amsterdam',
-    events: [],
-    members: [],
-    calendars: [],
-    canWrite: true,
-    familyId: 'family-1',
+  const isToday = anchor.getTime() === NOW.getTime();
+
+  loadHubBoardComposition.mockResolvedValue({
+    data: {
+      familyId: 'family-1',
+      now: NOW,
+      anchor,
+      timeZone: 'Europe/Amsterdam',
+      events: [],
+      members: [],
+      view: 'day',
+      weekStartsOn: 1,
+    },
+    dayKey: '2026-08-15',
+    dayEvents: [],
+    isToday,
+    reference: { kind: 'today', now: NOW },
+    flow: { mode: 'next', hero: null, live: false, liveBlocks: [] },
+    theme: null,
+    progress: null,
+    tasks: null,
+    weather: isToday ? { status: 'ok' as const } : null,
+    children: [],
+    slot: 'morning',
   });
 
   return render(
@@ -103,18 +167,17 @@ async function renderPage({ anchor }: { anchor: Date }) {
   );
 }
 
-describe('(app)/today — band order on the phone', () => {
-  it('draws the weather card before the NU strip', async () => {
+describe('(main)/today — the weather card is the page’s to forward', () => {
+  beforeEach(() => {
+    getSurface.mockReset();
+    getSurface.mockResolvedValue('app');
+    weatherProps.mockClear();
+  });
+
+  it('forwards the weather card into the day panel on today', async () => {
     const { container } = await renderPage({ anchor: NOW });
 
-    const order = [...container.querySelectorAll('[data-testid]')].map((node) =>
-      node.getAttribute('data-testid')
-    );
-
-    expect(order).toContain('weather-card');
-    expect(order.indexOf('weather-card')).toBeLessThan(order.indexOf('today-now'));
-    // …and it is still a band of the page, not a thing above the header.
-    expect(order.indexOf('today-header')).toBeLessThan(order.indexOf('weather-card'));
+    expect(container.querySelector('[data-testid="weather-card"]')).not.toBeNull();
   });
 
   it('draws the phone density', async () => {
@@ -123,10 +186,17 @@ describe('(app)/today — band order on the phone', () => {
     expect(weatherProps).toHaveBeenCalledWith(expect.objectContaining({ density: 'phone' }));
   });
 
+  it('draws the hub density', async () => {
+    getSurface.mockResolvedValue('hub');
+
+    await renderPage({ anchor: NOW });
+
+    expect(weatherProps).toHaveBeenCalledWith(expect.objectContaining({ density: 'hub' }));
+  });
+
   it('draws no weather card on a browsed day', async () => {
     const { container } = await renderPage({ anchor: new Date('2026-08-14T00:00:00.000Z') });
 
     expect(container.querySelector('[data-testid="weather-card"]')).toBeNull();
-    expect(container.querySelector('[data-testid="today-now"]')).not.toBeNull();
   });
 });

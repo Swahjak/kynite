@@ -88,9 +88,9 @@ function readNumber(formData: FormData, key: string, fallback: number): number {
 async function revalidateRewards(memberIds: readonly string[] = []): Promise<void> {
   const locale = await getLocale();
   revalidatePath(`/${locale}/rewards`);
-  revalidatePath(`/${locale}/hub/store`);
+  revalidatePath(`/${locale}/store`);
   for (const memberId of new Set(memberIds)) {
-    revalidatePath(`/${locale}/hub/stars/${memberId}`);
+    revalidatePath(`/${locale}/stars/${memberId}`);
   }
 }
 

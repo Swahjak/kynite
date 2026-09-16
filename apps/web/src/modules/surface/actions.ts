@@ -2,14 +2,11 @@
 
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
-import { assertCan, getPrincipal, type ActionState } from '@/modules/family';
+import { assertCan, getPrincipal } from '@/modules/family';
+import { idleState, type ActionState } from './action-state';
 import { SURFACE_COOKIE, type SurfaceCookieValue } from './resolve';
 
-export const idleState: ActionState = { status: 'idle' };
-
 const failure = (error: string): ActionState => ({ status: 'error', error });
-
-export type { ActionState };
 
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
 

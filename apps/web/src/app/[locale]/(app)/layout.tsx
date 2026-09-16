@@ -49,7 +49,7 @@ export default async function AppLayout({
   // A paired browser is a kiosk regardless of what other cookies it carries
   // (see `modules/family/principal.ts` on resolution order), so it goes to the
   // board rather than to a sign-in form it cannot escape.
-  if (principal?.kind === 'device') redirect({ href: '/hub', locale });
+  if (principal?.kind === 'device') redirect({ href: '/today', locale });
   if (principal?.kind !== 'member') redirect({ href: '/sign-in', locale });
   // `redirect()` throws, but next-intl's wrapper is not typed `never`, so the
   // narrowing has to be restated for the compiler. Unreachable at runtime.
@@ -98,7 +98,10 @@ export default async function AppLayout({
   const labels: NavLabels = {
     today: t('today'),
     calendar: t('calendar'),
+    tasks: t('tasks'),
+    stars: t('stars'),
     routines: t('routines'),
+    activeRoutines: t('activeRoutines'),
     rewards: t('rewards'),
     settings: t('settings'),
     timers: t('timers'),

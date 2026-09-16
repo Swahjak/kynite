@@ -24,7 +24,8 @@ import type { Member } from '@/modules/family';
  *     card in `<sc-if geenThema>`, and that rule must not be a hub rule;
  *  3. the quick-action grid is a *decided* difference, not an accident, and is
  *     never doubled with the task list's own pills;
- *  4. both routes render the same component, so the fork cannot come back.
+ *  4. the one day route renders the same panel on both surfaces, so the fork
+ *     cannot come back.
  */
 
 vi.mock('server-only', () => ({}));
@@ -147,21 +148,15 @@ describe('TodayTabDag — the theme banner reaches both surfaces', () => {
     expect(themed.container.querySelector('[data-testid="today-now"]')).toBeNull();
   });
 
-  it('draws the NU block in the hub column on an ordinary day', async () => {
-    const { container } = await renderDag({ surface: 'hub' });
+  it.each(['app', 'hub'] as const)(
+    'draws the NU block on %s on an ordinary day',
+    async (surface) => {
+      const { container } = await renderDag({ surface });
 
-    expect(container.querySelector('[data-testid="today-now"]')).not.toBeNull();
-    expect(container.querySelector('[data-testid="today-theme-banner"]')).toBeNull();
-  });
-
-  it('leaves the phone’s NU strip to the page', async () => {
-    // On the phone the strip is a band of `(app)/today` itself, above the tabs
-    // (`0dbcd61`'s order: header, weather, NU, tabs). The panel must not draw a
-    // second one inside the tab.
-    const { container } = await renderDag({ surface: 'app' });
-
-    expect(container.querySelector('[data-testid="today-now"]')).toBeNull();
-  });
+      expect(container.querySelector('[data-testid="today-now"]')).not.toBeNull();
+      expect(container.querySelector('[data-testid="today-theme-banner"]')).toBeNull();
+    }
+  );
 });
 
 describe('TodayTabDag — what stays surface-shaped', () => {
@@ -195,33 +190,35 @@ describe('TodayTabDag — what stays surface-shaped', () => {
 // coverage for "the wall's dial has two actions, the phone's has four"
 // belongs on `TodayFab` itself, not here.
 
-describe('the two routes render the same day panel', () => {
+describe('the one day route renders the same panel on both surfaces', () => {
   // Vitest runs with `apps/web` as its working directory.
   const read = (relative: string) => readFileSync(resolve('src', relative), 'utf8');
 
-  const hubPage = read('app/[locale]/(hub)/hub/page.tsx');
-  const todayPage = read('app/[locale]/(app)/today/page.tsx');
-  // M-R1: the hub's read moved into a loader shared with `/hub/kalender`
-  // (`loadHubBoardComposition`), so `resolveTodayTheme` now lives there
-  // rather than in the page itself — the page still renders the banner off
-  // what the loader hands back.
-  const hubLoader = read('modules/today/page-data-hub.ts');
+  // H3 merged the wall and phone route files into one page (`(main)/today`), so
+  // the "second file nobody thought to change" is gone. What must stay true is
+  // that the single page mounts the one panel and hands it the surface, rather
+  // than re-forking per surface.
+  const page = read('app/[locale]/(main)/today/page.tsx');
+  // M-R1: the read moved into a loader shared with `/calendar`
+  // (`loadHubBoardComposition`), so `resolveTodayTheme` now lives there rather
+  // than in the page itself — the page still renders the banner off what the
+  // loader hands back.
+  const loader = read('modules/today/page-data-hub.ts');
 
-  it('renders <TodayTabDag> on both surfaces', () => {
-    expect(hubPage).toContain('<TodayTabDag');
-    expect(todayPage).toContain('<TodayTabDag');
+  it('renders <TodayTabDag> with the surface as a prop, for both surfaces', () => {
+    expect(page).toContain('<TodayTabDag');
+    // One panel for both `surface` values: the surface is passed in, not
+    // hard-coded, so `app` and `hub` draw the same component.
+    expect(page).toContain('surface={surface}');
   });
 
   it('has no second day panel to drift against', () => {
-    expect(hubPage).not.toContain('TodayHubDag');
-    expect(todayPage).not.toContain('TodayHubDag');
+    expect(page).not.toContain('TodayHubDag');
     expect(read('modules/today/index.ts')).not.toContain('TodayHubDag');
   });
 
-  it('resolves the day’s theme on both surfaces', () => {
-    expect(hubLoader).toContain('resolveTodayTheme');
-    expect(hubPage).toContain('TodayThemeBanner');
-    expect(todayPage).toContain('resolveTodayTheme');
-    expect(todayPage).toContain('TodayThemeBanner');
+  it('resolves the day’s theme from the loader, not from a prop', () => {
+    expect(loader).toContain('resolveTodayTheme');
+    expect(page).toContain('TodayThemeBanner');
   });
 });

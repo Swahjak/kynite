@@ -4,15 +4,15 @@ import type { Member } from '@/modules/family';
 import type { KidProgress } from '@/modules/today/page-data';
 
 /**
- * The hub dashboard's routine cards link to `/hub/routines/[memberId]`; the
- * same panel on `(app)/today` does not, because that route needs a hub device
- * (`requireHubDevice`) a parent's phone never has.
+ * The wall's routine cards link to `/routines/[memberId]` — the child's own
+ * routine page, which a member and a device share since H3 (its gate is
+ * `requireMemberOrDevice`, not the removed `requireHubDevice`).
  *
- * `TodayTabDag` always passes `hub` when it mounts this panel — it only does
- * so on the `hub` surface (`today-dag-surfaces.test.tsx` pins that split) — so
- * `hub` here stands in for "reached from the wall" vs. "reached from
- * `(app)/today`'s own routines tab", which calls this component with no
- * `hub` prop at all.
+ * `TodayTabDag` only ever mounts this panel on the `hub` surface and always
+ * passes `hub` (`today-tab-dag.tsx`), so in the current tree every real caller
+ * gets the link. The `hub` prop's inert branch is now dead — nothing calls
+ * this component without it — but it is kept, and the second case below pins
+ * that the inert branch still renders no link rather than a broken one.
  */
 
 vi.mock('server-only', () => ({}));
@@ -55,11 +55,11 @@ describe('TodayTabRoutines — the card links only on the wall', () => {
   it('renders a link to the routine page when hub', async () => {
     const { container } = render(await TodayTabRoutines({ kids: [kid()], hub: true }));
 
-    const link = container.querySelector('a[href="/hub/routines/m1"]');
+    const link = container.querySelector('a[href="/routines/m1"]');
     expect(link).not.toBeNull();
   });
 
-  it('renders no link on (app)/today, which calls it with no `hub` prop', async () => {
+  it('renders no link on the inert (non-hub) branch', async () => {
     const { container } = render(await TodayTabRoutines({ kids: [kid()] }));
 
     expect(container.querySelector('a')).toBeNull();

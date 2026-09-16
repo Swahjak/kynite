@@ -26,7 +26,7 @@ import { getFamily, getPrincipal, type Principal } from '@/modules/family';
  */
 export async function requireHubDevice(
   locale: string,
-  href = '/hub',
+  href = '/today',
   searchParams?: URLSearchParams | Record<string, string | undefined>
 ): Promise<Principal> {
   const principal = await getPrincipal();
@@ -75,7 +75,7 @@ export async function requireHubDevice(
   }
 
   if (principal?.kind === 'member') redirect({ href: '/today', locale });
-  redirect({ href: '/hub/pair', locale });
+  redirect({ href: '/pair', locale });
 
   // `redirect()` throws; next-intl's wrapper is not typed `never`.
   throw new Error('unreachable');

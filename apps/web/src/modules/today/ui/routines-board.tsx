@@ -242,7 +242,7 @@ function RoutineProgressCard({ column, daypart }: { column: BoardColumn; daypart
 
   return (
     <Link
-      href={`/hub/routines/${column.memberId}`}
+      href={`/routines/${column.memberId}`}
       data-testid="routine-progress-card"
       className={cn(
         'mx-1.5 mt-3 mb-1 block min-h-12 rounded-lg p-3 transition-colors duration-200 ease-brand',

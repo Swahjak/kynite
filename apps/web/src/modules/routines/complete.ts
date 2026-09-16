@@ -80,9 +80,10 @@ export function actorOf(principal: Principal): { memberId?: string; deviceId?: s
 export async function revalidateRoutines(memberIds: readonly string[]): Promise<void> {
   const locale = await getLocale();
   revalidatePath(`/${locale}/routines`);
-  revalidatePath(`/${locale}/hub`);
+  revalidatePath(`/${locale}/manage/routines`);
+  revalidatePath(`/${locale}/today`);
   for (const memberId of new Set(memberIds)) {
-    revalidatePath(`/${locale}/hub/routines/${memberId}`);
+    revalidatePath(`/${locale}/routines/${memberId}`);
   }
 }
 

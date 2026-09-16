@@ -73,7 +73,7 @@ export function PairDevicePanel() {
           </span>
           <span className="text-body-sm text-ink-secondary" data-testid="pairing-code-hint">
             {t('pair.enterAt', {
-              url: `${typeof window === 'undefined' ? '' : window.location.host}/hub`,
+              url: `${typeof window === 'undefined' ? '' : window.location.host}/pair`,
             })}
           </span>
           <span className="text-body-sm text-ink-secondary">

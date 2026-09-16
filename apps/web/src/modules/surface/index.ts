@@ -13,7 +13,8 @@ export {
 } from './resolve';
 export { getSurface } from './server';
 export { getSurfacePreference, type SurfacePreference } from './queries';
-export { setSurfacePreferenceAction, idleState, type ActionState } from './actions';
+export { setSurfacePreferenceAction } from './actions';
+export { idleState, type ActionState } from './action-state';
 export {
   SurfacePreferenceForm,
   type SurfacePreferenceFormProps,

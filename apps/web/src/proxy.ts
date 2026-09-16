@@ -9,13 +9,12 @@ import { routing } from '@/i18n/routing';
 const intl = createMiddleware(routing);
 
 /**
- * First URL segment (after the locale) of every `(app)` route: the parent PWA,
- * which requires an account session (docs/architecture.md §2).
+ * First URL segment (after the locale) of every member-only route — the
+ * `(app)` tree, which requires an account session (docs/architecture.md §2).
+ * `/manage` is H4's Beheer index; the route does not exist yet, but the cookie
+ * rule below is already in place for it.
  */
-const PROTECTED_SECTIONS = new Set([
-  'today',
-  'calendar',
-  'routines',
+const MEMBER_SECTIONS = new Set([
   'rewards',
   'family',
   'settings',
@@ -23,14 +22,53 @@ const PROTECTED_SECTIONS = new Set([
   // layout guard is authoritative (same split as every other section here);
   // this is the same cheap early bounce.
   'oauth',
+  'manage',
+]);
+
+/**
+ * First URL segment of every page on the one route tree (H3): a member *or* a
+ * paired device renders the same page, so a request needs one of the two
+ * cookies — an account session or a device session — and never neither. The
+ * authoritative gate is `requireMemberOrDevice()` in each page; this is the
+ * cheap early bounce for a request that carries no credential at all.
+ */
+const SHARED_SECTIONS = new Set([
+  'today',
+  'calendar',
+  'routines',
+  'tasks',
+  'store',
+  'stars',
+  'timers',
+  'timer',
+  // `/clock` is the device-only screensaver, but the same "either cookie"
+  // rule applies at this layer: a member with a session is let through and
+  // redirected on by the gate in the page itself.
+  'clock',
 ]);
 
 function isLocale(segment: string | undefined): segment is (typeof routing.locales)[number] {
   return routing.locales.includes(segment as (typeof routing.locales)[number]);
 }
 
-/** The kiosk tree's own first segment (M12). */
-const HUB_SECTION = 'hub';
+/**
+ * H3 (D12): every old `/hub/*` path permanently redirects to its twin on the
+ * unprefixed one tree, keyed by the segment that followed `/hub`; `/hub`
+ * itself falls back to `today`. `routines`/`stars` keep their `[memberId]`
+ * tail; the rest are plain renames. The Fully kiosk still opens `/hub`, so
+ * this runs before any cookie check — it is a URL rewrite, not an auth gate.
+ */
+const HUB_REDIRECTS: Record<string, string> = {
+  kalender: 'calendar',
+  routines: 'routines',
+  taken: 'tasks',
+  store: 'store',
+  stars: 'stars',
+  timers: 'timers',
+  timer: 'timer',
+  pair: 'pair',
+  clock: 'clock',
+};
 
 /** The caregiver share tree's first segment — `(share)/s/[token]` (M13). */
 const SHARE_SECTION = 's';
@@ -90,16 +128,19 @@ function noIndex(response: NextResponse): NextResponse {
 }
 
 /**
- * Optimistic guard: a missing session cookie is turned away here so the tree
- * behind it is never even rendered. Cookie *presence* is not proof of a
- * session — `(app)/layout.tsx` and `requireHubDevice()` re-check against the
- * database and are authoritative. Both checks exist because the cheap one
- * saves a render and the expensive one is the one that is true.
+ * Optimistic guard: a request with no credential is turned away here so the
+ * tree behind it is never even rendered. Cookie *presence* is not proof of a
+ * session — `requireMemberOrDevice()` and the `(app)`/`(clock)` gates re-check
+ * against the database and are authoritative. Both checks exist because the
+ * cheap one saves a render and the expensive one is the one that is true.
  *
- * The two trees are mirror images: `(app)` needs an *account* cookie and
- * bounces to sign-in without one; `(hub)` needs a *device* cookie and bounces
- * to the pair screen without one. `/hub/pair` is exempt for the obvious reason
- * — it is where the device cookie comes from.
+ * One tree, two rules:
+ *
+ *  - the member-only sections (`(app)`, `/manage`) need an *account* session
+ *    cookie and bounce to sign-in without one;
+ *  - the shared sections (everything on the one tree) need *either* an
+ *    account cookie *or* a device cookie, and bounce to `/pair` with neither
+ *    — the pair screen is the one surface a credential-less kiosk can use.
  */
 export default function proxy(request: NextRequest): NextResponse {
   const segments = request.nextUrl.pathname.split('/').filter(Boolean);
@@ -145,7 +186,7 @@ export default function proxy(request: NextRequest): NextResponse {
     return noIndex(response);
   }
 
-  if (section && PROTECTED_SECTIONS.has(section) && !getSessionCookie(request)) {
+  if (section && MEMBER_SECTIONS.has(section) && !getSessionCookie(request)) {
     const url = request.nextUrl.clone();
     const intended = `${request.nextUrl.pathname}${request.nextUrl.search}`;
     url.pathname = `/${locale}/sign-in`;
@@ -166,17 +207,28 @@ export default function proxy(request: NextRequest): NextResponse {
     return noIndex(NextResponse.redirect(url));
   }
 
+  // H3 (D12): the old kiosk tree's `/hub/*` paths permanently redirect to
+  // their twins on the one tree, before any of the cookie rules below. A
+  // wall tablet that still boots to `/hub` — the Fully kiosk's start URL —
+  // carries no session and lands on `/today` with its device cookie intact.
+  if (section === 'hub') {
+    const sub = rest[1];
+    const target = (sub ? HUB_REDIRECTS[sub] : undefined) ?? 'today';
+    const tail =
+      (sub === 'routines' || sub === 'stars') && rest[2] ? `/${rest.slice(2).join('/')}` : '';
+    const url = request.nextUrl.clone();
+    url.pathname = `/${locale}/${target}${tail}`;
+    return noIndex(NextResponse.redirect(url, 308));
+  }
+
   if (
-    section === HUB_SECTION &&
-    rest[1] !== 'pair' &&
+    section &&
+    SHARED_SECTIONS.has(section) &&
     !request.cookies.has(DEVICE_SESSION_COOKIE) &&
-    // A signed-in parent is not redirected from here: `requireHubDevice()`
-    // sends them to their own surface instead, and it is the only one of the
-    // two that can tell a member principal from an unpaired tablet.
     !getSessionCookie(request)
   ) {
     const url = request.nextUrl.clone();
-    url.pathname = `/${locale}/hub/pair`;
+    url.pathname = `/${locale}/pair`;
     url.search = '';
     return noIndex(NextResponse.redirect(url));
   }

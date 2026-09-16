@@ -68,8 +68,8 @@ export function IdleReturn({ timeoutMs = HUB_IDLE_TIMEOUT_MS }: { timeoutMs?: nu
   const search = useSearchParams();
   const hasRunningTimer = useContext(TimerActivityContext);
   const pinned = ['date', 'time', 'now'].some((key) => search.get(key) !== null);
-  const watchingTimer = pathname === '/hub/timer' && hasRunningTimer;
-  const armed = pathname !== '/hub' && !pinned && !watchingTimer;
+  const watchingTimer = pathname === '/timer' && hasRunningTimer;
+  const armed = pathname !== '/today' && !pinned && !watchingTimer;
 
   useEffect(() => {
     if (!armed) return;
@@ -78,7 +78,7 @@ export function IdleReturn({ timeoutMs = HUB_IDLE_TIMEOUT_MS }: { timeoutMs?: nu
 
     const arm = () => {
       clearTimeout(handle);
-      handle = setTimeout(() => router.replace('/hub'), timeoutMs);
+      handle = setTimeout(() => router.replace('/today'), timeoutMs);
     };
 
     for (const event of ACTIVITY_EVENTS) {

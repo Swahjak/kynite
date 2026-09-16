@@ -33,7 +33,7 @@ export default async function OnboardingPage({ params }: { params: Promise<{ loc
   const { locale } = await params;
 
   const principal = await getPrincipal();
-  if (principal?.kind === 'device') redirect({ href: '/hub', locale });
+  if (principal?.kind === 'device') redirect({ href: '/today', locale });
   if (principal?.kind === 'member') redirect({ href: '/family', locale });
 
   const session = await getAuth().api.getSession({ headers: await headers() });

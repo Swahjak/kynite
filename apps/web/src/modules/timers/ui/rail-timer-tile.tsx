@@ -55,12 +55,12 @@ export function RailTimerTile({ initial }: { initial: TimerBoardData }) {
   const soonest = sorted[0];
   const paused = phaseOf(soonest, now) === 'paused';
   const ratio = progressRatio(soonest, now);
-  const active = pathname === '/hub/timer';
+  const active = pathname === '/timer';
   const count = timers.length;
 
   return (
     <Link
-      href="/hub/timer"
+      href="/timer"
       data-testid="hub-rail-timer"
       data-active={active ? 'true' : 'false'}
       data-paused={paused ? 'true' : 'false'}
