@@ -23,7 +23,7 @@ export const dynamic = 'force-dynamic';
  *
  * Until M-R1 this page mounted `TodayTabs` and all four of `/today`'s panels
  * at once, switched by a pill row the wall's own nav rail duplicated in
- * spirit (`HubRail`'s three-then-four destinations vs. the pills' four
+ * spirit (`NavRail`'s three-then-four destinations vs. the pills' four
  * views). Now the rail *is* the switch — `/hub` (this page), `/hub/kalender`,
  * `/hub/routines` and `/hub/store` are real routes, and this page draws
  * exactly one of the four former tabs: the day overview, because it is the

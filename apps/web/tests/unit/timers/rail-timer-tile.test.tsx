@@ -13,9 +13,9 @@ import { RailTimerTile } from '@/modules/timers/ui/rail-timer-tile';
 import type { TimerBoardData, TimerView } from '@/modules/timers/page-data';
 
 /**
- * `HubRail`'s conditional fifth tile (M-T2).
+ * `NavRail`'s conditional fifth tile (M-T2).
  *
- * `HubRail` itself may not import `@/modules/timers` (the boundary
+ * `NavRail` itself may not import `@/modules/timers` (the boundary
  * `RailTimerTile`'s own doc comment explains), so this is the one place the
  * tile's two contracts are actually exercised: it draws nothing at all with
  * no timers, and once one is running its fill tracks the soonest-ending

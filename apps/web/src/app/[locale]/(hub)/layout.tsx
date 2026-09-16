@@ -1,15 +1,13 @@
 import type { Metadata } from 'next';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
-import {
-  DARK_FROM_HOUR,
-  DARK_UNTIL_HOUR,
-  HUB_THEME_STORAGE_KEY,
-  KioskShell,
-} from '@/components/hub';
+import { getTranslations } from 'next-intl/server';
+import { DARK_FROM_HOUR, DARK_UNTIL_HOUR, HUB_THEME_STORAGE_KEY } from '@/components/hub';
 import { BrandMark } from '@/components/brand';
+import { AppShell, type NavRailItem } from '@/components/shell/app-shell';
 import { FormattingLocaleProvider } from '@/components/formatting';
 import { HubReloadController, ServiceWorkerRegistrar } from '@/components/offline';
 import { RealtimeProvider } from '@/components/realtime';
+import { FabSlot } from '@/components/ui/fab';
 import { defaultFormattingLocale } from '@/i18n/formatting-locale';
 import { routing } from '@/i18n/routing';
 import { getFamily, getPrincipal } from '@/modules/family';
@@ -28,13 +26,7 @@ import {
  * settles that deliberately rather than by inertia. `docs/architecture.md` §2
  * draws `(hub)/` with `page.tsx` at the group root, but a route group does not
  * consume a URL segment, so `(hub)/page.tsx` and `(app)/today/page.tsx` would
- * both want `/[locale]` and Next.js refuses the tree outright. `/hub/*` is also
- * what §7 itself writes ("`/hub/pair` exchanges it for a device session"), what
- * `public/hub.webmanifest` scopes an installed kiosk to, and what the service
- * worker's `isHubUrl()` matches to pick the hub caching strategy (§6). Three
- * things already depend on the prefix; the diagram is the odd one out. What M12
- * *does* fix is the part that mattered: this group now has a real layout of its
- * own instead of inheriting the parent app's.
+ * both want `/[locale]` and Next.js refuses the tree outright.
  *
  * **Auth is not here.** Each hub page opens with `requireDevicePrincipal()`
  * instead, and that is not duplication — Next.js layouts do not re-render on
@@ -76,11 +68,6 @@ export default async function HubLayout({
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 }) {
-  // `params` is only read for its locale segment (the pre-paint theme script
-  // and everything else in this shell is otherwise device-driven) — the
-  // segment still keeps this dynamic under Next 16's async params, so the
-  // shell can never be prerendered into a static shell with one family's
-  // device name baked in.
   const { locale } = await params;
 
   const principal = await getPrincipal();
@@ -89,33 +76,28 @@ export default async function HubLayout({
 
   // BLOCKING 2: same rule as `(app)/layout.tsx` — the wall clock and every
   // event chip on the board must read in the family's zone, not the server's.
-  // The pair screen has no device yet and falls back to `request.ts`'s
-  // default rather than a lookup with no family to key it by.
   const family = principal?.kind === 'device' ? await getFamily(principal.familyId) : null;
   const timeZone = family?.timezone ?? 'Europe/Amsterdam';
 
-  // M-T2: `HubRail`'s timer tile and `IdleReturn`'s "don't bounce off
-  // `/hub/timer`" exemption both need to know what is running, and both live
-  // under this one shell — so it is read once here, the same seam
-  // `chimeSettings`/`brand` already use, rather than each of the two reading
-  // it again on their own. `loadTimerBoard()` takes no `now`: unlike a page,
-  // a layout is never handed `searchParams` (only a page's own props carry
-  // those in Next 16), and this data is chrome — a rail tile and an idle
-  // timer, neither of them the pinned-instant countdown a visual-suite
-  // screenshot asserts against — so there is nothing here for `?now=` to pin.
-  // `RailTimerTile` reads the pin itself, client-side (its own doc comment),
-  // rather than the layout faking one it was never handed. `loadTimerBoard`
-  // is `React.cache()`d (`page-data.ts`) so the page under this layout that
-  // reads it again for the board itself (`hub/timer/page.tsx`,
-  // `hub/timers/page.tsx`) shares this same request-scoped result instead of
-  // re-querying.
+  // M-T2: the rail's timer tile and `IdleReturn`'s "don't bounce off
+  // `/hub/timer`" exemption both need to know what is running, so it is read
+  // once here. `loadTimerBoard()` takes no `now`: unlike a page, a layout is
+  // never handed `searchParams`. `RailTimerTile` reads the pin itself,
+  // client-side, rather than the layout faking one it was never handed.
   const timers = principal?.kind === 'device' ? await loadTimerBoard() : null;
-  // The household's date/time convention (`src/i18n/formatting-locale.ts`) —
-  // see `FormattingLocaleProvider`'s doc comment for why this is a second,
-  // next-intl-independent context rather than a `NextIntlClientProvider`
-  // `locale` override (it would break the rail's `Link`s).
+  // The household's date/time convention (`src/i18n/formatting-locale.ts`).
   const uiLocale = hasLocale(routing.locales, locale) ? locale : routing.defaultLocale;
   const formattingLocale = family?.formattingLocale ?? defaultFormattingLocale(uiLocale);
+
+  // The rail's destinations, as data — the device's five tiles (M-R1).
+  const tNav = await getTranslations('hub.nav');
+  const railItems: NavRailItem[] = [
+    { key: 'vandaag', href: '/hub', icon: 'calendar_month', label: tNav('vandaag'), exact: true },
+    { key: 'kalender', href: '/hub/kalender', icon: 'view_column', label: tNav('kalender') },
+    { key: 'routines', href: '/hub/routines', icon: 'restart_alt', label: tNav('routines') },
+    { key: 'taken', href: '/hub/taken', icon: 'checklist', label: tNav('taken') },
+    { key: 'sterren', href: '/hub/store', icon: 'bar_chart', label: tNav('sterren') },
+  ];
 
   return (
     // One stream for the whole wall display (§4): the board, the timers and the
@@ -124,39 +106,34 @@ export default async function HubLayout({
       <FormattingLocaleProvider formattingLocale={formattingLocale}>
         <RealtimeProvider>
           {/* The 6-foot scale and the theme are applied before first paint, not in
-          an effect. Both hang off the *document* element (globals.css keys the
-          kiosk type scale on `[data-surface='hub']`, and the design system's
-          dark variant on `.dark`), and a wall display that painted the parent
-          app's 16px scale and then reflowed to 22px on hydration would flash
-          the wrong layout across the room on every boot and every service
-          worker reload. `useHubTheme` takes over from here and keeps both in
-          sync; this only has to be right for the first frame, so it reads the
-          same localStorage key and the same media query and nothing else. */}
+          an effect. `useHubTheme` takes over from here; this only has to be
+          right for the first frame. */}
           <script dangerouslySetInnerHTML={{ __html: PRE_PAINT_THEME }} />
           {/* B-1: registered per-surface now, not from the root `[locale]`
           layout — see `(app)/layout.tsx` for why. */}
           <ServiceWorkerRegistrar />
           <HubReloadController />
-          {/* The chime control, the rail's timer tile and the "don't bounce off
-          `/hub/timer`" exemption are all built here rather than inside the
-          shell: the shell (and `HubRail`/`IdleReturn` below it) are client
-          components, and `@/modules/timers` carries `server-only` queries
-          (see `chime-settings-panel.tsx`, and `RailTimerTile`/
-          `TimerActivityProvider`'s own doc comments for the M-T2 additions).
-          A server component may import the barrel, so the slice's own
-          boundary stays intact. `TimerActivityProvider` wraps the whole shell
-          rather than being threaded through it as a prop — `IdleReturn` sits
-          several client layers below `KioskShell`, and its
-          `TimerActivityContext` crosses that for free (`idle-return.tsx`). */}
+          {/* `TimerActivityProvider` wraps the whole shell — `IdleReturn` sits
+          several client layers below it, and its context crosses that for free. */}
           <TimerActivityProvider initial={timers}>
-            <KioskShell
+            {/* The one shell (D9), in kiosk mode. Kiosk-only behaviour is either
+            mounted here (the watchers, wake lock, theme live in the shell's
+            kiosk frame) or handed in as slots (`chimeSettings`, `railTimerTile`,
+            `brand`, the FAB) — never decided by the shell itself. */}
+            <AppShell
+              surface="hub"
+              kiosk
               device={paired ? { id: paired.id, name: paired.name } : null}
+              railItems={railItems}
+              railNavLabel={tNav('label')}
+              railTestId="hub-rail"
+              railTimerTile={timers ? <RailTimerTile initial={timers} /> : null}
               chimeSettings={<ChimeSettingsPanel />}
               brand={<BrandMark variant="icon" className="h-7" />}
-              railTimerTile={timers ? <RailTimerTile initial={timers} /> : null}
+              fab={paired ? <FabSlot /> : null}
             >
               {children}
-            </KioskShell>
+            </AppShell>
           </TimerActivityProvider>
         </RealtimeProvider>
       </FormattingLocaleProvider>

@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
 import { cn, Icon } from '@kynite/ui';
 import { NavOverflowSheet } from './nav-overflow-sheet';
-import { PRIMARY_NAV, isActiveHref, type NavLabels } from './nav-items';
+import { isActiveHref, type NavItem, type NavLabels } from './nav-items';
 import { UserMenuSheetSection, type UserMenuLabels, type UserMenuUser } from './user-menu';
 
 /**
@@ -14,33 +14,42 @@ import { UserMenuSheetSection, type UserMenuLabels, type UserMenuUser } from './
  * not sit under an iOS home indicator), Material Symbols filled on the active
  * tab, label in caps micro-type.
  *
- * M15/NB-6: the parent app's header used to be ten flat links, which overflow a
- * 390px phone viewport. Below `sm` that nav is replaced by this bar — the four
- * destinations a parent reaches for daily plus a "More" sheet holding
- * everything else. M19 restyled it to the mockups and moved it onto the house
- * icon system: it was the last lucide holdout in the product, and it is the
- * most-seen nav on phones (docs/rebuild-design-gaps.md §5 root cause 3).
+ * Destinations are data: the layout (via the shell) hands in `primary` (the
+ * tabs) and `overflow` (everything behind the "Meer" sheet), because which
+ * surface a request renders as is decided server-side, not by a CSS
+ * breakpoint. This bar is now drawn only when the surface is `app`, so it no
+ * longer carries its own `sm:hidden` — the shell is the one switch.
  */
 export function MobileNav({
   labels,
+  primary,
+  overflow,
   user,
   userLabels,
   signOut,
+  className,
 }: {
   labels: NavLabels;
+  primary: readonly NavItem[];
+  overflow: readonly NavItem[];
   user?: UserMenuUser;
   userLabels: UserMenuLabels;
   signOut: () => Promise<void>;
+  /** Visibility refinement — the `desktop` surface passes `sm:hidden`. */
+  className?: string;
 }) {
   const pathname = usePathname();
 
   return (
     <nav
-      className="glass pb-safe fixed inset-x-0 bottom-0 z-40 flex items-stretch justify-around border-t border-border sm:hidden"
+      className={cn(
+        'glass pb-safe fixed inset-x-0 bottom-0 z-40 flex items-stretch justify-around border-t border-border',
+        className
+      )}
       aria-label={labels.mainNavigation}
       data-testid="mobile-nav"
     >
-      {PRIMARY_NAV.map(({ href, label, icon }) => {
+      {primary.map(({ href, label, icon }) => {
         const active = isActiveHref(pathname, href);
         return (
           <Link
@@ -56,6 +65,7 @@ export function MobileNav({
       })}
       <NavOverflowSheet
         labels={labels}
+        items={overflow}
         footer={
           user ? (
             <UserMenuSheetSection user={user} labels={userLabels} signOut={signOut} />
@@ -83,17 +93,10 @@ const tabClass =
 /**
  * Sentence case, Baloo, no tracking — the design's 10px tab label
  * ("Vandaag.dc.html":479–482), at the 12px the type scale actually declares.
- * The uppercase `label-overline` this replaced is the *metadata* register; a
- * destination is a name, and "BELONINGEN" in caps at 12px does not fit a
- * 78px tab, which is why every label but "Meer" used to end in an ellipsis.
  */
 const tabLabelClass = 'w-full truncate text-center font-display text-caption font-bold';
 /**
- * `text-primary`, which the mockups use, is now legible as text: the stitch
- * indigo is 7.47:1 on the bar's surface where the old brand green was 1.46:1
- * and had to be swapped for `text-brand-ink` (M17's axe sweep at 390px).
- * Both tokens now resolve to the same colour, and `text-primary` is the one the
- * mockup names.
+ * `text-primary`, which the mockups use, is now legible as text.
  */
 const tabActiveClass = 'font-bold text-primary';
 const tabIdleClass = 'text-ink-secondary';

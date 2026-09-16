@@ -11,19 +11,19 @@ import { useServerNow } from './use-server-now';
 import { useTimerChannel } from './use-timer-channel';
 
 /**
- * `HubRail`'s conditional fifth tile (M-T2): a timer is on the wall without
+ * `NavRail`'s conditional fifth tile (M-T2): a timer is on the wall without
  * anyone having to leave the rail to check, the same promise `AmbientTimers`
  * makes for the board itself.
  *
  * A self-contained client component rather than logic inlined in
- * `HubRail` — `HubRail` (`components/hub`) may not import this slice's
+ * `NavRail` — `NavRail` (`components/shell`) may not import this slice's
  * barrel or deep-import its live channel (the boundary
  * `TimerActivityContext`'s own doc comment explains), so `(hub)/layout.tsx`
  * (a server component, free to import `@/modules/timers`) instantiates this
- * once and hands the *element* down through `KioskShell` → `HubRail` as a
- * plain `ReactNode` prop, the same seam `chimeSettings`/`brand` already use.
- * Once mounted it lives entirely on its own hooks — `HubRail` never renders
- * it again, and it does not need to.
+ * once and hands the *element* down through `AppShell` (its kiosk frame) →
+ * `NavRail` as a plain `ReactNode` prop, the same seam
+ * `chimeSettings`/`brand` already use. Once mounted it lives entirely on its
+ * own hooks — `NavRail` never renders it again, and it does not need to.
  *
  * Renders nothing (`null`) once the live channel says no timer is running,
  * which is the actual "no timer = no tile" rule — `initial` only seeds the
@@ -67,7 +67,7 @@ export function RailTimerTile({ initial }: { initial: TimerBoardData }) {
       aria-current={active ? 'page' : undefined}
       aria-label={count > 1 ? t('timerCount', { count }) : t('timer')}
       className={cn(
-        // Same 52px/16px-radius shape as `HubRail`'s own `ITEMS` tiles.
+        // Same 52px/16px-radius shape as `NavRail`'s own tiles.
         'relative flex size-13 shrink-0 flex-col items-center justify-center gap-0.5 overflow-hidden rounded-2xl transition-colors duration-200 ease-brand',
         'focus-visible:ring-3 focus-visible:ring-ring/50',
         active ? 'text-primary' : 'text-ink-secondary hover:bg-surface-hover hover:text-foreground'

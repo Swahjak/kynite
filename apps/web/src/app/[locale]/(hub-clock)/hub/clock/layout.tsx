@@ -6,14 +6,14 @@ import type { Metadata } from 'next';
  * Fully Kiosk Browser is configured to load this URL as its screensaver
  * (kicks in on idle, closes on the first touch or motion event — Fully's own
  * job, not this app's). It is a route group of its own, sibling to `(hub)`,
- * rather than a page inside it, because `KioskShell` — the `(hub)` tree's
- * layout — is unconditionally wrong here:
+ * rather than a page inside it, because `AppShell`'s kiosk frame — the
+ * `(hub)` tree's layout — is unconditionally wrong here:
  *
  *  - **`IdleReturn`** navigates back to `/hub` after a period of inactivity.
  *    On the screensaver itself that would be fatal: it exists *because* the
  *    tablet went idle, so the shell would fight Fully for the same screen and
  *    the wall would flicker between the board and the clock forever.
- *  - **`HubRail`** and **`HubSettings`** are chrome a family taps; a
+ *  - **`NavRail`** and **`HubSettings`** are chrome a family taps; a
  *    screensaver is looked at, never touched (Fully closes it on the first
  *    touch itself), so both would be pure decoration at best and an accidental
  *    escape hatch out of ambient mode at worst.
