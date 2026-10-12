@@ -177,7 +177,7 @@ export async function TodayTabDag({
           grid used to hold, and it needed it — its rows now carry a time
           *range*, a category glyph and the faces of everyone on the event, which
           is the same "who has what" answer the third column was giving. Per
-          person is not lost, it is one pill away (`TodayTabPersonen`). From `lg`
+          person lives on the calendar (`/calendar`). From `lg`
           rather than `xl` because a wall tablet in landscape is 1194px wide and
           this composition exists to fit that frame without a scrollbar; the
           phone splits evenly and stacks below `lg`, in the order the day is
@@ -225,7 +225,7 @@ export async function TodayTabDag({
               (`event:write`/`task:write` are `deny` for a device, §7, so only
               "Timer" and "Ster geven" ever drew). Both are now actions on
               `TodayFab`, the speed dial each page mounts beside this panel
-              (`(hub)/hub/page.tsx`, `(app)/today/page.tsx`) rather than inside
+              (`(main)/today/page.tsx`) rather than inside
               it — `FabSpeedDial` portals into the shell's slot regardless of
               where in the tree it renders, so there is nothing this column
               needs to carry any more. */}

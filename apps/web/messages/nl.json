@@ -37,6 +37,7 @@
     "notifications": "Meldingen",
     "devices": "Schermen",
     "sharing": "Delen",
+    "manage": "Beheer",
     "more": "Meer",
     "mainNavigation": "Hoofdnavigatie",
     "account": "Account"
@@ -226,6 +227,24 @@
         }
       ]
     }
+  },
+  "account": {
+    "title": "Mijn instellingen",
+    "subtitle": "Alleen voor jou: je meldingen en hoe Kynite er in deze browser uitziet.",
+    "back": "Terug naar mijn instellingen"
+  },
+  "manage": {
+    "title": "Beheer",
+    "subtitle": "Routines, beloningen, gezin en instellingen.",
+    "areas": "Onderdelen",
+    "routines": "Routines",
+    "routinesDescription": "Bouwen en bewerken",
+    "rewards": "Beloningen",
+    "rewardsDescription": "Goedkeuren, sterren geven",
+    "family": "Gezin",
+    "familyDescription": "Leden",
+    "settings": "Instellingen",
+    "settingsDescription": "Voorkeuren, koppelingen en schermen"
   },
   "family": {
     "title": "Gezin",

@@ -5,6 +5,7 @@ import {
   PRIMARY_NAV,
   RAIL_FOOTER_NAV,
   RAIL_NAV,
+  withoutManage,
   type NavItem,
   type NavLabels,
 } from '@/components/app-nav/nav-items';
@@ -18,7 +19,14 @@ import { Toaster } from '@/components/ui/toast';
 import { redirect } from '@/i18n/navigation';
 import { defaultFormattingLocale } from '@/i18n/formatting-locale';
 import { routing } from '@/i18n/routing';
-import { MemberAvatar, getFamily, getMember, getPrincipal, signOutAction } from '@/modules/family';
+import {
+  MemberAvatar,
+  can,
+  getFamily,
+  getMember,
+  getPrincipal,
+  signOutAction,
+} from '@/modules/family';
 import { GoogleReauthBanner } from '@/modules/google';
 import { getSurface } from '@/modules/surface';
 
@@ -32,7 +40,7 @@ export const dynamic = 'force-dynamic';
  *
  * The principal must be a **member** since M12. A paired kiosk resolves to a
  * principal too, and it must not satisfy this tree: a wall tablet that reached
- * `/settings` would render the whole parent shell and then have the §7 matrix
+ * `/manage` would render the whole parent shell and then have the §7 matrix
  * refuse every control on it, which is worse than a redirect. A paired browser
  * is sent to the board instead — that is the surface it has.
  */
@@ -109,13 +117,20 @@ export default async function AppLayout({
     notifications: t('notifications'),
     devices: t('devices'),
     sharing: t('sharing'),
+    manage: t('manage'),
     more: t('more'),
     mainNavigation: t('mainNavigation'),
     appName: tCommon('appName'),
   };
 
+  // Beheer (`/manage`) is member-only and, of the member roles, only a parent
+  // may manage anything on it — `routine:write` is the least-privileged of the
+  // owner/adult capabilities and stands in for "may manage" (D16).
+  const canManage = can(principal, 'routine:write', { familyId: principal.familyId });
+
   const userLabels: UserMenuLabels = {
     account: t('account'),
+    settings: (await getTranslations('account'))('title'),
     signOut: (await getTranslations('auth'))('signOut'),
   };
 
@@ -143,7 +158,9 @@ export default async function AppLayout({
             <AppShell
               surface={surface}
               railItems={RAIL_NAV.map(toRailItem)}
-              railFooterItems={RAIL_FOOTER_NAV.map(toRailItem)}
+              railFooterItems={(canManage ? RAIL_FOOTER_NAV : withoutManage(RAIL_FOOTER_NAV)).map(
+                toRailItem
+              )}
               railNavLabel={labels.mainNavigation}
               railTestId="app-rail"
               railBrandHref="/today"
@@ -151,7 +168,7 @@ export default async function AppLayout({
               member={{
                 labels,
                 primary: PRIMARY_NAV,
-                overflow: OVERFLOW_NAV,
+                overflow: canManage ? OVERFLOW_NAV : withoutManage(OVERFLOW_NAV),
                 user,
                 userLabels,
                 signOut: signOutAction,

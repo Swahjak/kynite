@@ -12,7 +12,7 @@ import { CreateShareLinkPanel, ShareLinkList, loadSharingPage } from '@/modules/
 export const dynamic = 'force-dynamic';
 
 /**
- * `(app)/settings/sharing` — the parent side of caregiver links (M13).
+ * `/manage/settings/sharing` — the parent side of caregiver links (M13).
  *
  * Two things live here: making a link, and taking one away — both
  * `share:manage`, which the §7 matrix grants to owners and adults and to nobody

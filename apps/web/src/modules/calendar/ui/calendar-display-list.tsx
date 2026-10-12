@@ -61,7 +61,7 @@ export type CalendarDisplayView = {
 const VISIBILITY_OPTIONS: readonly CalendarDisplayView['visibility'][] = ['family', 'private'];
 
 /**
- * The calendars section of `(app)/settings` — FR28's "per-calendar
+ * The calendars section of `(app)/manage/settings` — FR28's "per-calendar
  * colour-coding", plus the family/private switch §7 already grades.
  *
  * One form per calendar rather than one form for all of them. A parent

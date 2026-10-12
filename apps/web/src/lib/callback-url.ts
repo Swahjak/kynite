@@ -5,7 +5,7 @@ import { routing } from '@/i18n/routing';
  *
  * `src/proxy.ts` used to throw the query string away (`url.search = ''`) when
  * it bounced a cookie-less request to the sign-in form, so a parent who tapped
- * a link to `/nl/settings/google` from an email landed on `/nl/family` and had
+ * a link to `/nl/manage/settings/google` from an email landed on `/nl/manage/family` and had
  * to find their way back. This is the round trip, and the whole of its security
  * argument lives in `sanitizeCallbackUrl`.
  *
@@ -41,7 +41,7 @@ export function sanitizeCallbackUrl(value: string | null | undefined): string | 
  * `@/i18n/navigation`'s `redirect({ href, locale })` wants, since it adds the
  * prefix back itself (`localePrefix: 'always'`).
  *
- * `/nl/settings/google?tab=x` → `/settings/google?tab=x`; a path with no
+ * `/nl/manage/settings/google?tab=x` → `/manage/settings/google?tab=x`; a path with no
  * recognisable locale segment is returned unchanged, and `/nl` alone becomes
  * `/`.
  */

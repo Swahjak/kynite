@@ -85,7 +85,7 @@ describe('redemptionRequestPayload is localized per family.locale', () => {
   it('deep-links into the locale-prefixed rewards route', async () => {
     const nl = await redemptionRequestPayload({ ...base, locale: 'nl' });
     const en = await redemptionRequestPayload({ ...base, locale: 'en' });
-    expect(nl.url).toBe('/nl/rewards');
-    expect(en.url).toBe('/en/rewards');
+    expect(nl.url).toBe('/nl/manage/rewards');
+    expect(en.url).toBe('/en/manage/rewards');
   });
 });

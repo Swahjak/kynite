@@ -37,6 +37,7 @@
     "notifications": "Notifications",
     "devices": "Screens",
     "sharing": "Sharing",
+    "manage": "Manage",
     "more": "More",
     "mainNavigation": "Main navigation",
     "account": "Account"
@@ -226,6 +227,24 @@
         }
       ]
     }
+  },
+  "account": {
+    "title": "My settings",
+    "subtitle": "Just for you: your notifications and how Kynite looks in this browser.",
+    "back": "Back to my settings"
+  },
+  "manage": {
+    "title": "Manage",
+    "subtitle": "Routines, rewards, family and settings.",
+    "areas": "Sections",
+    "routines": "Routines",
+    "routinesDescription": "Build and edit",
+    "rewards": "Rewards",
+    "rewardsDescription": "Approve, give stars",
+    "family": "Family",
+    "familyDescription": "Members",
+    "settings": "Settings",
+    "settingsDescription": "Preferences, links and screens"
   },
   "family": {
     "title": "Family",

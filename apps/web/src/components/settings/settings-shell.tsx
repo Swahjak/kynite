@@ -67,7 +67,13 @@ export function SettingsIconTile({
 }
 
 /** A subpage's way back to the hub. The four flows are deep links in the wild. */
-export function SettingsBackLink({ href = '/settings', label }: { href?: string; label: string }) {
+export function SettingsBackLink({
+  href = '/manage/settings',
+  label,
+}: {
+  href?: string;
+  label: string;
+}) {
   return (
     <Link
       href={href}

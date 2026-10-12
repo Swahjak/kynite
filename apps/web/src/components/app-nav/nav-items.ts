@@ -26,6 +26,8 @@ export type NavLabels = {
   rewards: string;
   settings: string;
   timers: string;
+  /** "Beheer" — the `/manage` index, shown only to a principal that may manage. */
+  manage: string;
   family: string;
   notifications: string;
   devices: string;
@@ -69,22 +71,31 @@ export const RAIL_NAV: readonly NavItem[] = [
 
 /**
  * Everything behind the "More" trigger — the everyday surfaces a bottom bar
- * cannot fit (`/routines`, `/timers`), then the Beheer destinations. Until the
- * `/manage` index lands (H4) the Beheer entries link straight to the pages
- * themselves; the rail surfaces reach them through the same sheet.
+ * cannot fit (`/routines`, `/timers`), then Beheer (`/manage`). The Beheer
+ * entry is gated on a capability, not a surface: the layouts filter it out for
+ * a principal that may not manage, so a child, a caregiver or a device never
+ * sees it (D16).
  */
 export const OVERFLOW_NAV: readonly NavItem[] = [
   { href: '/routines', label: 'activeRoutines', icon: 'restart_alt' },
   { href: '/timers', label: 'timers', icon: 'timer' },
-  { href: '/rewards', label: 'rewards', icon: 'star' },
-  { href: '/family', label: 'family', icon: 'group' },
-  { href: '/settings', label: 'settings', icon: 'settings' },
+  { href: '/manage', label: 'manage', icon: 'settings' },
 ] as const;
 
 /** Pinned to the bottom of the rail, per the stitch mockups. */
 export const RAIL_FOOTER_NAV: readonly NavItem[] = [
-  { href: '/settings', label: 'settings', icon: 'settings' },
+  { href: '/manage', label: 'manage', icon: 'settings' },
 ] as const;
+
+/**
+ * Drop the Beheer entry for a principal that may not manage. The layouts call
+ * this with the capability answer they resolve from the principal (`can()`);
+ * the device branch never sees either list at all, because it renders the
+ * rail from `RAIL_NAV` alone.
+ */
+export function withoutManage(items: readonly NavItem[]): readonly NavItem[] {
+  return items.filter((item) => item.href !== '/manage');
+}
 
 /**
  * Segment-aware active match: `pathname` carries the locale prefix

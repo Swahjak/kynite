@@ -86,7 +86,7 @@ export async function setCalendarSyncAction(
   });
 
   const locale = await getLocale();
-  revalidatePath(`/${locale}/settings/google`);
+  revalidatePath(`/${locale}/manage/settings/google`);
   revalidatePath(`/${locale}/calendar`);
   revalidatePath(`/${locale}/today`);
   return idleState;
@@ -260,7 +260,7 @@ export async function applyCalendarSelectionAction(
   }
 
   const locale = await getLocale();
-  revalidatePath(`/${locale}/settings/google`);
+  revalidatePath(`/${locale}/manage/settings/google`);
   revalidatePath(`/${locale}/calendar`);
   revalidatePath(`/${locale}/today`);
   return idleState;
@@ -285,7 +285,7 @@ export async function syncNowAction(
 
   for (const row of rows) await enqueueCalendarSync(row.id);
 
-  revalidatePath(`/${await getLocale()}/settings/google`);
+  revalidatePath(`/${await getLocale()}/manage/settings/google`);
   return idleState;
 }
 
@@ -320,7 +320,7 @@ export async function unlinkGoogleAccountAction(
 
   await unlinkGoogleAccount(account.id);
 
-  revalidatePath(`/${await getLocale()}/settings/google`);
+  revalidatePath(`/${await getLocale()}/manage/settings/google`);
   return idleState;
 }
 
@@ -376,7 +376,7 @@ export async function removeCalendarAction(
 
   await removeCalendar(row);
 
-  revalidatePath(`/${await getLocale()}/settings/google`);
+  revalidatePath(`/${await getLocale()}/manage/settings/google`);
   revalidatePath(`/${await getLocale()}/calendar`);
   return idleState;
 }

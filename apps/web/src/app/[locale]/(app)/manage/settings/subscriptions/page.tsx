@@ -11,10 +11,10 @@ import { IcsSubscriptionsPanel, loadSubscriptionsPage } from '@/modules/ics';
 export const dynamic = 'force-dynamic';
 
 /**
- * `(app)/settings/subscriptions` — calendars the household follows but does not
+ * `/manage/settings/subscriptions` — calendars the household follows but does not
  * own (M25): the school's holidays, the sports club's fixtures.
  *
- * A sibling route to `/settings/google` rather than a section on the settings
+ * A sibling route to `/manage/settings/google` rather than a section on the settings
  * hub, for the reason the hub page itself gives: each of the four (now five)
  * routes that kept their own page is "a flow rather than a field". Adding a
  * feed is a flow — paste, validate against a real server, name it — and it can

@@ -35,7 +35,7 @@ function redirectTo(path: string): NextResponse {
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const locale = await getLocale();
-  const settings = (query = ''): string => `/${locale}/settings/google${query}`;
+  const settings = (query = ''): string => `/${locale}/manage/settings/google${query}`;
 
   const fail = (reason: string): NextResponse =>
     redirectTo(settings(`?error=${encodeURIComponent(reason)}`));

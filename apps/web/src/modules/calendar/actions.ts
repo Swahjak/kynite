@@ -470,6 +470,6 @@ export async function setCalendarDisplayAction(
   });
 
   await revalidateCalendar();
-  revalidatePath(`/${await getLocale()}/settings`);
+  revalidatePath(`/${await getLocale()}/manage/settings`);
   return idleState;
 }

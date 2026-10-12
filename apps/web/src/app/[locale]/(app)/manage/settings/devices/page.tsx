@@ -12,7 +12,7 @@ import { DeviceList, PairDevicePanel, PendingCodeList, loadDevicesPage } from '@
 export const dynamic = 'force-dynamic';
 
 /**
- * `(app)/settings/devices` — the parent side of kiosk pairing (M12).
+ * `/manage/settings/devices` — the parent side of kiosk pairing (M12).
  *
  * Two things live here and nothing else: minting a code, and taking one away.
  * Both are `device:manage`, which the §7 matrix grants to owners and adults and

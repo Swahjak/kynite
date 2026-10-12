@@ -16,9 +16,7 @@ import {
   loadFamilyPage,
   loadFamilySettings,
 } from '@/modules/family';
-import { NotificationPreferencesForm, loadNotificationsPage } from '@/modules/notifications';
 import { RoutineGraduationList, hasGraduated, loadRoutinesPage } from '@/modules/routines';
-import { SurfacePreferenceForm, getSurfacePreference } from '@/modules/surface';
 import { WeatherLocationForm } from '@/modules/weather';
 
 /** Session-dependent: never prerendered, so `next build` needs no secrets. */
@@ -42,7 +40,11 @@ export const dynamic = 'force-dynamic';
  * implementation of member CRUD — there is exactly one, in the family slice,
  * and both surfaces mount it. That is what keeps the reward-horizon control in
  * one place: changing a child from instant to savings here is the same write
- * `(app)/family` performs, and the hub reward UI follows either way.
+ * `/manage/family` performs, and the hub reward UI follows either way.
+ *
+ * A member's *own* settings (notification preferences, the surface this browser
+ * renders as) are not here: they live at `/account`, reachable by every member.
+ * Everything below is household-wide and sits behind the `/manage` gate.
  *
  * Sections a caller may not use are omitted rather than disabled — the same
  * rule `loadFamilyPage` follows for invites. A control whose action would
@@ -53,12 +55,10 @@ export default async function SettingsHubPage() {
   // The layout guard redirects unauthenticated requests; this is belt-and-braces.
   if (!settings) notFound();
 
-  const [roster, routines, calendars, notifications, surfacePreference] = await Promise.all([
+  const [roster, routines, calendars] = await Promise.all([
     loadFamilyPage(),
     loadRoutinesPage(),
     loadCalendarDisplay(),
-    loadNotificationsPage(),
-    getSurfacePreference(),
   ]);
 
   const t = await getTranslations('settings');
@@ -121,22 +121,6 @@ export default async function SettingsHubPage() {
       </SettingsSection>
 
       <SettingsSection
-        id="notifications"
-        title={t('notifications.title')}
-        description={t('notifications.description')}
-      >
-        {notifications ? (
-          <NotificationPreferencesForm preferences={notifications.preferences} />
-        ) : null}
-        <SettingsNavRow
-          href="/settings/notifications"
-          icon="notifications"
-          label={t('notifications.manage')}
-          bordered
-        />
-      </SettingsSection>
-
-      <SettingsSection
         id="calendars"
         title={t('calendars.title')}
         description={t('calendars.description')}
@@ -150,7 +134,7 @@ export default async function SettingsHubPage() {
           <p className="text-body-sm text-ink-secondary">{t('calendars.readOnly')}</p>
         )}
         <SettingsNavRow
-          href="/settings/google"
+          href="/manage/settings/google"
           icon="calendar_month"
           label={t('calendars.manageGoogle')}
           bordered
@@ -159,19 +143,11 @@ export default async function SettingsHubPage() {
             the household follows but nobody in it owns. Beside Google rather
             than in its own section, because to a parent they are one question. */}
         <SettingsNavRow
-          href="/settings/subscriptions"
+          href="/manage/settings/subscriptions"
           icon="event"
           label={t('calendars.manageSubscriptions')}
           bordered
         />
-      </SettingsSection>
-
-      <SettingsSection
-        id="surface"
-        title={t('surface.title')}
-        description={t('surface.description')}
-      >
-        <SurfacePreferenceForm preference={surfacePreference} />
       </SettingsSection>
 
       {settings.canManageDisplay && settings.family ? (
@@ -190,7 +166,7 @@ export default async function SettingsHubPage() {
 
       <SettingsSection id="devices" title={t('devices.title')}>
         <SettingsNavRow
-          href="/settings/devices"
+          href="/manage/settings/devices"
           icon="tablet_mac"
           label={t('devices.manage')}
           description={t('devices.description')}
@@ -199,7 +175,7 @@ export default async function SettingsHubPage() {
 
       <SettingsSection id="sharing" title={t('sharing.title')}>
         <SettingsNavRow
-          href="/settings/sharing"
+          href="/manage/settings/sharing"
           icon="share"
           label={t('sharing.manage')}
           description={t('sharing.description')}

@@ -22,7 +22,7 @@
  */
 export const SHARE_SURFACES = ['calendar', 'routines', 'rewards', 'timers'] as const;
 
-/** The surfaces M13 renders — the set `(app)/settings/sharing` lets parents pick. */
+/** The surfaces M13 renders — the set `(app)/manage/settings/sharing` lets parents pick. */
 export const SHARE_SURFACE_CHOICES = ['calendar', 'routines'] as const;
 
 export type ShareSurface = (typeof SHARE_SURFACES)[number];

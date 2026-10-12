@@ -6,6 +6,7 @@ import {
   PRIMARY_NAV,
   RAIL_FOOTER_NAV,
   RAIL_NAV,
+  withoutManage,
   type NavItem,
   type NavLabels,
 } from '@/components/app-nav/nav-items';
@@ -21,7 +22,14 @@ import { Toaster } from '@/components/ui/toast';
 import { defaultFormattingLocale } from '@/i18n/formatting-locale';
 import { routing } from '@/i18n/routing';
 import { getDevice } from '@/modules/devices';
-import { MemberAvatar, getFamily, getMember, getPrincipal, signOutAction } from '@/modules/family';
+import {
+  MemberAvatar,
+  can,
+  getFamily,
+  getMember,
+  getPrincipal,
+  signOutAction,
+} from '@/modules/family';
 import { GoogleReauthBanner } from '@/modules/google';
 import { getSurface } from '@/modules/surface';
 import {
@@ -122,6 +130,7 @@ export default async function MainLayout({
     notifications: t('notifications'),
     devices: t('devices'),
     sharing: t('sharing'),
+    manage: t('manage'),
     more: t('more'),
     mainNavigation: t('mainNavigation'),
     appName: tCommon('appName'),
@@ -156,8 +165,15 @@ export default async function MainLayout({
 
     const userLabels: UserMenuLabels = {
       account: t('account'),
+      settings: (await getTranslations('account'))('title'),
       signOut: (await getTranslations('auth'))('signOut'),
     };
+
+    // Beheer (`/manage`) is member-only and, of the member roles, only a parent
+    // may manage anything on it — `routine:write` is the least-privileged of the
+    // owner/adult capabilities and stands in for "may manage" (D16). The kiosk
+    // branch below never reaches this and never renders either list.
+    const canManage = can(principal, 'routine:write', { familyId: principal.familyId });
 
     return (
       <NextIntlClientProvider timeZone={timeZone}>
@@ -173,7 +189,9 @@ export default async function MainLayout({
               <AppShell
                 surface={surface}
                 railItems={RAIL_NAV.map(toRailItem)}
-                railFooterItems={RAIL_FOOTER_NAV.map(toRailItem)}
+                railFooterItems={(canManage ? RAIL_FOOTER_NAV : withoutManage(RAIL_FOOTER_NAV)).map(
+                  toRailItem
+                )}
                 railNavLabel={labels.mainNavigation}
                 railTestId="app-rail"
                 railBrandHref="/today"
@@ -181,7 +199,7 @@ export default async function MainLayout({
                 member={{
                   labels,
                   primary: PRIMARY_NAV,
-                  overflow: OVERFLOW_NAV,
+                  overflow: canManage ? OVERFLOW_NAV : withoutManage(OVERFLOW_NAV),
                   user,
                   userLabels,
                   signOut: signOutAction,

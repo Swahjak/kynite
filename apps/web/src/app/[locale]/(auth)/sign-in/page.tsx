@@ -30,7 +30,7 @@ export default async function SignInPage({
   // form has nothing to ask it.
   const principal = await getPrincipal();
   if (principal) {
-    redirect({ href: callbackUrl ? withoutLocalePrefix(callbackUrl) : '/family', locale });
+    redirect({ href: callbackUrl ? withoutLocalePrefix(callbackUrl) : '/today', locale });
   }
 
   /**

@@ -60,7 +60,7 @@ async function withBucketLock<T>(tx: Tx, key: string, fn: () => Promise<T>): Pro
   return fn();
 }
 
-/** One row of `(app)/settings/devices`. */
+/** One row of `(app)/manage/settings/devices`. */
 export type DeviceListEntry = {
   id: string;
   name: string;

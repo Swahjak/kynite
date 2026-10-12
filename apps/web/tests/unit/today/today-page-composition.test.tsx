@@ -109,10 +109,8 @@ vi.mock('@/modules/today', () => ({
       {launcher}
     </div>
   ),
-  TodayTabPersonen: () => null,
   TodayTabRoutines: () => null,
   TodayTabSterren: () => null,
-  TodayTabs: () => <div data-testid="today-tabs" />,
   flowOf: () => ({ mode: 'next', hero: null, live: false, liveBlocks: [] }),
   loadTodayProgress: async () => null,
   loadHubBoardComposition: (...args: unknown[]) => loadHubBoardComposition(...args),

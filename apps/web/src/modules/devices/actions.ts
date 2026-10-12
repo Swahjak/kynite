@@ -60,7 +60,7 @@ const trimmed = z.string().trim();
 
 async function revalidateDevices(): Promise<void> {
   const locale = await getLocale();
-  revalidatePath(`/${locale}/settings/devices`);
+  revalidatePath(`/${locale}/manage/settings/devices`);
 }
 
 const createSchema = z.object({
@@ -139,7 +139,7 @@ const pairSchema = z.object({ code: trimmed.min(1).max(20) });
 export type PairDeviceInput = z.infer<typeof pairSchema>;
 
 /**
- * Exchange a pairing code for a device session (`/hub/pair`).
+ * Exchange a pairing code for a device session (`/pair`).
  *
  * @public-action — there is no principal to authorize: this action *is* the
  * authentication. The code is the credential, and everything that makes it one

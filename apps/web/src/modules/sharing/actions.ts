@@ -37,7 +37,7 @@ const MAX_EXPIRY_DAYS = 365;
 
 async function revalidateSharing(): Promise<void> {
   const locale = await getLocale();
-  revalidatePath(`/${locale}/settings/sharing`);
+  revalidatePath(`/${locale}/manage/settings/sharing`);
 }
 
 const createSchema = z.object({

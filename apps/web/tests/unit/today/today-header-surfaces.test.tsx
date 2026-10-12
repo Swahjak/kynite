@@ -228,7 +228,7 @@ describe('the one today route renders the one header', () => {
     // §7: a wall tablet is physically unauthenticated. The greeting is personal
     // on `app` only, so the member resolution is gated on the surface rather
     // than run for every principal — a device must not go looking for a member.
-    expect(page).toContain("surface === 'app' ? await getPrincipal()");
+    expect(page).toMatch(/surface\s*===\s*'app'\s*\?\s*await\s+getPrincipal\(\)/);
     expect(page).toContain('getMember');
     expect(page).toContain('firstNameOf');
   });

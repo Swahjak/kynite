@@ -17,7 +17,7 @@
  *
  * Three surfaces used to compare against a locally re-declared sentinel —
  * `ui/event-chip.tsx`, `ui/day-agenda-row.tsx`, `sharing/view/share-board.tsx`
- * — and `/today`'s two (`today-timeline.tsx`, `today-tab-personen.tsx`) simply
+ * — and `/today`'s timeline (`today-timeline.tsx`, and the since-removed per-person panel) simply
  * did not, so a synced nameless event rendered the literal "(no title)" on the
  * hub. Four hand-copied comparisons are four chances to forget the fifth.
  *

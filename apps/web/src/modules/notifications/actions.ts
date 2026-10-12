@@ -69,7 +69,7 @@ export async function updateNotificationPreferencesAction(
   });
 
   const locale = await getLocale();
-  revalidatePath(`/${locale}/settings`);
-  revalidatePath(`/${locale}/settings/notifications`);
+  revalidatePath(`/${locale}/account`);
+  revalidatePath(`/${locale}/account/notifications`);
   return idleState;
 }

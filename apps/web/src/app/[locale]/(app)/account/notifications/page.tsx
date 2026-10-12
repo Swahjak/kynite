@@ -11,8 +11,9 @@ import { PushOptIn, loadNotificationsPage } from '@/modules/notifications';
 export const dynamic = 'force-dynamic';
 
 /**
- * Notification settings (milestone M11, minimal — the full settings tree is
- * M16's).
+ * Notification settings (milestone M11) — a member's own push opt-in, so it
+ * lives under `/account` (H4 review), not `/manage`: every member, a child
+ * included, owns their devices' subscriptions.
  *
  * This page exists so that push opt-in has somewhere deliberate to live: §6
  * step 1 requires the prompt to follow a meaningful action and never a first
@@ -22,14 +23,14 @@ export default async function NotificationSettingsPage() {
   const data = await loadNotificationsPage();
   if (!data) notFound();
 
-  const [t, tSettings] = await Promise.all([
+  const [t, tAccount] = await Promise.all([
     getTranslations('notifications.settings'),
-    getTranslations('settings'),
+    getTranslations('account'),
   ]);
 
   return (
     <SettingsPage>
-      <SettingsBackLink label={tSettings('back')} />
+      <SettingsBackLink href="/account" label={tAccount('back')} />
       <SettingsPageHeader
         icon="notifications"
         title={t('pageTitle')}

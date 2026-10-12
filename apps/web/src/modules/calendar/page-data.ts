@@ -212,7 +212,7 @@ async function listWritableCalendars(familyId: string): Promise<WritableCalendar
 }
 
 /* ---------------------------------------------------------------------------
- * Hub display preferences: the calendars section of `(app)/settings` (FR28)
+ * Hub display preferences: the calendars section of `(app)/manage/settings` (FR28)
  * ------------------------------------------------------------------------ */
 
 export type CalendarDisplayData = {

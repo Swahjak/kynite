@@ -11,13 +11,11 @@ const intl = createMiddleware(routing);
 /**
  * First URL segment (after the locale) of every member-only route — the
  * `(app)` tree, which requires an account session (docs/architecture.md §2).
- * `/manage` is H4's Beheer index; the route does not exist yet, but the cookie
- * rule below is already in place for it.
+ * `/manage` is H4's Beheer tree (index, routines, rewards, family, settings);
+ * `/account` is a member's own settings, open to every member.
  */
 const MEMBER_SECTIONS = new Set([
-  'rewards',
-  'family',
-  'settings',
+  'account',
   // M-C: `(app)/oauth/consent` — the MCP/OAuth-provider consent screen. The
   // layout guard is authoritative (same split as every other section here);
   // this is the same cheap early bounce.
@@ -69,6 +67,23 @@ const HUB_REDIRECTS: Record<string, string> = {
   pair: 'pair',
   clock: 'clock',
 };
+
+/**
+ * H4: the pre-Beheer `(app)` roots, permanently redirected to their new homes.
+ * `/settings/notifications` is a member's own push opt-in and went to
+ * `/account`; every other `/settings/**` page is household-wide and went under
+ * `/manage/settings`. Returns the new path (without locale) or `null` if the
+ * path is not a legacy one.
+ */
+function legacyAppRedirect(rest: readonly string[]): string | null {
+  const [section, sub, ...tail] = rest;
+  if (section === 'family' || section === 'rewards')
+    return `/manage/${[section, sub, ...tail].filter(Boolean).join('/')}`;
+  if (section !== 'settings') return null;
+  if (sub === 'notifications')
+    return `/account/notifications${tail.length ? `/${tail.join('/')}` : ''}`;
+  return `/manage/settings${sub ? `/${[sub, ...tail].join('/')}` : ''}`;
+}
 
 /** The caregiver share tree's first segment — `(share)/s/[token]` (M13). */
 const SHARE_SECTION = 's';
@@ -184,6 +199,33 @@ export default function proxy(request: NextRequest): NextResponse {
     const response = intl(request);
     for (const [key, value] of Object.entries(SHARE_HEADERS)) response.headers.set(key, value);
     return noIndex(response);
+  }
+
+  // H4: old `(app)` roots redirect permanently to the new tree *before* the
+  // cookie rules, so a signed-out visitor on `/nl/settings/google` first lands
+  // on `/nl/manage/settings/google` and is then bounced to sign-in with that
+  // (new) path as `callbackUrl` — they come back to the right page. The query
+  // string (`?google=connected`, …) rides along.
+  const legacy = legacyAppRedirect(rest);
+  if (legacy) {
+    const url = request.nextUrl.clone();
+    url.pathname = `/${locale}${legacy}`;
+    return noIndex(NextResponse.redirect(url, 308));
+  }
+
+  // H4: a paired device on a member-only path (`/manage/*`) is sent to its own
+  // board, exactly as the `(app)` layout would — not to a sign-in form it cannot
+  // use. The device cookie is only a cheap hint here; the layout is authoritative.
+  if (
+    section &&
+    MEMBER_SECTIONS.has(section) &&
+    !getSessionCookie(request) &&
+    request.cookies.has(DEVICE_SESSION_COOKIE)
+  ) {
+    const url = request.nextUrl.clone();
+    url.pathname = `/${locale}/today`;
+    url.search = '';
+    return noIndex(NextResponse.redirect(url));
   }
 
   if (section && MEMBER_SECTIONS.has(section) && !getSessionCookie(request)) {

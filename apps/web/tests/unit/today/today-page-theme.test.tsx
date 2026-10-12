@@ -110,10 +110,8 @@ vi.mock('@/modules/today', async () => {
     TodayTabDag: ({ banner }: { banner?: ReactNode }) => (
       <div data-testid="today-dag">{banner}</div>
     ),
-    TodayTabPersonen: () => null,
     TodayTabRoutines: () => null,
     TodayTabSterren: () => null,
-    TodayTabs: ({ dag }: { dag: ReactNode }) => <div data-testid="today-tabs">{dag}</div>,
     loadHubBoardComposition: (...args: unknown[]) => loadHubBoardComposition(...args),
   };
 });
