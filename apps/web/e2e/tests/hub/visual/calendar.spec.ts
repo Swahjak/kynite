@@ -188,6 +188,10 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
     test('today board', async ({ page, family }) => {
       await seedBoardDay(family.familyId);
 
+      // `today-board` is the `app` surface's board: a member browser only
+      // resolves to it with the mobile client hint (D17); this project's
+      // desktop-class default renders the wall's `hub-board` instead.
+      await page.context().setExtraHTTPHeaders({ 'Sec-CH-UA-Mobile': '?1' });
       await page.goto(`/nl/today?date=${FUTURE_ANCHOR}`);
       await expect(page.getByTestId('today-board')).toBeVisible();
       // `today-greeting` (M18) picks morning/afternoon/evening off the real
