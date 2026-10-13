@@ -191,8 +191,8 @@ test.describe('kiosk layout audit', { tag: '@heavy' }, () => {
     const manifest = await page.request.get('/hub.webmanifest').then((r) => r.json());
     expect(manifest.display).toBe('fullscreen');
     expect(manifest.display_override).toContain('fullscreen');
-    expect(manifest.scope).toBe('/nl/hub');
-    expect(manifest.start_url).toBe('/nl/hub');
+    expect(manifest.scope).toBe('/nl/');
+    expect(manifest.start_url).toBe('/nl/today');
     // Landscape: a wall tablet is mounted, and a board that rotates is a board
     // that is briefly unreadable.
     expect(manifest.orientation).toBe('landscape');

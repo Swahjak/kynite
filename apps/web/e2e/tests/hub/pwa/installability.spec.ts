@@ -53,7 +53,7 @@ test.describe('installability', () => {
     expect(response.status()).toBe(200);
 
     const manifest = (await response.json()) as Manifest;
-    expect(manifest.start_url).toBe('/nl/hub');
+    expect(manifest.start_url).toBe('/nl/today');
     // Installing the hub must give a wall display, not a second parent app.
     expect(manifest.display).toBe('fullscreen');
   });

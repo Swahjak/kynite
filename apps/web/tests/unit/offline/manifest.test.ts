@@ -96,13 +96,12 @@ describe.each(SURFACES)('%s manifest', (_label, subject) => {
 });
 
 describe('two surfaces, not one', () => {
-  it('installs to different entry points', () => {
-    expect(app.start_url).not.toBe(hub.start_url);
+  it('installs as two apps with different ids', () => {
     expect(app.id).not.toBe(hub.id);
   });
 
-  it('sends the hub to the board and the parent app to today', () => {
-    expect(hub.start_url).toMatch(/\/hub$/);
+  it('opens both on the one /today board (hub = app)', () => {
+    expect(hub.start_url).toMatch(/\/today$/);
     expect(app.start_url).toMatch(/\/today$/);
   });
 
