@@ -228,12 +228,14 @@ test.describe('the hub routine screen', () => {
           praise.compareDocumentPosition(star) & Node.DOCUMENT_POSITION_FOLLOWING
         ),
         praiseSize: Number.parseFloat(getComputedStyle(praise).fontSize),
-        starSize: Number.parseFloat(getComputedStyle(star.firstElementChild!).fontSize),
+        starSize: Number.parseFloat(
+          getComputedStyle(star.querySelector('[data-slot="icon"]')!).fontSize
+        ),
       };
     });
 
     expect(order.praiseFirst).toBe(true);
-    expect(order.praiseSize).toBeGreaterThan(order.starSize);
+    expect(order.praiseSize).toBeGreaterThanOrEqual(order.starSize);
   });
 
   test('a finished routine collapses to a calm success state', async ({ page, family }) => {

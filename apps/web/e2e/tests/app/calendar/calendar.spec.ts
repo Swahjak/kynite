@@ -408,9 +408,8 @@ test.describe('the today tabs', () => {
       return owner.displayName;
     });
 
-    // H5 premise change: the pill tabs (dag/personen) are gone, `/today` is the
-    // one chronological timeline, so there is no tab to click and no per-device
-    // tab choice (`kynite.today.tab`) to survive a reload.
+    // `/today` is the one chronological timeline: there are no pill tabs to
+    // click and no per-device tab choice to survive a reload.
     await page.goto('/nl/today');
 
     // A run late enough in the day finds this event already "past", which the

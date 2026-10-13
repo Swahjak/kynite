@@ -136,3 +136,13 @@ describe('the tile variant is also the whole button', () => {
     expect(screen.getByTestId('step-tap')).toHaveAttribute('aria-pressed', 'true');
   });
 });
+
+describe('the tile variant praise', () => {
+  it('leads the star in size: body-lg, never caption', () => {
+    render(<StepRow {...base} variant="tile" done />);
+
+    const praise = screen.getByTestId('step-praise').className;
+    expect(praise).toContain('text-body-lg');
+    expect(praise).not.toContain('text-caption');
+  });
+});
