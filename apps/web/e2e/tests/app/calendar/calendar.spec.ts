@@ -34,15 +34,20 @@ async function fillWhen(group: Locator, date: string, time: string) {
 }
 
 /**
- * Open the event dialog through `trigger`, retrying until it is really there:
- * a tap that lands before the page has hydrated is lost, and the calendar
- * hydrates through a recovery render under the dev server.
+ * Open the event dialog through `trigger`, retrying until it is really there.
+ *
+ * Cause of the lost first click (reproduced 3/36 without the retry): the server
+ * renders the *wide* shape (`use-is-wide.ts:46`, server snapshot `true`), the
+ * app project is a 390px phone, so hydration swaps the SSR'd chip for the phone
+ * layout (`calendar-shell.tsx:95`). A tap in that window hits a node that is
+ * about to be replaced. The server cannot know the viewport, so this is not a
+ * dead click to fix in `src` — the test waits the swap out instead.
  */
 async function openEventDialog(page: Page, trigger: () => Promise<void>) {
   await expect(async () => {
     await trigger();
     await expect(page.getByTestId('event-dialog')).toBeVisible({ timeout: 2000 });
-  }).toPass();
+  }).toPass({ timeout: 15_000, intervals: [250, 500, 1000] });
 }
 
 test.describe('calendar views', () => {
