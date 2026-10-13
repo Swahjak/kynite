@@ -69,15 +69,14 @@ pnpm db:studio        # Open Drizzle Studio GUI
 
 ### Key Directories
 
-- `src/app/[locale]/` - Localized App Router pages (nl/en)
-- `src/components/` - App-level React components (the locale-coupled `ui/*` primitives, calendar/ for main feature)
+- `src/app/[locale]/` - Localized App Router pages (nl/en); route groups, gates and the surface resolver: `docs/route-tree.md`
+- `src/components/` - App-level React components (the locale-coupled `ui/*` primitives, `shell/` for the one responsive shell)
 - `src/lib/` - Shared utilities
-- `src/hooks/` - Custom React hooks
 - `src/i18n/` - Internationalization config (routing.ts, request.ts, navigation.ts)
 - `src/server/` - Server-side code (auth.ts, db/, schema.ts)
 - `messages/` - Translation JSON files (nl.json, en.json)
 - `e2e/` - Playwright E2E tests
-  - `tests/` - Test specs organized by feature (auth/, family/, dashboard/, visual/)
+  - `tests/` - Test specs organized by feature (`app/` member project, `hub/` paired-device project, `share/`)
   - `fixtures/` - Playwright fixtures for auth and page setup
   - `utils/` - Test data factory, DB seeder, test scenarios
 
@@ -127,20 +126,19 @@ Uses shadcn/ui component library with CSS variables for theming (see `packages/u
 
 ### Calendar Component
 
-The calendar is the core feature, located in `src/components/calendar/`:
+The calendar is the core feature. It lives in the `calendar` slice (`src/modules/calendar/`); the UI is in `src/modules/calendar/ui/`:
 
-- **CalendarProvider** (`contexts/calendar-context.tsx`) - Central state management for view, events, filtering, and user preferences. Settings persist to localStorage.
-- **Views**: day, week, month, year, agenda (in `views/` subdirectory)
-- **DnD**: Drag-and-drop event rescheduling (`dnd/` + `contexts/dnd-context.tsx`)
-- **Types**: `IEvent`, `IUser` interfaces in `interfaces.ts`, view/color types in `types.ts`
-- Use `useCalendar()` hook to access calendar state and actions
+- **CalendarShell** (`ui/calendar-shell.tsx`) - Client component owning the view state. The page fetches one window wide enough for every view, so switching day/week/month/agenda is a re-render, not a request; the URL follows via `history.replaceState`. Moving to another period navigates for real.
+- **Views**: `time-grid.tsx` (day/week), `month-view.tsx`, `agenda-view.tsx`; below `sm` they change shape (`mobile-month-view.tsx`, `day-strip.tsx`) via `use-is-wide.ts`. The ambient wall board is `hub-board.tsx`.
+- **Events**: `event-chip.tsx`, `event-dialog.tsx`; drag-to-reschedule in `use-drag-reschedule.ts`. Data and window logic: `page-data.ts`, `queries.ts`, `domain/`.
+- Consumers import from `@/modules/calendar` only (cross-module deep imports are lint-banned).
 
-### Confetti Celebrations
+### Celebrations
 
-Celebratory confetti effects in `src/components/confetti/`:
+Confetti and star-pop effects live in `src/components/celebration/` (presets and `StarPop` re-exported from `@kynite/ui`):
 
-- **ConfettiProvider** - Wrap app to enable confetti globally
-- **useConfetti()** hook - Trigger confetti programmatically with configurable presets
+- **`fireConfettiBurst()`** (`confetti-burst.ts`) - Trigger a burst programmatically; `CELEBRATION_PRESETS` / `CELEBRATION_INTENSITIES` configure it
+- Respect `prefersReducedMotion()`
 
 ### Google Calendar Push Notifications
 

@@ -86,6 +86,9 @@ graph TB
 
 ### Route groups
 
+> **Superseded for routing:** the `(app)`/`(hub)` split below predates the hub-equals-app work.
+> See `docs/route-tree.md` for the current route groups, gates and surface resolver.
+
 Route groups isolate surfaces with genuinely different layouts, auth models and
 service-worker scopes.
 
