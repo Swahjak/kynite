@@ -40,4 +40,20 @@ test.describe('legacy /hub URLs', () => {
     expect(response.status()).toBe(308);
     expect(new URL(response.headers()['location']!, 'http://x').pathname).toBe('/nl/calendar');
   });
+
+  test('an unknown segment falls back to /nl/today', async ({ request }) => {
+    const response = await request.get('/nl/hub/does-not-exist', { maxRedirects: 0 });
+
+    expect(response.status()).toBe(308);
+    expect(new URL(response.headers()['location']!, 'http://x').pathname).toBe('/nl/today');
+  });
+
+  test('the query string survives the redirect', async ({ request }) => {
+    const response = await request.get('/nl/hub/kalender?date=2026-10-13', { maxRedirects: 0 });
+
+    expect(response.status()).toBe(308);
+    const location = new URL(response.headers()['location']!, 'http://x');
+    expect(location.pathname).toBe('/nl/calendar');
+    expect(location.searchParams.get('date')).toBe('2026-10-13');
+  });
 });

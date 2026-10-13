@@ -150,6 +150,10 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         viewport: APP_VIEWPORT,
         storageState: APP_STORAGE_STATE,
+        // H2a (D17): the surface resolver reads `Sec-CH-UA-Mobile`; a Desktop
+        // Chrome UA at a phone viewport resolves to `desktop`, which renders
+        // like the wall. This project *is* a phone, so say so.
+        extraHTTPHeaders: { 'Sec-CH-UA-Mobile': '?1' },
       },
     },
 

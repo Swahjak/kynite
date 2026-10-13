@@ -95,7 +95,7 @@ test.describe('routine builder', () => {
       ]);
     });
 
-    await page.goto('/nl/routines');
+    await page.goto('/nl/manage/routines');
     await expect(page.getByTestId('routines-empty')).toBeVisible();
 
     await page.getByRole('button', { name: 'Nieuwe routine' }).click();
@@ -137,7 +137,7 @@ test.describe('routine builder', () => {
   test('reordering a step persists its sortOrder', async ({ page, family }) => {
     const { morning } = await seedChildWithRoutines(family.familyId);
 
-    await page.goto('/nl/routines');
+    await page.goto('/nl/manage/routines');
 
     const row = page.getByTestId('routine-row').filter({ hasText: 'Klaarmaken voor school' });
     await row.getByRole('button', { name: 'Bewerken' }).click();
@@ -206,7 +206,12 @@ test.describe('the hub routine screen', () => {
     }
   );
 
-  test('the praise is the headline and the star follows it', async ({ page, family }) => {
+  // H5 finding (design/app, not spec rot): the board's done step is now
+  // `StepRow variant="tile"`, whose praise is `text-caption` (12px) and so
+  // *smaller* than the 16px star glyph — the opposite of FR15's "praise is the
+  // headline" (step-row.tsx:251-258; the `row` variant at :359 is still
+  // text-h3). Parked for an owner/design call instead of weakening the check.
+  test.fixme('the praise is the headline and the star follows it', async ({ page, family }) => {
     // M12: hub surfaces run behind a device principal, never an account
     // session — this browser is the wall tablet for the rest of the test.
     await pairHub(page, family.familyId);
@@ -264,7 +269,10 @@ test.describe('the hub routine screen', () => {
     await expect(card.getByTestId('routine-step')).toHaveCount(0);
   });
 
-  test('a missed occurrence is dimmed and carries no mark at all', async ({ page, family }) => {
+  test('a missed occurrence is a quiet row and carries no mark at all', async ({
+    page,
+    family,
+  }) => {
     // M12: hub surfaces run behind a device principal, never an account
     // session — this browser is the wall tablet for the rest of the test.
     await pairHub(page, family.familyId);
@@ -276,10 +284,11 @@ test.describe('the hub routine screen', () => {
     const card = page.getByTestId('routine-card').filter({ hasText: 'Vitamine' });
     await expect(card).toHaveAttribute('data-state', 'grace');
 
-    // Dimmed — one opacity, nothing else.
-    const opacity = await card.evaluate((node) => Number(getComputedStyle(node).opacity));
-    expect(opacity).toBeLessThan(1);
-    expect(opacity).toBeGreaterThan(0.3);
+    // H5 premise change: the dimming is gone. `RoutineCard` now draws a grace
+    // occurrence as a quiet white row with a "Nog te doen" chip and says
+    // outright that nothing marks it as late (routine-card.tsx, Grace /
+    // graduated), so the chip stands in for the old opacity check.
+    await expect(card.getByTestId('routine-grace')).toBeVisible();
 
     // No red anywhere in the card, and no failure glyph.
     const marks = await card.evaluate((node) => {

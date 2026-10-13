@@ -32,7 +32,7 @@ test('a parent schedules a one-off chore, the child taps it, and it leaves the b
   );
 
   // ---- the builder -------------------------------------------------------
-  await page.goto('/nl/routines');
+  await page.goto('/nl/manage/routines');
   await page.getByRole('button', { name: 'Nieuwe routine' }).click();
 
   const dialog = page.getByRole('dialog');
@@ -48,7 +48,7 @@ test('a parent schedules a one-off chore, the child taps it, and it leaves the b
   await dialog.getByTestId('schedule-kind-once').click();
   await expect(dialog.getByTestId('weekday-MO')).toBeHidden();
 
-  await dialog.getByLabel('Datum').fill(todayKey());
+  await dialog.getByLabel('Datum', { exact: true }).fill(todayKey());
   // 00:01 so the chore is already due whenever this spec runs; it also puts it
   // in the morning band, which the board assertion below relies on.
   await dialog.getByLabel('Starttijd').fill('00:01');

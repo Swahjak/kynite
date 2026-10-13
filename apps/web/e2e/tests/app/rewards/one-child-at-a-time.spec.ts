@@ -132,13 +132,17 @@ test.describe('no screen renders two children together', () => {
     const { mila, daan } = await seedTwoChildren(family.familyId);
 
     await page.goto(`/nl/store?member=${mila.id}`);
-    await expect(page.getByTestId('available-stars')).toHaveText(String(MILA_STARS));
-    await expect(page.getByTestId('star-balance')).toHaveAttribute('data-member-id', mila.id);
+    await expect(
+      page.getByTestId('available-stars').getByText(String(MILA_STARS), { exact: true })
+    ).toBeVisible();
+    await expect(page.getByTestId('available-stars')).toHaveAttribute('data-member-id', mila.id);
 
     await page.getByTestId('store-chip').filter({ hasText: 'Daan' }).click();
 
-    await expect(page.getByTestId('available-stars')).toHaveText(String(DAAN_STARS));
-    await expect(page.getByTestId('star-balance')).toHaveAttribute('data-member-id', daan.id);
+    await expect(
+      page.getByTestId('available-stars').getByText(String(DAAN_STARS), { exact: true })
+    ).toBeVisible();
+    await expect(page.getByTestId('available-stars')).toHaveAttribute('data-member-id', daan.id);
 
     // Exactly one balance element exists at a time, on either shelf.
     await expect(page.getByTestId('available-stars')).toHaveCount(1);
@@ -177,7 +181,7 @@ test.describe('no screen renders two children together', () => {
   test('the routine builder still shows no completion or star totals', async ({ page, family }) => {
     await seedTwoChildren(family.familyId);
 
-    await page.goto('/nl/routines');
+    await page.goto('/nl/manage/routines');
     await expect(page.getByTestId('routines-page')).toBeVisible();
 
     expect(await renderedTotals(page)).toEqual([]);

@@ -81,7 +81,11 @@ test.describe('google settings', () => {
     // rather than the bar — which is the navigation a parent actually
     // performs, so it is the one under test.
     await page.getByTestId('mobile-nav-more').click();
-    await page.getByRole('link', { name: 'Instellingen' }).click();
+    // H4 (D16): the sheet's own "Instellingen" is the member's /account; the
+    // household settings hub sits behind "Beheer" -> "Instellingen".
+    await page.getByRole('link', { name: 'Beheer' }).click();
+    await expect(page).toHaveURL(/\/nl\/manage$/);
+    await page.getByRole('link', { name: /Instellingen/ }).click();
     await expect(page).toHaveURL(/\/nl\/manage\/settings$/);
 
     await page.getByRole('link', { name: 'Google-accounts beheren' }).click();

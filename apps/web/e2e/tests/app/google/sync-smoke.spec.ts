@@ -45,7 +45,13 @@ test.describe('google calendar sync smoke', () => {
     // `enqueueCalendarSync` threw on a process with no job queues. The link no
     // longer depends on it (see `modules/google/linking.ts`).
     await expect(page.getByRole('alert')).toHaveCount(0);
-    await expect(page.getByRole('status')).toContainText('ouder@example.test');
+    // A fresh link opens the calendar picker (`CalendarPickerDialog`) rather
+    // than the `role=status` notice, which only shows once the dialog is gone.
+    // The primary calendar is already ticked server-side, so "Klaar" keeps it.
+    const picker = page.getByTestId('calendar-picker');
+    await expect(picker).toContainText('ouder@example.test');
+    await picker.getByTestId('calendar-picker-confirm').click();
+    await expect(picker).toBeHidden();
     await expect(page.getByText('ouder@example.test').first()).toBeVisible();
     await expect(page.getByText('Gezinsagenda (Google)')).toBeVisible();
 

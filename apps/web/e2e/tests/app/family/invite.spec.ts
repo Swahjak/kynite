@@ -175,7 +175,9 @@ test.describe('second-parent onboarding', () => {
       // Withheld: `member:manage` is owner-only, so the roster offers them no
       // invite controls at all — they cannot hand out a login of their own.
       await invitee.goto('/nl/manage/family');
-      await expect(invitee.getByText(SECOND_PARENT, { exact: true })).toBeVisible();
+      await expect(
+        invitee.getByRole('main').getByText(SECOND_PARENT, { exact: true })
+      ).toBeVisible();
       await expect(invitee.getByTestId('member-invite-open')).toHaveCount(0);
       await expect(invitee.getByTestId('member-invite-pending')).toHaveCount(0);
     } finally {

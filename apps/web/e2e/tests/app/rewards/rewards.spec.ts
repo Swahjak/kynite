@@ -189,7 +189,11 @@ test.describe('the parent answers', () => {
     const tile = page.locator(`[data-reward-id="${film.id}"]`);
     await expect(tile).toHaveAttribute('data-state', 'affordable');
     await expect(tile.getByTestId('reward-requested')).toHaveCount(0);
-    await expect(page.getByTestId('available-stars')).toHaveText('10');
+    // `StarCount` is a glyph + the number + an sr-only phrase, so the number is
+    // asserted on its own node.
+    await expect(
+      page.getByTestId('available-stars').getByText('10', { exact: true })
+    ).toBeVisible();
 
     const text = (await page.getByTestId('reward-store').textContent()) ?? '';
     expect(text).not.toMatch(/[-−]\s*\d/);

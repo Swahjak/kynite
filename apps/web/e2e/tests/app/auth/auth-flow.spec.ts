@@ -83,7 +83,7 @@ test.describe('sign-up', () => {
 
     const dialog = page.getByRole('dialog');
     await dialog.getByLabel('Naam').fill('Bram');
-    await dialog.getByRole('button', { name: 'Oranje' }).click();
+    await dialog.getByRole('button', { name: 'Terracotta' }).click();
     await dialog.getByRole('button', { name: 'Vos' }).click();
     await dialog.getByRole('button', { name: 'Opslaan' }).click();
 
@@ -110,6 +110,8 @@ test.describe('sign-in', () => {
       await page.getByRole('button', { name: 'Inloggen' }).click();
 
       await expect(page).toHaveURL(/\/nl\/today$/);
+      // `/today` has no family heading; the family name lives on /manage/family.
+      await page.goto('/nl/manage/family');
       await expect(page.getByRole('heading', { name: familyName })).toBeVisible();
     }
   );
@@ -171,8 +173,17 @@ test.describe('app guard', () => {
 
   test('keeps every (app) section closed', async ({ page }) => {
     await page.goto('/nl/manage');
-
     await expect(page).toHaveURL(/\/nl\/sign-in\?callbackUrl=%2Fnl%2Fmanage$/);
+
+    await page.goto('/nl/account');
+    await expect(page).toHaveURL(/\/nl\/sign-in\?callbackUrl=%2Fnl%2Faccount$/);
+  });
+
+  test.fixme('anonymous /today: sign-in vs /pair, owner decision pending', async ({ page }) => {
+    // Intended (requireMemberOrDevice): no cookie -> sign-in. proxy.ts:266-274
+    // currently sends a cookie-less visit to /pair instead.
+    await page.goto('/nl/today');
+    await expect(page).toHaveURL(/\/nl\/sign-in\?callbackUrl=%2Fnl%2Ftoday$/);
   });
 
   test('returns the parent to the page they asked for after signing in', async ({ page }) => {

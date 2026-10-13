@@ -136,7 +136,7 @@ for (const [name, viewport] of Object.entries(VIEWPORTS) as [
     test('routine builder', async ({ page, family }) => {
       await seedBoard(family.familyId, name === 'tablet' ? 'c' : 'd');
 
-      await page.goto('/nl/routines');
+      await page.goto('/nl/manage/routines');
       await expect(page.getByTestId('routine-row').first()).toBeVisible();
       await settlePage(page);
 

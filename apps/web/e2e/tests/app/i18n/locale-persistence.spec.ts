@@ -96,7 +96,10 @@ test.describe('locale persistence', () => {
     await page.getByRole('link', { name: 'Calendar', exact: true }).click();
     await expect(page).toHaveURL(/\/en\/calendar$/, { timeout: 15000 });
 
-    await page.getByRole('link', { name: 'Routines', exact: true }).click();
+    // D16: on the phone, the routines board lives in the "More" sheet, where
+    // its link is called "Active routines".
+    await page.getByTestId('mobile-nav-more').click();
+    await page.getByRole('link', { name: 'Active routines', exact: true }).click();
     await expect(page).toHaveURL(/\/en\/routines$/, { timeout: 15000 });
   });
 
