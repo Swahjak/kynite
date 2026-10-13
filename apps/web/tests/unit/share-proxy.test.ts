@@ -135,11 +135,13 @@ describe('/manage is member-only at the proxy (H4)', () => {
     return new NextRequest(`https://kynite.test${path}`, { headers: { cookie: `${name}=x` } });
   }
 
-  it('sends a paired device to /today, not to sign-in', () => {
+  it('sends a device cookie without a session to sign-in with the callback (not /today)', () => {
     const response = proxy(withCookie('/nl/manage/rewards', DEVICE_SESSION_COOKIE));
+    const location = new URL(response.headers.get('location')!);
 
     expect(response.status).toBe(307);
-    expect(new URL(response.headers.get('location')!).pathname).toBe('/nl/today');
+    expect(location.pathname).toBe('/nl/sign-in');
+    expect(location.searchParams.get('callbackUrl')).toBe('/nl/manage/rewards');
   });
 
   it('sends a credential-less request to sign-in', () => {
@@ -201,14 +203,16 @@ describe('/account is member-only at the proxy (H4)', () => {
     expect(location.searchParams.get('callbackUrl')).toBe('/nl/account');
   });
 
-  it('sends a paired device to /today', () => {
+  it('sends a device cookie without a session to sign-in with the callback', () => {
     const response = proxy(
       new NextRequest('https://kynite.test/nl/account', {
         headers: { cookie: `${DEVICE_SESSION_COOKIE}=x` },
       })
     );
+    const location = new URL(response.headers.get('location')!);
 
-    expect(new URL(response.headers.get('location')!).pathname).toBe('/nl/today');
+    expect(location.pathname).toBe('/nl/sign-in');
+    expect(location.searchParams.get('callbackUrl')).toBe('/nl/account');
   });
 
   it('lets a session cookie through (no redirect)', () => {

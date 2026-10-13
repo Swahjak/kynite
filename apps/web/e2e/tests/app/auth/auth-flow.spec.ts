@@ -179,9 +179,7 @@ test.describe('app guard', () => {
     await expect(page).toHaveURL(/\/nl\/sign-in\?callbackUrl=%2Fnl%2Faccount$/);
   });
 
-  test.fixme('anonymous /today: sign-in vs /pair, owner decision pending', async ({ page }) => {
-    // Intended (requireMemberOrDevice): no cookie -> sign-in. proxy.ts:266-274
-    // currently sends a cookie-less visit to /pair instead.
+  test('anonymous /today goes to sign-in with the callback, not /pair', async ({ page }) => {
     await page.goto('/nl/today');
     await expect(page).toHaveURL(/\/nl\/sign-in\?callbackUrl=%2Fnl%2Ftoday$/);
   });

@@ -19,7 +19,11 @@ older `(app)`/`(hub)` split and is superseded by this page for routing.
 Auth lives in pages, not in `(main)/layout.tsx`: layouts do not re-render on client-side
 navigation, so a layout gate would run once per full page load. The layout only resolves the
 principal to pick the shell. `src/proxy.ts` adds a cheap early bounce (`MEMBER_SECTIONS`,
-`SHARED_SECTIONS`: no cookie at all goes to sign-in, resp. `/pair`); the page gate is authoritative.
+`SHARED_SECTIONS`); the page gate is authoritative. Exact rule: a member section without a session
+cookie goes to `/sign-in?callbackUrl=…` (a stale device cookie changes nothing); a shared section with
+neither cookie goes to `/sign-in?callbackUrl=…`, except the device-only `/clock`, which goes to `/pair`
+(kiosk cold boot); `/pair` itself needs nothing. A stale device cookie on a shared page is caught by
+`requireMemberOrDevice`: `/pair`.
 
 ## Surface resolver (D17)
 

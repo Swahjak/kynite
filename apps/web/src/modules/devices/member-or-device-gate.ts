@@ -2,6 +2,7 @@ import 'server-only';
 import { cookies } from 'next/headers';
 import { redirect } from '@/i18n/navigation';
 import { locales, routing } from '@/i18n/routing';
+import { CALLBACK_URL_PARAM } from '@/lib/callback-url';
 import { DEVICE_SESSION_COOKIE } from '@/lib/device-session';
 import { getFamily, getPrincipal, type Principal } from '@/modules/family';
 
@@ -69,7 +70,17 @@ export async function requireMemberOrDevice(
   // signed-out member. The cookie is read for *presence* only — whether it
   // resolves to a device is `getPrincipal()`'s job, and it already said no.
   const hasDeviceCookie = (await cookies()).has(DEVICE_SESSION_COOKIE);
-  redirect({ href: hasDeviceCookie ? '/pair' : '/sign-in', locale });
+  if (hasDeviceCookie) redirect({ href: '/pair', locale });
+  // The proxy puts `callbackUrl` on the sign-in redirect; do the same here so a
+  // session that expired mid-visit (cookie present, no principal) returns too.
+  const query = toQueryString(searchParams);
+  redirect({
+    href: {
+      pathname: '/sign-in',
+      query: { [CALLBACK_URL_PARAM]: `/${locale}${href}${query ? `?${query}` : ''}` },
+    },
+    locale,
+  });
 
   // `redirect()` throws; next-intl's wrapper is not typed `never`.
   throw new Error('unreachable');

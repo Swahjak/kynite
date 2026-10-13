@@ -45,6 +45,9 @@ const SHARED_SECTIONS = new Set([
   'clock',
 ]);
 
+/** Shared sections that only a paired device can use (`requireHubDevice`). */
+const DEVICE_ONLY_SECTIONS = new Set(['clock']);
+
 function isLocale(segment: string | undefined): segment is (typeof routing.locales)[number] {
   return routing.locales.includes(segment as (typeof routing.locales)[number]);
 }
@@ -143,6 +146,34 @@ function noIndex(response: NextResponse): NextResponse {
 }
 
 /**
+ * Turns a credential-less request away to sign-in, carrying the intended URL.
+ * A stale device cookie is no reason to detour via `/today` and `/pair`: the
+ * callback would be lost. A *valid* paired device landing on sign-in is bounced
+ * on to `callbackUrl` by the sign-in page, and from `/manage` to `/today` by
+ * the `(app)` layout.
+ */
+function signInRedirect(request: NextRequest, locale: string) {
+  const url = request.nextUrl.clone();
+  const intended = `${request.nextUrl.pathname}${request.nextUrl.search}`;
+  url.pathname = `/${locale}/sign-in`;
+  // M18: the sign-in URL starts with an empty query — the intended URL's
+  // parameters have no business sitting loose on the sign-in form — and the
+  // whole intended destination, *query string included*, is then carried
+  // across inside `?callbackUrl=`. Preserving it is the point: a parent
+  // deep-linked to `/today?date=2026-08-14` has to land back on that day and
+  // not on today. It is re-validated as a relative path on the
+  // way out (`lib/callback-url.ts`), which is what keeps a value this proxy
+  // wrote and a value an attacker put in a link indistinguishable *and*
+  // harmless.
+  url.search = '';
+  const callbackUrl = sanitizeCallbackUrl(intended);
+  if (callbackUrl && callbackUrl !== `/${locale}/sign-in`) {
+    url.searchParams.set(CALLBACK_URL_PARAM, callbackUrl);
+  }
+  return noIndex(NextResponse.redirect(url));
+}
+
+/**
  * Optimistic guard: a request with no credential is turned away here so the
  * tree behind it is never even rendered. Cookie *presence* is not proof of a
  * session — `requireMemberOrDevice()` and the `(app)`/`(clock)` gates re-check
@@ -154,8 +185,9 @@ function noIndex(response: NextResponse): NextResponse {
  *  - the member-only sections (`(app)`, `/manage`) need an *account* session
  *    cookie and bounce to sign-in without one;
  *  - the shared sections (everything on the one tree) need *either* an
- *    account cookie *or* a device cookie, and bounce to `/pair` with neither
- *    — the pair screen is the one surface a credential-less kiosk can use.
+ *    account cookie *or* a device cookie. With neither, a kiosk-only surface
+ *    (`/clock`) bounces to `/pair` (a credential-less kiosk's cold boot) and
+ *    every other page to sign-in with `callbackUrl` (an expired parent session).
  */
 export default function proxy(request: NextRequest): NextResponse {
   const segments = request.nextUrl.pathname.split('/').filter(Boolean);
@@ -213,40 +245,8 @@ export default function proxy(request: NextRequest): NextResponse {
     return noIndex(NextResponse.redirect(url, 308));
   }
 
-  // H4: a paired device on a member-only path (`/manage/*`) is sent to its own
-  // board, exactly as the `(app)` layout would — not to a sign-in form it cannot
-  // use. The device cookie is only a cheap hint here; the layout is authoritative.
-  if (
-    section &&
-    MEMBER_SECTIONS.has(section) &&
-    !getSessionCookie(request) &&
-    request.cookies.has(DEVICE_SESSION_COOKIE)
-  ) {
-    const url = request.nextUrl.clone();
-    url.pathname = `/${locale}/today`;
-    url.search = '';
-    return noIndex(NextResponse.redirect(url));
-  }
-
   if (section && MEMBER_SECTIONS.has(section) && !getSessionCookie(request)) {
-    const url = request.nextUrl.clone();
-    const intended = `${request.nextUrl.pathname}${request.nextUrl.search}`;
-    url.pathname = `/${locale}/sign-in`;
-    // M18: the sign-in URL starts with an empty query — the intended URL's
-    // parameters have no business sitting loose on the sign-in form — and the
-    // whole intended destination, *query string included*, is then carried
-    // across inside `?callbackUrl=`. Preserving it is the point: a parent
-    // deep-linked to `/today?date=2026-08-14` has to land back on that day and
-    // not on today. It is re-validated as a relative path on the
-    // way out (`lib/callback-url.ts`), which is what keeps a value this proxy
-    // wrote and a value an attacker put in a link indistinguishable *and*
-    // harmless.
-    url.search = '';
-    const callbackUrl = sanitizeCallbackUrl(intended);
-    if (callbackUrl && callbackUrl !== `/${locale}/sign-in`) {
-      url.searchParams.set(CALLBACK_URL_PARAM, callbackUrl);
-    }
-    return noIndex(NextResponse.redirect(url));
+    return signInRedirect(request, locale);
   }
 
   // H3 (D12): the old kiosk tree's `/hub/*` paths permanently redirect to
@@ -263,12 +263,16 @@ export default function proxy(request: NextRequest): NextResponse {
     return noIndex(NextResponse.redirect(url, 308));
   }
 
+  // No cookie at all on the shared tree. Device-only surfaces (`/clock`) are a
+  // kiosk cold boot and go to `/pair`; everything else is a member whose
+  // session expired and goes to sign-in, as `requireMemberOrDevice` does.
   if (
     section &&
     SHARED_SECTIONS.has(section) &&
     !request.cookies.has(DEVICE_SESSION_COOKIE) &&
     !getSessionCookie(request)
   ) {
+    if (!DEVICE_ONLY_SECTIONS.has(section)) return signInRedirect(request, locale);
     const url = request.nextUrl.clone();
     url.pathname = `/${locale}/pair`;
     url.search = '';
