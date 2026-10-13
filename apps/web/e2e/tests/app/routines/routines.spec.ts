@@ -206,12 +206,7 @@ test.describe('the hub routine screen', () => {
     }
   );
 
-  // H5 finding (design/app, not spec rot): the board's done step is now
-  // `StepRow variant="tile"`, whose praise is `text-caption` (12px) and so
-  // *smaller* than the 16px star glyph — the opposite of FR15's "praise is the
-  // headline" (step-row.tsx:251-258; the `row` variant at :359 is still
-  // text-h3). Parked for an owner/design call instead of weakening the check.
-  test.fixme('the praise is the headline and the star follows it', async ({ page, family }) => {
+  test('the praise is the headline and the star follows it', async ({ page, family }) => {
     // M12: hub surfaces run behind a device principal, never an account
     // session — this browser is the wall tablet for the rest of the test.
     await pairHub(page, family.familyId);
