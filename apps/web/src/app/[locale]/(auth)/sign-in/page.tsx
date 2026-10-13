@@ -29,6 +29,9 @@ export default async function SignInPage({
   // A session that is already scoped goes straight where it was headed — the
   // form has nothing to ask it.
   const principal = await getPrincipal();
+  // A paired device never sees this form and never follows a member callback:
+  // the proxy sends it here from `/manage`, so honouring the callback would loop.
+  if (principal?.kind === 'device') redirect({ href: '/today', locale });
   if (principal) {
     redirect({ href: callbackUrl ? withoutLocalePrefix(callbackUrl) : '/today', locale });
   }
