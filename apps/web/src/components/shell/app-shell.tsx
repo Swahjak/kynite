@@ -31,7 +31,7 @@ import {
 export type { NavRailItem } from './nav-rail';
 
 /**
- * The one shell both `(app)/layout.tsx` and `(hub)/layout.tsx` render (D9).
+ * The one shell `(app)/layout.tsx` and `(main)/layout.tsx` render (D9).
  *
  * Navigation is chosen by the `surface` the layout resolves server-side and
  * passes down:
@@ -99,7 +99,7 @@ export function AppShell(props: AppShellProps) {
 }
 
 /**
- * The kiosk frame (M12) — the `(hub)` tree's own shell. Fullscreen, no chrome,
+ * The kiosk frame (M12) — the frame a paired device (or the pair screen) gets. Fullscreen, no chrome,
  * theme applied before first paint, and it comes home by itself.
  */
 function KioskFrame(props: AppShellProps) {

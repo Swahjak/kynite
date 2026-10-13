@@ -10,7 +10,7 @@ older `(app)`/`(hub)` split and is superseded by this page for routing.
 | Group | URLs | Gate |
 |---|---|---|
 | `(main)` | `/today`, `/calendar`, `/routines[/<memberId>]`, `/tasks`, `/store`, `/stars/<memberId>`, `/timers`, `/timer` | member **or** device: `requireMemberOrDevice()` at the top of each page |
-| `(main)/pair` | `/pair` | the inverse: no principal. A paired device is sent to `/today` |
+| `(main)/pair` | `/pair` | the inverse: no device principal. A paired device is sent to `/today` |
 | `(clock)` | `/clock` | device only: `requireHubDevice()` in the page (the screensaver has its own bare layout) |
 | `(app)` | `/account`, `/account/notifications`, `/oauth/consent`, `/manage/*` | member: `(app)/layout.tsx` (a device is sent to `/today`, nobody to `/sign-in`) |
 | `(app)/manage` | `/manage` (index), `/manage/{routines,rewards,family,settings}` | member who `can(principal, 'routine:write')`: `manage/layout.tsx` gates every sub-page |
@@ -48,10 +48,18 @@ picks the manifest: `/manifest.webmanifest` for a member, `/hub.webmanifest` for
 The Fully Kiosk start URL and any bookmark still point at `/hub`. `proxy.ts` answers every
 `/hub[/...]` with a **308** to its twin (`HUB_REDIRECTS`: `kalender` to `calendar`, `taken` to
 `tasks`, the rest same name; `/hub` itself to `/today`; `routines`/`stars` keep their `[memberId]`
-tail). It runs before any cookie rule, so a tablet with only its device cookie lands on `/today`
-untouched. Same mechanism (`legacyAppRedirect`) for the pre-Beheer paths: `/family/**` and
+tail; an unknown `/hub/<x>` also lands on `/today`). It runs before the shared-section cookie
+rule, so a tablet with only its device cookie lands on `/today` untouched. Same mechanism (`legacyAppRedirect`) for the pre-Beheer paths: `/family/**` and
 `/rewards/**` to `/manage/...`, `/settings/notifications` to `/account/notifications`, other
 `/settings/**` to `/manage/settings`.
+
+## Service worker
+
+One worker, scope `/`. It cannot read the principal, so `sw-strategy.ts` matches by path:
+`HUB_SECTIONS` (the `(main)` sections, `/clock`, `/pair`, legacy `/hub`) use the hub shell
+strategy (`NetworkFirst`, 2s fuse, cached board on a dead network) for members and tablets
+alike; `/manage`, `/account`, `/oauth` stay `app-pages` (3s). Keep `HUB_SECTIONS` in step with
+`SHARED_SECTIONS` in `proxy.ts` when adding a section. Share and invite URLs stay network-only.
 
 ## Beheer (D10, D16)
 
