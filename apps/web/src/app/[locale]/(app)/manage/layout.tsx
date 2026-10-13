@@ -1,3 +1,5 @@
+import { headers } from 'next/headers';
+import { INTENDED_PATH_HEADER, signInHref } from '@/lib/callback-url';
 import { redirect } from '@/i18n/navigation';
 import { can, getPrincipal } from '@/modules/family';
 
@@ -27,7 +29,10 @@ export default async function ManageLayout({
   const principal = await getPrincipal();
 
   if (principal?.kind === 'device') redirect({ href: '/today', locale });
-  if (principal?.kind !== 'member') redirect({ href: '/sign-in', locale });
+  if (principal?.kind !== 'member') {
+    const intended = (await headers()).get(INTENDED_PATH_HEADER);
+    redirect({ href: signInHref(intended), locale });
+  }
   // `redirect()` is not typed `never` in next-intl's wrapper; restate the narrowing.
   if (principal?.kind !== 'member') return null;
   if (!can(principal, 'routine:write', { familyId: principal.familyId })) {

@@ -55,3 +55,22 @@ export function withoutLocalePrefix(path: string): string {
   const rest = path.slice(match[0].length);
   return rest.startsWith('/') || rest.length === 0 ? rest || '/' : `/${rest}`;
 }
+
+/**
+ * Request header the proxy sets to the intended `pathname + search`, so a
+ * server layout (which is never told its own URL) can send a signed-out member
+ * to sign-in with a `callbackUrl`.
+ */
+export const INTENDED_PATH_HEADER = 'x-kynite-path';
+
+/**
+ * The `redirect()` href for "go sign in, then come back to `intended`" — a
+ * locale-prefixed path with its query. Without a usable `intended` it is the
+ * bare `/sign-in`. Shared by `requireMemberOrDevice` and the `(app)` layouts.
+ */
+export function signInHref(intended: string | null | undefined) {
+  const callbackUrl = sanitizeCallbackUrl(intended);
+  return callbackUrl
+    ? { pathname: '/sign-in', query: { [CALLBACK_URL_PARAM]: callbackUrl } }
+    : '/sign-in';
+}

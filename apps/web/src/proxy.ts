@@ -1,7 +1,7 @@
-import { NextResponse, type NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getSessionCookie } from 'better-auth/cookies';
 import createMiddleware from 'next-intl/middleware';
-import { CALLBACK_URL_PARAM, sanitizeCallbackUrl } from '@/lib/callback-url';
+import { CALLBACK_URL_PARAM, INTENDED_PATH_HEADER, sanitizeCallbackUrl } from '@/lib/callback-url';
 import { DEVICE_SESSION_COOKIE } from '@/lib/device-session';
 import { routing } from '@/i18n/routing';
 
@@ -279,7 +279,11 @@ export default function proxy(request: NextRequest): NextResponse {
     return noIndex(NextResponse.redirect(url));
   }
 
-  return noIndex(intl(request));
+  // next-intl forwards the request headers it is given, so this reaches the
+  // layouts (`INTENDED_PATH_HEADER`) without a second response wrapper.
+  const headers = new Headers(request.headers);
+  headers.set(INTENDED_PATH_HEADER, `${request.nextUrl.pathname}${request.nextUrl.search}`);
+  return noIndex(intl(new NextRequest(request, { headers })));
 }
 
 export const config = {

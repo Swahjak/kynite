@@ -1,3 +1,5 @@
+import { headers } from 'next/headers';
+import { INTENDED_PATH_HEADER, signInHref } from '@/lib/callback-url';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 import {
@@ -58,7 +60,10 @@ export default async function AppLayout({
   // (see `modules/family/principal.ts` on resolution order), so it goes to the
   // board rather than to a sign-in form it cannot escape.
   if (principal?.kind === 'device') redirect({ href: '/today', locale });
-  if (principal?.kind !== 'member') redirect({ href: '/sign-in', locale });
+  if (principal?.kind !== 'member') {
+    const intended = (await headers()).get(INTENDED_PATH_HEADER);
+    redirect({ href: signInHref(intended), locale });
+  }
   // `redirect()` throws, but next-intl's wrapper is not typed `never`, so the
   // narrowing has to be restated for the compiler. Unreachable at runtime.
   if (principal?.kind !== 'member') return null;
