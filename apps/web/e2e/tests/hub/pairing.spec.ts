@@ -43,7 +43,11 @@ test.describe('device pairing', () => {
     const hub = await kiosk.newPage();
 
     await hub.goto('/nl/today');
-    // Unpaired: the proxy turns it away before anything renders.
+    // Unpaired: no cookie on the shared route tree sends the request to
+    // sign-in with the intended destination (H5e); the pair screen is one
+    // link away from that form.
+    await expect(hub).toHaveURL(/\/nl\/sign-in\?callbackUrl=%2Fnl%2Ftoday$/);
+    await hub.getByRole('link', { name: 'Dit scherm koppelen' }).click();
     await expect(hub).toHaveURL(/\/nl\/pair$/);
     await expect(hub.getByTestId('pair-form')).toBeVisible();
 
@@ -255,7 +259,9 @@ test.describe('a paired hub', () => {
     // bare locale root, and it is `(marketing)/page.tsx`'s own check that
     // sends a resolved member principal on to their own surface.
     await page.waitForURL(/\/nl\/today$/);
-    await expect(page.getByTestId('hub-board')).toHaveCount(0);
+    // The member renders as a browser now (`desktop`), not as the wall's
+    // device surface: the paired `hub` surface is gone with the cookie.
+    await expect(page.locator('html')).toHaveAttribute('data-surface', 'desktop');
 
     // And the device really is gone, not just the cookie on this page: a
     // fresh page carrying nothing but that same (now revoked) device token
@@ -288,6 +294,8 @@ test.describe('a paired hub', () => {
 
     // And the hub itself is back to square one.
     await hub.goto('/nl/today');
+    await expect(hub).toHaveURL(/\/nl\/sign-in\?callbackUrl=%2Fnl%2Ftoday$/);
+    await hub.getByRole('link', { name: 'Dit scherm koppelen' }).click();
     await expect(hub).toHaveURL(/\/nl\/pair$/);
     await expect(hub.getByTestId('pair-form')).toBeVisible();
 

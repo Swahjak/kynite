@@ -365,8 +365,11 @@ test.describe('hub offline', () => {
     const board = page.getByTestId('hub-board');
     await expect(board).toBeVisible({ timeout: 20_000 });
     // The board came from the served document, not from the foreign snapshot.
-    await expect(board).toContainText('Sanne');
+    // The signed-in owner is "Sanne"; the board's header filter draws each
+    // member as a face button named by initials, not by full name.
+    await expect(board.getByRole('button', { name: 'SA', exact: true })).toBeVisible();
     await expect(board).not.toContainText('Buurfamilie');
+    await expect(board.getByRole('button', { name: 'BU', exact: true })).toHaveCount(0);
 
     // And non-vacuously so: the read path did run, rejected the foreign row,
     // and replaced it with this family's own board.
