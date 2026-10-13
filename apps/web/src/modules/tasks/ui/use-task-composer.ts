@@ -13,7 +13,7 @@ import { useCallback, useSyncExternalStore } from 'react';
  * through the whole board composition — through a server component — for one
  * boolean.
  *
- * Same shape as `today/ui/use-today-tab.ts`, minus the persistence: an open
+ * An open
  * composer is a thing you are doing right now, not a preference, so it starts
  * closed on every load.
  */

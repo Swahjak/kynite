@@ -51,8 +51,7 @@ import { TodayClock } from './today-clock';
  * slice's nor the tasks slice's nor the family slice's value exports — every
  * slice barrel re-exports `server-only` reads alongside its client-safe
  * pieces. `toggleTaskAction` therefore arrives as a prop, passed by
- * reference from the server route, exactly as `TodayTabSterren` hands
- * `completeStepAction` to `StarMatrix`; member colour classes and routine
+ * reference from the server route; member colour classes and routine
  * icon tiles arrive pre-resolved on `board` itself (`colorClasses` on
  * `BoardColumn`, `accentClass` on every row) rather than being looked up
  * here.

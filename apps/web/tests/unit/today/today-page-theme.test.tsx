@@ -111,7 +111,6 @@ vi.mock('@/modules/today', async () => {
       <div data-testid="today-dag">{banner}</div>
     ),
     TodayTabRoutines: () => null,
-    TodayTabSterren: () => null,
     loadHubBoardComposition: (...args: unknown[]) => loadHubBoardComposition(...args),
   };
 });

@@ -66,8 +66,6 @@ export {
   type RoutinesBoardData,
 } from './page-data-board';
 
-export { StarMatrix, type StarMatrixColumn, type StarMatrixProps } from './ui/star-matrix';
-
 export { KidStatCard, type KidStatCardProps } from './ui/kid-stat-card';
 export { MemberFaces, joinNames, namesOf, participantsOf } from './ui/member-faces';
 export { TodayClock, type TodayClockProps } from './ui/today-clock';
@@ -82,12 +80,3 @@ export { TodayTabDag, type TodayTabDagProps } from './ui/today-tab-dag';
 export { TodayTabRoutines, type TodayTabRoutinesProps } from './ui/today-tab-routines';
 export { RoutinesBoard, type RoutinesBoardProps } from './ui/routines-board';
 export { RoutinesPageBoard, type RoutinesPageBoardProps } from './ui/routines-page-board';
-export { TodayTabSterren, type TodayTabSterrenProps } from './ui/today-tab-sterren';
-export {
-  DEFAULT_TODAY_TAB,
-  TODAY_TABS,
-  TODAY_TAB_STORAGE_KEY,
-  parseTodayTab,
-  useTodayTab,
-  type TodayTab,
-} from './ui/use-today-tab';

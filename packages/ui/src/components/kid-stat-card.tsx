@@ -26,8 +26,7 @@ import { StarCount } from './star-count';
  * facts this product actually keeps.
  *
  * **`render` makes the whole card a link, Base-UI style.** The hub dashboard
- * links each card to that child's routine page; `TodayTabSterren`'s stack and
- * `(app)/today`'s own routines tab do not, because `/hub/routines/[memberId]`
+ * links each card to that child's routine page; `(app)/today`'s own routines tab does not, because `/hub/routines/[memberId]`
  * needs a hub device. Since this package may not import `next/link`
  * (`packages/ui/.oxlintrc.json`), the caller passes the element — an
  * already-labelled `next/link` `<Link aria-label="…" href="…" />`, same seam
