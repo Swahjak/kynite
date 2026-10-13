@@ -54,12 +54,20 @@ export type LoadOptions = {
   /** `?date=YYYY-MM-DD` — anything unrecognised falls back to today. */
   date?: string;
   /**
-   * The hub is an ambient wall display: it renders free/busy for private
-   * calendars regardless of who happens to be signed in on it. Callers pass
-   * `'hub'` for a device principal only (`loadHubBoardComposition`); a signed-in
-   * member on the shared pages gets `'app'` and her own detail.
+   * Layout only: `'hub'` takes the family's `hubDefaultView` and fetches just
+   * the board being drawn; `'app'` defaults to the day view and fetches the
+   * window every view switches within. Callers derive it from the D17 surface
+   * resolver (`desktop` and `hub` present as `'hub'`). Says nothing about
+   * privacy — see `busyOnlyPrivate`.
    */
   surface?: 'app' | 'hub';
+  /**
+   * Private calendars render free/busy only, whoever is behind the request.
+   * Set for a device principal (the ambient wall display); §7 grades
+   * `calendar:view_private` as `busy-only` for it, this keeps the read honest
+   * even if a caller forgets. A member leaves it off and sees her own detail.
+   */
+  busyOnlyPrivate?: boolean;
 };
 
 /** Null when there is no principal — the caller redirects or renders a notice. */
@@ -108,15 +116,14 @@ export async function loadCalendarPage(options: LoadOptions): Promise<CalendarPa
    * grade is therefore carried into the query, which is the only layer holding
    * the resource it needs (`calendar.owner_member_id`).
    *
-   * The hub keeps forcing both off: an ambient wall display shows free/busy
-   * for private calendars regardless of who is signed in on it.
+   * `busyOnlyPrivate` (a device principal) forces both off: an ambient wall
+   * display shows free/busy for private calendars.
    */
-  const privateGrade =
-    options.surface === 'hub'
-      ? 'busy-only'
-      : grade(principal, 'calendar:view_private') === 'own'
-        ? 'own'
-        : decide(principal, 'calendar:view_private', { familyId: principal.familyId });
+  const privateGrade = options.busyOnlyPrivate
+    ? 'busy-only'
+    : grade(principal, 'calendar:view_private') === 'own'
+      ? 'own'
+      : decide(principal, 'calendar:view_private', { familyId: principal.familyId });
 
   const privateDetail = privateGrade === 'allow';
   const privateDetailFor =

@@ -10,6 +10,7 @@ vi.mock('server-only', () => ({}));
 
 const loadCalendarPage = vi.fn();
 const getPrincipal = vi.fn();
+const getSurface = vi.fn();
 
 vi.mock('@/modules/calendar', () => ({
   dayKeysOf: () => [] as string[],
@@ -24,6 +25,10 @@ vi.mock('@/modules/family', () => ({
   greetingSlotFor: () => 'morning',
   hourIn: () => 9,
   initialsOf: () => '',
+}));
+vi.mock('@/modules/surface', () => ({
+  getSurface: () => getSurface(),
+  presentationFor: (surface: string) => (surface === 'app' ? 'app' : 'hub'),
 }));
 vi.mock('@/modules/routines', () => ({ instantAt: vi.fn(), loadFamilyRoutineTotals: vi.fn() }));
 vi.mock('@/modules/tasks', () => ({ loadTodayTasks: vi.fn() }));
@@ -44,15 +49,20 @@ beforeEach(() => {
   });
 });
 
-describe('loadHubBoardComposition: calendar surface follows the principal', () => {
+describe('loadHubBoardComposition: privacy follows the principal, layout the surface', () => {
   it.each([
-    ['device', 'hub'],
-    ['member', 'app'],
-  ])('a %s principal reads the calendar as surface %s', async (kind, surface) => {
+    // [principal, D17 surface, expected layout surface (-> default view), busy-only private]
+    ['member', 'desktop', 'hub', false],
+    ['member', 'app', 'app', false],
+    ['device', 'hub', 'hub', true],
+  ])('a %s on the %s surface', async (kind, resolved, surface, busyOnlyPrivate) => {
     getPrincipal.mockResolvedValue({ kind, familyId: 'family-1' });
+    getSurface.mockResolvedValue(resolved);
 
     await loadHubBoardComposition({ date: '2026-08-15' });
 
-    expect(loadCalendarPage).toHaveBeenCalledWith(expect.objectContaining({ surface }));
+    expect(loadCalendarPage).toHaveBeenCalledWith(
+      expect.objectContaining({ surface, busyOnlyPrivate })
+    );
   });
 });

@@ -17,6 +17,7 @@ import {
   initialsOf,
   type GreetingSlot,
 } from '@/modules/family';
+import { getSurface, presentationFor } from '@/modules/surface';
 import { instantAt, loadFamilyRoutineTotals } from '@/modules/routines';
 import { loadTodayTasks, type TodayTasksData } from '@/modules/tasks';
 import { getFamilyWeather, type WeatherView } from '@/modules/weather';
@@ -96,22 +97,24 @@ export async function loadHubBoardComposition(options: {
    */
   time?: string;
   /**
-   * `?view=` — wins on both surfaces. Absent, a device principal gets the
-   * family's `hubDefaultView` (`loadCalendarPage`'s `surface: 'hub'`) and a
-   * member gets the day view.
+   * `?view=` — wins everywhere. Absent, the `hub` and `desktop` surfaces get the
+   * family's `hubDefaultView` and the `app` surface the day view.
    */
   view?: string;
   include?: HubBoardCompositionInclude;
 }): Promise<HubBoardComposition | null> {
   const include = options.include ?? {};
 
-  // Only a paired device is the ambient wall display that shows private events
-  // busy-only; a signed-in member on `/today` or `/calendar` sees her own detail.
+  // Two independent questions. Privacy follows the principal: only a paired
+  // device is the ambient wall display that shows private events busy-only; a
+  // signed-in member sees her own detail. Default view and fetch window follow
+  // the D17 surface: `hub`/`desktop` take the family's `hubDefaultView`, `app` the day view.
   const principal = await getPrincipal();
   const data = await loadCalendarPage({
     date: options.date,
     view: options.view,
-    surface: principal?.kind === 'device' ? 'hub' : 'app',
+    surface: presentationFor(await getSurface()),
+    busyOnlyPrivate: principal?.kind === 'device',
   });
   if (!data) return null;
 
