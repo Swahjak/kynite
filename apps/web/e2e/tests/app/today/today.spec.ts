@@ -34,13 +34,7 @@ test.describe('the takenlijst', () => {
     const row = page.getByTestId('today-task').filter({ hasText: title });
     await expect(row).toHaveAttribute('data-state', 'open');
 
-    // App finding (packages/ui fab.tsx:284): a *closed* speed dial keeps its
-    // invisible action stack in layout and `pointer-events-auto`, so on a
-    // phone it swallows taps over the right half of whatever sits above the
-    // FAB. Tap the row's left edge — the check circle — which is clear of it.
-    await row
-      .getByRole('button', { name: `${title} afvinken` })
-      .click({ position: { x: 16, y: 12 } });
+    await row.getByRole('button', { name: `${title} afvinken` }).click();
     await expect(row).toHaveAttribute('data-state', 'done');
   });
 });

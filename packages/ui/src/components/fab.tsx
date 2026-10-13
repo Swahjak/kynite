@@ -56,7 +56,7 @@ export type FabProps = {
 } & Omit<ComponentProps<'button'>, 'className'>;
 
 const fabClass =
-  'group/fab flex size-14 sm:size-16 items-center justify-center rounded-4xl bg-primary text-primary-foreground shadow-brand-lg transition-all duration-200 ease-brand hover:bg-brand-hover active:scale-95 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none';
+  'group/fab pointer-events-auto flex size-14 sm:size-16 items-center justify-center rounded-4xl bg-primary text-primary-foreground shadow-brand-lg transition-all duration-200 ease-brand hover:bg-brand-hover active:scale-95 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none';
 
 const fabIconClass = 'transition-transform duration-200 ease-brand group-hover/fab:rotate-90';
 
@@ -270,20 +270,22 @@ export function FabSpeedDial({
 
   return (
     <SlotPortal id={FAB_SLOT_ID}>
-      {/* Two siblings, both direct children of `FabSlot` so both get its
-          `pointer-events-auto`. The backdrop is only there to catch the
+      {/* Two siblings in `FabSlot` (which is `pointer-events-none`): the
+          backdrop and the dial root. Neither is hit-testable by default — the
+          trigger and the open action list opt back in, so a closed dial's
+          invisible action stack never swallows a tap. The backdrop is only there to catch the
           outside tap — it is transparent, because a scrim over the page would
           make a three-item menu read as a modal. */}
       <div
         data-slot="fab-speed-dial-backdrop"
         aria-hidden="true"
-        className={cn('fixed inset-0', open ? 'block' : 'hidden')}
+        className={cn('pointer-events-auto fixed inset-0', open ? 'block' : 'hidden')}
         onClick={close}
       />
       <div
         data-slot="fab-speed-dial"
         data-state={open ? 'open' : 'closed'}
-        className={cn('flex flex-col-reverse items-end gap-3', className)}
+        className={cn('pointer-events-none flex flex-col-reverse items-end gap-3', className)}
       >
         <button
           ref={triggerRef}
@@ -307,7 +309,7 @@ export function FabSpeedDial({
         <div
           id={listId}
           inert={!open}
-          className="flex flex-col-reverse items-end gap-3"
+          className={cn('flex flex-col-reverse items-end gap-3', open && 'pointer-events-auto')}
           data-slot="fab-speed-dial-actions"
         >
           {actions.map((action, index) => {
@@ -429,13 +431,13 @@ export function FabSpeedDial({
 /**
  * The shell-side half: an empty, fixed container in the corner the mockups put
  * the FAB in. `pointer-events-none` so an empty slot never eats a click on the
- * content beneath it; the FAB itself takes them back.
+ * content beneath it; the FAB (and an open speed dial) takes them back.
  */
 export function FabSlot() {
   return (
     <div
       id={FAB_SLOT_ID}
-      className="pb-safe pointer-events-none fixed right-4 bottom-20 z-40 flex justify-end sm:right-8 sm:bottom-8 [&>*]:pointer-events-auto"
+      className="pb-safe pointer-events-none fixed right-4 bottom-20 z-40 flex justify-end sm:right-8 sm:bottom-8"
     />
   );
 }
