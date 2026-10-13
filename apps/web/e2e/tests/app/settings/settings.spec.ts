@@ -120,10 +120,10 @@ test.describe('reward horizon', () => {
 
     const kiosk = await newAnonymousContext(browser, { locale: 'nl-NL' });
     const hub = await kiosk.newPage();
-    // Land on a `(hub)` route first: it redirects to the pair screen, which is
-    // where the service worker registers. `pairHub` waits for that worker to be
-    // active, and on the marketing page it never would be.
-    await hub.goto('/nl/today');
+    // Land on the pair screen first: it is inside `(main)`, where the service
+    // worker registers (`/nl/today` now sends a cookie-less request to sign-in,
+    // which registers nothing). `pairHub` waits for that worker to be active.
+    await hub.goto('/nl/pair');
     await pairHub(hub, family.familyId);
 
     // Instant is the column default: the store carries the horizon it renders
@@ -212,7 +212,7 @@ test.describe('hub display preferences', () => {
 
     const kiosk = await newAnonymousContext(browser, { locale: 'nl-NL' });
     const hub = await kiosk.newPage();
-    await hub.goto('/nl/today');
+    await hub.goto('/nl/pair');
     const device = await pairHub(hub, family.familyId);
 
     await hub.goto('/nl/calendar');
@@ -313,10 +313,10 @@ test.describe('household language and clock', () => {
 
     const kiosk = await newAnonymousContext(browser, { locale: 'nl-NL' });
     const hub = await kiosk.newPage();
-    // Land on a `(hub)` route first: it redirects to the pair screen, which is
-    // where the service worker registers. `pairHub` waits for that worker to be
-    // active, and on the marketing page it never would be.
-    await hub.goto('/nl/today');
+    // Land on the pair screen first: it is inside `(main)`, where the service
+    // worker registers (`/nl/today` now sends a cookie-less request to sign-in,
+    // which registers nothing). `pairHub` waits for that worker to be active.
+    await hub.goto('/nl/pair');
     await pairHub(hub, family.familyId);
     await hub.goto('/nl/today');
     await expect(hub.locator('html')).toHaveAttribute('lang', 'nl');
