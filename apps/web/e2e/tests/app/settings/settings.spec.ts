@@ -135,13 +135,7 @@ test.describe('reward horizon', () => {
     // --- The parent's phone, in the settings hub's members section ----------
     await page.goto('/nl/manage/settings');
     const row = page.getByTestId('member-row').filter({ hasText: 'Bram' });
-    // The settings page hydrates through a recovery render (the weather form
-    // branches on `navigator` — see report), so an early click can be lost:
-    // retry the open until the dialog is really there.
-    await expect(async () => {
-      await row.getByRole('button', { name: 'Bewerken' }).click();
-      await expect(page.getByTestId('member-reward-horizon')).toBeVisible({ timeout: 2000 });
-    }).toPass();
+    await row.getByRole('button', { name: 'Bewerken' }).click();
 
     await page.getByTestId('member-reward-horizon').click();
     await page.getByRole('option', { name: 'Sparen voor beloning' }).click();
@@ -175,12 +169,9 @@ test.describe('graduation', () => {
     await expect(teethRow).toHaveAttribute('data-graduated', 'false');
     await expect(coatRow).toHaveAttribute('data-graduated', 'false');
 
-    // A click that lands before hydration finishes is lost — retry until the
-    // row really flips (see the reward-horizon test for the cause).
-    await expect(async () => {
-      await teethRow.getByTestId('graduate-routine').click();
-      await expect(teethRow).toHaveAttribute('data-graduated', 'true', { timeout: 2000 });
-    }).toPass();
+    await teethRow.getByTestId('graduate-routine').click();
+
+    await expect(teethRow).toHaveAttribute('data-graduated', 'true');
     await expect(coatRow, 'the sibling routine is untouched').toHaveAttribute(
       'data-graduated',
       'false'
@@ -234,10 +225,8 @@ test.describe('hub display preferences', () => {
 
     // --- The parent's phone -------------------------------------------------
     await page.goto('/nl/manage/settings');
-    await expect(async () => {
-      await page.getByTestId('hub-default-view').click();
-      await page.getByRole('option', { name: 'Lijst van wat eraan komt' }).click({ timeout: 2000 });
-    }).toPass();
+    await page.getByTestId('hub-default-view').click();
+    await page.getByRole('option', { name: 'Lijst van wat eraan komt' }).click();
     await page.getByTestId('save-hub-display').click();
     await expect(page.getByTestId('save-hub-display')).toBeEnabled();
 
@@ -287,10 +276,8 @@ test.describe('hub display preferences', () => {
     // Provenance only: Google's colour for this calendar, as a dot.
     await expect(row.getByTestId('calendar-color-dot')).toBeVisible();
 
-    await expect(async () => {
-      await row.getByTestId('calendar-visibility').click();
-      await page.getByRole('option', { name: 'Privé — alleen bezet' }).click({ timeout: 2000 });
-    }).toPass();
+    await row.getByTestId('calendar-visibility').click();
+    await page.getByRole('option', { name: 'Privé — alleen bezet' }).click();
     await row.getByTestId('save-calendar-display').click();
     await expect(row.getByTestId('save-calendar-display')).toBeEnabled();
 
@@ -340,16 +327,9 @@ test.describe('household language and clock', () => {
 
     // --- The parent's phone -------------------------------------------------
     await page.goto('/nl/manage/settings');
-    await expect(async () => {
-      await page.getByTestId('family-locale').click();
-      await page.getByRole('option', { name: 'Engels' }).click({ timeout: 2000 });
-      await page.getByTestId('family-timezone').fill('Pacific/Auckland');
-      // Both edits must have survived the hydration recovery before saving.
-      await expect(page.getByTestId('family-locale')).toContainText('Engels', { timeout: 2000 });
-      await expect(page.getByTestId('family-timezone')).toHaveValue('Pacific/Auckland', {
-        timeout: 2000,
-      });
-    }).toPass();
+    await page.getByTestId('family-timezone').fill('Pacific/Auckland');
+    await page.getByTestId('family-locale').click();
+    await page.getByRole('option', { name: 'Engels' }).click();
     await page.getByTestId('save-family-settings').click();
     await expect(page.getByTestId('save-family-settings')).toBeEnabled();
 

@@ -1,12 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useSyncExternalStore } from 'react';
 import { useActionState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button, Field, FieldDescription, FieldLabel, Input } from '@kynite/ui';
 import { useActionToast } from '@/components/ui/use-action-toast';
 import { idleState } from '../action-state';
 import { setWeatherLocationAction } from '../actions';
+
+const noopSubscribe = () => () => {};
 
 export type WeatherLocationFormProps = {
   latitude: number | null;
@@ -31,7 +33,14 @@ export function WeatherLocationForm({ latitude, longitude, label }: WeatherLocat
 
   const [lat, setLat] = useState(latitude !== null ? String(latitude) : '');
   const [lng, setLng] = useState(longitude !== null ? String(longitude) : '');
-  const hasGeolocation = typeof navigator !== 'undefined' && 'geolocation' in navigator;
+  // Server snapshot is `false`: branching on `navigator` during render makes
+  // the server HTML (no button) differ from the first client render (button).
+  // React reconciles to the client snapshot after hydration.
+  const hasGeolocation = useSyncExternalStore(
+    noopSubscribe,
+    () => 'geolocation' in navigator,
+    () => false
+  );
 
   const useMyLocation = () => {
     navigator.geolocation.getCurrentPosition((position) => {
