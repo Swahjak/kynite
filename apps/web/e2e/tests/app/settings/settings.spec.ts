@@ -300,10 +300,6 @@ test.describe('hub display preferences', () => {
 
     // The hue on the board is the type's, and the owner still reads her own
     // private calendar in full (M23).
-    test.fixme(
-      true,
-      'APP REGRESSION: /today loads the calendar with surface:"hub" for a signed-in member (page-data-hub.ts:107), so the owner sees busy-only instead of her own private event'
-    );
     await page.goto('/nl/today');
     await expect(
       page.locator('[data-testid="today-timeline-row"][data-category="teal"]')

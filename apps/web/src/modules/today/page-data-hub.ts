@@ -11,6 +11,7 @@ import {
 } from '@/modules/calendar';
 import {
   MEMBER_COLOR_CLASSES,
+  getPrincipal,
   greetingSlotFor,
   hourIn,
   initialsOf,
@@ -95,16 +96,23 @@ export async function loadHubBoardComposition(options: {
    */
   time?: string;
   /**
-   * `?view=` (`/hub/kalender` only) — `loadCalendarPage` still wins with the
-   * family's `hubDefaultView` when this is absent, exactly as
-   * `page-data.ts`'s own comment describes.
+   * `?view=` — wins on both surfaces. Absent, a device principal gets the
+   * family's `hubDefaultView` (`loadCalendarPage`'s `surface: 'hub'`) and a
+   * member gets the day view.
    */
   view?: string;
   include?: HubBoardCompositionInclude;
 }): Promise<HubBoardComposition | null> {
   const include = options.include ?? {};
 
-  const data = await loadCalendarPage({ date: options.date, view: options.view, surface: 'hub' });
+  // Only a paired device is the ambient wall display that shows private events
+  // busy-only; a signed-in member on `/today` or `/calendar` sees her own detail.
+  const principal = await getPrincipal();
+  const data = await loadCalendarPage({
+    date: options.date,
+    view: options.view,
+    surface: principal?.kind === 'device' ? 'hub' : 'app',
+  });
   if (!data) return null;
 
   const pinned =

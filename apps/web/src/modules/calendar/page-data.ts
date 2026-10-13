@@ -55,14 +55,9 @@ export type LoadOptions = {
   date?: string;
   /**
    * The hub is an ambient wall display: it renders free/busy for private
-   * calendars regardless of who happens to be signed in on it.
-   *
-   * §7 already grades `calendar:view_private` as `busy-only` for a `device`
-   * principal, which is what the hub will carry once device sessions land
-   * (M12). Until then the hub authenticates as a member, and an owner would
-   * otherwise see private detail on a screen in the kitchen. Forcing it from
-   * the surface is the conservative reading, and it means M12 changes the
-   * principal without changing this behaviour.
+   * calendars regardless of who happens to be signed in on it. Callers pass
+   * `'hub'` for a device principal only (`loadHubBoardComposition`); a signed-in
+   * member on the shared pages gets `'app'` and her own detail.
    */
   surface?: 'app' | 'hub';
 };

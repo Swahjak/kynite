@@ -431,11 +431,7 @@ test.describe('the today tabs', () => {
 });
 
 test.describe('private calendars on the hub', () => {
-  test('renders busy-only on the hub while the app shows the detail', async ({ page, family }) => {
-    test.fixme(
-      true,
-      'APP REGRESSION: /today loads the calendar with surface:"hub" for a signed-in member (page-data-hub.ts:107), so the parent no longer sees private detail on her own device'
-    );
+  async function seedPrivateEvent(familyId: string) {
     // The seeded day must be the family's *local* today, not UTC's. Between
     // midnight and 02:00 Amsterdam time the two disagree, and building the
     // instant from `getUTCDate()` would seed the event onto yesterday's board —
@@ -452,13 +448,13 @@ test.describe('private calendars on the hub', () => {
     const at = (hour: number) => new Date(Date.UTC(year, month - 1, day, hour)).toISOString();
 
     await withDb(async (client) => {
-      const owner = await ownerMemberOf(client, family.familyId);
-      const privateCalendar = await seedCalendar(client, family.familyId, owner.id, {
+      const owner = await ownerMemberOf(client, familyId);
+      const privateCalendar = await seedCalendar(client, familyId, owner.id, {
         summary: 'Werk',
         visibility: 'private',
       });
 
-      await seedEvents(client, family.familyId, [
+      await seedEvents(client, familyId, [
         {
           title: 'Sollicitatiegesprek',
           startsAt: at(9),
@@ -468,6 +464,10 @@ test.describe('private calendars on the hub', () => {
         },
       ]);
     });
+  }
+
+  test('shows the private detail to a signed-in member on the app', async ({ page, family }) => {
+    await seedPrivateEvent(family.familyId);
 
     // The parent's own device: the owner may read their private calendar.
     await page.goto('/nl/today');
@@ -478,12 +478,13 @@ test.describe('private calendars on the hub', () => {
     // opposite with `toHaveCount(0)`, which is the assertion that has to stay
     // strict.
     await expect(page.getByText('Sollicitatiegesprek').first()).toBeVisible();
+  });
 
-    // Now the same browser becomes the wall tablet. Pairing happens *here*,
-    // between the two navigations, and not at the top of the test: a device
-    // cookie outranks the account session (M12,
-    // `modules/family/principal.ts`), so pairing first would have sent the
-    // `/nl/today` visit above to the board instead.
+  test('renders busy-only on the hub', async ({ page, family }) => {
+    await seedPrivateEvent(family.familyId);
+
+    // Pair first: a device cookie outranks the account session (M12,
+    // `modules/family/principal.ts`).
     await pairHub(page, family.familyId);
 
     // The wall display: the block is there, the title is not.
