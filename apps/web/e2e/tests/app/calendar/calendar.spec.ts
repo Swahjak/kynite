@@ -340,28 +340,25 @@ test.describe('pending sync', () => {
 });
 
 test.describe('the today tabs', () => {
-  // H5 premise change (D22): the per-person view (`TodayTabPersonen`, the
-  // `today-person-columns` columns) was deleted rather than re-homed, and the
-  // pill tabs are gone from `src`. Nothing renders these columns any more, so
-  // the ordering/colour guarantee has no surface to assert on. Parked, not
-  // removed, until the owner decides whether a replacement view needs it.
-  test.fixme('personen tab orders columns by sortOrder and carries each member colour', async ({
+  test('the day view orders member columns by sortOrder and carries each member colour', async ({
     page,
     family,
   }) => {
     await withDb(async (client) => {
+      // Seeded out of order on purpose: the columns follow `sortOrder`, not
+      // insertion order.
       await seedMembers(client, family.familyId, [
-        { displayName: 'Mila', role: 'child', color: 'orchid', sortOrder: 1 },
         { displayName: 'Daan', role: 'child', color: 'terracotta', sortOrder: 2 },
+        { displayName: 'Mila', role: 'child', color: 'orchid', sortOrder: 1 },
       ]);
     });
 
-    await page.goto('/nl/today');
-    // Rebuilt as tabs (commit 102facd): the day board's own combined/columns
-    // switcher is gone, and "per person" is one of the four tab peers.
-    await page.getByTestId('pill-tab-personen').click();
+    // The per-member columns live on the wide day grid (`MemberDayGrid`,
+    // `isWide` = min-width 640px); the 390px phone draws the day as a list.
+    await page.setViewportSize({ width: 1024, height: 800 });
+    await page.goto(`/nl/calendar?view=day&date=${ANCHOR}`);
 
-    const columns = page.locator('[data-testid="today-person-columns"] [data-member-id]');
+    const columns = page.locator('[data-testid="calendar-view-day"] [data-slot="member-column"]');
     await expect(columns).toHaveCount(3);
 
     // Sign-up's owner is sortOrder 0, so the seeded children follow in order.
@@ -369,8 +366,8 @@ test.describe('the today tabs', () => {
     await expect(columns.nth(1)).toContainText('Mila');
     await expect(columns.nth(2)).toContainText('Daan');
 
-    await expect(columns.nth(1).locator('.bg-cat-purple-surface')).toBeVisible();
-    await expect(columns.nth(2).locator('.bg-cat-orange-surface')).toBeVisible();
+    await expect(columns.nth(1).locator('.border-member-orchid-lijn')).toBeVisible();
+    await expect(columns.nth(2).locator('.border-member-terracotta-lijn')).toBeVisible();
   });
 
   test('the today timeline merges a shared event into one row', async ({ page, family }) => {
