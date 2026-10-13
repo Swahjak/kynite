@@ -28,6 +28,10 @@ vi.mock('@/modules/family', () => ({
   getPrincipal: () => getPrincipal(),
   can: (...args: unknown[]) => can(...args),
 }));
+// The matrix itself, for the one case that must not trust a mocked `can`.
+const { can: realCan } = await vi.importActual<typeof import('@/modules/family/authorize')>(
+  '@/modules/family/authorize'
+);
 
 const { default: ManageLayout } = await import('@/app/[locale]/(app)/manage/layout');
 const { default: ManagePage } = await import('@/app/[locale]/(app)/manage/page');
@@ -67,6 +71,26 @@ describe.each(subjects)('/manage gate (%s)', (_name, run) => {
   it('lets a manager through', async () => {
     getPrincipal.mockResolvedValue(member);
     can.mockReturnValue(true);
+    await expect(run()).resolves.not.toBeNull();
+    expect(redirect).not.toHaveBeenCalled();
+  });
+});
+
+describe.each(subjects)('/manage gate (%s), real can()', (_name, run) => {
+  beforeEach(() => {
+    redirect.mockClear();
+    can.mockReset();
+    can.mockImplementation((...args: Parameters<typeof realCan>) => realCan(...args));
+    getPrincipal.mockReset();
+  });
+
+  it('keeps a real child principal out, per the permission matrix', async () => {
+    getPrincipal.mockResolvedValue({ ...member, role: 'child' });
+    await expect(run()).rejects.toThrow('REDIRECT:/today');
+  });
+
+  it('lets a real owner principal in', async () => {
+    getPrincipal.mockResolvedValue({ ...member, role: 'owner' });
     await expect(run()).resolves.not.toBeNull();
     expect(redirect).not.toHaveBeenCalled();
   });

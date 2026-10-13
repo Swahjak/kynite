@@ -29,7 +29,7 @@ function uniqueEmail(): string {
 const PASSWORD = 'correct-horse-battery';
 
 test.describe('locale persistence', () => {
-  test('sign-up under /en lands the new family on /en/family', async ({ page }) => {
+  test('sign-up under /en lands the new family on /en/manage/family', async ({ page }) => {
     const email = uniqueEmail();
     const familyName = `EN Family ${Date.now()}`;
 
@@ -42,7 +42,7 @@ test.describe('locale persistence', () => {
     await page.getByLabel('Password').fill(PASSWORD);
     await page.getByRole('button', { name: 'Create family' }).click();
 
-    await expect(page).toHaveURL(/\/en\/family$/);
+    await expect(page).toHaveURL(/\/en\/manage\/family$/);
     await expect(page.locator('html')).toHaveAttribute('lang', 'en');
     await expect(page.getByRole('heading', { name: familyName })).toBeVisible();
   });
@@ -57,7 +57,7 @@ test.describe('locale persistence', () => {
     await page.getByLabel('Email address').fill(email);
     await page.getByLabel('Password').fill(PASSWORD);
     await page.getByRole('button', { name: 'Create family' }).click();
-    await expect(page).toHaveURL(/\/en\/family$/);
+    await expect(page).toHaveURL(/\/en\/manage\/family$/);
 
     // See the comment in the navigation test below: first visit to a route
     // under the e2e dev server pays a one-time on-demand compile.
@@ -69,7 +69,7 @@ test.describe('locale persistence', () => {
     await page.getByLabel('Password').fill(PASSWORD);
     await page.getByRole('button', { name: 'Sign in' }).click();
 
-    await expect(page).toHaveURL(/\/en\/family$/, { timeout: 15000 });
+    await expect(page).toHaveURL(/\/en\/today$/, { timeout: 15000 });
     await expect(page.locator('html')).toHaveAttribute('lang', 'en');
   });
 
@@ -83,7 +83,7 @@ test.describe('locale persistence', () => {
     await page.getByLabel('Email address').fill(email);
     await page.getByLabel('Password').fill(PASSWORD);
     await page.getByRole('button', { name: 'Create family' }).click();
-    await expect(page).toHaveURL(/\/en\/family$/);
+    await expect(page).toHaveURL(/\/en\/manage\/family$/);
 
     // A generous timeout here, not a shorter default one: this is the e2e
     // dev-server webServer (`playwright.config.ts`), so the *first* visit to
@@ -110,12 +110,12 @@ test.describe('locale persistence', () => {
     // its prefix would bounce an English parent into the Dutch app after they
     // signed in, which is the same bug one navigation later.
     for (const locale of ['en', 'nl'] as const) {
-      await page.goto(`/${locale}/today`);
+      await page.goto(`/${locale}/manage`);
       await expect(page).toHaveURL(new RegExp(`/${locale}/sign-in\\?`));
 
       const url = new URL(page.url());
       expect(url.pathname).toBe(`/${locale}/sign-in`);
-      expect(url.searchParams.get('callbackUrl')).toBe(`/${locale}/today`);
+      expect(url.searchParams.get('callbackUrl')).toBe(`/${locale}/manage`);
     }
   });
 });

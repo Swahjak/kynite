@@ -17,7 +17,7 @@ function uniqueEmail(): string {
 async function signUp(page: import('@playwright/test').Page): Promise<void> {
   // M17: the `app` project starts every context signed in as the baseline
   // parent (`playwright.config.ts` storage state), and the signed-in guard
-  // sends that browser straight to /family. This spec wants its own household.
+  // sends that browser straight to /today. This spec wants its own household.
   await page.context().clearCookies();
   await page.goto('/nl/sign-up');
   await page.getByLabel('Jouw naam').fill('Sarah');
@@ -25,7 +25,7 @@ async function signUp(page: import('@playwright/test').Page): Promise<void> {
   await page.getByLabel('E-mailadres').fill(uniqueEmail());
   await page.getByLabel('Wachtwoord').fill('correct-horse-battery');
   await page.getByRole('button', { name: 'Gezin aanmaken' }).click();
-  await expect(page).toHaveURL(/\/nl\/family$/);
+  await expect(page).toHaveURL(/\/nl\/manage\/family$/);
 }
 
 test.describe('google webhook', () => {
@@ -82,10 +82,10 @@ test.describe('google settings', () => {
     // performs, so it is the one under test.
     await page.getByTestId('mobile-nav-more').click();
     await page.getByRole('link', { name: 'Instellingen' }).click();
-    await expect(page).toHaveURL(/\/nl\/settings$/);
+    await expect(page).toHaveURL(/\/nl\/manage\/settings$/);
 
     await page.getByRole('link', { name: 'Google-accounts beheren' }).click();
-    await expect(page).toHaveURL(/\/nl\/settings\/google$/);
+    await expect(page).toHaveURL(/\/nl\/manage\/settings\/google$/);
 
     await expect(page.getByRole('heading', { name: 'Google Agenda' })).toBeVisible();
     await expect(page.getByText(/GOOGLE_CLIENT_ID/)).toBeVisible();
@@ -104,7 +104,7 @@ test.describe('google settings', () => {
 
     await page.goto('/api/google/oauth/start');
 
-    await expect(page).toHaveURL(/\/nl\/settings\/google\?error=notConfigured$/);
+    await expect(page).toHaveURL(/\/nl\/manage\/settings\/google\?error=notConfigured$/);
     // Scoped to the page's own alert: Next.js renders a route announcer with
     // the same role.
     await expect(page.getByRole('alert').first()).toContainText('niet ingesteld');

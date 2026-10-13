@@ -173,7 +173,7 @@ test.describe('the hub routine screen', () => {
 
       const { mila, morning } = await seedChildWithRoutines(family.familyId);
 
-      await page.goto(`/nl/hub/routines/${mila.id}`);
+      await page.goto(`/nl/routines/${mila.id}`);
 
       const card = page.getByTestId('routine-card').filter({ hasText: 'Klaarmaken voor school' });
       await expect(card).toHaveAttribute('data-expanded', 'true');
@@ -213,7 +213,7 @@ test.describe('the hub routine screen', () => {
 
     const { mila } = await seedChildWithRoutines(family.familyId);
 
-    await page.goto(`/nl/hub/routines/${mila.id}`);
+    await page.goto(`/nl/routines/${mila.id}`);
 
     const first = page.getByTestId('routine-step').first();
     await first.getByTestId('step-tap').click();
@@ -253,7 +253,7 @@ test.describe('the hub routine screen', () => {
       ])
     );
 
-    await page.goto(`/nl/hub/routines/${mila.id}`);
+    await page.goto(`/nl/routines/${mila.id}`);
 
     const card = page.getByTestId('routine-card').filter({ hasText: 'Huiswerk' });
     await expect(card).toHaveAttribute('data-complete', 'true');
@@ -271,7 +271,7 @@ test.describe('the hub routine screen', () => {
 
     const { mila } = await seedChildWithRoutines(family.familyId);
 
-    await page.goto(`/nl/hub/routines/${mila.id}`);
+    await page.goto(`/nl/routines/${mila.id}`);
 
     const card = page.getByTestId('routine-card').filter({ hasText: 'Vitamine' });
     await expect(card).toHaveAttribute('data-state', 'grace');
@@ -333,12 +333,12 @@ test.describe('the hub routine screen', () => {
       return seeded;
     });
 
-    await page.goto(`/nl/hub/routines/${mila.id}`);
+    await page.goto(`/nl/routines/${mila.id}`);
 
     await expect(page.getByTestId('hub-routines')).toContainText('Mila');
     await expect(page.getByTestId('routine-board')).not.toContainText('Daan');
 
-    await page.goto(`/nl/hub/routines/${daan.id}`);
+    await page.goto(`/nl/routines/${daan.id}`);
     await expect(page.getByTestId('routine-board')).not.toContainText('Mila');
   });
 
@@ -350,7 +350,7 @@ test.describe('the hub routine screen', () => {
     // session — this browser is the wall tablet for the rest of the test.
     await pairHub(page, family.familyId);
 
-    await page.goto('/nl/hub/routines/00000000-0000-4000-8000-000000000000');
+    await page.goto('/nl/routines/00000000-0000-4000-8000-000000000000');
     await expect(page.getByTestId('hub-routines')).toHaveCount(0);
   });
 });

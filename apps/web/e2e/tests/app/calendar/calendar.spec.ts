@@ -329,7 +329,12 @@ test.describe('pending sync', () => {
 });
 
 test.describe('the today tabs', () => {
-  test('personen tab orders columns by sortOrder and carries each member colour', async ({
+  // H5 premise change (D22): the per-person view (`TodayTabPersonen`, the
+  // `today-person-columns` columns) was deleted rather than re-homed, and the
+  // pill tabs are gone from `src`. Nothing renders these columns any more, so
+  // the ordering/colour guarantee has no surface to assert on. Parked, not
+  // removed, until the owner decides whether a replacement view needs it.
+  test.fixme('personen tab orders columns by sortOrder and carries each member colour', async ({
     page,
     family,
   }) => {
@@ -357,10 +362,7 @@ test.describe('the today tabs', () => {
     await expect(columns.nth(2).locator('.bg-cat-orange-surface')).toBeVisible();
   });
 
-  test('the dag tab merges a shared event into one row, and the tab choice survives a reload', async ({
-    page,
-    family,
-  }) => {
+  test('the today timeline merges a shared event into one row', async ({ page, family }) => {
     // Today in the *household's* zone, not UTC's — between midnight and 02:00
     // Amsterdam the two disagree and the event would land on yesterday's board.
     const [year, month, day] = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Amsterdam' })
@@ -392,6 +394,9 @@ test.describe('the today tabs', () => {
       ]);
     });
 
+    // H5 premise change: the pill tabs (dag/personen) are gone, `/today` is the
+    // one chronological timeline, so there is no tab to click and no per-device
+    // tab choice (`kynite.today.tab`) to survive a reload.
     await page.goto('/nl/today');
 
     // A run late enough in the day finds this event already "past", which the
@@ -401,26 +406,13 @@ test.describe('the today tabs', () => {
     const pastToggle = page.getByTestId('today-past-toggle');
     if (await pastToggle.count()) await pastToggle.click();
 
-    // The per-person columns would draw this event three times, once per
-    // member. The dag tab's timeline is the merged view and draws it once,
+    // A per-person view would draw this event once per member. The timeline
+    // is the merged view and draws it once,
     // with its sub-label naming all three.
     const rows = page.locator('[data-testid="today-timeline-row"]', { hasText: 'Zwemles' });
     await expect(rows).toHaveCount(1);
     await expect(rows.first()).toContainText('Mila');
     await expect(rows.first()).toContainText('Daan');
-
-    // The tab choice is per device (`kynite.today.tab` in localStorage) and
-    // survives a reload — no round trip, no save.
-    await page.getByTestId('pill-tab-personen').click();
-    await expect(page.locator('[data-testid="today-person-columns"] [data-member-id]')).toHaveCount(
-      4
-    );
-
-    await page.reload();
-    await expect(page.getByTestId('today-tab-personen')).toBeVisible();
-    await expect(page.locator('[data-testid="today-person-columns"] [data-member-id]')).toHaveCount(
-      4
-    );
   });
 });
 
@@ -477,7 +469,7 @@ test.describe('private calendars on the hub', () => {
     await pairHub(page, family.familyId);
 
     // The wall display: the block is there, the title is not.
-    await page.goto('/nl/hub');
+    await page.goto('/nl/today');
     await expect(page.getByTestId('hub-board')).toBeVisible();
     await expect(page.getByText('Sollicitatiegesprek')).toHaveCount(0);
 
@@ -493,7 +485,7 @@ test.describe('private calendars on the hub', () => {
     // session — this browser is the wall tablet for the rest of the test.
     await pairHub(page, family.familyId);
 
-    await page.goto('/nl/hub');
+    await page.goto('/nl/today');
 
     await expect(page.getByTestId('hub-board')).toBeVisible();
     await expect(page.getByTestId('event-create')).toHaveCount(0);

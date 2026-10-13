@@ -64,7 +64,7 @@ async function expectNoTypeableField(page: Page, step: string): Promise<void> {
 
 /** Mint an invite through the real roster UI and read the link back off the page. */
 async function mintInvite(page: Page, displayName = SECOND_PARENT): Promise<string> {
-  await page.goto('/nl/family');
+  await page.goto('/nl/manage/family');
 
   // The owner creates the member row first — the invite claims a row that
   // already exists, so there has to be one. Role `adult`: a child never logs
@@ -169,12 +169,12 @@ test.describe('second-parent onboarding', () => {
       await invitee.goto('/nl/calendar');
       await expect(invitee).toHaveURL(/\/nl\/calendar/);
 
-      await invitee.goto('/nl/settings/google');
-      await expect(invitee).toHaveURL(/\/settings\/google/);
+      await invitee.goto('/nl/manage/settings/google');
+      await expect(invitee).toHaveURL(/\/manage\/settings\/google/);
 
       // Withheld: `member:manage` is owner-only, so the roster offers them no
       // invite controls at all — they cannot hand out a login of their own.
-      await invitee.goto('/nl/family');
+      await invitee.goto('/nl/manage/family');
       await expect(invitee.getByText(SECOND_PARENT, { exact: true })).toBeVisible();
       await expect(invitee.getByTestId('member-invite-open')).toHaveCount(0);
       await expect(invitee.getByTestId('member-invite-pending')).toHaveCount(0);
@@ -292,7 +292,7 @@ test.describe('second-parent onboarding', () => {
   test('a revoked link stops working, and revocation is two taps', async ({ page, browser }) => {
     const inviteUrl = await mintInvite(page);
 
-    await page.goto('/nl/family');
+    await page.goto('/nl/manage/family');
     await expect(page.getByTestId('member-invite-pending')).toBeVisible();
 
     // Destructive to whoever holds the link, so a stray tap is not enough.

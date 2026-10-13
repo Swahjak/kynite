@@ -215,7 +215,7 @@ for (const [name, viewport] of Object.entries(VIEWPORTS) as [
         // ambient-board spec), so the household has to speak it.
         await withDb((client) => setFamilyLocale(client, family.familyId, locale));
 
-        await page.goto(`/${locale}/hub/routines/${mila.id}?date=${ANCHOR}&time=${ANCHOR_TIME}`);
+        await page.goto(`/${locale}/routines/${mila.id}?date=${ANCHOR}&time=${ANCHOR_TIME}`);
         await expect(page.getByTestId('routine-board')).toBeVisible();
         await settlePage(page);
 
@@ -242,7 +242,7 @@ for (const [name, viewport] of Object.entries(VIEWPORTS) as [
       await seedFamilyBoard(family.familyId, scope);
       await withDb((client) => setFamilyLocale(client, family.familyId, 'nl'));
 
-      await page.goto(`/nl/hub/routines?date=${ANCHOR}&time=${ANCHOR_TIME}`);
+      await page.goto(`/nl/routines?date=${ANCHOR}&time=${ANCHOR_TIME}`);
       await expect(page.getByTestId('routines-page-board')).toBeVisible();
       await settlePage(page);
 
@@ -254,7 +254,7 @@ for (const [name, viewport] of Object.entries(VIEWPORTS) as [
 }
 
 /**
- * `/hub/taken` shares `RoutinesBoard`'s member columns and progress cards
+ * `/tasks` shares `RoutinesBoard`'s member columns and progress cards
  * with the same `--text-*` tokens the family routines page uses, so it is
  * exposed to the same hub-type-inflation removal — see the "docs/plans/
  * 2026-09-15-routines-page-density.md" note in `tokens.css`. No dedicated
@@ -275,7 +275,7 @@ for (const [name, viewport] of Object.entries(VIEWPORTS) as [
       await seedFamilyBoard(family.familyId, scope);
       await withDb((client) => setFamilyLocale(client, family.familyId, 'nl'));
 
-      await page.goto(`/nl/hub/taken?date=${ANCHOR}&time=${ANCHOR_TIME}`);
+      await page.goto(`/nl/tasks?date=${ANCHOR}&time=${ANCHOR_TIME}`);
       await expect(page.getByTestId('hub-taken-board')).toBeVisible();
       await settlePage(page);
 

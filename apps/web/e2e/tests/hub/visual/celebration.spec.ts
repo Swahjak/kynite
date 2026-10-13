@@ -93,7 +93,7 @@ test.describe('celebration visuals — hub tablet', { tag: '@visual' }, () => {
       ]);
     });
 
-    await page.goto(`/nl/hub/routines/${memberId}?date=${today}&time=07:45`);
+    await page.goto(`/nl/routines/${memberId}?date=${today}&time=07:45`);
     await expect(page.getByTestId('routine-board')).toBeVisible();
 
     const card = page.getByTestId('routine-card').first();

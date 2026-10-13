@@ -70,7 +70,7 @@ test('a parent schedules a one-off chore, the child taps it, and it leaves the b
   // ---- the child's board -------------------------------------------------
   // M12: hub surfaces run behind a device principal, never the parent session.
   await pairHub(page, family.familyId);
-  await page.goto(`/nl/hub/routines/${mila.id}`);
+  await page.goto(`/nl/routines/${mila.id}`);
 
   const morning = page.getByTestId('routine-section-morning');
   const card = morning.getByTestId('routine-card').filter({ hasText: 'Garage opruimen' });

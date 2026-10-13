@@ -41,7 +41,7 @@ export async function signUpFamily(page: Page, familyName: string): Promise<Fami
   await page.getByLabel('Wachtwoord').fill(PASSWORD);
   await page.getByRole('button', { name: 'Gezin aanmaken' }).click();
 
-  await page.waitForURL(/\/nl\/family$/);
+  await page.waitForURL(/\/nl\/manage\/family$/);
 
   const cookies = await page.context().cookies();
   const header = cookies.map((cookie) => `${cookie.name}=${cookie.value}`).join('; ');

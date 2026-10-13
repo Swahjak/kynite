@@ -159,7 +159,7 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
 
       const { mila } = await seedShelf(family.familyId, SCOPE[name].storeInstant, 'instant');
 
-      await page.goto(`/nl/hub/store?member=${mila.id}&date=${ANCHOR}`);
+      await page.goto(`/nl/store?member=${mila.id}&date=${ANCHOR}`);
       await expect(page.getByTestId('reward-store')).toHaveAttribute('data-horizon', 'instant');
       // Icon-first and minimal-text: no goal card exists on this tier at all.
       await expect(page.getByTestId('savings-goal')).toHaveCount(0);
@@ -175,7 +175,7 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
 
       const { mila } = await seedShelf(family.familyId, SCOPE[name].storeSavings, 'savings');
 
-      await page.goto(`/nl/hub/store?member=${mila.id}&date=${ANCHOR}`);
+      await page.goto(`/nl/store?member=${mila.id}&date=${ANCHOR}`);
       await expect(page.getByTestId('reward-store')).toHaveAttribute('data-horizon', 'savings');
       // The featured goal: the nearest thing still out of reach (20, not 30).
       await expect(page.getByTestId('savings-goal')).toBeVisible();
@@ -194,7 +194,7 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
 
       const { mila } = await seedShelf(family.familyId, SCOPE[name].chartInstant, 'instant');
 
-      await page.goto(`/nl/hub/stars/${mila.id}?date=${ANCHOR}`);
+      await page.goto(`/nl/stars/${mila.id}?date=${ANCHOR}`);
       await expect(page.getByTestId('star-chart')).toHaveAttribute('data-horizon', 'instant');
       // The cumulative total is the whole metric on this tier; no week chart.
       await expect(page.getByTestId('earned-stars')).toHaveText('12');
@@ -211,7 +211,7 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
 
       const { mila } = await seedShelf(family.familyId, SCOPE[name].chartSavings, 'savings');
 
-      await page.goto(`/nl/hub/stars/${mila.id}?date=${ANCHOR}`);
+      await page.goto(`/nl/stars/${mila.id}?date=${ANCHOR}`);
       await expect(page.getByTestId('star-chart')).toHaveAttribute('data-horizon', 'savings');
       // Weekly totals: seven bars, zeros included, plus the week's sum.
       await expect(page.getByTestId('week-bar')).toHaveCount(7);

@@ -31,7 +31,7 @@ test.describe('custom avatar upload', () => {
   test('a parent uploads their own SVG and it becomes the member’s face', async ({ page }) => {
     const displayName = `Uploader ${Date.now()}`;
 
-    await page.goto('/nl/family');
+    await page.goto('/nl/manage/family');
     await page.getByRole('button', { name: 'Gezinslid toevoegen' }).click();
 
     const dialog = page.getByRole('dialog');
@@ -54,7 +54,7 @@ test.describe('custom avatar upload', () => {
   });
 
   test('refuses an oversized or hostile file, in the dialog, before saving', async ({ page }) => {
-    await page.goto('/nl/family');
+    await page.goto('/nl/manage/family');
     await page.getByRole('button', { name: 'Gezinslid toevoegen' }).click();
 
     const dialog = page.getByRole('dialog');
@@ -94,7 +94,7 @@ test.describe('custom avatar upload', () => {
   }) => {
     const displayName = `Papa ${Date.now()}`;
 
-    await page.goto('/nl/family');
+    await page.goto('/nl/manage/family');
     await page.getByRole('button', { name: 'Gezinslid toevoegen' }).click();
 
     const dialog = page.getByRole('dialog');

@@ -45,7 +45,12 @@ test.describe('the takenlijst', () => {
 const LONG_AGO = new Date(Date.now() - 60 * 86_400_000).toISOString();
 
 test.describe('the sterren tab', () => {
-  test('ticking a star cell completes the step for that child', async ({ page, family }) => {
+  // H5 premise change: the sterren pill tab became the `/store` + `/stars/<id>`
+  // routes (b4ce25c), and `StarMatrix`'s only render site (`TodayTabSterren`)
+  // has none left (`pill-tab-sterren` and `star-matrix` have zero matches in a
+  // rendered tree). Step completion by child is covered via the routine board
+  // in `routines.spec.ts`. Parked, not removed, pending the owner's call.
+  test.fixme('ticking a star cell completes the step for that child', async ({ page, family }) => {
     const routine = await withDb(async (client) => {
       const [mila] = await seedMembers(client, family.familyId, [
         { displayName: 'Mila', role: 'child', color: 'orchid', sortOrder: 1 },

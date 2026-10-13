@@ -97,7 +97,7 @@ test.describe('offline completion outbox', () => {
     const { child, routine } = await seedBoard(family.familyId);
     const stepId = routine.stepIds[0];
 
-    await page.goto(`/nl/hub/routines/${child.id}`);
+    await page.goto(`/nl/routines/${child.id}`);
     await expect(page.getByTestId('routine-board')).toBeVisible();
     await expect(page.getByTestId('routine-step').first()).toBeVisible();
 
@@ -158,7 +158,7 @@ test.describe('offline completion outbox', () => {
     const { child, routine } = await seedBoard(family.familyId);
     const stepId = routine.stepIds[0];
 
-    await page.goto(`/nl/hub/routines/${child.id}`);
+    await page.goto(`/nl/routines/${child.id}`);
     await expect(page.getByTestId('routine-board')).toBeVisible();
 
     const row = page.locator(`[data-step-id="${stepId}"]`);

@@ -16,8 +16,8 @@ const SURFACES = [
   { name: 'today', path: () => '/nl/today' },
   { name: 'calendar', path: () => '/nl/calendar' },
   { name: 'routines', path: () => '/nl/routines' },
-  { name: 'rewards', path: () => '/nl/rewards' },
-  { name: 'settings', path: () => '/nl/settings' },
+  { name: 'rewards', path: () => '/nl/manage/rewards' },
+  { name: 'settings', path: () => '/nl/manage/settings' },
 ] as const;
 
 test.describe('parent app accessibility', { tag: '@heavy' }, () => {
