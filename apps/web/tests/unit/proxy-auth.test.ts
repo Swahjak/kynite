@@ -2,12 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { describe, expect, it, vi } from 'vitest';
 
 // Same stub as share-proxy.test.ts: only the proxy's own redirects are under test.
+const seen = vi.hoisted(() => ({ request: null as NextRequest | null }));
 vi.mock('next-intl/middleware', () => ({
-  default: () => () => NextResponse.next(),
+  default: () => (request: NextRequest) => {
+    seen.request = request;
+    return NextResponse.next();
+  },
 }));
 
 const { default: proxy } = await import('@/proxy');
 const { DEVICE_SESSION_COOKIE } = await import('@/lib/device-session');
+const { INTENDED_PATH_HEADER } = await import('@/lib/callback-url');
 
 const SESSION = 'better-auth.session_token=abc';
 const DEVICE = `${DEVICE_SESSION_COOKIE}=xyz`;
@@ -45,5 +50,16 @@ describe('proxy decision table: shared tree and member sections', () => {
     ['/nl/manage', [SESSION], 'pass'],
   ])('%s with cookies %j -> %s', (path, cookies, expected) => {
     expect(decide(path, cookies)).toBe(expected);
+  });
+});
+
+describe('proxy intended-path header', () => {
+  it('overwrites a client-supplied x-kynite-path with the real path', () => {
+    proxy(
+      new NextRequest('https://kynite.test/nl/manage', {
+        headers: { cookie: SESSION, 'x-kynite-path': '//evil' },
+      })
+    );
+    expect(seen.request?.headers.get(INTENDED_PATH_HEADER)).toBe('/nl/manage');
   });
 });

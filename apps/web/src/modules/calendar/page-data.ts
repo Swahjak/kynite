@@ -119,11 +119,12 @@ export async function loadCalendarPage(options: LoadOptions): Promise<CalendarPa
    * `busyOnlyPrivate` (a device principal) forces both off: an ambient wall
    * display shows free/busy for private calendars.
    */
-  const privateGrade = options.busyOnlyPrivate
-    ? 'busy-only'
-    : grade(principal, 'calendar:view_private') === 'own'
-      ? 'own'
-      : decide(principal, 'calendar:view_private', { familyId: principal.familyId });
+  const privateGrade =
+    options.busyOnlyPrivate || principal.kind === 'device'
+      ? 'busy-only'
+      : grade(principal, 'calendar:view_private') === 'own'
+        ? 'own'
+        : decide(principal, 'calendar:view_private', { familyId: principal.familyId });
 
   const privateDetail = privateGrade === 'allow';
   const privateDetailFor =

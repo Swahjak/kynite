@@ -2,8 +2,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 /**
  * `/today` and `/calendar` both read through `loadHubBoardComposition`. Its
- * calendar read must be `surface: 'hub'` (private events busy-only) only for a
- * paired device; a signed-in member sees her own detail.
+ * calendar read must pass `busyOnlyPrivate` (private events busy-only) only for
+ * a paired device; a signed-in member sees her own detail. Privacy is decided
+ * by `busyOnlyPrivate`, not `surface` (which only picks the layout).
  */
 
 vi.mock('server-only', () => ({}));
