@@ -118,6 +118,16 @@ export function SignInForm({
               {t('signUp.title')}
             </Link>
           </p>
+
+          {/* An installed hub with no cookie lands here and has no other way out. */}
+          <p className="text-body-sm text-center">
+            <Link
+              href="/pair"
+              className="text-brand-ink font-semibold underline-offset-4 hover:underline"
+            >
+              {t('signIn.pairScreen')}
+            </Link>
+          </p>
         </form>
       </CardContent>
     </Card>

@@ -56,7 +56,8 @@
       "title": "Inloggen",
       "description": "Welkom terug bij Kynite.",
       "submit": "Inloggen",
-      "noAccount": "Nog geen account?"
+      "noAccount": "Nog geen account?",
+      "pairScreen": "Dit scherm koppelen"
     },
     "signUp": {
       "title": "Account aanmaken",

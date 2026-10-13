@@ -56,7 +56,8 @@
       "title": "Sign in",
       "description": "Welcome back to Kynite.",
       "submit": "Sign in",
-      "noAccount": "No account yet?"
+      "noAccount": "No account yet?",
+      "pairScreen": "Pair this screen"
     },
     "signUp": {
       "title": "Create account",
