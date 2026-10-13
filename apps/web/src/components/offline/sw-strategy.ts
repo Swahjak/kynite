@@ -1,9 +1,8 @@
 /**
  * Which caching strategy a request belongs to (docs/architecture.md §6).
  *
- * One service worker serves both surfaces — §6: "a single SW is simpler than
- * juggling two scopes, and `/hub` vs `/app` route matching is enough to
- * differentiate" — so the differentiation is a URL predicate, and a URL
+ * One service worker serves the whole route tree (§6: path-aware runtime
+ * rules, not two scopes), so the differentiation is a URL predicate, and a URL
  * predicate is worth being able to test without a browser. `src/app/sw.ts`
  * imports these and does nothing else with routing.
  *
@@ -83,8 +82,8 @@ const HUB_SECTIONS: ReadonlySet<string> = new Set([
   'timer',
   'clock',
   'pair',
-  // The pre-H3 kiosk tree; the proxy redirects it, so this only keeps a stale
-  // start URL on the hub strategy until the redirect lands.
+  // The pre-H3 kiosk tree. Classification only: the proxy redirects `/hub`, and
+  // a redirect response is never cached, so nothing stale is kept either way.
   'hub',
 ]);
 

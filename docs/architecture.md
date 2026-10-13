@@ -623,7 +623,7 @@ skip re-emitting a realtime event for our own writes.
 Two installable surfaces with different needs; one Serwist service worker with
 path-aware runtime rules (a single SW is simpler than juggling two scopes). The worker
 cannot see the principal, so it matches the shared route tree by path: the sections of
-`(main)` plus `/clock` (`HUB_SECTIONS` in `sw-strategy.ts`) get the hub shell strategy for
+`(main)` plus `/clock`, `/pair` and the legacy `/hub` (`HUB_SECTIONS` in `sw-strategy.ts`) get the hub shell strategy for
 member and tablet alike, while `/manage`, `/account` and `/oauth` stay `NetworkFirst`
 app pages (see `docs/route-tree.md`).
 
