@@ -19,41 +19,36 @@ Owner ask (2026-09-15): one route tree. Member and hub device render the same pa
 - D30: weather first on the phone (above the theme banner).
 - D31: push URLs keep opening the family board.
 - D32 (owner, 2026-10-14): WCAG contrast requirements dropped, design leads. Contrast asserts/checks are removed, not fixed; colours and tokens stay as designed. Other a11y checks stay.
+- D33 (owner, 2026-10-14): google calendar discovery contract as in M4-T3 (owner/writer/reader stored, only primary enabled, rooms and free/busy excluded).
+- D34 (owner, 2026-10-14, provisional): bin icon tile teal (orange is reward-only).
 
-## Resume here (checkpoint 2026-10-14, after R review + fixes)
+## Resume here (checkpoint 2026-10-14, after M4)
 
-State: M3 merged to `main` as #9 (`2c1af72`). No background processes running.
+State: M3 (#9, `2c1af72`) deployed: Railway deployment 2026-10-14 12:38, SUCCESS, behaviour matches M3. Discovery endpoints verified live: protected-resource + authorization-server docs 200, `/api/mcp` 401 with `resource_metadata`. Main CI fully green (gate + e2e) since `a141587`. No background processes.
 
-R done: opus security review + sonnet general review; 11b16dd (opencode.json/AGENTS.md) dropped from history, `opencode.json` now ignored (backup branch `backup/hub-equals-app-pre-R1`). Fix units: R2 (`requireManager` on every /manage page, pair ends the member session + `signOutFailed`), R3 (/today controls on principal, /timers member controls, weather order), R4 (sheet close, routines header surface, device rail order, next-intl vitest inline, cleanup). e2e baselines refreshed (rail, routine builder, settled stars), calendar greeting pinned.
+Only remaining M3 step: Fully kiosk start URL → `/nl/today` (owner action on the wall).
 
-Gates: typecheck/oxlint/build green; vitest only the 4 design-token reds; e2e app 90/100 (rest parked contrast + 3 flaky); hub targeted green except parked store contrast; share skipped (owner, unchanged since the green run); @smoke 9/9.
+R done earlier: opus security + sonnet general review; fix units R2–R4 (`requireManager` on /manage, pair ends member session, /today controls on principal, sheet close, etc.); e2e baselines refreshed.
 
-R remaining: `railway up`, discovery endpoints, Fully start URL → `/nl/today` (owner action on the wall). Deploy status unconfirmed.
+## Units (all done)
 
-## Units (all done; R remaining steps in Resume)
+Gates per unit: `pnpm typecheck` once, `pnpm exec oxlint --threads 1 <changed files>`, vitest scoped `--maxWorkers=1`. Playwright `--workers=1`.
 
-Gates per unit: `pnpm typecheck` once, `pnpm exec oxlint --threads 1 <changed files>`, vitest scoped to touched slices `--maxWorkers=1`. Playwright `--workers=1`.
+- [x] **H0** (`2287b4d`, D14) mcp excluded from `hardcoded-strings`. **H1** (`895fec1`) headers onto `TodayHeader`/`PageHeader surface`. **H2a** (D17, D18) surface resolver + "Weergave in deze browser". **H2** (D9, D16, D17) one responsive shell.
+- [x] **H3** (`89391f5`, D12): one route tree `(main)`/`(clock)`, member-or-device gate, `proxy.ts` pre-filter + `/hub/*` redirects.
+- [x] **H4** (D10, D22): Beheer under `/manage/*`, own settings at `/account`, 308 redirects; per-person view deleted.
+- [x] **H5** (D23–D27): e2e + docs on the one tree, auth/data, loader/proxy coverage, spec triage (D26), pre-paint script, D27; dead code removed.
+- [x] **R** (D28–D31): reviews + fixes + gates.
 
-- [x] **H0** (`2287b4d`, D14): `src/app/api/mcp` excluded from `hardcoded-strings`.
-- [x] **H1** (`895fec1`): routines/store/board headers onto the `TodayHeader`/`PageHeader surface` pattern.
-- [x] **H2a** (D17, D18): surface resolver (principal + cookie + UA hint) → `data-surface` on `<html>`, Tailwind variants, "Weergave in deze browser" setting; audit count 62 → 64.
-- [x] **H2** (D9, D16, D17): one responsive shell, one destination list, kiosk behaviours only for the device principal.
-- [x] **H3** (`89391f5`, D12): one route tree `(main)`/`(clock)`, member-or-device gate, `proxy.ts` pre-filter + `/hub/*` redirects; units H3a–g incl. merge-loss restores (weather density, NU strip, phone FAB actions, greeting, `today-board` testid) and the `'use server'` build fix.
-- [x] **H4** (D10, D22): Beheer under `/manage/*` (layout gate), own settings at `/account`, 308 redirects for `/settings/**`, `/family`, `/rewards`; per-person view (`TodayTabs`/`TodayTabPersonen`/`nowEventKey`) deleted.
-- [x] **H5** (2026-10-14, D23–D27): e2e + docs moved to the one tree, delivered by Claude sonnet subagents:
-  - H5a/a2: e2e path swap + `app` project. H5b: `hub` project + visual baselines.
-  - H5c/H5d: docs (`CLAUDE.md`, architecture note) + service-worker hub-shell on the shared paths.
-  - H5e: auth/data (D23–D25), private calendar.
-  - H5f: FAB pointer-events, weather hydration, praise size, replacement tests; dead code removed (StarMatrix, TodayTabSterren, use-today-tab).
-  - H5g: loader/proxy coverage. H5h: spec triage (D26). H5i: pre-paint script once via `useServerInsertedHTML`, D27, timer spec, unpair spec race.
-  - Reviews: opus on H5d/H5e (2 rounds)/H5g, sonnet on the rest. H5h got a third fix round on owner approval.
-- [x] **R — review + fixes + gates** (2026-10-14, D28–D31): see Resume. Merge + deploy remain.
+## M4 — contrast checks out (D32), wave done
 
-## M4 — contrast checks out (D32)
+Route correction: kynite is not registered in work-ledger and has no `.pi/project.json`, so units ran as Claude sonnet subagents in worktrees under `/var/www/worktrees/kynite/` (not peep-pi).
 
-Open wave: M4-T1 only. Branch `feat/hub-equals-app-M4-T1` from `main`, route peep-pi (default profile, `--max-rounds 3`), sonnet review.
-
-- [ ] **M4-T1** (S, D32): remove colour-contrast checking from the test suites so the parked contrast specs pass without changing the design. Disable only the contrast rule/assert (axe `color-contrast` or own helpers), keep every other a11y rule; delete asserts that exist only for contrast. No token, class or component change; no baseline refresh. Acceptance: the parked contrast specs (settings, `/dev/design`, hub store, calendar strike-through/face initials/past row, live event-row times) pass in `app` + `hub` with `--workers=1`; grep shows no remaining contrast check; other axe rules still run. Expected size: ≤10 files, ≤80 lines diff. Out of scope: the 4 red design-token unit files, flaky specs.
+- [x] **M4-T1** #10 (`1a42e4f`): axe `color-contrast` disabled in shared `e2e/utils/axe.ts`, two contrast-only tests deleted (D32).
+- [x] **M4-T2** #11 (`ab166f3`): red integration tests were test gaps, not prod bugs: device-pairing auth mock lacked `api.signOut`; family-scope fixtures for `task`/`weather_snapshot`; settings-authorization needed required `formattingLocale`.
+- [x] **M4-T3** #12 (`94d26f6`): google-calendar-picker test follows `594c1aa` contract (D33): owner/writer/reader stored, only primary enabled, rooms and free/busy excluded.
+- [x] **M4-T4** #13 (`e965085`): routine bin icon tile red → teal (D34, code fix); `display-3xl` registered in `FONT_SIZE_TOKENS` (tailwind-merge dropped `text-display-3xl` or the colour class on ambient clock / timer ring); nested-card-borders test updated to D4; border-width-scale allows the D4 step circle `border-[3px] border-[#dcdad4]` in `step-row.tsx` only.
+- [x] **M4-T5** #14 (`a141587`): CI `@visual` exclusion moved to config `grepInvert` via `E2E_GREP_INVERT` (CLI grep is not applied to dependency projects; `perf` depends on app/hub/share).
 
 ## Agent log (summary)
 
@@ -61,6 +56,7 @@ Open wave: M4-T1 only. Branch `feat/hub-equals-app-M4-T1` from `main`, route pee
 - H2/H3a–g/H4 (OpenCode `offload-lead`, 14 runs of the 40-run cap, logged ≈ $1.3 — dashboard ≈ 4x): reviews sonnet 62–78k, opus 85–107k; they caught ~10 🔴 (route collision, ungated `/manage/*`, four merge losses, manifest dropped).
 - R: reviews opus 113k/74k, sonnet 216k/84k/80k; fixes R2 89k, R3 95k, R4 105k; e2e runs 54–99k.
 - H4 finished and all of H5 by Claude sonnet subagents; token overruns vs the 80k budget: H5a 127k, H5a2 234k, H5b 140k, H5f 149k+, H5h 122k, H5i 138k.
+- M4: dev units 55k/79k/68k/81k/71k, reviews 19–38k, diagnostics haiku 66k/68k + sonnet 71k/52k.
 
 ### Lessen
 
@@ -68,7 +64,7 @@ Open wave: M4-T1 only. Branch `feat/hub-equals-app-M4-T1` from `main`, route pee
 - D21 follow-up: route collisions and `'use server'` non-function exports are only caught by `next build`.
 - Runner: the digest keeps ~300 chars of the final report, so briefs end with "write the full report to `<scratchpad>/<unit>-report.md`"; the digest also attributes concurrent main-thread edits to the run (check `git diff`); the model silently skips half a brief (2x) and the runner timeout/step cap can end a run unfinished.
 - OpenCode runs: harness "low memory" kills hit long backgrounded Bash with 14–18 GiB free; use short foreground launches, separate waiters, detached for >10 min. A blocked out-of-scope attempt (`DENIED`) is logged, not a stop. `runs.jsonl` cost is ≈ 4x too low (cache tokens).
-- Red unit files (none from M3): `no-negative-marking` (`modules/routines/ui/tokens.ts:108`), `utils` font scale misses `--text-display-3xl`, `ui/nested-card-borders` is stale vs D4, `border-width-scale`. The four `next-intl/navigation` resolve failures are fixed (inline in vitest).
+- Integration tests need the test DB and were not run during M3: "vitest green" claims must say whether integration ran.
 - Never run tests in parallel agents on the owner's laptop (load ~30–36): one test run at a time, `--workers=1`.
 - Subagent budget: units that combine "run the whole e2e project + fix" blow the 80k budget. Split e2e triage per project or per spec group.
 - Reviewers must not checkout/detach in the main checkout (one did, and restored it). The brief must say so explicitly.
@@ -76,16 +72,16 @@ Open wave: M4-T1 only. Branch `feat/hub-equals-app-M4-T1` from `main`, route pee
 
 ## Open follow-ups / Parking
 
-- Contrast failures (11+) → M4-T1 (D32: checks removed, design kept): settings `.border-primary` 4.35; `/dev/design` label-overline 4.04, bg-now 3.76, bg-gold/16 4.09; hub store label-overline 2.3, locked reward 2.99/2.3, `.px-3.5` 3.2; calendar strike-through `text-cat-purple-fg` 3.1, 8px face initials 3.32; live event-row times (`event-row.tsx:210,216`, D28); calendar past-event row.
-- The 4 design-token red unit files (see Lessen).
-- Flaky e2e: `calendar.spec.ts:174`, `invite.spec.ts:154`, `auth-flow.spec.ts:97`.
-- SW page cache is not cleared when a different member signs in.
-- Manifest scope `/nl/` (English households).
-- `kynite.surface` cookie is per browser.
-- `requireManager` sign-in callback drops the query string.
-- Phone first-tap loss on /calendar: SSR renders wide (`use-is-wide.ts:46`), the phone layout swaps at hydration. 3/36. `openEventDialog` keeps a bounded `toPass`.
-- Hydration warning on `/manage/routines` (`value="false"` input, suspected `Switch`), unverified.
-- `x-kynite-path` not stripped in the proxy's share/invite branches (hygiene only).
-- 🔵 tests: `proxy-auth.test.ts` should reset `seen.request` per case; `page-data.test.ts` has no deny-grade case.
+- Hub clock follows the device/system timezone, not the family timezone (CI renders 07:45 UTC vs baseline 08:45); visual specs with the clock (hub/visual timers, routines, rewards, celebration, calendar) depend on local TZ. Owner decision pending.
+- `/dev/design` `design-showcase.tsx:174` text "contrast is verified at WCAG AA" is wrong after D32.
+- e2e axe spec titles still say "no WCAG AA violations"; `axe.ts` comment "no exclusion list" next to `disableRules`.
+- Tests: settings-authorization invalid-timezone test lacks a positive control; `weather_snapshot` fixture uses `payload: {} as never`; google-calendar-picker lacks a non-primary owner case and two texts still mention the owner-only rule; nested-card-borders doesn't test the member `rowDone` tint path; `proxy-auth.test.ts` should reset `seen.request` per case; `page-data.test.ts` has no deny-grade case.
+- `no-negative-marking` scanner doesn't cover `modules/today/ui` and `modules/calendar/ui` (theme banner red is decorative; needs allowlist).
+- Flaky e2e: `calendar.spec.ts:174`, `invite.spec.ts:154`, `auth-flow.spec.ts:97`; new: `hub/pairing.spec.ts:156` (got `/nl/sign-in?callbackUrl=…` instead of `/nl/pair` after revoke).
+- `ci.yml:90` and `e2e/README.md` comments still say "flag"; `new RegExp(E2E_GREP_INVERT)` crashes on invalid regex.
+- Hydration-failed console errors in CI e2e web server output (unmapped). Hydration warning on `/manage/routines` (`value="false"` input, suspected `Switch`), unverified.
+- SW page cache is not cleared when a different member signs in. SW never caches a redirect: offline cold boot on `/nl/hub` gets the browser error page.
+- Manifest scope `/nl/` (English households). `kynite.surface` cookie is per browser.
+- `requireManager` sign-in callback drops the query string. `x-kynite-path` not stripped in the proxy's share/invite branches (hygiene).
+- Phone first-tap loss on /calendar: SSR renders wide (`use-is-wide.ts:46`), phone layout swaps at hydration. 3/36. `openEventDialog` keeps a bounded `toPass`.
 - SheetClose `role="link"` not verified in a browser.
-- Deploy condition: Fully kiosk start URL → `/nl/today`. The SW never caches a redirect, so an offline cold boot on `/nl/hub` gets the browser error page.
