@@ -213,6 +213,21 @@ describe.skipIf(!databaseUrl)('family scoping (integration)', () => {
       occurrenceDate: '2026-03-02',
       memberId: household.childId,
     });
+    await db.insert(schema.task).values({
+      familyId,
+      assigneeMemberId: household.childId,
+      createdByMemberId: household.parentId,
+      title: 'Kamer opruimen',
+    });
+    await db.insert(schema.weatherSnapshot).values({
+      familyId,
+      latitude: 51.69,
+      longitude: 5.3,
+      // Only the cascade is under test; the payload's shape is the weather
+      // module's own business.
+      payload: {} as never,
+      fetchedAt: new Date(),
+    });
     await db.insert(schema.eventLog).values({
       familyId,
       type: 'completion.created',

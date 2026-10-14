@@ -53,7 +53,16 @@ const stubs = vi.hoisted(() => ({
 
 vi.mock('@/server/db', () => ({ getDb: () => stubs.db }));
 vi.mock('@/server/auth', () => ({
-  getAuth: () => ({ api: { getSession: async () => stubs.session } }),
+  getAuth: () => ({
+    api: {
+      getSession: async () => stubs.session,
+      // Pairing ends the member session (M3 R2); like the real API, this one
+      // leaves no session behind for the next request to resolve.
+      signOut: async () => {
+        stubs.session = null;
+      },
+    },
+  }),
 }));
 vi.mock('next/headers', () => ({
   headers: async () => stubs.requestHeaders,
