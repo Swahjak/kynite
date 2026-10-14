@@ -96,12 +96,17 @@ test.describe('installability', () => {
   });
 
   test('registers a service worker and takes control of the page', async ({ page }) => {
-    // `/nl/today` rather than `/nl`: B-1 moved `ServiceWorkerRegistrar` out of
-    // the root `[locale]` layout (shared with the caregiver `(share)` tree,
-    // which must never install one) and into `(app)` and `(hub)` only. An
-    // unpaired browser here redirects to `/nl/pair`, still inside
-    // `(hub)/layout.tsx`.
+    // The hub project runs as a paired wall tablet (device cookie from the
+    // storage-state setup), so `/nl/today` is the board itself: it renders in
+    // `(main)`'s kiosk branch, which mounts `ServiceWorkerRegistrar` (B-1; the
+    // member branch mounts it too). A cookie-less browser would be sent to
+    // `/nl/sign-in` instead (H5e), which lives in `(auth)` and installs
+    // nothing; that entry is `/nl/pair`, see cold-entry.spec.ts.
     await page.goto('/nl/today');
+    // Guard the premise: a stale device cookie would land on /pair and this
+    // test would pass without ever having run the shared tree.
+    await expect(page).toHaveURL(/\/nl\/today$/);
+    await expect(page.getByTestId('hub-board')).toBeVisible();
 
     const scope = await page.evaluate(async () => {
       const registration = await navigator.serviceWorker.ready;

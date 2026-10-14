@@ -98,6 +98,12 @@ export async function pairHub(
   // on whatever page `pairHub` was called from, is what makes that
   // deterministic instead of a race against however long `/nl/manage/family` took to
   // register and activate.
+  //
+  // So `pairHub` must be called from a page that registers the worker: `(main)`
+  // (`/nl/pair`, or `/nl/today` once a device cookie is attached) or `(app)`.
+  // Not from `about:blank` or `/nl/sign-in` (`(auth)`, which installs nothing)
+  // — `ready` would never resolve there. A cookie-less `/nl/today` now ends on
+  // sign-in (H5e), so enter via `/nl/pair`.
   if (await page.evaluate(() => 'serviceWorker' in navigator)) {
     await page.evaluate(() => navigator.serviceWorker.ready);
   }
