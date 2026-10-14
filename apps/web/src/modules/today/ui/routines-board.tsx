@@ -80,9 +80,16 @@ export type RoutinesBoardProps = {
   dayKey: string;
   /** `toggleTaskAction` from the tasks slice, passed by reference. */
   toggleTaskAction: (input: ToggleTaskInput) => Promise<ActionState>;
+  /** Presentation the page resolved for this request (`presentationFor`). */
+  surface?: 'app' | 'hub';
 };
 
-export function RoutinesBoard({ board, dayKey, toggleTaskAction }: RoutinesBoardProps) {
+export function RoutinesBoard({
+  board,
+  dayKey,
+  toggleTaskAction,
+  surface = 'hub',
+}: RoutinesBoardProps) {
   const t = useTranslations('today');
   const formatDateTime = useDateTimeFormat();
   const router = useRouter();
@@ -132,12 +139,12 @@ export function RoutinesBoard({ board, dayKey, toggleTaskAction }: RoutinesBoard
   return (
     <div data-testid="routines-board" className="flex min-h-0 flex-1 flex-col gap-4">
       <PageHeader
-        surface="hub"
+        surface={surface}
         className="flex-shrink-0 border-b border-line-subtle pb-4"
         title={t('board.title')}
         subtitle={formatDateTime(board.now, { dateStyle: 'full' })}
         action={
-          <div className="flex items-center gap-5">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
             <MemberFilter
               members={filterMembers}
               selectedIds={selectedIds}
