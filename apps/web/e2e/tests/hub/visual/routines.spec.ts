@@ -11,8 +11,8 @@ import {
 import { settlePage } from '@e2e/utils/settle';
 
 /**
- * Visual regression for the routine surfaces, at the hub tablet (1280×800) and
- * a phone (390×844).
+ * Visual regression for the routine surfaces, at the hub tablet (1280×800)
+ * (the phone is the `app` project's job).
  *
  * Determinism comes from pinning the board's clock with `?date=&time=`, exactly
  * as the calendar visuals pin `?date=`. Every state the board can render is in
@@ -26,7 +26,6 @@ import { settlePage } from '@e2e/utils/settle';
 
 const VIEWPORTS = {
   tablet: { width: 1280, height: 800 },
-  mobile: { width: 390, height: 844 },
 } as const;
 
 /** A fixed Wednesday, rendered at 07:45 local. */
@@ -209,7 +208,7 @@ for (const [name, viewport] of Object.entries(VIEWPORTS) as [
         // locale — real families see their own titles either way, so the
         // board chrome (headings, praise, countdown labels) is what M15's
         // en baseline exists to pin, same as the hub ambient board above.
-        const scope = { tablet: { nl: 'a', en: 'e' }, mobile: { nl: 'b', en: 'f' } }[name][locale];
+        const scope = { tablet: { nl: 'a', en: 'e' } }[name][locale];
         const { mila } = await seedBoard(family.familyId, scope);
         // M16: the wall display renders in the household's language (see the
         // ambient-board spec), so the household has to speak it.
@@ -238,7 +237,7 @@ for (const [name, viewport] of Object.entries(VIEWPORTS) as [
     test('hub family routines board (nl)', async ({ page, family }) => {
       await pairHub(page, family.familyId);
 
-      const scope = { tablet: 'c', mobile: 'd' }[name];
+      const scope = { tablet: 'c' }[name];
       await seedFamilyBoard(family.familyId, scope);
       await withDb((client) => setFamilyLocale(client, family.familyId, 'nl'));
 
@@ -271,7 +270,7 @@ for (const [name, viewport] of Object.entries(VIEWPORTS) as [
     test('hub taken board (nl)', async ({ page, family }) => {
       await pairHub(page, family.familyId);
 
-      const scope = { tablet: '0', mobile: '1' }[name];
+      const scope = { tablet: '0' }[name];
       await seedFamilyBoard(family.familyId, scope);
       await withDb((client) => setFamilyLocale(client, family.familyId, 'nl'));
 

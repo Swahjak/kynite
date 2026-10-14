@@ -1,3 +1,4 @@
+import type { Page } from '@playwright/test';
 import { pairHub } from '@e2e/fixtures/hub';
 import { expect, test } from '@e2e/fixtures/family';
 import {
@@ -13,7 +14,7 @@ import { pinLiveText, settlePage } from '@e2e/utils/settle';
 
 /**
  * Visual regression for every calendar surface, at both viewports M06 names:
- * the hub tablet (1280×800) and a phone (390×844).
+ * the hub tablet (1280×800) and the phone's today board (390×844).
  *
  * Determinism is the whole design of this file, and it is bought with fixed
  * dates rather than masks.
@@ -37,8 +38,15 @@ import { pinLiveText, settlePage } from '@e2e/utils/settle';
 const VIEWPORTS = {
   /** The hub's wall tablet. */
   tablet: { width: 1280, height: 800 },
-  mobile: { width: 390, height: 844 },
 } as const;
+
+/**
+ * The phone is the `app` project's job; the one phone shot kept here is the
+ * app board (`today-mobile`), reached with the mobile client hint. A 390px
+ * viewport with a Desktop UA renders the wall's rail squeezed, which is not a
+ * surface anyone has.
+ */
+const PHONE = { width: 390, height: 844 } as const;
 
 const ANCHOR = '2026-03-11';
 /**
@@ -169,6 +177,26 @@ async function seedBoardDay(familyId: string) {
   });
 }
 
+async function shootTodayBoard(page: Page, familyId: string, name: string) {
+  await seedBoardDay(familyId);
+
+  // `today-board` is the `app` surface's board: a member browser only
+  // resolves to it with the mobile client hint (D17); this project's
+  // desktop-class default renders the wall's `hub-board` instead.
+  await page.context().setExtraHTTPHeaders({ 'Sec-CH-UA-Mobile': '?1' });
+  await page.goto(`/nl/today?date=${FUTURE_ANCHOR}`);
+  await expect(page.getByTestId('today-board')).toBeVisible();
+  // `today-greeting` (M18) picks morning/afternoon/evening off the real
+  // wall clock (`greetingSlotFor(hourIn(data.now, ...))` in
+  // `(app)/today/page.tsx` — `data.now` is `new Date()`, not derived from
+  // `?date=`), so it rotates under the suite the same way the header does
+  // and needs the same durable pin.
+  await pinLiveText(page, 'today-greeting', 'Goedemorgen, Sanne');
+  await settlePage(page);
+
+  await expect(page).toHaveScreenshot(`today-${name}.png`, { fullPage: true });
+}
+
 for (const [name, viewport] of Object.entries(VIEWPORTS)) {
   test.describe(`calendar visuals — ${name}`, { tag: '@visual' }, () => {
     test.use({ viewport });
@@ -185,25 +213,7 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
       });
     }
 
-    test('today board', async ({ page, family }) => {
-      await seedBoardDay(family.familyId);
-
-      // `today-board` is the `app` surface's board: a member browser only
-      // resolves to it with the mobile client hint (D17); this project's
-      // desktop-class default renders the wall's `hub-board` instead.
-      await page.context().setExtraHTTPHeaders({ 'Sec-CH-UA-Mobile': '?1' });
-      await page.goto(`/nl/today?date=${FUTURE_ANCHOR}`);
-      await expect(page.getByTestId('today-board')).toBeVisible();
-      // `today-greeting` (M18) picks morning/afternoon/evening off the real
-      // wall clock (`greetingSlotFor(hourIn(data.now, ...))` in
-      // `(app)/today/page.tsx` — `data.now` is `new Date()`, not derived from
-      // `?date=`), so it rotates under the suite the same way the header does
-      // and needs the same durable pin.
-      await pinLiveText(page, 'today-greeting', 'Goedemorgen, Sanne');
-      await settlePage(page);
-
-      await expect(page).toHaveScreenshot(`today-${name}.png`, { fullPage: true });
-    });
+    test('today board', async ({ page, family }) => shootTodayBoard(page, family.familyId, name));
 
     for (const locale of ['nl', 'en'] as const) {
       test(`hub ambient board (${locale})`, async ({ page, family }) => {
@@ -332,3 +342,9 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
     });
   });
 }
+
+test.describe('calendar visuals — phone', { tag: '@visual' }, () => {
+  test.use({ viewport: PHONE });
+
+  test('today board', async ({ page, family }) => shootTodayBoard(page, family.familyId, 'mobile'));
+});

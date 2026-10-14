@@ -12,8 +12,8 @@ import {
 import { settlePage } from '@e2e/utils/settle';
 
 /**
- * Visual regression for the reward surfaces, at the hub tablet (1280×800) and a
- * phone (390×844).
+ * Visual regression for the reward surfaces, at the hub tablet (1280×800)
+ * (the phone is the `app` project's job).
  *
  * The acceptance criterion these shots exist for is the age split: `instant`
  * (ages ~4–7) must render an icon-heavy, minimal-text store, and `savings`
@@ -35,7 +35,6 @@ import { settlePage } from '@e2e/utils/settle';
 
 const VIEWPORTS = {
   tablet: { width: 1280, height: 800 },
-  mobile: { width: 390, height: 844 },
 } as const;
 
 /** A fixed Wednesday. */
@@ -145,7 +144,6 @@ async function seedShelf(familyId: string, scope: string, horizon: 'instant' | '
 /** A distinct scope per (test, viewport) pair — fixed ids are globally unique. */
 const SCOPE: Record<string, Record<string, string>> = {
   tablet: { storeInstant: '1a', storeSavings: '1b', chartInstant: '1c', chartSavings: '1d' },
-  mobile: { storeInstant: '2a', storeSavings: '2b', chartInstant: '2c', chartSavings: '2d' },
 };
 
 for (const [name, viewport] of Object.entries(VIEWPORTS)) {
