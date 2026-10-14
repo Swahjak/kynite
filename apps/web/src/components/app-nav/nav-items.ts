@@ -70,13 +70,18 @@ export const RAIL_NAV: readonly NavItem[] = [
 ] as const;
 
 /**
- * The device (kiosk) rail: `RAIL_NAV` without Timers. The kiosk draws its own
+ * The device (kiosk) rail, in the old hub rail's order and without Timers. The kiosk draws its own
  * conditional `RailTimerTile` (a live countdown when one runs), so a static
  * Timers tile would be a duplicate — the pre-merge hub rail dropped it too.
  */
-export const DEVICE_RAIL_NAV: readonly NavItem[] = RAIL_NAV.filter(
-  (item) => item.href !== '/timers'
-);
+export const DEVICE_RAIL_NAV: readonly NavItem[] = [
+  { href: '/today', label: 'today', icon: 'calendar_month' },
+  { href: '/calendar', label: 'calendar', icon: 'view_column' },
+  { href: '/routines', label: 'routines', icon: 'restart_alt' },
+  { href: '/tasks', label: 'tasks', icon: 'checklist' },
+  // `bar_chart`: the tile is "Sterren", and the glyph follows the label.
+  { href: '/store', label: 'stars', icon: 'bar_chart' },
+] as const;
 
 /**
  * Everything behind the "More" trigger — the everyday surfaces a bottom bar

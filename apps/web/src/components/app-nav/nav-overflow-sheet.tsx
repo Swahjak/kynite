@@ -46,6 +46,8 @@ export function NavOverflowSheet({
           {items.map(({ href, label, icon }) => (
             <SheetClose
               key={href}
+              nativeButton={false}
+              role="link"
               render={
                 <Link
                   href={href}

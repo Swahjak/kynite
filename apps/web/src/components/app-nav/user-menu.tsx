@@ -165,6 +165,7 @@ export function UserMenuSheetSection({
       </div>
       <SheetClose
         nativeButton={false}
+        role="link"
         render={
           <Link
             href="/account"

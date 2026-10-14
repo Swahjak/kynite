@@ -286,6 +286,7 @@ test.describe('the hub routine screen', () => {
     // outright that nothing marks it as late (routine-card.tsx, Grace /
     // graduated), so the chip stands in for the old opacity check.
     await expect(card.getByTestId('routine-grace')).toBeVisible();
+    await expect(card).toHaveCSS('opacity', '1');
 
     // No red anywhere in the card, and no failure glyph.
     const marks = await card.evaluate((node) => {
