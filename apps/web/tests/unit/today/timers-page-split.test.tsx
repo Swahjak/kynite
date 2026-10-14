@@ -1,0 +1,79 @@
+import { render } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+/**
+ * `/timers` is one route for both principals: the principal decides the
+ * controls. A member gets `TimerControls`; a paired device gets the
+ * quick-start `TimerBoard` and never loads the member-only page data.
+ */
+
+vi.mock('server-only', () => ({}));
+
+vi.mock('next-intl/server', () => ({
+  getTranslations: async (namespace: string) => (key: string) => `${namespace}.${key}`,
+}));
+
+vi.mock('@/i18n/formatting-locale', () => ({ formatDateTime: () => '09:00' }));
+
+const requireMemberOrDevice = vi.fn();
+vi.mock('@/modules/devices', () => ({
+  requireMemberOrDevice: (...args: unknown[]) => requireMemberOrDevice(...args),
+}));
+
+vi.mock('@/modules/family', () => ({
+  getHouseholdFormattingLocale: async () => 'nl-NL',
+}));
+
+const loadTimersPage = vi.fn();
+const loadTimerBoard = vi.fn();
+
+vi.mock('@/modules/timers', () => ({
+  DURATION_PRESETS: [300],
+  TimerBoard: () => <div data-testid="timer-board" />,
+  TimerControls: () => <div data-testid="timer-controls" />,
+  loadTimerBoard: (...args: unknown[]) => loadTimerBoard(...args),
+  loadTimersPage: (...args: unknown[]) => loadTimersPage(...args),
+}));
+
+vi.mock('@kynite/ui', () => ({
+  EmptyState: () => null,
+  PageHeader: () => <div data-testid="page-header" />,
+}));
+
+const TimersPage = (await import('@/app/[locale]/(main)/timers/page')).default;
+
+async function renderPage() {
+  return render(
+    await TimersPage({
+      params: Promise.resolve({ locale: 'nl' }),
+      searchParams: Promise.resolve({}),
+    })
+  );
+}
+
+describe('(main)/timers — member vs device', () => {
+  beforeEach(() => {
+    requireMemberOrDevice.mockReset();
+    loadTimersPage.mockReset();
+    loadTimerBoard.mockReset();
+    loadTimersPage.mockResolvedValue({ familyId: 'family-1' });
+    loadTimerBoard.mockResolvedValue({ serverNow: 0 });
+  });
+
+  it('gives a member the TimerControls', async () => {
+    requireMemberOrDevice.mockResolvedValue({ kind: 'member', familyId: 'family-1' });
+    const { container } = await renderPage();
+
+    expect(container.querySelector('[data-testid="timer-controls"]')).not.toBeNull();
+    expect(container.querySelector('[data-testid="timer-board"]')).toBeNull();
+  });
+
+  it('gives a device the quick-start board and never loads the member page data', async () => {
+    requireMemberOrDevice.mockResolvedValue({ kind: 'device', familyId: 'family-1' });
+    const { container } = await renderPage();
+
+    expect(container.querySelector('[data-testid="timer-board"]')).not.toBeNull();
+    expect(container.querySelector('[data-testid="timer-controls"]')).toBeNull();
+    expect(loadTimersPage).not.toHaveBeenCalled();
+  });
+});

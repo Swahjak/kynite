@@ -55,9 +55,10 @@ import { TodayTimeline } from './today-timeline';
  *   Before H3 it was a band of the phone page above the tabs; the merge folded
  *   that band into this panel, so `heroEvents`/`flowMode`/`referenceNow` are
  *   read on both surfaces.
- * - **the weather card** — the head of this panel's second column, phone and
- *   wall alike. It is a slot the page fills with the resolved card; only the
- *   `density` still varies by surface.
+ * - **the weather card** — a slot the page fills with the resolved card. On the
+ *   wall it heads the second column; on the phone it is the first band under
+ *   the header, above the NU strip (it decides the coat before the schedule), and before a themed day's banner.
+ *   Only its position and `density` vary by surface.
  *
  * `banner` is *not* one of them. It is the day's headline and it belongs to the
  * day panel on both surfaces, which is the whole repair: it renders full-width
@@ -167,6 +168,14 @@ export async function TodayTabDag({
 
   return (
     <div className="flex flex-col gap-5" data-surface-variant={surface}>
+      {/* On the phone the weather card is the first band under the header, above
+          the NU strip: it answers "what is it doing outside" before the
+          schedule, because that decides the coat (design 0dbcd61). It is a band
+          here rather than the head of column two, which would stack it below the
+          whole timeline at 390px. The wall keeps it at the head of its second
+          column. */}
+      {hub ? null : weather}
+
       {/* Rendered bare, not in a wrapper: on the 348 ordinary days of the year
           the banner resolves to `null`, and a wrapper would leave the flex gap
           behind as a hole above the columns. */}
@@ -221,7 +230,7 @@ export async function TodayTabDag({
           {/* Bare, like `banner`: on a household with no location configured the
               widget resolves to nothing, and a wrapper would leave the column's
               flex gap behind as a hole above what follows. */}
-          {weather}
+          {hub ? weather : null}
 
           {/* The August sheet's 2×2 grid used to live here — a *wall*
               affordance, gated tile by tile on the permission it would need
