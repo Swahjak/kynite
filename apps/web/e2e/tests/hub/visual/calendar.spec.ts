@@ -1,3 +1,4 @@
+import type { Page } from '@playwright/test';
 import { pairHub } from '@e2e/fixtures/hub';
 import { expect, test } from '@e2e/fixtures/family';
 import {
@@ -13,7 +14,7 @@ import { pinLiveText, settlePage } from '@e2e/utils/settle';
 
 /**
  * Visual regression for every calendar surface, at both viewports M06 names:
- * the hub tablet (1280×800) and a phone (390×844).
+ * the hub tablet (1280×800) and the phone's today board (390×844).
  *
  * Determinism is the whole design of this file, and it is bought with fixed
  * dates rather than masks.
@@ -37,8 +38,15 @@ import { pinLiveText, settlePage } from '@e2e/utils/settle';
 const VIEWPORTS = {
   /** The hub's wall tablet. */
   tablet: { width: 1280, height: 800 },
-  mobile: { width: 390, height: 844 },
 } as const;
+
+/**
+ * The phone is the `app` project's job; the one phone shot kept here is the
+ * app board (`today-mobile`), reached with the mobile client hint. A 390px
+ * viewport with a Desktop UA renders the wall's rail squeezed, which is not a
+ * surface anyone has.
+ */
+const PHONE = { width: 390, height: 844 } as const;
 
 const ANCHOR = '2026-03-11';
 /**
@@ -169,6 +177,26 @@ async function seedBoardDay(familyId: string) {
   });
 }
 
+async function shootTodayBoard(page: Page, familyId: string, name: string) {
+  await seedBoardDay(familyId);
+
+  // `today-board` is the `app` surface's board: a member browser only
+  // resolves to it with the mobile client hint (D17); this project's
+  // desktop-class default renders the wall's `hub-board` instead.
+  await page.context().setExtraHTTPHeaders({ 'Sec-CH-UA-Mobile': '?1' });
+  await page.goto(`/nl/today?date=${FUTURE_ANCHOR}`);
+  await expect(page.getByTestId('today-board')).toBeVisible();
+  // `today-greeting` (M18) picks morning/afternoon/evening off the real
+  // wall clock (`greetingSlotFor(hourIn(data.now, ...))` in
+  // `(app)/today/page.tsx` — `data.now` is `new Date()`, not derived from
+  // `?date=`), so it rotates under the suite the same way the header does
+  // and needs the same durable pin.
+  await pinLiveText(page, 'today-greeting', 'Goedemorgen, Sanne');
+  await settlePage(page);
+
+  await expect(page).toHaveScreenshot(`today-${name}.png`, { fullPage: true });
+}
+
 for (const [name, viewport] of Object.entries(VIEWPORTS)) {
   test.describe(`calendar visuals — ${name}`, { tag: '@visual' }, () => {
     test.use({ viewport });
@@ -179,27 +207,16 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
 
         await page.goto(`/nl/calendar?view=${view}&date=${ANCHOR}`);
         await expect(page.getByTestId(`calendar-view-${view}`)).toBeVisible();
+        // The header greeting is picked off the real wall clock, so it rotates
+        // under the suite; pin it like the boards below do.
+        await pinLiveText(page, 'today-greeting', 'Goedemorgen');
         await settlePage(page);
 
         await expect(page).toHaveScreenshot(`calendar-${view}-${name}.png`, { fullPage: true });
       });
     }
 
-    test('today board', async ({ page, family }) => {
-      await seedBoardDay(family.familyId);
-
-      await page.goto(`/nl/today?date=${FUTURE_ANCHOR}`);
-      await expect(page.getByTestId('today-board')).toBeVisible();
-      // `today-greeting` (M18) picks morning/afternoon/evening off the real
-      // wall clock (`greetingSlotFor(hourIn(data.now, ...))` in
-      // `(app)/today/page.tsx` — `data.now` is `new Date()`, not derived from
-      // `?date=`), so it rotates under the suite the same way the header does
-      // and needs the same durable pin.
-      await pinLiveText(page, 'today-greeting', 'Goedemorgen, Sanne');
-      await settlePage(page);
-
-      await expect(page).toHaveScreenshot(`today-${name}.png`, { fullPage: true });
-    });
+    test('today board', async ({ page, family }) => shootTodayBoard(page, family.familyId, name));
 
     for (const locale of ['nl', 'en'] as const) {
       test(`hub ambient board (${locale})`, async ({ page, family }) => {
@@ -213,7 +230,7 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
         // that says `/en`. Without this the hub redirects back to `/nl`.
         await withDb((client) => setFamilyLocale(client, family.familyId, locale));
 
-        await page.goto(`/${locale}/hub?date=${FUTURE_ANCHOR}`);
+        await page.goto(`/${locale}/today?date=${FUTURE_ANCHOR}`);
         await expect(page.getByTestId('hub-board')).toBeVisible();
         // F14b: waiting on the theme settling too, matching the "dark" variant
         // below (`useHubTheme` only applies `.dark`/`data-hub-theme` to `<html>`
@@ -262,7 +279,7 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
 
       await seedBoardDay(family.familyId);
 
-      await page.goto(`/nl/hub?date=${FUTURE_ANCHOR}&theme=dark`);
+      await page.goto(`/nl/today?date=${FUTURE_ANCHOR}&theme=dark`);
       await expect(page.getByTestId('hub-board')).toBeVisible();
       await expect(page.getByTestId('kiosk-shell')).toHaveAttribute('data-hub-theme', 'dark');
 
@@ -276,42 +293,25 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
     });
 
     test('hub agenda board', async ({ page, family }) => {
-      // B-1, M25: `family.hubDefaultView = 'agenda'` no longer swaps the board
-      // to a different component (`hub-board.tsx` only draws a distinct shape
-      // for the cached offline mirror now) — it picks which of the vandaag
-      // composition's tabs opens first. `'agenda'` maps to the chronological
-      // "dag" tab rather than the per-person "personen" one (the opposite of
-      // the default), which needs its own baseline — the settings e2e spec
-      // seeds no events, so that spec's pass was an empty-state pass, not
-      // proof the dag tab renders content at hub scale. This baseline is
-      // seeded with `seedBoardDay` deliberately, so the timeline rows and
-      // `EventChip`'s hub sizing actually paint something.
+      // `family.hubDefaultView = 'agenda'` picks the opening *view* of the
+      // hub's calendar board. It used to pick the vandaag composition's
+      // opening tab (B-1, M25), but the board tabs became rail destinations
+      // (b4ce25c) and the per-person tab was dropped (D22), so `/today` no
+      // longer reads the setting — `/calendar` does (`calendar/page-data.ts`).
+      // Seeded with `seedBoardDay` so the agenda rows actually paint.
       await pairHub(page, family.familyId);
 
       await seedBoardDay(family.familyId);
       await withDb((client) => setHubDefaultView(client, family.familyId, 'agenda'));
 
-      await page.goto(`/nl/hub?date=${FUTURE_ANCHOR}`);
-      await expect(page.getByTestId('hub-board')).toBeVisible();
+      await page.goto(`/nl/calendar?date=${FUTURE_ANCHOR}`);
+      await expect(page.getByTestId('hub-kalender')).toBeVisible();
       await expect(page.getByTestId('kiosk-shell')).toHaveAttribute('data-hub-theme', 'light');
 
-      // The opening tab is the "dag" pill, not the default "personen" one —
-      // proof the setting actually steered the composition rather than the
-      // screenshot merely matching by accident.
-      await expect(page.getByTestId('pill-tab-dag')).toHaveAttribute('aria-selected', 'true');
-      await expect(page.getByTestId('today-tab-dag')).toBeVisible();
-      // The pill row (`PillTabs`) scrolls horizontally, and the browser's own
-      // scroll-into-view for the newly-focused active tab lands at a slightly
-      // different offset from run to run — a real difference in *scroll
-      // position*, not in the board itself, which made this baseline flaky.
-      // Pin it flush left, the layout's resting position before anyone has
-      // touched the row.
-      await page
-        .getByTestId('today-tabs')
-        .getByRole('tablist')
-        .evaluate((list) => {
-          list.scrollLeft = 0;
-        });
+      // Proof the setting steered the board rather than the screenshot
+      // matching by accident: the agenda view, not the default day view.
+      await expect(page.getByTestId('calendar-view-agenda')).toBeVisible();
+      await expect(page.getByTestId('calendar-view-day')).toHaveCount(0);
 
       await pinLiveText(page, 'today-greeting', 'Goedemorgen');
 
@@ -321,7 +321,7 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
     });
 
     test('hub kalender', async ({ page, family }) => {
-      // M4, hub-calendar-shell: `/hub/kalender` mounts the app's own
+      // M4, hub-calendar-shell: `/calendar` mounts the app's own
       // `CalendarShell surface="hub"` — a day board with one column per
       // member, no header/view-switcher chrome (that lives in `TodayHeader`
       // above it) and no create/dialog affordances (`canWrite` is false for
@@ -332,7 +332,7 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
 
       await seedBoardDay(family.familyId);
 
-      await page.goto(`/nl/hub/kalender?date=${FUTURE_ANCHOR}`);
+      await page.goto(`/nl/calendar?date=${FUTURE_ANCHOR}`);
       await expect(page.getByTestId('hub-kalender')).toBeVisible();
       await expect(page.getByTestId('calendar-view-day')).toBeVisible();
       await expect(page.getByTestId('kiosk-shell')).toHaveAttribute('data-hub-theme', 'light');
@@ -345,3 +345,9 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
     });
   });
 }
+
+test.describe('calendar visuals — phone', { tag: '@visual' }, () => {
+  test.use({ viewport: PHONE });
+
+  test('today board', async ({ page, family }) => shootTodayBoard(page, family.familyId, 'mobile'));
+});

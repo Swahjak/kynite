@@ -3,7 +3,9 @@
 import { useState, type ReactNode } from 'react';
 import { Menu } from '@base-ui/react/menu';
 import { clearUserCachesWithin } from '@/components/offline';
+import { Link } from '@/i18n/navigation';
 import { cn } from '@kynite/ui';
+import { SheetClose } from '@/components/ui/sheet';
 
 /**
  * The signed-in member, at the bottom of the nav — and the sign-out behind it.
@@ -29,6 +31,8 @@ import { cn } from '@kynite/ui';
 export type UserMenuLabels = {
   /** The trigger's and the popup's accessible name. */
   account: string;
+  /** "Mijn instellingen" — the link to `/account`, every member's own settings. */
+  settings: string;
   signOut: string;
 };
 
@@ -108,6 +112,13 @@ export function UserMenu({
             <div className="my-1 h-px bg-border" role="none" />
             <Menu.Item
               className={itemClass}
+              render={<Link href="/account" />}
+              data-testid="account-settings"
+            >
+              {labels.settings}
+            </Menu.Item>
+            <Menu.Item
+              className={itemClass}
               disabled={pending}
               onClick={run}
               data-testid="sign-out"
@@ -152,6 +163,19 @@ export function UserMenuSheetSection({
           {user.name}
         </span>
       </div>
+      <SheetClose
+        nativeButton={false}
+        role="link"
+        render={
+          <Link
+            href="/account"
+            className={cn(itemClass, 'w-full hover:bg-surface-container-high')}
+            data-testid="account-settings"
+          />
+        }
+      >
+        {labels.settings}
+      </SheetClose>
       <button
         type="button"
         disabled={pending}

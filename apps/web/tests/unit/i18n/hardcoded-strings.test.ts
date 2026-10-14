@@ -47,7 +47,12 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 const SCAN_ROOTS = ['src/app', 'src/modules', 'src/components'];
 
 /** Dev-only routes never reach a family — excluded by the acceptance criterion itself. */
-const EXCLUDED_DIR_SEGMENTS = ['src/app/dev'];
+const EXCLUDED_DIR_SEGMENTS = [
+  'src/app/dev',
+  // MCP tool `description` fields are English protocol text for an LLM host by
+  // design, not localized UI copy a family member sees.
+  'src/app/api/mcp',
+];
 
 /**
  * Files that are genuinely not UI copy, individually justified rather than

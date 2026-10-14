@@ -36,7 +36,7 @@ import { FEED_PRESETS, findPreset, type FeedPreset } from '../domain/presets';
 import type { SubscriptionView } from '../queries';
 
 /**
- * The subscription surface (M25) — `(app)/settings/subscriptions`.
+ * The subscription surface (M25) — `(app)/manage/settings/subscriptions`.
  *
  * Three things happen here and nothing else: paste a link, see whether it is
  * still working, and stop. Everything *about* a subscribed calendar that is

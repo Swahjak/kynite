@@ -90,7 +90,7 @@ test.describe('timer visuals — tablet', { tag: '@visual' }, () => {
       ]);
     });
 
-    await page.goto(`/nl/hub/timers?now=${NOW_MS}`);
+    await page.goto(`/nl/timers?now=${NOW_MS}`);
     await expect(page.getByTestId('timer-board')).toBeVisible();
     await expect(page.getByTestId('timer-tile')).toHaveCount(3);
     await settlePage(page);

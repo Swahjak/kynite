@@ -1,0 +1,30 @@
+import { notFound } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
+import { PageHeader } from '@kynite/ui';
+import { SettingsPage } from '@/components/settings/settings-shell';
+import { MemberDialog, MemberList, loadFamilyPage } from '@/modules/family';
+import { requireManager } from '@/modules/devices';
+
+/** Household roster + member CRUD (PRD FR1/FR2, milestone M03; invites M14). */
+export default async function FamilyPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  await requireManager(locale, '/manage/family');
+  const data = await loadFamilyPage();
+  if (!data) notFound();
+
+  const t = await getTranslations('family');
+
+  return (
+    <SettingsPage>
+      <PageHeader
+        icon="group"
+        iconTint="brand-container"
+        title={data.family?.name ?? t('title')}
+        subtitle={t('subtitle')}
+        action={<MemberDialog />}
+      />
+
+      <MemberList members={data.members} invites={data.invites} serverNow={data.serverNow} />
+    </SettingsPage>
+  );
+}

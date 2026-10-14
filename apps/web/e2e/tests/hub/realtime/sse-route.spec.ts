@@ -59,7 +59,7 @@ test.describe('GET /api/sse', () => {
       if (request.url().includes('/api/sse')) opened.push(request.url());
     });
 
-    await page.goto('/nl/hub');
+    await page.goto('/nl/today');
     await expect(page.getByTestId('ambient-timers').or(page.locator('body'))).toBeVisible();
     // Give the provider's effect a moment to connect.
     await page.waitForTimeout(1500);

@@ -4,7 +4,6 @@ import type { ReactElement } from 'react';
 import { useTranslations } from 'next-intl';
 import { FabSpeedDial, type FabSpeedDialAction } from '@/components/ui/fab';
 import { Link } from '@/i18n/navigation';
-import { useTodayTab } from './use-today-tab';
 
 /**
  * The day board's quick-action FAB — a speed dial replacing what used to be
@@ -57,12 +56,10 @@ export type TodayFabProps = {
     children?: unknown;
   }> | null;
   /**
-   * The route "Ster geven" navigates to instead of switching a tab — the hub
-   * passes `/hub/store` (M-R1: the star matrix is a route there, not a panel
-   * of `/hub`). Absent on `(app)/today`, where the star matrix stays a tab of
-   * the same page and the action switches `useTodayTab` as it always has.
+   * The route "Ster geven" navigates to (the star store is a route, not a
+   * panel of this page).
    */
-  starsHref?: string;
+  starsHref: string;
   /**
    * M-T2, hub only: "Timer starten" opens a modal (duration + icon, then a
    * start) instead of navigating to `timersHref`. Built the same way as
@@ -87,7 +84,6 @@ export function TodayFab({
   timerAction,
 }: TodayFabProps) {
   const t = useTranslations('today');
-  const { setTab } = useTodayTab();
 
   const actions: FabSpeedDialAction[] = [];
 
@@ -121,16 +117,7 @@ export function TodayFab({
       id: 'stars',
       icon: 'star',
       label: t('actions.giveStar'),
-      ...(starsHref
-        ? // A route on the hub since M-R1: the star matrix is `/hub/store`,
-          // not a tab of this page there, so the action navigates like the
-          // timer action above (the same `render`-prop pattern).
-          { render: <Link href={starsHref} /> }
-        : // Not a route on `(app)/today`: the star matrix is a tab of this
-          // very page, and the tab state is a shared store
-          // (`use-today-tab.ts`), so the action that sends you there is the
-          // same switch `TodayTabSterren`'s pills use.
-          { onClick: () => setTab('sterren') }),
+      render: <Link href={starsHref} />,
     });
   }
 

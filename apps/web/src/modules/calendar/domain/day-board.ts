@@ -181,7 +181,7 @@ export type MemberSplit<E extends CombinableEvent> = {
  * One day's events, split between the people they belong to.
  *
  * Replaces four hand-written copies — `ui/person-columns.tsx`,
- * `ui/member-day-grid.tsx`, `today/ui/today-tab-personen.tsx`, and the
+ * `ui/member-day-grid.tsx`, the former per-person `/today` panel, and the
  * attribution half of `ui/calendar-shell.tsx`'s member filter — which had
  * drifted into three different answers. The rule, in order:
  *

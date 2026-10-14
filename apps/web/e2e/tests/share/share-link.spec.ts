@@ -27,7 +27,7 @@ async function mintLink(
   page: import('@playwright/test').Page,
   options: { role: 'viewer' | 'contributor'; label: string; memberId?: string }
 ): Promise<string> {
-  await page.goto('/nl/settings/sharing');
+  await page.goto('/nl/manage/settings/sharing');
 
   await page.getByTestId('share-label-input').fill(options.label);
   await page.getByTestId(`share-role-${options.role}`).check();
@@ -330,7 +330,7 @@ test.describe('caregiver share links', () => {
 
     // Revoked before the caregiver ever gets there — same lifecycle
     // `revokeShareLinkAction` writes from the settings UI.
-    await page.goto('/nl/settings/sharing');
+    await page.goto('/nl/manage/settings/sharing');
     await page.getByTestId('share-revoke').click();
     await page.getByTestId('share-revoke-confirm').click();
     await expect(page.getByTestId('share-link-row')).toHaveAttribute('data-state', 'revoked');

@@ -9,7 +9,7 @@ import { Icon } from '@kynite/ui';
  * does not, and is not told. An anonymous holder of a wrong token who learns
  * that it "expired" has learned that the token was once valid, which turns a
  * blind guess into a confirmed hit. Parents get the true state in
- * `(app)/settings/sharing`, where they are authenticated and it is their own
+ * `(app)/manage/settings/sharing`, where they are authenticated and it is their own
  * link they are reading about.
  *
  * There is no retry button and no sign-in prompt. Nothing the person holding

@@ -7,7 +7,7 @@ import type { Family, Member } from './schema';
 import type { MemberInviteView } from './ui/member-invite';
 
 /**
- * Everything `(app)/family` renders, in one server-side read.
+ * Everything `(app)/manage/family` renders, in one server-side read.
  *
  * The same shape as `modules/sharing/page-data.ts`, and for the same two
  * reasons. First, the page component stays a layout: no principal juggling, no
@@ -60,7 +60,7 @@ export async function loadFamilyPage(): Promise<FamilyPageData | null> {
 }
 
 /**
- * The household section of `(app)/settings` (M16).
+ * The household section of `(app)/manage/settings` (M16).
  *
  * Separate from `loadFamilyPage` rather than folded into it: the roster page
  * needs members and invites and nothing about timezones, and the settings hub

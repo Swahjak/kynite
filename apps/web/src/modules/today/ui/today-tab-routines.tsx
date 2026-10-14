@@ -19,9 +19,9 @@ export type TodayTabRoutinesProps = {
   kids: KidProgress[] | null;
   /**
    * True on the wall (`TodayTabDag`'s `hub` surface), where each card links to
-   * `/hub/routines/[memberId]`. That route requires a hub device
-   * (`requireHubDevice`), so `(app)/today`'s own routines tab — this same
-   * component, unwrapped — leaves the default `false` and stays inert.
+   * `/routines/[memberId]`. `TodayTabDag` is currently the only caller and
+   * always passes it, so the inert `false` branch is dead today — kept for the
+   * day the panel is mounted off the wall.
    */
   hub?: boolean;
 };
@@ -51,7 +51,7 @@ export async function TodayTabRoutines({ kids, hub = false }: TodayTabRoutinesPr
               }
               starsLabel={t('kids.starsToday', { count: kid.starsToday })}
               progressLabel={t('routines.progressLabel', { name: kid.displayName })}
-              href={hub ? `/hub/routines/${kid.memberId}` : undefined}
+              href={hub ? `/routines/${kid.memberId}` : undefined}
               linkLabel={hub ? t('routines.viewLink', { name: kid.displayName }) : undefined}
             />
           ))}

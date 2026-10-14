@@ -137,7 +137,7 @@ export async function redemptionRequestPayload(input: {
       name: input.childName,
       reward: input.rewardTitle,
     }),
-    url: `/${locale}/rewards`,
+    url: `/${locale}/manage/rewards`,
     tag: `redemption:${input.redemptionId}`,
   };
 }

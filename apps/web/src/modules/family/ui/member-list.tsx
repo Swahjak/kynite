@@ -36,7 +36,7 @@ export async function MemberList({
   serverNow: number;
   /**
    * `member:manage` — gates the edit/invite/delete affordances (NB-7).
-   * Defaults `true` so `(app)/family` (owner-and-adult-reachable, but where
+   * Defaults `true` so `(app)/manage/family` (owner-and-adult-reachable, but where
    * the write actions themselves already refuse an adult) keeps its current
    * shape; the settings hub is the caller that passes the real answer.
    */

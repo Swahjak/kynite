@@ -1,9 +1,8 @@
 /**
  * Which caching strategy a request belongs to (docs/architecture.md §6).
  *
- * One service worker serves both surfaces — §6: "a single SW is simpler than
- * juggling two scopes, and `/hub` vs `/app` route matching is enough to
- * differentiate" — so the differentiation is a URL predicate, and a URL
+ * One service worker serves the whole route tree (§6: path-aware runtime
+ * rules, not two scopes), so the differentiation is a URL predicate, and a URL
  * predicate is worth being able to test without a browser. `src/app/sw.ts`
  * imports these and does nothing else with routing.
  *
@@ -60,15 +59,45 @@ function pathOf(url: URL | string): string {
 }
 
 /**
- * A hub URL: `/{locale}/hub` and everything under it.
+ * First path segment (after the locale) of every page a wall tablet shows.
+ *
+ * H3 moved the kiosk off `/hub/*` onto the one route tree, where a member's
+ * phone renders the very same URLs — so the URL no longer says which surface
+ * is asking, and the worker cannot ask the principal (the device cookie is
+ * HttpOnly and a `fetch` event carries no cookie access). Instead the whole
+ * shared tree gets the hub's shell strategy: the board must boot from cache on
+ * a dead network, and for a phone the only cost is a two-second rather than
+ * three-second fuse before the cached page. Member-only roots (`/manage`,
+ * `/account`, `/oauth`) are not listed and stay `NetworkFirst` app pages.
+ * Mirrors `SHARED_SECTIONS` in `proxy.ts`, plus `/pair` (the kiosk's cold boot).
+ */
+const HUB_SECTIONS: ReadonlySet<string> = new Set([
+  'today',
+  'calendar',
+  'routines',
+  'tasks',
+  'store',
+  'stars',
+  'timers',
+  'timer',
+  'clock',
+  'pair',
+  // The pre-H3 kiosk tree. Classification only: the proxy redirects `/hub`, and
+  // a redirect response is never cached, so nothing stale is kept either way.
+  'hub',
+]);
+
+/**
+ * A hub URL: `/{locale}/{section}` and everything under it, for each section
+ * of the shared route tree (docs/route-tree.md).
  *
  * Matched on the *path*, not on a referrer or a client id, because the same
  * service worker instance serves both surfaces and only the URL is reliable
  * for a navigation preload or a cold boot.
  */
 export function isHubUrl(url: URL | string): boolean {
-  const path = pathOf(url);
-  return LOCALES.some((locale) => path === `/${locale}/hub` || path.startsWith(`/${locale}/hub/`));
+  const [, locale, section] = pathOf(url).split('/');
+  return (LOCALES as readonly string[]).includes(locale ?? '') && HUB_SECTIONS.has(section ?? '');
 }
 
 /**

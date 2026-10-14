@@ -25,7 +25,7 @@ import {
 test.describe('device pairing', () => {
   test('a parent generates a code and the wall tablet redeems it', async ({ page, family }) => {
     // --- The parent's phone -------------------------------------------------
-    await page.goto('/nl/settings/devices');
+    await page.goto('/nl/manage/settings/devices');
 
     await expect(page.getByTestId('devices-empty')).toBeVisible();
 
@@ -42,15 +42,19 @@ test.describe('device pairing', () => {
     const kiosk = await newAnonymousContext(page.context().browser()!, { locale: 'nl-NL' });
     const hub = await kiosk.newPage();
 
-    await hub.goto('/nl/hub');
-    // Unpaired: the proxy turns it away before anything renders.
-    await expect(hub).toHaveURL(/\/nl\/hub\/pair$/);
+    await hub.goto('/nl/today');
+    // Unpaired: no cookie on the shared route tree sends the request to
+    // sign-in with the intended destination (H5e); the pair screen is one
+    // link away from that form.
+    await expect(hub).toHaveURL(/\/nl\/sign-in\?callbackUrl=%2Fnl%2Ftoday$/);
+    await hub.getByRole('link', { name: 'Dit scherm koppelen' }).click();
+    await expect(hub).toHaveURL(/\/nl\/pair$/);
     await expect(hub.getByTestId('pair-form')).toBeVisible();
 
     for (const digit of code) await hub.getByTestId(`pair-key-${digit}`).click();
     await hub.getByTestId('pair-submit').click();
 
-    await hub.waitForURL(/\/nl\/hub$/);
+    await hub.waitForURL(/\/nl\/today$/);
     await expect(hub.getByTestId('hub-board')).toBeVisible();
     // M20: the device name no longer sits in the chrome — it still shows up
     // in the settings sheet (`hub-settings`), which is the confirmation that
@@ -80,7 +84,7 @@ test.describe('device pairing', () => {
   });
 
   test('the same code cannot pair a second tablet', async ({ page }) => {
-    await page.goto('/nl/settings/devices');
+    await page.goto('/nl/manage/settings/devices');
     await page.getByTestId('device-name-input').fill('Keuken');
     await page.getByRole('button', { name: 'Code aanmaken' }).click();
     const code = await page.getByTestId('pairing-code').innerText();
@@ -89,19 +93,19 @@ test.describe('device pairing', () => {
 
     const first = await newAnonymousContext(browser, { locale: 'nl-NL' });
     const firstPage = await first.newPage();
-    await firstPage.goto('/nl/hub/pair');
+    await firstPage.goto('/nl/pair');
     for (const digit of code) await firstPage.getByTestId(`pair-key-${digit}`).click();
     await firstPage.getByTestId('pair-submit').click();
-    await firstPage.waitForURL(/\/nl\/hub$/);
+    await firstPage.waitForURL(/\/nl\/today$/);
 
     const second = await newAnonymousContext(browser, { locale: 'nl-NL' });
     const secondPage = await second.newPage();
-    await secondPage.goto('/nl/hub/pair');
+    await secondPage.goto('/nl/pair');
     for (const digit of code) await secondPage.getByTestId(`pair-key-${digit}`).click();
     await secondPage.getByTestId('pair-submit').click();
 
     await expect(secondPage.getByTestId('pair-status')).toContainText('werkt niet');
-    await expect(secondPage).toHaveURL(/\/nl\/hub\/pair$/);
+    await expect(secondPage).toHaveURL(/\/nl\/pair$/);
 
     await first.close();
     await second.close();
@@ -118,10 +122,10 @@ test.describe('a paired hub', () => {
     // there is no signed-in parent quietly holding the page up.
     const kiosk = await newAnonymousContext(browser, { locale: 'nl-NL' });
     const page = await kiosk.newPage();
-    await page.goto('/nl/hub/pair');
+    await page.goto('/nl/pair');
     const device = await pairHub(page, family.familyId, 'Keuken');
 
-    await page.goto('/nl/hub');
+    await page.goto('/nl/today');
     await expect(page.getByTestId('hub-board')).toBeVisible();
 
     // 1. A plain reload. This is what a tablet does after a power cut.
@@ -137,7 +141,7 @@ test.describe('a paired hub', () => {
     const aged = await deviceSessionExpiry(device.deviceId);
     expect(aged.getTime()).toBeLessThan(before.getTime());
 
-    await page.goto('/nl/hub');
+    await page.goto('/nl/today');
     await expect(page.getByTestId('hub-board')).toBeVisible();
     expect(page.url()).not.toContain('sign-in');
     expect(page.url()).not.toContain('/pair');
@@ -157,10 +161,10 @@ test.describe('a paired hub', () => {
     // the one this test is telling.
     const kiosk = await newAnonymousContext(browser, { locale: 'nl-NL' });
     const page = await kiosk.newPage();
-    await page.goto('/nl/hub/pair');
+    await page.goto('/nl/pair');
     const device = await pairHub(page, family.familyId, 'Keuken');
 
-    await page.goto('/nl/hub');
+    await page.goto('/nl/today');
     await expect(page.getByTestId('hub-board')).toBeVisible();
 
     await revokeDevice(device.deviceId);
@@ -173,9 +177,9 @@ test.describe('a paired hub', () => {
     // What "on the next request" means is that a request carrying the revoked
     // cookie is turned away, which is exactly what this asserts.
     const next = await kiosk.newPage();
-    await next.goto('/nl/hub');
+    await next.goto('/nl/today');
 
-    await expect(next).toHaveURL(/\/nl\/hub\/pair$/);
+    await expect(next).toHaveURL(/\/nl\/pair$/);
     await expect(next.getByTestId('pair-form')).toBeVisible();
     await expect(next.getByTestId('hub-board')).toHaveCount(0);
 
@@ -192,7 +196,7 @@ test.describe('a paired hub', () => {
     // physically unauthenticated").
     expect(family.familyId).toBeTruthy();
 
-    await page.goto('/nl/hub');
+    await page.goto('/nl/today');
     await expect(page).toHaveURL(/\/nl\/today$/);
   });
 
@@ -206,15 +210,15 @@ test.describe('a paired hub', () => {
     const kiosk = await newAnonymousContext(browser, { locale: 'nl-NL' });
     const hub = await kiosk.newPage();
 
-    await hub.goto('/nl/hub/pair');
+    await hub.goto('/nl/pair');
     const device = await pairHub(hub, family.familyId, 'Keuken');
 
-    await hub.goto('/nl/hub');
+    await hub.goto('/nl/today');
     await expect(hub.getByTestId('hub-board')).toBeVisible();
     // The stream has to be up, or this test would pass on the reload path.
     await expect(hub.getByTestId('offline-indicator')).toHaveCount(0);
 
-    await page.goto('/nl/settings/devices');
+    await page.goto('/nl/manage/settings/devices');
     // Two taps (review finding 7): revoking is destructive to whatever screen
     // it targets, so the first tap only reveals the confirm step.
     await page.getByTestId('revoke-device').click();
@@ -242,7 +246,7 @@ test.describe('a paired hub', () => {
     // the whole time, just shadowed by the device cookie.
     await pairHub(page, family.familyId, 'Laptop per ongeluk');
 
-    await page.goto('/nl/hub');
+    await page.goto('/nl/today');
     await expect(page.getByTestId('hub-board')).toBeVisible();
 
     await page.getByTestId('hub-settings-trigger').click();
@@ -254,14 +258,23 @@ test.describe('a paired hub', () => {
     // The member session, never gone, takes over: the redirect target is the
     // bare locale root, and it is `(marketing)/page.tsx`'s own check that
     // sends a resolved member principal on to their own surface.
-    await page.waitForURL(/\/nl\/today$/);
-    await expect(page.getByTestId('hub-board')).toHaveCount(0);
+    //
+    // The page is *already* at `/nl/today`, so a URL wait is satisfied before
+    // the unpair's hard navigation (`/nl` -> `/nl/today`, two dev compiles) has
+    // even started, and `<html data-surface>` — written only by the root
+    // layout — still reads the old `hub` until the new document arrives. So
+    // the attribute itself is awaited, on a budget that covers the compiles.
+    // The member renders as a browser now (`desktop`), not as the wall's
+    // device surface: the paired `hub` surface is gone with the cookie.
+    await expect(page.locator('html')).toHaveAttribute('data-surface', 'desktop', {
+      timeout: 20_000,
+    });
 
     // And the device really is gone, not just the cookie on this page: a
     // fresh page carrying nothing but that same (now revoked) device token
     // resolves no principal on the hub tree either.
     const next = await page.context().newPage();
-    await next.goto('/nl/hub');
+    await next.goto('/nl/today');
     await expect(next).toHaveURL(/\/nl\/today$/);
   });
 
@@ -272,10 +285,10 @@ test.describe('a paired hub', () => {
     const kiosk = await newAnonymousContext(browser, { locale: 'nl-NL' });
     const hub = await kiosk.newPage();
 
-    await hub.goto('/nl/hub/pair');
+    await hub.goto('/nl/pair');
     await pairHub(hub, family.familyId, 'Wandtablet');
 
-    await hub.goto('/nl/hub');
+    await hub.goto('/nl/today');
     await expect(hub.getByTestId('hub-board')).toBeVisible();
 
     await hub.getByTestId('hub-settings-trigger').click();
@@ -287,8 +300,10 @@ test.describe('a paired hub', () => {
     await hub.waitForURL(/\/nl$/);
 
     // And the hub itself is back to square one.
-    await hub.goto('/nl/hub');
-    await expect(hub).toHaveURL(/\/nl\/hub\/pair$/);
+    await hub.goto('/nl/today');
+    await expect(hub).toHaveURL(/\/nl\/sign-in\?callbackUrl=%2Fnl%2Ftoday$/);
+    await hub.getByRole('link', { name: 'Dit scherm koppelen' }).click();
+    await expect(hub).toHaveURL(/\/nl\/pair$/);
     await expect(hub.getByTestId('pair-form')).toBeVisible();
 
     await kiosk.close();

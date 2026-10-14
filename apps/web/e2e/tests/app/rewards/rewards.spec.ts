@@ -57,7 +57,7 @@ test.describe('the child asks for a reward', () => {
 
     const { mila, story } = await seedShelf(family.familyId);
 
-    await page.goto(`/nl/hub/store?member=${mila.id}`);
+    await page.goto(`/nl/store?member=${mila.id}`);
 
     const tile = page.locator(`[data-reward-id="${story.id}"]`);
     await expect(tile).toHaveAttribute('data-state', 'affordable');
@@ -89,7 +89,7 @@ test.describe('the child asks for a reward', () => {
 
     const { mila, story } = await seedShelf(family.familyId);
 
-    await page.goto(`/nl/hub/store?member=${mila.id}`);
+    await page.goto(`/nl/store?member=${mila.id}`);
 
     const tap = page.locator(`[data-reward-id="${story.id}"]`).getByTestId('reward-tap');
     // Two taps as fast as the browser will dispatch them. The second lands on
@@ -116,7 +116,7 @@ test.describe('the child asks for a reward', () => {
 
     const { mila, zoo } = await seedShelf(family.familyId);
 
-    await page.goto(`/nl/hub/store?member=${mila.id}`);
+    await page.goto(`/nl/store?member=${mila.id}`);
 
     const tile = page.locator(`[data-reward-id="${zoo.id}"]`);
     await expect(tile).toHaveAttribute('data-state', 'outOfReach');
@@ -140,7 +140,7 @@ test.describe('the parent answers', () => {
       ])
     );
 
-    await page.goto('/nl/rewards');
+    await page.goto('/nl/manage/rewards');
     await expect(page.getByTestId('approval-queue')).toBeVisible();
 
     await page.getByTestId('approve-redemption').first().click();
@@ -166,7 +166,7 @@ test.describe('the parent answers', () => {
 
     const before = await withDb((client) => readStarBalance(client, mila.id));
 
-    await page.goto('/nl/rewards');
+    await page.goto('/nl/manage/rewards');
     await page.getByTestId('deny-redemption').first().click();
 
     await expect
@@ -182,14 +182,18 @@ test.describe('the parent answers', () => {
     //
     // The browser becomes the wall tablet here, after the parent's half of the
     // test: a device cookie outranks the account session (M12), so pairing
-    // earlier would have redirected `/nl/rewards` to the board.
+    // earlier would have redirected `/nl/manage/rewards` to the board.
     await pairHub(page, family.familyId);
-    await page.goto(`/nl/hub/store?member=${mila.id}`);
+    await page.goto(`/nl/store?member=${mila.id}`);
 
     const tile = page.locator(`[data-reward-id="${film.id}"]`);
     await expect(tile).toHaveAttribute('data-state', 'affordable');
     await expect(tile.getByTestId('reward-requested')).toHaveCount(0);
-    await expect(page.getByTestId('available-stars')).toHaveText('10');
+    // `StarCount` is a glyph + the number + an sr-only phrase, so the number is
+    // asserted on its own node.
+    await expect(
+      page.getByTestId('available-stars').getByText('10', { exact: true })
+    ).toBeVisible();
 
     const text = (await page.getByTestId('reward-store').textContent()) ?? '';
     expect(text).not.toMatch(/[-−]\s*\d/);
@@ -212,7 +216,7 @@ test.describe('the star chart', () => {
       return id;
     });
 
-    await page.goto(`/nl/hub/stars/${mila.id}`);
+    await page.goto(`/nl/stars/${mila.id}`);
 
     // Earned stayed at 10 through a redemption that moved available to 2.
     await expect(page.getByTestId('earned-stars')).toHaveText('10');
@@ -240,7 +244,7 @@ test.describe('the star chart', () => {
       ]);
     });
 
-    await page.goto(`/nl/hub/stars/${mila.id}`);
+    await page.goto(`/nl/stars/${mila.id}`);
 
     const badge = page.getByTestId('graduation-badge');
     await expect(badge).toHaveCount(1);
@@ -257,7 +261,7 @@ test.describe('the parent catalogue', () => {
       ]);
     });
 
-    await page.goto('/nl/rewards');
+    await page.goto('/nl/manage/rewards');
     // The catalogue is the second tab since wave D2; the queue opens first,
     // because it is the only one of the three where somebody is waiting.
     await page.getByTestId('rewards-tab-catalogue').click();
@@ -278,7 +282,7 @@ test.describe('the parent catalogue', () => {
   test('a parent hands out a surprise star, and cannot take one away', async ({ page, family }) => {
     const { mila } = await seedShelf(family.familyId);
 
-    await page.goto('/nl/rewards');
+    await page.goto('/nl/manage/rewards');
     await page.getByTestId('award-stars-trigger').click();
 
     // A stepper, not a number field, and it starts at one: two taps to three.

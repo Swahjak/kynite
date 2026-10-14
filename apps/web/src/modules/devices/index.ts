@@ -69,6 +69,7 @@ export {
 export { loadDevicesPage, type DevicesPageData } from './page-data';
 
 export { requireHubDevice } from './hub-gate';
+export { requireManager, requireMemberOrDevice } from './member-or-device-gate';
 
 export { DeviceList } from './ui/device-list';
 export { PairCodeForm } from './ui/pair-code-form';

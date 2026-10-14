@@ -11,11 +11,13 @@ import {
 } from '@/modules/calendar';
 import {
   MEMBER_COLOR_CLASSES,
+  getPrincipal,
   greetingSlotFor,
   hourIn,
   initialsOf,
   type GreetingSlot,
 } from '@/modules/family';
+import { getSurface, presentationFor } from '@/modules/surface';
 import { instantAt, loadFamilyRoutineTotals } from '@/modules/routines';
 import { loadTodayTasks, type TodayTasksData } from '@/modules/tasks';
 import { getFamilyWeather, type WeatherView } from '@/modules/weather';
@@ -95,16 +97,25 @@ export async function loadHubBoardComposition(options: {
    */
   time?: string;
   /**
-   * `?view=` (`/hub/kalender` only) — `loadCalendarPage` still wins with the
-   * family's `hubDefaultView` when this is absent, exactly as
-   * `page-data.ts`'s own comment describes.
+   * `?view=` — wins everywhere. Absent, the `hub` and `desktop` surfaces get the
+   * family's `hubDefaultView` and the `app` surface the day view.
    */
   view?: string;
   include?: HubBoardCompositionInclude;
 }): Promise<HubBoardComposition | null> {
   const include = options.include ?? {};
 
-  const data = await loadCalendarPage({ date: options.date, view: options.view, surface: 'hub' });
+  // Two independent questions. Privacy follows the principal: only a paired
+  // device is the ambient wall display that shows private events busy-only; a
+  // signed-in member sees her own detail. Default view and fetch window follow
+  // the D17 surface: `hub`/`desktop` take the family's `hubDefaultView`, `app` the day view.
+  const principal = await getPrincipal();
+  const data = await loadCalendarPage({
+    date: options.date,
+    view: options.view,
+    surface: presentationFor(await getSurface()),
+    busyOnlyPrivate: principal?.kind === 'device',
+  });
   if (!data) return null;
 
   const pinned =

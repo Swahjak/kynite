@@ -181,7 +181,7 @@ test.describe('kiosk layout audit', { tag: '@heavy' }, () => {
     family,
   }) => {
     await pairHub(page, family.familyId);
-    await page.goto('/nl/hub');
+    await page.goto('/nl/today');
 
     // The hub tree overrides the parent app's manifest (§6: two installable
     // surfaces, one service worker).
@@ -191,8 +191,8 @@ test.describe('kiosk layout audit', { tag: '@heavy' }, () => {
     const manifest = await page.request.get('/hub.webmanifest').then((r) => r.json());
     expect(manifest.display).toBe('fullscreen');
     expect(manifest.display_override).toContain('fullscreen');
-    expect(manifest.scope).toBe('/nl/hub');
-    expect(manifest.start_url).toBe('/nl/hub');
+    expect(manifest.scope).toBe('/nl/');
+    expect(manifest.start_url).toBe('/nl/today');
     // Landscape: a wall tablet is mounted, and a board that rotates is a board
     // that is briefly unreadable.
     expect(manifest.orientation).toBe('landscape');
@@ -236,7 +236,7 @@ test.describe('kiosk layout audit', { tag: '@heavy' }, () => {
       'hub type inflation removed 2026-09-15 pending a new legibility floor — docs/plans/2026-09-15-routines-page-density.md'
     );
     await pairHub(page, family.familyId);
-    await page.goto('/nl/hub');
+    await page.goto('/nl/today');
     await expect(page.getByTestId('hub-board')).toBeVisible();
 
     // Measured on an element carrying the design system's own body class, not
@@ -271,20 +271,20 @@ test.describe('kiosk layout audit', { tag: '@heavy' }, () => {
   });
 
   for (const surface of [
-    { name: 'ambient board', path: () => '/nl/hub' },
+    { name: 'ambient board', path: () => '/nl/today' },
     // M-R1: real rail destinations, not tabs of the ambient board.
-    { name: 'kalender', path: () => '/nl/hub/kalender' },
-    { name: 'taken board', path: () => '/nl/hub/taken' },
+    { name: 'kalender', path: () => '/nl/calendar' },
+    { name: 'taken board', path: () => '/nl/tasks' },
     // M3 of the 2026-09-14 plan: the family-wide "Actieve routines" page,
     // which replaced the redirect this path used to serve.
-    { name: 'routines overview', path: () => '/nl/hub/routines' },
-    { name: 'store', path: () => '/nl/hub/store' },
-    { name: 'timers', path: () => '/nl/hub/timers' },
+    { name: 'routines overview', path: () => '/nl/routines' },
+    { name: 'store', path: () => '/nl/store' },
+    { name: 'timers', path: () => '/nl/timers' },
     // M-T2: the fullscreen watch screen. No timer is seeded for this suite,
     // so it renders its own empty state — still worth auditing, since that
     // dead end is what most visits to a cold hub will actually see.
-    { name: 'fullscreen timer', path: () => '/nl/hub/timer' },
-    { name: 'pair screen', path: () => '/nl/hub/pair', unpaired: true },
+    { name: 'fullscreen timer', path: () => '/nl/timer' },
+    { name: 'pair screen', path: () => '/nl/pair', unpaired: true },
   ]) {
     test(`typesets nothing below ${MIN_TEXT_PX}px on the ${surface.name}`, async ({
       page,
@@ -324,7 +324,7 @@ test.describe('kiosk layout audit', { tag: '@heavy' }, () => {
     family,
   }) => {
     await pairHub(page, family.familyId);
-    await page.goto('/nl/hub');
+    await page.goto('/nl/today');
 
     await page.getByTestId('hub-settings-trigger').click();
     await expect(page.getByTestId('hub-settings')).toBeVisible();
@@ -340,7 +340,7 @@ test.describe('kiosk layout audit', { tag: '@heavy' }, () => {
     await pairHub(page, family.familyId);
 
     await page.emulateMedia({ colorScheme: 'dark' });
-    await page.goto('/nl/hub');
+    await page.goto('/nl/today');
     await expect(page.getByTestId('kiosk-shell')).toHaveAttribute('data-hub-theme', 'dark');
     const dark = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
 
@@ -361,7 +361,7 @@ test.describe('kiosk layout audit', { tag: '@heavy' }, () => {
 
     await pairHub(page, family.familyId);
 
-    for (const path of [`/nl/hub/routines/${mila.id}`, `/nl/hub/store?member=${mila.id}`]) {
+    for (const path of [`/nl/routines/${mila.id}`, `/nl/store?member=${mila.id}`]) {
       await page.goto(path);
       await page.waitForFunction(() => document.fonts.status === 'loaded');
 

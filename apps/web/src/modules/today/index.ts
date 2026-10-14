@@ -43,13 +43,7 @@ export {
 
 export { resolveTodayTheme, type ResolveTodayThemeInput, type TodayTheme } from './domain/theme';
 
-export {
-  resolveStepIcon,
-  starMatrixRows,
-  type StarMatrixMember,
-  type StarMatrixRow,
-  type StarMatrixStep,
-} from './domain/star-matrix';
+export { resolveStepIcon, type StarMatrixStep } from './domain/star-matrix';
 
 export { loadTodayProgress, type KidProgress, type TodayProgressData } from './page-data';
 export {
@@ -66,8 +60,6 @@ export {
   type RoutinesBoardData,
 } from './page-data-board';
 
-export { StarMatrix, type StarMatrixColumn, type StarMatrixProps } from './ui/star-matrix';
-
 export { KidStatCard, type KidStatCardProps } from './ui/kid-stat-card';
 export { MemberFaces, joinNames, namesOf, participantsOf } from './ui/member-faces';
 export { TodayClock, type TodayClockProps } from './ui/today-clock';
@@ -79,17 +71,6 @@ export { TodayTimeline, type TodayTimelineProps } from './ui/today-timeline';
 export { TodayFab, type TodayFabProps } from './ui/today-fab';
 export { TodayNowStrip, type TodayNowStripProps } from './ui/today-now-strip';
 export { TodayTabDag, type TodayTabDagProps } from './ui/today-tab-dag';
-export { TodayTabPersonen, type TodayTabPersonenProps } from './ui/today-tab-personen';
 export { TodayTabRoutines, type TodayTabRoutinesProps } from './ui/today-tab-routines';
 export { RoutinesBoard, type RoutinesBoardProps } from './ui/routines-board';
 export { RoutinesPageBoard, type RoutinesPageBoardProps } from './ui/routines-page-board';
-export { TodayTabSterren, type TodayTabSterrenProps } from './ui/today-tab-sterren';
-export { TodayTabs, type TodayTabsProps } from './ui/today-tabs';
-export {
-  DEFAULT_TODAY_TAB,
-  TODAY_TABS,
-  TODAY_TAB_STORAGE_KEY,
-  parseTodayTab,
-  useTodayTab,
-  type TodayTab,
-} from './ui/use-today-tab';

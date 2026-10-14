@@ -14,13 +14,18 @@ import { IconMedallion } from './icon-medallion';
  *
  * `surface="hub"` is the wall-display variant: no icon tile, display-scale
  * title, and a slot on the right for the clock.
+ * `leading` renders before the icon/title, for something like a back link.
+ * `meta` renders inline next to the title itself — chips or badges, never a
+ * heading or a landmark — not stacked with the subtitle below it.
  */
 export function PageHeader({
   icon,
   iconTint = 'brand',
   iconFilled = false,
+  leading,
   title,
   subtitle,
+  meta,
   action,
   surface = 'app',
   className,
@@ -29,8 +34,10 @@ export function PageHeader({
   icon?: IconName;
   iconTint?: React.ComponentProps<typeof IconMedallion>['tint'];
   iconFilled?: boolean;
+  leading?: React.ReactNode;
   title: React.ReactNode;
   subtitle?: React.ReactNode;
+  meta?: React.ReactNode;
   /** Buttons, a clock, a dialog trigger — anything right-aligned. */
   action?: React.ReactNode;
   surface?: 'app' | 'hub';
@@ -45,6 +52,7 @@ export function PageHeader({
       {...props}
     >
       <div className="flex min-w-0 items-center gap-4">
+        {leading}
         {icon && !hub ? (
           <IconMedallion
             icon={icon}
@@ -56,11 +64,14 @@ export function PageHeader({
           />
         ) : null}
         <div className="min-w-0">
-          <h1
-            className={cn('font-display font-bold text-ink', hub ? 'text-display-md' : 'text-h1')}
-          >
-            {title}
-          </h1>
+          <div className="flex flex-wrap items-center gap-3">
+            <h1
+              className={cn('font-display font-bold text-ink', hub ? 'text-display-md' : 'text-h1')}
+            >
+              {title}
+            </h1>
+            {meta}
+          </div>
           {subtitle ? (
             <p className={cn('text-ink-secondary', hub ? 'text-body-lg' : 'text-body-sm')}>
               {subtitle}

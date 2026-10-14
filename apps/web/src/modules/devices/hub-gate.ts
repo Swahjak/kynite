@@ -4,7 +4,8 @@ import { locales, routing } from '@/i18n/routing';
 import { getFamily, getPrincipal, type Principal } from '@/modules/family';
 
 /**
- * The `(hub)` tree's authorization gate (M12).
+ * The device-only authorization gate (M12): the `(clock)` page, and the device
+ * branch of the `(main)` tree.
  *
  * Called at the top of every hub page rather than once in the layout, and that
  * is deliberate: Next.js layouts are not re-rendered on client-side
@@ -19,14 +20,14 @@ import { getFamily, getPrincipal, type Principal } from '@/modules/family';
  *    revoked (`getPrincipal()` joins `revoked_at is null`, so revocation lands
  *    on the very next request). It goes to the pair screen, which is the only
  *    thing it can usefully do.
- *  - **a member principal** — a signed-in parent who typed `/hub`. They are
+ *  - **a member principal** — a signed-in parent who opened a device-only URL. They are
  *    sent to their own surface instead. Showing them the board would mean an
  *    owner-level session rendering the kiosk, which is exactly the state M12
  *    exists to end (§7: "a wall tablet is physically unauthenticated").
  */
 export async function requireHubDevice(
   locale: string,
-  href = '/hub',
+  href = '/today',
   searchParams?: URLSearchParams | Record<string, string | undefined>
 ): Promise<Principal> {
   const principal = await getPrincipal();
@@ -38,7 +39,7 @@ export async function requireHubDevice(
      * `family.locale` is the *household* setting — it already decides what
      * language a push notification is written in (`notifications/copy.ts`) —
      * and a kiosk is the one surface with no person behind it to hold a
-     * preference of their own. A tablet paired at `/nl/hub` in a family that
+     * preference of their own. A tablet paired at `/nl/today` in a family that
      * later switches to English would otherwise keep rendering Dutch forever,
      * because nothing on a wall navigates.
      *
@@ -75,7 +76,7 @@ export async function requireHubDevice(
   }
 
   if (principal?.kind === 'member') redirect({ href: '/today', locale });
-  redirect({ href: '/hub/pair', locale });
+  redirect({ href: '/pair', locale });
 
   // `redirect()` throws; next-intl's wrapper is not typed `never`.
   throw new Error('unreachable');

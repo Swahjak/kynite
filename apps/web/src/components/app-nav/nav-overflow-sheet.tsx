@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
 import { Icon } from '@kynite/ui';
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { OVERFLOW_NAV, isActiveHref, type NavLabels } from './nav-items';
+import { isActiveHref, type NavItem, type NavLabels } from './nav-items';
 
 /**
  * The "More" sheet, shared by the desktop rail and the mobile bottom bar.
@@ -13,23 +13,27 @@ import { OVERFLOW_NAV, isActiveHref, type NavLabels } from './nav-items';
  * Both surfaces open the *same* list, which is the point: a destination that is
  * one tap away on a phone must not be unreachable on a laptop. The trigger is
  * supplied by the caller because the two chrome shapes style it completely
- * differently — a 56px rail tile vs. a bottom-bar tab — while the sheet itself,
+ * differently — a 52px rail tile vs. a bottom-bar tab — while the sheet itself,
  * its ordering and its active state are identical.
+ *
+ * The destinations are data (`items`), handed in by the layout through the
+ * shell, so a surface never hardcodes which routes it can reach.
  */
 export function NavOverflowSheet({
   labels,
+  items,
   renderTrigger,
   footer,
 }: {
   labels: NavLabels;
+  items: readonly NavItem[];
   renderTrigger: (props: { onClick: () => void; active: boolean }) => ReactNode;
-  /** M21: the phone's account block, at the very bottom of the list. The rail
-   *  passes nothing — it carries its own avatar tile instead. */
+  /** M21: the phone's account block, at the very bottom of the list. */
   footer?: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
-  const active = OVERFLOW_NAV.some((item) => isActiveHref(pathname, item.href));
+  const active = items.some((item) => isActiveHref(pathname, item.href));
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -39,9 +43,11 @@ export function NavOverflowSheet({
           <SheetTitle>{labels.more}</SheetTitle>
         </SheetHeader>
         <div className="flex flex-col gap-1 p-4 pt-0">
-          {OVERFLOW_NAV.map(({ href, label, icon }) => (
+          {items.map(({ href, label, icon }) => (
             <SheetClose
               key={href}
+              nativeButton={false}
+              role="link"
               render={
                 <Link
                   href={href}

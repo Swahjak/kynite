@@ -5,7 +5,7 @@
  *
  * This barrel re-exports the slice's Server Actions and the client components
  * that call them, which is what every other slice's barrel does and what
- * `(app)/settings/sharing` needs. The `(share)` route tree may import **zero**
+ * `(app)/manage/settings/sharing` needs. The `(share)` route tree may import **zero**
  * Server Actions, transitively, so it does *not* import this file: it imports
  * `@/modules/sharing/view`, the action-free entry point, which this barrel
  * re-exports from. The dependency runs one way only — `./view` never imports

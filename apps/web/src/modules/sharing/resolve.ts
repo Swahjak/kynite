@@ -58,7 +58,7 @@ export type ShareResolution =
  * same thing for all three. Telling an anonymous holder of a wrong token that
  * it "expired" would confirm the token was once real, which is a probe result
  * a stranger has no business getting. Parents see the true state — in
- * `(app)/settings/sharing`, where they are authenticated.
+ * `(app)/manage/settings/sharing`, where they are authenticated.
  */
 export const resolveShareLink = cache(async (rawToken: string): Promise<ShareResolution> => {
   if (!isShareTokenShaped(rawToken)) return { status: 'notFound' };

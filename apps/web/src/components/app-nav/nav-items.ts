@@ -1,14 +1,12 @@
 import type { IconName } from '@kynite/ui';
 
 /**
- * The parent app's navigation, as data.
+ * The shared navigation, as data (D16, docs/plans/2026-09-15-hub-equals-app.md).
  *
- * One table, three renderings: the desktop icon rail, the mobile bottom bar and
- * the overflow sheet both of them open. Before M19 the same ten destinations
- * were spelled out twice — once as flat `<Link>`s in `(app)/layout.tsx`, once
- * as a lucide-icon array in `mobile-nav.tsx` — and the two had already drifted
- * (the header carried no icons at all). Keeping the set here means a route can
- * only be added or removed in one place.
+ * One table, three renderings: the desktop/hub icon rail, the mobile bottom
+ * bar and the "Meer" sheet the bottom bar opens. The same destination set is
+ * spelled out once, so a route can only be added or removed in one place —
+ * whichever surface a request renders as.
  *
  * Labels stay in `messages/*.json` under `nav.*`; this table carries the *key*,
  * because next-intl resolves messages on the surface that renders them.
@@ -18,19 +16,25 @@ import type { IconName } from '@kynite/ui';
 export type NavLabels = {
   today: string;
   calendar: string;
+  /** "Taken" — the household task board (`/tasks`). */
+  tasks: string;
+  /** "Sterren" — the child's reward shelf (`/store`). */
+  stars: string;
   routines: string;
+  /** "Actieve routines" — the check-in board, the "Meer" sheet's own name for `/routines`. */
+  activeRoutines: string;
   rewards: string;
   settings: string;
   timers: string;
+  /** "Beheer" — the `/manage` index, shown only to a principal that may manage. */
+  manage: string;
   family: string;
   notifications: string;
   devices: string;
   sharing: string;
-  /** The overflow trigger and its sheet's title — distinct from `settings`,
-   *  which is only one of the destinations the sheet opens onto. */
+  /** The overflow trigger and its sheet's title. */
   more: string;
-  /** The `<nav>` landmark's accessible name — a screen reader announcing
-   *  "Settings, navigation" for the whole bottom bar was never right. */
+  /** The `<nav>` landmark's accessible name. */
   mainNavigation: string;
   /** `common.appName` — the rail's logo tile and its accessible name. */
   appName: string;
@@ -45,15 +49,14 @@ export type NavItem = {
 };
 
 /**
- * The four destinations a parent reaches for daily. These are the mobile bottom
- * bar's tabs and the top of the desktop rail, in the same order on both, so
- * muscle memory survives a change of device.
+ * The four destinations a family reaches for daily — the mobile bottom bar's
+ * tabs, in the order the Kalender mockup lays them out (`Kalender.dc.html`).
  */
 export const PRIMARY_NAV: readonly NavItem[] = [
   { href: '/today', label: 'today', icon: 'home' },
   { href: '/calendar', label: 'calendar', icon: 'calendar_month' },
-  { href: '/routines', label: 'routines', icon: 'checklist' },
-  { href: '/rewards', label: 'rewards', icon: 'star' },
+  { href: '/tasks', label: 'tasks', icon: 'checklist' },
+  { href: '/store', label: 'stars', icon: 'star' },
 ] as const;
 
 /**
@@ -62,31 +65,51 @@ export const PRIMARY_NAV: readonly NavItem[] = [
  */
 export const RAIL_NAV: readonly NavItem[] = [
   ...PRIMARY_NAV,
+  { href: '/routines', label: 'routines', icon: 'restart_alt' },
   { href: '/timers', label: 'timers', icon: 'timer' },
-  { href: '/family', label: 'family', icon: 'group' },
 ] as const;
 
 /**
- * Everything behind the "More" trigger — identical on the rail and the bottom
- * bar, so no destination is reachable on one device and not the other.
- *
- * M16 put a settings *hub* in front of the last three; they stay listed anyway
- * because each is a flow of its own and both nav shapes have pointed at them
- * since M11–M13 (an e2e test navigates to Google settings through this sheet).
+ * The device (kiosk) rail, in the old hub rail's order and without Timers. The kiosk draws its own
+ * conditional `RailTimerTile` (a live countdown when one runs), so a static
+ * Timers tile would be a duplicate — the pre-merge hub rail dropped it too.
+ */
+export const DEVICE_RAIL_NAV: readonly NavItem[] = [
+  { href: '/today', label: 'today', icon: 'calendar_month' },
+  { href: '/calendar', label: 'calendar', icon: 'view_column' },
+  { href: '/routines', label: 'routines', icon: 'restart_alt' },
+  { href: '/tasks', label: 'tasks', icon: 'checklist' },
+  // `bar_chart`: the tile is "Sterren", and the glyph follows the label.
+  { href: '/store', label: 'stars', icon: 'bar_chart' },
+] as const;
+
+/**
+ * Everything behind the "More" trigger — the everyday surfaces a bottom bar
+ * cannot fit (`/routines`, `/timers`), then Beheer (`/manage`). The Beheer
+ * entry is gated on a capability, not a surface: the layouts filter it out for
+ * a principal that may not manage, so a child, a caregiver or a device never
+ * sees it (D16).
  */
 export const OVERFLOW_NAV: readonly NavItem[] = [
+  { href: '/routines', label: 'activeRoutines', icon: 'restart_alt' },
   { href: '/timers', label: 'timers', icon: 'timer' },
-  { href: '/family', label: 'family', icon: 'group' },
-  { href: '/settings', label: 'settings', icon: 'settings' },
-  { href: '/settings/notifications', label: 'notifications', icon: 'notifications' },
-  { href: '/settings/devices', label: 'devices', icon: 'tablet_mac' },
-  { href: '/settings/sharing', label: 'sharing', icon: 'share' },
+  { href: '/manage', label: 'manage', icon: 'settings' },
 ] as const;
 
 /** Pinned to the bottom of the rail, per the stitch mockups. */
 export const RAIL_FOOTER_NAV: readonly NavItem[] = [
-  { href: '/settings', label: 'settings', icon: 'settings' },
+  { href: '/manage', label: 'manage', icon: 'settings' },
 ] as const;
+
+/**
+ * Drop the Beheer entry for a principal that may not manage. The layouts call
+ * this with the capability answer they resolve from the principal (`can()`);
+ * the device branch never sees either list at all, because it renders the
+ * rail from `RAIL_NAV` alone.
+ */
+export function withoutManage(items: readonly NavItem[]): readonly NavItem[] {
+  return items.filter((item) => item.href !== '/manage');
+}
 
 /**
  * Segment-aware active match: `pathname` carries the locale prefix

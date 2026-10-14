@@ -14,7 +14,7 @@ import { createSerwistRoute } from '@serwist/turbopack';
  *
  * The handler sets `Service-Worker-Allowed: /` on its responses, which is what
  * lets a worker served from `/serwist/sw.js` claim the whole origin — both
- * `(hub)` and `(app)` (§6: one worker, two surfaces).
+ * the shared tree and the member sections (§6: one worker, path-aware rules).
  *
  * `src/proxy.ts` never sees these URLs: its matcher excludes anything with a
  * file extension, and `/serwist/sw.js` has one.
@@ -27,7 +27,7 @@ export const { dynamic, dynamicParams, revalidate, generateStaticParams, GET } =
     // a cold `next build`.
     useNativeEsbuild: true,
     // The precache manifest. `public/` art and the built app shell; the hub
-    // document itself is cached at runtime (`StaleWhileRevalidate`) because it
+    // document itself is cached at runtime (`NetworkFirst`, 2s timeout) because it
     // is server-rendered per family and cannot be precached usefully.
     globDirectory: '.',
     globPatterns: [

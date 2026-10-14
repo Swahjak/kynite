@@ -34,10 +34,15 @@ export function HubTimerEmptyState() {
         description={t('emptyBody')}
         action={
           <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
-            <Button variant="outline" size="hub" render={<Link href="/hub" />} nativeButton={false}>
+            <Button
+              variant="outline"
+              size="hub"
+              render={<Link href="/today" />}
+              nativeButton={false}
+            >
               {t('backToBoard')}
             </Button>
-            <Button size="hub" render={<Link href="/hub/timers" />} nativeButton={false}>
+            <Button size="hub" render={<Link href="/timers" />} nativeButton={false}>
               {t('startOne')}
             </Button>
           </div>

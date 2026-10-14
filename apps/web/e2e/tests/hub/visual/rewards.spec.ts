@@ -12,8 +12,8 @@ import {
 import { settlePage } from '@e2e/utils/settle';
 
 /**
- * Visual regression for the reward surfaces, at the hub tablet (1280×800) and a
- * phone (390×844).
+ * Visual regression for the reward surfaces, at the hub tablet (1280×800)
+ * (the phone is the `app` project's job).
  *
  * The acceptance criterion these shots exist for is the age split: `instant`
  * (ages ~4–7) must render an icon-heavy, minimal-text store, and `savings`
@@ -35,7 +35,6 @@ import { settlePage } from '@e2e/utils/settle';
 
 const VIEWPORTS = {
   tablet: { width: 1280, height: 800 },
-  mobile: { width: 390, height: 844 },
 } as const;
 
 /** A fixed Wednesday. */
@@ -145,7 +144,6 @@ async function seedShelf(familyId: string, scope: string, horizon: 'instant' | '
 /** A distinct scope per (test, viewport) pair — fixed ids are globally unique. */
 const SCOPE: Record<string, Record<string, string>> = {
   tablet: { storeInstant: '1a', storeSavings: '1b', chartInstant: '1c', chartSavings: '1d' },
-  mobile: { storeInstant: '2a', storeSavings: '2b', chartInstant: '2c', chartSavings: '2d' },
 };
 
 for (const [name, viewport] of Object.entries(VIEWPORTS)) {
@@ -159,7 +157,7 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
 
       const { mila } = await seedShelf(family.familyId, SCOPE[name].storeInstant, 'instant');
 
-      await page.goto(`/nl/hub/store?member=${mila.id}&date=${ANCHOR}`);
+      await page.goto(`/nl/store?member=${mila.id}&date=${ANCHOR}`);
       await expect(page.getByTestId('reward-store')).toHaveAttribute('data-horizon', 'instant');
       // Icon-first and minimal-text: no goal card exists on this tier at all.
       await expect(page.getByTestId('savings-goal')).toHaveCount(0);
@@ -175,7 +173,7 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
 
       const { mila } = await seedShelf(family.familyId, SCOPE[name].storeSavings, 'savings');
 
-      await page.goto(`/nl/hub/store?member=${mila.id}&date=${ANCHOR}`);
+      await page.goto(`/nl/store?member=${mila.id}&date=${ANCHOR}`);
       await expect(page.getByTestId('reward-store')).toHaveAttribute('data-horizon', 'savings');
       // The featured goal: the nearest thing still out of reach (20, not 30).
       await expect(page.getByTestId('savings-goal')).toBeVisible();
@@ -194,7 +192,7 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
 
       const { mila } = await seedShelf(family.familyId, SCOPE[name].chartInstant, 'instant');
 
-      await page.goto(`/nl/hub/stars/${mila.id}?date=${ANCHOR}`);
+      await page.goto(`/nl/stars/${mila.id}?date=${ANCHOR}`);
       await expect(page.getByTestId('star-chart')).toHaveAttribute('data-horizon', 'instant');
       // The cumulative total is the whole metric on this tier; no week chart.
       await expect(page.getByTestId('earned-stars')).toHaveText('12');
@@ -211,7 +209,7 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
 
       const { mila } = await seedShelf(family.familyId, SCOPE[name].chartSavings, 'savings');
 
-      await page.goto(`/nl/hub/stars/${mila.id}?date=${ANCHOR}`);
+      await page.goto(`/nl/stars/${mila.id}?date=${ANCHOR}`);
       await expect(page.getByTestId('star-chart')).toHaveAttribute('data-horizon', 'savings');
       // Weekly totals: seven bars, zeros included, plus the week's sum.
       await expect(page.getByTestId('week-bar')).toHaveCount(7);

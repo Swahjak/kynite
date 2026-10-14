@@ -233,7 +233,10 @@ export async function signUpAction(
     return failure(signUpErrorKey(error));
   }
 
-  redirect({ href: '/family', locale: await getLocale() });
+  // First run of a brand-new owner: the roster is where the household gets its
+  // children, so this one landing stays `/manage/family` (every later sign-in
+  // lands on `/today`).
+  redirect({ href: '/manage/family', locale: await getLocale() });
   // `redirect()` throws — unreachable, but the signature must stay total.
   return idleState;
 }
@@ -271,7 +274,7 @@ export async function signInAction(
   const callbackUrl = sanitizeCallbackUrl(read(formData, 'callbackUrl'));
 
   redirect({
-    href: callbackUrl ? withoutLocalePrefix(callbackUrl) : '/family',
+    href: callbackUrl ? withoutLocalePrefix(callbackUrl) : '/today',
     locale: await getLocale(),
   });
   // `redirect()` throws — unreachable, but the signature must stay total.
@@ -298,11 +301,11 @@ function asExternalUrl(url: string): `${string}:${string}` {
 
 function socialCallbackUrls(locale: string, callbackUrl: string | null) {
   return {
-    callbackURL: callbackUrl ?? `/${locale}/family`,
+    callbackURL: callbackUrl ?? `/${locale}/today`,
     // A Google user is new the instant the callback creates their `user` row,
     // and at that instant they have no household — `session.create.before` in
     // `server/auth.ts` found no member to scope the session with. Sending them
-    // to `/family` would bounce them straight back to the sign-in form they
+    // to `/today` would bounce them straight back to the sign-in form they
     // just came from, so first-run goes to onboarding instead.
     newUserCallbackURL: `/${locale}/onboarding`,
     errorCallbackURL: `/${locale}/sign-in`,
@@ -489,7 +492,7 @@ export async function createFamilyForSocialUserAction(
   // and this is a success, not an error. Outside the `try` because `redirect()`
   // signals by throwing, which the catch above would otherwise swallow.
   if (alreadyOnboarded) {
-    redirect({ href: '/family', locale });
+    redirect({ href: '/today', locale });
     return idleState;
   }
 
@@ -500,7 +503,7 @@ export async function createFamilyForSocialUserAction(
    * F3: a failure here used to be swallowed. It cannot be. The whole point of
    * this step is that the *old* cookie stops being presented — if it survives,
    * the browser keeps a session that resolves to no principal forever and the
-   * user rides /onboarding → /family → /sign-in → /onboarding in a circle. The
+   * user rides /onboarding → /today → /sign-in → /onboarding in a circle. The
    * household stands (it is committed), so the honest report is "you are done,
    * sign in again", which is what `onboardingSignOutFailed` says.
    */
@@ -521,7 +524,7 @@ export async function createFamilyForSocialUserAction(
         // shared default). `loginHint` is a hint, not a constraint — Google may
         // still show the account chooser, and the account that comes back may be
         // a genuinely new one. That account has no household, so sending it to
-        // `/family` would strand it on a page it cannot pass; `/onboarding` is
+        // `/today` would strand it on a page it cannot pass; `/onboarding` is
         // where a user with no member row belongs, whichever trip created them.
         loginHint: session.user.email,
         disableRedirect: true,
@@ -561,7 +564,7 @@ export async function createMemberAction(
   if (!parsed.success) return failure('invalidInput');
 
   const result = await createMember(principal, parsed.data);
-  revalidatePath(`/${await getLocale()}/family`);
+  revalidatePath(`/${await getLocale()}/manage/family`);
   return result;
 }
 
@@ -577,7 +580,7 @@ export async function updateMemberAction(
   if (!parsed.success) return failure('invalidInput');
 
   const result = await updateMember(principal, { ...parsed.data, memberId });
-  revalidatePath(`/${await getLocale()}/family`);
+  revalidatePath(`/${await getLocale()}/manage/family`);
   return result;
 }
 
@@ -590,7 +593,7 @@ export async function deleteMemberAction(
   if (!principal) return failure('forbidden');
 
   const result = await deleteMember(principal, { memberId });
-  revalidatePath(`/${await getLocale()}/family`);
+  revalidatePath(`/${await getLocale()}/manage/family`);
   return result;
 }
 
@@ -607,8 +610,8 @@ export async function reorderMemberAction(
   if (direction !== 'up' && direction !== 'down') return failure('invalidInput');
 
   const result = await reorderMember(principal, { memberId, direction });
-  revalidatePath(`/${await getLocale()}/family`);
-  revalidatePath(`/${await getLocale()}/settings`);
+  revalidatePath(`/${await getLocale()}/manage/family`);
+  revalidatePath(`/${await getLocale()}/manage/settings`);
   return result;
 }
 
@@ -778,8 +781,8 @@ export async function deleteFamilyAction(
 /** Every parent-app surface that renders a household setting. */
 async function revalidateSettings(): Promise<void> {
   const locale = await getLocale();
-  revalidatePath(`/${locale}/settings`);
-  revalidatePath(`/${locale}/family`);
+  revalidatePath(`/${locale}/manage/settings`);
+  revalidatePath(`/${locale}/manage/family`);
 }
 
 /* ---------------------------------------------------------------------------
@@ -860,7 +863,7 @@ export async function createInviteAction(input: CreateInviteInput): Promise<Crea
 
   if (!minted) return createInviteFailure('memberNotInvitable');
 
-  revalidatePath(`/${await getLocale()}/family`);
+  revalidatePath(`/${await getLocale()}/manage/family`);
 
   return {
     status: 'created',
@@ -880,7 +883,7 @@ export async function revokeInviteAction(input: { inviteId: string }): Promise<A
   const revoked = await revokeInvite(principal.familyId, parsed.data.inviteId);
   if (!revoked) return failure('inviteNotFound');
 
-  revalidatePath(`/${await getLocale()}/family`);
+  revalidatePath(`/${await getLocale()}/manage/family`);
   return idleState;
 }
 
@@ -1119,7 +1122,7 @@ export async function chooseProfileAction(
   }
 
   const locale = await getLocale();
-  revalidatePath(`/${locale}/family`);
+  revalidatePath(`/${locale}/manage/family`);
 
   if (hasInviteToken) {
     redirect({ href: `/invite/${token}`, locale });

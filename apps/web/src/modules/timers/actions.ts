@@ -56,10 +56,9 @@ export type { StartTimerInput } from './write';
 async function revalidateTimers(): Promise<void> {
   const locale = await getLocale();
   revalidatePath(`/${locale}/timers`);
-  revalidatePath(`/${locale}/hub`);
-  revalidatePath(`/${locale}/hub/timers`);
+  revalidatePath(`/${locale}/today`);
   // M-T2: the fullscreen watch screen.
-  revalidatePath(`/${locale}/hub/timer`);
+  revalidatePath(`/${locale}/timer`);
 }
 
 export async function startTimerAction(input: StartTimerInput): Promise<StartTimerState> {

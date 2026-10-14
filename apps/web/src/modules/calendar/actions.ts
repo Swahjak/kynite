@@ -58,7 +58,7 @@ async function revalidateCalendar(): Promise<void> {
   // wall display within §4's 2s budget; this revalidation is what keeps the
   // *server-rendered* surfaces of the editing device itself correct on the
   // next navigation. Both, not either.
-  for (const path of ['/calendar', '/today', '/hub']) {
+  for (const path of ['/calendar', '/today']) {
     revalidatePath(`/${locale}${path}`);
   }
 }
@@ -470,6 +470,6 @@ export async function setCalendarDisplayAction(
   });
 
   await revalidateCalendar();
-  revalidatePath(`/${await getLocale()}/settings`);
+  revalidatePath(`/${await getLocale()}/manage/settings`);
   return idleState;
 }

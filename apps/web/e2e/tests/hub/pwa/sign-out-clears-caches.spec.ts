@@ -56,7 +56,7 @@ test.describe('sign-out', () => {
     await pairHub(page, family.familyId);
 
     // The hub fills both the shell cache and the IndexedDB mirror...
-    await page.goto('/nl/hub');
+    await page.goto('/nl/today');
     await expect(page.getByTestId('hub-board')).toBeVisible();
     await page.evaluate(() => navigator.serviceWorker.ready);
     await expect
@@ -64,7 +64,7 @@ test.describe('sign-out', () => {
         timeout: 20_000,
       })
       .toBe(true);
-    await page.goto('/nl/hub');
+    await page.goto('/nl/today');
     await expect(page.getByTestId('hub-board')).toBeVisible();
 
     // ...and the parent app fills the page cache with a document that is
@@ -80,7 +80,7 @@ test.describe('sign-out', () => {
     // could pass on a device that never cached anything.
     await expect
       .poll(
-        async () => urlsIn(await cacheContents(page)).filter((url) => url.includes('/nl/hub')),
+        async () => urlsIn(await cacheContents(page)).filter((url) => url.includes('/nl/today')),
         {
           timeout: 20_000,
         }
@@ -99,7 +99,7 @@ test.describe('sign-out', () => {
 
     const remaining = urlsIn(await cacheContents(page));
     expect(remaining.filter((url) => url.includes('/nl/today'))).toHaveLength(0);
-    expect(remaining.filter((url) => url.includes('/nl/hub'))).toHaveLength(0);
+    expect(remaining.filter((url) => url.includes('/nl/today'))).toHaveLength(0);
 
     // Both hand-rolled stores are gone: the mirrored board, and the completion
     // outbox — a queued tap belongs to the person who made it and must never

@@ -27,33 +27,45 @@ const page = (url: string) => strategyFor({ url, destination: 'document', mode: 
 
 describe('service worker strategy', () => {
   describe('hub matching', () => {
-    it('recognises the hub in every locale and at every depth', () => {
+    it('recognises every shared-tree section in every locale and at every depth', () => {
+      expect(isHubUrl('/nl/today')).toBe(true);
+      expect(isHubUrl('/en/calendar')).toBe(true);
+      expect(isHubUrl('/nl/routines/abc-123')).toBe(true);
+      expect(isHubUrl('/en/stars/abc-123')).toBe(true);
+      expect(isHubUrl('/nl/pair')).toBe(true);
+      expect(isHubUrl('/nl/clock')).toBe(true);
+      expect(isHubUrl(new URL('https://kynite.test/nl/store'))).toBe(true);
+      // The pre-H3 kiosk URL, until the proxy redirect lands.
       expect(isHubUrl('/nl/hub')).toBe(true);
-      expect(isHubUrl('/en/hub')).toBe(true);
-      expect(isHubUrl('/nl/hub/timers')).toBe(true);
-      expect(isHubUrl('/en/hub/routines/abc-123')).toBe(true);
-      expect(isHubUrl(new URL('https://kynite.test/nl/hub/store'))).toBe(true);
+      expect(isHubUrl('/en/hub/timers')).toBe(true);
     });
 
-    it('does not treat a route that merely starts with the same letters as the hub', () => {
-      // The board and a hypothetical `/nl/hubbub` are different surfaces; a
-      // `startsWith('/nl/hub')` would have conflated them.
+    it('does not treat a route that merely starts with the same letters as a hub section', () => {
+      expect(isHubUrl('/nl/todays')).toBe(false);
       expect(isHubUrl('/nl/hubbub')).toBe(false);
-      expect(isHubUrl('/nl/today')).toBe(false);
+      expect(isHubUrl('/today')).toBe(false);
       expect(isHubUrl('/hub')).toBe(false);
+    });
+
+    it('leaves the member-only roots to the parent app', () => {
+      expect(isHubUrl('/nl/manage/settings/devices')).toBe(false);
+      expect(isHubUrl('/nl/account/notifications')).toBe(false);
+      expect(isHubUrl('/nl/oauth/consent')).toBe(false);
     });
   });
 
   describe('page requests', () => {
-    it('gives the hub its own shell strategy', () => {
+    it('gives the shared tree the hub shell strategy', () => {
+      expect(page('/nl/today')).toBe('hub-shell');
+      expect(page('/en/calendar')).toBe('hub-shell');
+      expect(page('/nl/pair')).toBe('hub-shell');
       expect(page('/nl/hub')).toBe('hub-shell');
-      expect(page('/en/hub/timers')).toBe('hub-shell');
     });
 
-    it('gives the parent app network-first', () => {
-      expect(page('/nl/today')).toBe('app-pages');
-      expect(page('/nl/calendar')).toBe('app-pages');
-      expect(page('/en/settings/notifications')).toBe('app-pages');
+    it('gives the member-only roots network-first', () => {
+      expect(page('/nl/manage/settings/devices')).toBe('app-pages');
+      expect(page('/nl/account/notifications')).toBe('app-pages');
+      expect(page('/en/manage/routines')).toBe('app-pages');
     });
 
     it('keeps mobile freshness at the three seconds §6 specifies', () => {
@@ -137,7 +149,7 @@ describe('service worker strategy', () => {
     });
 
     it('does not classify a page as an asset', () => {
-      expect(isImmutableAsset('/nl/hub')).toBe(false);
+      expect(isImmutableAsset('/nl/today')).toBe(false);
       expect(isImmutableAsset('/api/timers')).toBe(false);
     });
   });

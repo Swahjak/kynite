@@ -1,7 +1,7 @@
-import { NextResponse, type NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getSessionCookie } from 'better-auth/cookies';
 import createMiddleware from 'next-intl/middleware';
-import { CALLBACK_URL_PARAM, sanitizeCallbackUrl } from '@/lib/callback-url';
+import { CALLBACK_URL_PARAM, INTENDED_PATH_HEADER, sanitizeCallbackUrl } from '@/lib/callback-url';
 import { DEVICE_SESSION_COOKIE } from '@/lib/device-session';
 import { routing } from '@/i18n/routing';
 
@@ -9,28 +9,84 @@ import { routing } from '@/i18n/routing';
 const intl = createMiddleware(routing);
 
 /**
- * First URL segment (after the locale) of every `(app)` route: the parent PWA,
- * which requires an account session (docs/architecture.md §2).
+ * First URL segment (after the locale) of every member-only route — the
+ * `(app)` tree, which requires an account session (docs/architecture.md §2).
+ * `/manage` is H4's Beheer tree (index, routines, rewards, family, settings);
+ * `/account` is a member's own settings, open to every member.
  */
-const PROTECTED_SECTIONS = new Set([
-  'today',
-  'calendar',
-  'routines',
-  'rewards',
-  'family',
-  'settings',
+const MEMBER_SECTIONS = new Set([
+  'account',
   // M-C: `(app)/oauth/consent` — the MCP/OAuth-provider consent screen. The
   // layout guard is authoritative (same split as every other section here);
   // this is the same cheap early bounce.
   'oauth',
+  'manage',
 ]);
+
+/**
+ * First URL segment of every page on the one route tree (H3): a member *or* a
+ * paired device renders the same page, so a request needs one of the two
+ * cookies — an account session or a device session — and never neither. The
+ * authoritative gate is `requireMemberOrDevice()` in each page; this is the
+ * cheap early bounce for a request that carries no credential at all.
+ */
+const SHARED_SECTIONS = new Set([
+  'today',
+  'calendar',
+  'routines',
+  'tasks',
+  'store',
+  'stars',
+  'timers',
+  'timer',
+  // `/clock` is the device-only screensaver, but the same "either cookie"
+  // rule applies at this layer: a member with a session is let through and
+  // redirected on by the gate in the page itself.
+  'clock',
+]);
+
+/** Shared sections that only a paired device can use (`requireHubDevice`). */
+const DEVICE_ONLY_SECTIONS = new Set(['clock']);
 
 function isLocale(segment: string | undefined): segment is (typeof routing.locales)[number] {
   return routing.locales.includes(segment as (typeof routing.locales)[number]);
 }
 
-/** The kiosk tree's own first segment (M12). */
-const HUB_SECTION = 'hub';
+/**
+ * H3 (D12): every old `/hub/*` path permanently redirects to its twin on the
+ * unprefixed one tree, keyed by the segment that followed `/hub`; `/hub`
+ * itself falls back to `today`. `routines`/`stars` keep their `[memberId]`
+ * tail; the rest are plain renames. The Fully kiosk still opens `/hub`, so
+ * this runs before any cookie check — it is a URL rewrite, not an auth gate.
+ */
+const HUB_REDIRECTS: Record<string, string> = {
+  kalender: 'calendar',
+  routines: 'routines',
+  taken: 'tasks',
+  store: 'store',
+  stars: 'stars',
+  timers: 'timers',
+  timer: 'timer',
+  pair: 'pair',
+  clock: 'clock',
+};
+
+/**
+ * H4: the pre-Beheer `(app)` roots, permanently redirected to their new homes.
+ * `/settings/notifications` is a member's own push opt-in and went to
+ * `/account`; every other `/settings/**` page is household-wide and went under
+ * `/manage/settings`. Returns the new path (without locale) or `null` if the
+ * path is not a legacy one.
+ */
+function legacyAppRedirect(rest: readonly string[]): string | null {
+  const [section, sub, ...tail] = rest;
+  if (section === 'family' || section === 'rewards')
+    return `/manage/${[section, sub, ...tail].filter(Boolean).join('/')}`;
+  if (section !== 'settings') return null;
+  if (sub === 'notifications')
+    return `/account/notifications${tail.length ? `/${tail.join('/')}` : ''}`;
+  return `/manage/settings${sub ? `/${[sub, ...tail].join('/')}` : ''}`;
+}
 
 /** The caregiver share tree's first segment — `(share)/s/[token]` (M13). */
 const SHARE_SECTION = 's';
@@ -90,16 +146,48 @@ function noIndex(response: NextResponse): NextResponse {
 }
 
 /**
- * Optimistic guard: a missing session cookie is turned away here so the tree
- * behind it is never even rendered. Cookie *presence* is not proof of a
- * session — `(app)/layout.tsx` and `requireHubDevice()` re-check against the
- * database and are authoritative. Both checks exist because the cheap one
- * saves a render and the expensive one is the one that is true.
+ * Turns a credential-less request away to sign-in, carrying the intended URL.
+ * A stale device cookie is no reason to detour via `/today` and `/pair`: the
+ * callback would be lost. A *valid* paired device landing on sign-in is bounced
+ * on to `callbackUrl` by the sign-in page, and from `/manage` to `/today` by
+ * the `(app)` layout.
+ */
+function signInRedirect(request: NextRequest, locale: string) {
+  const url = request.nextUrl.clone();
+  const intended = `${request.nextUrl.pathname}${request.nextUrl.search}`;
+  url.pathname = `/${locale}/sign-in`;
+  // M18: the sign-in URL starts with an empty query — the intended URL's
+  // parameters have no business sitting loose on the sign-in form — and the
+  // whole intended destination, *query string included*, is then carried
+  // across inside `?callbackUrl=`. Preserving it is the point: a parent
+  // deep-linked to `/today?date=2026-08-14` has to land back on that day and
+  // not on today. It is re-validated as a relative path on the
+  // way out (`lib/callback-url.ts`), which is what keeps a value this proxy
+  // wrote and a value an attacker put in a link indistinguishable *and*
+  // harmless.
+  url.search = '';
+  const callbackUrl = sanitizeCallbackUrl(intended);
+  if (callbackUrl && callbackUrl !== `/${locale}/sign-in`) {
+    url.searchParams.set(CALLBACK_URL_PARAM, callbackUrl);
+  }
+  return noIndex(NextResponse.redirect(url));
+}
+
+/**
+ * Optimistic guard: a request with no credential is turned away here so the
+ * tree behind it is never even rendered. Cookie *presence* is not proof of a
+ * session — `requireMemberOrDevice()` and the `(app)`/`(clock)` gates re-check
+ * against the database and are authoritative. Both checks exist because the
+ * cheap one saves a render and the expensive one is the one that is true.
  *
- * The two trees are mirror images: `(app)` needs an *account* cookie and
- * bounces to sign-in without one; `(hub)` needs a *device* cookie and bounces
- * to the pair screen without one. `/hub/pair` is exempt for the obvious reason
- * — it is where the device cookie comes from.
+ * One tree, two rules:
+ *
+ *  - the member-only sections (`(app)`, `/manage`) need an *account* session
+ *    cookie and bounce to sign-in without one;
+ *  - the shared sections (everything on the one tree) need *either* an
+ *    account cookie *or* a device cookie. With neither, a kiosk-only surface
+ *    (`/clock`) bounces to `/pair` (a credential-less kiosk's cold boot) and
+ *    every other page to sign-in with `callbackUrl` (an expired parent session).
  */
 export default function proxy(request: NextRequest): NextResponse {
   const segments = request.nextUrl.pathname.split('/').filter(Boolean);
@@ -145,43 +233,57 @@ export default function proxy(request: NextRequest): NextResponse {
     return noIndex(response);
   }
 
-  if (section && PROTECTED_SECTIONS.has(section) && !getSessionCookie(request)) {
+  // H4: old `(app)` roots redirect permanently to the new tree *before* the
+  // cookie rules, so a signed-out visitor on `/nl/settings/google` first lands
+  // on `/nl/manage/settings/google` and is then bounced to sign-in with that
+  // (new) path as `callbackUrl` — they come back to the right page. The query
+  // string (`?google=connected`, …) rides along.
+  const legacy = legacyAppRedirect(rest);
+  if (legacy) {
     const url = request.nextUrl.clone();
-    const intended = `${request.nextUrl.pathname}${request.nextUrl.search}`;
-    url.pathname = `/${locale}/sign-in`;
-    // M18: the sign-in URL starts with an empty query — the intended URL's
-    // parameters have no business sitting loose on the sign-in form — and the
-    // whole intended destination, *query string included*, is then carried
-    // across inside `?callbackUrl=`. Preserving it is the point: a parent
-    // deep-linked to `/today?date=2026-08-14` has to land back on that day and
-    // not on today. It is re-validated as a relative path on the
-    // way out (`lib/callback-url.ts`), which is what keeps a value this proxy
-    // wrote and a value an attacker put in a link indistinguishable *and*
-    // harmless.
-    url.search = '';
-    const callbackUrl = sanitizeCallbackUrl(intended);
-    if (callbackUrl && callbackUrl !== `/${locale}/sign-in`) {
-      url.searchParams.set(CALLBACK_URL_PARAM, callbackUrl);
-    }
-    return noIndex(NextResponse.redirect(url));
+    url.pathname = `/${locale}${legacy}`;
+    return noIndex(NextResponse.redirect(url, 308));
   }
 
+  if (section && MEMBER_SECTIONS.has(section) && !getSessionCookie(request)) {
+    return signInRedirect(request, locale);
+  }
+
+  // H3 (D12): the old kiosk tree's `/hub/*` paths permanently redirect to
+  // their twins on the one tree, before any of the cookie rules below. A
+  // wall tablet that still boots to `/hub` — the Fully kiosk's start URL —
+  // carries no session and lands on `/today` with its device cookie intact.
+  if (section === 'hub') {
+    const sub = rest[1];
+    const target = (sub ? HUB_REDIRECTS[sub] : undefined) ?? 'today';
+    const tail =
+      (sub === 'routines' || sub === 'stars') && rest[2] ? `/${rest.slice(2).join('/')}` : '';
+    const url = request.nextUrl.clone();
+    url.pathname = `/${locale}/${target}${tail}`;
+    return noIndex(NextResponse.redirect(url, 308));
+  }
+
+  // No cookie at all on the shared tree. Device-only surfaces (`/clock`) are a
+  // kiosk cold boot and go to `/pair`; everything else is a member whose
+  // session expired and goes to sign-in, as `requireMemberOrDevice` does.
   if (
-    section === HUB_SECTION &&
-    rest[1] !== 'pair' &&
+    section &&
+    SHARED_SECTIONS.has(section) &&
     !request.cookies.has(DEVICE_SESSION_COOKIE) &&
-    // A signed-in parent is not redirected from here: `requireHubDevice()`
-    // sends them to their own surface instead, and it is the only one of the
-    // two that can tell a member principal from an unpaired tablet.
     !getSessionCookie(request)
   ) {
+    if (!DEVICE_ONLY_SECTIONS.has(section)) return signInRedirect(request, locale);
     const url = request.nextUrl.clone();
-    url.pathname = `/${locale}/hub/pair`;
+    url.pathname = `/${locale}/pair`;
     url.search = '';
     return noIndex(NextResponse.redirect(url));
   }
 
-  return noIndex(intl(request));
+  // next-intl forwards the request headers it is given, so this reaches the
+  // layouts (`INTENDED_PATH_HEADER`) without a second response wrapper.
+  const headers = new Headers(request.headers);
+  headers.set(INTENDED_PATH_HEADER, `${request.nextUrl.pathname}${request.nextUrl.search}`);
+  return noIndex(intl(new NextRequest(request, { headers })));
 }
 
 export const config = {

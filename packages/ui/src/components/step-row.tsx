@@ -245,11 +245,12 @@ export function StepRow({
 
             {done ? (
               <span className="flex items-center gap-2">
-                {/* Headline first, star after — FR15, in the smallest shape the
-                    tile allows. */}
+                {/* Headline first, star after — FR15. The praise is at least as
+                    large as the star glyph (`Icon sm`, 18px = `text-body-lg`),
+                    so it leads in size as well as in order. */}
                 <span
                   data-testid="step-praise"
-                  className="min-w-0 font-display text-caption leading-snug font-bold text-cat-green-fg"
+                  className="min-w-0 font-display text-body-lg leading-snug font-bold text-cat-green-fg"
                 >
                   {praiseText}
                 </span>

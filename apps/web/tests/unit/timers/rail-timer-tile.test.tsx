@@ -13,16 +13,16 @@ import { RailTimerTile } from '@/modules/timers/ui/rail-timer-tile';
 import type { TimerBoardData, TimerView } from '@/modules/timers/page-data';
 
 /**
- * `HubRail`'s conditional fifth tile (M-T2).
+ * `NavRail`'s conditional fifth tile (M-T2).
  *
- * `HubRail` itself may not import `@/modules/timers` (the boundary
+ * `NavRail` itself may not import `@/modules/timers` (the boundary
  * `RailTimerTile`'s own doc comment explains), so this is the one place the
  * tile's two contracts are actually exercised: it draws nothing at all with
  * no timers, and once one is running its fill tracks the soonest-ending
  * timer's elapsed fraction.
  */
 
-let pathname = '/hub';
+let pathname = '/today';
 vi.mock('@/i18n/navigation', () => ({
   Link: ({ children, href, ...props }: React.ComponentProps<'a'> & { href: string }) => (
     <a href={href} {...props}>
@@ -80,23 +80,23 @@ function renderTile(initial: TimerBoardData) {
 
 describe('RailTimerTile', () => {
   it('renders nothing when no timer is running', () => {
-    pathname = '/hub';
+    pathname = '/today';
     const { container } = renderTile(board([], Date.parse('2026-08-06T07:30:00.000Z')));
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('renders the tile once a timer is running, linking to /hub/timer', () => {
-    pathname = '/hub';
+  it('renders the tile once a timer is running, linking to /timer', () => {
+    pathname = '/today';
     const now = Date.parse('2026-08-06T07:30:00.000Z');
     renderTile(board([timer()], now));
 
     const tile = screen.getByTestId('hub-rail-timer');
-    expect(tile).toHaveAttribute('href', '/hub/timer');
+    expect(tile).toHaveAttribute('href', '/timer');
     expect(screen.queryByTestId('hub-rail-timer-count')).not.toBeInTheDocument();
   });
 
   it("fills to the soonest-ending timer's elapsed fraction", () => {
-    pathname = '/hub';
+    pathname = '/today';
     const startedAt = Date.parse('2026-08-06T07:30:00.000Z');
     // 300s duration, 150s elapsed → half filled.
     const now = startedAt + 150_000;
@@ -107,15 +107,15 @@ describe('RailTimerTile', () => {
   });
 
   it('shows a count badge once more than one timer is running', () => {
-    pathname = '/hub';
+    pathname = '/today';
     const now = Date.parse('2026-08-06T07:30:00.000Z');
     renderTile(board([timer({ id: 'a' }), timer({ id: 'b', startedAt: now + 60_000 })], now));
 
     expect(screen.getByTestId('hub-rail-timer-count')).toHaveTextContent('2');
   });
 
-  it('marks itself active on /hub/timer', () => {
-    pathname = '/hub/timer';
+  it('marks itself active on /timer', () => {
+    pathname = '/timer';
     const now = Date.parse('2026-08-06T07:30:00.000Z');
     renderTile(board([timer()], now));
 
@@ -124,7 +124,7 @@ describe('RailTimerTile', () => {
   });
 
   it('shows a paused indication and freezes the fill while paused', () => {
-    pathname = '/hub';
+    pathname = '/today';
     const startedAt = Date.parse('2026-08-06T07:30:00.000Z');
     const pausedAt = startedAt + 150_000;
     renderTile(board([timer({ startedAt, durationSeconds: 300, pausedAt })], pausedAt + 999_000));

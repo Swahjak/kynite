@@ -3,7 +3,7 @@ import { can, getPrincipal } from '@/modules/family';
 import { listSubscriptions, type SubscriptionView } from './queries';
 
 /**
- * The server-side read `(app)/settings/subscriptions` composes (architecture
+ * The server-side read `(app)/manage/settings/subscriptions` composes (architecture
  * §2 rule 4: route files hold no logic).
  */
 

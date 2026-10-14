@@ -75,6 +75,13 @@ export type TodayTimelineProps = {
    */
   nowEventKeys: readonly string[];
   /**
+   * Whether live rows fold behind the disclosure with the finished ones.
+   * True only when the NU strip is drawn above (they would be said twice);
+   * on a themed day the banner replaces the strip and draws no events, so the
+   * caller passes `false` and the live row stays open (still tinted `now`).
+   */
+  foldLive?: boolean;
+  /**
    * `list` is the design's hub row — a flat line in a card. `card` is the phone's
    * — each row its own bordered tile, which is what survives at 390px.
    */
@@ -90,6 +97,7 @@ export async function TodayTimeline({
   now,
   isToday,
   nowEventKeys,
+  foldLive = true,
   density = 'list',
   className,
 }: TodayTimelineProps) {
@@ -122,7 +130,7 @@ export async function TodayTimeline({
   // in their one true chronological order rather than sorting past before
   // live, which would put a still-running block ahead of something that
   // already finished after it started.
-  const isCollapsed = (event: CalendarEvent) => isPast(event) || isLive(event);
+  const isCollapsed = (event: CalendarEvent) => isPast(event) || (foldLive && isLive(event));
 
   const collapsed = rows.filter(({ event }) => isCollapsed(event));
   const rest = rows.filter(({ event }) => !isCollapsed(event));

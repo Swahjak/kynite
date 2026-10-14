@@ -4,7 +4,10 @@ import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
 import { fontVariables } from '@/lib/fonts';
 import { routing } from '@/i18n/routing';
+import { getSurface } from '@/modules/surface';
 import '../globals.css';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Kynite',
@@ -62,17 +65,19 @@ export default async function LocaleLayout({
     notFound();
   }
   setRequestLocale(locale);
+  const surface = await getSurface();
 
   return (
     // `suppressHydrationWarning` covers exactly one thing: the kiosk's
-    // pre-paint script sets `data-surface`/`data-hub-theme` and the `.dark`
-    // class on this element before React hydrates ((hub)/layout.tsx). React
-    // would otherwise warn about attributes the server never rendered — which
-    // is the whole point of the script, since deferring them to an effect would
-    // flash a phone-sized light board across the room on every hub boot. The
-    // flag is not inherited by children; only this element's own attributes are
-    // exempt.
-    <html lang={locale} className={fontVariables} suppressHydrationWarning>
+    // pre-paint script sets `data-hub-theme` and the `.dark` class on this
+    // element before React hydrates ((hub)/layout.tsx). React would otherwise
+    // warn about attributes the server never rendered — which is the whole
+    // point of the script, since deferring them to an effect would flash a
+    // phone-sized light board across the room on every hub boot. `data-surface`
+    // is the server's own attribute (rendered below), so it is not covered by
+    // this flag. The flag is not inherited by children; only this element's own
+    // attributes are exempt.
+    <html lang={locale} className={fontVariables} data-surface={surface} suppressHydrationWarning>
       <body className="min-h-dvh antialiased">
         {/* No `ServiceWorkerRegistrar` here (B-1 fix): this layout also wraps
             `(share)`, and a caregiver's browser must never install the

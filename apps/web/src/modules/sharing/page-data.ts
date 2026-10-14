@@ -11,7 +11,7 @@ import { listShareLinks } from './queries';
 import type { ShareLinkRole } from './schema';
 
 /**
- * The server-side read `(app)/settings/sharing` composes (architecture §2 rule
+ * The server-side read `(app)/manage/settings/sharing` composes (architecture §2 rule
  * 4: route files hold no logic).
  *
  * Member-only, and refused outright for anything else rather than left to the

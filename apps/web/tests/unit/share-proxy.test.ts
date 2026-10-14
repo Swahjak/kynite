@@ -14,6 +14,7 @@ vi.mock('next-intl/middleware', () => ({
 }));
 
 const { default: proxy, config } = await import('@/proxy');
+const { DEVICE_SESSION_COOKIE } = await import('@/lib/device-session');
 
 /**
  * The transport-level half of M13, asserted where it can be asserted without a
@@ -126,5 +127,101 @@ describe('(invite) responses carry noindex and no-referrer', () => {
   it('is inside the matcher', () => {
     const matcher = new RegExp(`^${config.matcher}$`);
     expect(matcher.test(`/nl/invite/${TOKEN}`)).toBe(true);
+  });
+});
+
+describe('/manage is member-only at the proxy (H4)', () => {
+  function withCookie(path: string, name: string): NextRequest {
+    return new NextRequest(`https://kynite.test${path}`, { headers: { cookie: `${name}=x` } });
+  }
+
+  it('sends a device cookie without a session to sign-in with the callback (not /today)', () => {
+    const response = proxy(withCookie('/nl/manage/rewards', DEVICE_SESSION_COOKIE));
+    const location = new URL(response.headers.get('location')!);
+
+    expect(response.status).toBe(307);
+    expect(location.pathname).toBe('/nl/sign-in');
+    expect(location.searchParams.get('callbackUrl')).toBe('/nl/manage/rewards');
+  });
+
+  it('sends a credential-less request to sign-in', () => {
+    const response = proxy(request('/nl/manage'));
+
+    expect(new URL(response.headers.get('location')!).pathname).toBe('/nl/sign-in');
+  });
+});
+
+/**
+ * H4: the pre-Beheer `(app)` roots redirect permanently. A signed-out visitor
+ * is redirected *first* (308, before any cookie rule), so after sign-in the
+ * `callbackUrl` the proxy writes is the new path — the visitor ends on the
+ * right page.
+ */
+describe('legacy (app) roots redirect permanently (H4)', () => {
+  it.each([
+    ['/nl/settings', '/nl/manage/settings'],
+    ['/en/settings', '/en/manage/settings'],
+    ['/nl/settings/devices', '/nl/manage/settings/devices'],
+    ['/nl/settings/google', '/nl/manage/settings/google'],
+    ['/nl/settings/sharing', '/nl/manage/settings/sharing'],
+    ['/nl/settings/subscriptions', '/nl/manage/settings/subscriptions'],
+    ['/nl/settings/notifications', '/nl/account/notifications'],
+    ['/en/settings/notifications', '/en/account/notifications'],
+    ['/nl/family', '/nl/manage/family'],
+    ['/en/rewards', '/en/manage/rewards'],
+  ])('%s -> %s', (from, to) => {
+    const response = proxy(request(from));
+
+    expect(response.status).toBe(308);
+    expect(new URL(response.headers.get('location')!).pathname).toBe(to);
+  });
+
+  it('keeps the query string', () => {
+    const response = proxy(request('/nl/settings/google?google=connected'));
+
+    const location = new URL(response.headers.get('location')!);
+    expect(location.pathname).toBe('/nl/manage/settings/google');
+    expect(location.search).toBe('?google=connected');
+  });
+
+  it('redirects regardless of credentials, then sign-in carries the new path', () => {
+    const first = proxy(request('/nl/settings/google'));
+    expect(first.status).toBe(308);
+
+    const second = proxy(request(new URL(first.headers.get('location')!).pathname));
+    const location = new URL(second.headers.get('location')!);
+    expect(location.pathname).toBe('/nl/sign-in');
+    expect(location.searchParams.get('callbackUrl')).toBe('/nl/manage/settings/google');
+  });
+});
+
+describe('/account is member-only at the proxy (H4)', () => {
+  it('sends a credential-less request to sign-in with the callback', () => {
+    const location = new URL(proxy(request('/nl/account')).headers.get('location')!);
+
+    expect(location.pathname).toBe('/nl/sign-in');
+    expect(location.searchParams.get('callbackUrl')).toBe('/nl/account');
+  });
+
+  it('sends a device cookie without a session to sign-in with the callback', () => {
+    const response = proxy(
+      new NextRequest('https://kynite.test/nl/account', {
+        headers: { cookie: `${DEVICE_SESSION_COOKIE}=x` },
+      })
+    );
+    const location = new URL(response.headers.get('location')!);
+
+    expect(location.pathname).toBe('/nl/sign-in');
+    expect(location.searchParams.get('callbackUrl')).toBe('/nl/account');
+  });
+
+  it('lets a session cookie through (no redirect)', () => {
+    const response = proxy(
+      new NextRequest('https://kynite.test/nl/account', {
+        headers: { cookie: 'better-auth.session_token=x' },
+      })
+    );
+
+    expect(response.headers.get('location')).toBeNull();
   });
 });

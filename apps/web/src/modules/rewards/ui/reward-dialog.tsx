@@ -34,7 +34,7 @@ import { REWARD_CATEGORIES, type Reward } from '../schema';
 import { REWARD_ICONS, rewardIconOf } from './tokens';
 
 /**
- * The parent-facing catalogue editor (M08's `(app)/rewards`).
+ * The parent-facing catalogue editor (M08's `(app)/manage/rewards`).
  *
  * The category select offers three options because the database enum has three
  * (`privilege | experience | treat`). There is no "money", "allowance" or

@@ -32,7 +32,7 @@ test.describe('second-parent onboarding', { tag: '@visual' }, () => {
     const family = await signUpFamily(page, 'Familie Kynite');
 
     // Owner side: the member row the invite hands over, then the link.
-    await page.goto('/nl/family');
+    await page.goto('/nl/manage/family');
     await page.getByRole('button', { name: 'Gezinslid toevoegen' }).click();
 
     const dialog = page.getByRole('dialog');

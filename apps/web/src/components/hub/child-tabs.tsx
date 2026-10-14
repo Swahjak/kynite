@@ -26,9 +26,9 @@ type Tab = {
 };
 
 const TABS: readonly Tab[] = [
-  { key: 'routines', icon: 'checklist', href: (id) => `/hub/routines/${id}` },
-  { key: 'stars', icon: 'star', href: (id) => `/hub/stars/${id}` },
-  { key: 'store', icon: 'redeem', href: (id) => `/hub/store?member=${id}` },
+  { key: 'routines', icon: 'checklist', href: (id) => `/routines/${id}` },
+  { key: 'stars', icon: 'star', href: (id) => `/stars/${id}` },
+  { key: 'store', icon: 'redeem', href: (id) => `/store?member=${id}` },
 ];
 
 export function ChildTabs({ memberId, displayName }: { memberId: string; displayName: string }) {

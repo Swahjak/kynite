@@ -8,7 +8,7 @@ import { withDb } from '../utils/seed';
  *
  * Every hub surface now runs behind a **device** principal — §2's "`(hub)/` —
  * kiosk, device session required, no account" — so a spec that navigates to
- * `/nl/hub…` has to be a paired tablet, not a signed-in parent. This is the
+ * `/nl/today…` has to be a paired tablet, not a signed-in parent. This is the
  * one-line way to become one.
  *
  * The device row and its session are seeded straight into the database and the
@@ -88,16 +88,22 @@ export async function pairHub(
 
   // B-1 moved `ServiceWorkerRegistrar` out of the root `[locale]` layout and
   // into `(app)` and `(hub)` only, so `family`'s sign-up flow (which ends on
-  // `/nl/family`, inside `(app)`) is now the *only* navigation before this
+  // `/nl/manage/family`, inside `(app)`) is now the *only* navigation before this
   // point that could have registered a worker — one fewer than before, when
   // the root layout registered on `/nl/sign-up` as well. A spec that pairs and
   // then immediately asserts `serviceWorker.controller` on its very first
-  // `/nl/hub` navigation needs that worker to already be *active*, not merely
+  // `/nl/today` navigation needs that worker to already be *active*, not merely
   // registered, by the time that navigation starts — a controller is decided
   // once, at the start of a navigation, and never retroactively. Waiting here,
   // on whatever page `pairHub` was called from, is what makes that
-  // deterministic instead of a race against however long `/nl/family` took to
+  // deterministic instead of a race against however long `/nl/manage/family` took to
   // register and activate.
+  //
+  // So `pairHub` must be called from a page that registers the worker: `(main)`
+  // (`/nl/pair`, or `/nl/today` once a device cookie is attached) or `(app)`.
+  // Not from `about:blank` or `/nl/sign-in` (`(auth)`, which installs nothing)
+  // — `ready` would never resolve there. A cookie-less `/nl/today` now ends on
+  // sign-in (H5e), so enter via `/nl/pair`.
   if (await page.evaluate(() => 'serviceWorker' in navigator)) {
     await page.evaluate(() => navigator.serviceWorker.ready);
   }

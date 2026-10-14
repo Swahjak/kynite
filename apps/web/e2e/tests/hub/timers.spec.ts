@@ -101,7 +101,7 @@ test.describe('hub timers', () => {
 
     const row = await seedRunningTimer(family.familyId, 'Schoenen aan');
 
-    await page.goto('/nl/hub/timers');
+    await page.goto('/nl/timers');
     await expect(page.getByTestId('timer-tile')).toBeVisible();
 
     const first = await readCountdown(page, row);
@@ -133,7 +133,7 @@ test.describe('hub timers', () => {
     // and `clockOffsetMs` exist for.
     await page.clock.setFixedTime(new Date('2020-01-01T00:00:00Z'));
 
-    await page.goto('/nl/hub/timers');
+    await page.goto('/nl/timers');
     await expect(page.getByTestId('timer-tile')).toBeVisible();
 
     const shown = toSeconds(await page.getByTestId('timer-digits').innerText());
@@ -157,7 +157,7 @@ test.describe('hub timers', () => {
 
       await seedRunningTimer(family.familyId, 'Jassen aan');
 
-      await page.goto('/nl/hub');
+      await page.goto('/nl/today');
 
       await expect(page.getByTestId('ambient-timers')).toBeVisible();
       await expect(page.getByTestId('timer-label')).toHaveText('Jassen aan');
@@ -176,7 +176,7 @@ test.describe('hub timers', () => {
       ]);
     });
 
-    await page.goto('/nl/hub/timers');
+    await page.goto('/nl/timers');
 
     const tile = page.getByTestId('timer-tile');
     await expect(tile).toHaveAttribute('data-phase', 'overrun');
@@ -205,7 +205,7 @@ test.describe('hub timers', () => {
       ]);
     });
 
-    await page.goto('/nl/hub/timers');
+    await page.goto('/nl/timers');
 
     const warning = page.getByTestId('timer-warning');
     await expect(warning).toBeVisible();
@@ -216,7 +216,9 @@ test.describe('hub timers', () => {
   });
 });
 
-test.describe('controller → hub', () => {
+test.describe('member browser → hub', () => {
+  // A member keeps the Controller on `/timers` (`TimerControls`: label input,
+  // presets); a paired device gets the quick-start board on the same route.
   test('a timer started on the Controller appears on the hub, and stopping removes it', async ({
     page,
     context,
@@ -234,10 +236,10 @@ test.describe('controller → hub', () => {
     // like: a phone in a hand and a tablet on a wall.
     const kiosk = await newAnonymousContext(context.browser()!, { locale: 'nl-NL' });
     const hub = await kiosk.newPage();
-    await hub.goto('/nl/hub/pair');
+    await hub.goto('/nl/pair');
     await pairHub(hub, family.familyId);
 
-    await hub.goto('/nl/hub/timers');
+    await hub.goto('/nl/timers');
     await expect(hub.getByTestId('timer-board-empty')).toBeVisible();
 
     await page.goto('/nl/timers');

@@ -20,11 +20,11 @@ import { seedHousehold } from '@e2e/utils/household';
 const CLOCK = 'time=13:00';
 
 const SURFACES = [
-  { name: 'board', path: () => `/nl/hub?${CLOCK}` },
-  { name: 'routines', path: (ids: { child: string }) => `/nl/hub/routines/${ids.child}` },
-  { name: 'star chart', path: (ids: { child: string }) => `/nl/hub/stars/${ids.child}` },
-  { name: 'store', path: (ids: { child: string }) => `/nl/hub/store?member=${ids.child}` },
-  { name: 'timers', path: () => `/nl/hub/timers` },
+  { name: 'board', path: () => `/nl/today?${CLOCK}` },
+  { name: 'routines', path: (ids: { child: string }) => `/nl/routines/${ids.child}` },
+  { name: 'star chart', path: (ids: { child: string }) => `/nl/stars/${ids.child}` },
+  { name: 'store', path: (ids: { child: string }) => `/nl/store?member=${ids.child}` },
+  { name: 'timers', path: () => `/nl/timers` },
 ] as const;
 
 test.describe('hub accessibility', { tag: '@heavy' }, () => {

@@ -28,12 +28,16 @@
     "family": "Gezin",
     "settings": "Instellingen",
     "calendar": "Kalender",
+    "tasks": "Taken",
+    "stars": "Sterren",
     "routines": "Routines",
+    "activeRoutines": "Actieve routines",
     "rewards": "Beloningen",
     "timers": "Timers",
     "notifications": "Meldingen",
     "devices": "Schermen",
     "sharing": "Delen",
+    "manage": "Beheer",
     "more": "Meer",
     "mainNavigation": "Hoofdnavigatie",
     "account": "Account"
@@ -52,7 +56,8 @@
       "title": "Inloggen",
       "description": "Welkom terug bij Kynite.",
       "submit": "Inloggen",
-      "noAccount": "Nog geen account?"
+      "noAccount": "Nog geen account?",
+      "pairScreen": "Dit scherm koppelen"
     },
     "signUp": {
       "title": "Account aanmaken",
@@ -223,6 +228,24 @@
         }
       ]
     }
+  },
+  "account": {
+    "title": "Mijn instellingen",
+    "subtitle": "Alleen voor jou: je meldingen en hoe Kynite er in deze browser uitziet.",
+    "back": "Terug naar mijn instellingen"
+  },
+  "manage": {
+    "title": "Beheer",
+    "subtitle": "Routines, beloningen, gezin en instellingen.",
+    "areas": "Onderdelen",
+    "routines": "Routines",
+    "routinesDescription": "Bouwen en bewerken",
+    "rewards": "Beloningen",
+    "rewardsDescription": "Goedkeuren, sterren geven",
+    "family": "Gezin",
+    "familyDescription": "Leden",
+    "settings": "Instellingen",
+    "settingsDescription": "Voorkeuren, koppelingen en schermen"
   },
   "family": {
     "title": "Gezin",
@@ -528,7 +551,6 @@
   },
   "calendar": {
     "title": "Agenda",
-    "todayTitle": "Vandaag",
     "busy": "Bezet",
     "untitled": "(zonder titel)",
     "empty": "Geen afspraken in deze periode.",
@@ -777,7 +799,6 @@
     "tabs": {
       "label": "Weergave",
       "dag": "Dagoverzicht",
-      "personen": "Per persoon",
       "routines": "Routines",
       "sterren": "Sterren overzicht"
     },
@@ -829,10 +850,6 @@
       "otherDay": "Sterren worden alleen voor vandaag getoond.",
       "hint": "Tik op een vakje om af te vinken",
       "toggle": "{step} — {name}",
-      "summaryLabel": "Sterren vandaag",
-      "tableCaption": "Routinestappen van vandaag per kind",
-      "stepColumn": "Stap",
-      "noStep": "{name} heeft deze stap vandaag niet",
       "empty": "Vandaag staan er nog geen routinestappen klaar."
     },
     "kids": {
@@ -869,7 +886,6 @@
         "child": "Kind",
         "caregiver": "Oppas"
       },
-      "celebrateBadge": "Klaar",
       "countLabel": "{done} van {total} klaar",
       "progressLabel": "Voortgang van {name}",
       "allDone": "Alles gedaan!",
@@ -1383,7 +1399,8 @@
       "paired": "Gekoppeld als {name}.",
       "errors": {
         "invalidCode": "Die code werkt niet. Maak een nieuwe aan op de telefoon.",
-        "rateLimited": "Probeer het over een paar minuten opnieuw."
+        "rateLimited": "Probeer het over een paar minuten opnieuw.",
+        "signOutFailed": "Koppelen is niet gelukt. Maak een nieuwe code op de telefoon en probeer het opnieuw."
       }
     },
     "hubSettings": {
@@ -1542,6 +1559,22 @@
         "day": "Kolommen per persoon",
         "agenda": "Lijst van wat eraan komt"
       },
+      "errors": {
+        "forbidden": "Je hebt geen rechten om dit aan te passen.",
+        "invalidInput": "Controleer de ingevulde gegevens."
+      }
+    },
+    "surface": {
+      "title": "Weergave in deze browser",
+      "description": "Kies hoe Kynite eruitziet in déze browser — dit geldt niet voor andere apparaten.",
+      "label": "Weergave",
+      "hint": "Automatisch kiest op basis van dit apparaat. Een gepaard wandscherm ziet deze instelling niet.",
+      "options": {
+        "auto": "Automatisch",
+        "app": "Telefoon",
+        "desktop": "Desktop"
+      },
+      "save": "Opslaan",
       "errors": {
         "forbidden": "Je hebt geen rechten om dit aan te passen.",
         "invalidInput": "Controleer de ingevulde gegevens."

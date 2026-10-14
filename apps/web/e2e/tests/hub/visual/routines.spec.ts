@@ -1,3 +1,4 @@
+import type { Page } from '@playwright/test';
 import { pairHub } from '@e2e/fixtures/hub';
 import { expect, test } from '@e2e/fixtures/exclusive';
 import {
@@ -11,8 +12,24 @@ import {
 import { settlePage } from '@e2e/utils/settle';
 
 /**
- * Visual regression for the routine surfaces, at the hub tablet (1280×800) and
- * a phone (390×844).
+ * `StarPop` starts at scale-75 and flips to `data-settled="true"` after a
+ * timer; `settlePage` kills the transition, so a shot taken before that flip
+ * bakes in the small mid-pop star. Wait for every star to announce its end
+ * state first (same signal as celebration.spec.ts).
+ */
+async function settleStars(page: Page): Promise<void> {
+  await expect
+    .poll(() =>
+      page
+        .locator('[data-slot="star-pop"]')
+        .evaluateAll((els) => els.every((el) => el.getAttribute('data-settled') === 'true'))
+    )
+    .toBe(true);
+}
+
+/**
+ * Visual regression for the routine surfaces, at the hub tablet (1280×800)
+ * (the phone is the `app` project's job).
  *
  * Determinism comes from pinning the board's clock with `?date=&time=`, exactly
  * as the calendar visuals pin `?date=`. Every state the board can render is in
@@ -26,7 +43,6 @@ import { settlePage } from '@e2e/utils/settle';
 
 const VIEWPORTS = {
   tablet: { width: 1280, height: 800 },
-  mobile: { width: 390, height: 844 },
 } as const;
 
 /** A fixed Wednesday, rendered at 07:45 local. */
@@ -209,14 +225,15 @@ for (const [name, viewport] of Object.entries(VIEWPORTS) as [
         // locale — real families see their own titles either way, so the
         // board chrome (headings, praise, countdown labels) is what M15's
         // en baseline exists to pin, same as the hub ambient board above.
-        const scope = { tablet: { nl: 'a', en: 'e' }, mobile: { nl: 'b', en: 'f' } }[name][locale];
+        const scope = { tablet: { nl: 'a', en: 'e' } }[name][locale];
         const { mila } = await seedBoard(family.familyId, scope);
         // M16: the wall display renders in the household's language (see the
         // ambient-board spec), so the household has to speak it.
         await withDb((client) => setFamilyLocale(client, family.familyId, locale));
 
-        await page.goto(`/${locale}/hub/routines/${mila.id}?date=${ANCHOR}&time=${ANCHOR_TIME}`);
+        await page.goto(`/${locale}/routines/${mila.id}?date=${ANCHOR}&time=${ANCHOR_TIME}`);
         await expect(page.getByTestId('routine-board')).toBeVisible();
+        await settleStars(page);
         await settlePage(page);
 
         const suffix = locale === 'nl' ? '' : `-${locale}`;
@@ -238,12 +255,13 @@ for (const [name, viewport] of Object.entries(VIEWPORTS) as [
     test('hub family routines board (nl)', async ({ page, family }) => {
       await pairHub(page, family.familyId);
 
-      const scope = { tablet: 'c', mobile: 'd' }[name];
+      const scope = { tablet: 'c' }[name];
       await seedFamilyBoard(family.familyId, scope);
       await withDb((client) => setFamilyLocale(client, family.familyId, 'nl'));
 
-      await page.goto(`/nl/hub/routines?date=${ANCHOR}&time=${ANCHOR_TIME}`);
+      await page.goto(`/nl/routines?date=${ANCHOR}&time=${ANCHOR_TIME}`);
       await expect(page.getByTestId('routines-page-board')).toBeVisible();
+      await settleStars(page);
       await settlePage(page);
 
       await expect(page).toHaveScreenshot(`hub-routines-family-${name}.png`, {
@@ -254,7 +272,7 @@ for (const [name, viewport] of Object.entries(VIEWPORTS) as [
 }
 
 /**
- * `/hub/taken` shares `RoutinesBoard`'s member columns and progress cards
+ * `/tasks` shares `RoutinesBoard`'s member columns and progress cards
  * with the same `--text-*` tokens the family routines page uses, so it is
  * exposed to the same hub-type-inflation removal — see the "docs/plans/
  * 2026-09-15-routines-page-density.md" note in `tokens.css`. No dedicated
@@ -271,12 +289,13 @@ for (const [name, viewport] of Object.entries(VIEWPORTS) as [
     test('hub taken board (nl)', async ({ page, family }) => {
       await pairHub(page, family.familyId);
 
-      const scope = { tablet: '0', mobile: '1' }[name];
+      const scope = { tablet: '0' }[name];
       await seedFamilyBoard(family.familyId, scope);
       await withDb((client) => setFamilyLocale(client, family.familyId, 'nl'));
 
-      await page.goto(`/nl/hub/taken?date=${ANCHOR}&time=${ANCHOR_TIME}`);
+      await page.goto(`/nl/tasks?date=${ANCHOR}&time=${ANCHOR_TIME}`);
       await expect(page.getByTestId('hub-taken-board')).toBeVisible();
+      await settleStars(page);
       await settlePage(page);
 
       await expect(page).toHaveScreenshot(`hub-taken-${name}.png`, {

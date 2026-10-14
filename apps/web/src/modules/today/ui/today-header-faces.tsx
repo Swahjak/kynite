@@ -29,7 +29,8 @@ export function TodayHeaderFaces({
         variant="outline"
         size="lg"
         className={cn(
-          'cursor-pointer bg-card',
+          // D17: 48px floor on the wall/desktop surfaces; the phone keeps its size.
+          'cursor-pointer bg-card hub:min-h-12 hub:min-w-12 desktop:min-h-12 desktop:min-w-12',
           selected === null ? 'border-ink font-bold text-ink' : 'text-ink-secondary'
         )}
         data-state={selected === null ? 'on' : 'off'}
@@ -48,7 +49,7 @@ export function TodayHeaderFaces({
             aria-pressed={active}
             data-testid="today-timeline-filter-face"
             className={cn(
-              'rounded-full p-0 transition-opacity',
+              'rounded-full p-0 transition-opacity hub:size-12 desktop:size-12',
               // 80% is the axe AA floor against the member baan tints; the
               // mockup's 45% fails contrast.
               active ? 'opacity-100 ring-2 ring-primary' : 'opacity-80 hover:opacity-90'

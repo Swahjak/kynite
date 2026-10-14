@@ -44,27 +44,29 @@ import { TodayTimeline } from './today-timeline';
  *   while nobody is holding it, and the design answers that by refusing to make
  *   it scroll: everything lands on one 1194 × 834 frame.
  *
- * ## The two bands that are not the same on both
+ * ## The two bands the panel places on both surfaces
  *
- * Both are placement, both come from the design sheets, and both are kept as
- * *slots the page fills* rather than as a branch here:
+ * Both used to be bands of `(app)/today` itself on the phone and columns of the
+ * wall's panel. H3 folded the phone and wall routes into one page, so both now
+ * live here, drawn by this panel on **both** surfaces rather than branched:
  *
- * - **the NU block** — a band of `(app)/today` itself on the phone, above the
- *   tabs, so it survives a tab switch; the head of the first column on the wall
- *   ("Vandaag.dc.html"), where the panel owns the whole frame below the pills.
- *   Hence `heroEvents`/`flowMode`/`referenceNow` are only read on `hub`.
- * - **the weather card** — the top of the phone page (`0dbcd61`: what it is
- *   doing outside decides the coat before the schedule decides anything), and
- *   the head of this panel's second column on the wall.
+ * - **the NU block** — the head of the first column, phone and wall alike
+ *   ("Vandaag.dc.html", where the panel owns the whole frame below the pills).
+ *   Before H3 it was a band of the phone page above the tabs; the merge folded
+ *   that band into this panel, so `heroEvents`/`flowMode`/`referenceNow` are
+ *   read on both surfaces.
+ * - **the weather card** — a slot the page fills with the resolved card. On the
+ *   wall it heads the second column; on the phone it is the first band under
+ *   the header, above the NU strip (it decides the coat before the schedule), and before a themed day's banner.
+ *   Only its position and `density` vary by surface.
  *
  * `banner` is *not* one of them. It is the day's headline and it belongs to the
  * day panel on both surfaces, which is the whole repair: it renders full-width
  * above the columns, and where the NU block is drawn by this component it
  * **replaces** it — the design sheet wraps the NU card in `<sc-if geenThema>`
  * ("Vandaag met thema's":404), so Kerst and the zomervakantie take its place
- * rather than pushing it down a row. On the phone the same rule is applied by
- * the page, which is where that surface's strip lives. Passing `null` (which is
- * what the other 348 days resolve to) puts the NU block back.
+ * rather than pushing it down a row. Passing `null` (which is what the other
+ * 348 days resolve to) puts the NU block back, on both surfaces.
  */
 
 export type TodayTabDagProps = {
@@ -94,18 +96,23 @@ export type TodayTabDagProps = {
    */
   banner?: ReactNode;
   /**
-   * The NU block's own inputs, from the page's `flowOf`. Read on `hub`, where
-   * this panel draws the block; on the phone the strip is a band of the page.
+   * The NU block's own inputs, from the page's `flowOf`. Read on both surfaces,
+   * where this panel draws the block.
    *
    * `heroEvents` is `flow.liveBlocks` while live (every overlapping current
    * block), or `flow.hero` alone in every other mode — `flowOf` only ever
    * hands back more than one block in `liveBlocks`, so this is never plural
    * outside `live`.
+   *
+   * Required, with no fallback: if the page stops forwarding one of these the
+   * NU block silently draws its "nothing left today" branch while an event is
+   * live, and nothing in the panel can tell. The page is the only caller, and
+   * it always resolves all three from its own `flowOf`.
    */
-  heroEvents?: CalendarEvent[];
-  flowMode?: FlowMode;
+  heroEvents: CalendarEvent[];
+  flowMode: FlowMode;
   /** The instant the NU block measures against — the day's own on a browsed day. */
-  referenceNow?: Date;
+  referenceNow: Date;
   /** Today's routine progress, for the wall's second column. */
   kids?: KidProgress[] | null;
   /**
@@ -142,8 +149,8 @@ export async function TodayTabDag({
   nowEventKeys,
   tasks,
   banner,
-  heroEvents = [],
-  flowMode = 'next',
+  heroEvents,
+  flowMode,
   referenceNow,
   kids = null,
   weather,
@@ -161,6 +168,14 @@ export async function TodayTabDag({
 
   return (
     <div className="flex flex-col gap-5" data-surface-variant={surface}>
+      {/* On the phone the weather card is the first band under the header, above
+          the NU strip: it answers "what is it doing outside" before the
+          schedule, because that decides the coat (design 0dbcd61). It is a band
+          here rather than the head of column two, which would stack it below the
+          whole timeline at 390px. The wall keeps it at the head of its second
+          column. */}
+      {hub ? null : weather}
+
       {/* Rendered bare, not in a wrapper: on the 348 ordinary days of the year
           the banner resolves to `null`, and a wrapper would leave the flex gap
           behind as a hole above the columns. */}
@@ -171,7 +186,7 @@ export async function TodayTabDag({
           grid used to hold, and it needed it — its rows now carry a time
           *range*, a category glyph and the faces of everyone on the event, which
           is the same "who has what" answer the third column was giving. Per
-          person is not lost, it is one pill away (`TodayTabPersonen`). From `lg`
+          person lives on the calendar (`/calendar`). From `lg`
           rather than `xl` because a wall tablet in landscape is 1194px wide and
           this composition exists to fit that frame without a scrollbar; the
           phone splits evenly and stacks below `lg`, in the order the day is
@@ -184,14 +199,14 @@ export async function TodayTabDag({
       >
         <div className="flex flex-col gap-4">
           {/* On a themed day the banner *is* the NU block — see the note above.
-              Absent altogether on the phone, whose strip is a band of the page
-              and would otherwise be drawn twice. */}
-          {hub && !banner ? (
+              `!banner` holds on both surfaces: the strip is one statement about
+              the moment, and drawing it beside the banner would say it twice. */}
+          {!banner ? (
             <TodayNowStrip
               events={heroEvents}
               mode={flowMode}
               members={members}
-              now={referenceNow ?? now}
+              now={referenceNow}
               timeZone={timeZone}
             />
           ) : null}
@@ -204,6 +219,9 @@ export async function TodayTabDag({
             now={now}
             isToday={isToday}
             nowEventKeys={nowEventKeys}
+            // Live rows fold only because the NU strip already draws them. On
+            // a themed day the banner replaces the strip and draws no events.
+            foldLive={!banner}
             density={hub ? 'list' : 'card'}
           />
         </div>
@@ -211,16 +229,15 @@ export async function TodayTabDag({
         <div className="flex flex-col gap-4">
           {/* Bare, like `banner`: on a household with no location configured the
               widget resolves to nothing, and a wrapper would leave the column's
-              flex gap behind as a hole above what follows. Empty on the phone,
-              which draws the card at the top of the page instead. */}
-          {weather}
+              flex gap behind as a hole above what follows. */}
+          {hub ? weather : null}
 
           {/* The August sheet's 2×2 grid used to live here — a *wall*
               affordance, gated tile by tile on the permission it would need
               (`event:write`/`task:write` are `deny` for a device, §7, so only
               "Timer" and "Ster geven" ever drew). Both are now actions on
               `TodayFab`, the speed dial each page mounts beside this panel
-              (`(hub)/hub/page.tsx`, `(app)/today/page.tsx`) rather than inside
+              (`(main)/today/page.tsx`) rather than inside
               it — `FabSpeedDial` portals into the shell's slot regardless of
               where in the tree it renders, so there is nothing this column
               needs to carry any more. */}

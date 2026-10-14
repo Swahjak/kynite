@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Button, Icon } from '@kynite/ui';
+import { clearUserCachesWithin } from '@/components/offline';
 import { PAIRING_CODE_LENGTH, normalizePairingCode } from '@/lib/device-session';
 import { pairDeviceIdle, type PairDeviceState } from '../action-state';
 import { pairDeviceAction } from '../actions';
@@ -48,6 +49,9 @@ export function PairCodeForm() {
     if (!code) return;
 
     startTransition(async () => {
+      // A re-paired tablet must never paint the previous household's cached
+      // board: wipe the per-family caches before the new cookie exists.
+      await clearUserCachesWithin();
       const result = await pairDeviceAction({ code });
       setState(result);
       if (result.status === 'paired') {

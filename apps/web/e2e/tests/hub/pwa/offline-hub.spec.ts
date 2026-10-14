@@ -31,7 +31,7 @@ import { expect, test } from '@e2e/fixtures/family';
 type Page = import('@playwright/test').Page;
 
 /** The hub navigation and its RSC refetches — everything that serves the board. */
-const HUB_DOCUMENT = '**/nl/hub*';
+const HUB_DOCUMENT = '**/nl/today*';
 
 /** Wait until this page is actually being served through the worker. */
 async function waitForController(page: Page): Promise<void> {
@@ -223,14 +223,14 @@ test.describe('hub offline', () => {
     // session — this browser is the wall tablet for the rest of the test.
     await pairHub(page, family.familyId);
 
-    await page.goto('/nl/hub');
+    await page.goto('/nl/today');
     await expect(page.getByTestId('hub-board')).toBeVisible();
     await waitForController(page);
 
     // A second visit, so the document is definitely in the cache the worker
     // falls back to when the network fuse blows, not only in the one it just
     // wrote.
-    await page.goto('/nl/hub');
+    await page.goto('/nl/today');
     await expect(page.getByTestId('hub-board')).toBeVisible();
 
     const onlineHeading = await page.getByTestId('hub-board').locator('h1').first().innerText();
@@ -250,7 +250,7 @@ test.describe('hub offline', () => {
     // session — this browser is the wall tablet for the rest of the test.
     await pairHub(page, family.familyId);
 
-    await page.goto('/nl/hub');
+    await page.goto('/nl/today');
     await expect(page.getByTestId('hub-board')).toBeVisible();
 
     const snapshot = await waitForMirror(page);
@@ -293,11 +293,11 @@ test.describe('hub offline', () => {
      * document on screen is the worker's cached one. The sibling test above
      * covers the genuinely-offline half (pixels on the wall with no network).
      */
-    await page.goto('/nl/hub');
+    await page.goto('/nl/today');
     await expect(page.getByTestId('hub-board')).toBeVisible();
     await waitForController(page);
     const secondNavAt = Date.now();
-    await page.goto('/nl/hub');
+    await page.goto('/nl/today');
     await expect(page.getByTestId('hub-board')).toBeVisible();
     // NB-7: the flake this closes. `useMirroredHubState`'s mount effect saves
     // its own (real, server-sent) snapshot on every hub load, asynchronously
@@ -340,11 +340,11 @@ test.describe('hub offline', () => {
      * difference in outcome is attributable to the family check and nothing
      * else.
      */
-    await page.goto('/nl/hub');
+    await page.goto('/nl/today');
     await expect(page.getByTestId('hub-board')).toBeVisible();
     await waitForController(page);
     const secondNavAt = Date.now();
-    await page.goto('/nl/hub');
+    await page.goto('/nl/today');
     await expect(page.getByTestId('hub-board')).toBeVisible();
     // Same deterministic wait as the sibling test above (NB-7): let the
     // natural mirror write from *this* navigation land before racing it with
@@ -365,8 +365,11 @@ test.describe('hub offline', () => {
     const board = page.getByTestId('hub-board');
     await expect(board).toBeVisible({ timeout: 20_000 });
     // The board came from the served document, not from the foreign snapshot.
-    await expect(board).toContainText('Sanne');
+    // The signed-in owner is "Sanne"; the board's header filter draws each
+    // member as a face button named by initials, not by full name.
+    await expect(board.getByRole('button', { name: 'SA', exact: true })).toBeVisible();
     await expect(board).not.toContainText('Buurfamilie');
+    await expect(board.getByRole('button', { name: 'BU', exact: true })).toHaveCount(0);
 
     // And non-vacuously so: the read path did run, rejected the foreign row,
     // and replaced it with this family's own board.
@@ -382,7 +385,7 @@ test.describe('hub offline', () => {
     // session — this browser is the wall tablet for the rest of the test.
     await pairHub(page, family.familyId);
 
-    await page.goto('/nl/hub');
+    await page.goto('/nl/today');
     await expect(page.getByTestId('hub-board')).toBeVisible();
 
     // The board is unchanged the rest of the day: the indicator renders
@@ -429,7 +432,7 @@ test.describe('hub offline', () => {
       Object.defineProperty(navigator, 'onLine', { value: true, configurable: true });
     });
 
-    await page.goto('/nl/hub');
+    await page.goto('/nl/today');
     await expect(page.getByTestId('hub-board')).toBeVisible();
 
     await expect(page.getByTestId('offline-indicator')).toBeVisible({ timeout: 20_000 });
@@ -446,10 +449,10 @@ test.describe('hub offline', () => {
     // session — this browser is the wall tablet for the rest of the test.
     await pairHub(page, family.familyId);
 
-    await page.goto('/nl/hub');
+    await page.goto('/nl/today');
     await expect(page.getByTestId('hub-board')).toBeVisible();
     await waitForController(page);
-    await page.goto('/nl/hub');
+    await page.goto('/nl/today');
 
     await context.setOffline(true);
     await page.reload();

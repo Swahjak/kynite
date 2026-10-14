@@ -19,7 +19,7 @@
  *
  * ## Why the selection is not remembered
  *
- * Unlike the tab (`use-today-tab.ts`), which is a per-device habit, a filter is
+ * A filter is
  * a *question* — "what does Mila have today" — and it is asked and answered in
  * one look. A wall tablet that stayed filtered on one child after somebody
  * walked away would be quietly lying about the household's day, which is the

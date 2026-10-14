@@ -66,7 +66,7 @@ export function ChildLauncher({ entries }: { entries: readonly HubChild[] }) {
               className="flex items-center gap-3 rounded-2xl bg-card p-3 shadow-sm ring-1 ring-foreground/10"
             >
               <Link
-                href={`/hub/routines/${child.id}`}
+                href={`/routines/${child.id}`}
                 data-testid="hub-child-routines"
                 aria-label={t('openRoutines', { name: child.displayName })}
                 className={cn(
@@ -103,7 +103,7 @@ export function ChildLauncher({ entries }: { entries: readonly HubChild[] }) {
               </Link>
 
               <Link
-                href={`/hub/stars/${child.id}`}
+                href={`/stars/${child.id}`}
                 data-testid="hub-child-stars"
                 aria-label={t('openStars', { name: child.displayName })}
                 className={cn(

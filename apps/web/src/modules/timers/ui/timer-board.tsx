@@ -183,7 +183,7 @@ export function TimerBoard({
         // surface navigates; `TimerControls` (`(app)/timers`, the Controller)
         // is a parent-facing phone surface with no `/hub/timer` to send
         // anyone to.
-        if (result.status !== 'error') router.push('/hub/timer');
+        if (result.status !== 'error') router.push('/timer');
       } finally {
         setStarting((previous) => {
           const next = new Set(previous);

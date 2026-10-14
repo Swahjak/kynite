@@ -1,4 +1,5 @@
 import { newAnonymousContext } from '@e2e/utils/context';
+import { openFoldedRows } from '@e2e/utils/timeline';
 import { expect, test } from '@e2e/fixtures/family';
 import { pairHub } from '@e2e/fixtures/hub';
 import {
@@ -92,17 +93,9 @@ test.describe('settings hub', () => {
   test('has a section for every part of the household', async ({ page, family }) => {
     await seedHousehold(family.familyId);
 
-    await page.goto('/nl/settings');
+    await page.goto('/nl/manage/settings');
 
-    for (const section of [
-      'family',
-      'members',
-      'graduation',
-      'notifications',
-      'calendars',
-      'devices',
-      'sharing',
-    ]) {
+    for (const section of ['family', 'members', 'graduation', 'calendars', 'devices', 'sharing']) {
       await expect(page.getByTestId(`settings-section-${section}`)).toBeVisible();
     }
 
@@ -110,6 +103,11 @@ test.describe('settings hub', () => {
     await expect(page.getByRole('link', { name: 'Apparaten beheren' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Deellinks beheren' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Google-accounts beheren' })).toBeVisible();
+
+    // H4: a member's own notification preferences left this page for `/account`.
+    await expect(page.getByTestId('settings-section-notifications')).toHaveCount(0);
+    await page.goto('/nl/account');
+    await expect(page.getByTestId('settings-section-notifications')).toBeVisible();
   });
 });
 
@@ -123,20 +121,20 @@ test.describe('reward horizon', () => {
 
     const kiosk = await newAnonymousContext(browser, { locale: 'nl-NL' });
     const hub = await kiosk.newPage();
-    // Land on a `(hub)` route first: it redirects to the pair screen, which is
-    // where the service worker registers. `pairHub` waits for that worker to be
-    // active, and on the marketing page it never would be.
-    await hub.goto('/nl/hub');
+    // Land on the pair screen first: it is inside `(main)`, where the service
+    // worker registers (`/nl/today` now sends a cookie-less request to sign-in,
+    // which registers nothing). `pairHub` waits for that worker to be active.
+    await hub.goto('/nl/pair');
     await pairHub(hub, family.familyId);
 
     // Instant is the column default: the store carries the horizon it renders
     // and there is no savings goal on it.
-    await hub.goto(`/nl/hub/store?member=${child.id}`);
+    await hub.goto(`/nl/store?member=${child.id}`);
     await expect(hub.getByTestId('reward-store')).toHaveAttribute('data-horizon', 'instant');
     await expect(hub.getByTestId('savings-goal')).toHaveCount(0);
 
     // --- The parent's phone, in the settings hub's members section ----------
-    await page.goto('/nl/settings');
+    await page.goto('/nl/manage/settings');
     const row = page.getByTestId('member-row').filter({ hasText: 'Bram' });
     await row.getByRole('button', { name: 'Bewerken' }).click();
 
@@ -164,7 +162,7 @@ test.describe('graduation', () => {
     const { routines } = await seedHousehold(family.familyId);
     const [teeth, coat] = routines;
 
-    await page.goto('/nl/settings');
+    await page.goto('/nl/manage/settings');
 
     const teethRow = page.getByTestId('graduation-row').filter({ hasText: 'Tanden poetsen' });
     const coatRow = page.getByTestId('graduation-row').filter({ hasText: 'Jas ophangen' });
@@ -215,19 +213,19 @@ test.describe('hub display preferences', () => {
 
     const kiosk = await newAnonymousContext(browser, { locale: 'nl-NL' });
     const hub = await kiosk.newPage();
-    await hub.goto('/nl/hub');
+    await hub.goto('/nl/pair');
     const device = await pairHub(hub, family.familyId);
 
-    await hub.goto('/nl/hub');
-    await expect(hub.getByTestId('hub-board')).toBeVisible();
-    // The default board: `family.hubDefaultView = 'day'` opens the per-person
-    // tab (M25 — the setting now picks the vandaag composition's opening tab
-    // rather than a board component of its own).
-    await expect(hub.getByTestId('pill-tab-personen')).toHaveAttribute('aria-selected', 'true');
-    await expect(hub.getByTestId('today-tab-personen')).toBeVisible();
+    await hub.goto('/nl/calendar');
+    await expect(hub.getByTestId('hub-kalender')).toBeVisible();
+    // The default board: `family.hubDefaultView = 'day'` opens the hub
+    // calendar on its day view. (H5 premise change: the setting used to pick
+    // the vandaag composition's opening tab; the tabs became rail destinations
+    // and `/today` no longer reads it — `/calendar` does.)
+    await expect(hub.getByTestId('calendar-view-day')).toBeVisible();
 
     // --- The parent's phone -------------------------------------------------
-    await page.goto('/nl/settings');
+    await page.goto('/nl/manage/settings');
     await page.getByTestId('hub-default-view').click();
     await page.getByRole('option', { name: 'Lijst van wat eraan komt' }).click();
     await page.getByTestId('save-hub-display').click();
@@ -239,10 +237,8 @@ test.describe('hub display preferences', () => {
     // demands is that no *credential* changes, which is what is asserted
     // here — the device row is the one that was paired before the change.)
     await hub.reload();
-    // `'agenda'` maps to the chronological "dag" tab, the opposite of the
-    // default above.
-    await expect(hub.getByTestId('pill-tab-dag')).toHaveAttribute('aria-selected', 'true');
-    await expect(hub.getByTestId('today-tab-dag')).toBeVisible();
+    // `'agenda'` opens the chronological agenda view instead of the day view.
+    await expect(hub.getByTestId('calendar-view-agenda')).toBeVisible();
     // M20: the device name no longer sits in the chrome — the settings sheet
     // still carries it, and this is still the same device session (no
     // re-pair happened, just a reload).
@@ -274,7 +270,7 @@ test.describe('hub display preferences', () => {
       ])
     );
 
-    await page.goto('/nl/settings');
+    await page.goto('/nl/manage/settings');
 
     const row = page.getByTestId('calendar-display-row').filter({ hasText: 'Werk' });
     await expect(row).toBeVisible();
@@ -306,9 +302,12 @@ test.describe('hub display preferences', () => {
     // The hue on the board is the type's, and the owner still reads her own
     // private calendar in full (M23).
     await page.goto('/nl/today');
-    await expect(
-      page.locator('[data-testid="today-timeline-row"][data-category="teal"]')
-    ).toBeVisible();
+    // The event starts now, so it is live: folded behind the timeline toggle
+    // when the NU strip carries the moment, open on a themed day.
+    await openFoldedRows(page);
+    const teal = page.locator('[data-testid="today-timeline-row"][data-category="teal"]');
+    await expect(teal).toBeVisible();
+    await expect(teal).toContainText('Werkoverleg');
   });
 });
 
@@ -318,16 +317,16 @@ test.describe('household language and clock', () => {
 
     const kiosk = await newAnonymousContext(browser, { locale: 'nl-NL' });
     const hub = await kiosk.newPage();
-    // Land on a `(hub)` route first: it redirects to the pair screen, which is
-    // where the service worker registers. `pairHub` waits for that worker to be
-    // active, and on the marketing page it never would be.
-    await hub.goto('/nl/hub');
+    // Land on the pair screen first: it is inside `(main)`, where the service
+    // worker registers (`/nl/today` now sends a cookie-less request to sign-in,
+    // which registers nothing). `pairHub` waits for that worker to be active.
+    await hub.goto('/nl/pair');
     await pairHub(hub, family.familyId);
-    await hub.goto('/nl/hub');
+    await hub.goto('/nl/today');
     await expect(hub.locator('html')).toHaveAttribute('lang', 'nl');
 
     // --- The parent's phone -------------------------------------------------
-    await page.goto('/nl/settings');
+    await page.goto('/nl/manage/settings');
     await page.getByTestId('family-timezone').fill('Pacific/Auckland');
     await page.getByTestId('family-locale').click();
     await page.getByRole('option', { name: 'Engels' }).click();
@@ -336,7 +335,7 @@ test.describe('household language and clock', () => {
 
     // The parent stays signed in and stays on their own locale: `/nl` is a
     // per-person surface, and two parents may read the app in two languages.
-    await expect(page).toHaveURL(/\/nl\/settings/);
+    await expect(page).toHaveURL(/\/nl\/manage\/settings/);
     await expect(page.getByTestId('family-timezone')).toHaveValue('Pacific/Auckland');
     // No sign-in bounce anywhere: the session is untouched by a settings write.
     await page.goto('/nl/today');
@@ -344,15 +343,15 @@ test.describe('household language and clock', () => {
 
     // --- The wall display follows the household -----------------------------
     // `family.locale` is the household's language, and a kiosk has no person
-    // behind it to hold one of its own, so the hub moves to `/en/hub` on its
+    // behind it to hold one of its own, so the hub moves to `/en/today` on its
     // next request — without re-pairing.
-    await hub.goto('/nl/hub');
-    await expect(hub).toHaveURL(/\/en\/hub$/);
+    await hub.goto('/nl/today');
+    await expect(hub).toHaveURL(/\/en\/today$/);
     await expect(hub.locator('html')).toHaveAttribute('lang', 'en');
 
     // The star chart for the same child renders under the new locale too.
-    await hub.goto(`/nl/hub/stars/${child.id}`);
-    await expect(hub).toHaveURL(new RegExp(`/en/hub/stars/${child.id}$`));
+    await hub.goto(`/nl/stars/${child.id}`);
+    await expect(hub).toHaveURL(new RegExp(`/en/stars/${child.id}$`));
 
     await kiosk.close();
   });

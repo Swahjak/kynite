@@ -2,7 +2,7 @@
 
 import { useEffect, useOptimistic, useRef, useState, useTransition, type MouseEvent } from 'react';
 import { useTranslations } from 'next-intl';
-import { Icon, MemberFace, ProgressBar, cn, type IconName } from '@kynite/ui';
+import { Icon, MemberFace, PageHeader, ProgressBar, cn, type IconName } from '@kynite/ui';
 import { fireConfettiBurst } from '@/components/celebration';
 import { useDateTimeFormat } from '@/components/formatting';
 import { Link, useRouter } from '@/i18n/navigation';
@@ -51,8 +51,7 @@ import { TodayClock } from './today-clock';
  * slice's nor the tasks slice's nor the family slice's value exports — every
  * slice barrel re-exports `server-only` reads alongside its client-safe
  * pieces. `toggleTaskAction` therefore arrives as a prop, passed by
- * reference from the server route, exactly as `TodayTabSterren` hands
- * `completeStepAction` to `StarMatrix`; member colour classes and routine
+ * reference from the server route; member colour classes and routine
  * icon tiles arrive pre-resolved on `board` itself (`colorClasses` on
  * `BoardColumn`, `accentClass` on every row) rather than being looked up
  * here.
@@ -81,9 +80,16 @@ export type RoutinesBoardProps = {
   dayKey: string;
   /** `toggleTaskAction` from the tasks slice, passed by reference. */
   toggleTaskAction: (input: ToggleTaskInput) => Promise<ActionState>;
+  /** Presentation the page resolved for this request (`presentationFor`). */
+  surface?: 'app' | 'hub';
 };
 
-export function RoutinesBoard({ board, dayKey, toggleTaskAction }: RoutinesBoardProps) {
+export function RoutinesBoard({
+  board,
+  dayKey,
+  toggleTaskAction,
+  surface = 'hub',
+}: RoutinesBoardProps) {
   const t = useTranslations('today');
   const formatDateTime = useDateTimeFormat();
   const router = useRouter();
@@ -132,35 +138,34 @@ export function RoutinesBoard({ board, dayKey, toggleTaskAction }: RoutinesBoard
 
   return (
     <div data-testid="routines-board" className="flex min-h-0 flex-1 flex-col gap-4">
-      <header className="flex flex-shrink-0 items-center gap-5 border-b border-line-subtle pb-4">
-        <div className="min-w-0">
-          <h1 className="font-display text-h1 font-extrabold tracking-tight">{t('board.title')}</h1>
-          <span className="mt-0.5 block text-body-sm text-ink-secondary">
-            {formatDateTime(board.now, { dateStyle: 'full' })}
-          </span>
-        </div>
+      <PageHeader
+        surface={surface}
+        className="flex-shrink-0 border-b border-line-subtle pb-4"
+        title={t('board.title')}
+        subtitle={formatDateTime(board.now, { dateStyle: 'full' })}
+        action={
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+            <MemberFilter
+              members={filterMembers}
+              selectedIds={selectedIds}
+              onToggle={(memberId) =>
+                setSelectedIds((previous) => {
+                  const next = new Set(previous);
+                  if (next.has(memberId)) next.delete(memberId);
+                  else next.add(memberId);
+                  return next;
+                })
+              }
+              onClear={() => setSelectedIds(new Set())}
+              label={t('board.who.label')}
+              everyoneLabel={t('board.who.everyone')}
+              filterLabel={(name) => t('board.who.filterByMember', { name })}
+            />
 
-        <span className="flex-1" />
-
-        <MemberFilter
-          members={filterMembers}
-          selectedIds={selectedIds}
-          onToggle={(memberId) =>
-            setSelectedIds((previous) => {
-              const next = new Set(previous);
-              if (next.has(memberId)) next.delete(memberId);
-              else next.add(memberId);
-              return next;
-            })
-          }
-          onClear={() => setSelectedIds(new Set())}
-          label={t('board.who.label')}
-          everyoneLabel={t('board.who.everyone')}
-          filterLabel={(name) => t('board.who.filterByMember', { name })}
-        />
-
-        <TodayClock now={board.now} timeZone={board.timeZone} dayKey={dayKey} variant="hub" />
-      </header>
+            <TodayClock now={board.now} timeZone={board.timeZone} dayKey={dayKey} variant="hub" />
+          </div>
+        }
+      />
 
       <div className="flex min-h-0 flex-1 gap-3.5 overflow-x-auto [scrollbar-color:var(--line-subtle)_transparent] [scrollbar-width:thin]">
         <PoolColumn
@@ -243,7 +248,7 @@ function RoutineProgressCard({ column, daypart }: { column: BoardColumn; daypart
 
   return (
     <Link
-      href={`/hub/routines/${column.memberId}`}
+      href={`/routines/${column.memberId}`}
       data-testid="routine-progress-card"
       className={cn(
         'mx-1.5 mt-3 mb-1 block min-h-12 rounded-lg p-3 transition-colors duration-200 ease-brand',

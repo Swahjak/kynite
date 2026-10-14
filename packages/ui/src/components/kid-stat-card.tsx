@@ -25,10 +25,8 @@ import { StarCount } from './star-count';
  * reasoning is at `savings-goal-card.tsx`), and this block is built from the
  * facts this product actually keeps.
  *
- * **`render` makes the whole card a link, Base-UI style.** The hub dashboard
- * links each card to that child's routine page; `TodayTabSterren`'s stack and
- * `(app)/today`'s own routines tab do not, because `/hub/routines/[memberId]`
- * needs a hub device. Since this package may not import `next/link`
+ * **`render` makes the whole card a link, Base-UI style.** The caller decides
+ * whether a card links (e.g. to `/routines/[memberId]`) or stays plain. Since this package may not import `next/link`
  * (`packages/ui/.oxlintrc.json`), the caller passes the element — an
  * already-labelled `next/link` `<Link aria-label="…" href="…" />`, same seam
  * as `Fab`'s `render` — and it is cloned as an absolute overlay across the

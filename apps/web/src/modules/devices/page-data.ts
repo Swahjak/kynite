@@ -3,7 +3,7 @@ import { can, getPrincipal } from '@/modules/family';
 import { listDevices, listPendingPairingCodes, type DeviceListEntry } from './queries';
 
 /**
- * The server-side read `(app)/settings/devices` composes (architecture §2 rule
+ * The server-side read `(app)/manage/settings/devices` composes (architecture §2 rule
  * 4: route files hold no logic).
  */
 

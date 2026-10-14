@@ -102,7 +102,7 @@ test.describe('completion performance guard', { tag: '@heavy' }, () => {
 
     const { child, routine } = await seedBoard(family.familyId);
 
-    await page.goto(`/nl/hub/routines/${child.id}`);
+    await page.goto(`/nl/routines/${child.id}`);
     await expect(page.getByTestId('routine-board')).toBeVisible();
     await expect(page.getByTestId('routine-step').first()).toBeVisible();
 
@@ -142,14 +142,14 @@ test.describe('completion performance guard', { tag: '@heavy' }, () => {
 
     const { child, routine } = await seedBoard(family.familyId);
 
-    await page.goto(`/nl/hub/routines/${child.id}`);
+    await page.goto(`/nl/routines/${child.id}`);
     await expect(page.getByTestId('routine-board')).toBeVisible();
 
     // Hold every Server Action for two seconds. If the UI waited on the
     // response, the flip could not possibly happen inside the budget — so this
     // is the same assertion as above with the network taken hostage, which is
     // what proves the first one is not passing by being fast.
-    await page.route('**/nl/hub/routines/**', async (route) => {
+    await page.route('**/nl/routines/**', async (route) => {
       if (route.request().method() !== 'POST') return route.fallback();
       await new Promise((resolve) => setTimeout(resolve, 2000));
       return route.fallback();

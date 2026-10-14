@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 /** Anyone who already has a scoped session has no business on this form. */
 export default async function SignUpPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  if (await getPrincipal()) redirect({ href: '/family', locale });
+  if (await getPrincipal()) redirect({ href: '/today', locale });
 
   // M19 phase 2. Sign-up and sign-in offer Google through the *same* action:
   // better-auth's social endpoint signs an existing account in and registers a

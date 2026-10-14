@@ -142,7 +142,7 @@ function TimerStartForm({ onOpenChange }: { onOpenChange: (open: boolean) => voi
           return;
         }
         onOpenChange(false);
-        router.push('/hub/timer');
+        router.push('/timer');
       } finally {
         setPending(false);
       }

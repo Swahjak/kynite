@@ -28,12 +28,16 @@
     "family": "Family",
     "settings": "Settings",
     "calendar": "Calendar",
+    "tasks": "Tasks",
+    "stars": "Stars",
     "routines": "Routines",
+    "activeRoutines": "Active routines",
     "rewards": "Rewards",
     "timers": "Timers",
     "notifications": "Notifications",
     "devices": "Screens",
     "sharing": "Sharing",
+    "manage": "Manage",
     "more": "More",
     "mainNavigation": "Main navigation",
     "account": "Account"
@@ -52,7 +56,8 @@
       "title": "Sign in",
       "description": "Welcome back to Kynite.",
       "submit": "Sign in",
-      "noAccount": "No account yet?"
+      "noAccount": "No account yet?",
+      "pairScreen": "Pair this screen"
     },
     "signUp": {
       "title": "Create account",
@@ -223,6 +228,24 @@
         }
       ]
     }
+  },
+  "account": {
+    "title": "My settings",
+    "subtitle": "Just for you: your notifications and how Kynite looks in this browser.",
+    "back": "Back to my settings"
+  },
+  "manage": {
+    "title": "Manage",
+    "subtitle": "Routines, rewards, family and settings.",
+    "areas": "Sections",
+    "routines": "Routines",
+    "routinesDescription": "Build and edit",
+    "rewards": "Rewards",
+    "rewardsDescription": "Approve, give stars",
+    "family": "Family",
+    "familyDescription": "Members",
+    "settings": "Settings",
+    "settingsDescription": "Preferences, links and screens"
   },
   "family": {
     "title": "Family",
@@ -528,7 +551,6 @@
   },
   "calendar": {
     "title": "Calendar",
-    "todayTitle": "Today",
     "busy": "Busy",
     "untitled": "(no title)",
     "empty": "Nothing scheduled in this period.",
@@ -777,7 +799,6 @@
     "tabs": {
       "label": "View",
       "dag": "Day overview",
-      "personen": "Per person",
       "routines": "Routines",
       "sterren": "Star overview"
     },
@@ -829,10 +850,6 @@
       "otherDay": "Stars are only shown for today.",
       "hint": "Tap a square to tick it off",
       "toggle": "{step} — {name}",
-      "summaryLabel": "Stars today",
-      "tableCaption": "Today's routine steps per child",
-      "stepColumn": "Step",
-      "noStep": "{name} does not have this step today",
       "empty": "No routine steps for today yet."
     },
     "kids": {
@@ -869,7 +886,6 @@
         "child": "Child",
         "caregiver": "Caregiver"
       },
-      "celebrateBadge": "Done",
       "countLabel": "{done} of {total} done",
       "progressLabel": "{name}'s progress",
       "allDone": "All done!",
@@ -1383,7 +1399,8 @@
       "paired": "Paired as {name}.",
       "errors": {
         "invalidCode": "That code does not work. Create a new one on the phone.",
-        "rateLimited": "Please try again in a few minutes."
+        "rateLimited": "Please try again in a few minutes.",
+        "signOutFailed": "Pairing did not finish. Create a new code on the phone and try again."
       }
     },
     "hubSettings": {
@@ -1542,6 +1559,22 @@
         "day": "A column per person",
         "agenda": "A list of what's coming up"
       },
+      "errors": {
+        "forbidden": "You are not allowed to change this.",
+        "invalidInput": "Check the details you entered."
+      }
+    },
+    "surface": {
+      "title": "Display in this browser",
+      "description": "Choose how Kynite looks in this browser — this doesn't apply to other devices.",
+      "label": "Display",
+      "hint": "Automatic decides based on this device. A paired wall display never sees this setting.",
+      "options": {
+        "auto": "Automatic",
+        "app": "Phone",
+        "desktop": "Desktop"
+      },
+      "save": "Save",
       "errors": {
         "forbidden": "You are not allowed to change this.",
         "invalidInput": "Check the details you entered."

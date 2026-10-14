@@ -19,6 +19,7 @@ export {
 } from './hub-theme';
 
 export { useHubTheme } from './use-hub-theme';
+export { PrePaintTheme } from './pre-paint-theme';
 
 export {
   DEVICE_HEARTBEAT_INTERVAL_MS,
@@ -29,9 +30,8 @@ export {
 export { AmbientClock, type AmbientClockProps } from './ambient-clock';
 export { ChildLauncher, type HubChild } from './child-launcher';
 export { ChildTabs } from './child-tabs';
-export { HubRail } from './hub-rail';
+export { FullyLauncherButton, GoogleHomeButton } from './fully-buttons';
 export { HUB_IDLE_TIMEOUT_MS, IdleReturn } from './idle-return';
 export { HubSettings } from './hub-settings';
 export { SettingsWatcher } from './settings-watcher';
-export { KioskShell } from './kiosk-shell';
 export { TimerActivityContext } from './timer-activity-context';

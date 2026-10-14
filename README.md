@@ -43,7 +43,7 @@ system extraction; it is empty today.
 ```
 apps/web/           # the Next.js app — all source, tests and app tooling
   src/
-    app/[locale]/   # route groups: (marketing) (auth) (app) (hub) (share)
+    app/[locale]/   # route groups: (marketing) (auth) (main) (app) (clock) (share)
     modules/        # vertical feature slices — see src/modules/README.md
     components/ui/  # shadcn / Base UI primitives
     server/         # env.ts (zod), db/

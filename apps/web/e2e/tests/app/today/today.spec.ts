@@ -1,16 +1,10 @@
 import { expect, test } from '@e2e/fixtures/family';
-import { readCompletions, seedMembers, seedRoutines, withDb } from '@e2e/utils/seed';
+import { pairHub } from '@e2e/fixtures/hub';
+import { readStarBalance, seedMembers, seedRoutines, withDb } from '@e2e/utils/seed';
 
 /**
- * `/today`'s rebuilt tabbed layout (commits 102facd, 3639444).
- *
- * The day board's own combined/columns switcher and the M19 "up next" hero
- * are gone; four tabs — dag, personen, routines, sterren — sit under a
- * compact NU strip instead, remembered per device in `localStorage`
- * (`kynite.today.tab`). `calendar.spec.ts`'s "the today tabs" group already
- * covers the dag/personen split and the reload persistence; this file covers
- * the two new writing surfaces the rebuild adds: the Takenlijst and the star
- * matrix.
+ * `/today`'s writing surfaces: the Takenlijst, and the star counts a child's
+ * ticked steps leave on `/stars/<memberId>` and `/store`.
  */
 
 test.describe('the takenlijst', () => {
@@ -44,51 +38,64 @@ test.describe('the takenlijst', () => {
  * `routines.spec.ts` backdates its fixtures. */
 const LONG_AGO = new Date(Date.now() - 60 * 86_400_000).toISOString();
 
-test.describe('the sterren tab', () => {
-  test('ticking a star cell completes the step for that child', async ({ page, family }) => {
-    const routine = await withDb(async (client) => {
-      const [mila] = await seedMembers(client, family.familyId, [
+test.describe('star counts per child', () => {
+  // The old `/today` sterren tab (`StarMatrix`) is gone (D22); the stars live on
+  // `/stars/<memberId>` and `/store`. A step ticked on one child's board must
+  // pay out on that child's chart and on nobody else's. Tick → completion →
+  // ledger row itself is covered in `routines.spec.ts`.
+  test("ticking a child's steps pays that child's chart only", async ({ page, family }) => {
+    // Hub surfaces run behind a device principal, never an account session.
+    await pairHub(page, family.familyId);
+
+    const { mila, daan } = await withDb(async (client) => {
+      const [mila, daan] = await seedMembers(client, family.familyId, [
         { displayName: 'Mila', role: 'child', color: 'orchid', sortOrder: 1 },
+        { displayName: 'Daan', role: 'child', color: 'terracotta', sortOrder: 2 },
       ]);
       // Daily at 00:01 so today's occurrence is always already due when the
       // spec runs, the same pattern `routines.spec.ts` uses.
-      const [seededRoutine] = await seedRoutines(client, family.familyId, [
+      await seedRoutines(client, family.familyId, [
         {
           title: 'Klaarmaken voor school',
           ownerMemberId: mila.id,
           schedule: { rrule: 'FREQ=DAILY', timeOfDay: '00:01', graceDays: 1 },
+          starsPerCompletion: 2,
           createdAt: LONG_AGO,
-          steps: [{ title: 'Tanden poetsen' }],
+          steps: [{ title: 'Tanden poetsen' }, { title: 'Tas inpakken' }],
+        },
+        {
+          title: 'Kamer opruimen',
+          ownerMemberId: daan.id,
+          schedule: { rrule: 'FREQ=DAILY', timeOfDay: '00:01', graceDays: 1 },
+          createdAt: LONG_AGO,
+          steps: [{ title: 'Speelgoed opruimen' }],
         },
       ]);
-      return seededRoutine;
+      return { mila, daan };
     });
 
-    await page.goto('/nl/today');
-    const tab = page.getByTestId('pill-tab-sterren');
-    await expect(tab).toBeVisible();
-    // The pill tablist scrolls sideways on the app viewport and this is the
-    // last of the four — off-screen until scrolled to, so it needs a settled
-    // position before the click, not just visibility.
-    await tab.scrollIntoViewIfNeeded();
-    await tab.click();
-    await expect(tab).toHaveAttribute('aria-selected', 'true');
+    await page.goto(`/nl/routines/${mila.id}`);
+    const steps = page.getByTestId('routine-step');
+    await expect(steps).toHaveCount(2);
+    const first = steps.filter({ hasText: 'Tanden poetsen' });
+    await first.getByTestId('step-tap').click();
+    await expect(first).toHaveAttribute('data-state', 'done');
+    // The last tap collapses the finished routine into its success state, so
+    // there is no done row left to assert on — the ledger below is the check.
+    await steps.filter({ hasText: 'Tas inpakken' }).getByTestId('step-tap').click();
 
-    const matrix = page.getByTestId('star-matrix');
-    await expect(matrix).toBeVisible();
-
-    const cell = page.getByRole('button', { name: 'Tanden poetsen — Mila' });
-    await expect(cell).toHaveAttribute('data-state', 'todo');
-
-    await cell.click();
-    await expect(cell).toHaveAttribute('data-state', 'done');
-
+    // Two steps at two stars each: payout is per step, not per routine.
     await expect
-      .poll(async () => {
-        const rows = await withDb((client) => readCompletions(client, family.familyId));
-        return rows.filter((completion) => completion.routine_step_id === routine.stepIds[0])
-          .length;
-      })
-      .toBe(1);
+      .poll(async () => (await withDb((client) => readStarBalance(client, mila.id))).earned)
+      .toBe(4);
+
+    await page.goto(`/nl/stars/${mila.id}`);
+    await expect(page.getByTestId('earned-stars')).toHaveText('4');
+
+    await page.goto(`/nl/stars/${daan.id}`);
+    await expect(page.getByTestId('earned-stars')).toHaveText('0');
+
+    await page.goto(`/nl/store?member=${mila.id}`);
+    await expect(page.getByTestId('available-stars')).toContainText('4');
   });
 });

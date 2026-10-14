@@ -6,7 +6,7 @@ import { Link } from '@/i18n/navigation';
  * The localized 404 (M18).
  *
  * It lives at the locale segment, which is the only place it can serve every
- * `notFound()` in the app: `(app)/settings`, `(app)/settings/devices`, the hub
+ * `notFound()` in the app: `(app)/manage/settings`, `(app)/manage/settings/devices`, the hub
  * pages and the share view all throw it in normal use — a settings section a
  * caregiver principal may not read, a share token that has been revoked — and
  * before this file every one of them rendered Next.js's built-in English

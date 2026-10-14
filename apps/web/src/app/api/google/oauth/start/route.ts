@@ -36,7 +36,7 @@ function redirectTo(path: string): NextResponse {
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const locale = await getLocale();
   const settings = (reason?: string): string =>
-    `/${locale}/settings/google${reason ? `?error=${reason}` : ''}`;
+    `/${locale}/manage/settings/google${reason ? `?error=${reason}` : ''}`;
 
   const principal = await getPrincipal();
   if (!principal || principal.kind !== 'member') return redirectTo(`/${locale}/sign-in`);

@@ -113,6 +113,6 @@ async function clearLocation(familyId: string): Promise<void> {
 
 async function revalidateWeatherSurfaces(): Promise<void> {
   const locale = await getLocale();
-  revalidatePath(`/${locale}/settings`);
-  revalidatePath(`/${locale}/hub`);
+  revalidatePath(`/${locale}/manage/settings`);
+  revalidatePath(`/${locale}/today`);
 }

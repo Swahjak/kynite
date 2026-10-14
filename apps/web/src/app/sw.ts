@@ -22,12 +22,11 @@ import { RELOAD_HUB_MESSAGE } from '@/components/offline/reload-gate';
 /**
  * The Kynite service worker (docs/architecture.md §6, milestone M11).
  *
- * **One worker, two surfaces.** §6: "one Serwist service worker with
- * scope-aware runtime rules (a single SW is simpler than juggling two scopes,
- * and `/hub` vs `/app` route matching is enough to differentiate)". The
- * matching itself lives in `@/components/offline/sw-strategy`, which is pure
- * and unit-tested; everything here is the wiring that turns a strategy name
- * into a Serwist route.
+ * **One worker, two strategies.** §6: one Serwist service worker with path-aware
+ * runtime rules rather than two scopes. The matching itself lives in
+ * `@/components/offline/sw-strategy`, which is pure and unit-tested;
+ * everything here is the wiring that turns a strategy name into a Serwist
+ * route.
  *
  * | Surface | Pages | Why |
  * |---|---|---|

@@ -86,8 +86,13 @@ graph TB
 
 ### Route groups
 
-Route groups isolate surfaces with genuinely different layouts, auth models and
-service-worker scopes.
+> **Superseded for routing:** the `(app)`/`(hub)` split below predates the hub-equals-app work.
+> See `docs/route-tree.md` for the current route groups, gates and surface resolver.
+
+Route groups isolate trees with genuinely different layouts and auth models. Since the
+hub-equals-app work they split per principal, not per surface: a member and a paired tablet
+share `(main)`. `docs/route-tree.md` is authoritative for groups and gates; the tree below
+is a sketch.
 
 ```
 src/app/
@@ -96,13 +101,14 @@ src/app/
       page.tsx
     (auth)/                 # sign-in, sign-up, OAuth callback, invite accept
       sign-in/ sign-up/ invite/[token]/
-    (app)/                  # parent mobile PWA — account session required
-      layout.tsx            # bottom nav, mobile-first, ParentShell
-      today/ calendar/ routines/ rewards/ family/ settings/
-    (hub)/                  # kiosk — device session required, no account
-      layout.tsx            # fullscreen, dark, 6-foot type, no browser chrome
-      page.tsx              # ambient board (default surface)
-      routines/[memberId]/ timers/ store/ pair/
+    (main)/                 # the one tree: member OR paired device, same pages
+      layout.tsx            # resolves the principal, picks the AppShell frame
+      today/ calendar/ routines/ tasks/ store/ stars/ timers/ timer/ pair/
+    (clock)/                # device-only screensaver
+      clock/
+    (app)/                  # member-only — account session required
+      account/ oauth/consent/
+      manage/               # Beheer: routines, rewards, family, settings (routine:write)
     (share)/                # caregiver link view — signed token, read-only
       s/[token]/page.tsx
   api/
@@ -122,9 +128,10 @@ src/app/
   inside `[locale]/(auth)/`, even though conceptually they belong to the
   auth-adjacent flow that group holds.
 
-- **`(hub)` separate from `(app)`** — different session type, different a11y
-  budget (48px+ targets, 6-foot legibility), different caching strategy. Sharing
-  a layout would force every component to branch on surface.
+- **`(main)`, `(clock)` and `(app)` split per principal** — `(main)` serves a member or a
+  paired device and lets the principal decide the controls (one responsive shell, surface
+  from `getSurface()`); `(clock)` is device-only; `(app)` is member-only (account, Beheer).
+  A gate per tree, not a second copy of every page.
 - **`(share)` separate from both** — no session at all; must be impossible to
   reach a mutation from this tree. Enforced by the group having no Server Action
   imports and a proxy rule.
@@ -142,7 +149,8 @@ src/
   components/
     ui/             # shadcn/Base UI primitives (generated)
     hub/            # kiosk-only, large-format
-    app/            # parent-app
+    shell/          # AppShell: one responsive frame for member and device
+    app-nav/        # nav items, mobile bar, overflow sheet, user menu
     celebration/    # confetti presets, one module per animation (FR11)
   server/
     db/             # drizzle client, schema/, migrations/
@@ -613,8 +621,11 @@ skip re-emitting a realtime event for our own writes.
 ## 6. PWA & offline
 
 Two installable surfaces with different needs; one Serwist service worker with
-scope-aware runtime rules (a single SW is simpler than juggling two scopes, and
-`/hub` vs `/app` route matching is enough to differentiate).
+path-aware runtime rules (a single SW is simpler than juggling two scopes). The worker
+cannot see the principal, so it matches the shared route tree by path: the sections of
+`(main)` plus `/clock`, `/pair` and the legacy `/hub` (`HUB_SECTIONS` in `sw-strategy.ts`) get the hub shell strategy for
+member and tablet alike, while `/manage`, `/account` and `/oauth` stay `NetworkFirst`
+app pages (see `docs/route-tree.md`).
 
 ### Hub kiosk
 
@@ -660,7 +671,7 @@ a join, on every request.
 ### Kiosk device pairing
 
 Kiosks have no user and must survive reboots for months, so: parent generates a
-6-digit code (10-min TTL) in `(app)/settings/devices`; `/hub/pair` exchanges it
+6-digit code (10-min TTL) in `/manage/settings/devices`; `/pair` exchanges it
 for a `device` + `device_session`; the opaque token lives in an httpOnly cookie
 with **1-year expiry, sliding on each use** — no login screen on a wall tablet,
 ever. Sessions are family-scoped, individually revocable (revocation drops the

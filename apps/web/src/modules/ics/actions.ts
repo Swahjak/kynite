@@ -61,11 +61,10 @@ function actorOf(principal: Principal): { memberId?: string; source: 'mobile' | 
 /** Every surface a subscribed feed's events appear on. */
 async function revalidateFeeds(): Promise<void> {
   const locale = await getLocale();
-  revalidatePath(`/${locale}/settings/subscriptions`);
-  revalidatePath(`/${locale}/settings`);
+  revalidatePath(`/${locale}/manage/settings/subscriptions`);
+  revalidatePath(`/${locale}/manage/settings`);
   revalidatePath(`/${locale}/calendar`);
   revalidatePath(`/${locale}/today`);
-  revalidatePath(`/${locale}/hub`);
 }
 
 const addSchema = z.object({
@@ -189,7 +188,7 @@ export async function addSubscriptionAction(
         syncEnabled: true,
         // What the preset knows and a URL cannot: a Social Schools feed is a
         // school agenda. Events keep `event_type` null and inherit this (M23),
-        // and the calendars list on `/settings` stays the place to change it.
+        // and the calendars list on `/manage/settings` stays the place to change it.
         ...(preset ? { defaultType: preset.defaultType } : {}),
       })
       .returning();

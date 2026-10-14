@@ -131,12 +131,17 @@ for (const [name, viewport] of Object.entries(VIEWPORTS) as [
   (typeof VIEWPORTS)[ViewportName],
 ][]) {
   test.describe(`routine builder visuals — ${name}`, { tag: '@visual' }, () => {
-    test.use({ viewport });
+    // The `app` project sends `Sec-CH-UA-Mobile: ?1` (it is a phone). The
+    // tablet is not one: D17 resolves it to `desktop`, which draws the rail.
+    test.use({
+      viewport,
+      extraHTTPHeaders: { 'Sec-CH-UA-Mobile': name === 'tablet' ? '?0' : '?1' },
+    });
 
     test('routine builder', async ({ page, family }) => {
       await seedBoard(family.familyId, name === 'tablet' ? 'c' : 'd');
 
-      await page.goto('/nl/routines');
+      await page.goto('/nl/manage/routines');
       await expect(page.getByTestId('routine-row').first()).toBeVisible();
       await settlePage(page);
 

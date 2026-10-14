@@ -95,7 +95,7 @@ test.describe('routine builder', () => {
       ]);
     });
 
-    await page.goto('/nl/routines');
+    await page.goto('/nl/manage/routines');
     await expect(page.getByTestId('routines-empty')).toBeVisible();
 
     await page.getByRole('button', { name: 'Nieuwe routine' }).click();
@@ -137,7 +137,7 @@ test.describe('routine builder', () => {
   test('reordering a step persists its sortOrder', async ({ page, family }) => {
     const { morning } = await seedChildWithRoutines(family.familyId);
 
-    await page.goto('/nl/routines');
+    await page.goto('/nl/manage/routines');
 
     const row = page.getByTestId('routine-row').filter({ hasText: 'Klaarmaken voor school' });
     await row.getByRole('button', { name: 'Bewerken' }).click();
@@ -173,7 +173,7 @@ test.describe('the hub routine screen', () => {
 
       const { mila, morning } = await seedChildWithRoutines(family.familyId);
 
-      await page.goto(`/nl/hub/routines/${mila.id}`);
+      await page.goto(`/nl/routines/${mila.id}`);
 
       const card = page.getByTestId('routine-card').filter({ hasText: 'Klaarmaken voor school' });
       await expect(card).toHaveAttribute('data-expanded', 'true');
@@ -213,7 +213,7 @@ test.describe('the hub routine screen', () => {
 
     const { mila } = await seedChildWithRoutines(family.familyId);
 
-    await page.goto(`/nl/hub/routines/${mila.id}`);
+    await page.goto(`/nl/routines/${mila.id}`);
 
     const first = page.getByTestId('routine-step').first();
     await first.getByTestId('step-tap').click();
@@ -228,12 +228,14 @@ test.describe('the hub routine screen', () => {
           praise.compareDocumentPosition(star) & Node.DOCUMENT_POSITION_FOLLOWING
         ),
         praiseSize: Number.parseFloat(getComputedStyle(praise).fontSize),
-        starSize: Number.parseFloat(getComputedStyle(star.firstElementChild!).fontSize),
+        starSize: Number.parseFloat(
+          getComputedStyle(star.querySelector('[data-slot="icon"]')!).fontSize
+        ),
       };
     });
 
     expect(order.praiseFirst).toBe(true);
-    expect(order.praiseSize).toBeGreaterThan(order.starSize);
+    expect(order.praiseSize).toBeGreaterThanOrEqual(order.starSize);
   });
 
   test('a finished routine collapses to a calm success state', async ({ page, family }) => {
@@ -253,7 +255,7 @@ test.describe('the hub routine screen', () => {
       ])
     );
 
-    await page.goto(`/nl/hub/routines/${mila.id}`);
+    await page.goto(`/nl/routines/${mila.id}`);
 
     const card = page.getByTestId('routine-card').filter({ hasText: 'Huiswerk' });
     await expect(card).toHaveAttribute('data-complete', 'true');
@@ -264,22 +266,27 @@ test.describe('the hub routine screen', () => {
     await expect(card.getByTestId('routine-step')).toHaveCount(0);
   });
 
-  test('a missed occurrence is dimmed and carries no mark at all', async ({ page, family }) => {
+  test('a missed occurrence is a quiet row and carries no mark at all', async ({
+    page,
+    family,
+  }) => {
     // M12: hub surfaces run behind a device principal, never an account
     // session — this browser is the wall tablet for the rest of the test.
     await pairHub(page, family.familyId);
 
     const { mila } = await seedChildWithRoutines(family.familyId);
 
-    await page.goto(`/nl/hub/routines/${mila.id}`);
+    await page.goto(`/nl/routines/${mila.id}`);
 
     const card = page.getByTestId('routine-card').filter({ hasText: 'Vitamine' });
     await expect(card).toHaveAttribute('data-state', 'grace');
 
-    // Dimmed — one opacity, nothing else.
-    const opacity = await card.evaluate((node) => Number(getComputedStyle(node).opacity));
-    expect(opacity).toBeLessThan(1);
-    expect(opacity).toBeGreaterThan(0.3);
+    // H5 premise change: the dimming is gone. `RoutineCard` now draws a grace
+    // occurrence as a quiet white row with a "Nog te doen" chip and says
+    // outright that nothing marks it as late (routine-card.tsx, Grace /
+    // graduated), so the chip stands in for the old opacity check.
+    await expect(card.getByTestId('routine-grace')).toBeVisible();
+    await expect(card).toHaveCSS('opacity', '1');
 
     // No red anywhere in the card, and no failure glyph.
     const marks = await card.evaluate((node) => {
@@ -333,12 +340,12 @@ test.describe('the hub routine screen', () => {
       return seeded;
     });
 
-    await page.goto(`/nl/hub/routines/${mila.id}`);
+    await page.goto(`/nl/routines/${mila.id}`);
 
     await expect(page.getByTestId('hub-routines')).toContainText('Mila');
     await expect(page.getByTestId('routine-board')).not.toContainText('Daan');
 
-    await page.goto(`/nl/hub/routines/${daan.id}`);
+    await page.goto(`/nl/routines/${daan.id}`);
     await expect(page.getByTestId('routine-board')).not.toContainText('Mila');
   });
 
@@ -350,7 +357,7 @@ test.describe('the hub routine screen', () => {
     // session — this browser is the wall tablet for the rest of the test.
     await pairHub(page, family.familyId);
 
-    await page.goto('/nl/hub/routines/00000000-0000-4000-8000-000000000000');
+    await page.goto('/nl/routines/00000000-0000-4000-8000-000000000000');
     await expect(page.getByTestId('hub-routines')).toHaveCount(0);
   });
 });

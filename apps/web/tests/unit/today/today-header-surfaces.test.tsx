@@ -19,10 +19,11 @@ import type { Member } from '@/modules/family';
  *
  *  1. the festive chip, the countdown and the confetti render on **both**
  *     surfaces (the drift being repaired);
- *  2. the *personal* chrome — the signed-in member's face — is driven by a prop
- *     the phone passes and the hub does not, and the hub page never resolves a
- *     member to greet (a wall tablet has a device principal, §7);
- *  3. both routes render the same component, so the fork cannot quietly come
+ *  2. the *personal* chrome — the signed-in member's face — is driven by the
+ *     `viewer` prop rather than resolved inside the header, and the page
+ *     resolves a member to greet only for a member principal (a paired device
+ *     has nobody signed in, §7);
+ *  3. the one route renders the one header, so the fork cannot quietly come
  *     back.
  */
 
@@ -108,7 +109,7 @@ async function renderHeader({
       timeZone: TZ,
       dayKey,
       isToday: true,
-      href: surface === 'hub' ? '/hub' : '/today',
+      href: '/today',
       viewer,
       members,
     })
@@ -205,29 +206,32 @@ describe('TodayHeader — what stays surface-shaped', () => {
   });
 });
 
-describe('the two routes render the same header', () => {
+describe('the one today route renders the one header', () => {
   // Vitest runs with `apps/web` as its working directory.
   const read = (relative: string) => readFileSync(resolve('src', relative), 'utf8');
 
-  const hubPage = read('app/[locale]/(hub)/hub/page.tsx');
-  const todayPage = read('app/[locale]/(app)/today/page.tsx');
+  // H3 merged the wall and phone route files into one page (`(main)/today`).
+  const page = read('app/[locale]/(main)/today/page.tsx');
 
-  it('renders <TodayHeader> on both surfaces', () => {
-    expect(hubPage).toContain('<TodayHeader');
-    expect(todayPage).toContain('<TodayHeader');
+  it('renders <TodayHeader> with the surface as a prop', () => {
+    expect(page).toContain('<TodayHeader');
+    // One header for both surfaces: the surface is passed in, not hard-coded.
+    expect(page).toContain('surface={surface}');
   });
 
   it('has no second header component to drift against', () => {
-    expect(hubPage).not.toContain('TodayHubHeader');
-    expect(todayPage).not.toContain('TodayHubHeader');
+    expect(page).not.toContain('TodayHubHeader');
     expect(read('modules/today/index.ts')).not.toContain('TodayHubHeader');
   });
 
-  it('never resolves a member for the wall to greet', () => {
-    // §7: a wall tablet is physically unauthenticated. A greeting resolved from
-    // a member row there would be a permission smell before it was a copy one.
-    for (const identifier of ['getPrincipal', 'getMember', 'firstNameOf']) {
-      expect(hubPage).not.toContain(identifier);
-    }
+  it('resolves a member to greet only for a member principal', () => {
+    // §7: a wall tablet is physically unauthenticated. The greeting is personal
+    // for a member principal only — on any surface, a laptop included — so the
+    // member resolution is gated on the principal's kind, never the surface: a
+    // device must not go looking for a member.
+    expect(page).toMatch(/principal\?\.kind\s*===\s*'member'/);
+    expect(page).not.toMatch(/surface\s*===\s*'app'\s*\?\s*await\s+getPrincipal\(\)/);
+    expect(page).toContain('getMember');
+    expect(page).toContain('firstNameOf');
   });
 });

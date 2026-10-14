@@ -24,7 +24,7 @@ test.describe('google calendar sync smoke', () => {
     page,
     family,
   }) => {
-    await page.goto('/nl/settings/google');
+    await page.goto('/nl/manage/settings/google');
 
     // Linking is offered, because this server *is* configured.
     // A Base UI `Button` rendered as an `<a>`: the accessible role stays
@@ -37,7 +37,7 @@ test.describe('google calendar sync smoke', () => {
     // route → the fake's authorize endpoint → back to our callback with a code
     // → token exchange → userinfo → account row → calendar discovery.
     await link.click();
-    await page.waitForURL(/\/nl\/settings\/google/);
+    await page.waitForURL(/\/nl\/manage\/settings\/google/);
 
     // No error, and the account card is on screen. That pairing is the point:
     // the first run of this spec redirected to `?error=linkFailed` over a
@@ -45,7 +45,13 @@ test.describe('google calendar sync smoke', () => {
     // `enqueueCalendarSync` threw on a process with no job queues. The link no
     // longer depends on it (see `modules/google/linking.ts`).
     await expect(page.getByRole('alert')).toHaveCount(0);
-    await expect(page.getByRole('status')).toContainText('ouder@example.test');
+    // A fresh link opens the calendar picker (`CalendarPickerDialog`) rather
+    // than the `role=status` notice, which only shows once the dialog is gone.
+    // The primary calendar is already ticked server-side, so "Klaar" keeps it.
+    const picker = page.getByTestId('calendar-picker');
+    await expect(picker).toContainText('ouder@example.test');
+    await picker.getByTestId('calendar-picker-confirm').click();
+    await expect(picker).toBeHidden();
     await expect(page.getByText('ouder@example.test').first()).toBeVisible();
     await expect(page.getByText('Gezinsagenda (Google)')).toBeVisible();
 

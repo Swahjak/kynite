@@ -19,7 +19,7 @@ import { expect, test } from '@playwright/test';
  * it would be invisible to a dialog-based check.
  */
 
-const COLD_ENTRY_PATHS = ['/', '/nl', '/nl/sign-in', '/nl/sign-up', '/nl/hub'];
+const COLD_ENTRY_PATHS = ['/', '/nl', '/nl/sign-in', '/nl/sign-up', '/nl/today'];
 
 /** Records every call, and never actually prompts. */
 const INSTRUMENT = `
@@ -43,7 +43,7 @@ test.describe('cold entry', () => {
   test.beforeEach(async ({ context }) => {
     // A *cold* entry is a browser that has never been anything here. The `hub`
     // project hands every context the baseline tablet's device session (M17),
-    // which would make `/nl/sign-in` bounce to the board and `/nl/hub` render
+    // which would make `/nl/sign-in` bounce to the board and `/nl/today` render
     // a live board with an open SSE stream — neither of which is the state
     // this spec is about, and the second of which never reaches `networkidle`.
     await context.clearCookies();
@@ -73,13 +73,14 @@ test.describe('cold entry', () => {
     // a worker is installed (offline caching, push *delivery*) with no
     // permission dialog anywhere near it.
     //
-    // `/nl/hub` rather than `/nl`: B-1 moved `ServiceWorkerRegistrar` out of
+    // `/nl/pair` rather than `/nl`: B-1 moved `ServiceWorkerRegistrar` out of
     // the root `[locale]` layout (which also wraps the caregiver `(share)`
-    // tree — that tree must never install a worker) and into `(app)` and
-    // `(hub)` only. An unpaired browser hitting `/nl/hub` still redirects to
-    // `/nl/hub/pair`, which is inside `(hub)/layout.tsx` and registers just
-    // the same, with no session and no device cookie required.
-    await page.goto('/nl/hub');
+    // tree — that tree must never install a worker) and into `(main)` only.
+    // `/nl/today` no longer works as the cold entry: a cookie-less request is
+    // sent to `/nl/sign-in` (H5e), which lives in `(auth)` and installs
+    // nothing. `/nl/pair` is the unpaired browser's cold entry inside `(main)`:
+    // it registers with no session and no device cookie required.
+    await page.goto('/nl/pair');
     await page.evaluate(() => navigator.serviceWorker.ready);
 
     const requests = await page.evaluate(

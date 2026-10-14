@@ -37,7 +37,7 @@ export async function GoogleReauthBanner({ principal }: { principal: Principal }
         {t('reauthBanner', { email: accounts.map((a) => a.email).join(', ') })}
       </span>
       <Button
-        render={<Link href="/settings/google" />}
+        render={<Link href="/manage/settings/google" />}
         nativeButton={false}
         variant="destructive-soft"
         size="sm"
