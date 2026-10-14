@@ -1406,7 +1406,8 @@
       "paired": "Gekoppeld als {name}.",
       "errors": {
         "invalidCode": "Die code werkt niet. Maak een nieuwe aan op de telefoon.",
-        "rateLimited": "Probeer het over een paar minuten opnieuw."
+        "rateLimited": "Probeer het over een paar minuten opnieuw.",
+        "signOutFailed": "Koppelen is niet gelukt. Maak een nieuwe code op de telefoon en probeer het opnieuw."
       }
     },
     "hubSettings": {

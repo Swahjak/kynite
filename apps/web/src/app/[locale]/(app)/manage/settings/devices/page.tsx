@@ -6,7 +6,13 @@ import {
   SettingsPageHeader,
   SettingsSection,
 } from '@/components/settings/settings-shell';
-import { DeviceList, PairDevicePanel, PendingCodeList, loadDevicesPage } from '@/modules/devices';
+import {
+  DeviceList,
+  PairDevicePanel,
+  PendingCodeList,
+  loadDevicesPage,
+  requireManager,
+} from '@/modules/devices';
 
 /** Session-dependent: never prerendered, so `next build` needs no database. */
 export const dynamic = 'force-dynamic';
@@ -22,7 +28,13 @@ export const dynamic = 'force-dynamic';
  * with the times each was last touched, is not something to render on a screen
  * in the hall.
  */
-export default async function DeviceSettingsPage() {
+export default async function DeviceSettingsPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  await requireManager(locale, '/manage/settings/devices');
   const data = await loadDevicesPage();
   if (!data) notFound();
 

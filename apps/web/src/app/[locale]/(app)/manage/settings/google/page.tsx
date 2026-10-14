@@ -7,6 +7,7 @@ import {
 } from '@/components/settings/settings-shell';
 import { canOwn, getPrincipal } from '@/modules/family';
 import { GoogleAccountsPanel, listLinkedAccounts, missingGoogleConfig } from '@/modules/google';
+import { requireManager } from '@/modules/devices';
 
 /** Session- and env-dependent: never prerendered (`next build` needs no secrets). */
 export const dynamic = 'force-dynamic';
@@ -17,11 +18,14 @@ export const dynamic = 'force-dynamic';
  */
 export default async function GoogleSettingsPage({
   searchParams,
+  params: routeParams,
 }: {
+  params: Promise<{ locale: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const { locale } = await routeParams;
+  await requireManager(locale, '/manage/settings/google');
   const principal = await getPrincipal();
-  // The layout guard redirects unauthenticated requests; this is belt-and-braces.
   if (!principal) notFound();
 
   // Read-path gate: `listLinkedAccounts` returns linked Google emails and

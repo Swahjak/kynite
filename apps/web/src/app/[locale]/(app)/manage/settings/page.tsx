@@ -18,6 +18,7 @@ import {
 } from '@/modules/family';
 import { RoutineGraduationList, hasGraduated, loadRoutinesPage } from '@/modules/routines';
 import { WeatherLocationForm } from '@/modules/weather';
+import { requireManager } from '@/modules/devices';
 
 /** Session-dependent: never prerendered, so `next build` needs no secrets. */
 export const dynamic = 'force-dynamic';
@@ -50,9 +51,10 @@ export const dynamic = 'force-dynamic';
  * rule `loadFamilyPage` follows for invites. A control whose action would
  * refuse you is worse than no control.
  */
-export default async function SettingsHubPage() {
+export default async function SettingsHubPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  await requireManager(locale, '/manage/settings');
   const settings = await loadFamilySettings();
-  // The layout guard redirects unauthenticated requests; this is belt-and-braces.
   if (!settings) notFound();
 
   const [roster, routines, calendars] = await Promise.all([

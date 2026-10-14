@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import { RoutineDialog, RoutineManager, loadRoutinesPage } from '@/modules/routines';
 import { redirect } from '@/i18n/navigation';
+import { requireManager } from '@/modules/devices';
 
 /** Session-dependent: never prerendered, so `next build` needs no database. */
 export const dynamic = 'force-dynamic';
@@ -17,6 +18,7 @@ export const dynamic = 'force-dynamic';
  */
 export default async function RoutinesPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
+  await requireManager(locale, '/manage/routines');
 
   const data = await loadRoutinesPage();
   if (!data) redirect({ href: '/sign-in', locale });

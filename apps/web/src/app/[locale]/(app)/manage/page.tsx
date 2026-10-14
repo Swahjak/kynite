@@ -1,6 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { redirect } from '@/i18n/navigation';
-import { can, getPrincipal } from '@/modules/family';
+import { requireManager } from '@/modules/devices';
 import {
   SettingsNavRow,
   SettingsPage,
@@ -23,16 +22,8 @@ export const dynamic = 'force-dynamic';
  */
 export default async function ManagePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  // Member-only and manage-permission, like every page under it (D10). The
-  // layout already turns a device away; this keeps the index safe on its own and
-  // sends a member who may not manage (child, caregiver) back to the board.
-  const principal = await getPrincipal();
-  if (principal?.kind === 'device') redirect({ href: '/today', locale });
-  if (principal?.kind !== 'member') redirect({ href: '/sign-in', locale });
-  if (principal?.kind !== 'member') return null;
-  if (!can(principal, 'routine:write', { familyId: principal.familyId })) {
-    redirect({ href: '/today', locale });
-  }
+  // Member-only and manage-permission, like every page under it (D10).
+  await requireManager(locale, '/manage');
 
   const t = await getTranslations('manage');
 

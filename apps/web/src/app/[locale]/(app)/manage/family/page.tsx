@@ -3,11 +3,13 @@ import { getTranslations } from 'next-intl/server';
 import { PageHeader } from '@kynite/ui';
 import { SettingsPage } from '@/components/settings/settings-shell';
 import { MemberDialog, MemberList, loadFamilyPage } from '@/modules/family';
+import { requireManager } from '@/modules/devices';
 
 /** Household roster + member CRUD (PRD FR1/FR2, milestone M03; invites M14). */
-export default async function FamilyPage() {
+export default async function FamilyPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  await requireManager(locale, '/manage/family');
   const data = await loadFamilyPage();
-  // The layout guard redirects unauthenticated requests; this is belt-and-braces.
   if (!data) notFound();
 
   const t = await getTranslations('family');

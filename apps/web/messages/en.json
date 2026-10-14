@@ -1406,7 +1406,8 @@
       "paired": "Paired as {name}.",
       "errors": {
         "invalidCode": "That code does not work. Create a new one on the phone.",
-        "rateLimited": "Please try again in a few minutes."
+        "rateLimited": "Please try again in a few minutes.",
+        "signOutFailed": "Pairing did not finish. Create a new code on the phone and try again."
       }
     },
     "hubSettings": {

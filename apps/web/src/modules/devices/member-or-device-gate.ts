@@ -4,7 +4,7 @@ import { redirect } from '@/i18n/navigation';
 import { locales, routing } from '@/i18n/routing';
 import { signInHref } from '@/lib/callback-url';
 import { DEVICE_SESSION_COOKIE } from '@/lib/device-session';
-import { getFamily, getPrincipal, type Principal } from '@/modules/family';
+import { can, getFamily, getPrincipal, type Principal } from '@/modules/family';
 
 /**
  * The `(main)` tree's authorization gate (H3, docs/plans/2026-09-15-hub-equals-app.md).
@@ -78,6 +78,30 @@ export async function requireMemberOrDevice(
 
   // `redirect()` throws; next-intl's wrapper is not typed `never`.
   throw new Error('unreachable');
+}
+
+/**
+ * The `/manage/*` gate: a member who may manage (`routine:write`, the owner/adult
+ * stand-in the nav uses). Called at the top of every `/manage/*` page, *in
+ * addition to* the layout: layouts do not re-run on client navigation or on a
+ * crafted RSC request, so the layout alone leaves the page payloads open to a
+ * child member or a device. A device goes to its board, nobody to sign-in, a
+ * member without the right to the board.
+ */
+export async function requireManager(
+  locale: string,
+  href: string
+): Promise<Extract<Principal, { kind: 'member' }>> {
+  const principal = await getPrincipal();
+
+  if (principal?.kind === 'device') redirect({ href: '/today', locale });
+  if (principal?.kind !== 'member') redirect({ href: signInHref(`/${locale}${href}`), locale });
+  // `redirect()` is not typed `never` in next-intl's wrapper; restate the narrowing.
+  if (principal?.kind !== 'member') throw new Error('unreachable');
+  if (!can(principal, 'routine:write', { familyId: principal.familyId })) {
+    redirect({ href: '/today', locale });
+  }
+  return principal;
 }
 
 function toQueryString(searchParams?: URLSearchParams | Record<string, string | undefined>) {

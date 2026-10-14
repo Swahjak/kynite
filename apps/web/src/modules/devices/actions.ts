@@ -11,6 +11,7 @@ import {
   hashPairingCode,
   normalizePairingCode,
 } from '@/lib/device-session';
+import { getAuth } from '@/server/auth';
 import { assertCan } from '@/modules/family';
 import { publish } from '@/modules/realtime';
 import {
@@ -173,6 +174,16 @@ export async function pairDeviceAction(input: PairDeviceInput): Promise<PairDevi
   const outcome = await redeemPairingCode({ codeHash: hashPairingCode(code), clientHash });
 
   if (outcome.status !== 'paired') return pairDeviceFailure(outcome.status);
+
+  // The device principal outranks a member session, so a lingering one would be
+  // hidden, not gone: a later unpair would sign this browser back in as that
+  // member. End it before the browser becomes a device.
+  try {
+    await getAuth().api.signOut({ headers: requestHeaders });
+  } catch (error) {
+    console.error('[auth] could not end the member session while pairing', error);
+    return pairDeviceFailure('signOutFailed');
+  }
 
   (await cookies()).set(DEVICE_SESSION_COOKIE, outcome.result.token, deviceCookieOptions());
 
