@@ -26,21 +26,21 @@ export const dynamic = 'force-dynamic';
  *
  * H3 merged the phone's `(app)/today` and the wall hub's home screen into one
  * route (`docs/plans/2026-09-15-hub-equals-app.md`, "hub = app"). The surface
- * is resolved from the principal — `app` for a phone/desktop member, `hub` for
- * a paired device — and varies **presentation only**: the greeting, the board
- * container, the board's test id and the FAB's actions. The read behind the
+ * varies **presentation only** (the board container and its test id); who is
+ * greeted, the viewer's face and the FAB's write actions follow the principal
+ * (`kind === 'member'`), never the surface. The read behind the
  * composition (`loadHubBoardComposition`, `@/modules/today`) is shared verbatim
  * with `/calendar` and `/tasks`.
  *
  * ## What the surface still decides here
  *
- *  - **the greeting** — the viewer's first name on `app`
- *    (`common.greeting.<slot>`), the household's plain one on `hub`
- *    (`today.hubGreeting.<slot>`). A paired device has nobody signed in (§7),
- *    so only `app` resolves a member to greet.
- *  - **the FAB** — `app` resolves `newEventAction` and `taskAction`, gated on
- *    `event:write`/`task:write` as the loader hands them back; a paired device
- *    gets neither, and keeps its two-action dial.
+ *  - **who is greeted / the FAB** — not the surface's call. The principal is:
+ *    a member (`principal.kind === 'member'`, on a phone *or* a laptop) gets
+ *    the first-name greeting (`common.greeting.<slot>`), the viewer's face and
+ *    the "Nieuw event" / "Taak erbij" actions (still gated on
+ *    `event:write`/`task:write` as the loader hands them back); a paired
+ *    device greets the household (`today.hubGreeting.<slot>`) and gets neither
+ *    action, keeping its two-action dial.
  *  - **the chrome** — the phone's `mx-auto … max-w-7xl … flex-1` column with
  *    `data-testid="today-board"`; the wall's full-frame `h-full … px-6 py-4`
  *    board with `data-testid="hub-board"`.
@@ -106,24 +106,24 @@ export default async function TodayPage({
   /**
    * The greeting (M18).
    *
-   * `app` greets the signed-in member by first name; `hub` greets the
-   * household, because a paired device has nobody signed in (§7) and must not
-   * go looking for a member. The slot is resolved by the loader against the
+   * A signed-in member (any surface — a laptop is `desktop`, not `app`) is
+   * greeted by first name; a paired device greets the household, because it
+   * has nobody signed in (§7) and must not go looking for a member. The
+   * principal decides, never the surface. The slot is resolved by the loader against the
    * household's timezone, so a family in Curaçao is not wished a good evening
    * over breakfast. It degrades rather than fails — an `app` principal with no
    * member row, or one with a blank display name, keeps the plain title.
    */
-  const principal = surface === 'app' ? await getPrincipal() : null;
-  const viewer =
-    principal?.kind === 'member' ? await getMember(principal.familyId, principal.memberId) : null;
+  const principal = await getPrincipal();
+  const isMember = principal?.kind === 'member';
+  const viewer = isMember ? await getMember(principal.familyId, principal.memberId) : null;
   const firstName = viewer ? firstNameOf(viewer.displayName) : '';
   const tCommon = await getTranslations('common');
-  const greeting =
-    surface === 'app'
-      ? firstName
-        ? tCommon(`greeting.${slot}`, { name: firstName })
-        : t('title')
-      : t(`hubGreeting.${slot}`);
+  const greeting = isMember
+    ? firstName
+      ? tCommon(`greeting.${slot}`, { name: firstName })
+      : t('title')
+    : t(`hubGreeting.${slot}`);
 
   // Renders nothing when nothing is running, so the board is unchanged the
   // rest of the day.
@@ -238,7 +238,7 @@ export default async function TodayPage({
         starsHref="/store"
         timerAction={<TimerStartFabAction />}
         newEventAction={
-          surface === 'app' && data.canWrite ? (
+          isMember && data.canWrite ? (
             <AddEventFabAction
               members={data.members}
               calendars={data.calendars}
@@ -247,7 +247,7 @@ export default async function TodayPage({
             />
           ) : null
         }
-        taskAction={surface === 'app' && tasks?.canWrite ? <TaskComposerFabAction /> : null}
+        taskAction={isMember && tasks?.canWrite ? <TaskComposerFabAction /> : null}
       />
     </main>
   );

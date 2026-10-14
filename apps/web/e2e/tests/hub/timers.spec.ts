@@ -217,12 +217,9 @@ test.describe('hub timers', () => {
 });
 
 test.describe('member browser → hub', () => {
-  // H5b premise change: the Controller (`TimerControls`, label input + presets)
-  // is no longer routed; a member starts timers from the shared board's
-  // quick-start buttons, which navigate to the fullscreen `/timer`. That screen
-  // stops a timer with `hub-timer-stop`, not the board tile's `timer-stop` (the
-  // old spec reached for the tile's button, which only exists on `/timers`).
-  test('a timer started from a member browser appears on the hub, and stopping removes it', async ({
+  // A member keeps the Controller on `/timers` (`TimerControls`: label input,
+  // presets); a paired device gets the quick-start board on the same route.
+  test('a timer started on the Controller appears on the hub, and stopping removes it', async ({
     page,
     context,
     family,
@@ -252,10 +249,10 @@ test.describe('member browser → hub', () => {
     // compiling it — which has nothing to do with the propagation budget the
     // next round measures, and is the whole difference between this spec
     // passing alone and failing under four parallel workers.
-    await page.getByRole('button', { name: 'Timer van 5 minuten' }).click();
+    await page.getByTestId('timer-label-input').fill('Opwarmen');
+    await page.getByTestId('timer-preset-300').click();
     await expect(hub.getByTestId('timer-tile')).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByTestId('hub-timer-fullscreen')).toBeVisible();
-    await page.getByTestId('hub-timer-stop').click();
+    await page.getByTestId('timer-stop').first().click();
     await expect(hub.getByTestId('timer-board-empty')).toBeVisible({ timeout: 15_000 });
 
     // The measured round. M10's <2s budget, over SSE — the PRD number itself,
@@ -263,16 +260,13 @@ test.describe('member browser → hub', () => {
     // `timer.started` inside its own transaction, the hub's stream delivers it,
     // and the board refetches. M09 allowed 6s here because the transport was a
     // 2s poll.
-    // A quick start sends the starter to the fullscreen `/timer` (M-T2); the
-    // board with the presets is one navigation back.
-    await page.goto('/nl/timers');
-    await page.getByRole('button', { name: 'Timer van 5 minuten' }).click();
+    await page.getByTestId('timer-label-input').fill('Schoenen aan');
+    await page.getByTestId('timer-preset-300').click();
 
     await expect(hub.getByTestId('timer-tile')).toBeVisible({ timeout: 2000 });
-    await expect(hub.getByTestId('timer-label')).toHaveText('Timer van 5 min');
+    await expect(hub.getByTestId('timer-label')).toHaveText('Schoenen aan');
 
-    await expect(page.getByTestId('hub-timer-fullscreen')).toBeVisible();
-    await page.getByTestId('hub-timer-stop').click();
+    await page.getByTestId('timer-stop').first().click();
 
     await expect(hub.getByTestId('timer-board-empty')).toBeVisible({ timeout: 2000 });
 

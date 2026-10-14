@@ -21,7 +21,7 @@ import type { Member } from '@/modules/family';
  *     surfaces (the drift being repaired);
  *  2. the *personal* chrome — the signed-in member's face — is driven by the
  *     `viewer` prop rather than resolved inside the header, and the page
- *     resolves a member to greet only on the `app` surface (a paired device
+ *     resolves a member to greet only for a member principal (a paired device
  *     has nobody signed in, §7);
  *  3. the one route renders the one header, so the fork cannot quietly come
  *     back.
@@ -224,11 +224,13 @@ describe('the one today route renders the one header', () => {
     expect(read('modules/today/index.ts')).not.toContain('TodayHubHeader');
   });
 
-  it('resolves a member to greet only on the app surface', () => {
+  it('resolves a member to greet only for a member principal', () => {
     // §7: a wall tablet is physically unauthenticated. The greeting is personal
-    // on `app` only, so the member resolution is gated on the surface rather
-    // than run for every principal — a device must not go looking for a member.
-    expect(page).toMatch(/surface\s*===\s*'app'\s*\?\s*await\s+getPrincipal\(\)/);
+    // for a member principal only — on any surface, a laptop included — so the
+    // member resolution is gated on the principal's kind, never the surface: a
+    // device must not go looking for a member.
+    expect(page).toMatch(/principal\?\.kind\s*===\s*'member'/);
+    expect(page).not.toMatch(/surface\s*===\s*'app'\s*\?\s*await\s+getPrincipal\(\)/);
     expect(page).toContain('getMember');
     expect(page).toContain('firstNameOf');
   });

@@ -44,10 +44,12 @@ const MEMBER = {
   starBalance: 0,
 };
 
+const getPrincipal = vi.hoisted(() => vi.fn());
+
 vi.mock('@/modules/family', () => ({
   firstNameOf: (name: string) => name.split(' ')[0],
   getMember: async () => MEMBER,
-  getPrincipal: async () => ({ kind: 'member', familyId: 'family-1', memberId: 'm1' }),
+  getPrincipal: () => getPrincipal(),
 }));
 
 vi.mock('@/modules/calendar', () => ({
@@ -60,6 +62,8 @@ vi.mock('@/modules/devices', () => ({
 }));
 
 const getSurface = vi.fn();
+const DEVICE = { kind: 'device', familyId: 'family-1', deviceId: 'd1' };
+const MEMBER_PRINCIPAL = { kind: 'member', familyId: 'family-1', memberId: 'm1' };
 
 vi.mock('@/modules/surface', () => ({
   getSurface: (...args: unknown[]) => getSurface(...args),
@@ -112,8 +116,11 @@ const TodayPage = (await import('@/app/[locale]/(main)/today/page')).default;
 
 const NOW = new Date('2026-08-15T09:00:00.000Z');
 
-async function renderPage(surface: 'app' | 'hub') {
+async function renderPage(surface: 'app' | 'hub' | 'desktop', principal?: object) {
   getSurface.mockResolvedValue(surface);
+  // A paired device is the `hub` surface; every other surface is a signed-in
+  // member unless a test says otherwise.
+  getPrincipal.mockResolvedValue(principal ?? (surface === 'hub' ? DEVICE : MEMBER_PRINCIPAL));
 
   loadHubBoardComposition.mockResolvedValue({
     data: {
@@ -221,5 +228,28 @@ describe('(main)/today — what the surface still decides', () => {
         taskAction: null,
       })
     );
+  });
+
+  // Review finding: `desktop` maps to the `hub` presentation, so a signed-in
+  // member on a laptop used to lose the greeting, the face and both FAB
+  // actions. The principal decides these, never the surface.
+  it('treats a signed-in member on desktop like a member: greeting, viewer, FAB actions', async () => {
+    await renderPage('desktop');
+
+    expect(todayHeaderProps).toHaveBeenCalledWith(
+      expect.objectContaining({ greeting: 'common.greeting.morning', viewer: MEMBER })
+    );
+    expect(todayFabProps).toHaveBeenCalledWith(
+      expect.objectContaining({
+        newEventAction: expect.anything(),
+        taskAction: expect.anything(),
+      })
+    );
+  });
+
+  it('still keeps the wall frame for a desktop member (presentation only)', async () => {
+    const { container } = await renderPage('desktop');
+
+    expect(container.querySelector('main')?.getAttribute('data-testid')).toBe('hub-board');
   });
 });

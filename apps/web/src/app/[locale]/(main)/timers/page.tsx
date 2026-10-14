@@ -1,12 +1,14 @@
 import { getTranslations } from 'next-intl/server';
-import { EmptyState } from '@kynite/ui';
+import { EmptyState, PageHeader } from '@kynite/ui';
 import { formatDateTime } from '@/i18n/formatting-locale';
 import { requireMemberOrDevice } from '@/modules/devices';
-import { getHouseholdFormattingLocale } from '@/modules/family';
+import { getHouseholdFormattingLocale, getPrincipal } from '@/modules/family';
 import {
   DURATION_PRESETS,
   TimerBoard,
+  TimerControls,
   loadTimerBoard,
+  loadTimersPage,
   type TimerQuickStart,
 } from '@/modules/timers';
 
@@ -22,8 +24,11 @@ export const dynamic = 'force-dynamic';
  * so this page can be reloaded at any point in a countdown and resume on the
  * same second.
  *
- * Addressing is settled in `(hub)/layout.tsx`: the hub tree keeps its `/hub`
- * prefix, and this page is reached only behind a device principal (M12).
+ * One route for both principals; the principal decides the controls, the
+ * surface decides nothing here. A signed-in member gets the full
+ * `TimerControls` (custom label, member select, start from a routine step's
+ * prescribed timer, extend); a paired device keeps the wall's quick-start
+ * board.
  */
 export default async function HubTimersPage({
   params,
@@ -35,6 +40,28 @@ export default async function HubTimersPage({
   const { locale } = await params;
   const { now } = await searchParams;
   await requireMemberOrDevice(locale, '/timers', { now });
+
+  const principal = await getPrincipal();
+  if (principal?.kind === 'member') {
+    const [page, tMember] = await Promise.all([loadTimersPage(), getTranslations('timers')]);
+    if (!page) return null;
+    return (
+      <main
+        className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 p-4 sm:p-6"
+        data-testid="timers-page"
+      >
+        <PageHeader
+          icon="timer"
+          iconTint="brand-container"
+          iconFilled
+          title={tMember('title')}
+          subtitle={tMember('subtitle')}
+        />
+
+        <TimerControls page={page} />
+      </main>
+    );
+  }
 
   const board = await loadTimerBoard({ now });
   const t = await getTranslations('timers');
