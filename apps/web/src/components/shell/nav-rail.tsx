@@ -93,7 +93,13 @@ export function NavRail({
   const pathname = usePathname();
 
   const brand = brandHref ? (
-    <Link href={brandHref} className={brandClass} aria-label={brandLabel}>
+    <Link
+      href={brandHref}
+      // D17: a link is a tap target; 48px on the wall/desktop, the 12px growth
+      // taken out of the margin so the tiles below do not move.
+      className={cn(brandClass, 'hub:size-12 desktop:size-12 hub:mb-2.5 desktop:mb-2.5')}
+      aria-label={brandLabel}
+    >
       <Image src="/images/logo-icon.svg" alt="" width={36} height={36} unoptimized priority />
     </Link>
   ) : (
