@@ -301,9 +301,13 @@ test.describe('hub display preferences', () => {
     // The hue on the board is the type's, and the owner still reads her own
     // private calendar in full (M23).
     await page.goto('/nl/today');
-    await expect(
-      page.locator('[data-testid="today-timeline-row"][data-category="teal"]')
-    ).toBeVisible();
+    // The event starts now, so it is live: its row folds behind the timeline's
+    // disclosure (the NU strip, or on a themed day the banner, carries the
+    // moment) and is drawn in full once that is opened.
+    await page.getByTestId('today-past-toggle').click();
+    const teal = page.locator('[data-testid="today-timeline-row"][data-category="teal"]');
+    await expect(teal).toBeVisible();
+    await expect(teal).toContainText('Werkoverleg');
   });
 });
 

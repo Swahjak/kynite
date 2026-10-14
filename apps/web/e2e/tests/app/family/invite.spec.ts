@@ -204,8 +204,18 @@ test.describe('second-parent onboarding', () => {
       // `linkGoogleAccount` + `bootstrapAccount` + the first sync would leave
       // behind — an account owned by the *newly claimed member*, one calendar,
       // one event on it.
-      const start = new Date();
-      start.setHours(start.getHours() + 3, 0, 0, 0);
+      //
+      // Pinned inside today's Amsterdam day, not "now + 3h": a member's
+      // calendar opens on the day view (H5e), and a run after 21:00 pushed a
+      // relative start into tomorrow, off the page the assertion looks at.
+      // 09:00 UTC is 10:00 or 11:00 local across the DST change.
+      const [year, month, day] = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Europe/Amsterdam',
+      })
+        .format(new Date())
+        .split('-')
+        .map(Number);
+      const start = new Date(Date.UTC(year, month - 1, day, 9));
       const end = new Date(start.getTime() + 60 * 60 * 1000);
 
       await withDb(async (client) => {
