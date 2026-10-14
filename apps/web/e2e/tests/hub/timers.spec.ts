@@ -254,6 +254,7 @@ test.describe('member browser → hub', () => {
     // passing alone and failing under four parallel workers.
     await page.getByRole('button', { name: 'Timer van 5 minuten' }).click();
     await expect(hub.getByTestId('timer-tile')).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId('hub-timer-fullscreen')).toBeVisible();
     await page.getByTestId('hub-timer-stop').click();
     await expect(hub.getByTestId('timer-board-empty')).toBeVisible({ timeout: 15_000 });
 
@@ -270,6 +271,7 @@ test.describe('member browser → hub', () => {
     await expect(hub.getByTestId('timer-tile')).toBeVisible({ timeout: 2000 });
     await expect(hub.getByTestId('timer-label')).toHaveText('Timer van 5 min');
 
+    await expect(page.getByTestId('hub-timer-fullscreen')).toBeVisible();
     await page.getByTestId('hub-timer-stop').click();
 
     await expect(hub.getByTestId('timer-board-empty')).toBeVisible({ timeout: 2000 });
