@@ -16,7 +16,7 @@ full suite:
   tests; this is the gate to run when CPU budget is tight.
 - `@visual` — every screenshot/snapshot spec (`**/visual/*.spec.ts`).
   Slow and prone to pixel-diff noise; skip these for a fast functional pass.
-  **Out of the CI gate for the alpha** (`ci.yml` runs `--grep-invert @visual`):
+  **Out of the CI gate for the alpha** (`ci.yml` runs `E2E_GREP_INVERT=@visual`):
   while the interface is being rebuilt every snapshot diff is a deliberate
   change, so the gate was red by design and told you nothing. 18 of the 40
   baselines cover the calendar and Vandaag — both open work — and the two
