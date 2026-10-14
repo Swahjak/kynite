@@ -93,7 +93,12 @@ export default async function HubTakenBoardPage({
       >
         {/* RoutinesBoard renders its own header (title, date, "Wie" filter, clock), so TodayHeader only renders for the browsed-day fallback. */}
         {board ? (
-          <RoutinesBoard board={board} dayKey={dayKey} toggleTaskAction={toggleTaskAction} />
+          <RoutinesBoard
+            board={board}
+            dayKey={dayKey}
+            toggleTaskAction={toggleTaskAction}
+            surface={surface}
+          />
         ) : (
           <>
             <TodayHeader

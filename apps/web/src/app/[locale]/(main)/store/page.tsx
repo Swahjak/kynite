@@ -34,8 +34,8 @@ export const dynamic = 'force-dynamic';
  * snapshot is deterministic; the latter affects display only (see
  * `page-data.ts` — the Server Action re-derives nothing from it).
  *
- * Addressing is settled in `(hub)/layout.tsx`: the hub tree keeps its `/hub`
- * prefix, and this page is reached only behind a device principal (M12).
+ * Addressing is settled in `(main)/layout.tsx`: this page is reached at
+ * `/store` by a member or a device principal alike.
  */
 export default async function HubStorePage({
   params,

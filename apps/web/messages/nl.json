@@ -551,7 +551,6 @@
   },
   "calendar": {
     "title": "Agenda",
-    "todayTitle": "Vandaag",
     "busy": "Bezet",
     "untitled": "(zonder titel)",
     "empty": "Geen afspraken in deze periode.",
@@ -800,7 +799,6 @@
     "tabs": {
       "label": "Weergave",
       "dag": "Dagoverzicht",
-      "personen": "Per persoon",
       "routines": "Routines",
       "sterren": "Sterren overzicht"
     },
@@ -852,10 +850,6 @@
       "otherDay": "Sterren worden alleen voor vandaag getoond.",
       "hint": "Tik op een vakje om af te vinken",
       "toggle": "{step} — {name}",
-      "summaryLabel": "Sterren vandaag",
-      "tableCaption": "Routinestappen van vandaag per kind",
-      "stepColumn": "Stap",
-      "noStep": "{name} heeft deze stap vandaag niet",
       "empty": "Vandaag staan er nog geen routinestappen klaar."
     },
     "kids": {
@@ -892,7 +886,6 @@
         "child": "Kind",
         "caregiver": "Oppas"
       },
-      "celebrateBadge": "Klaar",
       "countLabel": "{done} van {total} klaar",
       "progressLabel": "Voortgang van {name}",
       "allDone": "Alles gedaan!",

@@ -76,9 +76,16 @@ export type RoutinesPageBoardProps = {
   dayKey: string;
   /** `completeStepAction` from the routines slice, passed by reference. */
   completeStepAction: (input: CompleteStepInput) => Promise<CompletionState>;
+  /** Presentation the page resolved for this request (`presentationFor`). */
+  surface?: 'app' | 'hub';
 };
 
-export function RoutinesPageBoard({ data, dayKey, completeStepAction }: RoutinesPageBoardProps) {
+export function RoutinesPageBoard({
+  data,
+  dayKey,
+  completeStepAction,
+  surface = 'hub',
+}: RoutinesPageBoardProps) {
   const t = useTranslations('today');
   const formatDateTime = useDateTimeFormat();
 
@@ -185,12 +192,12 @@ export function RoutinesPageBoard({ data, dayKey, completeStepAction }: Routines
   return (
     <div data-testid="routines-page-board" className="flex min-h-0 flex-1 flex-col gap-4">
       <PageHeader
-        surface="hub"
+        surface={surface}
         className="flex-shrink-0 border-b border-line-subtle pb-4"
         title={t('routinesPage.title')}
         subtitle={formatDateTime(data.now, { dateStyle: 'full' })}
         action={
-          <div className="flex items-center gap-5">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
             <MemberFilter
               members={filterMembers}
               selectedIds={selectedIds}

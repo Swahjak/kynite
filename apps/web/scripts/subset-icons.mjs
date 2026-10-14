@@ -142,7 +142,7 @@ const EXTRA_ICONS = [
   'restaurant',
   'bedtime',
   // Named through a table or a ternary rather than a literal `name="…"`, which
-  // is all the scanner below can see: `today/ui/today-tabs.tsx`'s TAB_ICONS,
+  // is all the scanner below can see: the today tab icons,
   // `tasks/ui/task-list.tsx`'s checked/unchecked pair, and
   // `routines/ui/tokens.ts`'s SECTION_ICONS.
   'view_column',

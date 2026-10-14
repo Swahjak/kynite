@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 import {
+  DEVICE_RAIL_NAV,
   OVERFLOW_NAV,
   PRIMARY_NAV,
   RAIL_FOOTER_NAV,
@@ -227,7 +228,7 @@ export default async function MainLayout({
               surface="hub"
               kiosk
               device={paired ? { id: paired.id, name: paired.name } : null}
-              railItems={RAIL_NAV.map(toRailItem)}
+              railItems={DEVICE_RAIL_NAV.map(toRailItem)}
               railNavLabel={labels.mainNavigation}
               railTestId="hub-rail"
               railTimerTile={timers ? <RailTimerTile initial={timers} /> : null}

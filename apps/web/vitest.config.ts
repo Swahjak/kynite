@@ -17,6 +17,10 @@ const serverOnlyAlias = {
   'server-only': fileURLToPath(new URL('./tests/setup/server-only.ts', import.meta.url)),
 };
 
+// next-intl's ESM dist imports `next/navigation` extensionless, which Node's
+// ESM resolver rejects. Inlining it makes Vite resolve the import instead.
+const inlineNextIntl = { server: { deps: { inline: ['next-intl'] } } };
+
 const sharedExclude = ['node_modules/**', '.next/**', 'e2e/**'];
 
 export default defineConfig({
@@ -36,6 +40,7 @@ export default defineConfig({
           name: 'node',
           globals: true,
           environment: 'node',
+          ...inlineNextIntl,
           include: ['tests/**/*.test.ts', 'src/**/*.test.ts'],
           exclude: sharedExclude,
         },
@@ -48,6 +53,7 @@ export default defineConfig({
           name: 'dom',
           globals: true,
           environment: 'jsdom',
+          ...inlineNextIntl,
           setupFiles: ['./tests/setup/dom.ts'],
           include: ['src/**/*.test.tsx', 'tests/**/*.test.tsx'],
           exclude: sharedExclude,

@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import { EmptyState } from '@kynite/ui';
 import { requireMemberOrDevice } from '@/modules/devices';
+import { getSurface, presentationFor } from '@/modules/surface';
 import { completeStepAction, loadFamilyRoutines, todayKeyIn } from '@/modules/routines';
 import { RoutinesPageBoard, TodayLive } from '@/modules/today';
 
@@ -12,12 +13,12 @@ export const dynamic = 'force-dynamic';
  * taken-board-routines-page plan, M3, after
  * `docs/design/claude-design/Actieve routines.dc.html`).
  *
- * Its own page on the wall tablet, separate from `/hub/taken`: one column per
+ * Its own page on the wall tablet, separate from `/tasks`: one column per
  * family member, the day running top to bottom inside each, the routine that
  * is live standing open with its steps and the finished ones staying in place
  * wearing KLAAR. This is where a routine step is tapped from the household's
- * overview; `/hub/taken` shows only how far along a member's routine is, and
- * `/hub/routines/[memberId]` (untouched) is still one child's own larger
+ * overview; `/tasks` shows only how far along a member's routine is, and
+ * `/routines/[memberId]` (untouched) is still one child's own larger
  * screen. All three tick the same completion through the same seam.
  *
  * `?date=`/`?time=` pin the rendered clock so a visual snapshot is
@@ -61,6 +62,7 @@ export default async function HubRoutinesOverviewPage({
         data={data}
         dayKey={todayKeyIn(data.timeZone, data.now)}
         completeStepAction={completeStepAction}
+        surface={presentationFor(await getSurface())}
       />
     </main>
   );

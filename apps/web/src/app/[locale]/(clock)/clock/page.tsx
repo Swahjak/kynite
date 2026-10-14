@@ -5,10 +5,10 @@ import { requireHubDevice } from '@/modules/devices';
 import { getFamily, getHouseholdFormattingLocale } from '@/modules/family';
 
 /**
- * `/hub/clock` — see `layout.tsx` for why this is its own route group.
+ * `/clock` — see `layout.tsx` for why this is its own route group.
  *
  * The auth gate lives here, not in the layout, for the same reason every
- * `(hub)` page states it: Next.js layouts don't re-render on client-side
+ * `(main)` page states it: Next.js layouts don't re-render on client-side
  * navigation, so a check there only ever runs once. This tree has exactly one
  * page and no in-tree navigation, but the rule is cheap to keep and the one
  * place a stray future link would still be caught correctly.

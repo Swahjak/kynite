@@ -5,6 +5,7 @@ import { Menu } from '@base-ui/react/menu';
 import { clearUserCachesWithin } from '@/components/offline';
 import { Link } from '@/i18n/navigation';
 import { cn } from '@kynite/ui';
+import { SheetClose } from '@/components/ui/sheet';
 
 /**
  * The signed-in member, at the bottom of the nav — and the sign-out behind it.
@@ -162,13 +163,19 @@ export function UserMenuSheetSection({
           {user.name}
         </span>
       </div>
-      <Link
-        href="/account"
-        className={cn(itemClass, 'w-full hover:bg-surface-container-high')}
-        data-testid="account-settings"
+      <SheetClose
+        nativeButton={false}
+        role="link"
+        render={
+          <Link
+            href="/account"
+            className={cn(itemClass, 'w-full hover:bg-surface-container-high')}
+            data-testid="account-settings"
+          />
+        }
       >
         {labels.settings}
-      </Link>
+      </SheetClose>
       <button
         type="button"
         disabled={pending}

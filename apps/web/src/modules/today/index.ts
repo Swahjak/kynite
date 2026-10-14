@@ -43,13 +43,7 @@ export {
 
 export { resolveTodayTheme, type ResolveTodayThemeInput, type TodayTheme } from './domain/theme';
 
-export {
-  resolveStepIcon,
-  starMatrixRows,
-  type StarMatrixMember,
-  type StarMatrixRow,
-  type StarMatrixStep,
-} from './domain/star-matrix';
+export { resolveStepIcon, type StarMatrixStep } from './domain/star-matrix';
 
 export { loadTodayProgress, type KidProgress, type TodayProgressData } from './page-data';
 export {
