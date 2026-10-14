@@ -14,7 +14,7 @@ import type { UserMenuLabels, UserMenuUser } from '@/components/app-nav/user-men
 import { BrandMark } from '@/components/brand';
 import { AppShell, type NavRailItem } from '@/components/shell/app-shell';
 import { FormattingLocaleProvider } from '@/components/formatting';
-import { DARK_FROM_HOUR, DARK_UNTIL_HOUR, HUB_THEME_STORAGE_KEY } from '@/components/hub';
+import { PrePaintTheme } from '@/components/hub';
 import { HubReloadController, ServiceWorkerRegistrar } from '@/components/offline';
 import { RealtimeProvider } from '@/components/realtime';
 import { FabSlot } from '@/components/ui/fab';
@@ -80,17 +80,6 @@ export async function generateMetadata(): Promise<Metadata> {
  * shell to draw*: the pair screen legitimately has no principal, and a shell
  * that showed a rail on it would be lying.
  */
-const PRE_PAINT_THEME = `(function(){try{
-var r=document.documentElement;
-var m=localStorage.getItem(${JSON.stringify(HUB_THEME_STORAGE_KEY)})||'auto';
-var h=new Date().getHours();
-var clock=h>=${DARK_FROM_HOUR}||h<${DARK_UNTIL_HOUR};
-var none=window.matchMedia('(prefers-color-scheme: no-preference)').matches;
-var d=m==='dark'||(m==='auto'&&(none?clock:window.matchMedia('(prefers-color-scheme: dark)').matches));
-r.classList.toggle('dark',d);
-r.dataset.hubTheme=d?'dark':'light';
-}catch(e){}})()`;
-
 export default async function MainLayout({
   children,
   params,
@@ -228,7 +217,7 @@ export default async function MainLayout({
           {/* The 6-foot scale and the theme are applied before first paint, not
           in an effect. `useHubTheme` takes over from here; this only has to be
           right for the first frame. */}
-          <script dangerouslySetInnerHTML={{ __html: PRE_PAINT_THEME }} />
+          <PrePaintTheme />
           <ServiceWorkerRegistrar />
           <HubReloadController />
           {/* `TimerActivityProvider` wraps the whole shell — `IdleReturn` sits

@@ -19,6 +19,7 @@ export {
 } from './hub-theme';
 
 export { useHubTheme } from './use-hub-theme';
+export { PrePaintTheme } from './pre-paint-theme';
 
 export {
   DEVICE_HEARTBEAT_INTERVAL_MS,
