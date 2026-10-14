@@ -105,7 +105,7 @@ export const ROUTINE_ICON_TILE: Record<RoutineIcon, string> = {
   countertops: 'bg-cat-yellow-surface text-cat-yellow-fg',
   toys: 'bg-cat-pink-surface text-cat-pink-fg',
   bedroom_baby: 'bg-cat-purple-surface text-cat-purple-fg',
-  delete: 'bg-cat-red-surface text-cat-red-fg',
+  delete: 'bg-cat-teal-surface text-cat-teal-fg',
   potted_plant: 'bg-cat-green-surface text-cat-green-fg',
   mail: 'bg-cat-blue-surface text-cat-blue-fg',
   wb_twilight: 'bg-cat-yellow-surface text-cat-yellow-fg',

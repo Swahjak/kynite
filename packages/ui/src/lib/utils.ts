@@ -22,6 +22,7 @@ import { extendTailwindMerge } from 'tailwind-merge';
  */
 export const FONT_SIZE_TOKENS = [
   'display-hub',
+  'display-3xl',
   'display-xl',
   'display-lg',
   'display-md',

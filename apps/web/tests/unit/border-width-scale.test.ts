@@ -13,7 +13,9 @@ import { describe, expect, it } from 'vitest';
  *   2px  the emphasis width, and it has exactly three jobs the spec names:
  *        the input's bottom rule, the avatar's surface ring, and the "Wie"
  *        filter's selected indigo ring.
- *   3px  the focus ring, and only the focus ring.
+ *   3px  the focus ring — plus one mockup-mandated exception, the 46px step
+ *        circle (`STEP_CIRCLE_TODO`, D4 of the design-drift plan: "white + 3px
+ *        `#dcdad4` border", 8d12487).
  *
  * Two things can break that, and both are asserted here:
  *  1. a call site smuggling a one-off through a Tailwind arbitrary value, and
@@ -36,6 +38,15 @@ const SOURCE_EXTENSIONS = ['.ts', '.tsx', '.css', '.js', '.jsx', '.mjs'];
 
 /** The single sanctioned focus affordance. */
 const FOCUS_SPELLING = 'focus-visible:ring-3';
+
+/**
+ * The one sanctioned arbitrary border: the todo step circle in `StepRow`, which
+ * the routines mockups draw as a 3px `#dcdad4` ring (D4, 2026-09-15: follow the
+ * designs; owner principle D28/D32: design leads over style rules). Matched as
+ * the exact string, so any other arbitrary width — or this one elsewhere —
+ * still fails.
+ */
+const STEP_CIRCLE_TODO = 'border-[3px] border-[#dcdad4]';
 
 function walk(dir: string): string[] {
   return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
@@ -60,7 +71,13 @@ function offenders(pattern: RegExp): string[] {
 
 describe('border + ring widths', () => {
   it('has no arbitrary `border-[…]` or `ring-[…]` widths', () => {
-    expect(offenders(/(?:border|ring|outline)-\[[^\]]*\]/g)).toEqual([]);
+    const sanctioned = (line: string) =>
+      line.startsWith('packages/ui/src/components/step-row.tsx:') &&
+      line.endsWith(` — ${STEP_CIRCLE_TODO}`);
+    const found = offenders(/(?:border|ring|outline)-\[[^\]]*\]/g).filter(
+      (line) => !sanctioned(line)
+    );
+    expect(found).toEqual([]);
   });
 
   it('spells the focus affordance exactly one way', () => {

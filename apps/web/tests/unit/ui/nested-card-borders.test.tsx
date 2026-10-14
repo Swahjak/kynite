@@ -75,7 +75,10 @@ describe('nested surfaces carry no border of their own', () => {
 
     const tile = screen.getByTestId('step-tap');
     expect(classesOf(tile)).not.toMatch(BORDER_WIDTH);
-    expect(classesOf(tile)).toMatch(/bg-cat-green-surface/);
+    // D4 (design-drift plan, 2026-09-15): a done tile takes the member's
+    // `rij-klaar` tint via `memberClasses.rowDone`; with none passed it falls
+    // back to the neutral low tonal ground, no longer a baked-in green.
+    expect(classesOf(tile)).toMatch(/bg-surface-container-low/);
   });
 
   it('keeps the border on a reward tile, which sits on the page ground', () => {
