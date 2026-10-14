@@ -209,10 +209,10 @@ export async function TodayTabDag({
             dayKey={dayKey}
             now={now}
             isToday={isToday}
-            // The timeline folds live rows only because the NU strip already
-            // draws them. On a themed day the banner replaces the strip and
-            // draws no events, so live rows stay open there.
-            nowEventKeys={banner ? [] : nowEventKeys}
+            nowEventKeys={nowEventKeys}
+            // Live rows fold only because the NU strip already draws them. On
+            // a themed day the banner replaces the strip and draws no events.
+            foldLive={!banner}
             density={hub ? 'list' : 'card'}
           />
         </div>

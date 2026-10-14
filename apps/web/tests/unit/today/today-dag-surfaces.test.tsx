@@ -59,11 +59,20 @@ vi.mock('@/modules/tasks', () => ({
 }));
 
 vi.mock('@/modules/today/ui/today-timeline', () => ({
-  TodayTimeline: ({ density, nowEventKeys }: { density?: string; nowEventKeys?: string[] }) => (
+  TodayTimeline: ({
+    density,
+    nowEventKeys,
+    foldLive,
+  }: {
+    density?: string;
+    nowEventKeys?: string[];
+    foldLive?: boolean;
+  }) => (
     <div
       data-testid="today-timeline"
       data-density={density ?? 'list'}
       data-now-keys={(nowEventKeys ?? []).join(',')}
+      data-fold-live={String(foldLive)}
     />
   ),
 }));
@@ -166,24 +175,26 @@ describe('TodayTabDag — the theme banner reaches both surfaces', () => {
 });
 
 describe('TodayTabDag — live rows fold only behind the NU strip', () => {
-  const keys = (container: HTMLElement) =>
-    container.querySelector('[data-testid="today-timeline"]')!.getAttribute('data-now-keys');
+  const attr = (container: HTMLElement, name: string) =>
+    container.querySelector('[data-testid="today-timeline"]')!.getAttribute(name);
 
   it.each(['app', 'hub'] as const)(
-    'hands the live keys to the timeline when the NU strip is shown (%s)',
+    'folds live rows when the NU strip is shown (%s)',
     async (surface) => {
       const { container } = await renderDag({ surface, nowEventKeys: ['a', 'b'] });
 
-      expect(keys(container)).toBe('a,b');
+      expect(attr(container, 'data-fold-live')).toBe('true');
+      expect(attr(container, 'data-now-keys')).toBe('a,b');
     }
   );
 
   it.each(['app', 'hub'] as const)(
-    'hands it none on a themed day, where the banner draws no events (%s)',
+    'keeps them open on a themed day, still telling the timeline which are live (%s)',
     async (surface) => {
       const { container } = await renderDag({ surface, banner: BANNER, nowEventKeys: ['a', 'b'] });
 
-      expect(keys(container)).toBe('');
+      expect(attr(container, 'data-fold-live')).toBe('false');
+      expect(attr(container, 'data-now-keys')).toBe('a,b');
     }
   );
 });
