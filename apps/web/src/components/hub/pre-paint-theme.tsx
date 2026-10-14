@@ -1,6 +1,7 @@
 'use client';
 
 import { useServerInsertedHTML } from 'next/navigation';
+import { useRef } from 'react';
 import { DARK_FROM_HOUR, DARK_UNTIL_HOUR, HUB_THEME_STORAGE_KEY } from './hub-theme';
 
 const PRE_PAINT_THEME = `(function(){try{
@@ -23,6 +24,13 @@ r.dataset.hubTheme=d?'dark':'light';
  * first load anyway (`useHubTheme` takes over from there).
  */
 export function PrePaintTheme() {
-  useServerInsertedHTML(() => <script dangerouslySetInnerHTML={{ __html: PRE_PAINT_THEME }} />);
+  // Next calls every inserted-HTML callback on every streamed flush, so a
+  // once-only flag keeps this to a single <script> per document.
+  const inserted = useRef(false);
+  useServerInsertedHTML(() => {
+    if (inserted.current) return null;
+    inserted.current = true;
+    return <script dangerouslySetInnerHTML={{ __html: PRE_PAINT_THEME }} />;
+  });
   return null;
 }
