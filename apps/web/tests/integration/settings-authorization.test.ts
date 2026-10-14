@@ -79,6 +79,7 @@ function form(fields: Record<string, string>): FormData {
 const familyInput = {
   name: 'Nieuwe naam',
   locale: 'en',
+  formattingLocale: 'en-US',
   timezone: 'America/New_York',
   weekStartsOn: '7',
 };
@@ -160,6 +161,7 @@ describe.skipIf(!databaseUrl)('settings authorization (integration)', () => {
       expect(after).toMatchObject({
         name: 'Nieuwe naam',
         locale: 'en',
+        formattingLocale: 'en-US',
         timezone: 'America/New_York',
         weekStartsOn: 7,
       });
