@@ -10,7 +10,6 @@ export default async function FamilyPage({ params }: { params: Promise<{ locale:
   const { locale } = await params;
   await requireManager(locale, '/manage/family');
   const data = await loadFamilyPage();
-  // The layout guard redirects unauthenticated requests; this is belt-and-braces.
   if (!data) notFound();
 
   const t = await getTranslations('family');

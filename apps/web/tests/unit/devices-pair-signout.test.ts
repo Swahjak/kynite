@@ -54,4 +54,18 @@ describe('pairDeviceAction and an active member session', () => {
     expect(signOut).not.toHaveBeenCalled();
     expect(cookieSet).not.toHaveBeenCalled();
   });
+
+  it('fails with a typed error and sets no cookie when sign-out throws', async () => {
+    redeemPairingCode.mockResolvedValue({
+      status: 'paired',
+      result: { token: 't', deviceName: 'Keuken' },
+    });
+    signOut.mockRejectedValueOnce(new Error('db down'));
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    await expect(pairDeviceAction({ code: '123456' })).resolves.toEqual({
+      status: 'error',
+      error: 'signOutFailed',
+    });
+    expect(cookieSet).not.toHaveBeenCalled();
+  });
 });

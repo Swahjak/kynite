@@ -55,7 +55,6 @@ export default async function SettingsHubPage({ params }: { params: Promise<{ lo
   const { locale } = await params;
   await requireManager(locale, '/manage/settings');
   const settings = await loadFamilySettings();
-  // The layout guard redirects unauthenticated requests; this is belt-and-braces.
   if (!settings) notFound();
 
   const [roster, routines, calendars] = await Promise.all([

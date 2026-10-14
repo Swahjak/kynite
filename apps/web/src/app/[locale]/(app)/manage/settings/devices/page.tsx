@@ -6,8 +6,13 @@ import {
   SettingsPageHeader,
   SettingsSection,
 } from '@/components/settings/settings-shell';
-import { DeviceList, PairDevicePanel, PendingCodeList, loadDevicesPage } from '@/modules/devices';
-import { requireManager } from '@/modules/devices';
+import {
+  DeviceList,
+  PairDevicePanel,
+  PendingCodeList,
+  loadDevicesPage,
+  requireManager,
+} from '@/modules/devices';
 
 /** Session-dependent: never prerendered, so `next build` needs no database. */
 export const dynamic = 'force-dynamic';

@@ -26,7 +26,6 @@ export default async function GoogleSettingsPage({
   const { locale } = await routeParams;
   await requireManager(locale, '/manage/settings/google');
   const principal = await getPrincipal();
-  // The layout guard redirects unauthenticated requests; this is belt-and-braces.
   if (!principal) notFound();
 
   // Read-path gate: `listLinkedAccounts` returns linked Google emails and
