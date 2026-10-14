@@ -432,20 +432,11 @@ test.describe('the today tabs', () => {
 
 test.describe('private calendars on the hub', () => {
   async function seedPrivateEvent(familyId: string) {
-    // The seeded day must be the family's *local* today, not UTC's. Between
-    // midnight and 02:00 Amsterdam time the two disagree, and building the
-    // instant from `getUTCDate()` would seed the event onto yesterday's board —
-    // which is a test that fails for two hours a night and passes for
-    // twenty-two (M06 carry-forward, fixed here because M10 touches this path).
-    const [year, month, day] = new Intl.DateTimeFormat('en-CA', {
-      timeZone: 'Europe/Amsterdam',
-    })
-      .format(new Date())
-      .split('-')
-      .map(Number);
-    // 09:00 UTC is 10:00 or 11:00 in Amsterdam — comfortably inside the local
-    // day, whichever side of the DST change the run happens on.
-    const at = (hour: number) => new Date(Date.UTC(year, month - 1, day, hour)).toISOString();
+    // Live, not clock-pinned: it starts now and runs 30 minutes, so at any
+    // hour it is "today" and always in the same state. A fixed hour slid from
+    // upcoming to live to past through the day, and `TodayTimeline` folds live
+    // and past rows behind the toggle, so assertions only held before ~10:00.
+    const now = new Date();
 
     await withDb(async (client) => {
       const owner = await ownerMemberOf(client, familyId);
@@ -457,8 +448,8 @@ test.describe('private calendars on the hub', () => {
       await seedEvents(client, familyId, [
         {
           title: 'Sollicitatiegesprek',
-          startsAt: at(9),
-          endsAt: at(10),
+          startsAt: now.toISOString(),
+          endsAt: new Date(now.getTime() + 30 * 60 * 1000).toISOString(),
           ownerMemberId: owner.id,
           calendarId: privateCalendar,
         },
@@ -466,18 +457,21 @@ test.describe('private calendars on the hub', () => {
     });
   }
 
+  /** The live row sits behind the timeline's disclosure: open it, so the rows are really in the DOM. */
+  async function openFoldedRows(page: Page) {
+    await page.getByTestId('today-past-toggle').click();
+    await expect(page.getByTestId('today-timeline-row').first()).toBeVisible();
+  }
+
   test('shows the private detail to a signed-in member on the app', async ({ page, family }) => {
     await seedPrivateEvent(family.familyId);
 
     // The parent's own device: the owner may read their private calendar.
     await page.goto('/nl/today');
-    // `.first()` because the rebuilt `/today` (102facd) shows the next event
-    // twice — once in the NU strip and once as its row on the dag tab's
-    // timeline. The claim under test is that the title is legible *at all* on
-    // the parent's own device; the hub half below still asserts the exact
-    // opposite with `toHaveCount(0)`, which is the assertion that has to stay
-    // strict.
-    await expect(page.getByText('Sollicitatiegesprek').first()).toBeVisible();
+    await openFoldedRows(page);
+    await expect(
+      page.getByTestId('today-timeline-row').filter({ hasText: 'Sollicitatiegesprek' })
+    ).toBeVisible();
   });
 
   test('renders busy-only on the hub', async ({ page, family }) => {
@@ -490,14 +484,15 @@ test.describe('private calendars on the hub', () => {
     // The wall display: the block is there, the title is not.
     await page.goto('/nl/today');
     await expect(page.getByTestId('hub-board')).toBeVisible();
-    await expect(page.getByText('Sollicitatiegesprek')).toHaveCount(0);
+    await openFoldedRows(page);
 
-    // `/today` draws the day as `EventRow`s; a free/busy one carries
-    // `data-busy` (lock glyph + "Bezet"), the chip's `data-busy-only` is
-    // what the calendar time grids and month cells draw.
-    const busy = page.locator('[data-testid="today-timeline-row"][data-busy="true"]').first();
-    await expect(busy).toBeVisible();
+    // The row must really be in the DOM before "no title" means anything.
+    // `/today` draws `EventRow`s; a free/busy one carries `data-busy` (lock
+    // glyph + "Bezet"); the chip's `data-busy-only` is the calendar grids'.
+    const busy = page.locator('[data-testid="today-timeline-row"][data-busy="true"]');
+    await expect(busy).toHaveCount(1);
     await expect(busy).toContainText('Bezet');
+    await expect(page.getByText('Sollicitatiegesprek')).toHaveCount(0);
   });
 
   test('offers no write affordance on the hub', async ({ page, family }) => {
