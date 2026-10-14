@@ -258,10 +258,17 @@ test.describe('a paired hub', () => {
     // The member session, never gone, takes over: the redirect target is the
     // bare locale root, and it is `(marketing)/page.tsx`'s own check that
     // sends a resolved member principal on to their own surface.
-    await page.waitForURL(/\/nl\/today$/);
+    //
+    // The page is *already* at `/nl/today`, so a URL wait is satisfied before
+    // the unpair's hard navigation (`/nl` -> `/nl/today`, two dev compiles) has
+    // even started, and `<html data-surface>` — written only by the root
+    // layout — still reads the old `hub` until the new document arrives. So
+    // the attribute itself is awaited, on a budget that covers the compiles.
     // The member renders as a browser now (`desktop`), not as the wall's
     // device surface: the paired `hub` surface is gone with the cookie.
-    await expect(page.locator('html')).toHaveAttribute('data-surface', 'desktop');
+    await expect(page.locator('html')).toHaveAttribute('data-surface', 'desktop', {
+      timeout: 20_000,
+    });
 
     // And the device really is gone, not just the cookie on this page: a
     // fresh page carrying nothing but that same (now revoked) device token
