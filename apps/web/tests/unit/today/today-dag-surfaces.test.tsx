@@ -59,8 +59,12 @@ vi.mock('@/modules/tasks', () => ({
 }));
 
 vi.mock('@/modules/today/ui/today-timeline', () => ({
-  TodayTimeline: ({ density }: { density?: string }) => (
-    <div data-testid="today-timeline" data-density={density ?? 'list'} />
+  TodayTimeline: ({ density, nowEventKeys }: { density?: string; nowEventKeys?: string[] }) => (
+    <div
+      data-testid="today-timeline"
+      data-density={density ?? 'list'}
+      data-now-keys={(nowEventKeys ?? []).join(',')}
+    />
   ),
 }));
 
@@ -101,9 +105,11 @@ const tasks = {
 async function renderDag({
   surface,
   banner = null,
+  nowEventKeys = [],
 }: {
   surface: 'app' | 'hub';
   banner?: ReactNode;
+  nowEventKeys?: string[];
 }) {
   const result = render(
     await TodayTabDag({
@@ -114,7 +120,7 @@ async function renderDag({
       dayKey: '2026-08-17',
       now: NOW,
       isToday: true,
-      nowEventKeys: [],
+      nowEventKeys,
       tasks,
       banner,
       heroEvents: [],
@@ -155,6 +161,29 @@ describe('TodayTabDag — the theme banner reaches both surfaces', () => {
 
       expect(container.querySelector('[data-testid="today-now"]')).not.toBeNull();
       expect(container.querySelector('[data-testid="today-theme-banner"]')).toBeNull();
+    }
+  );
+});
+
+describe('TodayTabDag — live rows fold only behind the NU strip', () => {
+  const keys = (container: HTMLElement) =>
+    container.querySelector('[data-testid="today-timeline"]')!.getAttribute('data-now-keys');
+
+  it.each(['app', 'hub'] as const)(
+    'hands the live keys to the timeline when the NU strip is shown (%s)',
+    async (surface) => {
+      const { container } = await renderDag({ surface, nowEventKeys: ['a', 'b'] });
+
+      expect(keys(container)).toBe('a,b');
+    }
+  );
+
+  it.each(['app', 'hub'] as const)(
+    'hands it none on a themed day, where the banner draws no events (%s)',
+    async (surface) => {
+      const { container } = await renderDag({ surface, banner: BANNER, nowEventKeys: ['a', 'b'] });
+
+      expect(keys(container)).toBe('');
     }
   );
 });

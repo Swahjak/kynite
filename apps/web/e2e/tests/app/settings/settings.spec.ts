@@ -301,11 +301,13 @@ test.describe('hub display preferences', () => {
     // The hue on the board is the type's, and the owner still reads her own
     // private calendar in full (M23).
     await page.goto('/nl/today');
-    // The event starts now, so it is live: its row folds behind the timeline's
-    // disclosure (the NU strip carries the moment; on a themed day the banner
-    // draws no events, so nothing does until the disclosure is opened - see
-    // docs/plans/2026-09-15-hub-equals-app.md) and is drawn in full once opened.
-    await page.getByTestId('today-past-toggle').click();
+    // The event starts now, so it is live. With the NU strip (no banner) the
+    // strip carries the moment and the row folds behind the timeline's
+    // disclosure; on a themed day the banner replaces the strip and draws no
+    // events, so the row stays open. The test cannot choose the date, so it
+    // reads which of the two it got and asserts each rule.
+    const themed = (await page.getByTestId('today-theme-banner').count()) > 0;
+    if (!themed) await page.getByTestId('today-past-toggle').click();
     const teal = page.locator('[data-testid="today-timeline-row"][data-category="teal"]');
     await expect(teal).toBeVisible();
     await expect(teal).toContainText('Werkoverleg');
