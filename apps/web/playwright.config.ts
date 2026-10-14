@@ -63,6 +63,10 @@ export default defineConfig({
   testDir: './e2e',
   outputDir: './e2e/test-results',
   fullyParallel: true,
+  // A CLI `--grep-invert` is not applied to dependency projects, and `perf`
+  // depends on app/hub/share, so on a full run it silently re-adds every
+  // test. The config-level filter applies to them too (CI sets `@visual`).
+  grepInvert: process.env.E2E_GREP_INVERT ? new RegExp(process.env.E2E_GREP_INVERT) : undefined,
   forbidOnly: !!process.env.CI,
   /**
    * One retry locally, two on CI.

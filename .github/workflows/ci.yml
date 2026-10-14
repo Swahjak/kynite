@@ -88,8 +88,9 @@ jobs:
       #
       # Restore this at feature freeze: run `pnpm e2e:visual:update` once, drop
       # the flag, and the baselines are a real gate again. See `e2e/README.md`.
-      - run: pnpm e2e:run --grep-invert @visual
+      - run: pnpm e2e:run
         env:
+          E2E_GREP_INVERT: '@visual'
           DATABASE_URL: postgresql://kynite:kynite@localhost:5435/kynite_test
           BETTER_AUTH_URL: http://127.0.0.1:3100
 
