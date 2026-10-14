@@ -6,6 +6,7 @@ import {
   SettingsPageHeader,
 } from '@/components/settings/settings-shell';
 import { IcsSubscriptionsPanel, loadSubscriptionsPage } from '@/modules/ics';
+import { requireManager } from '@/modules/devices';
 
 /** Session-dependent: never prerendered, so `next build` needs no database. */
 export const dynamic = 'force-dynamic';
@@ -24,7 +25,13 @@ export const dynamic = 'force-dynamic';
  * `ics:manage` outright, so a child's login or a wall tablet gets a 404 rather
  * than a list of the household's feed URLs.
  */
-export default async function SubscriptionsSettingsPage() {
+export default async function SubscriptionsSettingsPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  await requireManager(locale, '/manage/settings/subscriptions');
   const data = await loadSubscriptionsPage();
   if (!data) notFound();
 

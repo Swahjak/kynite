@@ -7,6 +7,7 @@ import {
   SettingsSection,
 } from '@/components/settings/settings-shell';
 import { CreateShareLinkPanel, ShareLinkList, loadSharingPage } from '@/modules/sharing';
+import { requireManager } from '@/modules/devices';
 
 /** Session-dependent: never prerendered, so `next build` needs no database. */
 export const dynamic = 'force-dynamic';
@@ -27,7 +28,13 @@ export const dynamic = 'force-dynamic';
  * the only evidence a parent has when deciding whether a link still belongs to
  * somebody.
  */
-export default async function SharingSettingsPage() {
+export default async function SharingSettingsPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  await requireManager(locale, '/manage/settings/sharing');
   const data = await loadSharingPage();
   if (!data) notFound();
 

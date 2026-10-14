@@ -9,6 +9,7 @@ import {
 } from '@/modules/rewards';
 import { MEMBER_COLOR_CLASSES, initialsOf } from '@/modules/family';
 import { redirect } from '@/i18n/navigation';
+import { requireManager } from '@/modules/devices';
 
 /** Session-dependent: never prerendered, so `next build` needs no database. */
 export const dynamic = 'force-dynamic';
@@ -31,6 +32,7 @@ export const dynamic = 'force-dynamic';
  */
 export default async function RewardsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
+  await requireManager(locale, '/manage/rewards');
 
   const data = await loadRewardsPage();
   if (!data) redirect({ href: '/sign-in', locale });

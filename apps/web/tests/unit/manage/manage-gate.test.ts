@@ -7,10 +7,18 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
  * manager through.
  */
 
-const redirect = vi.fn((arg: { href: string }) => {
-  throw new Error(`REDIRECT:${arg.href}`);
+type Href = string | { pathname: string };
+const redirect = vi.fn((arg: { href: Href }) => {
+  throw new Error(`REDIRECT:${typeof arg.href === 'string' ? arg.href : arg.href.pathname}`);
 });
-vi.mock('@/i18n/navigation', () => ({ redirect: (arg: { href: string }) => redirect(arg) }));
+vi.mock('@/i18n/navigation', () => ({ redirect: (arg: { href: Href }) => redirect(arg) }));
+
+// The layout reads the intended path; outside a request scope `headers()` throws.
+// (It started doing so after this test was written — the premise moved, not the gate.)
+vi.mock('next/headers', () => ({
+  headers: async () => new Headers(),
+  cookies: async () => ({ has: () => false }),
+}));
 
 vi.mock('next-intl/server', () => ({
   getTranslations: async (ns: string) => (key: string) => `${ns}.${key}`,
@@ -39,12 +47,68 @@ const { default: ManagePage } = await import('@/app/[locale]/(app)/manage/page')
 const params = Promise.resolve({ locale: 'nl' });
 const member = { kind: 'member', familyId: 'f1', memberId: 'm1' };
 
+// Layouts do not re-run on client navigation, so every page gates itself (R2).
+// The loaders are never reached for a denied caller; stub the slices so the
+// pages import without a database.
+const slice = new Proxy(
+  {},
+  {
+    get: (_t, key) =>
+      typeof key === 'symbol' || key === 'then' || key === '__esModule' ? undefined : () => null,
+  }
+);
+for (const m of [
+  '@/modules/calendar',
+  '@/modules/routines',
+  '@/modules/weather',
+  '@/modules/google',
+  '@/modules/rewards',
+  '@/modules/sharing',
+  '@/modules/ics',
+]) {
+  vi.doMock(m, () => slice);
+}
+type Page = (props: unknown) => Promise<unknown>;
+const pages: (readonly [string, Page])[] = [
+  ['page family', (await import('@/app/[locale]/(app)/manage/family/page')).default as Page],
+  ['page rewards', (await import('@/app/[locale]/(app)/manage/rewards/page')).default as Page],
+  ['page routines', (await import('@/app/[locale]/(app)/manage/routines/page')).default as Page],
+  ['page settings', (await import('@/app/[locale]/(app)/manage/settings/page')).default as Page],
+  [
+    'page settings/devices',
+    (await import('@/app/[locale]/(app)/manage/settings/devices/page')).default as Page,
+  ],
+  [
+    'page settings/google',
+    (await import('@/app/[locale]/(app)/manage/settings/google/page')).default as Page,
+  ],
+  [
+    'page settings/sharing',
+    (await import('@/app/[locale]/(app)/manage/settings/sharing/page')).default as Page,
+  ],
+  [
+    'page settings/subscriptions',
+    (await import('@/app/[locale]/(app)/manage/settings/subscriptions/page')).default as Page,
+  ],
+];
+
 const subjects = [
-  ['layout', () => ManageLayout({ children: 'child', params })],
-  ['index', () => ManagePage({ params })],
+  ['layout', () => ManageLayout({ children: 'child', params }), true],
+  ['index', () => ManagePage({ params }), true],
+  // Past the gate a page hits its (stubbed) loader, which may 404 — only the gate is under test.
+  ...pages.map(
+    ([name, Page]) =>
+      [name, () => Page({ params, searchParams: Promise.resolve({}) }), false] as const
+  ),
 ] as const;
 
-describe.each(subjects)('/manage gate (%s)', (_name, run) => {
+const passes = async (run: () => unknown, strict: boolean) => {
+  if (strict) await expect(Promise.resolve(run())).resolves.not.toBeNull();
+  else await Promise.resolve(run()).catch(() => undefined);
+  expect(redirect).not.toHaveBeenCalled();
+};
+
+describe.each(subjects)('/manage gate (%s)', (_name, run, strict) => {
   beforeEach(() => {
     redirect.mockClear();
     can.mockReset();
@@ -71,12 +135,11 @@ describe.each(subjects)('/manage gate (%s)', (_name, run) => {
   it('lets a manager through', async () => {
     getPrincipal.mockResolvedValue(member);
     can.mockReturnValue(true);
-    await expect(run()).resolves.not.toBeNull();
-    expect(redirect).not.toHaveBeenCalled();
+    await passes(run, strict);
   });
 });
 
-describe.each(subjects)('/manage gate (%s), real can()', (_name, run) => {
+describe.each(subjects)('/manage gate (%s), real can()', (_name, run, strict) => {
   beforeEach(() => {
     redirect.mockClear();
     can.mockReset();
@@ -91,7 +154,6 @@ describe.each(subjects)('/manage gate (%s), real can()', (_name, run) => {
 
   it('lets a real owner principal in', async () => {
     getPrincipal.mockResolvedValue({ ...member, role: 'owner' });
-    await expect(run()).resolves.not.toBeNull();
-    expect(redirect).not.toHaveBeenCalled();
+    await passes(run, strict);
   });
 });
