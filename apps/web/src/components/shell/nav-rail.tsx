@@ -14,8 +14,8 @@ import { Link, usePathname } from '@/i18n/navigation';
  * longer the *look* — it is the destinations and the footer, both of which are
  * now data/slots handed in by the layout:
  *
- * - the **hub** layout passes the device's five tiles (`/hub`, `/hub/kalender`,
- *   `/hub/routines`, `/hub/taken`, `/hub/store`) and a footer that the kiosk
+ * - the **device** layout passes the kiosk's tiles (`DEVICE_RAIL_NAV`:
+ *   `/today`, `/calendar`, `/tasks`, `/store`, `/routines`) and a footer that the kiosk
  *   shell composes (offline indicator, Google Home, Fully launcher, settings);
  * - the **member** layout (surface `desktop`) passes the member destinations
  *   from `nav-items.ts` (`RAIL_NAV`), a "Meer" trigger and a footer that is the
@@ -33,12 +33,6 @@ export type NavRailItem = {
   icon: IconName;
   /** Already-translated label — resolved server-side by the layout. */
   label: string;
-  /**
-   * Exact-match only (the board). Every other item owns its subtree; the one
-   * home tile must not, because its sibling routes live under the same prefix
-   * (`/hub` vs `/hub/kalender`).
-   */
-  exact?: boolean;
 };
 
 const railClass =
@@ -55,9 +49,8 @@ export const navRailLabelClass =
 export const navRailActiveClass = 'bg-accent text-accent-foreground';
 export const navRailIdleClass = 'text-ink-secondary hover:bg-surface-hover hover:text-foreground';
 
-/** `/hub` is the only exact match; everything else owns its subtree. */
+/** Every item owns its subtree. */
 function isActivePath(pathname: string, item: NavRailItem): boolean {
-  if (item.exact) return pathname === item.href;
   return pathname === item.href || pathname.startsWith(`${item.href}/`);
 }
 

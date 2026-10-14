@@ -36,7 +36,8 @@ export type { NavRailItem } from './nav-rail';
  * Navigation is chosen by the `surface` the layout resolves server-side and
  * passes down:
  *
- * - `hub` and `desktop` draw the left rail (`NavRail`);
+ * - `desktop` draws the left rail (`NavRail`) for a member; the kiosk draws
+ *   the same rail from the device's own items (`surface` ignored);
  * - `app` draws the bottom tab bar plus the "Meer" sheet (`MobileNav`).
  *
  * Kiosk-only behaviour (idle return, the session/settings watchers, the wake

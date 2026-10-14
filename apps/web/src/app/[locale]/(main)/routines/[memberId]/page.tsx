@@ -23,8 +23,8 @@ export const dynamic = 'force-dynamic';
  * `?date=`/`?time=` pin the rendered clock so the visual snapshot is
  * deterministic; they affect display only (see `page-data.ts`).
  *
- * Addressing is settled in `(hub)/layout.tsx`: the hub tree keeps its `/hub`
- * prefix, and this page is reached only behind a device principal (M12).
+ * Addressing is settled in `(main)/layout.tsx`: this page is reached at
+ * `/routines/[memberId]` by a member or a device principal alike.
  */
 export default async function HubRoutinesPage({
   params,

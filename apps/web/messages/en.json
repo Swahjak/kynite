@@ -551,7 +551,6 @@
   },
   "calendar": {
     "title": "Calendar",
-    "todayTitle": "Today",
     "busy": "Busy",
     "untitled": "(no title)",
     "empty": "Nothing scheduled in this period.",
@@ -800,7 +799,6 @@
     "tabs": {
       "label": "View",
       "dag": "Day overview",
-      "personen": "Per person",
       "routines": "Routines",
       "sterren": "Star overview"
     },
@@ -852,10 +850,6 @@
       "otherDay": "Stars are only shown for today.",
       "hint": "Tap a square to tick it off",
       "toggle": "{step} — {name}",
-      "summaryLabel": "Stars today",
-      "tableCaption": "Today's routine steps per child",
-      "stepColumn": "Step",
-      "noStep": "{name} does not have this step today",
       "empty": "No routine steps for today yet."
     },
     "kids": {
@@ -892,7 +886,6 @@
         "child": "Child",
         "caregiver": "Caregiver"
       },
-      "celebrateBadge": "Done",
       "countLabel": "{done} of {total} done",
       "progressLabel": "{name}'s progress",
       "allDone": "All done!",
