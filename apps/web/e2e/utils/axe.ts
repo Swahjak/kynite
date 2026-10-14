@@ -8,7 +8,10 @@ import { expect, type Page } from '@playwright/test';
  * one this product's colour tokens, target sizes and type scale were designed
  * against in M02 and M12.
  *
- * There is deliberately **no exclusion list**. A violation here is a bug in a
+ * Colour contrast is the one rule switched off (D32, owner decision
+ * 2026-10-14): the design leads, WCAG contrast is not a requirement.
+ *
+ * Apart from that there is deliberately **no exclusion list**. A violation here is a bug in a
  * component, and the fix is in the component; an `exclude()` would turn this
  * suite into a record of which problems we have agreed not to see. The failure
  * message carries the rule id, the count and the selector, because "axe found
@@ -17,6 +20,7 @@ import { expect, type Page } from '@playwright/test';
 export async function expectNoAxeViolations(page: Page, surface: string): Promise<void> {
   const results = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+    .disableRules(['color-contrast'])
     .analyze();
 
   const readable = results.violations.flatMap((violation) =>
