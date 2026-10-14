@@ -18,16 +18,17 @@ Owner ask (2026-09-15): one route tree. Member and hub device render the same pa
 - D29: TimerControls restored for members on `/timers`; the device keeps quick start.
 - D30: weather first on the phone (above the theme banner).
 - D31: push URLs keep opening the family board.
+- D32 (owner, 2026-10-14): WCAG contrast requirements dropped, design leads. Contrast asserts/checks are removed, not fixed; colours and tokens stay as designed. Other a11y checks stay.
 
 ## Resume here (checkpoint 2026-10-14, after R review + fixes)
 
-State: H0–H5 and the R review fixes committed on `feat/hub-equals-app`; PR open to `main`. No background processes running.
+State: M3 merged to `main` as #9 (`2c1af72`). No background processes running.
 
 R done: opus security review + sonnet general review; 11b16dd (opencode.json/AGENTS.md) dropped from history, `opencode.json` now ignored (backup branch `backup/hub-equals-app-pre-R1`). Fix units: R2 (`requireManager` on every /manage page, pair ends the member session + `signOutFailed`), R3 (/today controls on principal, /timers member controls, weather order), R4 (sheet close, routines header surface, device rail order, next-intl vitest inline, cleanup). e2e baselines refreshed (rail, routine builder, settled stars), calendar greeting pinned.
 
 Gates: typecheck/oxlint/build green; vitest only the 4 design-token reds; e2e app 90/100 (rest parked contrast + 3 flaky); hub targeted green except parked store contrast; share skipped (owner, unchanged since the green run); @smoke 9/9.
 
-R remaining: merge PR, `railway up`, discovery endpoints, Fully start URL → `/nl/today` (owner action on the wall).
+R remaining: `railway up`, discovery endpoints, Fully start URL → `/nl/today` (owner action on the wall). Deploy status unconfirmed.
 
 ## Units (all done; R remaining steps in Resume)
 
@@ -47,6 +48,12 @@ Gates per unit: `pnpm typecheck` once, `pnpm exec oxlint --threads 1 <changed fi
   - H5g: loader/proxy coverage. H5h: spec triage (D26). H5i: pre-paint script once via `useServerInsertedHTML`, D27, timer spec, unpair spec race.
   - Reviews: opus on H5d/H5e (2 rounds)/H5g, sonnet on the rest. H5h got a third fix round on owner approval.
 - [x] **R — review + fixes + gates** (2026-10-14, D28–D31): see Resume. Merge + deploy remain.
+
+## M4 — contrast checks out (D32)
+
+Open wave: M4-T1 only. Branch `feat/hub-equals-app-M4-T1` from `main`, route peep-pi (default profile, `--max-rounds 3`), sonnet review.
+
+- [ ] **M4-T1** (S, D32): remove colour-contrast checking from the test suites so the parked contrast specs pass without changing the design. Disable only the contrast rule/assert (axe `color-contrast` or own helpers), keep every other a11y rule; delete asserts that exist only for contrast. No token, class or component change; no baseline refresh. Acceptance: the parked contrast specs (settings, `/dev/design`, hub store, calendar strike-through/face initials/past row, live event-row times) pass in `app` + `hub` with `--workers=1`; grep shows no remaining contrast check; other axe rules still run. Expected size: ≤10 files, ≤80 lines diff. Out of scope: the 4 red design-token unit files, flaky specs.
 
 ## Agent log (summary)
 
@@ -69,7 +76,7 @@ Gates per unit: `pnpm typecheck` once, `pnpm exec oxlint --threads 1 <changed fi
 
 ## Open follow-ups / Parking
 
-- Contrast failures (11+), parked by the owner for one token unit after M3 (these specs stay red): settings `.border-primary` 4.35; `/dev/design` label-overline 4.04, bg-now 3.76, bg-gold/16 4.09; hub store label-overline 2.3, locked reward 2.99/2.3, `.px-3.5` 3.2; calendar strike-through `text-cat-purple-fg` 3.1, 8px face initials 3.32; plus live event-row times (`event-row.tsx:210,216`, D28) and the calendar past-event row.
+- Contrast failures (11+) → M4-T1 (D32: checks removed, design kept): settings `.border-primary` 4.35; `/dev/design` label-overline 4.04, bg-now 3.76, bg-gold/16 4.09; hub store label-overline 2.3, locked reward 2.99/2.3, `.px-3.5` 3.2; calendar strike-through `text-cat-purple-fg` 3.1, 8px face initials 3.32; live event-row times (`event-row.tsx:210,216`, D28); calendar past-event row.
 - The 4 design-token red unit files (see Lessen).
 - Flaky e2e: `calendar.spec.ts:174`, `invite.spec.ts:154`, `auth-flow.spec.ts:97`.
 - SW page cache is not cleared when a different member signs in.
