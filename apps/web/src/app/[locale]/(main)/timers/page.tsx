@@ -2,7 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import { EmptyState, PageHeader } from '@kynite/ui';
 import { formatDateTime } from '@/i18n/formatting-locale';
 import { requireMemberOrDevice } from '@/modules/devices';
-import { getHouseholdFormattingLocale, getPrincipal } from '@/modules/family';
+import { getHouseholdFormattingLocale } from '@/modules/family';
 import {
   DURATION_PRESETS,
   TimerBoard,
@@ -39,10 +39,9 @@ export default async function HubTimersPage({
 }) {
   const { locale } = await params;
   const { now } = await searchParams;
-  await requireMemberOrDevice(locale, '/timers', { now });
+  const principal = await requireMemberOrDevice(locale, '/timers', { now });
 
-  const principal = await getPrincipal();
-  if (principal?.kind === 'member') {
+  if (principal.kind === 'member') {
     const [page, tMember] = await Promise.all([loadTimersPage(), getTranslations('timers')]);
     if (!page) return null;
     return (

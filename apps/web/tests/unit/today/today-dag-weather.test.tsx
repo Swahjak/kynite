@@ -134,6 +134,20 @@ describe('TodayTabDag — the weather card and the NU block', () => {
     expect(order.indexOf('weather-card')).toBeLessThan(order.indexOf('today-now'));
   });
 
+  it('draws the weather card before the theme banner on the phone', async () => {
+    const { container } = await renderDag({
+      surface: 'app',
+      weather: WEATHER,
+      banner: <div data-testid="today-theme-banner" />,
+    });
+
+    const order = [...container.querySelectorAll('[data-testid]')].map((node) =>
+      node.getAttribute('data-testid')
+    );
+
+    expect(order.indexOf('weather-card')).toBeLessThan(order.indexOf('today-theme-banner'));
+  });
+
   it('keeps the NU block in the first column and the weather in the second on the wall', async () => {
     const { container } = await renderDag({ surface: 'hub', weather: WEATHER });
 
