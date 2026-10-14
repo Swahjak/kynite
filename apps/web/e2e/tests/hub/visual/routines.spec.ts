@@ -1,3 +1,4 @@
+import type { Page } from '@playwright/test';
 import { pairHub } from '@e2e/fixtures/hub';
 import { expect, test } from '@e2e/fixtures/exclusive';
 import {
@@ -9,6 +10,22 @@ import {
   withDb,
 } from '@e2e/utils/seed';
 import { settlePage } from '@e2e/utils/settle';
+
+/**
+ * `StarPop` starts at scale-75 and flips to `data-settled="true"` after a
+ * timer; `settlePage` kills the transition, so a shot taken before that flip
+ * bakes in the small mid-pop star. Wait for every star to announce its end
+ * state first (same signal as celebration.spec.ts).
+ */
+async function settleStars(page: Page): Promise<void> {
+  await expect
+    .poll(() =>
+      page
+        .locator('[data-slot="star-pop"]')
+        .evaluateAll((els) => els.every((el) => el.getAttribute('data-settled') === 'true'))
+    )
+    .toBe(true);
+}
 
 /**
  * Visual regression for the routine surfaces, at the hub tablet (1280×800)
@@ -216,6 +233,7 @@ for (const [name, viewport] of Object.entries(VIEWPORTS) as [
 
         await page.goto(`/${locale}/routines/${mila.id}?date=${ANCHOR}&time=${ANCHOR_TIME}`);
         await expect(page.getByTestId('routine-board')).toBeVisible();
+        await settleStars(page);
         await settlePage(page);
 
         const suffix = locale === 'nl' ? '' : `-${locale}`;
@@ -243,6 +261,7 @@ for (const [name, viewport] of Object.entries(VIEWPORTS) as [
 
       await page.goto(`/nl/routines?date=${ANCHOR}&time=${ANCHOR_TIME}`);
       await expect(page.getByTestId('routines-page-board')).toBeVisible();
+      await settleStars(page);
       await settlePage(page);
 
       await expect(page).toHaveScreenshot(`hub-routines-family-${name}.png`, {
@@ -276,6 +295,7 @@ for (const [name, viewport] of Object.entries(VIEWPORTS) as [
 
       await page.goto(`/nl/tasks?date=${ANCHOR}&time=${ANCHOR_TIME}`);
       await expect(page.getByTestId('hub-taken-board')).toBeVisible();
+      await settleStars(page);
       await settlePage(page);
 
       await expect(page).toHaveScreenshot(`hub-taken-${name}.png`, {
