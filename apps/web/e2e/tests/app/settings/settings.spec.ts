@@ -1,4 +1,5 @@
 import { newAnonymousContext } from '@e2e/utils/context';
+import { openFoldedRows } from '@e2e/utils/timeline';
 import { expect, test } from '@e2e/fixtures/family';
 import { pairHub } from '@e2e/fixtures/hub';
 import {
@@ -301,13 +302,9 @@ test.describe('hub display preferences', () => {
     // The hue on the board is the type's, and the owner still reads her own
     // private calendar in full (M23).
     await page.goto('/nl/today');
-    // The event starts now, so it is live. With the NU strip (no banner) the
-    // strip carries the moment and the row folds behind the timeline's
-    // disclosure; on a themed day the banner replaces the strip and draws no
-    // events, so the row stays open. The test cannot choose the date, so it
-    // reads which of the two it got and asserts each rule.
-    const themed = (await page.getByTestId('today-theme-banner').count()) > 0;
-    if (!themed) await page.getByTestId('today-past-toggle').click();
+    // The event starts now, so it is live: folded behind the timeline toggle
+    // when the NU strip carries the moment, open on a themed day.
+    await openFoldedRows(page);
     const teal = page.locator('[data-testid="today-timeline-row"][data-category="teal"]');
     await expect(teal).toBeVisible();
     await expect(teal).toContainText('Werkoverleg');

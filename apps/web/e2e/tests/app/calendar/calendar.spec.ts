@@ -1,5 +1,6 @@
 import type { Locator, Page } from '@playwright/test';
 import { pairHub } from '@e2e/fixtures/hub';
+import { openFoldedRows } from '@e2e/utils/timeline';
 import { expect, test } from '@e2e/fixtures/family';
 import {
   childrenOf,
@@ -455,12 +456,6 @@ test.describe('private calendars on the hub', () => {
         },
       ]);
     });
-  }
-
-  /** The live row sits behind the timeline's disclosure: open it, so the rows are really in the DOM. */
-  async function openFoldedRows(page: Page) {
-    await page.getByTestId('today-past-toggle').click();
-    await expect(page.getByTestId('today-timeline-row').first()).toBeVisible();
   }
 
   test('shows the private detail to a signed-in member on the app', async ({ page, family }) => {
