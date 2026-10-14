@@ -207,6 +207,9 @@ for (const [name, viewport] of Object.entries(VIEWPORTS)) {
 
         await page.goto(`/nl/calendar?view=${view}&date=${ANCHOR}`);
         await expect(page.getByTestId(`calendar-view-${view}`)).toBeVisible();
+        // The header greeting is picked off the real wall clock, so it rotates
+        // under the suite; pin it like the boards below do.
+        await pinLiveText(page, 'today-greeting', 'Goedemorgen');
         await settlePage(page);
 
         await expect(page).toHaveScreenshot(`calendar-${view}-${name}.png`, { fullPage: true });
