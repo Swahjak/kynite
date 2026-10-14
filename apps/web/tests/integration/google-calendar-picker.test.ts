@@ -17,12 +17,12 @@ import { createFakeApi } from '../unit/google/support/fake-api';
  * on again, every time.
  *
  * Two separate questions, in order. **May this calendar exist here at all?** —
- * answered only by ownership: Kynite stores calendars the account holder owns
- * and nothing else, so a colleague's diary, a meeting room and a subscribed
- * feed are never rows, and a row that stops qualifying is pruned on the next
- * pass. **Then, of the household's own calendars, which sync?** — a first link
- * enables the primary and nothing else, a relink enables nothing, and a
- * calendar the parent already decided about is never re-decided.
+ * answered by readable events (commit 594c1aa): owner, writer and reader
+ * calendars are stored, while free/busy-only entries and resource rooms never
+ * are, and a row that stops qualifying is pruned on the next pass. **Then,
+ * which of the stored calendars sync?** — a first link enables the primary and
+ * nothing else, a relink enables nothing, and a calendar the parent already
+ * decided about is never re-decided.
  *
  * All of it runs against a real Postgres because one upsert (and one delete)
  * decides the lot. Then the picker: one confirmation applying additions and
@@ -201,19 +201,29 @@ describe.skipIf(!databaseUrl)('calendar picker + discovery defaults (integration
         summary: 'Vergaderzaal 3',
         accessRole: 'reader',
       },
+      { id: 'drukte@example.test', summary: 'Drukte', accessRole: 'freeBusyReader' },
     ]);
 
-  it('stores only the calendars the account holder owns', async () => {
+  it('stores owner, writer and reader calendars, enables only the primary, excludes rooms and free/busy', async () => {
     stubs.listCalendars.push(workAccount());
 
     await discoverCalendars(accountId);
 
-    // A colleague's diary, a subscribed feed and a meeting room are not rows at
-    // all — not rows that are switched off. There is nothing to pick, nothing
-    // to enable and nothing to sync.
-    expect(await storedCalendars()).toEqual([
+    const stored = await storedCalendars();
+
+    // Everything with readable events is a row (owner, writer, reader) — and
+    // only the primary is switched on; the rest waits for the picker.
+    expect(stored).toEqual([
+      { googleCalendarId: 'holidays@group.v.calendar.google.com', syncEnabled: false },
+      { googleCalendarId: 'jeroen@example.test', syncEnabled: false },
       { googleCalendarId: 'sarah@example.test', syncEnabled: true },
     ]);
+
+    // A meeting room (even graded `reader`) and a free/busy-only entry are not
+    // rows at all — not rows that are switched off.
+    const ids = stored.map((row) => row.googleCalendarId);
+    expect(ids).not.toContain('room-3@resource.calendar.google.com');
+    expect(ids).not.toContain('drukte@example.test');
   });
 
   it('enables only the primary calendar on a first link', async () => {
