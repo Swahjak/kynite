@@ -217,14 +217,12 @@ test.describe('hub timers', () => {
 });
 
 test.describe('member browser → hub', () => {
-  // FIXME (H5b premise change): the Controller (`TimerControls`, label input +
-  // presets) is no longer routed; a member starts timers from the shared
-  // board's quick-start buttons, which navigate to the fullscreen `/timer`.
-  // Ported to that flow the first round passes, but in the measured round
-  // `timer-stop` on `/timer` detaches from the DOM on every retry until the
-  // test times out — needs an owner look before this can be a trustworthy
-  // propagation test again (see h5/b-report.md).
-  test.fixme('a timer started from a member browser appears on the hub, and stopping removes it', async ({
+  // H5b premise change: the Controller (`TimerControls`, label input + presets)
+  // is no longer routed; a member starts timers from the shared board's
+  // quick-start buttons, which navigate to the fullscreen `/timer`. That screen
+  // stops a timer with `hub-timer-stop`, not the board tile's `timer-stop` (the
+  // old spec reached for the tile's button, which only exists on `/timers`).
+  test('a timer started from a member browser appears on the hub, and stopping removes it', async ({
     page,
     context,
     family,
@@ -256,7 +254,7 @@ test.describe('member browser → hub', () => {
     // passing alone and failing under four parallel workers.
     await page.getByRole('button', { name: 'Timer van 5 minuten' }).click();
     await expect(hub.getByTestId('timer-tile')).toBeVisible({ timeout: 15_000 });
-    await page.getByTestId('timer-stop').first().click();
+    await page.getByTestId('hub-timer-stop').click();
     await expect(hub.getByTestId('timer-board-empty')).toBeVisible({ timeout: 15_000 });
 
     // The measured round. M10's <2s budget, over SSE — the PRD number itself,
@@ -272,7 +270,7 @@ test.describe('member browser → hub', () => {
     await expect(hub.getByTestId('timer-tile')).toBeVisible({ timeout: 2000 });
     await expect(hub.getByTestId('timer-label')).toHaveText('Timer van 5 min');
 
-    await page.getByTestId('timer-stop').first().click();
+    await page.getByTestId('hub-timer-stop').click();
 
     await expect(hub.getByTestId('timer-board-empty')).toBeVisible({ timeout: 2000 });
 
