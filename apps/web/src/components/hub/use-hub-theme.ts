@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useSyncExternalStore } from 'react';
 import { useTimeZone } from 'next-intl';
-import { hourInZone } from '@/lib/hour-in-zone';
+import { hourIn } from '@/lib/hour-in-zone';
 import {
   HUB_THEME_STORAGE_KEY,
   parseHubThemeMode,
@@ -125,7 +125,7 @@ export function useHubTheme(override?: ResolvedHubTheme): {
   // The family's zone, not the tablet's: the clock rule must agree with the
   // server and with `PrePaintTheme` whatever zone the device is set to.
   const timeZone = useTimeZone() ?? 'Europe/Amsterdam';
-  const hourSnapshot = useCallback(() => hourInZone(new Date(), timeZone), [timeZone]);
+  const hourSnapshot = useCallback(() => hourIn(new Date(), timeZone), [timeZone]);
   const hour = useSyncExternalStore(subscribeHour, hourSnapshot, hourServerSnapshot);
 
   const theme = override ?? resolveHubTheme({ mode, systemPrefersDark, hour });

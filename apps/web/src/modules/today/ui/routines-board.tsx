@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Icon, MemberFace, PageHeader, ProgressBar, cn, type IconName } from '@kynite/ui';
 import { fireConfettiBurst } from '@/components/celebration';
 import { useDateTimeFormat } from '@/components/formatting';
-import { hourInZone } from '@/lib/hour-in-zone';
+import { hourIn } from '@/lib/hour-in-zone';
 import { Link, useRouter } from '@/i18n/navigation';
 import type { ActionState, ToggleTaskInput } from '@/modules/tasks';
 import { columnProgress, daypartFromHour, type TimeSection } from '../domain/routines-board';
@@ -95,7 +95,7 @@ export function RoutinesBoard({
   const formatDateTime = useDateTimeFormat();
   const router = useRouter();
 
-  const daypart: TimeSection = daypartFromHour(hourInZone(new Date(board.now), board.timeZone));
+  const daypart: TimeSection = daypartFromHour(hourIn(new Date(board.now), board.timeZone));
 
   const [optimistic, setOptimistic] = useOptimistic<ReadonlyMap<string, boolean>, OptimisticRow>(
     new Map(),

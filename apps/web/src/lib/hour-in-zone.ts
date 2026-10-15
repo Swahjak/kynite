@@ -7,7 +7,7 @@
  *
  * `PrePaintTheme` inlines the same `Intl` call as a string; keep them in step.
  */
-export function hourInZone(date: Date, timeZone: string): number {
+export function hourIn(date: Date, timeZone: string): number {
   return Number(
     new Intl.DateTimeFormat('en-GB', { timeZone, hour: 'numeric', hourCycle: 'h23' }).format(date)
   );

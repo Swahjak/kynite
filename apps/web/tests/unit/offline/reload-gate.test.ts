@@ -10,6 +10,11 @@ import {
   shouldReloadHub,
 } from '@/components/offline/reload-gate';
 
+// Pin the device zone to UTC, which differs from the family zone (Europe/Amsterdam)
+// at every instant used here, whatever machine runs this (an Amsterdam laptop would
+// otherwise agree with the family zone and hide the bug). Node re-reads TZ on assignment.
+process.env.TZ = 'UTC';
+
 /**
  * The `RELOAD_HUB` gate (docs/architecture.md §6 "Long-run hygiene"; M11:
  * "Service worker skip-waiting posts `RELOAD_HUB`; the hub reloads only when

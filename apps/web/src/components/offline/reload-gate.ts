@@ -1,4 +1,4 @@
-import { hourInZone } from '@/lib/hour-in-zone';
+import { hourIn } from '@/lib/hour-in-zone';
 
 /**
  * When a wall tablet is allowed to reload itself (docs/architecture.md §6,
@@ -44,7 +44,7 @@ export type ReloadGateInput = {
 };
 
 export function isNightly(now: Date, timeZone: string, window = NIGHTLY_WINDOW): boolean {
-  const hour = hourInZone(now, timeZone);
+  const hour = hourIn(now, timeZone);
   return hour >= window.startHour && hour < window.endHour;
 }
 

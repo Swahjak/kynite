@@ -8,6 +8,11 @@ import { useHubTheme } from '@/components/hub/use-hub-theme';
 import { RoutinesBoard } from '@/modules/today/ui/routines-board';
 import type { RoutinesBoardData } from '@/modules/today/page-data-board';
 
+// Pin the device zone to UTC, which differs from the family zone (Europe/Amsterdam)
+// at every instant used here, whatever machine runs this (an Amsterdam laptop would
+// otherwise agree with the family zone and hide the bug). Node re-reads TZ on assignment.
+process.env.TZ = 'UTC';
+
 vi.mock('@/i18n/navigation', () => ({
   useRouter: () => ({ refresh: vi.fn(), push: vi.fn(), replace: vi.fn() }),
   Link: ({ children, href }: { children?: ReactNode; href: string }) => (
@@ -18,7 +23,7 @@ vi.mock('@/i18n/navigation', () => ({
 }));
 
 /**
- * Run under `TZ=UTC` (server/CI) with family zone Europe/Amsterdam (CEST until
+ * Device zone is pinned to UTC (see above) with family zone Europe/Amsterdam (CEST until
  * 2026-10-25). Daypart: 22:30Z is 00:30 local (morning) but hour 22 on the
  * device. Theme: 05:30Z is 07:30 local (light) but before 06:00 on the device.
  */
@@ -66,6 +71,10 @@ function boardAt(now: Date): RoutinesBoardData {
 }
 
 describe('family timezone, not device timezone', () => {
+  it('runs with a device zone that differs from the family zone', () => {
+    expect(new Date('2026-10-15T05:30:00Z').getHours()).toBe(5);
+  });
+
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => vi.useRealTimers());
 
