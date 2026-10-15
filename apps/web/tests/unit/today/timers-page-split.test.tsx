@@ -13,14 +13,19 @@ vi.mock('next-intl/server', () => ({
   getTranslations: async (namespace: string) => (key: string) => `${namespace}.${key}`,
 }));
 
-vi.mock('@/i18n/formatting-locale', () => ({ formatDateTime: () => '09:00' }));
+const formatDateTime = vi.fn((..._args: unknown[]) => '09:00');
+vi.mock('@/i18n/formatting-locale', () => ({
+  formatDateTime: (...args: unknown[]) => formatDateTime(...args),
+}));
 
 const requireMemberOrDevice = vi.fn();
 vi.mock('@/modules/devices', () => ({
   requireMemberOrDevice: (...args: unknown[]) => requireMemberOrDevice(...args),
 }));
 
+const getFamily = vi.fn();
 vi.mock('@/modules/family', () => ({
+  getFamily: (...args: unknown[]) => getFamily(...args),
   getHouseholdFormattingLocale: async () => 'nl-NL',
 }));
 
@@ -56,6 +61,9 @@ describe('(main)/timers — member vs device', () => {
     requireMemberOrDevice.mockReset();
     loadTimersPage.mockReset();
     loadTimerBoard.mockReset();
+    formatDateTime.mockClear();
+    getFamily.mockReset();
+    getFamily.mockResolvedValue({ timezone: 'Europe/Amsterdam' });
     loadTimersPage.mockResolvedValue({ familyId: 'family-1' });
     loadTimerBoard.mockResolvedValue({ serverNow: 0 });
   });
@@ -75,5 +83,20 @@ describe('(main)/timers — member vs device', () => {
     expect(container.querySelector('[data-testid="timer-board"]')).not.toBeNull();
     expect(container.querySelector('[data-testid="timer-controls"]')).toBeNull();
     expect(loadTimersPage).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    [{ timezone: 'America/New_York' }, 'America/New_York'],
+    [null, 'Europe/Amsterdam'],
+  ])('formats the wall clock in the family zone (%o -> %s)', async (family, expected) => {
+    requireMemberOrDevice.mockResolvedValue({ kind: 'device', familyId: 'family-1' });
+    getFamily.mockResolvedValue(family);
+    await renderPage();
+
+    expect(formatDateTime).toHaveBeenCalledWith(
+      expect.any(Date),
+      'nl-NL',
+      expect.objectContaining({ timeZone: expected })
+    );
   });
 });
