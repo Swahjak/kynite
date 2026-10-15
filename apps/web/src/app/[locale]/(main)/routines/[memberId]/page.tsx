@@ -97,7 +97,10 @@ export default async function HubRoutinesPage({
             {t('hub.greeting', { name: board.member.displayName })}
           </h1>
           <p className="text-body-lg text-ink-secondary">
-            {formatDateTime(board.now, formattingLocale, { dateStyle: 'full' })}
+            {formatDateTime(board.now, formattingLocale, {
+              dateStyle: 'full',
+              timeZone: board.timeZone,
+            })}
           </p>
         </div>
 
