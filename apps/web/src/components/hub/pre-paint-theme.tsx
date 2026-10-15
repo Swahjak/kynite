@@ -4,10 +4,13 @@ import { useServerInsertedHTML } from 'next/navigation';
 import { useRef } from 'react';
 import { DARK_FROM_HOUR, DARK_UNTIL_HOUR, HUB_THEME_STORAGE_KEY } from './hub-theme';
 
-const PRE_PAINT_THEME = `(function(){try{
+/** JSON for an inline `<script>`: `<` escaped so a value can never close the tag. */
+const safeJson = (value: string) => JSON.stringify(value).replaceAll('<', '\\u003c');
+
+export const prePaintTheme = (timeZone: string) => `(function(){try{
 var r=document.documentElement;
 var m=localStorage.getItem(${JSON.stringify(HUB_THEME_STORAGE_KEY)})||'auto';
-var h=new Date().getHours();
+var h=+new Intl.DateTimeFormat('en-GB',{timeZone:${safeJson(timeZone)},hour:'numeric',hourCycle:'h23'}).format(new Date());
 var clock=h>=${DARK_FROM_HOUR}||h<${DARK_UNTIL_HOUR};
 var none=window.matchMedia('(prefers-color-scheme: no-preference)').matches;
 var d=m==='dark'||(m==='auto'&&(none?clock:window.matchMedia('(prefers-color-scheme: dark)').matches));
@@ -21,16 +24,17 @@ r.dataset.hubTheme=d?'dark':'light';
  * (`useServerInsertedHTML`), never into the React tree: a `<script>` rendered
  * as a component makes React log "script tag while rendering" on every client
  * navigation into this layout, and the script has nothing to do after the
- * first load anyway (`useHubTheme` takes over from there).
+ * first load anyway (`useHubTheme` takes over from there). `timeZone` is the
+ * family's zone, so the clock fallback matches `useHubTheme` (`hourIn`).
  */
-export function PrePaintTheme() {
+export function PrePaintTheme({ timeZone }: { timeZone: string }) {
   // Next calls every inserted-HTML callback on every streamed flush, so a
   // once-only flag keeps this to a single <script> per document.
   const inserted = useRef(false);
   useServerInsertedHTML(() => {
     if (inserted.current) return null;
     inserted.current = true;
-    return <script dangerouslySetInnerHTML={{ __html: PRE_PAINT_THEME }} />;
+    return <script dangerouslySetInnerHTML={{ __html: prePaintTheme(timeZone) }} />;
   });
   return null;
 }

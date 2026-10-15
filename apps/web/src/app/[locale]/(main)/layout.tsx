@@ -218,7 +218,7 @@ export default async function MainLayout({
           {/* The 6-foot scale and the theme are applied before first paint, not
           in an effect. `useHubTheme` takes over from here; this only has to be
           right for the first frame. */}
-          <PrePaintTheme />
+          <PrePaintTheme timeZone={timeZone} />
           <ServiceWorkerRegistrar />
           <HubReloadController />
           {/* `TimerActivityProvider` wraps the whole shell — `IdleReturn` sits

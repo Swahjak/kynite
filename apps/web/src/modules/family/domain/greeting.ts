@@ -34,15 +34,4 @@ export function firstNameOf(displayName: string): string {
   return displayName.trim().split(/\s+/)[0] ?? '';
 }
 
-/** The hour of `instant` as it reads on a clock in `timeZone`. */
-export function hourIn(instant: Date, timeZone: string): number {
-  const formatted = new Intl.DateTimeFormat('en-GB', {
-    timeZone,
-    hour: '2-digit',
-    hour12: false,
-  }).format(instant);
-
-  const hour = Number.parseInt(formatted, 10);
-  // `24` is a legal `hour12: false` rendering of midnight in some ICU builds.
-  return Number.isFinite(hour) ? hour % 24 : 0;
-}
+export { hourIn } from '@/lib/hour-in-zone';

@@ -1,3 +1,5 @@
+import { hourIn } from '@/lib/hour-in-zone';
+
 /**
  * When a wall tablet is allowed to reload itself (docs/architecture.md §6,
  * "Long-run hygiene": the SW skips waiting, posts `RELOAD_HUB`, and "the hub
@@ -33,14 +35,16 @@ export const MAX_DEFERRAL_MS = 2 * 86_400_000;
 
 export type ReloadGateInput = {
   now: Date;
+  /** The family's zone: "nightly" is the household's 03:00, not the tablet's. */
+  timeZone: string;
   /** When the service worker said a new build is waiting. `null` = nothing pending. */
   updateReadyAt: Date | null;
   /** Last touch/keypress/pointer event on this device. */
   lastInteractionAt: Date;
 };
 
-export function isNightly(now: Date, window = NIGHTLY_WINDOW): boolean {
-  const hour = now.getHours();
+export function isNightly(now: Date, timeZone: string, window = NIGHTLY_WINDOW): boolean {
+  const hour = hourIn(now, timeZone);
   return hour >= window.startHour && hour < window.endHour;
 }
 
@@ -80,7 +84,7 @@ export function reloadReason(input: ReloadGateInput): ReloadReason {
     return 'deferred-too-long';
   }
   if (idleMs(input) >= IDLE_BEFORE_RELOAD_MS) return 'idle';
-  if (isNightly(input.now)) return 'nightly';
+  if (isNightly(input.now, input.timeZone)) return 'nightly';
   return null;
 }
 

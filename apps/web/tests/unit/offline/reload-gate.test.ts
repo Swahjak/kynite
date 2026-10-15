@@ -10,6 +10,11 @@ import {
   shouldReloadHub,
 } from '@/components/offline/reload-gate';
 
+// Pin the device zone to UTC, which differs from the family zone (Europe/Amsterdam)
+// at every instant used here, whatever machine runs this (an Amsterdam laptop would
+// otherwise agree with the family zone and hide the bug). Node re-reads TZ on assignment.
+process.env.TZ = 'UTC';
+
 /**
  * The `RELOAD_HUB` gate (docs/architecture.md §6 "Long-run hygiene"; M11:
  * "Service worker skip-waiting posts `RELOAD_HUB`; the hub reloads only when
@@ -22,7 +27,8 @@ import {
  */
 
 /** 08:00 on a Tuesday — the middle of the one hour that must never be interrupted. */
-const morning = (hour = 8, minute = 0) => new Date(2026, 2, 10, hour, minute, 0);
+const timeZone = 'UTC';
+const morning = (hour = 8, minute = 0) => new Date(Date.UTC(2026, 2, 10, hour, minute, 0));
 
 describe('reload gate', () => {
   it('never reloads when no update is pending', () => {
@@ -30,6 +36,7 @@ describe('reload gate', () => {
 
     expect(
       shouldReloadHub({
+        timeZone,
         now,
         updateReadyAt: null,
         // Untouched for a week. Still nothing to reload *for*.
@@ -43,6 +50,7 @@ describe('reload gate', () => {
 
     expect(
       shouldReloadHub({
+        timeZone,
         now,
         // Ready an hour ago.
         updateReadyAt: new Date(now.getTime() - 3_600_000),
@@ -55,6 +63,7 @@ describe('reload gate', () => {
   it('reloads once the board has been idle past the threshold', () => {
     const now = morning(14, 0);
     const input = {
+      timeZone,
       now,
       updateReadyAt: new Date(now.getTime() - 600_000),
       lastInteractionAt: new Date(now.getTime() - IDLE_BEFORE_RELOAD_MS - 1000),
@@ -67,6 +76,7 @@ describe('reload gate', () => {
   it('holds at exactly the threshold and releases one millisecond later', () => {
     const now = morning(14, 0);
     const at = (idle: number) => ({
+      timeZone,
       now,
       updateReadyAt: new Date(now.getTime() - 600_000),
       lastInteractionAt: new Date(now.getTime() - idle),
@@ -79,8 +89,9 @@ describe('reload gate', () => {
   });
 
   it('reloads inside the nightly window even if the board was just touched', () => {
-    const night = new Date(2026, 2, 10, NIGHTLY_WINDOW.startHour, 30, 0);
+    const night = new Date(Date.UTC(2026, 2, 10, NIGHTLY_WINDOW.startHour, 30, 0));
     const input = {
+      timeZone,
       now: night,
       updateReadyAt: new Date(night.getTime() - 60_000),
       lastInteractionAt: new Date(night.getTime() - 5_000),
@@ -91,15 +102,24 @@ describe('reload gate', () => {
   });
 
   it('treats the nightly window as half-open on the hour', () => {
-    expect(isNightly(new Date(2026, 2, 10, NIGHTLY_WINDOW.startHour - 1, 59))).toBe(false);
-    expect(isNightly(new Date(2026, 2, 10, NIGHTLY_WINDOW.startHour, 0))).toBe(true);
-    expect(isNightly(new Date(2026, 2, 10, NIGHTLY_WINDOW.endHour - 1, 59))).toBe(true);
-    expect(isNightly(new Date(2026, 2, 10, NIGHTLY_WINDOW.endHour, 0))).toBe(false);
+    expect(
+      isNightly(new Date(Date.UTC(2026, 2, 10, NIGHTLY_WINDOW.startHour - 1, 59)), timeZone)
+    ).toBe(false);
+    expect(isNightly(new Date(Date.UTC(2026, 2, 10, NIGHTLY_WINDOW.startHour, 0)), timeZone)).toBe(
+      true
+    );
+    expect(
+      isNightly(new Date(Date.UTC(2026, 2, 10, NIGHTLY_WINDOW.endHour - 1, 59)), timeZone)
+    ).toBe(true);
+    expect(isNightly(new Date(Date.UTC(2026, 2, 10, NIGHTLY_WINDOW.endHour, 0)), timeZone)).toBe(
+      false
+    );
   });
 
   it('eventually takes an update on a board that is never idle and never nightly', () => {
     const now = morning(11, 0);
     const input = {
+      timeZone,
       now,
       updateReadyAt: new Date(now.getTime() - MAX_DEFERRAL_MS - 1),
       lastInteractionAt: new Date(now.getTime() - 1_000),
@@ -126,5 +146,14 @@ describe('reload gate', () => {
 
   it('pins the threshold to five minutes', () => {
     expect(IDLE_BEFORE_RELOAD_MS).toBe(5 * 60_000);
+  });
+
+  it('reads the nightly window in the family zone, not the runtime zone', () => {
+    // 01:30Z is 02:30 in Amsterdam (CET): not nightly there, but a UTC clock
+    // (or a tablet set to UTC) would read 01:30 and a Tokyo one 10:30.
+    expect(isNightly(new Date('2026-03-10T01:30:00Z'), 'Europe/Amsterdam')).toBe(false);
+    // 02:30Z is 03:30 in Amsterdam: nightly there, though 02:30 in UTC is not.
+    expect(isNightly(new Date('2026-03-10T02:30:00Z'), 'Europe/Amsterdam')).toBe(true);
+    expect(isNightly(new Date('2026-03-10T02:30:00Z'), 'UTC')).toBe(false);
   });
 });

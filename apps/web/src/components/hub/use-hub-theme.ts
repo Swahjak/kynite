@@ -1,6 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useSyncExternalStore } from 'react';
+import { useTimeZone } from 'next-intl';
+import { hourIn } from '@/lib/hour-in-zone';
 import {
   HUB_THEME_STORAGE_KEY,
   parseHubThemeMode,
@@ -98,10 +100,6 @@ function subscribeHour(listener: () => void): () => void {
   return () => clearInterval(timer);
 }
 
-function hourSnapshot(): number {
-  return new Date().getHours();
-}
-
 /**
  * Noon on the server: the *only* thing the hour feeds is the fallback for a
  * device that reports no colour-scheme preference at all, and a server render
@@ -124,6 +122,10 @@ export function useHubTheme(override?: ResolvedHubTheme): {
     schemeSnapshot,
     schemeServerSnapshot
   );
+  // The family's zone, not the tablet's: the clock rule must agree with the
+  // server and with `PrePaintTheme` whatever zone the device is set to.
+  const timeZone = useTimeZone() ?? 'Europe/Amsterdam';
+  const hourSnapshot = useCallback(() => hourIn(new Date(), timeZone), [timeZone]);
   const hour = useSyncExternalStore(subscribeHour, hourSnapshot, hourServerSnapshot);
 
   const theme = override ?? resolveHubTheme({ mode, systemPrefersDark, hour });

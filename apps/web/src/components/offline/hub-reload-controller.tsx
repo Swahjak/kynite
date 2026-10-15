@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { useTimeZone } from 'next-intl';
 import { RELOAD_HUB_MESSAGE, shouldReloadHub } from './reload-gate';
 
 /**
@@ -31,6 +32,7 @@ export function HubReloadController({
   reload?: () => void;
   enabled?: boolean;
 }) {
+  const timeZone = useTimeZone() ?? 'Europe/Amsterdam';
   const updateReadyAt = useRef<Date | null>(null);
   const lastInteractionAt = useRef<Date>(new Date());
 
@@ -57,6 +59,7 @@ export function HubReloadController({
       if (
         shouldReloadHub({
           now: new Date(),
+          timeZone,
           updateReadyAt: ready,
           lastInteractionAt: lastInteractionAt.current,
         })
@@ -70,7 +73,7 @@ export function HubReloadController({
       navigator.serviceWorker.removeEventListener('message', onMessage);
       clearInterval(timer);
     };
-  }, [reload, enabled]);
+  }, [reload, enabled, timeZone]);
 
   return null;
 }
