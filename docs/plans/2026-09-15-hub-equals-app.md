@@ -25,7 +25,7 @@ Owner ask (2026-09-15): one route tree. Member and hub device render the same pa
 
 ## Resume here (checkpoint 2026-10-15, after M5)
 
-State: production deployed 2026-10-15 16:13 (Railway `0bc77f44`, commit 5641090: M4 + M5-T1); health, redirects and discovery verified. M5-T2 (03d45b0) merged but NOT deployed yet. Main CI green. No background processes.
+State: production deployed 2026-10-16 09:29 (Railway `d5473def`, commit 94d2249: M4 + M5); health, redirects, discovery and pre-paint timezone verified. Main CI green. No background processes.
 
 Only remaining M3 step: Fully kiosk start URL → `/nl/today` (owner action on the wall).
 
