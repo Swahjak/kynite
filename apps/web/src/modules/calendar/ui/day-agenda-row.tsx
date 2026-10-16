@@ -214,7 +214,7 @@ export function DayAgendaRow({
 
             Absent entirely on a redacted row rather than rendered empty: an
             empty line would still reserve the space and read as a name that
-            failed to load. */}
+            could not load. */}
         {who !== null && (
           <span
             className={cn(

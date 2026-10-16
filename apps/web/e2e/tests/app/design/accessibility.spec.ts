@@ -9,7 +9,7 @@ import { gotoDesignPage } from '@e2e/utils/design-page';
  */
 test.describe('design system accessibility', { tag: '@heavy' }, () => {
   for (const theme of ['light', 'dark'] as const) {
-    test(`has no WCAG A/AA violations of any kind in ${theme} mode`, async ({ page }) => {
+    test(`has no axe violations (color-contrast off) in ${theme} mode`, async ({ page }) => {
       await gotoDesignPage(page, theme);
 
       const results = await new AxeBuilder({ page })
