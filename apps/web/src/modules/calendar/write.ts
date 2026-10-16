@@ -1,3 +1,4 @@
+import { DEFAULT_TIMEZONE } from '@/lib/default-timezone';
 import 'server-only';
 import { and, eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
@@ -172,7 +173,7 @@ export async function resolveInput(
   input: EventInput
 ): Promise<{ ok: true; resolved: Resolved } | { ok: false; error: string }> {
   const family = await getFamily(familyId);
-  const timeZone = family?.timezone ?? 'Europe/Amsterdam';
+  const timeZone = family?.timezone ?? DEFAULT_TIMEZONE;
 
   const startsAt = toInstant(input.startsAt, timeZone, input.allDay);
   const endsAt = toInstant(input.endsAt, timeZone, input.allDay);
@@ -475,7 +476,7 @@ export async function updateEventOccurrence(
   if (!existing.rrule) return { ok: false, error: 'notRecurring' };
 
   const family = await getFamily(principal.familyId);
-  const tz = family?.timezone ?? 'Europe/Amsterdam';
+  const tz = family?.timezone ?? DEFAULT_TIMEZONE;
 
   const startsAt = input.startsAt ? new Date(input.startsAt) : instant;
   if (Number.isNaN(startsAt.getTime())) return { ok: false, error: 'invalidInput' };
@@ -652,7 +653,7 @@ export async function updateEvent(
   }
 
   const family = await getFamily(principal.familyId);
-  const tz = family?.timezone ?? 'Europe/Amsterdam';
+  const tz = family?.timezone ?? DEFAULT_TIMEZONE;
 
   let rrule = existing.rrule;
   if (input.recurrence !== undefined || input.byweekday !== undefined) {

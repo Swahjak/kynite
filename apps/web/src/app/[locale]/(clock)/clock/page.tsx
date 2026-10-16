@@ -1,3 +1,4 @@
+import { DEFAULT_TIMEZONE } from '@/lib/default-timezone';
 import { NextIntlClientProvider } from 'next-intl';
 import { AmbientClock } from '@/components/hub';
 import { FormattingLocaleProvider } from '@/components/formatting';
@@ -28,7 +29,7 @@ export default async function HubClockPage({ params }: { params: Promise<{ local
   // `getFamily` is `React.cache`-memoised (same call `getHouseholdFormattingLocale`
   // makes internally), so resolving both here costs one query, not two.
   const family = await getFamily(principal.familyId);
-  const timeZone = family?.timezone ?? 'Europe/Amsterdam';
+  const timeZone = family?.timezone ?? DEFAULT_TIMEZONE;
   const formattingLocale = await getHouseholdFormattingLocale();
 
   return (

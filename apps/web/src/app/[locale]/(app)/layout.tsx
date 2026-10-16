@@ -1,3 +1,4 @@
+import { DEFAULT_TIMEZONE } from '@/lib/default-timezone';
 import { headers } from 'next/headers';
 import { INTENDED_PATH_HEADER, signInHref } from '@/lib/callback-url';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
@@ -82,7 +83,7 @@ export default async function AppLayout({
   // yet. Once a member principal exists, this is the one place to resolve
   // the real zone and hand it down.
   const family = await getFamily(principal.familyId);
-  const timeZone = family?.timezone ?? 'Europe/Amsterdam';
+  const timeZone = family?.timezone ?? DEFAULT_TIMEZONE;
   // The household's date/time convention (`src/i18n/formatting-locale.ts`) — a
   // second, next-intl-independent context, not a `NextIntlClientProvider`
   // override.

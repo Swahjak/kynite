@@ -1,3 +1,4 @@
+import { DEFAULT_TIMEZONE } from '@/lib/default-timezone';
 import 'server-only';
 import { z } from 'zod';
 import { MCP_TASKS_READ, MCP_TASKS_WRITE, hasAllScopes } from '@/server/mcp-auth';
@@ -74,7 +75,7 @@ export function registerTasksTools(
       if (!hasAllScopes(grantedScopes, [MCP_TASKS_READ])) return toolError(SCOPE_READ);
 
       const family = await getFamily(principal.familyId);
-      const timeZone = family?.timezone ?? 'Europe/Amsterdam';
+      const timeZone = family?.timezone ?? DEFAULT_TIMEZONE;
       const anchor = date ? new Date(`${date}T12:00:00Z`) : new Date();
       const todayKey = date ?? todayKeyIn(timeZone, anchor);
 

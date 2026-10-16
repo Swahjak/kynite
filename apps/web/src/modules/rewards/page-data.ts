@@ -1,3 +1,4 @@
+import { DEFAULT_TIMEZONE } from '@/lib/default-timezone';
 import 'server-only';
 import {
   MEMBER_COLOR_CLASSES,
@@ -182,7 +183,7 @@ export async function loadStore(options: StoreOptions = {}): Promise<StoreData |
     listMembers(principal.familyId),
   ]);
 
-  const timeZone = family?.timezone ?? 'Europe/Amsterdam';
+  const timeZone = family?.timezone ?? DEFAULT_TIMEZONE;
   const children = members.filter((entry) => entry.role === 'child');
 
   const member = options.memberId
@@ -296,7 +297,7 @@ export async function loadStarChart(options: StarChartOptions): Promise<StarChar
   if (!member) return null;
 
   const family = await getFamily(principal.familyId);
-  const timeZone = family?.timezone ?? 'Europe/Amsterdam';
+  const timeZone = family?.timezone ?? DEFAULT_TIMEZONE;
 
   const now = options.date ? new Date(`${options.date}T12:00:00Z`) : new Date();
   /**

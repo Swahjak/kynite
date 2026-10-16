@@ -1,3 +1,4 @@
+import { DEFAULT_TIMEZONE } from '@/lib/default-timezone';
 import { hasLocale } from 'next-intl';
 import { getRequestConfig } from 'next-intl/server';
 import { routing } from './routing';
@@ -18,6 +19,6 @@ export default getRequestConfig(async ({ requestLocale }) => {
     // the principal's family once one exists; `(share)` passes the shared
     // family's zone explicitly into its own `format` calls instead, since a
     // caregiver's zone is per-link, not per-provider.
-    timeZone: 'Europe/Amsterdam',
+    timeZone: DEFAULT_TIMEZONE,
   };
 });

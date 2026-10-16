@@ -71,7 +71,6 @@ export {
 } from './fetch';
 
 export {
-  DEFAULT_FEED_TIMEZONE,
   ingestFeed,
   listRefreshableSubscriptionIds,
   refreshSubscription,

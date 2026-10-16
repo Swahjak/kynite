@@ -1,3 +1,4 @@
+import { DEFAULT_TIMEZONE } from '@/lib/default-timezone';
 import 'server-only';
 import {
   MEMBER_COLOR_CLASSES,
@@ -113,7 +114,7 @@ export async function loadRoutinesPage(): Promise<RoutinesPageData | null> {
     members,
     owners: ownerOptionsOf(members),
     routines,
-    timeZone: family?.timezone ?? 'Europe/Amsterdam',
+    timeZone: family?.timezone ?? DEFAULT_TIMEZONE,
     canWrite: can(principal, 'routine:write', { familyId: principal.familyId }),
   };
 }
@@ -245,7 +246,7 @@ export async function loadFamilyRoutineTotals(
     listRoutines(principal.familyId, { activeOnly: true }),
   ]);
 
-  const timeZone = family?.timezone ?? 'Europe/Amsterdam';
+  const timeZone = family?.timezone ?? DEFAULT_TIMEZONE;
   const now = resolveNow(options, timeZone);
 
   // Same rule as the single-member board: a routine with no open occurrence is
@@ -364,7 +365,7 @@ export async function loadMemberRoutines(options: BoardOptions): Promise<Routine
   if (!member) return null;
 
   const family = await getFamily(principal.familyId);
-  const timeZone = family?.timezone ?? 'Europe/Amsterdam';
+  const timeZone = family?.timezone ?? DEFAULT_TIMEZONE;
   const now = resolveNow(options, timeZone);
 
   const routines = await listRoutines(principal.familyId, {
@@ -528,7 +529,7 @@ export async function loadFamilyRoutines(
     listRoutines(principal.familyId, { activeOnly: true }),
   ]);
 
-  const timeZone = family?.timezone ?? 'Europe/Amsterdam';
+  const timeZone = family?.timezone ?? DEFAULT_TIMEZONE;
   const now = resolveNow(options, timeZone);
 
   const timed = routines.flatMap((row) => {
