@@ -59,7 +59,7 @@ export function defaultFormattingLocale(uiLocale: Locale): FormattingLocale {
 export function formatDateTime(
   value: Date,
   formattingLocale: FormattingLocale,
-  options?: Intl.DateTimeFormatOptions
+  options: Intl.DateTimeFormatOptions & { timeZone: string }
 ): string {
   return new Intl.DateTimeFormat(formattingLocale, options).format(value);
 }
