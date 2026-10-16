@@ -22,14 +22,17 @@ Owner ask (2026-09-15): one route tree. Member and hub device render the same pa
 - D33 (owner, 2026-10-14): google calendar discovery contract as in M4-T3 (owner/writer/reader stored, only primary enabled, rooms and free/busy excluded).
 - D34 (owner, final 2026-10-15: "don't care"): bin icon tile teal (orange is reward-only).
 - D35 (owner, 2026-10-15): time-of-day logic and date/time formatting use the family timezone (fallback Europe/Amsterdam), never the device/server TZ.
+- D36 (owner, 2026-10-16): red in the calendar (category palette, form/system error texts, parent-only delete buttons) is not negative marking of a child; allowlisted in the `no-negative-marking` scanner with anchored patterns.
 
-## Resume here (checkpoint 2026-10-16, M6 planned)
+## Resume here (checkpoint 2026-10-16, after M6)
 
-State: production deployed 2026-10-16 09:29 (Railway `d5473def`, commit 94d2249: M4 + M5); health, redirects, discovery and pre-paint timezone verified. Main CI green. No background processes.
+State: M6 closed (all five PRs merged). Main CI was running on `8933b3f` at close, not yet verified green. Production still at 94d2249 (M4 + M5). No background processes.
 
-Only remaining M3 step: Fully kiosk start URL → `/nl/today` (owner action on the wall).
+Next step: open M7 (auth/SW/runtime), starting with a brief preflight per unit; SW-cache and proxy units get opus review.
 
-R done earlier: opus security + sonnet general review; fix units R2–R4 (`requireManager` on /manage, pair ends member session, /today controls on principal, sheet close, etc.); e2e baselines refreshed.
+Remaining M3 owner action: Fully kiosk start URL → `/nl/today` (on the wall).
+
+R done earlier: opus security + sonnet general review; fix units R2–R4; e2e baselines refreshed.
 
 ## Units (all done)
 
@@ -58,15 +61,22 @@ Claude sonnet subagents in worktrees.
 - [x] **M5-T1** #15 (`5641090`): server-rendered timers header clock passes the family timezone; `AmbientClock`/`TodayClock` were already correct via `useDateTimeFormat`; regression test in `timers-page-split.test.tsx`.
 - [x] **M5-T2** #16 (`03d45b0`): one `hourIn` in `src/lib/hour-in-zone.ts` (h23), used by routines-board daypart (likely hydration-mismatch source; hub e2e under TZ=UTC: 0 "Hydration failed"), use-hub-theme, reload-gate (`timeZone` required), pre-paint-theme (zone serialized with `<` escaped); routines/[memberId] page passes timeZone; tests pin `process.env.TZ='UTC'` per file.
 
-## M6 — hygiene wave (planned 2026-10-16, owner approved)
+## M6 — hygiene wave (D36), wave done
 
-Claude sonnet subagents in worktrees under `/var/www/worktrees/kynite/`; sonnet reviews (no security/data PR). One test-running agent at a time. Order: T1 → T2 (same file); T3 and T5 test-free, parallel; T4 last.
+Claude sonnet subagents in worktrees under `/var/www/worktrees/kynite/`; sonnet reviews. One test-running agent at a time.
 
-- [ ] **M6-T1** (S): shared `DEFAULT_TIMEZONE` constant, replace the ≥4 `Europe/Amsterdam` literals (now only in `modules/google/domain/mapping.ts:21`). `toWall` (`modules/calendar/domain/zone.ts`) only if free, else stays.
-- [ ] **M6-T2** (M, after T1, brief preflight): server `formatDateTime` (`src/i18n/formatting-locale.ts:64`) `timeZone` required; 6 calls (star-chart, star-week-card, routine-manager, `today-header:143` + its test) each need an instant-vs-date-key judgement.
-- [ ] **M6-T3** (S): D32/CI leftovers: `design-showcase.tsx:174` "contrast is verified at WCAG AA"; e2e axe spec titles "no WCAG AA violations"; `axe.ts` comment "no exclusion list" next to `disableRules`; `ci.yml:90` + `e2e/README.md` "flag" comments; `new RegExp(E2E_GREP_INVERT)` crashes on invalid regex.
-- [ ] **M6-T4** (M, last, runs integration with test DB): settings-authorization invalid-timezone positive control; `weather_snapshot` fixture `payload: {} as never`; google-calendar-picker non-primary owner case + two texts still on the owner-only rule; nested-card-borders member `rowDone` tint path; `proxy-auth.test.ts` reset `seen.request` per case; `page-data.test.ts` deny-grade case.
-- [ ] **M6-T5** (S): `no-negative-marking` scanner covers `modules/today/ui` and `modules/calendar/ui`, allowlist for decorative theme-banner red.
+- [x] **M6-T1** #18 (`f9446af`): shared `DEFAULT_TIMEZONE` in `apps/web/src/lib/default-timezone.ts`; 17 fallbacks + ics `DEFAULT_FEED_TIMEZONE` folded; `toWall` and schema defaults left.
+- [x] **M6-T2** #20 (`b39343b`): server `formatDateTime` requires `timeZone`; noon-UTC date-keys (star-chart, star-week-card, routine-manager) → `'UTC'`; `today-header:143` instant → family zone; tests pinned to Pacific/Kiritimati.
+- [x] **M6-T3** #17 (`d85590a`): D32/CI wording leftovers; invalid `E2E_GREP_INVERT` now throws a clear error.
+- [x] **M6-T4** #21 (`8933b3f`): 6 test gaps closed; integration ran against test DB (5435) 26/26.
+- [x] **M6-T5** #19 (`a847aaa`): `no-negative-marking` scanner covers `today/ui` + `calendar/ui`; anchored allowlist + stale-entry test (D36).
+
+## Open follow-ups
+
+- Docs `docs/features/{dashboard,reward-chart,timers}/ui.md` and `docs/architecture.md:810` still claim WCAG 2.1 AA / 4.5:1 contrast (contradicts D32).
+- oxlint and oxfmt ignore `apps/web/tests/` (no lint/format on tests).
+- `apps/web/e2e/utils/seed.ts:123` still has an `'Europe/Amsterdam'` fallback literal (deliberately left).
+- Nits: `DEFAULT_TIMEZONE` import above `import 'server-only'` in 11 files; `mapping.ts` import/re-export sits mid-file.
 
 ## M7 — auth/SW/runtime (next wave, not open)
 
@@ -86,6 +96,7 @@ Opus review for the auth/privacy units (SW cache, proxy).
 - R: reviews opus 113k/74k, sonnet 216k/84k/80k; fixes R2 89k, R3 95k, R4 105k; e2e runs 54–99k.
 - H4 finished and all of H5 by Claude sonnet subagents; token overruns vs the 80k budget: H5a 127k, H5a2 234k, H5b 140k, H5f 149k+, H5h 122k, H5i 138k.
 - M5: dev 77k (+fix round to 82k), 109k; fix round 60k; deploy 42k; reviews 22k/34k.
+- M6: dev T1 60k, T2 73k (+nits 77k), T3 48k, T4 72k (+nits 73k), T5 59k (+fix rounds 62k/71k); reviews 50–70k each (sonnet); preflights T2 63k, T4 60k.
 - M4: dev units 55k/79k/68k/81k/71k, reviews 19–38k, diagnostics haiku 66k/68k + sonnet 71k/52k.
 
 ### Lessen
@@ -100,6 +111,9 @@ Opus review for the auth/privacy units (SW cache, proxy).
 - Subagent budget: units that combine "run the whole e2e project + fix" blow the 80k budget. Split e2e triage per project or per spec group.
 - Reviewers must not checkout/detach in the main checkout (one did, and restored it). The brief must say so explicitly.
 - e2e asserts on `/today` are time-of-day sensitive (folded live/past rows). Seed relative to now and use `e2e/utils/timeline.ts` `openFoldedRows`.
+- Preflight caught a wrong premise in M6-T2: noon-UTC date-keys need `'UTC'`, not the family zone.
+- Integration suites use `describe.skipIf(!DATABASE_URL)` and look green when skipped: run via `pnpm e2e:setup` + `DATABASE_URL=…:5435/kynite_test`.
+- Size estimates from tracking text ("≥4 literals") were 4x off (17 found): preflight S units with grep-able scope too.
 
 ## Parking (owner decision needed)
 
