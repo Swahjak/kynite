@@ -11,7 +11,7 @@ import { expect, type Page } from '@playwright/test';
  * Colour contrast is the one rule switched off (D32, owner decision
  * 2026-10-14): the design leads, WCAG contrast is not a requirement.
  *
- * Apart from that there is deliberately **no exclusion list**. A violation here is a bug in a
+ * Apart from that rule there is deliberately **no exclusion list** (no `exclude()`). A violation here is a bug in a
  * component, and the fix is in the component; an `exclude()` would turn this
  * suite into a record of which problems we have agreed not to see. The failure
  * message carries the rule id, the count and the selector, because "axe found
@@ -30,5 +30,5 @@ export async function expectNoAxeViolations(page: Page, surface: string): Promis
     )
   );
 
-  expect(readable, `${surface} has WCAG AA violations`).toEqual([]);
+  expect(readable, `${surface} has axe violations (color-contrast off)`).toEqual([]);
 }

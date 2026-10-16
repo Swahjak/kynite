@@ -3,7 +3,7 @@ import { expectNoAxeViolations } from '@e2e/utils/axe';
 import { seedHousehold } from '@e2e/utils/household';
 
 /**
- * Zero WCAG AA violations across the parent app (M17).
+ * Zero axe violations (WCAG A/AA tags, color-contrast off per D32) across the parent app (M17).
  *
  * Every surface is seeded first. An axe run against an empty family passes by
  * having nothing on screen — no routine cards to label, no shelf, no chips —
@@ -22,7 +22,7 @@ const SURFACES = [
 
 test.describe('parent app accessibility', { tag: '@heavy' }, () => {
   for (const surface of SURFACES) {
-    test(`${surface.name} has no WCAG AA violations`, async ({ page, family }) => {
+    test(`${surface.name} has no axe violations (color-contrast off)`, async ({ page, family }) => {
       const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Amsterdam' }).format(
         new Date()
       );
