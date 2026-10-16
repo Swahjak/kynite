@@ -64,6 +64,7 @@ export async function RoutineManager({
     formatDateTime(new Date(`${dateKey}T12:00:00Z`), formattingLocale, {
       day: 'numeric',
       month: 'short',
+      timeZone: 'UTC',
     });
 
   const scheduleOf = (routine: ManagedRoutine) => {

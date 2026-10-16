@@ -147,10 +147,10 @@ export async function StarChart({ chart }: { chart: StarChartData }) {
                         : 'text-ink-secondary opacity-70'
                     )}
                   >
-                    {formatDateTime(date, formattingLocale, { day: 'numeric' })}
+                    {formatDateTime(date, formattingLocale, { day: 'numeric', timeZone: 'UTC' })}
                   </span>
                   <span className="label-overline text-ink-secondary">
-                    {formatDateTime(date, formattingLocale, { weekday: 'short' })}
+                    {formatDateTime(date, formattingLocale, { weekday: 'short', timeZone: 'UTC' })}
                   </span>
                 </li>
               );

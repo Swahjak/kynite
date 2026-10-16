@@ -144,6 +144,7 @@ export async function TodayHeader({
         day: 'numeric',
         month: 'short',
         weekday: 'short',
+        timeZone,
       });
 
   const chevron = cn(
