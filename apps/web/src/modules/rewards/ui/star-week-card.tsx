@@ -34,13 +34,17 @@ export async function StarWeekCard({
     // back at midnight would let any zone west of UTC render the day before.
     label: formatDateTime(new Date(`${bar.day}T12:00:00Z`), formattingLocale, {
       weekday: 'short',
+      timeZone: 'UTC',
     }),
     value: bar.total,
     // Which column is marked is a *date* question now that the window is the
     // fixed Monday-to-Sunday week: on a Wednesday the last bar is Sunday.
     today: bar.day === chart.today,
     srLabel: t('chart.dayStars', {
-      day: formatDateTime(new Date(`${bar.day}T12:00:00Z`), formattingLocale, { weekday: 'long' }),
+      day: formatDateTime(new Date(`${bar.day}T12:00:00Z`), formattingLocale, {
+        weekday: 'long',
+        timeZone: 'UTC',
+      }),
       count: bar.total,
     }),
   }));

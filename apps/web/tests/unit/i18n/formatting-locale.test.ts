@@ -45,13 +45,13 @@ describe('formatDateTime', () => {
   // 14 August 2026, 17:05 UTC — an afternoon time (rules out an accidental
   // 12-hour/24-hour tie) on a day where `dd` and `mm` also disagree.
   const instant = new Date('2026-08-14T17:05:00Z');
-  const dateOptions: Intl.DateTimeFormatOptions = {
+  const dateOptions: Intl.DateTimeFormatOptions & { timeZone: string } = {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
     timeZone: 'UTC',
   };
-  const timeOptions: Intl.DateTimeFormatOptions = {
+  const timeOptions: Intl.DateTimeFormatOptions & { timeZone: string } = {
     hour: '2-digit',
     minute: '2-digit',
     timeZone: 'UTC',

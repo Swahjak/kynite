@@ -27,6 +27,10 @@ import type { Member } from '@/modules/family';
  *     back.
  */
 
+// A zone whose calendar day differs from the family's (Amsterdam) at the anchor
+// used below, so a label formatted in the device zone is the wrong day.
+process.env.TZ = 'Pacific/Kiritimati';
+
 vi.mock('server-only', () => ({}));
 
 vi.mock('@/i18n/navigation', () => ({
@@ -91,14 +95,18 @@ async function renderHeader({
   greeting = 'Goedemorgen',
   viewer = null,
   members = [],
+  isToday = true,
+  anchorIso,
 }: {
   surface: 'app' | 'hub';
   dayKey: string;
   greeting?: string;
   viewer?: Member | null;
   members?: Member[];
+  isToday?: boolean;
+  anchorIso?: string;
 }) {
-  const anchor = new Date(`${dayKey}T09:00:00.000Z`);
+  const anchor = new Date(anchorIso ?? `${dayKey}T09:00:00.000Z`);
 
   const result = render(
     await TodayHeader({
@@ -108,7 +116,7 @@ async function renderHeader({
       now: anchor,
       timeZone: TZ,
       dayKey,
-      isToday: true,
+      isToday,
       href: '/today',
       viewer,
       members,
@@ -162,6 +170,23 @@ describe('TodayHeader — the festive treatment reaches both surfaces', () => {
 
     expect(container.querySelector('[data-testid="today-festive"]')).toBeNull();
     expect(container.querySelector('[data-testid="holiday-confetti"]')).toBeNull();
+  });
+});
+
+describe('TodayHeader — the date pill is the family’s day', () => {
+  it('labels a non-today anchor in the family zone, not the device zone', async () => {
+    // 11:00 UTC on 5 Dec: noon in Amsterdam (Saturday 5th), 01:00 on the 6th in
+    // Kiritimati (the pinned process zone).
+    const { container } = await renderHeader({
+      surface: 'app',
+      dayKey: SINTERKLAAS,
+      anchorIso: '2026-12-05T11:00:00.000Z',
+      isToday: false,
+    });
+
+    const text = container.textContent ?? '';
+    expect(text).toMatch(/za\.?,? 5 dec/);
+    expect(text).not.toMatch(/zo\.?,? 6 dec/);
   });
 });
 

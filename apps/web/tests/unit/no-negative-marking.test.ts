@@ -45,6 +45,9 @@ const CHILD_FACING_ROOTS = [
   // verdict on somebody else's kid. Same rules, same scanner.
   'src/modules/sharing/view',
   'src/app/[locale]/(share)',
+  // M6. The Today board and the calendar are what a child reads on the hub.
+  'src/modules/today/ui',
+  'src/modules/calendar/ui',
 ];
 
 /**
@@ -95,6 +98,61 @@ const PARENT_ONLY = [
   'src/modules/rewards/ui/seed-presets-button.tsx',
   'src/modules/timers/ui/timer-controls.tsx',
 ];
+
+/**
+ * Narrow exceptions: a finding is dropped only when file, rule and the matched
+ * line all agree. Patterns, not line numbers, so edits do not break them; each
+ * is anchored to the shape of the real line so a new violation still fails.
+ * A stale entry (matching no raw finding) fails its own test below.
+ */
+const ALLOWED_FINDINGS: readonly { file: string; rule: string; text: RegExp; reason: string }[] = [
+  {
+    file: 'src/modules/today/ui/today-theme-banner.tsx',
+    rule: 'alarm-styling',
+    text: /^ink: \['text-cat-red-solid', 'text-(?:gold|cat-orange-solid)'\],$/,
+    reason: 'decorative seasonal ink (Sinterklaas, autumn break), not a verdict on a child',
+  },
+  {
+    file: 'src/modules/calendar/ui/tokens.ts',
+    rule: 'alarm-styling',
+    // Palette-block shape only: a known palette slot mapped to its own cat-red-*
+    // utility. A semantic key such as `missed: 'text-cat-red-fg'` does not match.
+    text: /^(?:surface|fill|icon|border|rule|solid|text|ring|deep|strong): '(?:bg|text|border|ring)-cat-red-\w+',$/,
+    reason: 'red is one hue of the event-category palette, not a penalty colour',
+  },
+  {
+    file: 'src/modules/calendar/ui/event-dialog.tsx',
+    rule: 'alarm-styling',
+    text: /^<p role="alert" className="text-sm text-destructive">$/,
+    reason: 'form/system error text in the parent-only event dialog',
+  },
+  {
+    file: 'src/modules/calendar/ui/calendar-display-list.tsx',
+    rule: 'alarm-styling',
+    text: /^<span role="alert" className="text-body-sm text-destructive">$/,
+    reason: 'system error text (calendar list failed to load), not marking of a child',
+  },
+  {
+    file: 'src/modules/calendar/ui/event-dialog.tsx',
+    rule: 'alarm-styling',
+    text: /^variant="destructive"$/,
+    // Verified: EventDialog is mounted only by CalendarShell (/calendar) and
+    // AddEventFabAction / NewEventAction (/today FAB), and /today only builds
+    // the FAB action when `isMember && data.canWrite`; `event:write` is `deny`
+    // for child and device principals (see the EventDialog doc comment), so
+    // the delete trigger and confirm are not reachable by a child or device.
+    reason: 'parent-only delete trigger and confirm; gated on event:write (deny for child/device)',
+  },
+];
+
+function isAllowed(finding: Finding): boolean {
+  return ALLOWED_FINDINGS.some(
+    (allowed) =>
+      allowed.file === finding.file &&
+      allowed.rule === finding.rule &&
+      allowed.text.test(finding.text)
+  );
+}
 
 type Rule = { id: string; pattern: RegExp };
 
@@ -349,10 +407,30 @@ describe('no negative marking on any child-facing surface', () => {
     // treatment would be most tempting, so both must be in scope by name.
     expect(files.map((file) => file.path)).toContain('src/modules/timers/ui/timer-tile.tsx');
     expect(files.map((file) => file.path)).toContain('src/modules/timers/ui/timer-board.tsx');
+    // M6: the Today and calendar trees, by a file from each.
+    expect(files.map((file) => file.path)).toContain('src/modules/today/ui/today-theme-banner.tsx');
+    expect(files.map((file) => file.path)).toContain('src/modules/calendar/ui/event-dialog.tsx');
   });
 
   it('finds no red X, negative delta, streak loss or sibling comparison', () => {
-    expect(scanForNegativeMarking(files)).toEqual([]);
+    const findings = scanForNegativeMarking(files).filter((finding) => !isAllowed(finding));
+    expect(findings).toEqual([]);
+  });
+
+  it('has no stale allowlist entry — each still matches a raw finding', () => {
+    const raw = scanForNegativeMarking(files);
+    for (const allowed of ALLOWED_FINDINGS) {
+      const hit = raw.some(
+        (finding) =>
+          finding.file === allowed.file &&
+          finding.rule === allowed.rule &&
+          allowed.text.test(finding.text)
+      );
+      expect(
+        hit,
+        `stale allowlist entry: ${allowed.file} ${allowed.text} (${allowed.reason})`
+      ).toBe(true);
+    }
   });
 
   it('catches every banned shape (fixture) — the scanner is not vacuous', () => {
