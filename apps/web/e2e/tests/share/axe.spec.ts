@@ -5,7 +5,7 @@ import { seedHousehold } from '@e2e/utils/household';
 import { seedCalendar, seedEvents, seedShareLink, withDb } from '@e2e/utils/seed';
 
 /**
- * Zero WCAG AA violations on the caregiver share view (M17).
+ * Zero axe violations (WCAG A/AA tags, color-contrast off per D32) on the caregiver share view (M17).
  *
  * Both roles, because they are different documents: a viewer link renders a
  * read-only schedule with nothing to press, and a contributor link adds the
@@ -19,7 +19,10 @@ import { seedCalendar, seedEvents, seedShareLink, withDb } from '@e2e/utils/seed
 
 test.describe('share view accessibility', { tag: '@heavy' }, () => {
   for (const role of ['viewer', 'contributor'] as const) {
-    test(`a ${role} link has no WCAG AA violations`, async ({ browser, family }) => {
+    test(`a ${role} link has no axe violations (color-contrast off)`, async ({
+      browser,
+      family,
+    }) => {
       const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Amsterdam' }).format(
         new Date()
       );

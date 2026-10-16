@@ -59,6 +59,16 @@ const serverEnv = {
   E2E: 'true',
 };
 
+function grepInvertFromEnv(): RegExp | undefined {
+  const pattern = process.env.E2E_GREP_INVERT;
+  if (!pattern) return undefined;
+  try {
+    return new RegExp(pattern);
+  } catch {
+    throw new Error(`E2E_GREP_INVERT is not a valid regular expression: ${pattern}`);
+  }
+}
+
 export default defineConfig({
   testDir: './e2e',
   outputDir: './e2e/test-results',
@@ -66,7 +76,7 @@ export default defineConfig({
   // A CLI `--grep-invert` is not applied to dependency projects, and `perf`
   // depends on app/hub/share, so on a full run it silently re-adds every
   // test. The config-level filter applies to them too (CI sets `@visual`).
-  grepInvert: process.env.E2E_GREP_INVERT ? new RegExp(process.env.E2E_GREP_INVERT) : undefined,
+  grepInvert: grepInvertFromEnv(),
   forbidOnly: !!process.env.CI,
   /**
    * One retry locally, two on CI.
