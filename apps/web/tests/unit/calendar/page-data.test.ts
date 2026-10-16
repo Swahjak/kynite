@@ -77,6 +77,14 @@ describe('loadCalendarPage private detail', () => {
     expect(listArgs()).toMatchObject({ privateDetail: false, privateDetailFor: 'm1' });
   });
 
+  it('a denied member gets busy-only, scoped to nobody', async () => {
+    grade.mockReturnValue('deny');
+    decide.mockReturnValue('deny');
+    await loadCalendarPage({ surface: 'app' });
+    expect(decide).toHaveBeenCalledWith(member, 'calendar:view_private', { familyId: 'fam' });
+    expect(listArgs()).toMatchObject({ privateDetail: false, privateDetailFor: null });
+  });
+
   it('a device principal is busy-only even when the caller omits the flag', async () => {
     getPrincipal.mockResolvedValue(device);
     await loadCalendarPage({ surface: 'hub' });

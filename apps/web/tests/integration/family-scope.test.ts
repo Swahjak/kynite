@@ -2,8 +2,32 @@ import { randomUUID } from 'node:crypto';
 import { getTableConfig, PgTable } from 'drizzle-orm/pg-core';
 import { is, sql } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import type { WeatherSnapshot } from '@/modules/weather/domain/snapshot';
 import * as schema from '@/server/db/schema';
 import { createTestDb, databaseUrl, seedHousehold, type Household } from './support/db';
+
+// A well-formed reading, so the row is what the weather module would store.
+// Only the cascade is under test, but the column is typed `WeatherSnapshot`.
+const weatherPayload: WeatherSnapshot = {
+  place: {
+    latitude: 51.69,
+    longitude: 5.3,
+    label: "'s-Hertogenbosch",
+    timeZone: 'Europe/Amsterdam',
+  },
+  current: {
+    observedAt: '2026-03-02T09:00',
+    temperatureC: 7.5,
+    apparentTemperatureC: 5.1,
+    weatherCode: 3,
+    isDay: true,
+  },
+  forecast: [
+    { date: '2026-03-02', weatherCode: 3, minTemperatureC: 2.1, maxTemperatureC: 9.4 },
+    { date: '2026-03-03', weatherCode: 61, minTemperatureC: 3.0, maxTemperatureC: 8.2 },
+  ],
+  fetchedAt: '2026-03-02T08:00:00.000Z',
+};
 
 /**
  * `familyId` is not decoration: it is the single predicate that scopes every
@@ -223,9 +247,7 @@ describe.skipIf(!databaseUrl)('family scoping (integration)', () => {
       familyId,
       latitude: 51.69,
       longitude: 5.3,
-      // Only the cascade is under test; the payload's shape is the weather
-      // module's own business.
-      payload: {} as never,
+      payload: weatherPayload,
       fetchedAt: new Date(),
     });
     await db.insert(schema.eventLog).values({

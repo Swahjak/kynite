@@ -173,8 +173,7 @@ describe.skipIf(!databaseUrl)('calendar picker + discovery defaults (integration
 
   /**
    * Sarah's own calendars: her primary, plus two she created herself. Google
-   * grades all three `owner`, which is exactly what makes them the family's to
-   * hold.
+   * grades all three `owner`; each is stored, and only the primary is enabled.
    */
   const ownCalendars = () =>
     page([
@@ -226,6 +225,24 @@ describe.skipIf(!databaseUrl)('calendar picker + discovery defaults (integration
     expect(ids).not.toContain('drukte@example.test');
   });
 
+  it('stores a non-primary owner calendar as syncEnabled: false', async () => {
+    // D33: the role grades readability, not enablement. "Werk" is Sarah's own
+    // (`owner`) calendar and a row, but only the primary starts out syncing.
+    stubs.listCalendars.push(
+      page([
+        { id: 'sarah@example.test', summary: 'Sarah', primary: true, accessRole: 'owner' },
+        { id: 'werk@example.test', summary: 'Werk', accessRole: 'owner' },
+      ])
+    );
+
+    await discoverCalendars(accountId);
+
+    expect(await storedCalendars()).toEqual([
+      { googleCalendarId: 'sarah@example.test', syncEnabled: true },
+      { googleCalendarId: 'werk@example.test', syncEnabled: false },
+    ]);
+  });
+
   it('enables only the primary calendar on a first link', async () => {
     stubs.listCalendars.push(ownCalendars());
 
@@ -270,10 +287,9 @@ describe.skipIf(!databaseUrl)('calendar picker + discovery defaults (integration
     ]);
   });
 
-  it('prunes a calendar stored before the owner-only rule, channel and all', async () => {
-    // The state a household is actually in today: a colleague's diary and a
-    // meeting room, discovered and synced under the old rule, both with a live
-    // push channel.
+  it('prunes a stored calendar that Google no longer lists, channel and all', async () => {
+    // A colleague's diary that was discovered and synced earlier, with a live
+    // push channel, and is no longer in the account's calendar list.
     stubs.listCalendars.push(ownCalendars());
     await discoverCalendars(accountId);
 
