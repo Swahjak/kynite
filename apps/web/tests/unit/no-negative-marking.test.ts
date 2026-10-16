@@ -110,6 +110,31 @@ const ALLOWED_FINDINGS: readonly { file: string; rule: string; text: RegExp }[] 
     rule: 'alarm-styling',
     text: /^ink: \['text-cat-red-solid', 'text-(?:gold|cat-orange-solid)'\],$/,
   },
+  // Red is one hue of the event-category palette, not a verdict on a child.
+  { file: 'src/modules/calendar/ui/tokens.ts', rule: 'alarm-styling', text: /cat-red-/ },
+  // Form/system error text, not marking of a child.
+  {
+    file: 'src/modules/calendar/ui/event-dialog.tsx',
+    rule: 'alarm-styling',
+    text: /text-destructive/,
+  },
+  {
+    file: 'src/modules/calendar/ui/calendar-display-list.tsx',
+    rule: 'alarm-styling',
+    text: /text-destructive/,
+  },
+  // Parent-facing delete actions in the event dialog.
+  {
+    file: 'src/modules/calendar/ui/event-dialog.tsx',
+    rule: 'alarm-styling',
+    text: /^variant="destructive"$/,
+  },
+  // A code-comment about a data load failing, not copy a child reads.
+  {
+    file: 'src/modules/calendar/ui/day-agenda-row.tsx',
+    rule: 'streak-loss',
+    text: /^failed to load\. \*\/\}$/,
+  },
 ];
 
 type Rule = { id: string; pattern: RegExp };
