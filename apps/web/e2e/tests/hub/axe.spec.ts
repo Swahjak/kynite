@@ -4,7 +4,7 @@ import { expectNoAxeViolations } from '@e2e/utils/axe';
 import { seedHousehold } from '@e2e/utils/household';
 
 /**
- * Zero WCAG AA violations across the wall display (M17).
+ * Zero axe violations (WCAG A/AA tags, color-contrast off per D32) across the wall display (M17).
  *
  * The hub is the surface where this matters most and is easiest to get wrong:
  * it is glanceable, it is operated by a child, and most of its controls are
@@ -29,7 +29,10 @@ const SURFACES = [
 
 test.describe('hub accessibility', { tag: '@heavy' }, () => {
   for (const surface of SURFACES) {
-    test(`the hub ${surface.name} has no WCAG AA violations`, async ({ page, family }) => {
+    test(`the hub ${surface.name} has no axe violations (color-contrast off)`, async ({
+      page,
+      family,
+    }) => {
       const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Amsterdam' }).format(
         new Date()
       );
