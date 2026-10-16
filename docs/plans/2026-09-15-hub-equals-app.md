@@ -23,7 +23,7 @@ Owner ask (2026-09-15): one route tree. Member and hub device render the same pa
 - D34 (owner, final 2026-10-15: "don't care"): bin icon tile teal (orange is reward-only).
 - D35 (owner, 2026-10-15): time-of-day logic and date/time formatting use the family timezone (fallback Europe/Amsterdam), never the device/server TZ.
 
-## Resume here (checkpoint 2026-10-15, after M5)
+## Resume here (checkpoint 2026-10-16, M6 planned)
 
 State: production deployed 2026-10-16 09:29 (Railway `d5473def`, commit 94d2249: M4 + M5); health, redirects, discovery and pre-paint timezone verified. Main CI green. No background processes.
 
@@ -58,6 +58,27 @@ Claude sonnet subagents in worktrees.
 - [x] **M5-T1** #15 (`5641090`): server-rendered timers header clock passes the family timezone; `AmbientClock`/`TodayClock` were already correct via `useDateTimeFormat`; regression test in `timers-page-split.test.tsx`.
 - [x] **M5-T2** #16 (`03d45b0`): one `hourIn` in `src/lib/hour-in-zone.ts` (h23), used by routines-board daypart (likely hydration-mismatch source; hub e2e under TZ=UTC: 0 "Hydration failed"), use-hub-theme, reload-gate (`timeZone` required), pre-paint-theme (zone serialized with `<` escaped); routines/[memberId] page passes timeZone; tests pin `process.env.TZ='UTC'` per file.
 
+## M6 — hygiene wave (planned 2026-10-16, owner approved)
+
+Claude sonnet subagents in worktrees under `/var/www/worktrees/kynite/`; sonnet reviews (no security/data PR). One test-running agent at a time. Order: T1 → T2 (same file); T3 and T5 test-free, parallel; T4 last.
+
+- [ ] **M6-T1** (S): shared `DEFAULT_TIMEZONE` constant, replace the ≥4 `Europe/Amsterdam` literals (now only in `modules/google/domain/mapping.ts:21`). `toWall` (`modules/calendar/domain/zone.ts`) only if free, else stays.
+- [ ] **M6-T2** (M, after T1, brief preflight): server `formatDateTime` (`src/i18n/formatting-locale.ts:64`) `timeZone` required; 6 calls (star-chart, star-week-card, routine-manager, `today-header:143` + its test) each need an instant-vs-date-key judgement.
+- [ ] **M6-T3** (S): D32/CI leftovers: `design-showcase.tsx:174` "contrast is verified at WCAG AA"; e2e axe spec titles "no WCAG AA violations"; `axe.ts` comment "no exclusion list" next to `disableRules`; `ci.yml:90` + `e2e/README.md` "flag" comments; `new RegExp(E2E_GREP_INVERT)` crashes on invalid regex.
+- [ ] **M6-T4** (M, last, runs integration with test DB): settings-authorization invalid-timezone positive control; `weather_snapshot` fixture `payload: {} as never`; google-calendar-picker non-primary owner case + two texts still on the owner-only rule; nested-card-borders member `rowDone` tint path; `proxy-auth.test.ts` reset `seen.request` per case; `page-data.test.ts` deny-grade case.
+- [ ] **M6-T5** (S): `no-negative-marking` scanner covers `modules/today/ui` and `modules/calendar/ui`, allowlist for decorative theme-banner red.
+
+## M7 — auth/SW/runtime (next wave, not open)
+
+Opus review for the auth/privacy units (SW cache, proxy).
+
+- SW page cache not cleared when a different member signs in; SW never caches a redirect: offline cold boot on `/nl/hub` gets the browser error page.
+- `requireManager` sign-in callback drops the query string; `x-kynite-path` not stripped in the proxy's share/invite branches (hygiene).
+- Hydration warning on `/manage/routines` (`value="false"` input, suspected `Switch`), unverified.
+- Phone first-tap loss on /calendar: SSR renders wide (`use-is-wide.ts:46`), phone layout swaps at hydration. 3/36. `openEventDialog` keeps a bounded `toPass`.
+- SheetClose `role="link"` not verified in a browser.
+- Flaky e2e, diagnose per spec: `calendar.spec.ts:174`, `invite.spec.ts:154`, `auth-flow.spec.ts:97`, `hub/pairing.spec.ts:156` (got `/nl/sign-in?callbackUrl=…` instead of `/nl/pair` after revoke).
+
 ## Agent log (summary)
 
 - s6 sonnet scout (81k); H0–H2a: sonnet dispatchers 59–171k per unit, reviews 31–57k; OpenCode ≈ $0.2 per unit.
@@ -80,19 +101,6 @@ Claude sonnet subagents in worktrees.
 - Reviewers must not checkout/detach in the main checkout (one did, and restored it). The brief must say so explicitly.
 - e2e asserts on `/today` are time-of-day sensitive (folded live/past rows). Seed relative to now and use `e2e/utils/timeline.ts` `openFoldedRows`.
 
-## Open follow-ups / Parking
+## Parking (owner decision needed)
 
-- Server `formatDateTime` (`src/i18n/formatting-locale.ts:64`) still has optional `timeZone`; making it required breaks 6 calls in star-chart, star-week-card, routine-manager, `today-header:143` + its test, each needing an instant-vs-date-key judgement.
-- `Europe/Amsterdam` fallback literal repeated in ≥4 places; `DEFAULT_TIMEZONE` exists only in `modules/google/domain/mapping.ts:21`: make it a shared constant. `toWall` in `modules/calendar/domain/zone.ts` is a third hour-in-zone variant.
-- `/dev/design` `design-showcase.tsx:174` text "contrast is verified at WCAG AA" is wrong after D32.
-- e2e axe spec titles still say "no WCAG AA violations"; `axe.ts` comment "no exclusion list" next to `disableRules`.
-- Tests: settings-authorization invalid-timezone test lacks a positive control; `weather_snapshot` fixture uses `payload: {} as never`; google-calendar-picker lacks a non-primary owner case and two texts still mention the owner-only rule; nested-card-borders doesn't test the member `rowDone` tint path; `proxy-auth.test.ts` should reset `seen.request` per case; `page-data.test.ts` has no deny-grade case.
-- `no-negative-marking` scanner doesn't cover `modules/today/ui` and `modules/calendar/ui` (theme banner red is decorative; needs allowlist).
-- Flaky e2e: `calendar.spec.ts:174`, `invite.spec.ts:154`, `auth-flow.spec.ts:97`; new: `hub/pairing.spec.ts:156` (got `/nl/sign-in?callbackUrl=…` instead of `/nl/pair` after revoke).
-- `ci.yml:90` and `e2e/README.md` comments still say "flag"; `new RegExp(E2E_GREP_INVERT)` crashes on invalid regex.
-- Hydration warning on `/manage/routines` (`value="false"` input, suspected `Switch`), unverified.
-- SW page cache is not cleared when a different member signs in. SW never caches a redirect: offline cold boot on `/nl/hub` gets the browser error page.
 - Manifest scope `/nl/` (English households). `kynite.surface` cookie is per browser.
-- `requireManager` sign-in callback drops the query string. `x-kynite-path` not stripped in the proxy's share/invite branches (hygiene).
-- Phone first-tap loss on /calendar: SSR renders wide (`use-is-wide.ts:46`), phone layout swaps at hydration. 3/36. `openEventDialog` keeps a bounded `toPass`.
-- SheetClose `role="link"` not verified in a browser.
