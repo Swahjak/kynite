@@ -1,3 +1,4 @@
+import { DEFAULT_TIMEZONE } from '@/lib/default-timezone';
 import 'server-only';
 import { revalidatePath } from 'next/cache';
 import { getLocale } from 'next-intl/server';
@@ -145,7 +146,7 @@ export async function recordCompletion(
   }
 
   const family = await getFamily(principal.familyId);
-  const timeZone = family?.timezone ?? 'Europe/Amsterdam';
+  const timeZone = family?.timezone ?? DEFAULT_TIMEZONE;
 
   const completable = isCompletableOn(
     { schedule: target.routine.schedule, anchor: target.routine.createdAt, timeZone },

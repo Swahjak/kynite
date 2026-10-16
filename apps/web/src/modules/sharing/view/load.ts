@@ -1,3 +1,4 @@
+import { DEFAULT_TIMEZONE } from '@/lib/default-timezone';
 import 'server-only';
 import { hasLocale } from 'next-intl';
 import { getLocale } from 'next-intl/server';
@@ -138,7 +139,7 @@ export async function loadShareView(rawToken: string): Promise<ShareViewResult> 
   const familyId = principal.familyId;
 
   const family = await getFamily(familyId);
-  const timeZone = family?.timezone ?? 'Europe/Amsterdam';
+  const timeZone = family?.timezone ?? DEFAULT_TIMEZONE;
   const requestedLocale = await getLocale();
   const uiLocale = hasLocale(routing.locales, requestedLocale)
     ? requestedLocale

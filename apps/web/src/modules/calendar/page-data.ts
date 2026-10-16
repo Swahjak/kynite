@@ -1,3 +1,4 @@
+import { DEFAULT_TIMEZONE } from '@/lib/default-timezone';
 import 'server-only';
 import { and, asc, desc, eq } from 'drizzle-orm';
 import { getTranslations } from 'next-intl/server';
@@ -76,7 +77,7 @@ export async function loadCalendarPage(options: LoadOptions): Promise<CalendarPa
   if (!principal) return null;
 
   const family = await getFamily(principal.familyId);
-  const timeZone = family?.timezone ?? 'Europe/Amsterdam';
+  const timeZone = family?.timezone ?? DEFAULT_TIMEZONE;
   const weekStartsOn = family?.weekStartsOn ?? 1;
 
   /**

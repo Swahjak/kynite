@@ -1,3 +1,4 @@
+import { DEFAULT_TIMEZONE } from '@/lib/default-timezone';
 import type { Metadata } from 'next';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
@@ -99,7 +100,7 @@ export default async function MainLayout({
   // is per-*family*, not per-request-locale. Once a principal exists, this is
   // the one place to resolve the real zone and hand it down.
   const family = principal ? await getFamily(principal.familyId) : null;
-  const timeZone = family?.timezone ?? 'Europe/Amsterdam';
+  const timeZone = family?.timezone ?? DEFAULT_TIMEZONE;
   const uiLocale = hasLocale(routing.locales, locale) ? locale : routing.defaultLocale;
   const formattingLocale = family?.formattingLocale ?? defaultFormattingLocale(uiLocale);
 
