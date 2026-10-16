@@ -218,11 +218,11 @@ describe.skipIf(!databaseUrl)('settings authorization (integration)', () => {
       // written, so the rejection above is about the zone and nothing else.
       const accepted = await updateFamilyAction(
         { status: 'idle' },
-        form({ ...familyInput, timezone: 'Europe/Amsterdam' })
+        form({ ...familyInput, timezone: 'Asia/Tokyo' })
       );
 
       expect(accepted).toEqual({ status: 'idle' });
-      expect(await row(household.familyId)).toMatchObject({ timezone: 'Europe/Amsterdam' });
+      expect(await row(household.familyId)).toMatchObject({ timezone: 'Asia/Tokyo' });
     });
   });
 

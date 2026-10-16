@@ -6,14 +6,6 @@ import type { WeatherSnapshot } from '@/modules/weather/domain/snapshot';
 import * as schema from '@/server/db/schema';
 import { createTestDb, databaseUrl, seedHousehold, type Household } from './support/db';
 
-/**
- * `familyId` is not decoration: it is the single predicate that scopes every
- * query (and, later, RLS), and deleting a family must take the entire household
- * with it. This seeds one row in *every* family-scoped table, deletes the
- * family, and then walks the schema objects to prove nothing survived — so a
- * table added in a later milestone without a cascading `family_id` fails here
- * rather than leaking rows forever.
- */
 // A well-formed reading, so the row is what the weather module would store.
 // Only the cascade is under test, but the column is typed `WeatherSnapshot`.
 const weatherPayload: WeatherSnapshot = {
@@ -37,6 +29,14 @@ const weatherPayload: WeatherSnapshot = {
   fetchedAt: '2026-03-02T08:00:00.000Z',
 };
 
+/**
+ * `familyId` is not decoration: it is the single predicate that scopes every
+ * query (and, later, RLS), and deleting a family must take the entire household
+ * with it. This seeds one row in *every* family-scoped table, deletes the
+ * family, and then walks the schema objects to prove nothing survived — so a
+ * table added in a later milestone without a cascading `family_id` fails here
+ * rather than leaking rows forever.
+ */
 describe.skipIf(!databaseUrl)('family scoping (integration)', () => {
   const { pool, db } = createTestDb();
 
