@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Same stub as share-proxy.test.ts: only the proxy's own redirects are under test.
 const seen = vi.hoisted(() => ({ request: null as NextRequest | null }));
@@ -9,6 +9,10 @@ vi.mock('next-intl/middleware', () => ({
     return NextResponse.next();
   },
 }));
+
+beforeEach(() => {
+  seen.request = null;
+});
 
 const { default: proxy } = await import('@/proxy');
 const { DEVICE_SESSION_COOKIE } = await import('@/lib/device-session');

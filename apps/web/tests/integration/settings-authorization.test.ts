@@ -213,6 +213,16 @@ describe.skipIf(!databaseUrl)('settings authorization (integration)', () => {
 
       expect(result).toEqual({ status: 'error', error: 'invalidInput' });
       expect(await row(household.familyId)).toMatchObject({ timezone: before.timezone });
+
+      // Positive control: the same input with a real zone is accepted and
+      // written, so the rejection above is about the zone and nothing else.
+      const accepted = await updateFamilyAction(
+        { status: 'idle' },
+        form({ ...familyInput, timezone: 'Europe/Amsterdam' })
+      );
+
+      expect(accepted).toEqual({ status: 'idle' });
+      expect(await row(household.familyId)).toMatchObject({ timezone: 'Europe/Amsterdam' });
     });
   });
 

@@ -81,6 +81,31 @@ describe('nested surfaces carry no border of their own', () => {
     expect(classesOf(tile)).toMatch(/bg-surface-container-low/);
   });
 
+  it('takes the member rowDone tint on a done tile when one is passed', () => {
+    render(
+      <ul>
+        <StepRow
+          variant="tile"
+          stepId="s1"
+          title="Tanden poetsen"
+          done
+          timerSeconds={null}
+          praiseText="Goed gedaan!"
+          stars={1}
+          starLabel="1 ster"
+          actionLabel="Markeer Tanden poetsen als klaar"
+          memberClasses={{ rowDone: 'bg-member-blue-rij-klaar' }}
+        />
+      </ul>
+    );
+
+    const tile = screen.getByTestId('step-tap');
+    expect(classesOf(tile)).not.toMatch(BORDER_WIDTH);
+    expect(classesOf(tile)).toMatch(/bg-member-blue-rij-klaar/);
+    // The tint replaces the neutral fallback rather than stacking on it.
+    expect(classesOf(tile)).not.toMatch(/bg-surface-container-low/);
+  });
+
   it('keeps the border on a reward tile, which sits on the page ground', () => {
     render(
       <ul>
