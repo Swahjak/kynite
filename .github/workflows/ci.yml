@@ -87,7 +87,7 @@ jobs:
       # above until something actually boots.
       #
       # Restore this at feature freeze: run `pnpm e2e:visual:update` once, drop
-      # the flag, and the baselines are a real gate again. See `e2e/README.md`.
+      # `E2E_GREP_INVERT`, and the baselines are a real gate again. See `e2e/README.md`.
       - run: pnpm e2e:run
         env:
           E2E_GREP_INVERT: '@visual'

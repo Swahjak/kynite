@@ -1,5 +1,6 @@
 'use server';
 
+import { DEFAULT_TIMEZONE } from '@/lib/default-timezone';
 import { revalidatePath } from 'next/cache';
 import { getLocale } from 'next-intl/server';
 import { and, eq } from 'drizzle-orm';
@@ -23,7 +24,7 @@ import { checkFeedUrl } from './domain/url';
 import { parseIcs } from './domain/parse';
 import { fetchFeed } from './fetch';
 import { enqueueSubscriptionRefresh } from './jobs';
-import { DEFAULT_FEED_TIMEZONE, ingestFeed, refreshSubscription } from './refresh';
+import { ingestFeed, refreshSubscription } from './refresh';
 import { getSubscription } from './queries';
 import { icsSubscription } from './schema';
 
@@ -168,7 +169,7 @@ export async function addSubscriptionAction(
   // The name, in the order a parent would expect: what they typed, else what
   // the publisher calls its own calendar, else the host it came from — never a
   // blank row in the settings list.
-  const feed = parseIcs(result.body, { defaultTimeZone: DEFAULT_FEED_TIMEZONE });
+  const feed = parseIcs(result.body, { defaultTimeZone: DEFAULT_TIMEZONE });
   const name = parsed.data.name || feed.name || checked.url.hostname;
 
   const created = await db.transaction(async (tx) => {

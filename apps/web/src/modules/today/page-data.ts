@@ -1,3 +1,4 @@
+import { DEFAULT_TIMEZONE } from '@/lib/default-timezone';
 import 'server-only';
 import { startOfDay } from '@/modules/calendar';
 import { can, getFamily, getPrincipal, listMembers, type Member } from '@/modules/family';
@@ -80,7 +81,7 @@ export async function loadTodayProgress(
   if (!principal) return null;
 
   const family = await getFamily(principal.familyId);
-  const timeZone = family?.timezone ?? 'Europe/Amsterdam';
+  const timeZone = family?.timezone ?? DEFAULT_TIMEZONE;
   const now = options.now ?? new Date();
 
   const [members, routines, starTotals, starsToday] = await Promise.all([

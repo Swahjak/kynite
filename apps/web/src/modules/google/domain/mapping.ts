@@ -18,7 +18,9 @@ import type {
  * pointing at its master by *Google* id.
  */
 
-export const DEFAULT_TIMEZONE = 'Europe/Amsterdam';
+import { DEFAULT_TIMEZONE } from '@/lib/default-timezone';
+
+export { DEFAULT_TIMEZONE };
 
 /** An untitled Google event is legal; the column is NOT NULL, so name it. */
 export const UNTITLED = '(no title)';

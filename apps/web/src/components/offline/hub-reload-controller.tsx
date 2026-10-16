@@ -1,5 +1,6 @@
 'use client';
 
+import { DEFAULT_TIMEZONE } from '@/lib/default-timezone';
 import { useEffect, useRef } from 'react';
 import { useTimeZone } from 'next-intl';
 import { RELOAD_HUB_MESSAGE, shouldReloadHub } from './reload-gate';
@@ -32,7 +33,7 @@ export function HubReloadController({
   reload?: () => void;
   enabled?: boolean;
 }) {
-  const timeZone = useTimeZone() ?? 'Europe/Amsterdam';
+  const timeZone = useTimeZone() ?? DEFAULT_TIMEZONE;
   const updateReadyAt = useRef<Date | null>(null);
   const lastInteractionAt = useRef<Date>(new Date());
 

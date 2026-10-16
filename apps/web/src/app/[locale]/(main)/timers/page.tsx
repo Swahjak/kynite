@@ -1,3 +1,4 @@
+import { DEFAULT_TIMEZONE } from '@/lib/default-timezone';
 import { getTranslations } from 'next-intl/server';
 import { EmptyState, PageHeader } from '@kynite/ui';
 import { formatDateTime } from '@/i18n/formatting-locale';
@@ -67,7 +68,7 @@ export default async function HubTimersPage({
   const hub = await getTranslations('hub.timers');
   const formattingLocale = await getHouseholdFormattingLocale();
   // The wall clock reads in the family's zone, never the server's (UTC on Railway).
-  const timeZone = (await getFamily(principal.familyId))?.timezone ?? 'Europe/Amsterdam';
+  const timeZone = (await getFamily(principal.familyId))?.timezone ?? DEFAULT_TIMEZONE;
 
   // M19, owner decision: the wall starts timers, it does not only display them.
   // `timer:control` is `allow` for a device principal (§7), so the Server

@@ -1,5 +1,6 @@
 'use client';
 
+import { DEFAULT_TIMEZONE } from '@/lib/default-timezone';
 import { useCallback, useEffect, useSyncExternalStore } from 'react';
 import { useTimeZone } from 'next-intl';
 import { hourIn } from '@/lib/hour-in-zone';
@@ -124,7 +125,7 @@ export function useHubTheme(override?: ResolvedHubTheme): {
   );
   // The family's zone, not the tablet's: the clock rule must agree with the
   // server and with `PrePaintTheme` whatever zone the device is set to.
-  const timeZone = useTimeZone() ?? 'Europe/Amsterdam';
+  const timeZone = useTimeZone() ?? DEFAULT_TIMEZONE;
   const hourSnapshot = useCallback(() => hourIn(new Date(), timeZone), [timeZone]);
   const hour = useSyncExternalStore(subscribeHour, hourSnapshot, hourServerSnapshot);
 

@@ -171,7 +171,7 @@ export function DesignShowcase({ initialTheme = 'light' }: { initialTheme?: 'lig
           <Section
             id="surfaces"
             title="Surfaces, ink, lines and status"
-            description="Every value flips with the dark class; contrast is verified at WCAG AA."
+            description="Every value flips with the dark class."
           >
             <Panel className="space-y-6">
               <div className="space-y-3">

@@ -1,3 +1,4 @@
+import { DEFAULT_TIMEZONE } from '@/lib/default-timezone';
 import 'server-only';
 import { and, eq, inArray, isNotNull, notInArray } from 'drizzle-orm';
 import { getDb } from '@/server/db';
@@ -34,13 +35,6 @@ import { icsSubscription } from './schema';
  */
 
 export type RefreshFailure = FetchFailure | 'parseFailed';
-
-/**
- * The zone a floating DTSTART is read in when the calendar row has none of its
- * own — the same default the Google mapper carries, and for the same reason:
- * some zone has to be chosen and this is the household's.
- */
-export const DEFAULT_FEED_TIMEZONE = 'Europe/Amsterdam';
 
 export type RefreshOutcome =
   | { status: 'synced'; imported: number; removed: number }
@@ -145,7 +139,7 @@ export async function ingestFeed(params: {
   defaultTimeZone: string | null;
 }): Promise<{ imported: number; removed: number }> {
   const feed = parseIcs(params.body, {
-    defaultTimeZone: params.defaultTimeZone ?? DEFAULT_FEED_TIMEZONE,
+    defaultTimeZone: params.defaultTimeZone ?? DEFAULT_TIMEZONE,
   });
 
   // A feed that parses to no events is not an error — a school's calendar is
