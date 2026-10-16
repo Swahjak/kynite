@@ -27,7 +27,7 @@ vi.mock('@/modules/family', () => ({
 const { StarWeekCard } = await import('@/modules/rewards/ui/star-week-card');
 const { StarChart } = await import('@/modules/rewards/ui/star-chart');
 
-// Wednesday 2026-09-16 .. Friday: a Monday-first week with distinct weekdays.
+// Monday 2026-09-14 .. Sunday 2026-09-20: a Monday-first week, today being the Wednesday.
 const WEEK = [
   '2026-09-14',
   '2026-09-15',
@@ -71,12 +71,13 @@ describe('star chart date keys never shift day', () => {
 
   it('labels the chart columns with the key’s own day number and weekday', async () => {
     const { container } = render(await StarChart({ chart }));
-    const columns = [...container.querySelectorAll('ol > li')].map((li) => li.textContent);
+    const columns = [...container.querySelectorAll('ol > li')].map((li) => ({
+      day: li.querySelector('span.rounded-full')?.textContent,
+      weekday: li.querySelector('.label-overline')?.textContent,
+    }));
 
     expect(columns).toHaveLength(7);
-    expect(columns[0]).toContain('14');
-    expect(columns[0]).toContain('Mon');
-    expect(columns[6]).toContain('20');
-    expect(columns[6]).toContain('Sun');
+    expect(columns[0]).toEqual({ day: '14', weekday: 'Mon' });
+    expect(columns[6]).toEqual({ day: '20', weekday: 'Sun' });
   });
 });

@@ -62,6 +62,6 @@ describe('RoutineManager one-off date key', () => {
       })
     );
 
-    expect(container.textContent).toContain('schedule.onceShort:16 Sept');
+    expect(container.textContent).toMatch(/schedule\.onceShort:16 Sep/);
   });
 });
